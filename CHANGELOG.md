@@ -1,0 +1,29 @@
+# Catatan Perubahan (CHANGELOG)
+
+Semua perubahan penting pada proyek **TabunganKu** akan didokumentasikan di file ini.
+
+Format pengisian mengikuti [Keep a Changelog](https://keepachangelog.com/id/1.0.0/).
+
+## [1.2.0] - 2026-03-31
+
+### Ditambahkan
+- **Fitur Scan Struk (OCR):** Deteksi otomatis nominal belanja dari foto struk fisik.
+- **Sistem Profil:** Kustomisasi nickname dan pemilihan avatar secara permanen.
+- **Ink-Well Dashboard:** Efek visual premium saat menyentuh kartu saldo.
+- **Manajemen Tabungan Keluarga:** Sinkronisasi database antar perangkat anggota keluarga.
+
+### Diperbaiki
+- Sinkronisasi kustomisasi tema agar tidak kembali ke pengaturan awal saat aplikasi ditutup.
+- Penanganan error saat akses pertama kali ke halaman grup keluarga.
+
+## [1.1.0] - Mar 2026
+
+### Ditambahkan
+- Implementasi awal database Firebase Firestore.
+- Dashboard utama dengan grafik pendapatan vs pengeluaran.
+- Fitur target menabung (saving goals).
+
+## [1.0.0] - Feb 2026
+- Rilis awal aplikasi TabunganKu.
+- Fitur pencatatan transaksi manual.
+- Autentikasi lokal (biometrik sederhana).

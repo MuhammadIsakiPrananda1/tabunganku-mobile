@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Theme applied to the Android Window while the process is starting on Android 12+ -->
+    <style name="LaunchTheme" parent="@android:style/Theme.Light.NoTitleBar">
+        <!-- This hides the default app icon on Android 12+'s splash screen -->
+        <item name="android:windowSplashScreenAnimatedIcon">@android:color/transparent</item>
+        <!-- This sets the background color of the Android 12+ system splash screen -->
+        <item name="android:windowSplashScreenBackground">#E0F2F1</item>
+    </style>
+    
+    <style name="NormalTheme" parent="@android:style/Theme.Light.NoTitleBar">
+        <item name="android:windowBackground">?android:colorBackground</item>
+    </style>
+</resources>

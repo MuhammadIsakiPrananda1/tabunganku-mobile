@@ -10,7 +10,7 @@
 
 - **📊 Dashboard Real-time:** Pantau sisa saldo, total pendapatan, dan pengeluaran harian dengan grafik interaktif yang memanjakan mata.
 - **👨‍👩‍👧‍👦 Grup Keluarga:** Sinkronkan catatan tabungan dengan seluruh anggota keluarga dalam satu database yang sama.
-- **📸 Scan Struk OCR:** Tidak perlu mengetik manual! Cukup foto struk belanja Anda, dan aplikasi akan mendeteksi nominalnya secara otomatis.
+- ~~**📸 Scan Struk OCR:** Tidak perlu mengetik manual! Cukup foto struk belanja Anda, dan aplikasi akan mendeteksi nominalnya secara otomatis.~~
 - **👤 Kustomisasi Profil:** Pilih avatar premium dan ganti nickname sesuai keinginan Anda dengan penyimpanan permanen.
 - **🎯 Target Menabung:** Buat rencana keuangan untuk masa depan dan pantau progresnya hingga tercapai.
 - **📈 Laporan PDF:** Ekspor riwayat transaksi Anda ke dalam format PDF yang rapi untuk keperluan administrasi.

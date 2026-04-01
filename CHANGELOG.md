@@ -4,12 +4,15 @@ Semua perubahan penting pada proyek **TabunganKu** akan didokumentasikan di file
 
 Format pengisian mengikuti [Keep a Changelog](https://keepachangelog.com/id/1.0.0/).
 
-## [1.3.9] - 2026-04-01
+## [1.3.0] - 2026-04-01
+
+### Ditambahkan
+- **Optimasi UI Dashboard:** Perbaikan visual pada kartu saldo dan grafik interaktif.
+- **Pembaruan README:** Dokumentasi yang lebih modern dan informatif.
 
 ### Diperbarui
-
-- **Pembaruan Sistem:** Peningkatan stabilitas dan pembaruan versi build.
-- **Gradle Update:** Penyesuaian konfigurasi Android Gradle ke versi 1.3.0.
+- **Sistem Gradle:** Penyesuaian konfigurasi Android Gradle ke versi 1.3.0 untuk stabilitas build.
+- **Versi Aplikasi:** Sinkronisasi versi ke 1.3.0.
 
 ## [1.2.0] - 2026-03-31
 

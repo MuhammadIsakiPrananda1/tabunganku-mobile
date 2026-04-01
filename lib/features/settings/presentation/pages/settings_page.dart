@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:tabunganku/core/theme/app_colors.dart';
+import 'package:tabunganku/core/theme/theme_provider.dart';
 
 
 class SettingsPage extends ConsumerStatefulWidget {
@@ -12,16 +13,18 @@ class SettingsPage extends ConsumerStatefulWidget {
 }
 
 class _SettingsPageState extends ConsumerState<SettingsPage> {
-  bool _darkMode = false;
   bool _notifications = true;
 
   @override
   Widget build(BuildContext context) {
+    final themeMode = ref.watch(themeProvider);
+    final isDarkMode = themeMode == ThemeMode.dark;
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('Pengaturan', style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         elevation: 0,
         centerTitle: true,
       ),
@@ -44,8 +47,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             _buildSectionHeader('Preferensi'),
             _buildSettingTile(Icons.dark_mode_outlined, 'Dark Mode', () {},
                 trailing: Switch(
-                  value: _darkMode,
-                  onChanged: (val) => setState(() => _darkMode = val),
+                  value: isDarkMode,
+                  onChanged: (val) => ref.read(themeProvider.notifier).toggleTheme(),
                   activeThumbColor: AppColors.primary,
                 )),
             _buildSettingTile(Icons.language, 'Bahasa', () {}, subtitle: 'Bahasa Indonesia'),
@@ -55,7 +58,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             _buildSettingTile(Icons.info_outline, 'Tentang Aplikasi', () {}),
 
             const SizedBox(height: 40),
-            const Text('Versi 1.2.0', style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+            const Text('Versi 1.3.9', style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
           ],
         ),
       ),
@@ -66,7 +69,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -106,7 +109,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       padding: const EdgeInsets.only(bottom: 12, left: 4),
       child: Text(
         title,
-        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textPrimary),
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 16,
+          color: Theme.of(context).textTheme.titleLarge?.color,
+        ),
       ),
     );
   }
@@ -115,15 +122,15 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
       ),
       child: ListTile(
         onTap: onTap,
         leading: Icon(icon, color: color ?? AppColors.primary),
-        title: Text(title, style: TextStyle(color: color ?? AppColors.textPrimary, fontWeight: FontWeight.w500)),
-        subtitle: subtitle != null ? Text(subtitle) : null,
-        trailing: trailing ?? const Icon(Icons.chevron_right, color: AppColors.textSecondary),
+        title: Text(title, style: TextStyle(color: color ?? Theme.of(context).textTheme.bodyLarge?.color, fontWeight: FontWeight.w500)),
+        subtitle: subtitle != null ? Text(subtitle, style: TextStyle(color: Theme.of(context).textTheme.bodySmall?.color)) : null,
+        trailing: trailing ?? Icon(Icons.chevron_right, color: Theme.of(context).textTheme.bodySmall?.color),
       ),
     );
   }

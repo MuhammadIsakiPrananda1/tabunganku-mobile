@@ -5,7 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:timezone/data/latest.dart' as tz_data;
+import 'package:timezone/timezone.dart' as tz;
+import 'package:flutter_timezone/flutter_timezone.dart';
 import 'core/theme/app_theme.dart';
+import 'core/theme/theme_provider.dart';
 import 'core/routing/app_router.dart';
 
 /// Global instance agar bisa diakses dari mana saja
@@ -28,16 +32,27 @@ Future<void> _initNotifications() async {
 
   await flutterLocalNotificationsPlugin.initialize(initSettings);
 
-  // Request permission untuk Android 13+
+  // Request permission untuk Android 13+ (Notifikasi & Exact Alarm)
   final androidPlugin = flutterLocalNotificationsPlugin
       .resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin>();
-  await androidPlugin?.requestNotificationsPermission();
+  
+  if (androidPlugin != null) {
+    await androidPlugin.requestNotificationsPermission();
+    await androidPlugin.requestExactAlarmsPermission();
+  }
 }
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+
+  // Inisialisasi timezone
+  tz_data.initializeTimeZones();
+  final dynamic location = await FlutterTimezone.getLocalTimezone();
+  // flutter_timezone v5.x returns TimezoneInfo object with 'identifier' property
+  final String locationName = location is String ? location : (location as dynamic).identifier.toString();
+  tz.setLocalLocation(tz.getLocation(locationName));
 
   // Inisialisasi notifikasi di level app (bukan di widget)
   await _initNotifications();
@@ -70,11 +85,14 @@ class TabunganKuApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appRouter = ref.watch(appRouterProvider);
+    final themeMode = ref.watch(themeProvider);
 
     return MaterialApp.router(
       title: 'TabunganKu',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: themeMode,
       routerConfig: appRouter,
     );
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/theme_provider.dart';
 import '../../../../providers/family_group_provider.dart';
 
 class NameSetupSheet extends ConsumerStatefulWidget {
@@ -17,10 +18,11 @@ class _NameSetupSheetState extends ConsumerState<NameSetupSheet> {
   void _submit() async {
     final name = _nameController.text.trim();
     if (name.isEmpty) {
+      final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark || (ref.watch(themeProvider) == ThemeMode.system && Theme.of(context).brightness == Brightness.dark);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Mohon masukkan nama panggilan kamu.'),
-          backgroundColor: Colors.orange,
+        SnackBar(
+          content: const Text('Mohon masukkan nama panggilan kamu.'),
+          backgroundColor: isDarkMode ? Colors.orange.shade900 : Colors.orange,
         ),
       );
       return;
@@ -43,6 +45,9 @@ class _NameSetupSheetState extends ConsumerState<NameSetupSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark || (ref.watch(themeProvider) == ThemeMode.system && theme.brightness == Brightness.dark);
+
     return Container(
       padding: EdgeInsets.only(
         left: 24,
@@ -50,9 +55,9 @@ class _NameSetupSheetState extends ConsumerState<NameSetupSheet> {
         top: 24,
         bottom: MediaQuery.of(context).viewInsets.bottom + 24,
       ),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -63,36 +68,37 @@ class _NameSetupSheetState extends ConsumerState<NameSetupSheet> {
               width: 48,
               height: 6,
               decoration: BoxDecoration(
-                color: Colors.grey.shade300,
+                color: isDarkMode ? Colors.white10 : Colors.grey.shade300,
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
           ),
           const SizedBox(height: 24),
-          const Text(
+          Text(
             'Nama Panggilan',
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.w900,
-              color: AppColors.primaryDark,
+              color: isDarkMode ? Colors.white : AppColors.primaryDark,
             ),
           ),
           const SizedBox(height: 8),
           Text(
             'Masukkan nama panggilan agar anggota keluarga lain mengenalimu.',
-            style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+            style: TextStyle(color: isDarkMode ? Colors.white38 : Colors.grey.shade600, fontSize: 13),
           ),
           const SizedBox(height: 24),
           TextField(
             controller: _nameController,
             textCapitalization: TextCapitalization.words,
             autofocus: true,
-            style: const TextStyle(fontWeight: FontWeight.bold),
+            style: TextStyle(fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : Colors.black),
             decoration: InputDecoration(
               hintText: 'Contoh: Ayah, Ibu, Kakak...',
+              hintStyle: TextStyle(color: isDarkMode ? Colors.white12 : Colors.grey),
               prefixIcon: const Icon(Icons.person, color: AppColors.primary),
               filled: true,
-              fillColor: AppColors.background,
+              fillColor: isDarkMode ? Colors.white.withOpacity(0.05) : AppColors.background,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
                 borderSide: BorderSide.none,

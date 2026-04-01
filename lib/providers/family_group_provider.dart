@@ -3,6 +3,23 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/family_group_model.dart';
+import '../models/transaction_model.dart';
+import './transaction_provider.dart';
+
+/// Provider that watches family transactions and automatically syncs the total balance to Firestore
+final familyBalanceSyncProvider = Provider.autoDispose<void>((ref) {
+  final groupId = ref.watch(userGroupIdProvider);
+  if (groupId == null || groupId.isEmpty) return;
+
+  ref.listen(transactionsByGroupProvider(groupId), (previous, next) {
+    final totalBalance = next.fold(0.0, (sum, t) => 
+      sum + (t.type == TransactionType.income ? t.amount : -t.amount));
+    
+    // Perform sync in background
+    ref.read(familyGroupServiceProvider).syncLocalBalance(totalBalance);
+  }, fireImmediately: true);
+});
+
 
 // User Profile Model
 class UserProfile {
@@ -204,6 +221,13 @@ class FamilyGroupService {
     if (query.docs.isEmpty) throw Exception("Kode keluarga salah atau kadaluarsa.");
 
     final doc = query.docs.first;
+    final groupData = doc.data();
+    final List<String> members = List<String>.from(groupData['members'] ?? []);
+    
+    if (members.length >= 5) {
+      throw Exception("Gagal bergabung: Anggota keluarga sudah maksimal (5 orang).");
+    }
+
     final groupId = doc.id;
 
     // Fast update: and merge balance

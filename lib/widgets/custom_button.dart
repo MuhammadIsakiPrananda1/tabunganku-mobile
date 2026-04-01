@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../core/theme/app_colors.dart';
+import '../core/theme/theme_provider.dart';
 
-class CustomButton extends StatefulWidget {
+class CustomButton extends ConsumerStatefulWidget {
   final String text;
   final VoidCallback? onPressed;
   final bool isSecondary;
@@ -15,14 +18,21 @@ class CustomButton extends StatefulWidget {
   });
 
   @override
-  State<CustomButton> createState() => _CustomButtonState();
+  ConsumerState<CustomButton> createState() => _CustomButtonState();
 }
 
-class _CustomButtonState extends State<CustomButton> {
+class _CustomButtonState extends ConsumerState<CustomButton> {
   bool _isPressed = false;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark || (ref.watch(themeProvider) == ThemeMode.system && theme.brightness == Brightness.dark);
+    
+    final primaryColor = AppColors.primary;
+    final secondaryColor = isDarkMode ? AppColors.surfaceDark : Colors.white;
+    final textColor = widget.isSecondary ? primaryColor : Colors.white;
+
     return GestureDetector(
       onTapDown: widget.isLoading ? null : (_) => setState(() => _isPressed = true),
       onTapUp: widget.isLoading ? null : (_) => setState(() => _isPressed = false),
@@ -35,12 +45,19 @@ class _CustomButtonState extends State<CustomButton> {
           height: 48,
           decoration: BoxDecoration(
             color: widget.isLoading
-                ? Colors.grey.shade400
-                : (widget.isSecondary ? Colors.white : const Color(0xFF6366E1)),
+                ? (isDarkMode ? Colors.white10 : Colors.grey.shade400)
+                : (widget.isSecondary ? secondaryColor : primaryColor),
             borderRadius: BorderRadius.circular(8),
             border: widget.isSecondary
-                ? Border.all(color: const Color(0xFF6366E1), width: 1.5)
+                ? Border.all(color: primaryColor, width: 1.5)
                 : null,
+            boxShadow: !widget.isSecondary && !widget.isLoading ? [
+              BoxShadow(
+                color: primaryColor.withOpacity(isDarkMode ? 0.3 : 0.2),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
+              )
+            ] : null,
           ),
           child: Material(
             color: Colors.transparent,
@@ -54,9 +71,7 @@ class _CustomButtonState extends State<CustomButton> {
                         height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            widget.isSecondary ? const Color(0xFF6366E1) : Colors.white,
-                          ),
+                          valueColor: AlwaysStoppedAnimation<Color>(textColor),
                         ),
                       )
                     : Text(
@@ -64,7 +79,7 @@ class _CustomButtonState extends State<CustomButton> {
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
-                          color: widget.isSecondary ? const Color(0xFF6366E1) : Colors.white,
+                          color: textColor,
                         ),
                       ),
               ),

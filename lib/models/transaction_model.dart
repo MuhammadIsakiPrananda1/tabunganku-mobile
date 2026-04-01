@@ -13,6 +13,7 @@ class TransactionModel {
   final String category;
   final String? imageUrl;
   final String? groupId;
+  final String? creatorName;
 
   TransactionModel({
     required this.id,
@@ -24,6 +25,7 @@ class TransactionModel {
     required this.category,
     this.imageUrl,
     this.groupId,
+    this.creatorName,
   });
 
   factory TransactionModel.fromJson(Map<String, dynamic> json) {
@@ -37,6 +39,7 @@ class TransactionModel {
       category: json['category'] as String,
       imageUrl: json['imageUrl'] as String?,
       groupId: json['groupId'] as String?,
+      creatorName: json['creatorName'] as String?,
     );
   }
 
@@ -51,6 +54,7 @@ class TransactionModel {
       'category': category,
       'imageUrl': imageUrl,
       'groupId': groupId,
+      'creatorName': creatorName,
     };
   }
 
@@ -64,6 +68,7 @@ class TransactionModel {
     String? category,
     String? imageUrl,
     String? groupId,
+    String? creatorName,
   }) {
     return TransactionModel(
       id: id ?? this.id,
@@ -75,6 +80,7 @@ class TransactionModel {
       category: category ?? this.category,
       imageUrl: imageUrl ?? this.imageUrl,
       groupId: groupId ?? this.groupId,
+      creatorName: creatorName ?? this.creatorName,
     );
   }
 }

@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/theme_provider.dart';
 import '../../../../providers/family_group_provider.dart';
 import '../../../../providers/transaction_provider.dart';
 import '../../../../models/family_group_model.dart';
@@ -55,18 +56,20 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
 
   void _showError(String message) {
     if (!mounted) return;
+    final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark || (ref.watch(themeProvider) == ThemeMode.system && Theme.of(context).brightness == Brightness.dark);
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(message),
-      backgroundColor: Colors.redAccent,
+      backgroundColor: isDarkMode ? Colors.red.shade900 : Colors.redAccent,
       behavior: SnackBarBehavior.floating,
     ));
   }
 
   void _showSuccess(String message) {
     if (!mounted) return;
+    final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark || (ref.watch(themeProvider) == ThemeMode.system && Theme.of(context).brightness == Brightness.dark);
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(message),
-      backgroundColor: Colors.teal.shade700,
+      backgroundColor: isDarkMode ? AppColors.primaryDark : Colors.teal.shade700,
       behavior: SnackBarBehavior.floating,
     ));
   }
@@ -104,15 +107,16 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
       backgroundColor: Colors.transparent,
       builder: (context) {
         bool isCreating = false;
+        final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark || (ref.watch(themeProvider) == ThemeMode.system && Theme.of(context).brightness == Brightness.dark);
         return StatefulBuilder(builder: (context, setModalState) {
           return Container(
             padding: EdgeInsets.only(
               left: 24, right: 24, top: 24,
               bottom: MediaQuery.of(context).viewInsets.bottom + 24,
             ),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+            decoration: BoxDecoration(
+              color: isDarkMode ? AppColors.surfaceDark : Colors.white,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -128,26 +132,27 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
                   ),
                 ),
                 const SizedBox(height: 24),
-                const Text(
+                Text(
                   'Buat Grup Keluarga',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: AppColors.primaryDark),
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: isDarkMode ? Colors.white : AppColors.primaryDark),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Beri nama grup untuk keluarga kamu.',
-                  style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                  style: TextStyle(color: isDarkMode ? Colors.white38 : Colors.grey.shade600, fontSize: 13),
                 ),
                 const SizedBox(height: 24),
                 TextField(
                   controller: _createGroupController,
                   textCapitalization: TextCapitalization.words,
                   autofocus: true,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                  style: TextStyle(fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : Colors.black),
                   decoration: InputDecoration(
                     hintText: 'Contoh: Tabungan Liburan Keluarga',
-                    prefixIcon: const Icon(Icons.group, color: AppColors.primary),
+                    hintStyle: TextStyle(color: isDarkMode ? Colors.white24 : Colors.grey),
+                    prefixIcon: Icon(Icons.group, color: isDarkMode ? AppColors.primary : AppColors.primary),
                     filled: true,
-                    fillColor: AppColors.background,
+                    fillColor: isDarkMode ? Colors.white.withOpacity(0.05) : AppColors.background,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
                   ),
                 ),
@@ -189,9 +194,11 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
     );
   }
 
-  Future<void> _showAddFamilyTransaction(String groupId, {TransactionModel? existingTx}) async {
+  Future<void> _showAddFamilyTransaction(FamilyGroupModel group, {TransactionModel? existingTx}) async {
+    final groupId = group.id;
+
     final amountController = TextEditingController(
-      text: existingTx != null ? _formatNumberNoDots(existingTx.amount) : '',
+      text: existingTx != null ? _formatNumberWithDots(existingTx.amount) : '',
     );
     final customCategoryController = TextEditingController(
       text: existingTx != null && !['Tabungan', 'Belanja Bulanan', 'Listrik & Air', 'Pendidikan', 'Kesehatan', 'Cicilan & Hutang', 'Transportasi', 'Kebutuhan Anak', 'Dana Darurat', 'Hiburan & Liburan', 'Renovasi Rumah', 'Sosial & Zakat'].contains(existingTx.category) 
@@ -199,6 +206,9 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
     );
     
     String selectedCategory = existingTx?.category ?? 'Tabungan';
+    TransactionType selectedType = existingTx?.type ?? TransactionType.income;
+    final userName = ref.read(userNameProvider);
+    
     // If it's a custom category, set dropdown to 'Lainnya'
     if (existingTx != null && !['Tabungan', 'Belanja Bulanan', 'Listrik & Air', 'Pendidikan', 'Kesehatan', 'Cicilan & Hutang', 'Transportasi', 'Kebutuhan Anak', 'Dana Darurat', 'Hiburan & Liburan', 'Renovasi Rumah', 'Sosial & Zakat'].contains(existingTx.category)) {
       selectedCategory = 'Lainnya';
@@ -209,116 +219,180 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => StatefulBuilder(
-        builder: (context, setModalState) => Container(
-          padding: EdgeInsets.only(
-            left: 24, right: 24, top: 24,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-          ),
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-          ),
+        builder: (context, setModalState) {
+          final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark || (ref.watch(themeProvider) == ThemeMode.system && Theme.of(context).brightness == Brightness.dark);
+          return Container(
+            padding: EdgeInsets.only(
+              left: 24, right: 24, top: 24,
+              bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+            ),
+            decoration: BoxDecoration(
+              color: isDarkMode ? AppColors.surfaceDark : Colors.white,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+            ),
           child: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2)))),
+                Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: isDarkMode ? Colors.white10 : Colors.grey.shade300, borderRadius: BorderRadius.circular(2)))),
                 const SizedBox(height: 24),
-                Text(existingTx != null ? 'Edit Tabungan' : 'Tambah Tabungan', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: AppColors.primaryDark)),
-                const SizedBox(height: 8),
-                Text(existingTx != null ? 'Perbarui catatan tabungan keluarga Anda.' : 'Catat pemasukan untuk saldo bersama keluarga.', style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
-                const SizedBox(height: 32),
-                
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const Text(
-                      'Rp',
-                      style: TextStyle(
-                        fontSize: 40,
-                        fontWeight: FontWeight.w900,
-                        color: AppColors.primary,
-                        letterSpacing: -1,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: TextField(
-                        controller: amountController,
-                        keyboardType: TextInputType.number,
-                        autofocus: true,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                          _ThousandsSeparatorInputFormatter(),
-                        ],
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w900,
-                          fontSize: 44,
-                          letterSpacing: -2,
-                          color: AppColors.primaryDark,
-                        ),
-                        decoration: InputDecoration(
-                          hintText: '0',
-                          hintStyle: TextStyle(color: Colors.grey.shade200, fontWeight: FontWeight.w900),
-                          filled: true,
-                          fillColor: AppColors.background,
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 32),
-                
-                const Text('Pilih Kategori', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.primaryDark)),
-                const SizedBox(height: 12),
-                
-                DropdownButtonFormField<String>(
-                  value: selectedCategory,
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: AppColors.background,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                    prefixIcon: const Icon(Icons.category_rounded, color: AppColors.primary),
+                Center(
+                  child: Text(
+                    existingTx != null ? 'Edit Nominal' : 'Tambah Transaksi', 
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: isDarkMode ? Colors.white : AppColors.primaryDark)
                   ),
-                  icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.primary),
-                  dropdownColor: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  items: [
-                    'Tabungan', 'Belanja Bulanan', 'Listrik & Air', 'Pendidikan', 
-                    'Kesehatan', 'Cicilan & Hutang', 'Transportasi', 'Kebutuhan Anak', 
-                    'Dana Darurat', 'Hiburan & Liburan', 'Renovasi Rumah', 'Sosial & Zakat', 
-                    'Lainnya'
-                  ].map((String category) {
-                    return DropdownMenuItem<String>(
-                      value: category,
-                      child: Text(category, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.primaryDark)),
-                    );
-                  }).toList(),
-                  onChanged: (String? newValue) {
-                    if (newValue != null) {
-                      setModalState(() => selectedCategory = newValue);
-                    }
-                  },
                 ),
+                if (existingTx != null) ...[
+                  const SizedBox(height: 8),
+                  Center(
+                    child: Text(
+                      existingTx.category, 
+                      style: TextStyle(color: isDarkMode ? AppColors.primary : Colors.teal.shade700, fontWeight: FontWeight.bold, fontSize: 16)
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 32),
                 
-                if (selectedCategory == 'Lainnya') ...[
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: customCategoryController,
-                    textCapitalization: TextCapitalization.sentences,
+                // Transaction Type Selector (Hanya tampil saat TAMBAH BARU)
+                if (existingTx == null) ...[
+                  Row(
+                    children: [
+                      Expanded(
+                        child: InkWell(
+                          onTap: () => setModalState(() => selectedType = TransactionType.income),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            decoration: BoxDecoration(
+                              color: selectedType == TransactionType.income 
+                                  ? (isDarkMode ? Colors.green.withOpacity(0.1) : Colors.green.shade50) 
+                                  : (isDarkMode ? Colors.white.withOpacity(0.02) : Colors.grey.shade50),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: selectedType == TransactionType.income ? Colors.green.shade200.withOpacity(0.5) : Colors.transparent),
+                            ),
+                            child: Column(
+                              children: [
+                                Icon(Icons.add_circle_outline_rounded, color: selectedType == TransactionType.income ? Colors.green : (isDarkMode ? Colors.white24 : Colors.grey)),
+                                const SizedBox(height: 4),
+                                Text('Pemasukan', style: TextStyle(fontWeight: FontWeight.bold, color: selectedType == TransactionType.income ? (isDarkMode ? Colors.greenAccent : Colors.green.shade700) : (isDarkMode ? Colors.white24 : Colors.grey))),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: InkWell(
+                          onTap: () => setModalState(() => selectedType = TransactionType.expense),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            decoration: BoxDecoration(
+                              color: selectedType == TransactionType.expense 
+                                  ? (isDarkMode ? Colors.red.withOpacity(0.1) : Colors.red.shade50) 
+                                  : (isDarkMode ? Colors.white.withOpacity(0.02) : Colors.grey.shade50),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: selectedType == TransactionType.expense ? Colors.red.shade200.withOpacity(0.5) : Colors.transparent),
+                            ),
+                            child: Column(
+                              children: [
+                                Icon(Icons.remove_circle_outline_rounded, color: selectedType == TransactionType.expense ? Colors.red : (isDarkMode ? Colors.white24 : Colors.grey)),
+                                const SizedBox(height: 4),
+                                Text('Pengeluaran', style: TextStyle(fontWeight: FontWeight.bold, color: selectedType == TransactionType.expense ? (isDarkMode ? Colors.redAccent : Colors.red.shade700) : (isDarkMode ? Colors.white24 : Colors.grey))),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 32),
+                ],
+                
+                // Nominal Input
+                TextFormField(
+                  controller: amountController,
+                  autofocus: true,
+                  keyboardType: TextInputType.number,
+                  style: TextStyle(fontWeight: FontWeight.w900, fontSize: 32, letterSpacing: -1, color: isDarkMode ? Colors.white : Colors.black),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    _ThousandsSeparatorInputFormatter(),
+                  ],
+                  decoration: InputDecoration(
+                    labelText: 'Input Nominal Baru',
+                    labelStyle: TextStyle(fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white38 : Colors.grey),
+                    prefixIcon: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text('Rp', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 24, color: isDarkMode ? Colors.white38 : Colors.grey.shade600)),
+                          const SizedBox(width: 8),
+                        ],
+                      ),
+                    ),
+                    filled: true,
+                    fillColor: isDarkMode ? Colors.white.withOpacity(0.02) : Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(color: isDarkMode ? AppColors.primary : Colors.teal, width: 2),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(color: isDarkMode ? Colors.white10 : Colors.teal.shade200, width: 2),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(color: isDarkMode ? AppColors.primary : Colors.teal, width: 2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 32),
+                
+                if (existingTx == null) ...[
+                  Text('Pilih Kategori', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : AppColors.primaryDark)),
+                  const SizedBox(height: 12),
+                  
+                  DropdownButtonFormField<String>(
+                    value: selectedCategory,
                     decoration: InputDecoration(
-                      hintText: 'Nama Kategori Kustom...',
                       filled: true,
-                      fillColor: AppColors.background,
+                      fillColor: isDarkMode ? Colors.white.withOpacity(0.05) : AppColors.background,
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                      prefixIcon: const Icon(Icons.category_rounded, color: AppColors.primary),
+                    ),
+                    icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.primary),
+                    dropdownColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    items: [
+                      'Tabungan', 'Belanja Bulanan', 'Listrik & Air', 'Pendidikan', 
+                      'Kesehatan', 'Cicilan & Hutang', 'Transportasi', 'Kebutuhan Anak', 
+                      'Dana Darurat', 'Hiburan & Liburan', 'Renovasi Rumah', 'Sosial & Zakat', 
+                      'Lainnya'
+                    ].map((String category) {
+                      return DropdownMenuItem<String>(
+                        value: category,
+                        child: Text(category, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: isDarkMode ? Colors.white : AppColors.primaryDark)),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      if (newValue != null) {
+                        setModalState(() => selectedCategory = newValue);
+                      }
+                    },
+                  ),
+                  
+                  if (selectedCategory == 'Lainnya') ...[
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: customCategoryController,
+                      textCapitalization: TextCapitalization.sentences,
+                      decoration: InputDecoration(
                       prefixIcon: const Icon(Icons.edit_note_rounded, color: AppColors.primary),
                     ),
                   ),
+                  ],
                 ],
                 
                 const SizedBox(height: 48),
@@ -335,103 +409,149 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
                         finalCategory = customCategoryController.text.trim();
                       }
                       
+                      final title = "${selectedType == TransactionType.income ? 'Pemasukan' : 'Pengeluaran'} dari $userName";
+
                       if (existingTx != null) {
                         // Update
                         final updatedTx = existingTx.copyWith(
                           amount: amount,
                           category: finalCategory,
-                          title: finalCategory,
+                          title: title,
+                          description: finalCategory,
+                          type: selectedType,
                         );
                         await ref.read(transactionServiceProvider).updateTransaction(updatedTx);
                         if (context.mounted) Navigator.pop(context);
-                        _showSuccess('Tabungan berhasil diperbarui!');
+                        _showSuccess('Transaksi berhasil diperbarui!');
                       } else {
                         // Add
                         final tx = TransactionModel(
                           id: DateTime.now().millisecondsSinceEpoch.toString(),
-                          title: finalCategory,
-                          description: 'Entry via Tabungan Keluarga',
+                          title: title,
+                          description: finalCategory,
                           amount: amount,
-                          type: TransactionType.income,
+                          type: selectedType,
                           date: DateTime.now(),
                           category: finalCategory,
                           groupId: groupId,
+                          creatorName: userName,
                         );
                         await ref.read(transactionServiceProvider).addTransaction(tx);
                         if (context.mounted) Navigator.pop(context);
-                        _showSuccess('Tabungan berhasil dicatat!');
+                        _showSuccess('Transaksi berhasil dicatat!');
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryDark,
+                      backgroundColor: existingTx != null 
+                          ? (isDarkMode ? Colors.teal.shade900.withOpacity(0.5) : Colors.teal.shade700) 
+                          : (isDarkMode ? AppColors.primary : AppColors.primaryDark),
                       foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                       elevation: 0,
                     ),
-                    child: Text(existingTx != null ? 'Update Tabungan' : 'Simpan Tabungan', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                    child: Text(existingTx != null ? 'Simpan Perubahan' : 'Simpan Transaksi', 
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
                   ),
                 ),
               ],
             ),
           ),
-        ),
-      ),
-    );
+        );
+      },
+    ),
+  );
+}
+
+  String _formatNumberWithDots(double value) {
+    final rounded = value.round();
+    return rounded.toString().replaceAllMapped(
+          RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
+          (match) => '${match[1]}.',
+        );
   }
 
-  String _formatNumberNoDots(double value) {
-    return value.toInt().toString();
-  }
-
-  void _showTransactionActions(TransactionModel transaction, String groupId) {
+  void _showTransactionActions(TransactionModel transaction, FamilyGroupModel group) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(24),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-        ),
+      builder: (context) {
+        final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark || (ref.watch(themeProvider) == ThemeMode.system && Theme.of(context).brightness == Brightness.dark);
+        return Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: isDarkMode ? AppColors.surfaceDark : Colors.white,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+          ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2))),
+            Container(width: 40, height: 4, decoration: BoxDecoration(color: isDarkMode ? Colors.white10 : Colors.grey.shade300, borderRadius: BorderRadius.circular(2))),
             const SizedBox(height: 24),
-            const Text('Aksi Transaksi', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.primaryDark)),
+            Text('Aksi Transaksi', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : AppColors.primaryDark)),
             const SizedBox(height: 24),
-            ListTile(
-              leading: const CircleAvatar(backgroundColor: Color(0xFFE3F2FD), child: Icon(Icons.edit_rounded, color: Colors.blue)),
-              title: const Text('Edit Transaksi', style: TextStyle(fontWeight: FontWeight.bold)),
-              subtitle: const Text('Ubah nominal atau kategori'),
-              onTap: () {
-                Navigator.pop(context);
-                _showAddFamilyTransaction(groupId, existingTx: transaction);
-              },
-            ),
-            const SizedBox(height: 8),
-            ListTile(
-              leading: const CircleAvatar(backgroundColor: Color(0xFFFFEBEE), child: Icon(Icons.delete_forever_rounded, color: Colors.red)),
-              title: const Text('Hapus Transaksi', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red)),
-              subtitle: const Text('Data akan dihapus permanen'),
-              onTap: () {
-                Navigator.pop(context);
-                _confirmDeleteTransaction(transaction);
+            
+            Consumer(
+              builder: (context, ref, child) {
+                final currentUserName = ref.watch(userNameProvider);
+                // Allow edit/delete if owner OR if legacy (no creatorName)
+                final isOwner = transaction.creatorName == null || transaction.creatorName == currentUserName;
+                
+                if (!isOwner) {
+                  return Column(
+                    children: [
+                      Icon(Icons.lock_person_rounded, size: 48, color: isDarkMode ? Colors.white10 : Colors.grey.shade300),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Hanya ${transaction.creatorName ?? "pemilik"} yang bisa mengelola transaksi ini.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: isDarkMode ? Colors.white38 : Colors.grey.shade500, fontSize: 13),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                  );
+                }
+
+                return Column(
+                  children: [
+                    ListTile(
+                      leading: CircleAvatar(backgroundColor: isDarkMode ? Colors.blue.withOpacity(0.1) : const Color(0xFFE3F2FD), child: const Icon(Icons.edit_rounded, color: Colors.blue)),
+                      title: Text('Edit Transaksi', style: TextStyle(fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : Colors.black)),
+                      subtitle: Text('Ubah nominal atau kategori', style: TextStyle(color: isDarkMode ? Colors.white38 : Colors.black54)),
+                      onTap: () {
+                        Navigator.pop(context);
+                         _showAddFamilyTransaction(group, existingTx: transaction);
+                      },
+                    ),
+                    const SizedBox(height: 8),
+                    ListTile(
+                      leading: CircleAvatar(backgroundColor: isDarkMode ? Colors.red.withOpacity(0.1) : const Color(0xFFFFEBEE), child: const Icon(Icons.delete_forever_rounded, color: Colors.red)),
+                      title: const Text('Hapus Transaksi', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red)),
+                      subtitle: Text('Data akan dihapus permanen', style: TextStyle(color: isDarkMode ? Colors.white38 : Colors.black54)),
+                      onTap: () {
+                        Navigator.pop(context);
+                        _confirmDeleteTransaction(transaction);
+                      },
+                    ),
+                  ],
+                );
               },
             ),
             const SizedBox(height: 24),
           ],
         ),
-      ),
-    );
-  }
+      );
+    },
+  );
+}
 
   void _confirmDeleteTransaction(TransactionModel transaction) {
+    final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark || (ref.watch(themeProvider) == ThemeMode.system && Theme.of(context).brightness == Brightness.dark);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Hapus Transaksi?'),
-        content: const Text('Data tabungan ini akan dihapus dan saldo grup akan otomatis menyesuaikan.'),
+        backgroundColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
+        title: Text('Hapus Transaksi?', style: TextStyle(color: isDarkMode ? Colors.white : Colors.black)),
+        content: Text('Data tabungan ini akan dihapus dan saldo grup akan otomatis menyesuaikan.', style: TextStyle(color: isDarkMode ? Colors.white70 : Colors.black87)),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context), child: const Text('Batal')),
           ElevatedButton(
@@ -449,10 +569,13 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
   }
 
   String _formatK(double amount) {
-    if (amount >= 1000000) {
-      return '${(amount / 1000000).toStringAsFixed(1).replaceAll('.0', '')} Jt';
-    } else if (amount >= 1000) {
-      return '${(amount / 1000).toStringAsFixed(1).replaceAll('.0', '')} K';
+    final absAmount = amount.abs();
+    final sign = amount < 0 ? '-' : '';
+    
+    if (absAmount >= 1000000) {
+      return '$sign${(absAmount / 1000000).toStringAsFixed(1).replaceAll('.0', '')} JT';
+    } else if (absAmount >= 1000) {
+      return '$sign${(absAmount / 1000).toStringAsFixed(1).replaceAll('.0', '')} K';
     }
     return amount.toStringAsFixed(0);
   }
@@ -463,6 +586,12 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
     final groupId = ref.watch(userGroupIdProvider);
     final groupAsync = ref.watch(familyGroupStreamProvider);
 
+    // Watch the global sync provider to ensure cloud state stays updated
+    ref.watch(familyBalanceSyncProvider);
+
+    final theme = Theme.of(context);
+    final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark || (ref.watch(themeProvider) == ThemeMode.system && theme.brightness == Brightness.dark);
+
     // Prompt Setup Name Automatically
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (userName.isEmpty && ModalRoute.of(context)?.isCurrent == true) {
@@ -472,13 +601,13 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
     });
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: isDarkMode ? AppColors.backgroundDark : AppColors.background,
       appBar: AppBar(
         title: const Text('Keluarga', style: TextStyle(fontWeight: FontWeight.w900)),
         centerTitle: true,
-        backgroundColor: Colors.white,
+        backgroundColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
         elevation: 0,
-        foregroundColor: AppColors.primaryDark,
+        foregroundColor: isDarkMode ? Colors.white : AppColors.primaryDark,
       ),
       body: (groupId == null || groupId.isEmpty)
           ? _buildNoGroupView(userName)
@@ -546,12 +675,18 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
         ),
       ),
       floatingActionButton: (groupId != null && groupId.isNotEmpty)
-          ? _buildSmartFab(groupId)
+          ? groupAsync.when(
+              data: (group) => group != null ? _buildSmartFab(group) : const SizedBox(),
+              loading: () => const SizedBox(),
+              error: (_, __) => const SizedBox(),
+            )
           : null,
     );
   }
 
-  Widget _buildSmartFab(String groupId) {
+  Widget _buildSmartFab(FamilyGroupModel group) {
+    final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark || (ref.watch(themeProvider) == ThemeMode.system && Theme.of(context).brightness == Brightness.dark);
+    
     return AnimatedContainer(
       duration: const Duration(milliseconds: 600),
       curve: Curves.easeInOutQuart,
@@ -559,11 +694,11 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
       width: _isFabExtended ? 190 : 56,
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        color: AppColors.primaryDark,
+        color: isDarkMode ? AppColors.primary : AppColors.primaryDark,
         borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primaryDark.withOpacity(0.4),
+            color: (isDarkMode ? AppColors.primary : AppColors.primaryDark).withOpacity(0.4),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),
@@ -574,7 +709,7 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           borderRadius: BorderRadius.circular(28),
-          onTap: () => _showAddFamilyTransaction(groupId),
+          onTap: () => _showAddFamilyTransaction(group),
           child: Center(
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
@@ -597,7 +732,7 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
                           child: const Padding(
                             padding: EdgeInsets.only(left: 10),
                             child: Text(
-                              'Tambah Tabungan',
+                              'Tambah Transaksi',
                               maxLines: 1,
                               softWrap: false,
                               overflow: TextOverflow.visible,
@@ -623,6 +758,8 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
   }
 
   Widget _buildNoGroupView(String userName) {
+    final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark || (ref.watch(themeProvider) == ThemeMode.system && Theme.of(context).brightness == Brightness.dark);
+    
     return SingleChildScrollView(
       controller: _scrollController,
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
@@ -635,20 +772,20 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
               width: 120,
               height: 120,
               decoration: BoxDecoration(
-                color: AppColors.primaryLight.withOpacity(0.5),
+                color: (isDarkMode ? AppColors.primary : AppColors.primaryLight).withOpacity(isDarkMode ? 0.2 : 0.5),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.family_restroom, size: 64, color: AppColors.primaryDark),
+              child: Icon(Icons.family_restroom, size: 64, color: isDarkMode ? AppColors.primary : AppColors.primaryDark),
             ),
           ),
           const SizedBox(height: 24),
-          const Text(
+          Text(
             'Tabungan Keluarga',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.w900,
-              color: AppColors.primaryDark,
+              color: isDarkMode ? Colors.white : AppColors.primaryDark,
               letterSpacing: -0.5,
             ),
           ),
@@ -658,7 +795,7 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
                 ? 'Halo! Silakan atur nama Anda terlebih dahulu untuk mulai menabung bersama.'
                 : 'Halo, $userName!\nGabung dengan keluarga kamu atau buat grup baru sekarang.',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 14, color: Colors.grey.shade600, height: 1.5),
+            style: TextStyle(fontSize: 14, color: isDarkMode ? Colors.white38 : Colors.grey.shade600, height: 1.5),
           ),
           const SizedBox(height: 48),
           
@@ -666,10 +803,10 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: isDarkMode ? AppColors.surfaceDark : Colors.white,
               borderRadius: BorderRadius.circular(24),
               boxShadow: [
-                BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 20, offset: const Offset(0, 4)),
+                BoxShadow(color: Colors.black.withOpacity(isDarkMode ? 0.2 : 0.04), blurRadius: 20, offset: const Offset(0, 4)),
               ],
             ),
             child: Column(
@@ -678,8 +815,8 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
                   icon: const Icon(Icons.add_circle_outline),
                   label: const Text('Buat Keluarga Baru'),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.primary,
-                    side: const BorderSide(color: AppColors.primary, width: 2),
+                    foregroundColor: isDarkMode ? AppColors.primary : AppColors.primary,
+                    side: BorderSide(color: isDarkMode ? AppColors.primary.withOpacity(0.5) : AppColors.primary, width: 2),
                     minimumSize: const Size(double.infinity, 56),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
@@ -689,12 +826,17 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
                 const SizedBox(height: 24),
                 Row(
                   children: [
-                    Expanded(child: Divider(color: Colors.grey.shade300)),
+                    Expanded(child: Divider(color: isDarkMode ? Colors.white10 : Colors.grey.shade300)),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text('ATAU', style: TextStyle(color: Colors.grey.shade500, fontWeight: FontWeight.bold, fontSize: 12)),
+                      child: Text('ATAU', 
+                        style: TextStyle(
+                          color: isDarkMode ? Colors.white10 : Colors.grey.shade500, 
+                          fontWeight: FontWeight.bold, 
+                          fontSize: 12
+                        )),
                     ),
-                    Expanded(child: Divider(color: Colors.grey.shade300)),
+                    Expanded(child: Divider(color: isDarkMode ? Colors.white10 : Colors.grey.shade300)),
                   ],
                 ),
                 const SizedBox(height: 24),
@@ -702,12 +844,12 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
                   controller: _joinCodeController,
                   textCapitalization: TextCapitalization.characters,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, letterSpacing: 2),
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, letterSpacing: 2, color: isDarkMode ? Colors.white : Colors.black),
                   decoration: InputDecoration(
                     hintText: 'Ketik Kode',
-                    hintStyle: TextStyle(fontWeight: FontWeight.normal, fontSize: 16, letterSpacing: 0, color: Colors.grey.shade400),
+                    hintStyle: TextStyle(fontWeight: FontWeight.normal, fontSize: 16, letterSpacing: 0, color: isDarkMode ? Colors.white12 : Colors.grey.shade400),
                     filled: true,
-                    fillColor: AppColors.background,
+                    fillColor: isDarkMode ? Colors.white.withOpacity(0.05) : AppColors.background,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
                   ),
                 ),
@@ -715,7 +857,7 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
                 ElevatedButton(
                   onPressed: _isLoading ? null : _handleJoin,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryDark,
+                    backgroundColor: isDarkMode ? AppColors.primary : AppColors.primaryDark,
                     foregroundColor: Colors.white,
                     minimumSize: const Size(double.infinity, 56),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -753,6 +895,8 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
     // Format mata uang
     final formatCurrency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
 
+    final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark || (ref.watch(themeProvider) == ThemeMode.system && Theme.of(context).brightness == Brightness.dark);
+    
     return SingleChildScrollView(
       controller: _scrollController,
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 100),
@@ -764,9 +908,9 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
               margin: const EdgeInsets.only(bottom: 20),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.orange.shade50,
+                color: isDarkMode ? Colors.orange.withOpacity(0.1) : Colors.orange.shade50,
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.orange.shade200),
+                border: Border.all(color: isDarkMode ? Colors.orange.withOpacity(0.2) : Colors.orange.shade200),
               ),
               child: Row(
                 children: [
@@ -776,8 +920,8 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Sinkronisasi Nama', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.orange.shade900)),
-                        Text('Gunakan nama "$userName" di grup ini?', style: TextStyle(fontSize: 12, color: Colors.orange.shade800)),
+                        Text('Sinkronisasi Nama', style: TextStyle(fontWeight: FontWeight.bold, color: isDarkMode ? Colors.orange : Colors.orange.shade900)),
+                        Text('Gunakan nama "$userName" di grup ini?', style: TextStyle(fontSize: 12, color: isDarkMode ? Colors.orange.withOpacity(0.7) : Colors.orange.shade800)),
                       ],
                     ),
                   ),
@@ -786,7 +930,7 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
                       _showSuccess('Memperbarui nama di grup...');
                       await ref.read(familyGroupServiceProvider).trySyncMemberName(userName);
                     },
-                    child: const Text('Sinkron'),
+                    child: Text('Sinkron', style: TextStyle(color: isDarkMode ? Colors.orange : null)),
                   )
                 ],
               ),
@@ -797,13 +941,18 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [AppColors.primaryDark, AppColors.primary],
+                colors: group.totalGroupSavings >= 0 
+                    ? [AppColors.primaryDark, AppColors.primary]
+                    : [Colors.red.shade900, Colors.red.shade700],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(32),
               boxShadow: [
-                BoxShadow(color: AppColors.primary.withOpacity(0.3), blurRadius: 20, offset: const Offset(0, 10))
+                BoxShadow(
+                  color: (group.totalGroupSavings >= 0 ? AppColors.primary : Colors.red).withOpacity(0.3), 
+                  blurRadius: 20, offset: const Offset(0, 10)
+                )
               ],
             ),
             child: Column(
@@ -824,8 +973,9 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
                       onPressed: () async {
                          // Konfirmasi Keluar
                          final act = await showDialog(context: context, builder: (c) => AlertDialog(
-                           title: const Text('Keluar Grup?'),
-                           content: const Text('Kamu akan menghapus aksesmu dari grup ini secara lokal.'),
+                           backgroundColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
+                           title: Text('Keluar Grup?', style: TextStyle(color: isDarkMode ? Colors.white : AppColors.primaryDark)),
+                           content: Text('Kamu akan menghapus aksesmu dari grup ini secara lokal.', style: TextStyle(color: isDarkMode ? Colors.white70 : Colors.black87)),
                            actions: [
                              TextButton(onPressed: ()=>Navigator.pop(c, false), child: const Text('Batal')),
                              TextButton(onPressed: ()=>Navigator.pop(c, true), child: const Text('Keluar', style: TextStyle(color: Colors.red))),
@@ -843,13 +993,93 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
                 const SizedBox(height: 8),
                 Text(
                   formatCurrency.format(group.totalGroupSavings),
-                  style: const TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: -1),
+                  style: const TextStyle(
+                    fontSize: 32, 
+                    fontWeight: FontWeight.w900, 
+                    color: Colors.white, 
+                    letterSpacing: -1
+                  ),
                 ),
+                const SizedBox(height: 24),
+                
+                // Stats Row
+                Consumer(
+                  builder: (context, ref, child) {
+                    final groupTransactions = ref.watch(transactionsByGroupProvider(group.id));
+                    final totalIn = groupTransactions
+                        .where((t) => t.type == TransactionType.income)
+                        .fold(0.0, (sum, t) => sum + t.amount);
+                    final totalOut = groupTransactions
+                        .where((t) => t.type == TransactionType.expense)
+                        .fold(0.0, (sum, t) => sum + t.amount);
+                    
+                    return Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: Colors.white.withOpacity(0.2)),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    const Icon(Icons.arrow_downward_rounded, color: Colors.greenAccent, size: 14),
+                                    const SizedBox(width: 4),
+                                    const Text('Pemasukan', style: TextStyle(fontSize: 10, color: Colors.white70, fontWeight: FontWeight.bold)),
+                                  ],
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Rp ${_formatK(totalIn)}', 
+                                  style: const TextStyle(color: Colors.greenAccent, fontWeight: FontWeight.w900, fontSize: 16)
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: Colors.white.withOpacity(0.2)),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    const Icon(Icons.arrow_upward_rounded, color: Colors.redAccent, size: 14),
+                                    const SizedBox(width: 4),
+                                    const Text('Pengeluaran', style: TextStyle(fontSize: 10, color: Colors.white70, fontWeight: FontWeight.bold)),
+                                  ],
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Rp ${_formatK(totalOut)}', 
+                                  style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w900, fontSize: 16)
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+                
                 const SizedBox(height: 24),
                 // Kode
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  decoration: BoxDecoration(color: Colors.white.withOpacity(0.15), borderRadius: BorderRadius.circular(16)),
+                  decoration: BoxDecoration(color: Colors.white.withOpacity(isDarkMode ? 0.05 : 0.15), borderRadius: BorderRadius.circular(16)),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -876,7 +1106,7 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
           ),
           const SizedBox(height: 32),
           
-          Text('Anggota Keluarga', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.primaryDark)),
+          Text('Anggota Keluarga', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: isDarkMode ? Colors.white : AppColors.primaryDark)),
           const SizedBox(height: 16),
           
           ...group.members.map((member) {
@@ -887,17 +1117,21 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
               margin: const EdgeInsets.only(bottom: 12),
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: isCurrentUser ? AppColors.primary.withOpacity(0.05) : Colors.white,
+                color: isCurrentUser 
+                    ? AppColors.primary.withOpacity(isDarkMode ? 0.2 : 0.05) 
+                    : (isDarkMode ? AppColors.surfaceDark : Colors.white),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: isCurrentUser ? AppColors.primary.withOpacity(0.2) : Colors.grey.shade100),
+                border: Border.all(color: isCurrentUser 
+                    ? AppColors.primary.withOpacity(0.2) 
+                    : (isDarkMode ? Colors.white.withOpacity(0.05) : Colors.grey.shade100)),
               ),
               child: Row(
                 children: [
                   CircleAvatar(
-                    backgroundColor: isCurrentUser ? AppColors.primary : Colors.grey.shade200,
+                    backgroundColor: isCurrentUser ? AppColors.primary : (isDarkMode ? Colors.white.withOpacity(0.05) : Colors.grey.shade200),
                     child: Text(
                       member.substring(0, 1).toUpperCase(),
-                      style: TextStyle(color: isCurrentUser ? Colors.white : Colors.grey.shade700, fontWeight: FontWeight.bold),
+                      style: TextStyle(color: isCurrentUser ? Colors.white : (isDarkMode ? Colors.white70 : Colors.grey.shade700), fontWeight: FontWeight.bold),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -909,7 +1143,7 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
                           member,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: isDarkMode ? Colors.white : Colors.black),
                         ),
                         Text(
                           member == group.adminName 
@@ -917,7 +1151,7 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
                               : (isCurrentUser ? 'Anda (Anggota)' : 'Anggota'),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
+                          style: TextStyle(color: isDarkMode ? Colors.white24 : Colors.grey.shade500, fontSize: 12),
                         ),
                       ],
                     ),
@@ -925,10 +1159,16 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
                   const SizedBox(width: 8),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+                    decoration: BoxDecoration(
+                      color: (balance >= 0 ? AppColors.primary : Colors.red).withOpacity(isDarkMode ? 0.2 : 0.1), 
+                      borderRadius: BorderRadius.circular(10)
+                    ),
                     child: Text(
                       _formatK(balance),
-                      style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 13),
+                      style: TextStyle(
+                        color: balance >= 0 ? (isDarkMode ? Colors.greenAccent.shade200 : AppColors.primary) : (isDarkMode ? Colors.redAccent.shade100 : Colors.red.shade700), 
+                        fontWeight: FontWeight.bold, fontSize: 13
+                      ),
                     ),
                   ),
                 ],
@@ -940,8 +1180,8 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Riwayat Transaksi', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.primaryDark)),
-              const Icon(Icons.history, color: Colors.grey, size: 20),
+              Text('Riwayat Transaksi', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: isDarkMode ? Colors.white : AppColors.primaryDark)),
+              Icon(Icons.history, color: isDarkMode ? Colors.white24 : Colors.grey, size: 20),
             ],
           ),
           const SizedBox(height: 16),
@@ -965,17 +1205,27 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 8.0),
                         child: ListTile(
-                          onTap: () => _showTransactionActions(t, group.id),
+                          onTap: () => _showTransactionActions(t, group),
                           contentPadding: EdgeInsets.zero,
                           leading: CircleAvatar(
-                            backgroundColor: AppColors.primary.withOpacity(0.1),
-                            child: const Icon(Icons.add_task_rounded, color: AppColors.primary, size: 20),
+                            backgroundColor: t.type == TransactionType.income 
+                                ? Colors.green.withOpacity(isDarkMode ? 0.2 : 0.1) 
+                                : Colors.red.withOpacity(isDarkMode ? 0.2 : 0.1),
+                            child: Icon(
+                              t.type == TransactionType.income ? Icons.add_rounded : Icons.remove_rounded, 
+                              color: t.type == TransactionType.income ? Colors.green : Colors.red, 
+                              size: 20
+                            ),
                           ),
-                          title: Text(t.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                          subtitle: Text(DateFormat('dd MMM yyyy, HH:mm').format(t.date), style: const TextStyle(fontSize: 11)),
+                          title: Text(t.title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: isDarkMode ? Colors.white : Colors.black)),
+                          subtitle: Text(DateFormat('dd MMM yyyy, HH:mm').format(t.date), style: TextStyle(fontSize: 11, color: isDarkMode ? Colors.white24 : Colors.black54)),
                           trailing: Text(
                             NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(t.amount),
-                            style: const TextStyle(fontWeight: FontWeight.w900, color: AppColors.primary, fontSize: 14),
+                            style: TextStyle(
+                              fontWeight: FontWeight.w900, 
+                              color: t.type == TransactionType.income ? (isDarkMode ? Colors.greenAccent.shade200 : Colors.green.shade700) : (isDarkMode ? Colors.redAccent.shade100 : Colors.red.shade700), 
+                              fontSize: 14
+                            ),
                           ),
                         ),
                       );
@@ -991,24 +1241,37 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
 
 class _ThousandsSeparatorInputFormatter extends TextInputFormatter {
   @override
-  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
-    if (newValue.selection.baseOffset == 0) {
-      return newValue;
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
+    if (newValue.text.isEmpty) return newValue;
+
+    // Clean characters for processing
+    String digitsOnly = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
+    if (digitsOnly.isEmpty) return const TextEditingValue(text: '');
+
+    // Format with dots
+    final formatted = digitsOnly.replaceAllMapped(
+      RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
+      (match) => '${match[1]}.',
+    );
+
+    // Robust cursor positioning:
+    // 1. Find how many digits were before the cursor in the new unformatted text
+    int numDigitsBefore = newValue.selection.end - newValue.text.substring(0, newValue.selection.end).replaceAll(RegExp(r'[0-9]'), '').length;
+    
+    // 2. Find the index in the formatted text that has the same count of digits before it
+    int newSelectionIndex = 0;
+    int digitsCount = 0;
+    while (digitsCount < numDigitsBefore && newSelectionIndex < formatted.length) {
+      if (RegExp(r'[0-9]').hasMatch(formatted[newSelectionIndex])) {
+        digitsCount++;
+      }
+      newSelectionIndex++;
     }
 
-    String joinedText = newValue.text.replaceAll('.', '');
-    double? value = double.tryParse(joinedText);
-
-    if (value == null) {
-      return newValue;
-    }
-
-    final formatter = NumberFormat.decimalPattern('id');
-    String newText = formatter.format(value);
-
-    return newValue.copyWith(
-      text: newText,
-      selection: TextSelection.collapsed(offset: newText.length),
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: newSelectionIndex),
     );
   }
 }

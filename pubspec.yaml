@@ -1,7 +1,7 @@
 name: tabunganku
 description: A new Flutter project for saving money online.
 publish_to: 'none'
-version: 1.2.0+3
+version: 1.3.0+130
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -35,6 +35,8 @@ dependencies:
   json_annotation: ^4.8.1
   firebase_core: ^4.6.0
   cloud_firestore: ^6.2.0
+  timezone: ^0.9.4
+  flutter_timezone: ^5.0.2
   
   
    # Data Models

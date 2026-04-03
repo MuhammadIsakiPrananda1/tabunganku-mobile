@@ -2,88 +2,103 @@
 
 ![Banner Utama](assets/banner.png)
 
-**TabunganKu** adalah aplikasi manajemen keuangan modern yang dirancang khusus untuk membantu Anda dan keluarga dalam mengelola tabungan secara efektif, transparan, dan otomatis. Dengan integrasi **Real-time Database** dan **Teknologi OCR**, mencatat transaksi kini semudah mengambil foto.
+**TabunganKu** adalah ekosistem manajemen keuangan modern yang dirancang untuk menghadirkan transparansi dan kebiasaan menabung yang sehat bagi keluarga Indonesia. Dengan pendekatan **Premium UI/UX (Mint Fresh Design)** dan integrasi awan yang cerdas, kami mengubah cara Anda melihat uang Anda.
 
 ---
 
-## ✨ Fitur Utama
+## 🚀 Perjalanan Evolusi (Roadmap & Versi)
 
-- **📊 Dashboard Real-time:** Pantau sisa saldo, total pendapatan, dan pengeluaran harian dengan grafik interaktif yang memanjakan mata.
-- **👨‍👩‍👧‍👦 Grup Keluarga:** Sinkronkan catatan tabungan dengan seluruh anggota keluarga dalam satu database yang sama.
-- ~~**📸 Scan Struk OCR:** Tidak perlu mengetik manual! Cukup foto struk belanja Anda, dan aplikasi akan mendeteksi nominalnya secara otomatis.~~
-- **👤 Kustomisasi Profil:** Pilih avatar premium dan ganti nickname sesuai keinginan Anda dengan penyimpanan permanen.
-- **🎯 Target Menabung:** Buat rencana keuangan untuk masa depan dan pantau progresnya hingga tercapai.
-- **📈 Laporan PDF:** Ekspor riwayat transaksi Anda ke dalam format PDF yang rapi untuk keperluan administrasi.
+Kami terus berinovasi untuk memberikan pengalaman terbaik. Berikut adalah kronologi perkembangan fitur utama dari awal hingga saat ini:
+
+### **v1.4.0 - Premium Shopping & Smart Reminders (Current)**
+*   **🎉 Migrasi Catatan Belanja**: Fitur "Belanja" kini memiliki halaman mandiri yang luas dan responsif, menggantikan model bottom sheet untuk pengelolaan item yang lebih leluasa.
+*   **💡 Smart Daily Reminders**: Penjadwalan notifikasi jam 6 pagi yang lebih tangguh dengan sinkronisasi timezone otomatis (`Asia/Jakarta` fallback) dan prioritas sistem tertinggi.
+*   **🔌 Auto-Reschedule**: Algoritma cerdas yang menjadwalkan ulang pengingat setiap kali aplikasi dibuka agar alarm sistem tetap sinkron.
+*   **🧹 Code Cleanup**: Optimasi codebase dengan penghapusan 800+ baris kode redundan untuk performa lebih ringan.
+
+### **v1.3.0 - Dashboard Optimization**
+*   **📊 UI Dashboard v2**: Peningkatan visual pada kartu saldo dan grafik interaktif menggunakan `fl_chart`.
+*   **📦 Gradle Sync**: Sinkronisasi sistem build Android Gradle ke standar 1.3.0 untuk stabilitas kompilasi yang lebih baik.
+
+### **v1.2.0 - Advanced Features & OCR**
+*   **📸 Scan Struk OCR**: Integrasi awal deteksi nominal belanja otomatis dari foto struk fisik.
+*   **👤 Manajemen Profil**: Sistem identitas dengan pemilihan avatar premium dan penyimpanan nickname permanen.
+
+### **v1.1.0 - Cloud Integration**
+*   **🔥 Firebase Backend**: Implementasi awal Cloud Firestore untuk sinkronisasi data antar anggota keluarga secara real-time.
+*   **🎯 Target Menabung**: Fitur penetapan impian keuangan dengan progres bar visual.
+
+### **v1.0.0 - Initial Release**
+*   **💎 Core Foundation**: Landasan aplikasi dengan pencatatan transaksi manual dan keamanan biometrik sederhana.
 
 ---
 
-## 🛠️ Teknologi yang Digunakan
+## ✨ Fitur Unggulan
 
-| Komponen | Teknologi |
+- **📊 Dashboard Interaktif:** Pantau sisa saldo, pendapatan, dan pengeluaran harian dengan grafik elegan.
+- **👨‍👩‍👧‍👦 Grup Keluarga:** Sinkronkan catatan tabungan dengan seluruh anggota keluarga secara instan.
+- **🎯 Progres Target:** Visualisasikan seberapa dekat Anda dengan impian Anda (iPhone, Kendaraan, dll).
+- **📈 Laporan PDF:** Ekspor riwayat transaksi ke format PDF yang rapi dengan satu klik.
+
+---
+
+## 🛠️ Stack Teknologi
+
+| Layer | Teknologi |
 | :--- | :--- |
-| **Framework** | [Flutter](https://flutter.dev) (Dart) |
+| **Core Framework** | [Flutter](https://flutter.dev) (Dart SDK 3.0.0+) |
 | **State Management** | [Riverpod](https://riverpod.dev) |
-| **Database** | [Cloud Firestore](https://firebase.google.com/docs/firestore) |
-| **Navigation** | [Go Router](https://pub.dev/packages/go_router) |
-| **Design System** | Custom Vanilla CSS & Google Fonts (Poppins) |
-| **Local Storage** | Shared Preferences & Flutter Secure Storage |
+| **Backend & Sync** | [Google Firebase](https://firebase.google.com) (Firestore & Auth) |
+| **Notifications** | [Flutter Local Notifications](https://pub.dev/packages/flutter_local_notifications) |
+| **UI/UX Design** | Custom Mint Fresh Aesthetic (Vanilla CSS + Poppins Fonts) |
+| **Charts** | [FL Chart](https://pub.dev/packages/fl_chart) |
 
 ---
 
-## 🚀 Cara Instalasi
+## 📥 Cara Instalasi (Audit & Development)
 
 ### Prasyarat
-- [Flutter SDK](https://docs.flutter.dev/get-started/install) (versi 3.0.0 ke atas)
-- [Dart SDK](https://dart.dev/get-dart)
-- Android Studio / Xcode (untuk simulator)
+- Flutter SDK (versi 3.0.0 atau lebih tinggi)
+- Android Studio / VS Code dengan plugin Flutter
+- Koneksi internet untuk sinkronisasi Firebase
 
-### Langkah-langkah
-1. **Clone repository:**
-   ```bash
-   git clone https://github.com/username/tabunganku.git
-   cd tabunganku
-   ```
-2. **Instal dependensi:**
-   ```bash
-   flutter pub get
-   ```
-3. **Konfigurasi Firebase:**
-   - Tambahkan file `google-services.json` (untuk Android) ke `android/app/`.
-   - Tambahkan file `GoogleService-Info.plist` (untuk iOS) ke `ios/Runner/`.
-4. **Jalankan aplikasi:**
-   ```bash
-   flutter run
-   ```
+### Langkah Development
+1.  **Clone Repository**
+    ```bash
+    git clone https://github.com/MuhammadIsakiPrananda1/tabunganku-mobile.git
+    cd tabunganku-mobile
+    ```
+2.  **Konfigurasi Dependensi**
+    ```bash
+    flutter pub get
+    ```
+3.  **Setup Firebase Artifacts**
+    - Simpan `google-services.json` (Android) di `android/app/`.
+    - Simpan `GoogleService-Info.plist` (iOS) di `ios/Runner/`.
+4.  **Running Device**
+    ```bash
+    flutter run
+    ```
 
 ---
 
-## 🏗️ Cara Build Aplikasi
+## 🏗️ Build & Deployment
 
-### Android (APK)
-Untuk membuat file installer Android:
+### Android
+Untuk mendapatkan APK dengan arsitektur spesifik:
 ```bash
-flutter build apk --release
+flutter build apk --split-per-abi
 ```
-File APK akan tersedia di: `build/app/outputs/flutter-apk/app-release.apk`
+File hasil build akan berada di `build/app/outputs/flutter-apk/`.
 
-### iOS (IPA)
-*Catatan: Membutuhkan macOS dan Xcode.*
+### iOS
 ```bash
 flutter build ipa --release
 ```
 
 ---
 
-## 🛡️ Keamanan & Kontribusi
-Silakan lihat dokumen berikut untuk informasi lebih lanjut:
-- [PANDUAN KEAMANAN (SECURITY.md)](SECURITY.md)
-- [PANDUAN KONTRIBUSI (CONTRIBUTING.md)](CONTRIBUTING.md)
-- [CATATAN PERUBAHAN (CHANGELOG.md)](CHANGELOG.md)
+## 📄 Lisensi & Kredit
+Proyek ini dikembangkan oleh **Muhammad Isaki Prananda** dan didistribusikan di bawah **MIT License**.
 
----
-
-### 📄 Lisensi
-Didistribusikan di bawah **MIT License**. Lihat [LICENSE](LICENSE) untuk informasi lebih lanjut.
-
----
-**Dibuat dengan ❤️ oleh [Neverland Studio](https://github.com/neverlandstudio)**
+**Dibuat dengan ❤️ oleh [Muhammad Isaki Prananda](https://github.com/MuhammadIsakiPrananda1)**

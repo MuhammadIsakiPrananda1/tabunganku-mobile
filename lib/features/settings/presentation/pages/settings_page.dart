@@ -58,7 +58,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             _buildSettingTile(Icons.info_outline, 'Tentang Aplikasi', () {}),
 
             const SizedBox(height: 40),
-            const Text('Versi 1.3.9', style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+            const Text('Versi 1.4.0', style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
           ],
         ),
       ),

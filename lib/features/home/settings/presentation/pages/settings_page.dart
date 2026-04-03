@@ -42,7 +42,7 @@ class _SettingsPageState extends State<SettingsPage> {
               borderRadius: BorderRadius.circular(24),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.02),
+                  color: Colors.black.withValues(alpha: 0.02),
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 ),
@@ -54,7 +54,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   padding: const EdgeInsets.all(3),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(color: AppColors.primary.withOpacity(0.2), width: 2),
+                    border: Border.all(color: AppColors.primary.withValues(alpha: 0.2), width: 2),
                   ),
                   child: const CircleAvatar(
                     radius: 30,
@@ -77,10 +77,10 @@ class _SettingsPageState extends State<SettingsPage> {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Anggota Premium • v1.1.0',
+                        'Anggota Premium • v1.4.0',
                         style: TextStyle(
                           fontSize: 12,
-                          color: Colors.teal.shade600.withOpacity(0.7),
+                          color: Colors.teal.shade600.withValues(alpha: 0.7),
                         ),
                       ),
                     ],
@@ -187,7 +187,7 @@ class _SettingsPageState extends State<SettingsPage> {
         style: TextStyle(
           fontSize: 15,
           fontWeight: FontWeight.bold,
-          color: Colors.teal.shade900.withOpacity(0.5),
+          color: Colors.teal.shade900.withValues(alpha: 0.5),
           letterSpacing: 1,
         ),
       ),
@@ -228,7 +228,7 @@ class _SettingsPageState extends State<SettingsPage> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.015),
+            color: Colors.black.withValues(alpha: 0.015),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -239,7 +239,7 @@ class _SettingsPageState extends State<SettingsPage> {
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: AppColors.primary.withOpacity(0.05),
+            color: AppColors.primary.withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Icon(icon, color: AppColors.primary, size: 22),

@@ -25,7 +25,7 @@ class TransactionTile extends ConsumerWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(isDarkMode ? 0.2 : 0.02),
+            color: Colors.black.withValues(alpha: isDarkMode ? 0.2 : 0.02),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -36,7 +36,7 @@ class TransactionTile extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: (isExpense ? AppColors.error : AppColors.success).withOpacity(isDarkMode ? 0.2 : 0.1),
+              color: (isExpense ? AppColors.error : AppColors.success).withValues(alpha: isDarkMode ? 0.2 : 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(

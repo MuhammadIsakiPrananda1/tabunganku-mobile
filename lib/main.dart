@@ -47,15 +47,42 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
 
-  // Inisialisasi timezone
-  tz_data.initializeTimeZones();
-  final dynamic location = await FlutterTimezone.getLocalTimezone();
-  // flutter_timezone v5.x returns TimezoneInfo object with 'identifier' property
-  final String locationName = location is String ? location : (location as dynamic).identifier.toString();
-  tz.setLocalLocation(tz.getLocation(locationName));
+  // Inisialisasi timezone dengan fallback yang lebih aman
+  try {
+    tz_data.initializeTimeZones();
+    final dynamic location = await FlutterTimezone.getLocalTimezone();
+    // flutter_timezone v5.x returns TimezoneInfo object with 'identifier' property
+    final String locationName = location is String ? location : (location as dynamic).identifier.toString();
+    tz.setLocalLocation(tz.getLocation(locationName));
+    debugPrint('Timezone set to: $locationName');
+  } catch (e) {
+    debugPrint('Gagal mendeteksi timezone otomatis: $e. Menggunakan Asia/Jakarta sebagai default.');
+    try {
+      tz.setLocalLocation(tz.getLocation('Asia/Jakarta'));
+    } catch (_) {
+      debugPrint('Fallback Asia/Jakarta juga gagal. Menggunakan UTC.');
+    }
+  }
 
-  // Inisialisasi notifikasi di level app (bukan di widget)
+  // Inisialisasi notifikasi di level app
   await _initNotifications();
+  
+  // Buat channel notifikasi Android secara eksplisit agar prioritas tinggi terjamin
+  final androidPlugin = flutterLocalNotificationsPlugin
+      .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>();
+  if (androidPlugin != null) {
+    const AndroidNotificationChannel channel = AndroidNotificationChannel(
+      'daily_reminder_channel_v2',
+      'Daily Reminder',
+      description: 'Pengingat menabung harian',
+      importance: Importance.max,
+      playSound: true,
+      enableVibration: true,
+      showBadge: true,
+    );
+    await androidPlugin.createNotificationChannel(channel);
+  }
   
   // Inisialisasi locale data untuk DateFormat('...', 'id_ID')
   await initializeDateFormatting('id_ID', null);

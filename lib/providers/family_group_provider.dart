@@ -12,8 +12,8 @@ final familyBalanceSyncProvider = Provider.autoDispose<void>((ref) {
   if (groupId == null || groupId.isEmpty) return;
 
   ref.listen(transactionsByGroupProvider(groupId), (previous, next) {
-    final totalBalance = next.fold(0.0, (sum, t) => 
-      sum + (t.type == TransactionType.income ? t.amount : -t.amount));
+    final totalBalance = next.fold(0.0, (acc, t) => 
+      acc + (t.type == TransactionType.income ? t.amount : -t.amount));
     
     // Perform sync in background
     ref.read(familyGroupServiceProvider).syncLocalBalance(totalBalance);
@@ -112,8 +112,8 @@ class UserProfileNotifier extends StateNotifier<UserProfile> {
     if (name != null && newName != oldName && oldName.isNotEmpty) {
       try {
         await ref.read(familyGroupServiceProvider).updateMemberName(oldName, newName);
-      } catch (e) {
-        print("Failed to sync name change: $e");
+      } catch (_) {
+        // Silently fail if sync fails, as the user already successfully updated locally
       }
     }
   }

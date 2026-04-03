@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -152,7 +151,7 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
                     hintStyle: TextStyle(color: isDarkMode ? Colors.white24 : Colors.grey),
                     prefixIcon: Icon(Icons.group, color: isDarkMode ? AppColors.primary : AppColors.primary),
                     filled: true,
-                    fillColor: isDarkMode ? Colors.white.withOpacity(0.05) : AppColors.background,
+                    fillColor: isDarkMode ? Colors.white.withValues(alpha: 0.05) : AppColors.background,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
                   ),
                 ),
@@ -265,10 +264,10 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             decoration: BoxDecoration(
                               color: selectedType == TransactionType.income 
-                                  ? (isDarkMode ? Colors.green.withOpacity(0.1) : Colors.green.shade50) 
-                                  : (isDarkMode ? Colors.white.withOpacity(0.02) : Colors.grey.shade50),
+                                  ? (isDarkMode ? Colors.green.withValues(alpha: 0.1) : Colors.green.shade50) 
+                                  : (isDarkMode ? Colors.white.withValues(alpha: 0.02) : Colors.grey.shade50),
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: selectedType == TransactionType.income ? Colors.green.shade200.withOpacity(0.5) : Colors.transparent),
+                              border: Border.all(color: selectedType == TransactionType.income ? Colors.green.shade200.withValues(alpha: 0.5) : Colors.transparent),
                             ),
                             child: Column(
                               children: [
@@ -288,10 +287,10 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             decoration: BoxDecoration(
                               color: selectedType == TransactionType.expense 
-                                  ? (isDarkMode ? Colors.red.withOpacity(0.1) : Colors.red.shade50) 
-                                  : (isDarkMode ? Colors.white.withOpacity(0.02) : Colors.grey.shade50),
+                                  ? (isDarkMode ? Colors.red.withValues(alpha: 0.1) : Colors.red.shade50) 
+                                  : (isDarkMode ? Colors.white.withValues(alpha: 0.02) : Colors.grey.shade50),
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: selectedType == TransactionType.expense ? Colors.red.shade200.withOpacity(0.5) : Colors.transparent),
+                              border: Border.all(color: selectedType == TransactionType.expense ? Colors.red.shade200.withValues(alpha: 0.5) : Colors.transparent),
                             ),
                             child: Column(
                               children: [
@@ -332,7 +331,7 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
                       ),
                     ),
                     filled: true,
-                    fillColor: isDarkMode ? Colors.white.withOpacity(0.02) : Colors.white,
+                    fillColor: isDarkMode ? Colors.white.withValues(alpha: 0.02) : Colors.white,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
                       borderSide: BorderSide(color: isDarkMode ? AppColors.primary : Colors.teal, width: 2),
@@ -354,10 +353,10 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
                   const SizedBox(height: 12),
                   
                   DropdownButtonFormField<String>(
-                    value: selectedCategory,
+                    initialValue: selectedCategory,
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: isDarkMode ? Colors.white.withOpacity(0.05) : AppColors.background,
+                      fillColor: isDarkMode ? Colors.white.withValues(alpha: 0.05) : AppColors.background,
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                       prefixIcon: const Icon(Icons.category_rounded, color: AppColors.primary),
@@ -443,7 +442,7 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: existingTx != null 
-                          ? (isDarkMode ? Colors.teal.shade900.withOpacity(0.5) : Colors.teal.shade700) 
+                          ? (isDarkMode ? Colors.teal.shade900.withValues(alpha: 0.5) : Colors.teal.shade700) 
                           : (isDarkMode ? AppColors.primary : AppColors.primaryDark),
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -514,7 +513,7 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
                 return Column(
                   children: [
                     ListTile(
-                      leading: CircleAvatar(backgroundColor: isDarkMode ? Colors.blue.withOpacity(0.1) : const Color(0xFFE3F2FD), child: const Icon(Icons.edit_rounded, color: Colors.blue)),
+                      leading: CircleAvatar(backgroundColor: isDarkMode ? Colors.blue.withValues(alpha: 0.1) : const Color(0xFFE3F2FD), child: const Icon(Icons.edit_rounded, color: Colors.blue)),
                       title: Text('Edit Transaksi', style: TextStyle(fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : Colors.black)),
                       subtitle: Text('Ubah nominal atau kategori', style: TextStyle(color: isDarkMode ? Colors.white38 : Colors.black54)),
                       onTap: () {
@@ -524,7 +523,7 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
                     ),
                     const SizedBox(height: 8),
                     ListTile(
-                      leading: CircleAvatar(backgroundColor: isDarkMode ? Colors.red.withOpacity(0.1) : const Color(0xFFFFEBEE), child: const Icon(Icons.delete_forever_rounded, color: Colors.red)),
+                      leading: CircleAvatar(backgroundColor: isDarkMode ? Colors.red.withValues(alpha: 0.1) : const Color(0xFFFFEBEE), child: const Icon(Icons.delete_forever_rounded, color: Colors.red)),
                       title: const Text('Hapus Transaksi', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red)),
                       subtitle: Text('Data akan dihapus permanen', style: TextStyle(color: isDarkMode ? Colors.white38 : Colors.black54)),
                       onTap: () {
@@ -628,7 +627,7 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
             children: [
               CircularProgressIndicator(color: AppColors.primary),
               SizedBox(height: 16),
-              const Text('Menghubungkan ke Cloud...', style: TextStyle(color: Colors.grey)),
+              Text('Menghubungkan ke Cloud...', style: TextStyle(color: Colors.grey)),
             ],
           ),
         ),
@@ -654,7 +653,7 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.05),
+                    color: Colors.red.withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -698,7 +697,7 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
         borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
-            color: (isDarkMode ? AppColors.primary : AppColors.primaryDark).withOpacity(0.4),
+            color: (isDarkMode ? AppColors.primary : AppColors.primaryDark).withValues(alpha: 0.4),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),
@@ -772,7 +771,7 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
               width: 120,
               height: 120,
               decoration: BoxDecoration(
-                color: (isDarkMode ? AppColors.primary : AppColors.primaryLight).withOpacity(isDarkMode ? 0.2 : 0.5),
+                color: (isDarkMode ? AppColors.primary : AppColors.primaryLight).withValues(alpha: isDarkMode ? 0.2 : 0.5),
                 shape: BoxShape.circle,
               ),
               child: Icon(Icons.family_restroom, size: 64, color: isDarkMode ? AppColors.primary : AppColors.primaryDark),
@@ -806,7 +805,7 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
               color: isDarkMode ? AppColors.surfaceDark : Colors.white,
               borderRadius: BorderRadius.circular(24),
               boxShadow: [
-                BoxShadow(color: Colors.black.withOpacity(isDarkMode ? 0.2 : 0.04), blurRadius: 20, offset: const Offset(0, 4)),
+                BoxShadow(color: Colors.black.withValues(alpha: isDarkMode ? 0.2 : 0.04), blurRadius: 20, offset: const Offset(0, 4)),
               ],
             ),
             child: Column(
@@ -816,7 +815,7 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
                   label: const Text('Buat Keluarga Baru'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: isDarkMode ? AppColors.primary : AppColors.primary,
-                    side: BorderSide(color: isDarkMode ? AppColors.primary.withOpacity(0.5) : AppColors.primary, width: 2),
+                    side: BorderSide(color: isDarkMode ? AppColors.primary.withValues(alpha: 0.5) : AppColors.primary, width: 2),
                     minimumSize: const Size(double.infinity, 56),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
@@ -849,7 +848,7 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
                     hintText: 'Ketik Kode',
                     hintStyle: TextStyle(fontWeight: FontWeight.normal, fontSize: 16, letterSpacing: 0, color: isDarkMode ? Colors.white12 : Colors.grey.shade400),
                     filled: true,
-                    fillColor: isDarkMode ? Colors.white.withOpacity(0.05) : AppColors.background,
+                    fillColor: isDarkMode ? Colors.white.withValues(alpha: 0.05) : AppColors.background,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
                   ),
                 ),
@@ -908,9 +907,9 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
               margin: const EdgeInsets.only(bottom: 20),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: isDarkMode ? Colors.orange.withOpacity(0.1) : Colors.orange.shade50,
+                color: isDarkMode ? Colors.orange.withValues(alpha: 0.1) : Colors.orange.shade50,
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: isDarkMode ? Colors.orange.withOpacity(0.2) : Colors.orange.shade200),
+                border: Border.all(color: isDarkMode ? Colors.orange.withValues(alpha: 0.2) : Colors.orange.shade200),
               ),
               child: Row(
                 children: [
@@ -921,7 +920,7 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('Sinkronisasi Nama', style: TextStyle(fontWeight: FontWeight.bold, color: isDarkMode ? Colors.orange : Colors.orange.shade900)),
-                        Text('Gunakan nama "$userName" di grup ini?', style: TextStyle(fontSize: 12, color: isDarkMode ? Colors.orange.withOpacity(0.7) : Colors.orange.shade800)),
+                        Text('Gunakan nama "$userName" di grup ini?', style: TextStyle(fontSize: 12, color: isDarkMode ? Colors.orange.withValues(alpha: 0.7) : Colors.orange.shade800)),
                       ],
                     ),
                   ),
@@ -950,7 +949,7 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
               borderRadius: BorderRadius.circular(32),
               boxShadow: [
                 BoxShadow(
-                  color: (group.totalGroupSavings >= 0 ? AppColors.primary : Colors.red).withOpacity(0.3), 
+                  color: (group.totalGroupSavings >= 0 ? AppColors.primary : Colors.red).withValues(alpha: 0.3), 
                   blurRadius: 20, offset: const Offset(0, 10)
                 )
               ],
@@ -989,7 +988,7 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
                   ],
                 ),
                 const SizedBox(height: 16),
-                Text('TOTAL SALDO BERSAMA', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1.5, color: Colors.white.withOpacity(0.7))),
+                Text('TOTAL SALDO BERSAMA', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1.5, color: Colors.white.withValues(alpha: 0.7))),
                 const SizedBox(height: 8),
                 Text(
                   formatCurrency.format(group.totalGroupSavings),
@@ -1019,9 +1018,9 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
                           child: Container(
                             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.15),
+                              color: Colors.white.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: Colors.white.withOpacity(0.2)),
+                              border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1047,9 +1046,9 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
                           child: Container(
                             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.15),
+                              color: Colors.white.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: Colors.white.withOpacity(0.2)),
+                              border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1079,14 +1078,14 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
                 // Kode
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  decoration: BoxDecoration(color: Colors.white.withOpacity(isDarkMode ? 0.05 : 0.15), borderRadius: BorderRadius.circular(16)),
+                  decoration: BoxDecoration(color: Colors.white.withValues(alpha: isDarkMode ? 0.05 : 0.15), borderRadius: BorderRadius.circular(16)),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('KODE GABUNG', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.white.withOpacity(0.7), letterSpacing: 1)),
+                          Text('KODE GABUNG', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.white.withValues(alpha: 0.7), letterSpacing: 1)),
                           const SizedBox(height: 4),
                           Text(group.code, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, letterSpacing: 2, color: Colors.white)),
                         ],
@@ -1118,17 +1117,17 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: isCurrentUser 
-                    ? AppColors.primary.withOpacity(isDarkMode ? 0.2 : 0.05) 
+                    ? AppColors.primary.withValues(alpha: isDarkMode ? 0.2 : 0.05) 
                     : (isDarkMode ? AppColors.surfaceDark : Colors.white),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: isCurrentUser 
-                    ? AppColors.primary.withOpacity(0.2) 
-                    : (isDarkMode ? Colors.white.withOpacity(0.05) : Colors.grey.shade100)),
+                    ? AppColors.primary.withValues(alpha: 0.2) 
+                    : (isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100)),
               ),
               child: Row(
                 children: [
                   CircleAvatar(
-                    backgroundColor: isCurrentUser ? AppColors.primary : (isDarkMode ? Colors.white.withOpacity(0.05) : Colors.grey.shade200),
+                    backgroundColor: isCurrentUser ? AppColors.primary : (isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade200),
                     child: Text(
                       member.substring(0, 1).toUpperCase(),
                       style: TextStyle(color: isCurrentUser ? Colors.white : (isDarkMode ? Colors.white70 : Colors.grey.shade700), fontWeight: FontWeight.bold),
@@ -1160,7 +1159,7 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(
-                      color: (balance >= 0 ? AppColors.primary : Colors.red).withOpacity(isDarkMode ? 0.2 : 0.1), 
+                      color: (balance >= 0 ? AppColors.primary : Colors.red).withValues(alpha: isDarkMode ? 0.2 : 0.1), 
                       borderRadius: BorderRadius.circular(10)
                     ),
                     child: Text(
@@ -1209,8 +1208,8 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
                           contentPadding: EdgeInsets.zero,
                           leading: CircleAvatar(
                             backgroundColor: t.type == TransactionType.income 
-                                ? Colors.green.withOpacity(isDarkMode ? 0.2 : 0.1) 
-                                : Colors.red.withOpacity(isDarkMode ? 0.2 : 0.1),
+                                ? Colors.green.withValues(alpha: isDarkMode ? 0.2 : 0.1) 
+                                : Colors.red.withValues(alpha: isDarkMode ? 0.2 : 0.1),
                             child: Icon(
                               t.type == TransactionType.income ? Icons.add_rounded : Icons.remove_rounded, 
                               color: t.type == TransactionType.income ? Colors.green : Colors.red, 

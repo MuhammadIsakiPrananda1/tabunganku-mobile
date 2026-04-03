@@ -59,7 +59,7 @@ class _TransactionPageState extends ConsumerState<TransactionPage> {
                 ),
               ),
               pw.SizedBox(height: 20),
-              pw.Table.fromTextArray(
+              pw.TableHelper.fromTextArray(
                 headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold),
                 headers: ['Tanggal', 'Keterangan', 'Kategori', 'Tipe', 'Nominal'],
                 data: transactions.map((t) {

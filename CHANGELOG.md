@@ -4,9 +4,27 @@ Semua perubahan penting pada proyek **TabunganKu** akan didokumentasikan di file
 
 Format pengisian mengikuti [Keep a Changelog](https://keepachangelog.com/id/1.0.0/).
 
+## [1.4.0] - 2026-04-03
+
+### Ditambahkan
+
+- **Migrasi Catatan Belanja:** Transisi fitur belanja dari model bottom sheet ke halaman mandiri yang lebih premium.
+- **Peningkatan Pengingat Harian:** Sistem notifikasi yang lebih stabil dengan deteksi timezone otomatis dan prioritas tinggi (Max Importance).
+- **Auto-Reschedule Notifikasi:** Pembaruan otomatis jadwal pengingat setiap kali aplikasi dibuka.
+
+### Diperbaiki
+
+- **Sinkronisasi Waktu:** Perbaikan bug pada penjadwalan notifikasi jam 6 pagi yang sebelumnya tidak muncul.
+- **Pembersihan Kode:** Penghapusan 800+ baris kode legacy dan optimalisasi import pada dashboard.
+
+### Diperbarui
+
+- **Versi Aplikasi:** Pembaruan versi aplikasi ke 1.4.0.
+
 ## [1.3.0] - 2026-04-01
 
 ### Ditambahkan
+
 - **Optimasi UI Dashboard:** Perbaikan visual pada kartu saldo dan grafik interaktif.
 - **Pembaruan README:** Dokumentasi yang lebih modern dan informatif.
 

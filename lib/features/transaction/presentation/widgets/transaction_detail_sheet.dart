@@ -98,7 +98,7 @@ class TransactionDetailSheet extends ConsumerWidget {
                         margin: const EdgeInsets.symmetric(horizontal: 2),
                         height: 1,
                         color: isDarkMode
-                            ? Colors.white.withOpacity(0.05)
+                            ? Colors.white.withValues(alpha: 0.05)
                             : Colors.grey.shade200,
                       ),
                     )),
@@ -133,7 +133,7 @@ class TransactionDetailSheet extends ConsumerWidget {
                       label: const Text('Edit Nominal'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: isDarkMode
-                            ? Colors.blue.shade900.withOpacity(0.3)
+                            ? Colors.blue.shade900.withValues(alpha: 0.3)
                             : Colors.blue.shade50,
                         foregroundColor:
                             isDarkMode ? Colors.blue.shade200 : Colors.blue.shade700,
@@ -156,7 +156,7 @@ class TransactionDetailSheet extends ConsumerWidget {
                       label: const Text('Hapus'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: isDarkMode
-                            ? Colors.red.shade900.withOpacity(0.3)
+                            ? Colors.red.shade900.withValues(alpha: 0.3)
                             : Colors.red.shade50,
                         foregroundColor:
                             isDarkMode ? Colors.red.shade200 : Colors.red.shade700,
@@ -192,7 +192,7 @@ class TransactionDetailSheet extends ConsumerWidget {
                   fontWeight: FontWeight.bold,
                   color: isDarkMode
                       ? Colors.white24
-                      : Colors.teal.shade800.withOpacity(0.3))),
+                      : Colors.teal.shade800.withValues(alpha: 0.3))),
         ),
         Expanded(
           child: Text(value,

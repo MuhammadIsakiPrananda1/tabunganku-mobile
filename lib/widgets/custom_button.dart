@@ -53,7 +53,7 @@ class _CustomButtonState extends ConsumerState<CustomButton> {
                 : null,
             boxShadow: !widget.isSecondary && !widget.isLoading ? [
               BoxShadow(
-                color: primaryColor.withOpacity(isDarkMode ? 0.3 : 0.2),
+                color: primaryColor.withValues(alpha: isDarkMode ? 0.3 : 0.2),
                 blurRadius: 8,
                 offset: const Offset(0, 4),
               )

@@ -1,7 +1,7 @@
 name: tabunganku
 description: A new Flutter project for saving money online.
 publish_to: 'none'
-version: 1.3.0+130
+version: 1.4.0+140
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -22,6 +22,7 @@ dependencies:
   path_provider: ^2.1.2
   open_filex: ^4.4.0
   
+  
   # Authentication & Security
   flutter_secure_storage: ^9.0.0
   local_auth: ^2.1.14
@@ -40,6 +41,7 @@ dependencies:
   
   
    # Data Models
+  image_picker: ^1.0.7
 
 dev_dependencies:
   flutter_test:

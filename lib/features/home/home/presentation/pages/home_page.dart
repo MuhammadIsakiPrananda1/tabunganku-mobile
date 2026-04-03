@@ -30,7 +30,7 @@ class HomePage extends StatelessWidget {
                     fontSize: 12,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 1.5,
-                    color: Colors.teal.shade800.withOpacity(0.5),
+                    color: Colors.teal.shade800.withValues(alpha: 0.5),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -118,7 +118,7 @@ class HomePage extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         const Text(
-                          'Version 1.1.0',
+                          'v1.4.0',
                           style: TextStyle(fontSize: 8, color: Colors.grey),
                         ),
                       ],
@@ -145,7 +145,7 @@ class HomePage extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.015),
+                color: Colors.black.withValues(alpha: 0.015),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -159,7 +159,7 @@ class HomePage extends StatelessWidget {
           style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w600,
-            color: Colors.teal.shade800.withOpacity(0.8),
+            color: Colors.teal.shade800.withValues(alpha: 0.8),
           ),
         ),
       ],
@@ -176,7 +176,7 @@ class HomePage extends StatelessWidget {
         borderRadius: BorderRadius.circular(32),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha: 0.02),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -194,13 +194,13 @@ class HomePage extends StatelessWidget {
                   fontSize: 10,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 1.2,
-                  color: Colors.teal.shade800.withOpacity(0.4),
+                  color: Colors.teal.shade800.withValues(alpha: 0.4),
                 ),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.1),
+                  color: AppColors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Text('iPhone 15 Pro', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.primary)),
@@ -225,7 +225,7 @@ class HomePage extends StatelessWidget {
                 '/ 100%',
                 style: TextStyle(
                   fontSize: 16,
-                  color: Colors.teal.shade800.withOpacity(0.3),
+                  color: Colors.teal.shade800.withValues(alpha: 0.3),
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -270,7 +270,7 @@ class HomePage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text('KEKURANGAN', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.grey.shade500)),
-                  Text(format.format(5000000), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Colors.teal.shade700.withOpacity(0.5))),
+                  Text(format.format(5000000), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Colors.teal.shade700.withValues(alpha: 0.5))),
                 ],
               ),
             ],
@@ -290,7 +290,7 @@ class HomePage extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.01),
+            color: Colors.black.withValues(alpha: 0.01),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -305,7 +305,7 @@ class HomePage extends StatelessWidget {
               fontSize: 9,
               fontWeight: FontWeight.w900,
               letterSpacing: 1.2,
-              color: Colors.teal.shade800.withOpacity(0.4),
+              color: Colors.teal.shade800.withValues(alpha: 0.4),
             ),
           ),
           const SizedBox(height: 10),
@@ -327,12 +327,12 @@ class HomePage extends StatelessWidget {
                       FlSpot(6, 2.2),
                     ],
                     isCurved: true,
-                    color: AppColors.primary.withOpacity(0.5),
+                    color: AppColors.primary.withValues(alpha: 0.5),
                     barWidth: 2,
                     dotData: const FlDotData(show: false),
                     belowBarData: BarAreaData(
                       show: true,
-                      color: AppColors.primary.withOpacity(0.05),
+                      color: AppColors.primary.withValues(alpha: 0.05),
                     ),
                   ),
                 ],

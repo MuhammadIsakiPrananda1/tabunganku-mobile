@@ -74,12 +74,26 @@ class _NameSetupSheetState extends ConsumerState<NameSetupSheet> {
             ),
           ),
           const SizedBox(height: 24),
-          Text(
-            'Nama Panggilan',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.w900,
-              color: isDarkMode ? Colors.white : AppColors.primaryDark,
+          RichText(
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: 'Nama Panggilan',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w900,
+                    color: isDarkMode ? Colors.white : AppColors.primaryDark,
+                  ),
+                ),
+                const TextSpan(
+                  text: ' *',
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 8),
@@ -98,7 +112,7 @@ class _NameSetupSheetState extends ConsumerState<NameSetupSheet> {
               hintStyle: TextStyle(color: isDarkMode ? Colors.white12 : Colors.grey),
               prefixIcon: const Icon(Icons.person, color: AppColors.primary),
               filled: true,
-              fillColor: isDarkMode ? Colors.white.withOpacity(0.05) : AppColors.background,
+              fillColor: isDarkMode ? Colors.white.withValues(alpha: 0.05) : AppColors.background,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
                 borderSide: BorderSide.none,

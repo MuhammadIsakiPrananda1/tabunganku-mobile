@@ -1,102 +1,89 @@
-<div align="center">
-
-# 💰 TabunganKu
-### Aplikasi Tabungan Keluarga Cerdas & Modern
-
-[![GitHub Release](https://img.shields.io/github/v/release/MuhammadIsakiPrananda1/tabunganku-mobile?style=for-the-badge&color=2563EB)](https://github.com/MuhammadIsakiPrananda1/tabunganku-mobile/releases)
-[![Build Status](https://img.shields.io/github/actions/workflow/status/MuhammadIsakiPrananda1/tabunganku-mobile/flutter_release.yml?style=for-the-badge&logo=github)](https://github.com/MuhammadIsakiPrananda1/tabunganku-mobile/actions)
-[![License: MIT](https://img.shields.io/badge/License-MIT-F59E0B.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
+# 💰 TabunganKu - Aplikasi Tabungan Keluarga Cerdas
 
 ![Banner Utama](assets/banner.png)
 
-</div>
+**TabunganKu** adalah aplikasi manajemen keuangan modern yang dirancang khusus untuk membantu Anda dan keluarga dalam mengelola tabungan secara efektif, transparan, dan otomatis. Dengan integrasi **Real-time Database** dan **Teknologi OCR**, mencatat transaksi kini semudah mengambil foto.
 
 ---
 
-## 🌟 Tentang TabunganKu
-**TabunganKu** adalah solusi finansial keluarga masa kini. Dirancang untuk memudahkan kolaborasi pencatatan keuangan, aplikasi ini menggabungkan kemudahan **Real-time Synchronization** dengan kecanggihan **Teknologi OCR (Optical Character Recognition)**.
+## ✨ Fitur Utama
 
-Misi kami adalah membantu Anda dan keluarga mencapai kebebasan finansial melalui kebiasaan menabung yang disiplin dan terpantau.
-
----
-
-## 🔥 Fitur Unggulan
-
-<div align="center">
-
-| 📊 **Dashboard Interaktif** | 📸 **Smart OCR Scan** | 👨‍👩‍👧‍👦 **Family Group** |
-| :--- | :--- | :--- |
-| Pantau saldo, pemasukan, dan pengeluaran secara visual melalui grafik dinamis. | Catat transaksi belanja hanya dengan memotret struk. Akurasi tinggi & hemat waktu. | Database terintegrasi. Semua anggota keluarga bisa melihat & mengelola bersama. |
-
-| 👤 **Personalized Profile** | 🎯 **Saving Goals** | 📈 **Export PDF** |
-| :--- | :--- | :--- |
-| Ubah identitas nickname dan avatar premium sesuai kepribadian masing-masing. | Rencanakan target masa depan & aplikasi akan menghitung progres Anda secara otomatis. | Cetak riwayat transaksi menjadi laporan PDF resmi yang rapi dan profesional. |
-
-</div>
+- **📊 Dashboard Real-time:** Pantau sisa saldo, total pendapatan, dan pengeluaran harian dengan grafik interaktif yang memanjakan mata.
+- **👨‍👩‍👧‍👦 Grup Keluarga:** Sinkronkan catatan tabungan dengan seluruh anggota keluarga dalam satu database yang sama.
+- ~~**📸 Scan Struk OCR:** Tidak perlu mengetik manual! Cukup foto struk belanja Anda, dan aplikasi akan mendeteksi nominalnya secara otomatis.~~
+- **👤 Kustomisasi Profil:** Pilih avatar premium dan ganti nickname sesuai keinginan Anda dengan penyimpanan permanen.
+- **🎯 Target Menabung:** Buat rencana keuangan untuk masa depan dan pantau progresnya hingga tercapai.
+- **📈 Laporan PDF:** Ekspor riwayat transaksi Anda ke dalam format PDF yang rapi untuk keperluan administrasi.
 
 ---
 
-## 🛠️ Stack Teknologi
+## 🛠️ Teknologi yang Digunakan
 
-- **Core Framework:** [Flutter](https://flutter.dev) (Dart) - *Cross-platform Excellence*
-- **State Management:** [Riverpod](https://riverpod.dev) - *Reactive & Scalable*
-- **Database Backend:** [Firebase Firestore](https://firebase.google.com/docs/firestore) - *Real-time Persistence*
-- **UX Layout:** Custom Vanilla CSS & Google Fonts (Poppins) - *Premium Aesthetics*
-- **Navigation Engine:** [Go Router](https://pub.dev/packages/go_router) - *Clean & Declarative*
-- **Security Boilerplate:** Flutter Secure Storage - *Safe Data Handling*
+| Komponen | Teknologi |
+| :--- | :--- |
+| **Framework** | [Flutter](https://flutter.dev) (Dart) |
+| **State Management** | [Riverpod](https://riverpod.dev) |
+| **Database** | [Cloud Firestore](https://firebase.google.com/docs/firestore) |
+| **Navigation** | [Go Router](https://pub.dev/packages/go_router) |
+| **Design System** | Custom Vanilla CSS & Google Fonts (Poppins) |
+| **Local Storage** | Shared Preferences & Flutter Secure Storage |
 
 ---
 
-## 🚀 Instalasi & Memulai
+## 🚀 Cara Instalasi
 
-### 📋 Prasyarat
-- **Flutter SDK:** >= 3.0.0
-- **Dart SDK:** >= 3.0.1
-- **Platform:** Android 6.0+ (Marshmallow) atau iOS 12.0+
+### Prasyarat
+- [Flutter SDK](https://docs.flutter.dev/get-started/install) (versi 3.0.0 ke atas)
+- [Dart SDK](https://dart.dev/get-dart)
+- Android Studio / Xcode (untuk simulator)
 
-### 🛠️ Langkah Cepat
-1. **Clone Repo:**
+### Langkah-langkah
+1. **Clone repository:**
    ```bash
-   git clone https://github.com/MuhammadIsakiPrananda1/tabunganku-mobile.git
+   git clone https://github.com/username/tabunganku.git
+   cd tabunganku
    ```
-2. **Setup Dependencies:**
+2. **Instal dependensi:**
    ```bash
    flutter pub get
    ```
 3. **Konfigurasi Firebase:**
-   Letakkan file `google-services.json` (Android) di `android/app/` dan `GoogleService-Info.plist` (iOS) di `ios/Runner/`.
-4. **Jalankan:**
+   - Tambahkan file `google-services.json` (untuk Android) ke `android/app/`.
+   - Tambahkan file `GoogleService-Info.plist` (untuk iOS) ke `ios/Runner/`.
+4. **Jalankan aplikasi:**
    ```bash
-   flutter run --release
+   flutter run
    ```
 
 ---
 
-## 🏗️ Deployment (Build)
+## 🏗️ Cara Build Aplikasi
 
-### 🤖 Android
-Kami merekomendasikan build dengan split-per-abi untuk ukuran file yang lebih kecil:
+### Android (APK)
+Untuk membuat file installer Android:
 ```bash
-flutter build apk --split-per-abi
+flutter build apk --release
 ```
-File APK akan berada di directory: `build/app/outputs/flutter-apk/`
+File APK akan tersedia di: `build/app/outputs/flutter-apk/app-release.apk`
+
+### iOS (IPA)
+*Catatan: Membutuhkan macOS dan Xcode.*
+```bash
+flutter build ipa --release
+```
 
 ---
 
-## 🛡️ Kontribusi & Keamanan
-
-Kami sangat menghargai kontribusi dari komunitas.
-- 🤝 Baca [PANDUAN KONTRIBUSI](CONTRIBUTING.md)
-- 🔒 Laporkan masalah keamanan lewat [SECURITY.md](SECURITY.md)
-- 📜 Lihat sejarah perubahan di [CHANGELOG.md](CHANGELOG.md)
+## 🛡️ Keamanan & Kontribusi
+Silakan lihat dokumen berikut untuk informasi lebih lanjut:
+- [PANDUAN KEAMANAN (SECURITY.md)](SECURITY.md)
+- [PANDUAN KONTRIBUSI (CONTRIBUTING.md)](CONTRIBUTING.md)
+- [CATATAN PERUBAHAN (CHANGELOG.md)](CHANGELOG.md)
 
 ---
 
 ### 📄 Lisensi
-Copyright © 2026 [Neverland Studio](https://github.com/neverlandstudio).
-Proyek ini dilisensikan di bawah **MIT License** - lihat file [LICENSE](LICENSE) untuk detailnya.
+Didistribusikan di bawah **MIT License**. Lihat [LICENSE](LICENSE) untuk informasi lebih lanjut.
 
 ---
-<div align="center">
-  <b>Dibuat dengan ❤️ oleh Muhammad Isaki Prananda</b>
-</div>
+**Dibuat dengan ❤️ oleh [Neverland Studio](https://github.com/neverlandstudio)**

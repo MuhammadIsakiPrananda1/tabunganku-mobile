@@ -25,8 +25,8 @@ android {
         applicationId = "com.tabunganku"
         minSdk = flutter.minSdkVersion
         targetSdk = 36
-        versionCode = 140
-        versionName = "1.4.0"
+        versionCode = 141
+        versionName = "1.4.1"
     }
 
     buildTypes {

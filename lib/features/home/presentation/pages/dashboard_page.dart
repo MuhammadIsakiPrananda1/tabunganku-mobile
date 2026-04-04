@@ -1,6 +1,8 @@
+import 'dart:io';
 import 'dart:math' as math;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
+import 'package:image_picker/image_picker.dart';
 
 import 'package:flutter/material.dart';
 
@@ -1177,7 +1179,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Text('Edisi Mint Fresh v1.4.0',
+                  Text('Edisi Mint Fresh v1.4.1',
                       style: TextStyle(
                           fontSize: 8,
                           color: isDarkMode ? Colors.white38 : Colors.grey)),
@@ -3625,102 +3627,19 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     if (transactionsAsync.isLoading)
       return const Center(child: CircularProgressIndicator());
 
-    final theme = Theme.of(context);
     final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
         (ref.watch(themeProvider) == ThemeMode.system &&
-            theme.brightness == Brightness.dark);
+            Theme.of(context).brightness == Brightness.dark);
 
-    if (transactions.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.receipt_long_rounded,
-                size: 64,
-                color: isDarkMode ? Colors.white24 : Colors.teal.shade50),
-            const SizedBox(height: 16),
-            Text('Belum ada riwayat transaksi.',
-                style: TextStyle(
-                    color: isDarkMode ? Colors.white60 : Colors.black26,
-                    fontWeight: FontWeight.bold)),
-          ],
-        ),
-      );
-    }
-
-    // Grouping by Month
-    final Map<String, List<TransactionModel>> monthlyGrouped = {};
-    for (var t in transactions) {
-      final monthKey =
-          DateFormat('MMMM yyyy', 'id_ID').format(t.date).toUpperCase();
-      if (!monthlyGrouped.containsKey(monthKey)) monthlyGrouped[monthKey] = [];
-      monthlyGrouped[monthKey]!.add(t);
-    }
-
-    return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 110),
-      itemCount: monthlyGrouped.length,
-      itemBuilder: (context, index) {
-        final monthLabel = monthlyGrouped.keys.elementAt(index);
-        final monthTransactions = monthlyGrouped[monthLabel]!;
-
-        // Calculate monthly totals
-        final monthIncome = monthTransactions
-            .where((t) => t.type == TransactionType.income)
-            .fold<double>(0, (s, t) => s + t.amount);
-        final monthExpense = monthTransactions
-            .where((t) => t.type == TransactionType.expense)
-            .fold<double>(0, (s, t) => s + t.amount);
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Month Header with Summary
-            Padding(
-              padding: const EdgeInsets.fromLTRB(8, 24, 8, 16),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(monthLabel,
-                            style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w900,
-                                color: isDarkMode
-                                    ? Colors.white60
-                                    : Colors.teal.shade900,
-                                letterSpacing: 1.2)),
-                        const SizedBox(height: 12),
-                        Row(
-                          children: [
-                            _miniHeaderStat(
-                                'MASUK',
-                                monthIncome,
-                                isDarkMode
-                                    ? Colors.greenAccent.shade400
-                                    : Colors.green),
-                            const SizedBox(width: 12),
-                            _miniHeaderStat(
-                                'KELUAR',
-                                monthExpense,
-                                isDarkMode
-                                    ? Colors.redAccent.shade200
-                                    : Colors.red),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            ...monthTransactions.map((t) => _buildTransactionCard(t)),
-          ],
-        );
-      },
+    // Gunakan widget terpisah agar bisa punya TabController sendiri
+    return _HistoryTabView(
+      allTransactions: transactions,
+      isDarkMode: isDarkMode,
+      buildTransactionCard: _buildTransactionCard,
+      miniHeaderStat: _miniHeaderStat,
+      formatRupiah: _formatRupiah,
+      formatCompact: _formatCompactRupiah,
+      onTransactionTap: _showTransactionDetailSheet,
     );
   }
 
@@ -3843,11 +3762,15 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
   }
 
   Future<void> _showTransactionDetailSheet(TransactionModel t) async {
+    final isSystemLinked = t.category == 'Hutang' ||
+        t.category == 'Piutang' ||
+        t.id.startsWith('shopping_');
+
     await TransactionDetailSheet.show(
       context,
       ref,
       t,
-      onEdit: () => _showEditTransactionSheet(t),
+      onEdit: isSystemLinked ? null : () => _showEditTransactionSheet(t),
       onDelete: () => _confirmDeleteTransaction(t),
     );
   }
@@ -3966,42 +3889,48 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 Stack(
                   alignment: Alignment.bottomRight,
                   children: [
+                    // Avatar — tampilkan foto atau ikon default
                     GestureDetector(
-                      onTap: () => _showAvatarSelectionSheet(
-                          profile, avatarIcons, avatarColors),
+                      onTap: () => _pickProfilePhoto(),
                       child: Container(
                         width: 100,
                         height: 100,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          gradient: LinearGradient(
-                            colors: [
-                              selectedColor,
-                              selectedColor.withValues(alpha: 0.7)
-                            ],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
+                          border: Border.all(
+                            color: selectedColor.withValues(alpha: 0.4),
+                            width: 3,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: selectedColor.withValues(alpha: 0.3),
+                              color: selectedColor.withValues(alpha: 0.25),
                               blurRadius: 15,
                               offset: const Offset(0, 8),
                             )
                           ],
                         ),
-                        child: Center(
-                          child: Icon(
-                            selectedIcon,
-                            size: 48,
-                            color: Colors.white,
-                          ),
+                        child: ClipOval(
+                          child: profile.photoUrl != null
+                              ? Image.network(
+                                  profile.photoUrl!,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) => Container(
+                                    color: selectedColor,
+                                    child: Icon(selectedIcon,
+                                        size: 48, color: Colors.white),
+                                  ),
+                                )
+                              : Container(
+                                  color: selectedColor,
+                                  child: Icon(selectedIcon,
+                                      size: 48, color: Colors.white),
+                                ),
                         ),
                       ),
                     ),
+                    // Badge kamera
                     GestureDetector(
-                      onTap: () => _showAvatarSelectionSheet(
-                          profile, avatarIcons, avatarColors),
+                      onTap: () => _pickProfilePhoto(),
                       child: Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
@@ -4119,7 +4048,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           _profileMenuCard(
             icon: Icons.info_outline_rounded,
             title: 'Tentang TabunganKu',
-            subtitle: 'Informasi aplikasi & Versi v1.4.0',
+            subtitle: 'Informasi aplikasi & Versi v1.4.1',
             onTap: () => _showAboutAppDialog(),
             color: Colors.teal.shade600,
           ),
@@ -4154,7 +4083,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                         color:
                             isDarkMode ? Colors.white : Colors.teal.shade900)),
                 const SizedBox(height: 8),
-                Text('Versi 1.4.0 (Global Release)',
+                Text('Versi 1.4.1 (Global Release)',
                     style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
@@ -4168,151 +4097,114 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     );
   }
 
-  void _showAvatarSelectionSheet(
-      UserProfile profile, List<IconData> icons, List<Color> colors) {
-    final theme = Theme.of(context);
-    final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
-        (ref.watch(themeProvider) == ThemeMode.system &&
-            theme.brightness == Brightness.dark);
+  /// Buka picker foto profil dari kamera atau galeri
+  Future<void> _pickProfilePhoto() async {
+    final isDarkMode = ref.read(themeProvider) == ThemeMode.dark ||
+        (ref.read(themeProvider) == ThemeMode.system &&
+            Theme.of(context).brightness == Brightness.dark);
 
-    showModalBottomSheet(
+    final source = await showModalBottomSheet<ImageSource>(
       context: context,
       backgroundColor: Colors.transparent,
-      isScrollControlled: true,
       builder: (context) => Container(
         padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
         decoration: BoxDecoration(
           color: isDarkMode ? AppColors.surfaceDark : Colors.white,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
+            Container(
+              width: 40, height: 4,
+              decoration: BoxDecoration(
+                color: isDarkMode ? Colors.white12 : Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text('Ganti Foto Profil',
+                style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                    color: isDarkMode ? Colors.white : Colors.black87)),
+            const SizedBox(height: 24),
+            ListTile(
+              onTap: () => Navigator.pop(context, ImageSource.camera),
+              leading: Container(
+                padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                    color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
-                    borderRadius: BorderRadius.circular(2)),
-              ),
-            ),
-            const SizedBox(height: 24),
-            Text('Pilih Foto Profil',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: isDarkMode ? Colors.white : Colors.black87,
-                )),
-            const SizedBox(height: 24),
-            Text('Ikon Kamu',
-                style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: isDarkMode ? Colors.white30 : Colors.grey)),
-            const SizedBox(height: 12),
-            SizedBox(
-              height: 60,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: icons.length,
-                itemBuilder: (context, index) {
-                  final isSelected = profile.avatarIndex == index;
-                  return GestureDetector(
-                    onTap: () => ref
-                        .read(userProfileProvider.notifier)
-                        .updateProfile(avatarIndex: index),
-                    child: Container(
-                      width: 60,
-                      margin: const EdgeInsets.only(right: 12),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? AppColors.primary.withValues(alpha: 0.1)
-                            : (isDarkMode
-                                ? Colors.white.withValues(alpha: 0.05)
-                                : Colors.grey.shade50),
-                        borderRadius: BorderRadius.circular(16),
-                        border: isSelected
-                            ? Border.all(color: AppColors.primary, width: 2)
-                            : null,
-                      ),
-                      child: Icon(icons[index],
-                          color: isSelected
-                              ? AppColors.primary
-                              : (isDarkMode ? Colors.white24 : Colors.grey),
-                          size: 28),
-                    ),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 24),
-            Text('Warna Tema',
-                style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: isDarkMode ? Colors.white30 : Colors.grey)),
-            const SizedBox(height: 12),
-            SizedBox(
-              height: 50,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: colors.length,
-                itemBuilder: (context, index) {
-                  final isSelected = profile.colorIndex == index;
-                  return GestureDetector(
-                    onTap: () => ref
-                        .read(userProfileProvider.notifier)
-                        .updateProfile(colorIndex: index),
-                    child: Container(
-                      width: 50,
-                      margin: const EdgeInsets.only(right: 12),
-                      decoration: BoxDecoration(
-                        color: colors[index],
-                        shape: BoxShape.circle,
-                        border: isSelected
-                            ? Border.all(
-                                color: isDarkMode
-                                    ? AppColors.surfaceDark
-                                    : Colors.white,
-                                width: 4)
-                            : null,
-                        boxShadow: isSelected
-                            ? [
-                                BoxShadow(
-                                    color: colors[index].withValues(alpha: 0.4),
-                                    blurRadius: 10)
-                              ]
-                            : null,
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 32),
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16)),
-                  elevation: 0,
+                  color: AppColors.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Text('Simpan Foto',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
+                child: const Icon(Icons.camera_alt_rounded, color: AppColors.primary),
               ),
+              title: Text('Buka Kamera',
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: isDarkMode ? Colors.white : Colors.black87)),
+              subtitle: Text('Ambil foto langsung',
+                  style: TextStyle(
+                      color: isDarkMode ? Colors.white38 : Colors.black38,
+                      fontSize: 12)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             ),
+            ListTile(
+              onTap: () => Navigator.pop(context, ImageSource.gallery),
+              leading: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.purple.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.photo_library_rounded, color: Colors.purple),
+              ),
+              title: Text('Pilih dari Galeri',
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: isDarkMode ? Colors.white : Colors.black87)),
+              subtitle: Text('Gunakan foto yang sudah ada',
+                  style: TextStyle(
+                      color: isDarkMode ? Colors.white38 : Colors.black38,
+                      fontSize: 12)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            ),
+            const SizedBox(height: 8),
           ],
         ),
       ),
     );
+
+    if (source == null || !mounted) return;
+
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(
+      source: source,
+      maxWidth: 800,
+      maxHeight: 800,
+      imageQuality: 80,
+    );
+    if (picked == null || !mounted) return;
+
+    final result = await ref
+        .read(userProfileProvider.notifier)
+        .uploadAndSetPhoto(File(picked.path));
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(result != null
+            ? 'Foto profil berhasil diperbarui! ✓'
+            : 'Gagal mengupload foto. Coba lagi.'),
+        backgroundColor: result != null ? Colors.green : Colors.red,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
   }
+
+
+
 
   Widget _buildSimpleStatCard(
       String label, String value, IconData icon, Color color) {
@@ -4701,7 +4593,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   color: isDarkMode ? Colors.white70 : Colors.black54),
             ),
             const SizedBox(height: 24),
-            _aboutInfoRow('Versi', '1.4.0+140'),
+            _aboutInfoRow('Versi', '1.4.1+141'),
             _aboutInfoRow('Build', 'Global Release'),
             _aboutInfoRow('Developer', 'Neverland Studio'),
             const SizedBox(height: 16),
@@ -5083,6 +4975,599 @@ class _CalculatorSheetContentState
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Widget Riwayat 3-Tab (terpisah agar punya TabController sendiri)
+// ─────────────────────────────────────────────────────────────────────────────
+class _HistoryTabView extends StatefulWidget {
+  final List<TransactionModel> allTransactions;
+  final bool isDarkMode;
+  final Widget Function(TransactionModel) buildTransactionCard;
+  final Widget Function(String, double, Color) miniHeaderStat;
+  final String Function(double) formatRupiah;
+  final String Function(double) formatCompact;
+  final void Function(TransactionModel) onTransactionTap;
+
+  const _HistoryTabView({
+    required this.allTransactions,
+    required this.isDarkMode,
+    required this.buildTransactionCard,
+    required this.miniHeaderStat,
+    required this.formatRupiah,
+    required this.formatCompact,
+    required this.onTransactionTap,
+  });
+
+  @override
+  State<_HistoryTabView> createState() => _HistoryTabViewState();
+}
+
+class _HistoryTabViewState extends State<_HistoryTabView> {
+  int _filterIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  bool _isHutangPiutang(TransactionModel t) =>
+      t.category == 'Hutang' || t.category == 'Piutang';
+  bool _isBelanja(TransactionModel t) => t.id.startsWith('shopping_');
+  bool _isRegular(TransactionModel t) =>
+      !_isHutangPiutang(t) && !_isBelanja(t);
+
+  String _fmtCur(double amount) => NumberFormat.currency(
+          locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0)
+      .format(amount);
+
+  @override
+  Widget build(BuildContext context) {
+    final sorted = [...widget.allTransactions]
+      ..sort((a, b) => b.date.compareTo(a.date));
+
+    final regularList = sorted.where(_isRegular).toList();
+    final hutangList = sorted.where(_isHutangPiutang).toList();
+    final belanjaList = sorted.where(_isBelanja).toList();
+    final isDark = widget.isDarkMode;
+
+    return Column(
+      children: [
+        // ── Minimalist Filter Selektor ────────────────────────────────────
+        _buildHistoryFilter(isDark, regularList, hutangList, belanjaList),
+
+        // ── Konten Filtered ───────────────────────────────────────────────
+        Expanded(
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            child: _buildFilteredBody(sorted, regularList, hutangList, belanjaList, isDark),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHistoryFilter(bool isDark, List<TransactionModel> regularList, List<TransactionModel> hutangList, List<TransactionModel> belanjaList) {
+    final categories = ['Pemasukan & Pengeluaran', 'Hutang', 'Belanja'];
+    final categoryIcons = [Icons.account_balance_rounded, Icons.account_balance_wallet_rounded, Icons.shopping_basket_rounded];
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(20, 12, 20, 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // Filter Dropdown / Pill Minimalist
+          Material(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(20),
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              onTap: () async {
+                final RenderBox button = context.findRenderObject() as RenderBox;
+                final RenderBox overlay = Navigator.of(context).overlay!.context.findRenderObject() as RenderBox;
+                final RelativeRect position = RelativeRect.fromRect(
+                  Rect.fromPoints(
+                    button.localToGlobal(const Offset(0, 45), ancestor: overlay),
+                    button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay),
+                  ),
+                  Offset.zero & overlay.size,
+                );
+
+                final int? result = await showMenu<int>(
+                  context: context,
+                  position: position,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  color: isDark ? AppColors.surfaceDark : Colors.white,
+                  elevation: 8,
+                  items: [
+                    for (int i = 0; i < categories.length; i++)
+                      PopupMenuItem(
+                        value: i,
+                        child: Row(
+                          children: [
+                            Icon(categoryIcons[i],
+                                size: 18,
+                                color: _filterIndex == i
+                                    ? AppColors.primary
+                                    : (isDark ? Colors.white38 : Colors.black38)),
+                            const SizedBox(width: 12),
+                            Text(categories[i],
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: _filterIndex == i
+                                      ? FontWeight.w900
+                                      : FontWeight.w600,
+                                  color: _filterIndex == i
+                                      ? AppColors.primary
+                                      : (isDark ? Colors.white : Colors.black87),
+                                )),
+                          ],
+                        ),
+                      ),
+                  ],
+                );
+                if (result != null && mounted) {
+                  setState(() => _filterIndex = result);
+                }
+              },
+              borderRadius: BorderRadius.circular(20),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.03)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(categoryIcons[_filterIndex], size: 16, color: AppColors.primary),
+                    const SizedBox(width: 10),
+                    Text(
+                      categories[_filterIndex],
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w900,
+                        color: isDark ? Colors.white : AppColors.primaryDark,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Icon(Icons.keyboard_arrow_down_rounded, 
+                         size: 18, 
+                         color: isDark ? Colors.white38 : Colors.black38),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          
+          // Count Badge (Optional, added for minimalist premium feel)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              _filterIndex == 0 ? '${regularList.length} Item' : (_filterIndex == 1 ? '${hutangList.length} Item' : '${belanjaList.length} Item'),
+              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: AppColors.primary),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilteredBody(
+      List<TransactionModel> allSorted,
+      List<TransactionModel> regularList,
+      List<TransactionModel> hutangList,
+      List<TransactionModel> belanjaList,
+      bool isDark) {
+    switch (_filterIndex) {
+      case 0:
+        return _buildRegularTab(allSorted, regularList, isDark);
+      case 1:
+        return _buildHutangTab(hutangList, isDark);
+      case 2:
+        return _buildBelanjaTab(belanjaList, isDark);
+      default:
+        return const SizedBox.shrink();
+    }
+  }
+
+  // ── Tab 1: Pemasukan & Pengeluaran ───────────────────────────────────────
+  // List: hanya transaksi reguler
+  // Header bulan: MASUK & KELUAR mencakup SEMUA jenis transaksi
+  Widget _buildRegularTab(
+      List<TransactionModel> allSorted,
+      List<TransactionModel> regularList,
+      bool isDark) {
+    if (regularList.isEmpty) {
+      return _emptyState(isDark,
+          icon: Icons.receipt_long_outlined,
+          label: 'Belum ada pemasukan/pengeluaran');
+    }
+
+    // Group regular by month
+    final Map<String, List<TransactionModel>> grouped = {};
+    for (final t in regularList) {
+      final k = DateFormat('MMMM yyyy', 'id_ID').format(t.date).toUpperCase();
+      grouped.putIfAbsent(k, () => []).add(t);
+    }
+    // Group ALL by month (untuk summary)
+    final Map<String, List<TransactionModel>> allGrouped = {};
+    for (final t in allSorted) {
+      final k = DateFormat('MMMM yyyy', 'id_ID').format(t.date).toUpperCase();
+      allGrouped.putIfAbsent(k, () => []).add(t);
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 110),
+      itemCount: grouped.keys.length,
+      itemBuilder: (context, i) {
+        final monthKey = grouped.keys.elementAt(i);
+        final monthTx = grouped[monthKey]!;
+        final allMonthTx = allGrouped[monthKey] ?? monthTx;
+
+        // Summary dari SEMUA (incl hutang & belanja)
+        final totalIn = allMonthTx
+            .where((t) => t.type == TransactionType.income)
+            .fold(0.0, (s, t) => s + t.amount);
+        final totalOut = allMonthTx
+            .where((t) => t.type == TransactionType.expense)
+            .fold(0.0, (s, t) => s + t.amount);
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(8, 24, 8, 16),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(monthKey,
+                            style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w900,
+                                color: isDark
+                                    ? Colors.white60
+                                    : Colors.teal.shade900,
+                                letterSpacing: 1.2)),
+                        const SizedBox(height: 10),
+                        Row(children: [
+                          widget.miniHeaderStat(
+                              'MASUK',
+                              totalIn,
+                              isDark
+                                  ? Colors.greenAccent.shade400
+                                  : Colors.green),
+                          const SizedBox(width: 10),
+                          widget.miniHeaderStat(
+                              'KELUAR',
+                              totalOut,
+                              isDark
+                                  ? Colors.redAccent.shade200
+                                  : Colors.red),
+                        ])
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            ...monthTx.map((t) => widget.buildTransactionCard(t)),
+          ],
+        );
+      },
+    );
+  }
+
+  // ── Tab 2: Hutang/Piutang ────────────────────────────────────────────────
+  Widget _buildHutangTab(List<TransactionModel> list, bool isDark) {
+    if (list.isEmpty) {
+      return _emptyState(isDark,
+          icon: Icons.account_balance_wallet_outlined,
+          label: 'Belum ada riwayat hutang/piutang',
+          subtitle:
+              'Muncul saat hutang/piutang ditandai lunas');
+    }
+
+    final hutangOnly = list.where((t) => t.category == 'Hutang').toList();
+    final piutangOnly = list.where((t) => t.category == 'Piutang').toList();
+    final totalH = hutangOnly.fold(0.0, (s, t) => s + t.amount);
+    final totalP = piutangOnly.fold(0.0, (s, t) => s + t.amount);
+
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 110),
+      children: [
+        // Summary Minimalist (Style Masuk/Keluar)
+        Container(
+          padding: const EdgeInsets.all(18),
+          margin: const EdgeInsets.only(bottom: 16),
+          decoration: BoxDecoration(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.05)
+                : Colors.grey.shade50,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.08)
+                    : Colors.grey.shade100),
+          ),
+          child: Row(
+            children: [
+              Expanded(child: _sumItemMinimalist(isDark,
+                  label: 'HUTANG DIBAYAR',
+                  amount: totalH,
+                  color: Colors.red.shade400)),
+              Container(width: 1, height: 30,
+                  color: isDark ? Colors.white12 : Colors.grey.shade200),
+              Expanded(child: _sumItemMinimalist(isDark,
+                  label: 'PIUTANG DITERIMA',
+                  amount: totalP,
+                  color: Colors.green.shade400)),
+            ],
+          ),
+        ),
+        if (hutangOnly.isNotEmpty) ...[
+          _groupHeader('HUTANG TERBAYAR', Colors.red.shade400, isDark),
+          const SizedBox(height: 10),
+          ...hutangOnly.map((t) => _debtCard(t, isDark)),
+          const SizedBox(height: 20),
+        ],
+        if (piutangOnly.isNotEmpty) ...[
+          _groupHeader('PIUTANG DITERIMA', Colors.green.shade400, isDark),
+          const SizedBox(height: 10),
+          ...piutangOnly.map((t) => _debtCard(t, isDark)),
+        ],
+      ],
+    );
+  }
+
+  // ── Tab 3: Belanja ───────────────────────────────────────────────────────
+  Widget _buildBelanjaTab(List<TransactionModel> list, bool isDark) {
+    if (list.isEmpty) {
+      return _emptyState(isDark,
+          icon: Icons.shopping_bag_outlined,
+          label: 'Belum ada riwayat belanja',
+          subtitle: 'Muncul saat item belanja ditandai dibeli');
+    }
+
+    final total = list.fold(0.0, (s, t) => s + t.amount);
+
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 110),
+      children: [
+        // Summary Minimalist (Style Masuk/Keluar)
+        Container(
+          padding: const EdgeInsets.all(18),
+          margin: const EdgeInsets.only(bottom: 16),
+          decoration: BoxDecoration(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.05)
+                : Colors.grey.shade50,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.08)
+                    : Colors.grey.shade100),
+          ),
+          child: Row(
+            children: [
+              Expanded(child: _sumItemMinimalist(isDark,
+                  label: 'TOTAL BELANJA',
+                  amount: total,
+                  color: AppColors.primary)),
+              Container(width: 1, height: 30,
+                  color: isDark ? Colors.white12 : Colors.grey.shade200),
+              Expanded(child: _sumItemMinimalist(isDark,
+                  label: 'JUMLAH ITEM',
+                  amount: list.length.toDouble(),
+                  isCurrency: false,
+                  color: isDark ? Colors.white38 : Colors.black38)),
+            ],
+          ),
+        ),
+        ...list.map((t) => _shoppingCard(t, isDark)),
+      ],
+    );
+  }
+
+  // ── Shared Widgets ───────────────────────────────────────────────────────
+  Widget _debtCard(TransactionModel t, bool isDark) {
+    final isHutang = t.category == 'Hutang';
+    final color = isHutang ? Colors.red.shade400 : Colors.green.shade400;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      decoration: BoxDecoration(
+        color: isDark ? Colors.white.withValues(alpha: 0.04) : Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.06)
+                : Colors.grey.shade100),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(18),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: () => widget.onTransactionTap(t),
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Row(
+              children: [
+                Container(
+                  width: 40, height: 40,
+                  decoration: BoxDecoration(
+                      color: color.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(13)),
+                  child: Icon(
+                      isHutang
+                          ? Icons.call_made_rounded
+                          : Icons.call_received_rounded,
+                      color: color, size: 18),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(t.title,
+                          style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w800,
+                              color: isDark ? Colors.white : Colors.black87)),
+                      if (t.description.isNotEmpty)
+                        Text(t.description,
+                            style: TextStyle(
+                                fontSize: 11,
+                                color: isDark ? Colors.white38 : Colors.black38)),
+                    ],
+                  ),
+                ),
+                Text(_fmtCur(t.amount),
+                    style: TextStyle(
+                        fontSize: 14, fontWeight: FontWeight.w900, color: color)),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _shoppingCard(TransactionModel t, bool isDark) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      decoration: BoxDecoration(
+        color: isDark ? Colors.white.withValues(alpha: 0.04) : Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.06)
+                : Colors.grey.shade100),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(18),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: () => widget.onTransactionTap(t),
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Row(
+              children: [
+                Container(
+                  width: 40, height: 40,
+                  decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(13)),
+                  child: const Icon(Icons.shopping_bag_rounded,
+                      color: AppColors.primary, size: 18),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(t.title,
+                      style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                          color: isDark ? Colors.white : Colors.black87)),
+                ),
+                Text(_fmtCur(t.amount),
+                    style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w900,
+                        color: AppColors.primary)),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _sumItemMinimalist(bool isDark,
+      {required String label,
+      required double amount,
+      required Color color,
+      bool isCurrency = true}) {
+    return Column(children: [
+      Text(label,
+          style: TextStyle(
+              fontSize: 8,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 0.8,
+              color: isDark ? Colors.white38 : Colors.black38)),
+      const SizedBox(height: 5),
+      Text(isCurrency ? _fmtCur(amount) : amount.toInt().toString(),
+          style: TextStyle(
+              fontSize: 14, fontWeight: FontWeight.w900, color: color)),
+    ]);
+  }
+
+  Widget _groupHeader(String label, Color color, bool isDark) {
+    return Row(children: [
+      Container(
+          width: 4, height: 14,
+          decoration: BoxDecoration(
+              color: color, borderRadius: BorderRadius.circular(2))),
+      const SizedBox(width: 10),
+      Text(label,
+          style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 1.2,
+              color: isDark ? Colors.white38 : Colors.black38)),
+    ]);
+  }
+
+  Widget _emptyState(bool isDark,
+      {required IconData icon, required String label, String? subtitle}) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(28),
+            decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.06),
+                shape: BoxShape.circle),
+            child: Icon(icon,
+                size: 60,
+                color: AppColors.primary.withValues(alpha: 0.3)),
+          ),
+          const SizedBox(height: 20),
+          Text(label,
+              style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
+                  color: isDark ? Colors.white38 : Colors.black38)),
+          if (subtitle != null) ...[
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 40),
+              child: Text(subtitle,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      fontSize: 12,
+                      color: isDark ? Colors.white24 : Colors.black26)),
+            ),
+          ],
+        ],
       ),
     );
   }

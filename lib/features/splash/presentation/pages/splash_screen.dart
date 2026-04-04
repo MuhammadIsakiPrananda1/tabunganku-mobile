@@ -83,7 +83,8 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background, // Selaras dengan Dashboard Mint Fresh
+      backgroundColor:
+          AppColors.background, // Selaras dengan Dashboard Mint Fresh
       body: Stack(
         children: [
           // Background Ornaments (Subtle geometric patterns for Mint Fresh)
@@ -131,7 +132,8 @@ class _SplashScreenState extends State<SplashScreen>
                             boxShadow: [
                               // Subtle Mint Glowing Pulse
                               BoxShadow(
-                                color: AppColors.primary.withValues(alpha: 0.15),
+                                color:
+                                    AppColors.primary.withValues(alpha: 0.15),
                                 blurRadius: 40 * _pulseAnimation.value,
                                 spreadRadius: 10 * _pulseAnimation.value,
                               ),
@@ -175,10 +177,12 @@ class _SplashScreenState extends State<SplashScreen>
                           padding: const EdgeInsets.symmetric(
                               horizontal: 16, vertical: 6),
                           decoration: BoxDecoration(
-                            color: AppColors.primaryLight.withValues(alpha: 0.1),
+                            color:
+                                AppColors.primaryLight.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                              color: AppColors.primaryLight.withValues(alpha: 0.2),
+                              color:
+                                  AppColors.primaryLight.withValues(alpha: 0.2),
                               width: 1,
                             ),
                           ),
@@ -206,30 +210,32 @@ class _SplashScreenState extends State<SplashScreen>
             left: 0,
             right: 0,
             child: FadeTransition(
-               opacity: _textFade,
-               child: Column(
-                 children: [
-                   SizedBox(
-                     width: 32,
-                     height: 32,
-                     child: CircularProgressIndicator(
-                       valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
-                       strokeWidth: 3,
-                       backgroundColor: AppColors.primaryLight.withValues(alpha: 0.2),
-                     ),
-                   ),
-                   const SizedBox(height: 20),
-                   const Text(
-                     'v1.4.0',
-                     style: TextStyle(
-                       color: AppColors.textTertiary,
-                       fontSize: 14,
-                       fontWeight: FontWeight.w600,
-                       letterSpacing: 2.0,
-                     ),
-                   ),
-                 ],
-               ),
+              opacity: _textFade,
+              child: Column(
+                children: [
+                  SizedBox(
+                    width: 32,
+                    height: 32,
+                    child: CircularProgressIndicator(
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                          AppColors.primary),
+                      strokeWidth: 3,
+                      backgroundColor:
+                          AppColors.primaryLight.withValues(alpha: 0.2),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'v1.4.1',
+                    style: TextStyle(
+                      color: AppColors.textTertiary,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 2.0,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],

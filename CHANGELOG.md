@@ -4,6 +4,20 @@ Semua perubahan penting pada proyek **TabunganKu** akan didokumentasikan di file
 
 Format pengisian mengikuti [Keep a Changelog](https://keepachangelog.com/id/1.0.0/).
 
+## [1.4.1] - 2026-04-04
+
+### Ditambahkan
+
+- **Modernisasi UI Riwayat:** Navigasi minimalis dropdown/pill yang elegan menggantikan TabBar lebar untuk pengalaman yang lebih bersih.
+- **Sinkronisasi Penghapusan (2 Arah):** Menghapus catatan Hutang atau rencana Belanja kini otomatis menghapus transaksi terkait di Riwayat.
+- **Interaktivitas Riwayat:** Seluruh item riwayat kini bisa diklik untuk melihat detail atau dihapus secara individual.
+- **Perbaikan Bug & Ripple:** Perbaikan efek ripple pada filter dan penambahan logging untuk diagnosa upload foto profil.
+- **Update UI Riwayat (Kategori):** Pemisahan riwayat menjadi kategori: "Pemasukan & Pengeluaran", "Hutang/Piutang", dan "Belanja".
+- **Summary Bulanan Cerdas:** Header bulan tetap menghitung total "Masuk" & "Keluar" dari SEMUA jenis transaksi.
+- **Custom Foto Profil:** Upload foto profil kustom melalui kamera atau galeri.
+- **Sinkronisasi Foto Keluarga:** Sinkronisasi foto profil ke seluruh anggota grup secara real-time.
+- **Automasi Transaksi:** Pencatatan otomatis untuk pelunasan hutang dan item belanja yang dibeli.
+
 ## [1.4.0] - 2026-04-03
 
 ### Ditambahkan
@@ -59,4 +73,3 @@ Format pengisian mengikuti [Keep a Changelog](https://keepachangelog.com/id/1.0.
 - Rilis awal aplikasi TabunganKu.
 - Fitur pencatatan transaksi manual.
 - Autentikasi lokal (biometrik sederhana).
-

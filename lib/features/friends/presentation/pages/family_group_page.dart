@@ -1126,13 +1126,68 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
               ),
               child: Row(
                 children: [
-                  CircleAvatar(
-                    backgroundColor: isCurrentUser ? AppColors.primary : (isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade200),
-                    child: Text(
-                      member.substring(0, 1).toUpperCase(),
-                      style: TextStyle(color: isCurrentUser ? Colors.white : (isDarkMode ? Colors.white70 : Colors.grey.shade700), fontWeight: FontWeight.bold),
-                    ),
-                  ),
+                  // Avatar: tampilkan foto dari Firestore jika ada
+                  Builder(builder: (context) {
+                    final photoUrl = group.memberPhotos[member];
+                    return Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: isCurrentUser
+                            ? Border.all(color: AppColors.primary, width: 2)
+                            : null,
+                      ),
+                      child: ClipOval(
+                        child: photoUrl != null && photoUrl.isNotEmpty
+                            ? Image.network(
+                                photoUrl,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => Container(
+                                  color: isCurrentUser
+                                      ? AppColors.primary
+                                      : (isDarkMode
+                                          ? Colors.white.withValues(alpha: 0.07)
+                                          : Colors.grey.shade200),
+                                  child: Center(
+                                    child: Text(
+                                      member.substring(0, 1).toUpperCase(),
+                                      style: TextStyle(
+                                        color: isCurrentUser
+                                            ? Colors.white
+                                            : (isDarkMode
+                                                ? Colors.white70
+                                                : Colors.grey.shade700),
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              )
+                            : Container(
+                                color: isCurrentUser
+                                    ? AppColors.primary
+                                    : (isDarkMode
+                                        ? Colors.white.withValues(alpha: 0.07)
+                                        : Colors.grey.shade200),
+                                child: Center(
+                                  child: Text(
+                                    member.substring(0, 1).toUpperCase(),
+                                    style: TextStyle(
+                                      color: isCurrentUser
+                                          ? Colors.white
+                                          : (isDarkMode
+                                              ? Colors.white70
+                                              : Colors.grey.shade700),
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                      ),
+                    );
+                  }),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(

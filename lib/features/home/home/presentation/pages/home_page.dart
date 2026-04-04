@@ -10,19 +10,21 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final curFormat = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+    final curFormat =
+        NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
 
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 10),
-                
+
                 // Minimalist Balance Header - No greeting, just the data
                 Text(
                   'TOTAL SALDO TERKUMPUL',
@@ -50,32 +52,33 @@ class HomePage extends StatelessWidget {
                     );
                   },
                 ),
-                
+
                 const SizedBox(height: 32),
-                
+
                 // Quick Actions (Minimalist Tool Style)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _buildToolButton(Icons.add_circle_outline_rounded, 'Tabung'),
+                    _buildToolButton(
+                        Icons.add_circle_outline_rounded, 'Tabung'),
                     _buildToolButton(Icons.history_rounded, 'Riwayat'),
                     _buildToolButton(Icons.insights_rounded, 'Statistik'),
                     _buildToolButton(Icons.settings_outlined, 'Atur'),
                   ],
                 ),
-                
+
                 const SizedBox(height: 40),
-                
+
                 // Priority Focus: Primary Savings Goal
                 _buildGoalCard(curFormat),
-                
+
                 const SizedBox(height: 40),
-                
+
                 // Supporting Data: Trend Line (Simplified)
                 _buildMiniChart(),
-                
+
                 const SizedBox(height: 40),
-                
+
                 // Recent Activity
                 Text(
                   'Aktivitas Terakhir',
@@ -90,17 +93,20 @@ class HomePage extends StatelessWidget {
                   shrinkWrap: true,
                   padding: EdgeInsets.zero,
                   physics: const NeverScrollableScrollPhysics(),
-                  itemCount: dummyTransactions.length > 3 ? 3 : dummyTransactions.length,
+                  itemCount: dummyTransactions.length > 3
+                      ? 3
+                      : dummyTransactions.length,
                   itemBuilder: (context, index) {
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 8),
-                      child: TransactionTile(transaction: dummyTransactions[index]),
+                      child: TransactionTile(
+                          transaction: dummyTransactions[index]),
                     );
                   },
                 ),
-                
+
                 const SizedBox(height: 80),
-                
+
                 // Minimalist Watermark at the bottom of content
                 Center(
                   child: Opacity(
@@ -118,7 +124,7 @@ class HomePage extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         const Text(
-                          'v1.4.0',
+                          'v1.4.1',
                           style: TextStyle(fontSize: 8, color: Colors.grey),
                         ),
                       ],
@@ -203,7 +209,11 @@ class HomePage extends StatelessWidget {
                   color: AppColors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Text('iPhone 15 Pro', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.primary)),
+                child: const Text('iPhone 15 Pro',
+                    style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primary)),
               ),
             ],
           ),
@@ -241,18 +251,16 @@ class HomePage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  return Container(
-                    height: 8,
-                    width: constraints.maxWidth * progress,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  );
-                }
-              ),
+              LayoutBuilder(builder: (context, constraints) {
+                return Container(
+                  height: 8,
+                  width: constraints.maxWidth * progress,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                );
+              }),
             ],
           ),
           const SizedBox(height: 20),
@@ -262,15 +270,31 @@ class HomePage extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('TERKUMPUL', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.grey.shade500)),
-                  Text(format.format(15000000), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Colors.teal.shade900)),
+                  Text('TERKUMPUL',
+                      style: TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey.shade500)),
+                  Text(format.format(15000000),
+                      style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.teal.shade900)),
                 ],
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text('KEKURANGAN', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.grey.shade500)),
-                  Text(format.format(5000000), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Colors.teal.shade700.withValues(alpha: 0.5))),
+                  Text('KEKURANGAN',
+                      style: TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey.shade500)),
+                  Text(format.format(5000000),
+                      style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.teal.shade700.withValues(alpha: 0.5))),
                 ],
               ),
             ],

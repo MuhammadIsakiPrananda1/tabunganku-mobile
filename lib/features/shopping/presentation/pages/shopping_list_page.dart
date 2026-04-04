@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:tabunganku/models/shopping_item_model.dart';
+import 'package:tabunganku/models/transaction_model.dart';
 import 'package:tabunganku/providers/shopping_item_provider.dart';
+import 'package:tabunganku/providers/transaction_provider.dart';
 import 'package:tabunganku/core/theme/app_colors.dart';
 import 'package:tabunganku/core/theme/theme_provider.dart';
 import '../widgets/shopping_form_sheet.dart';
@@ -137,7 +139,7 @@ class ShoppingListPage extends ConsumerWidget {
   }
 
   Widget _buildShoppingTile(BuildContext context, WidgetRef ref, ShoppingItem item, bool isDarkMode) {
-    final color = AppColors.primary;
+    const color = AppColors.primary;
     final theme = Theme.of(context);
 
     return Container(
@@ -319,7 +321,34 @@ class ShoppingListPage extends ConsumerWidget {
               isDarkMode: isDarkMode,
               onTap: () async {
                 Navigator.pop(context);
-                final updated = item.copyWith(isBought: !item.isBought);
+                final nowBought = !item.isBought;
+                final txId = 'shopping_${item.id}';
+
+                if (nowBought) {
+                  // Buat transaksi pengeluaran dengan judul nama barang
+                  final transaction = TransactionModel(
+                    id: txId,
+                    title: item.name,
+                    description: item.category != null && item.category!.isNotEmpty
+                        ? item.category!
+                        : 'Catatan Belanja',
+                    amount: item.estimatedPrice,
+                    type: TransactionType.expense,
+                    date: DateTime.now(),
+                    category: 'Belanja Bulanan',
+                  );
+                  await ref.read(transactionServiceProvider).addTransaction(transaction);
+                } else {
+                  // Hapus transaksi terkait jika di-uncheck
+                  try {
+                    await ref.read(transactionServiceProvider).deleteTransaction(txId);
+                  } catch (_) {}
+                }
+
+                final updated = item.copyWith(
+                  isBought: nowBought,
+                  linkedTransactionId: nowBought ? txId : null,
+                );
                 await ref.read(shoppingItemServiceProvider).updateItem(updated);
               },
             ),
@@ -340,6 +369,11 @@ class ShoppingListPage extends ConsumerWidget {
               isDarkMode: isDarkMode,
               onTap: () async {
                 Navigator.pop(context);
+                // Hapus transaksi terkait di Riwayat jika ada
+                try {
+                  await ref.read(transactionServiceProvider).deleteTransaction('shopping_${item.id}');
+                } catch (_) {}
+                
                 await ref.read(shoppingItemServiceProvider).deleteItem(item.id);
               },
             ),

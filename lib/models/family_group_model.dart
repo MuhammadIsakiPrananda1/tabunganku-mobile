@@ -5,6 +5,7 @@ class FamilyGroupModel {
   final String adminName;
   final List<String> members;
   final Map<String, double> memberBalances;
+  final Map<String, String> memberPhotos; // nama → URL foto profil
 
   FamilyGroupModel({
     required this.id,
@@ -13,6 +14,7 @@ class FamilyGroupModel {
     required this.adminName,
     required this.members,
     required this.memberBalances,
+    this.memberPhotos = const {},
   });
 
   factory FamilyGroupModel.fromJson(Map<String, dynamic> json) {
@@ -25,6 +27,9 @@ class FamilyGroupModel {
       memberBalances: (json['memberBalances'] as Map<String, dynamic>?)?.map(
         (key, value) => MapEntry(key, (value as num).toDouble()),
       ) ?? {},
+      memberPhotos: (json['memberPhotos'] as Map<String, dynamic>?)?.map(
+        (key, value) => MapEntry(key, value as String),
+      ) ?? {},
     );
   }
 
@@ -36,6 +41,7 @@ class FamilyGroupModel {
       'adminName': adminName,
       'members': members,
       'memberBalances': memberBalances,
+      'memberPhotos': memberPhotos,
     };
   }
 

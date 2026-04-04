@@ -4,7 +4,9 @@ import 'package:intl/intl.dart';
 import 'package:tabunganku/core/theme/app_colors.dart';
 import 'package:tabunganku/core/theme/theme_provider.dart';
 import 'package:tabunganku/models/debt_model.dart';
+import 'package:tabunganku/models/transaction_model.dart';
 import 'package:tabunganku/providers/debt_provider.dart';
+import 'package:tabunganku/providers/transaction_provider.dart';
 import 'package:tabunganku/features/transaction/presentation/widgets/debt_form_sheet.dart';
 
 class DebtListPage extends ConsumerWidget {
@@ -353,10 +355,27 @@ class DebtListPage extends ConsumerWidget {
     final updatedDebt = debt.copyWith(isPaid: true);
     await ref.read(debtServiceProvider).updateDebt(updatedDebt);
 
+    // Catat ke Riwayat Transaksi
+    final isHutang = debt.type == DebtType.hutang;
+    final title = isHutang
+        ? 'Pembayaran Hutang ke ${debt.contactName}'
+        : 'Pembayaran Piutang dari ${debt.contactName}';
+
+    final transaction = TransactionModel(
+      id: 'paid_debt_${debt.id}', // Gunakan ID yang deterministik agar bisa dihapus sinkron
+      title: title,
+      description: debt.title.isNotEmpty ? debt.title : (isHutang ? 'Hutang' : 'Piutang'),
+      amount: debt.amount,
+      type: isHutang ? TransactionType.expense : TransactionType.income,
+      date: DateTime.now(),
+      category: isHutang ? 'Hutang' : 'Piutang',
+    );
+    await ref.read(transactionServiceProvider).addTransaction(transaction);
+
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Catatan ditandai sebagai lunas'),
+        SnackBar(
+          content: Text('${isHutang ? 'Hutang' : 'Piutang'} lunas & tercatat di Riwayat'),
           behavior: SnackBarBehavior.floating,
           backgroundColor: Colors.green,
         ),
@@ -365,6 +384,11 @@ class DebtListPage extends ConsumerWidget {
   }
 
   void _deleteDebt(BuildContext context, WidgetRef ref, DebtModel debt) async {
+    // Hapus transaksi terkait di Riwayat jika ada (jika sudah lunas)
+    try {
+      await ref.read(transactionServiceProvider).deleteTransaction('paid_debt_${debt.id}');
+    } catch (_) {}
+
     await ref.read(debtServiceProvider).deleteDebt(debt.id);
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(

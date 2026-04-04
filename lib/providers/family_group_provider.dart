@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'dart:math';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -26,22 +28,27 @@ class UserProfile {
   final String name;
   final int avatarIndex;
   final int colorIndex;
+  final String? photoUrl;
 
   UserProfile({
     required this.name,
     this.avatarIndex = 0,
     this.colorIndex = 0,
+    this.photoUrl,
   });
 
   UserProfile copyWith({
     String? name,
     int? avatarIndex,
     int? colorIndex,
+    String? photoUrl,
+    bool clearPhoto = false,
   }) {
     return UserProfile(
       name: name ?? this.name,
       avatarIndex: avatarIndex ?? this.avatarIndex,
       colorIndex: colorIndex ?? this.colorIndex,
+      photoUrl: clearPhoto ? null : (photoUrl ?? this.photoUrl),
     );
   }
 }
@@ -67,6 +74,7 @@ class UserProfileNotifier extends StateNotifier<UserProfile> {
     String name = prefs.getString('user_name') ?? '';
     int avatar = prefs.getInt('user_avatar') ?? 0;
     int color = prefs.getInt('user_color') ?? 0;
+    String? photoUrl = prefs.getString('user_photo_url');
     
     // Cleanup old random names if they still exist
     final prefixes = ['Sultan', 'Jagoan', 'Pejuang', 'Juragan', 'Master', 'Pendekar', 'Bintang'];
@@ -87,7 +95,7 @@ class UserProfileNotifier extends StateNotifier<UserProfile> {
       name = '';
     }
     
-    state = UserProfile(name: name, avatarIndex: avatar, colorIndex: color);
+    state = UserProfile(name: name, avatarIndex: avatar, colorIndex: color, photoUrl: photoUrl);
   }
 
   Future<void> updateProfile({String? name, int? avatarIndex, int? colorIndex}) async {
@@ -115,6 +123,49 @@ class UserProfileNotifier extends StateNotifier<UserProfile> {
       } catch (_) {
         // Silently fail if sync fails, as the user already successfully updated locally
       }
+    }
+  }
+
+  /// Upload foto ke Firebase Storage, simpan URL lokal & sync ke Firestore grup
+  Future<String?> uploadAndSetPhoto(File imageFile) async {
+    final userName = state.name;
+    if (userName.isEmpty) {
+      print("ERROR: Nama pengguna kosong, tidak bisa upload foto.");
+      return null;
+    }
+
+    try {
+      // Upload ke Firebase Storage
+      final storageRef = FirebaseStorage.instance
+          .ref()
+          .child('profile_photos')
+          .child('${userName.replaceAll(' ', '_')}_${DateTime.now().millisecondsSinceEpoch}.jpg');
+
+      print("DEBUG: Memulai upload ke Firebase Storage...");
+      final uploadTask = await storageRef.putFile(
+        imageFile,
+        SettableMetadata(contentType: 'image/jpeg'),
+      );
+      final downloadUrl = await uploadTask.ref.getDownloadURL();
+      print("DEBUG: Upload berhasil. URL: $downloadUrl");
+
+      // Simpan lokal
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('user_photo_url', downloadUrl);
+      state = state.copyWith(photoUrl: downloadUrl);
+
+      // Sync ke Firestore grup
+      try {
+        await ref.read(familyGroupServiceProvider).updateMemberPhoto(userName, downloadUrl);
+        print("DEBUG: Sinkronisasi ke Firestore grup berhasil.");
+      } catch (e) {
+        print("WARNING: Sinkronisasi ke Firestore gagal: $e");
+      }
+
+      return downloadUrl;
+    } catch (e) {
+      print("CRITICAL ERROR: Gagal upload foto ke Firebase Storage: $e");
+      return null;
     }
   }
 
@@ -362,5 +413,16 @@ class FamilyGroupService {
         'adminName': adminName,
       });
     });
+  }
+
+  /// Update URL foto profil anggota di Firestore
+  Future<void> updateMemberPhoto(String memberName, String photoUrl) async {
+    final groupId = ref.read(userGroupIdProvider);
+    if (groupId == null || groupId.isEmpty || memberName.isEmpty) return;
+
+    final docRef = FirebaseFirestore.instance.collection('family_groups').doc(groupId);
+    await docRef.set({
+      'memberPhotos': {memberName: photoUrl}
+    }, SetOptions(merge: true));
   }
 }

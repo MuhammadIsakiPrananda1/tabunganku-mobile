@@ -19,14 +19,12 @@ class _SettingsPageState extends State<SettingsPage> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text(
-          'Pengaturan', 
-          style: TextStyle(
-            color: Colors.teal.shade900, 
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-          )
-        ),
+        title: Text('Pengaturan',
+            style: TextStyle(
+              color: Colors.teal.shade900,
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
+            )),
         elevation: 0,
         backgroundColor: Colors.transparent,
         centerTitle: false,
@@ -54,12 +52,15 @@ class _SettingsPageState extends State<SettingsPage> {
                   padding: const EdgeInsets.all(3),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(color: AppColors.primary.withValues(alpha: 0.2), width: 2),
+                    border: Border.all(
+                        color: AppColors.primary.withValues(alpha: 0.2),
+                        width: 2),
                   ),
                   child: const CircleAvatar(
                     radius: 30,
                     backgroundColor: AppColors.background,
-                    child: Icon(Icons.person_rounded, color: AppColors.primary, size: 36),
+                    child: Icon(Icons.person_rounded,
+                        color: AppColors.primary, size: 36),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -77,7 +78,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Anggota Premium • v1.4.0',
+                        'Anggota Premium • v1.4.1',
                         style: TextStyle(
                           fontSize: 12,
                           color: Colors.teal.shade600.withValues(alpha: 0.7),
@@ -86,12 +87,13 @@ class _SettingsPageState extends State<SettingsPage> {
                     ],
                   ),
                 ),
-                const Icon(Icons.arrow_forward_ios_rounded, color: Colors.grey, size: 16),
+                const Icon(Icons.arrow_forward_ios_rounded,
+                    color: Colors.grey, size: 16),
               ],
             ),
           ),
           const SizedBox(height: 32),
-          
+
           _buildHeading('Keamanan'),
           const SizedBox(height: 12),
           _buildSettingTile(
@@ -100,9 +102,9 @@ class _SettingsPageState extends State<SettingsPage> {
             subtitle: 'Perbarui PIN 6-digit keamanan Anda',
             onTap: () {},
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           _buildHeading('Preferensi'),
           const SizedBox(height: 12),
           _buildSettingTile(
@@ -123,9 +125,9 @@ class _SettingsPageState extends State<SettingsPage> {
             subtitle: 'Syarat & Ketentuan, Kebijakan Privasi',
             onTap: () {},
           ),
-          
+
           const SizedBox(height: 32),
-          
+
           // Logout Button
           ElevatedButton(
             onPressed: () => _showLogoutDialog(context),
@@ -134,7 +136,8 @@ class _SettingsPageState extends State<SettingsPage> {
               foregroundColor: Colors.red.shade700,
               elevation: 0,
               minimumSize: const Size(double.infinity, 56),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16)),
               side: BorderSide(color: Colors.red.shade100),
             ),
             child: const Row(
@@ -142,13 +145,14 @@ class _SettingsPageState extends State<SettingsPage> {
               children: [
                 Icon(Icons.logout_rounded, size: 20),
                 SizedBox(width: 8),
-                Text('Keluar dari Akun', style: TextStyle(fontWeight: FontWeight.bold)),
+                Text('Keluar dari Akun',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
               ],
             ),
           ),
-          
+
           const SizedBox(height: 48),
-          
+
           // Copyright Footer
           Center(
             child: Opacity(
@@ -200,7 +204,8 @@ class _SettingsPageState extends State<SettingsPage> {
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text('Keluar Aplikasi?'),
-        content: const Text('Anda perlu memasukkan PIN kembali saat ingin masuk.'),
+        content:
+            const Text('Anda perlu memasukkan PIN kembali saat ingin masuk.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -244,12 +249,15 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
           child: Icon(icon, color: AppColors.primary, size: 22),
         ),
-        title: Text(
-          title, 
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.teal.shade900)
-        ),
-        subtitle: Text(subtitle, style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
-        trailing: const Icon(Icons.arrow_forward_ios_rounded, color: Colors.grey, size: 14),
+        title: Text(title,
+            style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+                color: Colors.teal.shade900)),
+        subtitle: Text(subtitle,
+            style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
+        trailing: const Icon(Icons.arrow_forward_ios_rounded,
+            color: Colors.grey, size: 14),
         onTap: onTap,
       ),
     );

@@ -132,7 +132,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
               widget.debt == null ? 'Catatan Baru' : 'Edit Catatan',
               style: TextStyle(
                 fontSize: 24,
-                fontWeight: FontWeight.w900,
+                fontWeight: FontWeight.bold,
                 color: isDarkMode ? Colors.white : Colors.black87,
                 letterSpacing: -0.5,
               ),

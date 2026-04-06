@@ -33,7 +33,7 @@ class ShoppingListPage extends ConsumerWidget {
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('Catatan Belanja',
-            style: TextStyle(fontWeight: FontWeight.w900)),
+            style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
         scrolledUnderElevation: 0,
@@ -98,7 +98,7 @@ class ShoppingListPage extends ConsumerWidget {
             'Belum ada rencana belanja',
             style: TextStyle(
                 fontSize: 18,
-                fontWeight: FontWeight.w900,
+                fontWeight: FontWeight.bold,
                 color: isDarkMode ? Colors.white60 : Colors.black38),
           ),
           const SizedBox(height: 8),
@@ -129,7 +129,7 @@ class ShoppingListPage extends ConsumerWidget {
           title.toUpperCase(),
           style: TextStyle(
             fontSize: 11,
-            fontWeight: FontWeight.w900,
+            fontWeight: FontWeight.bold,
             color: isDarkMode ? Colors.white54 : Colors.black38,
             letterSpacing: 1.2,
           ),
@@ -211,7 +211,7 @@ class ShoppingListPage extends ConsumerWidget {
                         item.name,
                         style: TextStyle(
                           fontSize: 16,
-                          fontWeight: FontWeight.w900,
+                          fontWeight: FontWeight.bold,
                           color: item.isBought 
                               ? (isDarkMode ? Colors.white24 : Colors.black26)
                               : (isDarkMode ? Colors.white : Colors.black87),
@@ -232,7 +232,7 @@ class ShoppingListPage extends ConsumerWidget {
                                 item.category!,
                                 style: TextStyle(
                                   fontSize: 9,
-                                  fontWeight: FontWeight.w900,
+                                  fontWeight: FontWeight.bold,
                                   color: color,
                                 ),
                               ),
@@ -260,7 +260,7 @@ class ShoppingListPage extends ConsumerWidget {
                       _formatRupiah(item.estimatedPrice),
                       style: TextStyle(
                         fontSize: 16,
-                        fontWeight: FontWeight.w900,
+                        fontWeight: FontWeight.bold,
                         color: item.isBought
                             ? (isDarkMode ? Colors.white24 : Colors.grey.shade400)
                             : color,
@@ -278,7 +278,7 @@ class ShoppingListPage extends ConsumerWidget {
                           'DIBELI',
                           style: TextStyle(
                             fontSize: 9,
-                            fontWeight: FontWeight.w900,
+                            fontWeight: FontWeight.bold,
                             color: Colors.green,
                           ),
                         ),
@@ -428,15 +428,15 @@ class ShoppingListPage extends ConsumerWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('ESTIMASI TOTAL', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1, color: isDarkMode ? Colors.white38 : Colors.black26)),
-              Text(_formatRupiah(totalEstimated), style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: isDarkMode ? Colors.white : Colors.teal.shade900)),
+              Text('ESTIMASI TOTAL', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1, color: isDarkMode ? Colors.white38 : Colors.black26)),
+              Text(_formatRupiah(totalEstimated), style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : Colors.teal.shade900)),
             ],
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text('DIBELI', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1, color: isDarkMode ? Colors.green.shade900.withValues(alpha: 0.5) : Colors.green.shade700.withValues(alpha: 0.3))),
-              Text(_formatRupiah(totalBought), style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.green.shade600)),
+              Text('DIBELI', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1, color: isDarkMode ? Colors.green.shade900.withValues(alpha: 0.5) : Colors.green.shade700.withValues(alpha: 0.3))),
+              Text(_formatRupiah(totalBought), style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.green.shade600)),
             ],
           ),
         ],

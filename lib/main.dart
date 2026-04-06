@@ -11,6 +11,8 @@ import 'package:flutter_timezone/flutter_timezone.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_provider.dart';
 import 'core/routing/app_router.dart';
+import 'features/settings/presentation/providers/security_provider.dart';
+import 'core/widgets/notification_observer.dart';
 
 /// Global instance agar bisa diakses dari mana saja
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
@@ -67,22 +69,7 @@ void main() async {
   // Inisialisasi notifikasi di level app
   await _initNotifications();
   
-  // Buat channel notifikasi Android secara eksplisit agar prioritas tinggi terjamin
-  final androidPlugin = flutterLocalNotificationsPlugin
-      .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin>();
-  if (androidPlugin != null) {
-    const AndroidNotificationChannel channel = AndroidNotificationChannel(
-      'daily_reminder_channel_v2',
-      'Daily Reminder',
-      description: 'Pengingat menabung harian',
-      importance: Importance.max,
-      playSound: true,
-      enableVibration: true,
-      showBadge: true,
-    );
-    await androidPlugin.createNotificationChannel(channel);
-  }
+
   
   // Inisialisasi locale data untuk DateFormat('...', 'id_ID')
   await initializeDateFormatting('id_ID', null);
@@ -106,21 +93,65 @@ void main() async {
   );
 }
 
-class TabunganKuApp extends ConsumerWidget {
+class TabunganKuApp extends ConsumerStatefulWidget {
   const TabunganKuApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<TabunganKuApp> createState() => _TabunganKuAppState();
+}
+
+class _TabunganKuAppState extends ConsumerState<TabunganKuApp>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    final security = ref.read(securityProvider);
+    final router = ref.read(appRouterProvider);
+
+    if (state == AppLifecycleState.paused) {
+      // Deauthorize ONLY if we are not currently showing a biometric dialog
+      if (security.hasPin && !security.isAuthenticating) {
+        ref.read(securityProvider.notifier).deauthorize();
+      }
+    } else if (state == AppLifecycleState.resumed) {
+      if (security.hasPin && !security.isAuthorized) {
+        final String currentLocation = router.routerDelegate.currentConfiguration.fullPath;
+        
+        // Final guard for routes that should never be locked
+        if (currentLocation != '/lock' && 
+            currentLocation != '/splash' && 
+            currentLocation != '/pin-setup') {
+          router.go('/lock');
+        }
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final appRouter = ref.watch(appRouterProvider);
     final themeMode = ref.watch(themeProvider);
 
-    return MaterialApp.router(
-      title: 'TabunganKu',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: themeMode,
-      routerConfig: appRouter,
+    return NotificationObserver(
+      child: MaterialApp.router(
+        title: 'TabunganKu',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: themeMode,
+        routerConfig: appRouter,
+      ),
     );
   }
 }

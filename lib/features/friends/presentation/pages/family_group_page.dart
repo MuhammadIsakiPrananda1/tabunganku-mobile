@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -133,7 +134,7 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
                 const SizedBox(height: 24),
                 Text(
                   'Buat Grup Keluarga',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: isDarkMode ? Colors.white : AppColors.primaryDark),
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : AppColors.primaryDark),
                 ),
                 const SizedBox(height: 8),
                 Text(
@@ -239,7 +240,7 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
                 Center(
                   child: Text(
                     existingTx != null ? 'Edit Nominal' : 'Tambah Transaksi', 
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: isDarkMode ? Colors.white : AppColors.primaryDark)
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : AppColors.primaryDark)
                   ),
                 ),
                 if (existingTx != null) ...[
@@ -312,7 +313,7 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
                   controller: amountController,
                   autofocus: true,
                   keyboardType: TextInputType.number,
-                  style: TextStyle(fontWeight: FontWeight.w900, fontSize: 32, letterSpacing: -1, color: isDarkMode ? Colors.white : Colors.black),
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 32, letterSpacing: -1, color: isDarkMode ? Colors.white : Colors.black),
                   inputFormatters: [
                     FilteringTextInputFormatter.digitsOnly,
                     _ThousandsSeparatorInputFormatter(),
@@ -325,7 +326,7 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text('Rp', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 24, color: isDarkMode ? Colors.white38 : Colors.grey.shade600)),
+                          Text('Rp', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24, color: isDarkMode ? Colors.white38 : Colors.grey.shade600)),
                           const SizedBox(width: 8),
                         ],
                       ),
@@ -591,18 +592,10 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
     final theme = Theme.of(context);
     final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark || (ref.watch(themeProvider) == ThemeMode.system && theme.brightness == Brightness.dark);
 
-    // Prompt Setup Name Automatically
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (userName.isEmpty && ModalRoute.of(context)?.isCurrent == true) {
-        // Debounce to prevent multiple dialogs
-        showNameSetupSheet(context);
-      }
-    });
-
     return Scaffold(
       backgroundColor: isDarkMode ? AppColors.backgroundDark : AppColors.background,
       appBar: AppBar(
-        title: const Text('Keluarga', style: TextStyle(fontWeight: FontWeight.w900)),
+        title: const Text('Keluarga', style: TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
         backgroundColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
         elevation: 0,
@@ -783,7 +776,7 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 28,
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.bold,
               color: isDarkMode ? Colors.white : AppColors.primaryDark,
               letterSpacing: -0.5,
             ),
@@ -963,7 +956,7 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
                     Expanded(
                       child: Text(
                         group.name,
-                        style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Colors.white),
+                        style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
                         maxLines: 1, overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -988,13 +981,13 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
                   ],
                 ),
                 const SizedBox(height: 16),
-                Text('TOTAL SALDO BERSAMA', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1.5, color: Colors.white.withValues(alpha: 0.7))),
+                Text('TOTAL SALDO BERSAMA', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5, color: Colors.white.withValues(alpha: 0.7))),
                 const SizedBox(height: 8),
                 Text(
                   formatCurrency.format(group.totalGroupSavings),
                   style: const TextStyle(
                     fontSize: 32, 
-                    fontWeight: FontWeight.w900, 
+                    fontWeight: FontWeight.bold, 
                     color: Colors.white, 
                     letterSpacing: -1
                   ),
@@ -1035,7 +1028,7 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
                                 const SizedBox(height: 4),
                                 Text(
                                   'Rp ${_formatK(totalIn)}', 
-                                  style: const TextStyle(color: Colors.greenAccent, fontWeight: FontWeight.w900, fontSize: 16)
+                                  style: const TextStyle(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 16)
                                 ),
                               ],
                             ),
@@ -1063,7 +1056,7 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
                                 const SizedBox(height: 4),
                                 Text(
                                   'Rp ${_formatK(totalOut)}', 
-                                  style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w900, fontSize: 16)
+                                  style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 16)
                                 ),
                               ],
                             ),
@@ -1087,7 +1080,7 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
                         children: [
                           Text('KODE GABUNG', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.white.withValues(alpha: 0.7), letterSpacing: 1)),
                           const SizedBox(height: 4),
-                          Text(group.code, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, letterSpacing: 2, color: Colors.white)),
+                          Text(group.code, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 2, color: Colors.white)),
                         ],
                       ),
                       IconButton(
@@ -1105,7 +1098,7 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
           ),
           const SizedBox(height: 32),
           
-          Text('Anggota Keluarga', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: isDarkMode ? Colors.white : AppColors.primaryDark)),
+          Text('Anggota Keluarga', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : AppColors.primaryDark)),
           const SizedBox(height: 16),
           
           ...group.members.map((member) {
@@ -1140,29 +1133,60 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
                       ),
                       child: ClipOval(
                         child: photoUrl != null && photoUrl.isNotEmpty
-                            ? Image.network(
-                                photoUrl,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => Container(
-                                  color: isCurrentUser
-                                      ? AppColors.primary
-                                      : (isDarkMode
-                                          ? Colors.white.withValues(alpha: 0.07)
-                                          : Colors.grey.shade200),
-                                  child: Center(
-                                    child: Text(
-                                      member.substring(0, 1).toUpperCase(),
-                                      style: TextStyle(
+                            ? Builder(
+                                builder: (context) {
+                                  if (photoUrl.startsWith('http')) {
+                                    return Image.network(
+                                      photoUrl,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) => Container(
                                         color: isCurrentUser
-                                            ? Colors.white
+                                            ? AppColors.primary
                                             : (isDarkMode
-                                                ? Colors.white70
-                                                : Colors.grey.shade700),
-                                        fontWeight: FontWeight.bold,
+                                                ? Colors.white.withValues(alpha: 0.07)
+                                                : Colors.grey.shade200),
+                                        child: Center(
+                                          child: Text(
+                                            member.substring(0, 1).toUpperCase(),
+                                            style: TextStyle(
+                                              color: isCurrentUser
+                                                  ? Colors.white
+                                                  : (isDarkMode
+                                                      ? Colors.white70
+                                                      : Colors.grey.shade700),
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
                                       ),
-                                    ),
-                                  ),
-                                ),
+                                    );
+                                  } else {
+                                    return Image.file(
+                                      File(photoUrl),
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) => Container(
+                                        color: isCurrentUser
+                                            ? AppColors.primary
+                                            : (isDarkMode
+                                                ? Colors.white.withValues(alpha: 0.07)
+                                                : Colors.grey.shade200),
+                                        child: Center(
+                                          child: Text(
+                                            member.substring(0, 1).toUpperCase(),
+                                            style: TextStyle(
+                                              color: isCurrentUser
+                                                  ? Colors.white
+                                                  : (isDarkMode
+                                                      ? Colors.white70
+                                                      : Colors.grey.shade700),
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                },
                               )
                             : Container(
                                 color: isCurrentUser
@@ -1234,7 +1258,7 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Riwayat Transaksi', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: isDarkMode ? Colors.white : AppColors.primaryDark)),
+              Text('Riwayat Transaksi', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : AppColors.primaryDark)),
               Icon(Icons.history, color: isDarkMode ? Colors.white24 : Colors.grey, size: 20),
             ],
           ),
@@ -1276,7 +1300,7 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
                           trailing: Text(
                             NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(t.amount),
                             style: TextStyle(
-                              fontWeight: FontWeight.w900, 
+                              fontWeight: FontWeight.bold, 
                               color: t.type == TransactionType.income ? (isDarkMode ? Colors.greenAccent.shade200 : Colors.green.shade700) : (isDarkMode ? Colors.redAccent.shade100 : Colors.red.shade700), 
                               fontSize: 14
                             ),

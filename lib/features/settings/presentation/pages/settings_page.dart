@@ -2,10 +2,20 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:go_router/go_router.dart';
+import 'package:share_plus/share_plus.dart';
 
 import 'package:tabunganku/core/theme/app_colors.dart';
 import 'package:tabunganku/core/theme/theme_provider.dart';
 import 'package:tabunganku/providers/family_group_provider.dart';
+import 'package:tabunganku/providers/transaction_provider.dart';
+import 'package:tabunganku/models/transaction_model.dart';
+import 'package:tabunganku/features/settings/presentation/providers/security_provider.dart';
+import 'package:tabunganku/features/settings/presentation/providers/achievement_provider.dart';
+import 'package:tabunganku/providers/budget_provider.dart';
+import 'package:tabunganku/models/budget_model.dart';
+import 'package:tabunganku/features/home/presentation/widgets/budget_form_sheet.dart';
+import 'package:intl/intl.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
@@ -15,7 +25,6 @@ class SettingsPage extends ConsumerStatefulWidget {
 }
 
 class _SettingsPageState extends ConsumerState<SettingsPage> {
-  bool _notifications = true;
   bool _isUploadingPhoto = false;
 
   Future<void> _pickAndUploadPhoto() async {
@@ -84,7 +93,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               'Ganti Foto Profil',
               style: TextStyle(
                 fontSize: 18,
-                fontWeight: FontWeight.w900,
+                fontWeight: FontWeight.bold,
                 color: isDarkMode ? Colors.white : Colors.black87,
               ),
             ),
@@ -147,40 +156,128 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         (themeMode == ThemeMode.system &&
             Theme.of(context).brightness == Brightness.dark);
     final profile = ref.watch(userProfileProvider);
+    final transactionsAsync = ref.watch(transactionsStreamProvider);
+    final securityState = ref.watch(securityProvider);
+    final achievements = ref.watch(achievementsProvider);
+    final unlockedCount = achievements.where((a) => a.isUnlocked).length;
+    final budgets = ref.watch(currentMonthBudgetsProvider);
+
+    // ── Hitung Statistik Dasar ──────────────────────────────────────
+    final transactions = (transactionsAsync.value ?? [])
+        .where((t) => t.groupId == null)
+        .toList();
+        
+    final totalIncome = transactions
+        .where((t) => t.type == TransactionType.income)
+        .fold(0.0, (sum, t) => sum + t.amount);
+        
+    final totalExpense = transactions
+        .where((t) => t.type == TransactionType.expense)
+        .fold(0.0, (sum, t) => sum + t.amount);
+
+    final currentBalance = totalIncome - totalExpense;
+
+    // ── Hitung Health Score & Budget ────────────────────────────────
+    double healthScore = 100;
+    final Map<String, double> budgetConsumption = {};
+    for (final budget in budgets) {
+      final spent = transactions
+          .where((t) =>
+              t.category == budget.category &&
+              t.type == TransactionType.expense &&
+              t.date.month == budget.month &&
+              t.date.year == budget.year)
+          .fold<double>(0, (sum, t) => sum + t.amount);
+      budgetConsumption[budget.category] = spent;
+      if (spent > budget.limitAmount) {
+        healthScore -= 15;
+      } else if (spent > budget.limitAmount * 0.8) {
+        healthScore -= 5;
+      }
+    }
+    if (totalExpense > totalIncome && totalIncome > 0) healthScore -= 10;
+    healthScore = healthScore.clamp(0, 100);
+
+    final String rankName = _getRankName(totalIncome);
+    final IconData rankIcon = _getRankIcon(totalIncome);
+    final Color rankColor = _getRankColor(totalIncome);
+
+    // Hitung Streak Menabung (Hari beruntun ada income)
+    int streak = 0;
+    if (transactions.isNotEmpty) {
+      final incomeDates = transactions
+          .where((t) => t.type == TransactionType.income)
+          .map((t) => DateTime(t.date.year, t.date.month, t.date.day))
+          .toSet()
+          .toList()
+        ..sort((a, b) => b.compareTo(a));
+
+      if (incomeDates.isNotEmpty) {
+        DateTime checkDate = DateTime(
+            DateTime.now().year, DateTime.now().month, DateTime.now().day);
+        
+        if (incomeDates.first.isAtSameMomentAs(checkDate) || 
+            incomeDates.first.isAtSameMomentAs(checkDate.subtract(const Duration(days: 1)))) {
+           for (int i = 0; i < incomeDates.length; i++) {
+             if (i == 0) {
+               streak = 1;
+               checkDate = incomeDates[i];
+               continue;
+             }
+             if (incomeDates[i].isAtSameMomentAs(checkDate.subtract(const Duration(days: 1)))) {
+               streak++;
+               checkDate = incomeDates[i];
+             } else {
+               break;
+             }
+           }
+        }
+      }
+    }
+
+    final currencyFormatter =
+        NumberFormat.currency(locale: 'id_ID', symbol: 'Rp', decimalDigits: 0);
 
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: const Text('Pengaturan',
-            style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-        elevation: 0,
-        centerTitle: true,
-      ),
+      backgroundColor: Colors.transparent, // Let DashboardPage handle the bg color
+      // Removed redundant appBar as it caused double title issues
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
             // ── Kartu Profil ──────────────────────────────────────
-            _buildProfileCard(profile, isDarkMode),
-            const SizedBox(height: 32),
-            _buildSectionHeader('Akun'),
-            _buildSettingTile(
-              Icons.notifications_outlined,
-              'Notifikasi',
-              () {},
-              trailing: Switch(
-                value: _notifications,
-                onChanged: (val) => setState(() => _notifications = val),
-                activeThumbColor: AppColors.primary,
-              ),
-            ),
-            const SizedBox(height: 32),
+            _buildProfileCard(profile, isDarkMode, rankName, rankIcon, rankColor),
+            const SizedBox(height: 24),
+            
+            // ── Statistik Baris ───────────────────────────────────
+            _buildStatsRow(streak, currentBalance, unlockedCount, currencyFormatter, isDarkMode),
+            const SizedBox(height: 16),
+
+            // ── Kesehatan Keuangan ─────────────────────────────────
+            _buildHealthScoreCard(healthScore, isDarkMode),
+            const SizedBox(height: 16),
+
+            // ── Lencana Pencapaian ─────────────────────────────────
+            _buildSectionHeader('Pencapaian'),
+            _buildAchievementList(achievements, isDarkMode),
+            const SizedBox(height: 16),
+
+            // ── Budget Bulanan ─────────────────────────────────────
+            _buildSectionHeader('Budget Bulanan'),
+            _buildBudgetTrackingSection(budgets, budgetConsumption, isDarkMode),
+            const SizedBox(height: 16),
+            
             _buildSectionHeader('Preferensi'),
             _buildSettingTile(
+              Icons.calculate_outlined,
+              'Simulasi Tabungan',
+              () => context.push('/saving-simulator'),
+              subtitle: 'Hitung target tabungan Anda',
+            ),
+            _buildSettingTile(
               Icons.dark_mode_outlined,
-              'Dark Mode',
-              () {},
+              'Mode Gelap',
+              () => ref.read(themeProvider.notifier).toggleTheme(),
               trailing: Switch(
                 value: isDarkMode,
                 onChanged: (val) =>
@@ -188,14 +285,63 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 activeThumbColor: AppColors.primary,
               ),
             ),
-            _buildSettingTile(Icons.language, 'Bahasa', () {},
-                subtitle: 'Bahasa Indonesia'),
+            const SizedBox(height: 16),
+            
+            _buildSectionHeader('Keamanan'),
+            _buildSettingTile(
+              Icons.fingerprint_rounded,
+              'Kunci Biometrik',
+              () {}, // Empty now as logic is in Switch
+              trailing: Opacity(
+                opacity: 1.0, // Making it always appear active to encourage setup
+                child: Switch(
+                  value: securityState.isBiometricEnabled && securityState.hasPin,
+                  onChanged: (val) {
+                    if (!securityState.hasPin) {
+                      context.push('/pin-setup');
+                    } else {
+                      ref.read(securityProvider.notifier).toggleBiometric(val);
+                    }
+                  },
+                  activeThumbColor: AppColors.primary,
+                ),
+              ),
+              subtitle: securityState.hasPin ? 'Gunakan sidik jari/wajah' : 'Pasang PIN terlebih dahulu',
+            ),
+            _buildSettingTile(Icons.lock_outline_rounded, securityState.hasPin ? 'Ubah PIN Keamanan' : 'Pasang PIN Keamanan', () => context.push('/pin-setup')),
+            
+            if (securityState.hasPin)
+              _buildSettingTile(
+                Icons.lock_reset_rounded, 
+                'Hapus PIN Keamanan', 
+                () => _showDeletePinDialog(),
+                color: Colors.red,
+                subtitle: 'Matikan semua fitur keamanan',
+              ),
             const SizedBox(height: 32),
-            _buildSectionHeader('Lainnya'),
-            _buildSettingTile(Icons.help_outline, 'Pusat Bantuan', () {}),
-            _buildSettingTile(Icons.info_outline, 'Tentang Aplikasi', () {}),
-            const SizedBox(height: 40),
-            const Text('Versi 1.4.1',
+
+            _buildSectionHeader('Sosial'),
+            _buildSettingTile(
+              Icons.people_alt_outlined,
+              'Undang Keluarga',
+              () => context.push('/family-group'),
+              subtitle: 'Ajak keluarga menabung bersama',
+              color: Colors.blue,
+            ),
+            _buildSettingTile(
+              Icons.share_rounded,
+              'Bagikan Aplikasi',
+              () => _shareApp(),
+              color: Colors.pink,
+            ),
+            const SizedBox(height: 16),
+
+            _buildSectionHeader('Bantuan & Informasi'),
+            _buildSettingTile(Icons.help_outline_rounded, 'Pusat Bantuan', () => _showHelpDialog()),
+            _buildSettingTile(Icons.info_outline_rounded, 'Tentang Aplikasi', () => _showAboutDialog()),
+            const SizedBox(height: 16),
+
+            const Text('Versi 1.4.2',
                 style:
                     TextStyle(color: AppColors.textSecondary, fontSize: 12)),
           ],
@@ -204,7 +350,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     );
   }
 
-  Widget _buildProfileCard(UserProfile profile, bool isDarkMode) {
+  Widget _buildProfileCard(UserProfile profile, bool isDarkMode, String rank, IconData rankIcon, Color rankColor) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -252,11 +398,25 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                             ),
                           )
                         : profile.photoUrl != null
-                            ? Image.network(
-                                profile.photoUrl!,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) =>
-                                    _buildDefaultAvatar(profile.name),
+                            ? Builder(
+                                builder: (context) {
+                                  final photoUrl = profile.photoUrl!;
+                                  if (photoUrl.startsWith('http')) {
+                                    return Image.network(
+                                      photoUrl,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) =>
+                                          _buildDefaultAvatar(profile.name),
+                                    );
+                                  } else {
+                                    return Image.file(
+                                      File(photoUrl),
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) =>
+                                          _buildDefaultAvatar(profile.name),
+                                    );
+                                  }
+                                },
                               )
                             : _buildDefaultAvatar(profile.name),
                   ),
@@ -289,15 +449,30 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  profile.name.isNotEmpty
-                      ? profile.name
-                      : 'Pengguna TabunganKu',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w900,
-                    fontSize: 18,
-                    color: isDarkMode ? Colors.white : Colors.black87,
-                  ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        profile.name.isNotEmpty
+                            ? profile.name
+                            : 'Pengguna TabunganKu',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                          color: isDarkMode ? Colors.white : Colors.black87,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.edit_outlined, size: 18),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      onPressed: () => _showEditNameDialog(profile.name),
+                      color: AppColors.primary,
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -307,27 +482,211 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     color: isDarkMode ? Colors.white38 : Colors.black38,
                   ),
                 ),
-                if (profile.photoUrl != null) ...[
-                  const SizedBox(height: 6),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: Colors.green.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Text(
-                      '✓ Tersinkron ke Keluarga',
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.green,
-                      ),
-                    ),
+                const SizedBox(height: 8),
+                // Rank Badge
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: rankColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                        color: rankColor.withValues(alpha: 0.3), width: 1),
                   ),
-                ],
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(rankIcon, color: rankColor, size: 14),
+                      const SizedBox(width: 6),
+                      Text(
+                        rank,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: rankColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatsRow(int streak, double currentBalance, int unlockedCount,
+      NumberFormat formatter, bool isDarkMode) {
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _buildStatCard('Streak', '$streak Hari', Icons.whatshot_rounded,
+              Colors.orange, isDarkMode),
+          const SizedBox(width: 8),
+          _buildStatCard('Total Saldo', formatter.format(currentBalance),
+              Icons.account_balance_wallet_rounded, Colors.blue, isDarkMode),
+          const SizedBox(width: 8),
+          _buildStatCard('Lencana', '$unlockedCount/10', Icons.emoji_events_rounded,
+              Colors.amber, isDarkMode),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatCard(String label, String value, IconData icon, Color color,
+      bool isDarkMode) {
+    return Expanded(
+      child: Container(
+        height: 110, // Fixed height for perfect alignment
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDarkMode ? 0.25 : 0.05),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 10,
+                color: isDarkMode ? Colors.white38 : Colors.black38,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.3,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Expanded(
+              child: Center(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    value,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: isDarkMode ? Colors.white : Colors.black87,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Icon(icon, color: color, size: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAchievementList(List<Achievement> achievements, bool isDarkMode) {
+    return SizedBox(
+      height: 110,
+      child: ListView.separated(
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        scrollDirection: Axis.horizontal,
+        itemCount: achievements.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 16),
+        itemBuilder: (context, index) {
+          final item = achievements[index];
+          final bool unlocked = item.isUnlocked;
+          return Container(
+            width: 80,
+            child: Column(
+              children: [
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: unlocked
+                        ? AppColors.primary.withValues(alpha: 0.1)
+                        : (isDarkMode ? Colors.white10 : Colors.grey.shade100),
+                    shape: BoxShape.circle,
+                    border: unlocked
+                        ? Border.all(color: AppColors.primary.withValues(alpha: 0.3))
+                        : null,
+                    boxShadow: unlocked ? [
+                      BoxShadow(
+                        color: AppColors.primary.withValues(alpha: 0.2),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      )
+                    ] : null,
+                  ),
+                  child: Icon(
+                    item.icon,
+                    size: 24,
+                    color: unlocked
+                        ? AppColors.primary
+                        : (isDarkMode ? Colors.white24 : Colors.grey.shade300),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  item.title,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 9,
+                    height: 1.1,
+                    fontWeight: unlocked ? FontWeight.w600 : FontWeight.w500,
+                    color: unlocked
+                        ? (isDarkMode ? Colors.white : Colors.black87)
+                        : (isDarkMode ? Colors.white24 : Colors.grey.shade400),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  void _showEditNameDialog(String currentName) {
+    final controller = TextEditingController(text: currentName);
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Theme.of(context).canvasColor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: const Text('Ganti Nama', style: TextStyle(fontWeight: FontWeight.bold)),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          decoration: InputDecoration(
+            hintText: 'Masukkan nama baru',
+            fillColor: AppColors.primary.withValues(alpha: 0.05),
+            filled: true,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Batal')),
+          ElevatedButton(
+            onPressed: () {
+              if (controller.text.trim().isNotEmpty) {
+                ref.read(userProfileProvider.notifier).setName(controller.text.trim());
+                Navigator.pop(context);
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            child: const Text('Simpan'),
           ),
         ],
       ),
@@ -344,7 +703,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           initial,
           style: TextStyle(
             fontSize: 30,
-            fontWeight: FontWeight.w900,
+            fontWeight: FontWeight.bold,
             color: AppColors.primary,
           ),
         ),
@@ -355,7 +714,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   Widget _buildSectionHeader(String title) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.only(bottom: 12, left: 4),
+      padding: const EdgeInsets.only(top: 8, bottom: 8, left: 4),
       child: Text(
         title,
         style: TextStyle(
@@ -367,6 +726,294 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     );
   }
 
+  void _shareApp() {
+    Share.share('Ayo raih target finansialmu lebih mudah dengan TabunganKu! Download sekarang di Neverland Studio. 🎉');
+  }
+
+  // ── Health Score & Budget ──────────────────────────────────────
+
+  Widget _buildHealthScoreCard(double score, bool isDarkMode) {
+    String status = 'Sehat';
+    Color scoreColor = Colors.green;
+    if (score < 40) {
+      status = 'Kritis';
+      scoreColor = Colors.red;
+    } else if (score < 70) {
+      status = 'Waspada';
+      scoreColor = Colors.orange;
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDarkMode ? 0.3 : 0.05),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              SizedBox(
+                width: 72,
+                height: 72,
+                child: CircularProgressIndicator(
+                  value: score / 100,
+                  strokeWidth: 7,
+                  backgroundColor:
+                      isDarkMode ? Colors.white10 : Colors.grey.shade100,
+                  valueColor: AlwaysStoppedAnimation<Color>(scoreColor),
+                  strokeCap: StrokeCap.round,
+                ),
+              ),
+              Text(
+                '${score.toInt()}',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: isDarkMode ? Colors.white : Colors.black87,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(width: 20),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Kesehatan Keuangan',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: isDarkMode ? Colors.white30 : Colors.black38,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  status,
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                    color: scoreColor,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Berdasarkan budget & pengeluaran bulan ini.',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: isDarkMode ? Colors.white24 : Colors.black26,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBudgetTrackingSection(
+      List<BudgetModel> budgets,
+      Map<String, double> consumption,
+      bool isDarkMode) {
+    if (budgets.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDarkMode ? 0.3 : 0.05),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            const SizedBox(height: 8),
+            Icon(
+              Icons.account_balance_rounded,
+              size: 36,
+              color: isDarkMode ? Colors.white12 : Colors.grey.shade200,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Belum ada budget bulan ini.',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                color: isDarkMode ? Colors.white38 : Colors.black38,
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextButton.icon(
+              onPressed: () => BudgetFormSheet.show(context),
+              icon: const Icon(Icons.add, size: 16, color: AppColors.primary),
+              label: const Text(
+                'Set Budget Sekarang',
+                style: TextStyle(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Align(
+          alignment: Alignment.centerRight,
+          child: TextButton.icon(
+            onPressed: () => BudgetFormSheet.show(context),
+            icon: const Icon(Icons.add, size: 16, color: AppColors.primary),
+            label: const Text(
+              'Tambah',
+              style: TextStyle(
+                color: AppColors.primary,
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 4),
+        ...budgets.map((budget) {
+          final spent = consumption[budget.category] ?? 0;
+          return _buildBudgetProgressBar(budget, spent, isDarkMode);
+        }),
+      ],
+    );
+  }
+
+  Widget _buildBudgetProgressBar(
+      BudgetModel budget, double spent, bool isDarkMode) {
+    final category = budget.category;
+    final limit = budget.limitAmount;
+    final progress = (spent / limit).clamp(0.0, 1.0);
+    final isExceeded = spent > limit;
+    final color = isExceeded
+        ? Colors.red
+        : (progress > 0.8 ? Colors.orange : AppColors.primary);
+
+    final currencyFormatter =
+        NumberFormat.currency(locale: 'id_ID', symbol: 'Rp', decimalDigits: 0);
+
+    return GestureDetector(
+      onTap: () => BudgetFormSheet.show(context, budget: budget),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDarkMode ? 0.25 : 0.04),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    category,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                      color: isDarkMode ? Colors.white : Colors.black87,
+                    ),
+                  ),
+                ),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: color.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        '${(progress * 100).toInt()}%',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 11,
+                          color: color,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Icon(
+                      Icons.edit_outlined,
+                      size: 14,
+                      color: isDarkMode ? Colors.white24 : Colors.black26,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: LinearProgressIndicator(
+                value: progress,
+                minHeight: 7,
+                backgroundColor:
+                    isDarkMode ? Colors.white10 : Colors.grey.shade100,
+                valueColor: AlwaysStoppedAnimation<Color>(color),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  currencyFormatter.format(spent),
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: isDarkMode ? Colors.white70 : Colors.black87,
+                  ),
+                ),
+                Text(
+                  'Limit: ${currencyFormatter.format(limit)}',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: isDarkMode ? Colors.white38 : Colors.grey,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+
+
   Widget _buildSettingTile(IconData icon, String title, VoidCallback onTap,
       {Widget? trailing, String? subtitle, Color? color}) {
     return Container(
@@ -375,24 +1022,148 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
       ),
-      child: ListTile(
-        onTap: onTap,
-        leading: Icon(icon, color: color ?? AppColors.primary),
-        title: Text(title,
-            style: TextStyle(
-                color:
-                    color ?? Theme.of(context).textTheme.bodyLarge?.color,
-                fontWeight: FontWeight.w500)),
-        subtitle: subtitle != null
-            ? Text(subtitle,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Material(
+          color: Colors.transparent,
+          child: ListTile(
+            onTap: onTap,
+            leading: Icon(icon, color: color ?? AppColors.primary),
+            title: Text(title,
                 style: TextStyle(
-                    color:
-                        Theme.of(context).textTheme.bodySmall?.color))
-            : null,
-        trailing: trailing ??
-            Icon(Icons.chevron_right,
-                color: Theme.of(context).textTheme.bodySmall?.color),
+                    color: color ?? Theme.of(context).textTheme.bodyLarge?.color,
+                    fontWeight: FontWeight.w500)),
+            subtitle: subtitle != null
+                ? Text(subtitle,
+                    style: TextStyle(
+                        color: Theme.of(context).textTheme.bodySmall?.color))
+                : null,
+            trailing: trailing ??
+                Icon(Icons.chevron_right,
+                    color: Theme.of(context).textTheme.bodySmall?.color),
+          ),
+        ),
       ),
     );
+  }
+
+  void _showDeletePinDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Theme.of(context).canvasColor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: const Text('Hapus PIN?', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red)),
+        content: const Text(
+          'Apakah kamu yakin ingin menghapus PIN keamanan? Ini akan mematikan kunci aplikasi dan biometrik.',
+          style: TextStyle(fontSize: 14),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Batal')),
+          ElevatedButton(
+            onPressed: () {
+              ref.read(securityProvider.notifier).clearPin();
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Keamanan telah dinonaktifkan'),
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            child: const Text('Hapus Sekarang'),
+          ),
+        ],
+      ),
+    );
+  }
+
+
+
+  void _showHelpDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Pusat Bantuan'),
+        content: const Text(
+            'Ada kendala? Hubungi tim support kami melalui email support@neverlandstudio.com atau kunjungi website kami.'),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Tutup'))
+        ],
+      ),
+    );
+  }
+
+  void _showAboutDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Theme.of(context).canvasColor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 16),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Image.asset('assets/icon.png', width: 72, height: 72, errorBuilder: (_, __, ___) => const Icon(Icons.wallet, size: 72, color: AppColors.primary)),
+            ),
+            const SizedBox(height: 24),
+            const Text('TabunganKu', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+            const Text('Versi 1.4.2', style: TextStyle(color: Colors.grey, fontSize: 13)),
+            const SizedBox(height: 24),
+            const Text(
+              'Aplikasi pengelola keuangan pribadi yang cerdas dan estetik untuk membantu kamu mencapai tujuan finansial.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 14, height: 1.5),
+            ),
+            const SizedBox(height: 32),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                ),
+                child: const Text('Tutup', style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+
+
+  IconData _getRankIcon(double totalSaved) {
+    if (totalSaved < 100000) return Icons.eco_rounded;
+    if (totalSaved < 500000) return Icons.bolt_rounded;
+    if (totalSaved < 2000000) return Icons.stars_rounded;
+    return Icons.workspace_premium_rounded;
+  }
+
+  String _getRankName(double totalSaved) {
+    if (totalSaved < 100000) return 'Penabung Pemula';
+    if (totalSaved < 500000) return 'Pejuang Cuan';
+    if (totalSaved < 2000000) return 'Juragan Tabung';
+    return 'Sultan Hemat';
+  }
+
+  Color _getRankColor(double totalSaved) {
+    if (totalSaved < 100000) return Colors.green;
+    if (totalSaved < 500000) return Colors.orange;
+    if (totalSaved < 2000000) return Colors.amber;
+    return Colors.purple;
   }
 }

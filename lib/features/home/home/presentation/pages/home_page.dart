@@ -30,7 +30,7 @@ class HomePage extends StatelessWidget {
                   'TOTAL SALDO TERKUMPUL',
                   style: TextStyle(
                     fontSize: 12,
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.bold,
                     letterSpacing: 1.5,
                     color: Colors.teal.shade800.withValues(alpha: 0.5),
                   ),
@@ -45,7 +45,7 @@ class HomePage extends StatelessWidget {
                       curFormat.format(value),
                       style: TextStyle(
                         fontSize: 36,
-                        fontWeight: FontWeight.w900,
+                        fontWeight: FontWeight.bold,
                         color: Colors.teal.shade900,
                         letterSpacing: -1,
                       ),
@@ -124,7 +124,7 @@ class HomePage extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         const Text(
-                          'v1.4.1',
+                          'v1.4.2',
                           style: TextStyle(fontSize: 8, color: Colors.grey),
                         ),
                       ],
@@ -198,7 +198,7 @@ class HomePage extends StatelessWidget {
                 'PROGRES TARGET UTAMA',
                 style: TextStyle(
                   fontSize: 10,
-                  fontWeight: FontWeight.w900,
+                  fontWeight: FontWeight.bold,
                   letterSpacing: 1.2,
                   color: Colors.teal.shade800.withValues(alpha: 0.4),
                 ),
@@ -226,7 +226,7 @@ class HomePage extends StatelessWidget {
                 '75%',
                 style: TextStyle(
                   fontSize: 32,
-                  fontWeight: FontWeight.w900,
+                  fontWeight: FontWeight.bold,
                   color: Colors.teal.shade900,
                 ),
               ),
@@ -278,7 +278,7 @@ class HomePage extends StatelessWidget {
                   Text(format.format(15000000),
                       style: TextStyle(
                           fontSize: 14,
-                          fontWeight: FontWeight.w900,
+                          fontWeight: FontWeight.bold,
                           color: Colors.teal.shade900)),
                 ],
               ),
@@ -293,7 +293,7 @@ class HomePage extends StatelessWidget {
                   Text(format.format(5000000),
                       style: TextStyle(
                           fontSize: 14,
-                          fontWeight: FontWeight.w900,
+                          fontWeight: FontWeight.bold,
                           color: Colors.teal.shade700.withValues(alpha: 0.5))),
                 ],
               ),
@@ -327,7 +327,7 @@ class HomePage extends StatelessWidget {
             'TREN 7 HARI TERAKHIR',
             style: TextStyle(
               fontSize: 9,
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.bold,
               letterSpacing: 1.2,
               color: Colors.teal.shade800.withValues(alpha: 0.4),
             ),

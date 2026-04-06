@@ -50,7 +50,7 @@ class _TransactionPageState extends ConsumerState<TransactionPage>
         title: Text(
           'Riwayat',
           style: TextStyle(
-            fontWeight: FontWeight.w900,
+            fontWeight: FontWeight.bold,
             color: isDarkMode ? Colors.white : Colors.black,
           ),
         ),
@@ -64,7 +64,7 @@ class _TransactionPageState extends ConsumerState<TransactionPage>
               isDarkMode ? Colors.white38 : AppColors.textSecondary,
           indicatorColor: AppColors.primary,
           indicatorSize: TabBarIndicatorSize.label,
-          labelStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+          labelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
           unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
           tabs: const [
             Tab(text: 'Transaksi'),
@@ -313,7 +313,7 @@ class _TransactionPageState extends ConsumerState<TransactionPage>
                     'TOTAL BELANJA',
                     style: TextStyle(
                       fontSize: 10,
-                      fontWeight: FontWeight.w900,
+                      fontWeight: FontWeight.bold,
                       letterSpacing: 1,
                       color: isDarkMode ? Colors.white38 : Colors.black38,
                     ),
@@ -323,7 +323,7 @@ class _TransactionPageState extends ConsumerState<TransactionPage>
                     _formatRupiah(total),
                     style: TextStyle(
                       fontSize: 20,
-                      fontWeight: FontWeight.w900,
+                      fontWeight: FontWeight.bold,
                       color: isDarkMode ? Colors.white : Colors.teal.shade900,
                     ),
                   ),
@@ -411,7 +411,7 @@ class _TransactionPageState extends ConsumerState<TransactionPage>
           label,
           style: TextStyle(
             fontSize: 9,
-            fontWeight: FontWeight.w900,
+            fontWeight: FontWeight.bold,
             letterSpacing: 0.8,
             color: isDarkMode ? Colors.white38 : Colors.black38,
           ),
@@ -421,7 +421,7 @@ class _TransactionPageState extends ConsumerState<TransactionPage>
           _formatRupiah(amount),
           style: TextStyle(
             fontSize: 13,
-            fontWeight: FontWeight.w900,
+            fontWeight: FontWeight.bold,
             color: color,
           ),
         ),
@@ -443,7 +443,7 @@ class _TransactionPageState extends ConsumerState<TransactionPage>
           label,
           style: TextStyle(
             fontSize: 10,
-            fontWeight: FontWeight.w900,
+            fontWeight: FontWeight.bold,
             letterSpacing: 1.2,
             color: isDarkMode ? Colors.white38 : Colors.black38,
           ),
@@ -502,7 +502,7 @@ class _TransactionPageState extends ConsumerState<TransactionPage>
                   t.title,
                   style: TextStyle(
                     fontSize: 14,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w600,
                     color: isDarkMode ? Colors.white : Colors.black87,
                   ),
                 ),
@@ -521,7 +521,7 @@ class _TransactionPageState extends ConsumerState<TransactionPage>
             _formatRupiah(t.amount),
             style: TextStyle(
               fontSize: 15,
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.bold,
               color: color,
             ),
           ),
@@ -574,7 +574,7 @@ class _TransactionPageState extends ConsumerState<TransactionPage>
                   t.title,
                   style: TextStyle(
                     fontSize: 14,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w600,
                     color: isDarkMode ? Colors.white : Colors.black87,
                   ),
                 ),
@@ -593,7 +593,7 @@ class _TransactionPageState extends ConsumerState<TransactionPage>
             _formatRupiah(t.amount),
             style: TextStyle(
               fontSize: 15,
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.bold,
               color: AppColors.primary,
             ),
           ),
@@ -624,7 +624,7 @@ class _TransactionPageState extends ConsumerState<TransactionPage>
             label,
             style: TextStyle(
               fontSize: 16,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w600,
               color: isDarkMode ? Colors.white38 : Colors.black38,
             ),
           ),

@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as p;
 import 'package:tabunganku/core/theme/app_colors.dart';
 import 'package:tabunganku/core/theme/theme_provider.dart';
 import 'package:tabunganku/models/shopping_item_model.dart';
@@ -86,8 +88,15 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
         imageQuality: 85,
       );
       if (pickedFile != null) {
+        // Simpan gambar secara permanen ke direktori dokumen aplikasi
+        final appDir = await getApplicationDocumentsDirectory();
+        final fileName = p.basename(pickedFile.path);
+        final permanentPath = p.join(appDir.path, fileName);
+        
+        await File(pickedFile.path).copy(permanentPath);
+        
         setState(() {
-          _imagePath = pickedFile.path;
+          _imagePath = permanentPath;
         });
       }
     } catch (e) {
@@ -124,7 +133,7 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
             const SizedBox(height: 32),
             Text('Pilih Sumber Foto', 
               style: TextStyle(
-                fontWeight: FontWeight.w900, 
+                fontWeight: FontWeight.bold, 
                 fontSize: 18,
                 color: isDarkMode ? Colors.white : Colors.black87
               )),
@@ -265,7 +274,7 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
               widget.item == null ? 'Tambah Rencana Baru' : 'Edit Rencana',
               style: TextStyle(
                 fontSize: 24,
-                fontWeight: FontWeight.w900,
+                fontWeight: FontWeight.bold,
                 color: isDarkMode ? Colors.white : Colors.black87,
                 letterSpacing: -0.5,
               ),
@@ -324,7 +333,7 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
                           Text('TAMBAH FOTO BARANG', 
                             style: TextStyle(
                               fontSize: 10, 
-                              fontWeight: FontWeight.w900,
+                              fontWeight: FontWeight.bold,
                               letterSpacing: 1.2,
                               color: isDarkMode ? Colors.white24 : Colors.grey
                             )),

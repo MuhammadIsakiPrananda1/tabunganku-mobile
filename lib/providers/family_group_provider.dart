@@ -1,9 +1,10 @@
 import 'dart:io';
 import 'dart:math';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
 import '../models/family_group_model.dart';
 import '../models/transaction_model.dart';
 import './transaction_provider.dart';
@@ -115,56 +116,60 @@ class UserProfileNotifier extends StateNotifier<UserProfile> {
       avatarIndex: avatarIndex,
       colorIndex: colorIndex,
     );
-
-    // Sync to Firestore if in a group and name changed
-    if (name != null && newName != oldName && oldName.isNotEmpty) {
-      try {
-        await ref.read(familyGroupServiceProvider).updateMemberName(oldName, newName);
-      } catch (_) {
-        // Silently fail if sync fails, as the user already successfully updated locally
-      }
-    }
   }
 
-  /// Upload foto ke Firebase Storage, simpan URL lokal & sync ke Firestore grup
+  /// Simpan foto ke penyimpanan lokal perangkat, simpan path lokal & sync ke Firestore grup
   Future<String?> uploadAndSetPhoto(File imageFile) async {
     final userName = state.name;
     if (userName.isEmpty) {
-      print("ERROR: Nama pengguna kosong, tidak bisa upload foto.");
+      print("ERROR: Nama pengguna kosong, tidak bisa simpan foto.");
       return null;
     }
 
     try {
-      // Upload ke Firebase Storage
-      final storageRef = FirebaseStorage.instance
-          .ref()
-          .child('profile_photos')
-          .child('${userName.replaceAll(' ', '_')}_${DateTime.now().millisecondsSinceEpoch}.jpg');
-
-      print("DEBUG: Memulai upload ke Firebase Storage...");
-      final uploadTask = await storageRef.putFile(
-        imageFile,
-        SettableMetadata(contentType: 'image/jpeg'),
-      );
-      final downloadUrl = await uploadTask.ref.getDownloadURL();
-      print("DEBUG: Upload berhasil. URL: $downloadUrl");
-
-      // Simpan lokal
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('user_photo_url', downloadUrl);
-      state = state.copyWith(photoUrl: downloadUrl);
-
-      // Sync ke Firestore grup
-      try {
-        await ref.read(familyGroupServiceProvider).updateMemberPhoto(userName, downloadUrl);
-        print("DEBUG: Sinkronisasi ke Firestore grup berhasil.");
-      } catch (e) {
-        print("WARNING: Sinkronisasi ke Firestore gagal: $e");
+      // Dapatkan direktori dokumen aplikasi
+      final appDir = await getApplicationDocumentsDirectory();
+      final photosDir = Directory(path.join(appDir.path, 'profile_photos'));
+      
+      // Buat folder jika belum ada
+      if (!await photosDir.exists()) {
+        await photosDir.create(recursive: true);
       }
 
-      return downloadUrl;
+      // Tentukan path file baru
+      final fileName = 'profile_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final localPath = path.join(photosDir.path, fileName);
+
+      // Salin file ke lokasi permanen
+      print("DEBUG: Menyimpan foto ke lokasi lokal: $localPath");
+      final savedImage = await imageFile.copy(localPath);
+      
+      // Hapus foto lama jika ada di local storage (opsional tapi disarankan)
+      if (state.photoUrl != null && state.photoUrl!.startsWith('/')) {
+        final oldFile = File(state.photoUrl!);
+        if (await oldFile.exists()) {
+          print("DEBUG: Menghapus foto profil lama...");
+          await oldFile.delete();
+        }
+      }
+
+      // Simpan path lokal ke SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('user_photo_url', savedImage.path);
+      state = state.copyWith(photoUrl: savedImage.path);
+
+      print("DEBUG: Foto berhasil disimpan secara lokal.");
+      
+      // Sync ke Firestore grup (opsional, karena path lokal tidak berguna buat orang lain)
+      // Tapi kita kirim saja agar field di Firestore terupdate (atau biarkan kosong jika ingin orang lain tidak melihat path lokal kita)
+      final groupId = ref.read(userGroupIdProvider);
+      if (groupId != null && groupId.isNotEmpty) {
+        await ref.read(familyGroupServiceProvider).updateMemberPhoto(userName, savedImage.path);
+      }
+
+      return savedImage.path;
     } catch (e) {
-      print("CRITICAL ERROR: Gagal upload foto ke Firebase Storage: $e");
+      print("CRITICAL ERROR: Gagal simpan foto ke lokal: $e");
       return null;
     }
   }
@@ -247,6 +252,7 @@ class FamilyGroupService {
       adminName: userName,
       members: [userName],
       memberBalances: {userName: 0.0},
+      memberPhotos: {},
     );
 
     // Save to Firebase
@@ -283,10 +289,12 @@ class FamilyGroupService {
 
     // Fast update: and merge balance
     try {
-      await doc.reference.update({
+      final updates = {
         'members': FieldValue.arrayUnion([userName]),
-        'memberBalances.$userName': 0.0, // Initialize or keep as is if exists (Firestore merge notation)
-      });
+        'memberBalances.$userName': 0.0,
+      };
+
+      await doc.reference.update(updates);
 
       // Save Local
       await ref.read(userGroupIdProvider.notifier).setGroupId(groupId);
@@ -385,6 +393,7 @@ class FamilyGroupService {
       final data = snapshot.data()!;
       final members = List<String>.from(data['members'] ?? []);
       final balances = Map<String, dynamic>.from(data['memberBalances'] ?? {});
+      final photos = Map<String, dynamic>.from(data['memberPhotos'] ?? {});
       String adminName = data['adminName'] ?? '';
 
       // Update members list
@@ -398,8 +407,16 @@ class FamilyGroupService {
         final balanceValue = balances[oldName];
         balances.remove(oldName);
         balances[newName] = balanceValue;
-      } else {
+      } else if (!balances.containsKey(newName)) {
         balances[newName] = 0.0;
+      }
+
+      // Update photos map (re-key)
+      // Removal requested by user - avatar in family group won't change even if name changes locally
+      if (photos.containsKey(oldName)) {
+        final photoValue = photos[oldName];
+        photos.remove(oldName);
+        photos[newName] = photoValue;
       }
 
       // Update admin name if needed
@@ -410,6 +427,7 @@ class FamilyGroupService {
       transaction.update(docRef, {
         'members': members,
         'memberBalances': balances,
+        'memberPhotos': photos,
         'adminName': adminName,
       });
     });

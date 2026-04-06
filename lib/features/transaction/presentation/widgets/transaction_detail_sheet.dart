@@ -75,7 +75,7 @@ class TransactionDetailSheet extends ConsumerWidget {
           Text(isExpense ? 'PENGELUARAN' : 'PEMASUKAN',
               style: TextStyle(
                   fontSize: 12,
-                  fontWeight: FontWeight.w900,
+                  fontWeight: FontWeight.bold,
                   letterSpacing: 2,
                   color: isExpense
                       ? (isDarkMode ? Colors.redAccent.shade100 : Colors.red)
@@ -84,7 +84,7 @@ class TransactionDetailSheet extends ConsumerWidget {
           Text(formatRupiah(transaction.amount),
               style: TextStyle(
                   fontSize: 32,
-                  fontWeight: FontWeight.w900,
+                  fontWeight: FontWeight.bold,
                   color: isDarkMode ? Colors.white : Colors.teal.shade900,
                   letterSpacing: -1)),
           const SizedBox(height: 32),
@@ -199,7 +199,7 @@ class TransactionDetailSheet extends ConsumerWidget {
               textAlign: TextAlign.right,
               style: TextStyle(
                   fontSize: 13,
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w600,
                   color: isDarkMode ? Colors.white70 : Colors.teal.shade900)),
         ),
       ],

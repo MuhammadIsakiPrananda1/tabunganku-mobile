@@ -4,6 +4,16 @@ Semua perubahan penting pada proyek **TabunganKu** akan didokumentasikan di file
 
 Format pengisian mengikuti [Keep a Changelog](https://keepachangelog.com/id/1.0.0/).
 
+## [1.4.2] - 2026-04-06
+
+### Ditambahkan
+- **Fitur Anggaran (Budgeting):** Pantau pengeluaran Anda dengan penetapan batas anggaran bulanan, beserta peringatan visual saat pengeluaran mendekati limit.
+- **Detail Transaksi (Detail Sheet):** Tampilan baru yang lebih terstruktur dan premium saat melihat informasi detail sebuah transaksi.
+
+### Diperbaiki
+- **UI Overflow pada Form:** Menyelesaikan isu layar terpotong (overflow) pada halaman Tambah Barang agar responsif di seluruh ukuran layar perangkat.
+- **Optimasi Dashboard & Notifikasi:** Penyempurnaan penyajian data sisa anggaran dan peningkatan stabilitas trigger notifikasi pengingat.
+
 ## [1.4.1] - 2026-04-04
 
 ### Ditambahkan

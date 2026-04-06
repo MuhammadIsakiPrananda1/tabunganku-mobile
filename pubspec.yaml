@@ -1,7 +1,7 @@
 name: tabunganku
 description: A new Flutter project for saving money online.
 publish_to: 'none'
-version: 1.4.1+141
+version: 1.4.2+142
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -11,7 +11,7 @@ dependencies:
     sdk: flutter
   flutter_riverpod: ^2.4.9
   riverpod_annotation: ^2.3.3
-  google_fonts: ^6.1.0
+  google_fonts: 8.0.2
   fl_chart: ^0.66.0
   intl: ^0.19.0
   shared_preferences: ^2.2.2
@@ -43,6 +43,8 @@ dependencies:
    # Data Models
   image_picker: ^1.0.7
   firebase_storage: ^13.2.0
+  share_plus: ^12.0.2
+  path: ^1.9.1
 
 dev_dependencies:
   flutter_test:
@@ -66,11 +68,3 @@ flutter:
   uses-material-design: true
   assets:
     - assets/
-  fonts:
-    - family: Poppins
-      fonts:
-        - asset: assets/fonts/Poppins-Regular.ttf
-        - asset: assets/fonts/Poppins-Medium.ttf
-          weight: 500
-        - asset: assets/fonts/Poppins-Bold.ttf
-          weight: 700

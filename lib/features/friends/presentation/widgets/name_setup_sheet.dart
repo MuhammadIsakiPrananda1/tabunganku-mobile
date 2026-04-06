@@ -81,7 +81,7 @@ class _NameSetupSheetState extends ConsumerState<NameSetupSheet> {
                   text: 'Nama Panggilan',
                   style: TextStyle(
                     fontSize: 24,
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.bold,
                     color: isDarkMode ? Colors.white : AppColors.primaryDark,
                   ),
                 ),
@@ -90,7 +90,7 @@ class _NameSetupSheetState extends ConsumerState<NameSetupSheet> {
                   style: TextStyle(
                     color: Colors.red,
                     fontSize: 24,
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ],

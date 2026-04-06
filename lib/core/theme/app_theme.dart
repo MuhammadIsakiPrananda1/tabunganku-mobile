@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
 
 class AppTheme {
@@ -6,7 +7,7 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
-      fontFamily: 'Poppins',
+      fontFamily: GoogleFonts.comicNeue().fontFamily,
       colorScheme: const ColorScheme.light(
         primary: AppColors.primary,
         onPrimary: Colors.white,
@@ -18,77 +19,83 @@ class AppTheme {
       scaffoldBackgroundColor: AppColors.background,
       cardColor: AppColors.surface,
       dividerColor: AppColors.divider,
-      textTheme: const TextTheme(
-        displayLarge: TextStyle(
-          fontSize: 32,
-          fontWeight: FontWeight.w700,
+      textTheme: TextTheme(
+        displayLarge: GoogleFonts.comicNeue(
+          fontSize: 34,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 0.5,
           color: AppColors.textPrimary,
         ),
-        displayMedium: TextStyle(
-          fontSize: 28,
-          fontWeight: FontWeight.w600,
+        displayMedium: GoogleFonts.comicNeue(
+          fontSize: 30,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 0.5,
           color: AppColors.textPrimary,
         ),
-        displaySmall: TextStyle(
-          fontSize: 24,
-          fontWeight: FontWeight.w600,
+        displaySmall: GoogleFonts.comicNeue(
+          fontSize: 26,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 0.5,
           color: AppColors.textPrimary,
         ),
-        headlineMedium: TextStyle(
+        headlineMedium: GoogleFonts.comicNeue(
+          fontSize: 22,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 0.5,
+          color: AppColors.textPrimary,
+        ),
+        headlineSmall: GoogleFonts.comicNeue(
           fontSize: 20,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 0.5,
           color: AppColors.textPrimary,
         ),
-        headlineSmall: TextStyle(
+        titleLarge: GoogleFonts.comicNeue(
           fontSize: 18,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 0.5,
           color: AppColors.textPrimary,
         ),
-        titleLarge: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-          color: AppColors.textPrimary,
-        ),
-        titleMedium: TextStyle(
+        titleMedium: GoogleFonts.comicNeue(
           fontSize: 14,
-          fontWeight: FontWeight.w500,
+          fontWeight: FontWeight.w600,
           color: AppColors.textPrimary,
         ),
-        titleSmall: TextStyle(
+        titleSmall: GoogleFonts.comicNeue(
           fontSize: 12,
-          fontWeight: FontWeight.w500,
+          fontWeight: FontWeight.w600,
           color: AppColors.textSecondary,
         ),
-        bodyLarge: TextStyle(
+        bodyLarge: GoogleFonts.comicNeue(
           fontSize: 16,
-          fontWeight: FontWeight.w400,
+          fontWeight: FontWeight.normal,
           color: AppColors.textPrimary,
         ),
-        bodyMedium: TextStyle(
+        bodyMedium: GoogleFonts.comicNeue(
           fontSize: 14,
-          fontWeight: FontWeight.w400,
+          fontWeight: FontWeight.normal,
           color: AppColors.textSecondary,
         ),
-        bodySmall: TextStyle(
+        bodySmall: GoogleFonts.comicNeue(
           fontSize: 12,
-          fontWeight: FontWeight.w400,
+          fontWeight: FontWeight.normal,
           color: AppColors.textSecondary,
         ),
-        labelLarge: TextStyle(
+        labelLarge: GoogleFonts.comicNeue(
           fontSize: 14,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.bold,
           color: AppColors.textPrimary,
         ),
       ),
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         backgroundColor: AppColors.surface,
         elevation: 0,
         centerTitle: false,
-        iconTheme: IconThemeData(color: AppColors.textPrimary),
-        titleTextStyle: TextStyle(
-          fontFamily: 'Poppins',
-          fontSize: 20,
-          fontWeight: FontWeight.w600,
+        iconTheme: const IconThemeData(color: AppColors.textPrimary),
+        titleTextStyle: GoogleFonts.comicNeue(
+          fontSize: 22,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 0.5,
           color: AppColors.textPrimary,
         ),
       ),
@@ -101,10 +108,9 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
-          textStyle: const TextStyle(
-            fontFamily: 'Poppins',
+          textStyle: GoogleFonts.comicNeue(
             fontSize: 16,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.bold,
           ),
         ),
       ),
@@ -116,10 +122,9 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
-          textStyle: const TextStyle(
-            fontFamily: 'Poppins',
+          textStyle: GoogleFonts.comicNeue(
             fontSize: 16,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.bold,
           ),
         ),
       ),
@@ -147,19 +152,19 @@ class AppTheme {
           borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(color: AppColors.error, width: 2),
         ),
-        hintStyle: const TextStyle(
-          fontFamily: 'Poppins',
+        hintStyle: GoogleFonts.comicNeue(
           fontSize: 14,
+          fontWeight: FontWeight.normal,
           color: AppColors.textSecondary,
         ),
-        labelStyle: const TextStyle(
-          fontFamily: 'Poppins',
+        labelStyle: GoogleFonts.comicNeue(
           fontSize: 14,
+          fontWeight: FontWeight.w600,
           color: AppColors.textPrimary,
         ),
-        errorStyle: const TextStyle(
-          fontFamily: 'Poppins',
+        errorStyle: GoogleFonts.comicNeue(
           fontSize: 12,
+          fontWeight: FontWeight.normal,
           color: AppColors.error,
         ),
       ),
@@ -177,7 +182,7 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
-      fontFamily: 'Poppins',
+      fontFamily: GoogleFonts.comicNeue().fontFamily,
       colorScheme: const ColorScheme.dark(
         primary: AppColors.primary,
         onPrimary: Colors.white,
@@ -189,77 +194,83 @@ class AppTheme {
       scaffoldBackgroundColor: AppColors.backgroundDark,
       cardColor: AppColors.surfaceDark,
       dividerColor: AppColors.dividerDark,
-      textTheme: const TextTheme(
-        displayLarge: TextStyle(
-          fontSize: 32,
-          fontWeight: FontWeight.w700,
+      textTheme: TextTheme(
+        displayLarge: GoogleFonts.comicNeue(
+          fontSize: 34,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 0.5,
           color: AppColors.textPrimaryDark,
         ),
-        displayMedium: TextStyle(
-          fontSize: 28,
-          fontWeight: FontWeight.w600,
+        displayMedium: GoogleFonts.comicNeue(
+          fontSize: 30,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 0.5,
           color: AppColors.textPrimaryDark,
         ),
-        displaySmall: TextStyle(
-          fontSize: 24,
-          fontWeight: FontWeight.w600,
+        displaySmall: GoogleFonts.comicNeue(
+          fontSize: 26,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 0.5,
           color: AppColors.textPrimaryDark,
         ),
-        headlineMedium: TextStyle(
+        headlineMedium: GoogleFonts.comicNeue(
+          fontSize: 22,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 0.5,
+          color: AppColors.textPrimaryDark,
+        ),
+        headlineSmall: GoogleFonts.comicNeue(
           fontSize: 20,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 0.5,
           color: AppColors.textPrimaryDark,
         ),
-        headlineSmall: TextStyle(
+        titleLarge: GoogleFonts.comicNeue(
           fontSize: 18,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 0.5,
           color: AppColors.textPrimaryDark,
         ),
-        titleLarge: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-          color: AppColors.textPrimaryDark,
-        ),
-        titleMedium: TextStyle(
+        titleMedium: GoogleFonts.comicNeue(
           fontSize: 14,
-          fontWeight: FontWeight.w500,
+          fontWeight: FontWeight.w600,
           color: AppColors.textPrimaryDark,
         ),
-        titleSmall: TextStyle(
+        titleSmall: GoogleFonts.comicNeue(
           fontSize: 12,
-          fontWeight: FontWeight.w500,
+          fontWeight: FontWeight.w600,
           color: AppColors.textSecondaryDark,
         ),
-        bodyLarge: TextStyle(
+        bodyLarge: GoogleFonts.comicNeue(
           fontSize: 16,
-          fontWeight: FontWeight.w400,
+          fontWeight: FontWeight.normal,
           color: AppColors.textPrimaryDark,
         ),
-        bodyMedium: TextStyle(
+        bodyMedium: GoogleFonts.comicNeue(
           fontSize: 14,
-          fontWeight: FontWeight.w400,
+          fontWeight: FontWeight.normal,
           color: AppColors.textSecondaryDark,
         ),
-        bodySmall: TextStyle(
+        bodySmall: GoogleFonts.comicNeue(
           fontSize: 12,
-          fontWeight: FontWeight.w400,
+          fontWeight: FontWeight.normal,
           color: AppColors.textSecondaryDark,
         ),
-        labelLarge: TextStyle(
+        labelLarge: GoogleFonts.comicNeue(
           fontSize: 14,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.bold,
           color: AppColors.textPrimaryDark,
         ),
       ),
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         backgroundColor: AppColors.surfaceDark,
         elevation: 0,
         centerTitle: false,
-        iconTheme: IconThemeData(color: AppColors.textPrimaryDark),
-        titleTextStyle: TextStyle(
-          fontFamily: 'Poppins',
-          fontSize: 20,
-          fontWeight: FontWeight.w600,
+        iconTheme: const IconThemeData(color: AppColors.textPrimaryDark),
+        titleTextStyle: GoogleFonts.comicNeue(
+          fontSize: 22,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 0.5,
           color: AppColors.textPrimaryDark,
         ),
       ),
@@ -272,10 +283,9 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
-          textStyle: const TextStyle(
-            fontFamily: 'Poppins',
+          textStyle: GoogleFonts.comicNeue(
             fontSize: 16,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.bold,
           ),
         ),
       ),
@@ -287,10 +297,9 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
-          textStyle: const TextStyle(
-            fontFamily: 'Poppins',
+          textStyle: GoogleFonts.comicNeue(
             fontSize: 16,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.bold,
           ),
         ),
       ),
@@ -318,19 +327,19 @@ class AppTheme {
           borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(color: AppColors.error, width: 2),
         ),
-        hintStyle: const TextStyle(
-          fontFamily: 'Poppins',
+        hintStyle: GoogleFonts.comicNeue(
           fontSize: 14,
+          fontWeight: FontWeight.normal,
           color: AppColors.textSecondaryDark,
         ),
-        labelStyle: const TextStyle(
-          fontFamily: 'Poppins',
+        labelStyle: GoogleFonts.comicNeue(
           fontSize: 14,
+          fontWeight: FontWeight.w600,
           color: AppColors.textPrimaryDark,
         ),
-        errorStyle: const TextStyle(
-          fontFamily: 'Poppins',
+        errorStyle: GoogleFonts.comicNeue(
           fontSize: 12,
+          fontWeight: FontWeight.normal,
           color: AppColors.error,
         ),
       ),

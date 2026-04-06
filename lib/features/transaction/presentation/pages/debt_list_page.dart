@@ -32,7 +32,7 @@ class DebtListPage extends ConsumerWidget {
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('Catatan Hutang',
-            style: TextStyle(fontWeight: FontWeight.w900)),
+            style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
         scrolledUnderElevation: 0,
@@ -95,7 +95,7 @@ class DebtListPage extends ConsumerWidget {
             'Belum ada catatan',
             style: TextStyle(
                 fontSize: 18,
-                fontWeight: FontWeight.w900,
+                fontWeight: FontWeight.bold,
                 color: isDarkMode ? Colors.white60 : Colors.black38),
           ),
           const SizedBox(height: 8),
@@ -126,7 +126,7 @@ class DebtListPage extends ConsumerWidget {
           title.toUpperCase(),
           style: TextStyle(
             fontSize: 11,
-            fontWeight: FontWeight.w900,
+            fontWeight: FontWeight.bold,
             color: isDarkMode ? Colors.white54 : Colors.black38,
             letterSpacing: 1.2,
           ),
@@ -188,7 +188,7 @@ class DebtListPage extends ConsumerWidget {
                         debt.contactName,
                         style: TextStyle(
                           fontSize: 16,
-                          fontWeight: FontWeight.w900,
+                          fontWeight: FontWeight.bold,
                           color: isDarkMode ? Colors.white : Colors.black87,
                           decoration: debt.isPaid ? TextDecoration.lineThrough : null,
                         ),
@@ -231,7 +231,7 @@ class DebtListPage extends ConsumerWidget {
                       _formatRupiah(debt.amount),
                       style: TextStyle(
                         fontSize: 16,
-                        fontWeight: FontWeight.w900,
+                        fontWeight: FontWeight.bold,
                         color: debt.isPaid
                             ? (isDarkMode ? Colors.white24 : Colors.grey.shade400)
                             : color,
@@ -249,7 +249,7 @@ class DebtListPage extends ConsumerWidget {
                           'LUNAS',
                           style: TextStyle(
                             fontSize: 9,
-                            fontWeight: FontWeight.w900,
+                            fontWeight: FontWeight.bold,
                             color: Colors.green,
                           ),
                         ),

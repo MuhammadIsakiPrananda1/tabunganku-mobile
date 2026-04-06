@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tabunganku/core/theme/app_colors.dart';
+import 'package:tabunganku/features/settings/presentation/providers/security_provider.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen>
+class _SplashScreenState extends ConsumerState<SplashScreen>
     with TickerProviderStateMixin {
   late AnimationController _fadeSlideController;
   late AnimationController _pulseController;
@@ -26,11 +28,9 @@ class _SplashScreenState extends State<SplashScreen>
   void initState() {
     super.initState();
 
-    // 1. Controller for initial entrance (fade and slide up)
     _fadeSlideController = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 1800));
 
-    // Logo animations (starts at 0.0, ends at 0.5)
     _logoFade = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(
       parent: _fadeSlideController,
       curve: const Interval(0.0, 0.5, curve: Curves.easeOut),
@@ -41,7 +41,6 @@ class _SplashScreenState extends State<SplashScreen>
       curve: const Interval(0.0, 0.5, curve: Curves.easeOutCubic),
     ));
 
-    // Text animations (starts at 0.3, ends at 0.8)
     _textFade = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(
       parent: _fadeSlideController,
       curve: const Interval(0.3, 0.8, curve: Curves.easeOut),
@@ -52,7 +51,6 @@ class _SplashScreenState extends State<SplashScreen>
       curve: const Interval(0.3, 0.8, curve: Curves.easeOutCubic),
     ));
 
-    // 2. Controller for continuous pulse effect on the logo
     _pulseController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 2000),
@@ -62,15 +60,41 @@ class _SplashScreenState extends State<SplashScreen>
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
 
-    // Start entrance animation
     _fadeSlideController.forward();
+    
+    // Start loading settings immediately
+    ref.read(securityProvider);
 
-    // Navigate to dashboard automatically after 3.5 seconds
-    Future.delayed(const Duration(milliseconds: 3500), () {
-      if (mounted) {
-        context.go('/dashboard');
+    _startAppLogic();
+  }
+
+  Future<void> _startAppLogic() async {
+    // Wait for minimum splash time for animations
+    final minimumWait = Future.delayed(const Duration(milliseconds: 3500));
+    
+    // Wait until security settings are loaded
+    bool isLoaded = false;
+    while (!isLoaded && mounted) {
+      final security = ref.read(securityProvider);
+      if (security.isInitialized) {
+        isLoaded = true;
+      } else {
+        await Future.delayed(const Duration(milliseconds: 100));
       }
-    });
+    }
+
+    await minimumWait;
+    
+    if (!mounted) return;
+
+    final security = ref.read(securityProvider);
+    
+    // Condition: Only show lock screen if Biometric OR PIN is enabled
+    if (security.isBiometricEnabled || security.hasPin) {
+      context.go('/lock');
+    } else {
+      context.go('/dashboard');
+    }
   }
 
   @override
@@ -83,11 +107,10 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:
-          AppColors.background, // Selaras dengan Dashboard Mint Fresh
+      backgroundColor: AppColors.background,
       body: Stack(
         children: [
-          // Background Ornaments (Subtle geometric patterns for Mint Fresh)
+          // Background Ornaments
           Positioned(
             top: -100,
             right: -50,
@@ -118,7 +141,6 @@ class _SplashScreenState extends State<SplashScreen>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Animated Logo Image Group
                 SlideTransition(
                   position: _logoSlide,
                   child: FadeTransition(
@@ -130,16 +152,13 @@ class _SplashScreenState extends State<SplashScreen>
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             boxShadow: [
-                              // Subtle Mint Glowing Pulse
                               BoxShadow(
-                                color:
-                                    AppColors.primary.withValues(alpha: 0.15),
+                                color: AppColors.primary.withValues(alpha: 0.15),
                                 blurRadius: 40 * _pulseAnimation.value,
                                 spreadRadius: 10 * _pulseAnimation.value,
                               ),
                             ],
                           ),
-                          // Menggunakan logo asli
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(32),
                             child: Image.asset(
@@ -156,7 +175,6 @@ class _SplashScreenState extends State<SplashScreen>
                 ),
                 const SizedBox(height: 32),
 
-                // Animated Text Group
                 SlideTransition(
                   position: _textSlide,
                   child: FadeTransition(
@@ -168,7 +186,7 @@ class _SplashScreenState extends State<SplashScreen>
                           style: TextStyle(
                             color: AppColors.primaryDark,
                             fontSize: 36,
-                            fontWeight: FontWeight.w900,
+                            fontWeight: FontWeight.bold,
                             letterSpacing: 1.2,
                           ),
                         ),
@@ -177,12 +195,10 @@ class _SplashScreenState extends State<SplashScreen>
                           padding: const EdgeInsets.symmetric(
                               horizontal: 16, vertical: 6),
                           decoration: BoxDecoration(
-                            color:
-                                AppColors.primaryLight.withValues(alpha: 0.1),
+                            color: AppColors.primaryLight.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                              color:
-                                  AppColors.primaryLight.withValues(alpha: 0.2),
+                              color: AppColors.primaryLight.withValues(alpha: 0.2),
                               width: 1,
                             ),
                           ),
@@ -204,7 +220,7 @@ class _SplashScreenState extends State<SplashScreen>
             ),
           ),
 
-          // Bottom loading and version
+          // Bottom Version
           Positioned(
             bottom: 40,
             left: 0,
@@ -226,7 +242,7 @@ class _SplashScreenState extends State<SplashScreen>
                   ),
                   const SizedBox(height: 20),
                   const Text(
-                    'v1.4.1',
+                    'v1.4.2',
                     style: TextStyle(
                       color: AppColors.textTertiary,
                       fontSize: 14,

@@ -124,7 +124,7 @@ class HomePage extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         const Text(
-                          'v1.4.2',
+                          'v1.4.3',
                           style: TextStyle(fontSize: 8, color: Colors.grey),
                         ),
                       ],

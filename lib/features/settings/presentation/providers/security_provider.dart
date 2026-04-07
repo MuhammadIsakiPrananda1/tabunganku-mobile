@@ -15,6 +15,7 @@ class SecurityState {
   final String? error;
   final DateTime? lastAuthenticatedAt;
   final bool isAuthorized;
+  final bool isExternalOperationInProgress;
 
   SecurityState({
     this.isBiometricEnabled = false,
@@ -24,6 +25,7 @@ class SecurityState {
     this.error,
     this.lastAuthenticatedAt,
     this.isAuthorized = false,
+    this.isExternalOperationInProgress = false,
   });
 
   SecurityState copyWith({
@@ -34,6 +36,7 @@ class SecurityState {
     String? error,
     DateTime? lastAuthenticatedAt,
     bool? isAuthorized,
+    bool? isExternalOperationInProgress,
   }) {
     return SecurityState(
       isBiometricEnabled: isBiometricEnabled ?? this.isBiometricEnabled,
@@ -43,6 +46,7 @@ class SecurityState {
       error: error,
       lastAuthenticatedAt: lastAuthenticatedAt ?? this.lastAuthenticatedAt,
       isAuthorized: isAuthorized ?? this.isAuthorized,
+      isExternalOperationInProgress: isExternalOperationInProgress ?? this.isExternalOperationInProgress,
     );
   }
 }
@@ -137,5 +141,9 @@ class SecurityNotifier extends StateNotifier<SecurityState> {
     final prefs = await SharedPreferences.getInstance();
     final savedPin = prefs.getString(_pinKey);
     return savedPin == inputPin;
+  }
+
+  void setExternalOperation(bool value) {
+    state = state.copyWith(isExternalOperationInProgress: value);
   }
 }

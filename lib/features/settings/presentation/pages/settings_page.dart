@@ -32,12 +32,21 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     final source = await _showImageSourceDialog();
     if (source == null) return;
 
-    final pickedFile = await picker.pickImage(
-      source: source,
-      maxWidth: 800,
-      maxHeight: 800,
-      imageQuality: 80,
-    );
+    XFile? pickedFile;
+    try {
+      // SET external operation to true to prevent appraisal lockout
+      ref.read(securityProvider.notifier).setExternalOperation(true);
+      
+      pickedFile = await picker.pickImage(
+        source: source,
+        maxWidth: 800,
+        maxHeight: 800,
+        imageQuality: 80,
+      );
+    } finally {
+      // UNSET external operation after image picking is done
+      ref.read(securityProvider.notifier).setExternalOperation(false);
+    }
 
     if (pickedFile == null) return;
     if (!mounted) return;
@@ -341,7 +350,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             _buildSettingTile(Icons.info_outline_rounded, 'Tentang Aplikasi', () => _showAboutDialog()),
             const SizedBox(height: 16),
 
-            const Text('Versi 1.4.2',
+            const Text('Versi 1.4.3',
                 style:
                     TextStyle(color: AppColors.textSecondary, fontSize: 12)),
           ],
@@ -1117,7 +1126,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             ),
             const SizedBox(height: 24),
             const Text('TabunganKu', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-            const Text('Versi 1.4.2', style: TextStyle(color: Colors.grey, fontSize: 13)),
+            const Text('Versi 1.4.3', style: TextStyle(color: Colors.grey, fontSize: 13)),
             const SizedBox(height: 24),
             const Text(
               'Aplikasi pengelola keuangan pribadi yang cerdas dan estetik untuk membantu kamu mencapai tujuan finansial.',

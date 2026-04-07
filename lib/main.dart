@@ -121,16 +121,20 @@ class _TabunganKuAppState extends ConsumerState<TabunganKuApp>
 
     if (state == AppLifecycleState.paused) {
       // Deauthorize ONLY if we are not currently showing a biometric dialog
-      if (security.hasPin && !security.isAuthenticating) {
+      // AND NOT currently in an external operation (like Picking Image)
+      if (security.hasPin && 
+          !security.isAuthenticating && 
+          !security.isExternalOperationInProgress) {
         ref.read(securityProvider.notifier).deauthorize();
       }
     } else if (state == AppLifecycleState.resumed) {
       if (security.hasPin && !security.isAuthorized) {
-        final String currentLocation = router.routerDelegate.currentConfiguration.fullPath;
-        
+        final String currentLocation =
+            router.routerDelegate.currentConfiguration.fullPath;
+
         // Final guard for routes that should never be locked
-        if (currentLocation != '/lock' && 
-            currentLocation != '/splash' && 
+        if (currentLocation != '/lock' &&
+            currentLocation != '/splash' &&
             currentLocation != '/pin-setup') {
           router.go('/lock');
         }

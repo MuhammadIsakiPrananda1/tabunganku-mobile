@@ -583,6 +583,17 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
               ),
             ],
           ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _buildToolAction(Icons.document_scanner_rounded,
+                    'Scan Bukti', _QuickActionType.scanReceipt),
+              ),
+              const Expanded(child: SizedBox.shrink()),
+              const Expanded(child: SizedBox.shrink()),
+            ],
+          ),
 
           const SizedBox(height: 40),
 
@@ -780,7 +791,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Text('Edisi Mint Fresh v1.4.2',
+                  Text('Edisi Mint Fresh v1.4.3',
                       style: TextStyle(
                           fontSize: 8,
                           color: isDarkMode ? Colors.white38 : Colors.grey)),
@@ -948,6 +959,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     if (type == _QuickActionType.debt) iconColor = Colors.orange.shade500;
     if (type == _QuickActionType.family) iconColor = Colors.blue.shade500;
     if (type == _QuickActionType.shoppingList) iconColor = Colors.purple.shade300;
+    if (type == _QuickActionType.scanReceipt)
+      iconColor = Colors.tealAccent.shade700;
 
     return Material(
       color: Colors.transparent,
@@ -1424,6 +1437,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             builder: (context) => const ShoppingListPage(),
           ),
         );
+        break;
+      case _QuickActionType.scanReceipt:
+        context.push('/scan-receipt');
         break;
     }
   }
@@ -3674,7 +3690,8 @@ enum _QuickActionType {
   simulator,
   debt,
   shoppingList,
-  budget
+  budget,
+  scanReceipt
 }
 
 class _NavItem {

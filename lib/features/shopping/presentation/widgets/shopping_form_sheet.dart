@@ -10,6 +10,7 @@ import 'package:tabunganku/core/theme/app_colors.dart';
 import 'package:tabunganku/core/theme/theme_provider.dart';
 import 'package:tabunganku/models/shopping_item_model.dart';
 import 'package:tabunganku/providers/shopping_item_provider.dart';
+import 'package:tabunganku/features/settings/presentation/providers/security_provider.dart';
 
 class ShoppingFormSheet extends ConsumerStatefulWidget {
   final ShoppingItem? item;
@@ -81,6 +82,9 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
 
   Future<void> _pickImage(ImageSource source) async {
     try {
+      // SET external operation to true to prevent appraisal lockout
+      ref.read(securityProvider.notifier).setExternalOperation(true);
+
       final XFile? pickedFile = await _picker.pickImage(
         source: source,
         maxWidth: 1000,
@@ -92,15 +96,18 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
         final appDir = await getApplicationDocumentsDirectory();
         final fileName = p.basename(pickedFile.path);
         final permanentPath = p.join(appDir.path, fileName);
-        
+
         await File(pickedFile.path).copy(permanentPath);
-        
+
         setState(() {
           _imagePath = permanentPath;
         });
       }
     } catch (e) {
       debugPrint('Error picking image: $e');
+    } finally {
+      // UNSET external operation after image picking is done
+      ref.read(securityProvider.notifier).setExternalOperation(false);
     }
   }
 

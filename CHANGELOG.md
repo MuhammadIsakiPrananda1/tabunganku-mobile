@@ -4,6 +4,15 @@ Semua perubahan penting pada proyek **TabunganKu** akan didokumentasikan di file
 
 Format pengisian mengikuti [Keep a Changelog](https://keepachangelog.com/id/1.0.0/).
 
+## [1.4.3] - 2026-04-07
+
+### Diperbaiki
+
+- **Akurasi OCR Struk:** Peningkatan signifikan pada deteksi nominal dari berbagai struk perbankan dan e-wallet (BCA, Mandiri, DANA, OVO, GoPay, ShopeePay).
+- **Deteksi Nominal Kecil:** Mendukung pemindaian nominal transaksi mulai dari Rp 1.
+- **Filter Biaya Siluman:** Secara cerdas mengabaikan biaya admin, biaya transaksi, dan pajak agar hanya jumlah transaksi riil yang tercatat.
+- **Filtrasi Metadata:** Pembersihan otomatis data nomor HP dan ID transaksi dari hasil pemindaian struk.
+
 ## [1.4.2] - 2026-04-06
 
 ### Ditambahkan

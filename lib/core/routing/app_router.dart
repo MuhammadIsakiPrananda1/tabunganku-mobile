@@ -7,6 +7,7 @@ import 'package:tabunganku/features/auth/presentation/pages/lock_screen.dart';
 import 'package:tabunganku/features/friends/presentation/pages/family_group_page.dart';
 import 'package:tabunganku/features/settings/presentation/pages/pin_setup_page.dart';
 import 'package:tabunganku/features/home/presentation/pages/saving_simulator_page.dart';
+import 'package:tabunganku/features/transaction/presentation/pages/scan_receipt_page.dart';
 final appRouterProvider = Provider((ref) {
   return GoRouter(
     initialLocation: '/splash',
@@ -46,11 +47,17 @@ final appRouterProvider = Provider((ref) {
         builder: (context, state) => const PinSetupPage(),
       ),
 
-      // Saving Simulator
       GoRoute(
         path: '/saving-simulator',
         name: 'saving-simulator',
         builder: (context, state) => const SavingSimulatorPage(),
+      ),
+
+      // Scan Receipt
+      GoRoute(
+        path: '/scan-receipt',
+        name: 'scan-receipt',
+        builder: (context, state) => const ScanReceiptPage(),
       ),
 
 

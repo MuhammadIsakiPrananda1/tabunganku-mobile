@@ -1716,7 +1716,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     final amountController = TextEditingController();
     final nameController = TextEditingController();
     final customCategoryController = TextEditingController();
-    var selectedCategory = type == TransactionType.expense ? 'Makan' : 'Gaji';
+    var selectedCategory = type == TransactionType.expense ? 'Makanan & Minuman' : 'Gaji';
     var noteText = '';
 
     final theme = Theme.of(context);

@@ -550,48 +550,24 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           const SizedBox(height: 40),
 
           // Primary Navigation / Actions
-          Row(
+          // Primary Navigation / Actions Grid (4-column layout)
+          GridView.count(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            crossAxisCount: 4,
+            mainAxisSpacing: 0,
+            crossAxisSpacing: 0,
+            childAspectRatio: 0.85,
             children: [
-              Expanded(
-                child: _buildToolAction(Icons.add_circle_outline_rounded,
-                    'Pemasukan', _QuickActionType.income),
-              ),
-              Expanded(
-                child: _buildToolAction(Icons.remove_circle_outline_rounded,
-                    'Pengeluaran', _QuickActionType.expense),
-              ),
-              Expanded(
-                child: _buildToolAction(Icons.track_changes_rounded, 'Target',
-                    _QuickActionType.savingTarget),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: _buildToolAction(Icons.auto_stories_rounded,
-                    'Hutang/Piutang', _QuickActionType.debt),
-              ),
-              Expanded(
-                child: _buildToolAction(Icons.family_restroom_rounded,
-                    'Keluarga', _QuickActionType.family),
-              ),
-              Expanded(
-                child: _buildToolAction(Icons.shopping_cart_outlined, 'Belanja',
-                    _QuickActionType.shoppingList),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: _buildToolAction(Icons.document_scanner_rounded,
-                    'Scan Bukti', _QuickActionType.scanReceipt),
-              ),
-              const Expanded(child: SizedBox.shrink()),
-              const Expanded(child: SizedBox.shrink()),
+              _buildToolAction(Icons.add_circle_outline_rounded, 'Pemasukan', _QuickActionType.income),
+              _buildToolAction(Icons.remove_circle_outline_rounded, 'Pengeluaran', _QuickActionType.expense),
+              _buildToolAction(Icons.account_balance_wallet_rounded, 'Budget', _QuickActionType.budget),
+              _buildToolAction(Icons.auto_stories_rounded, 'Hutang/Piutang', _QuickActionType.debt),
+              _buildToolAction(Icons.family_restroom_rounded, 'Keluarga', _QuickActionType.family),
+              _buildToolAction(Icons.shopping_cart_outlined, 'Belanja', _QuickActionType.shoppingList),
+              _buildToolAction(Icons.document_scanner_rounded, 'Scan Bukti', _QuickActionType.scanReceipt),
+              _buildToolAction(Icons.emoji_events_rounded, 'Challenge', _QuickActionType.challenge),
+              _buildToolAction(Icons.track_changes_rounded, 'Target', _QuickActionType.savingTarget),
             ],
           ),
 
@@ -791,7 +767,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Text('Edisi Mint Fresh v1.4.3',
+                  Text('Edisi Mint Fresh v1.4.4',
                       style: TextStyle(
                           fontSize: 8,
                           color: isDarkMode ? Colors.white38 : Colors.grey)),
@@ -964,36 +940,36 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
 
     return Material(
       color: Colors.transparent,
-      borderRadius: BorderRadius.circular(24),
+      borderRadius: BorderRadius.circular(20),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () => _handleQuickActionTap(
             _QuickAction(icon: icon, label: label, type: type)),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                padding: const EdgeInsets.all(18),
+                padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
                   color: isDarkMode ? AppColors.surfaceDark : Colors.white,
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: isDarkMode ? 0.2 : 0.04),
-                      blurRadius: 20,
-                      offset: const Offset(0, 8),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
                     ),
                   ],
                   border: Border.all(
-                    color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.03),
-                    width: 1.5,
+                    color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.02),
+                    width: 1.2,
                   ),
                 ),
-                child: Icon(icon, color: iconColor, size: 28),
+                child: Icon(icon, color: iconColor, size: 24),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               FittedBox(
                 fit: BoxFit.scaleDown,
                 child: Text(
@@ -1403,7 +1379,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         await _showSavingTargetDialog(bal);
         break;
       case _QuickActionType.budget:
-        setState(() => _currentIndex = 3);
+        context.push('/monthly-budget');
         break;
       case _QuickActionType.calculator:
         _showCalculatorSheet();
@@ -1440,6 +1416,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         break;
       case _QuickActionType.scanReceipt:
         context.push('/scan-receipt');
+        break;
+      case _QuickActionType.challenge:
+        context.push('/challenge');
         break;
     }
   }
@@ -1756,19 +1735,16 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             {'label': 'Lainnya', 'icon': Icons.more_horiz_rounded},
           ]
         : [
-            {'label': 'Makan', 'icon': Icons.restaurant_rounded},
-            {'label': 'Transport', 'icon': Icons.directions_bus_rounded},
-            {'label': 'Belanja', 'icon': Icons.shopping_bag_rounded},
+            {'label': 'Makanan & Minuman', 'icon': Icons.restaurant_rounded},
+            {'label': 'Transportasi', 'icon': Icons.directions_bus_rounded},
+            {'label': 'Belanja & Keperluan', 'icon': Icons.shopping_bag_rounded},
             {'label': 'Tagihan', 'icon': Icons.receipt_rounded},
             {'label': 'Hiburan', 'icon': Icons.movie_rounded},
-            {'label': 'Kopi', 'icon': Icons.coffee_rounded},
             {'label': 'Kesehatan', 'icon': Icons.medical_services_rounded},
             {'label': 'Pendidikan', 'icon': Icons.school_rounded},
-            {'label': 'Hobi', 'icon': Icons.sports_esports_rounded},
+            {'label': 'Zakat & Donasi', 'icon': Icons.volunteer_activism_rounded},
             {'label': 'Cicilan', 'icon': Icons.credit_card_rounded},
-            {'label': 'Zakat', 'icon': Icons.volunteer_activism_rounded},
-            {'label': 'Keperluan Rumah', 'icon': Icons.home_work_rounded},
-            {'label': 'Pulsa/Data', 'icon': Icons.tap_and_play_rounded},
+            {'label': 'Pulsa & Data', 'icon': Icons.tap_and_play_rounded},
             {'label': 'Lainnya', 'icon': Icons.more_horiz_rounded},
           ];
 
@@ -3691,7 +3667,8 @@ enum _QuickActionType {
   debt,
   shoppingList,
   budget,
-  scanReceipt
+  scanReceipt,
+  challenge
 }
 
 class _NavItem {

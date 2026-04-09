@@ -1,44 +1,25 @@
 # 💰 TabunganKu - Aplikasi Tabungan Keluarga Cerdas
 
-![Banner Utama](assets/banner.png)
+![Banner Utama](file:///C:/Users/Neverland%20Studio/.gemini/antigravity/brain/2d7b6fe8-97c8-486a-9926-54f72e00aecd/tabunganku_release_v120_banner_1775704460241.png)
 
 **TabunganKu** adalah ekosistem manajemen keuangan modern yang dirancang untuk menghadirkan transparansi dan kebiasaan menabung yang sehat bagi keluarga Indonesia. Dengan pendekatan **Premium UI/UX (Mint Fresh Design)** dan integrasi awan yang cerdas, kami mengubah cara Anda melihat uang Anda.
-
----
-
-## 🚀 Perjalanan Evolusi (Roadmap & Versi)
-
-Kami terus berinovasi untuk memberikan pengalaman terbaik. Berikut adalah kronologi perkembangan fitur utama dari awal hingga saat ini:
-
-### **v1.4.0 - Premium Shopping & Smart Reminders (Current)**
-*   **🎉 Migrasi Catatan Belanja**: Fitur "Belanja" kini memiliki halaman mandiri yang luas dan responsif, menggantikan model bottom sheet untuk pengelolaan item yang lebih leluasa.
-*   **💡 Smart Daily Reminders**: Penjadwalan notifikasi jam 6 pagi yang lebih tangguh dengan sinkronisasi timezone otomatis (`Asia/Jakarta` fallback) dan prioritas sistem tertinggi.
-*   **🔌 Auto-Reschedule**: Algoritma cerdas yang menjadwalkan ulang pengingat setiap kali aplikasi dibuka agar alarm sistem tetap sinkron.
-*   **🧹 Code Cleanup**: Optimasi codebase dengan penghapusan 800+ baris kode redundan untuk performa lebih ringan.
-
-### **v1.3.0 - Dashboard Optimization**
-*   **📊 UI Dashboard v2**: Peningkatan visual pada kartu saldo dan grafik interaktif menggunakan `fl_chart`.
-*   **📦 Gradle Sync**: Sinkronisasi sistem build Android Gradle ke standar 1.3.0 untuk stabilitas kompilasi yang lebih baik.
-
-### **v1.2.0 - Advanced Features & OCR**
-*   **📸 Scan Struk OCR**: Integrasi awal deteksi nominal belanja otomatis dari foto struk fisik.
-*   **👤 Manajemen Profil**: Sistem identitas dengan pemilihan avatar premium dan penyimpanan nickname permanen.
-
-### **v1.1.0 - Cloud Integration**
-*   **🔥 Firebase Backend**: Implementasi awal Cloud Firestore untuk sinkronisasi data antar anggota keluarga secara real-time.
-*   **🎯 Target Menabung**: Fitur penetapan impian keuangan dengan progres bar visual.
-
-### **v1.0.0 - Initial Release**
-*   **💎 Core Foundation**: Landasan aplikasi dengan pencatatan transaksi manual dan keamanan biometrik sederhana.
 
 ---
 
 ## ✨ Fitur Unggulan
 
 - **📊 Dashboard Interaktif:** Pantau sisa saldo, pendapatan, dan pengeluaran harian dengan grafik elegan.
+- **🎯 Challenge Menabung:** Sistem gamifikasi dengan 14 challenge templates, badge collection, dan streak counter.
+- **⏱️ Custom Duration:** Kini kamu bisa menentukan sendiri durasi tantangan (Setup hari) sesuai keinginanmu! (NEW)
 - **👨‍👩‍👧‍👦 Grup Keluarga:** Sinkronkan catatan tabungan dengan seluruh anggota keluarga secara instan.
-- **🎯 Progres Target:** Visualisasikan seberapa dekat Anda dengan impian Anda (iPhone, Kendaraan, dll).
-- **📈 Laporan PDF:** Ekspor riwayat transaksi ke format PDF yang rapi dengan satu klik.
+- **⚡ Real-time Sync:** Sinkronisasi cerdas antara transaksi dan progres tantangan secara otomatis. (NEW)
+- **🏆 Achievement System:** Kumpulkan badge dan poin melalui berbagai pencapaian dalam menyelesaikan challenge.
+- **📈 Progres Target:** Visualisasikan seberapa dekat Anda dengan impian Anda (iPhone, Kendaraan, dll).
+- **📄 Laporan PDF:** Ekspor riwayat transaksi ke format PDF yang rapi dengan satu klik.
+- **🔥 Streak Tracker:** Hitung berapa hari berturut-turut Anda konsisten menyelesaikan challenge.
+
+### 🆕 Versi Terbaru (v1.2.0)
+Lihat catatan rilis lengkap kami di sini: [GitHub Release v1.2.0](https://github.com/MuhammadIsakiPrananda1/tabunganku-mobile/releases/tag/v1.2.0)
 
 ---
 
@@ -55,7 +36,7 @@ Kami terus berinovasi untuk memberikan pengalaman terbaik. Berikut adalah kronol
 
 ---
 
-## 📥 Cara Instalasi (Audit & Development)
+## 📥 Cara Instalasi (Tutorial Development)
 
 ### Prasyarat
 - Flutter SDK (versi 3.0.0 atau lebih tinggi)

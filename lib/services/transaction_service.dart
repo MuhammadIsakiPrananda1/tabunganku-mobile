@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tabunganku/core/security/secure_storage_service.dart';
 import 'package:tabunganku/models/transaction_model.dart';
+import 'package:tabunganku/services/challenge_service.dart';
 
 /// Service untuk mengelola data transaksi
 /// Timpa dengan Firebase/REST API nanti
@@ -20,7 +21,11 @@ abstract class TransactionService {
 
 /// Mock implementation untuk testing
 class MockTransactionService implements TransactionService {
-    @override
+  final ChallengeService? challengeService;
+
+  MockTransactionService({this.challengeService});
+
+  @override
     Future<void> clearAllTransactions() async {
       final userId = await _getCurrentUserId();
       await _ensureUserLoaded(userId);
@@ -114,6 +119,12 @@ class MockTransactionService implements TransactionService {
     _userTransactions[userId]!.add(transaction);
     await _saveUserTransactions(userId);
     await _emitTransactions(userId);
+
+    // Trigger challenge update
+    if (challengeService != null) {
+      await challengeService!.checkAndUpdateChallengeFromTransaction(transaction);
+    }
+
     return transaction;
   }
 

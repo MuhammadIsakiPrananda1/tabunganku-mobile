@@ -242,7 +242,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                   ),
                   const SizedBox(height: 20),
                   const Text(
-                    'v1.4.3',
+                    'v1.4.4',
                     style: TextStyle(
                       color: AppColors.textTertiary,
                       fontSize: 14,

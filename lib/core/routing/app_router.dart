@@ -8,6 +8,8 @@ import 'package:tabunganku/features/friends/presentation/pages/family_group_page
 import 'package:tabunganku/features/settings/presentation/pages/pin_setup_page.dart';
 import 'package:tabunganku/features/home/presentation/pages/saving_simulator_page.dart';
 import 'package:tabunganku/features/transaction/presentation/pages/scan_receipt_page.dart';
+import 'package:tabunganku/features/challenge/presentation/pages/challenge_page.dart';
+import 'package:tabunganku/features/budget/presentation/pages/monthly_budget_page.dart';
 final appRouterProvider = Provider((ref) {
   return GoRouter(
     initialLocation: '/splash',
@@ -60,6 +62,19 @@ final appRouterProvider = Provider((ref) {
         builder: (context, state) => const ScanReceiptPage(),
       ),
 
+      // Challenge Page
+      GoRoute(
+        path: '/challenge',
+        name: 'challenge',
+        builder: (context, state) => const ChallengePage(),
+      ),
+
+      // Monthly Budget Page
+      GoRoute(
+        path: '/monthly-budget',
+        name: 'monthly-budget',
+        builder: (context, state) => const MonthlyBudgetPage(),
+      ),
 
       // Catch-all redirect to splash
       GoRoute(

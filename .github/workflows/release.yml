@@ -41,7 +41,7 @@ jobs:
             build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
             build/app/outputs/flutter-apk/app-x86_64-release.apk
           name: "Release ${{ github.ref_name }} 🚀"
-          body_path: release_notes_v1.3.0.md
+          body_path: release_note.md
           draft: false
           prerelease: false
         env:

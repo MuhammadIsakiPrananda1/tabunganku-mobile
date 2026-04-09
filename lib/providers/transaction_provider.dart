@@ -1,11 +1,32 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tabunganku/models/transaction_model.dart';
 import 'package:tabunganku/services/transaction_service.dart';
+import 'package:tabunganku/providers/challenge_provider.dart';
 
 // Provider untuk TransactionService
 final transactionServiceProvider = Provider<TransactionService>((ref) {
-  // Timpa dengan Firebase service nanti
-  return MockTransactionService();
+  final challengeService = ref.watch(challengeServiceProvider);
+  return MockTransactionService(challengeService: challengeService);
+});
+
+// Helper provider untuk menambah transaksi dengan auto-update challenge
+final addTransactionProvider = Provider((ref) {
+  return (TransactionModel transaction) async {
+    final transactionService = ref.read(transactionServiceProvider);
+    final challengeService = ref.read(challengeServiceProvider);
+    
+    // Add transaction
+    final result = await transactionService.addTransaction(transaction);
+    
+    // Auto-update challenge progress
+    await challengeService.checkAndUpdateChallengeFromTransaction(transaction);
+    
+    // Refresh providers
+    ref.invalidate(transactionsProvider);
+    ref.invalidate(activeChallengesProvider);
+    
+    return result;
+  };
 });
 
 // Provider untuk mendapatkan semua transaksi

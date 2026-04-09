@@ -1,94 +1,95 @@
-# Catatan Perubahan (CHANGELOG)
+# 📝 Catatan Perubahan TabunganKu
 
-Semua perubahan penting pada proyek **TabunganKu** akan didokumentasikan di file ini.
+Semua update dan perbaikan aplikasi **TabunganKu** terdokumentasi di sini.
 
-Format pengisian mengikuti [Keep a Changelog](https://keepachangelog.com/id/1.0.0/).
+---
 
-## [1.4.3] - 2026-04-07
+## [1.4.4] — 9 April 2026
 
-### Diperbaiki
+### ✨ Yang Berubah
+- **Challenge Page Lebih Rapi** — Layout yang lebih bersih, spacing konsisten di semua elemen
+- **Typography Lebih Elegan** — Heading dan teks dengan letter-spacing yang sempurna
+- **Kartu Lebih Lega** — Stat cards, template cards, dan badge dengan ukuran optimal
+- **Dark Mode Lebih Nyaman** — Kontras warna yang lebih baik untuk mata
 
-- **Akurasi OCR Struk:** Peningkatan signifikan pada deteksi nominal dari berbagai struk perbankan dan e-wallet (BCA, Mandiri, DANA, OVO, GoPay, ShopeePay).
-- **Deteksi Nominal Kecil:** Mendukung pemindaian nominal transaksi mulai dari Rp 1.
-- **Filter Biaya Siluman:** Secara cerdas mengabaikan biaya admin, biaya transaksi, dan pajak agar hanya jumlah transaksi riil yang tercatat.
-- **Filtrasi Metadata:** Pembersihan otomatis data nomor HP dan ID transaksi dari hasil pemindaian struk.
+---
 
-## [1.4.2] - 2026-04-06
+## [1.4.3] — 7 April 2026
 
-### Ditambahkan
-- **Fitur Anggaran (Budgeting):** Pantau pengeluaran Anda dengan penetapan batas anggaran bulanan, beserta peringatan visual saat pengeluaran mendekati limit.
-- **Detail Transaksi (Detail Sheet):** Tampilan baru yang lebih terstruktur dan premium saat melihat informasi detail sebuah transaksi.
+### ✨ Yang Berubah
+- **OCR Lebih Akurat** — Deteksi nominal struk dari BCA, Mandiri, DANA, OVO, GoPay, ShopeePay
+- **Nominal Kecil Tertarik** — Sekarang bisa scan dari Rp 1
+- **Biaya Otomatis Diabaikan** — Admin, pajak, dan biaya transaksi tidak tercatat
 
-### Diperbaiki
-- **UI Overflow pada Form:** Menyelesaikan isu layar terpotong (overflow) pada halaman Tambah Barang agar responsif di seluruh ukuran layar perangkat.
-- **Optimasi Dashboard & Notifikasi:** Penyempurnaan penyajian data sisa anggaran dan peningkatan stabilitas trigger notifikasi pengingat.
+---
 
-## [1.4.1] - 2026-04-04
+## [1.4.2] — 6 April 2026
 
-### Ditambahkan
+### ✨ Fitur Baru
+- **Budget Tracker** — Pantau pengeluaran dengan batas bulanan + peringatan
+- **Detail Transaksi Premium** — Tampilan detail yang lebih terstruktur
 
-- **Modernisasi UI Riwayat:** Navigasi minimalis dropdown/pill yang elegan menggantikan TabBar lebar untuk pengalaman yang lebih bersih.
-- **Sinkronisasi Penghapusan (2 Arah):** Menghapus catatan Hutang atau rencana Belanja kini otomatis menghapus transaksi terkait di Riwayat.
-- **Interaktivitas Riwayat:** Seluruh item riwayat kini bisa diklik untuk melihat detail atau dihapus secara individual.
-- **Perbaikan Bug & Ripple:** Perbaikan efek ripple pada filter dan penambahan logging untuk diagnosa upload foto profil.
-- **Update UI Riwayat (Kategori):** Pemisahan riwayat menjadi kategori: "Pemasukan & Pengeluaran", "Hutang/Piutang", dan "Belanja".
-- **Summary Bulanan Cerdas:** Header bulan tetap menghitung total "Masuk" & "Keluar" dari SEMUA jenis transaksi.
-- **Custom Foto Profil:** Upload foto profil kustom melalui kamera atau galeri.
-- **Sinkronisasi Foto Keluarga:** Sinkronisasi foto profil ke seluruh anggota grup secara real-time.
-- **Automasi Transaksi:** Pencatatan otomatis untuk pelunasan hutang dan item belanja yang dibeli.
+### ✨ Yang Diperbaiki
+- **Form Tidak Overflow** — Halaman Tambah Barang responsif di semua ukuran layar
+- **Notifikasi Lebih Stabil** — Peringatan anggaran bekerja lebih baik
 
-## [1.4.0] - 2026-04-03
+---
 
-### Ditambahkan
+## [1.4.1] — 4 April 2026
 
-- **Migrasi Catatan Belanja:** Transisi fitur belanja dari model bottom sheet ke halaman mandiri yang lebih premium.
-- **Peningkatan Pengingat Harian:** Sistem notifikasi yang lebih stabil dengan deteksi timezone otomatis dan prioritas tinggi (Max Importance).
-- **Auto-Reschedule Notifikasi:** Pembaruan otomatis jadwal pengingat setiap kali aplikasi dibuka.
+### ✨ Fitur & Perbaikan
+- **Riwayat Lebih Rapi** — Navigasi dengan pill buttons (tidak pakai TabBar lagi)
+- **Hapus Transaksi Berantai** — Hapus hutang/belanja → otomatis hapus transaksinya
+- **Klik Item Riwayat** — Bisa lihat detail atau hapus langsung dari history
+- **Foto Profil Kustom** — Upload dari kamera atau galeri
+- **Sinkronisasi Foto Keluarga** — Foto profil terlihat di semua member grup
 
-### Diperbaiki
+---
 
-- **Sinkronisasi Waktu:** Perbaikan bug pada penjadwalan notifikasi jam 6 pagi yang sebelumnya tidak muncul.
-- **Pembersihan Kode:** Penghapusan 800+ baris kode legacy dan optimalisasi import pada dashboard.
+## [1.4.0] — 3 April 2026
 
-### Diperbarui
+### ✨ Fitur & Perbaikan
+- **Catatan Belanja Pindah** — Dari bottom sheet ke halaman penuh (lebih lega)
+- **Notifikasi Pengingat Lebih Tangguh** — Deteksi timezone otomatis, prioritas maksimal
+- **Auto-reschedule Reminder** — Pengingat otomatis sinkron saat buka aplikasi
+- **Fix Notifikasi 6 Pagi** — Bug penjadwalan sudah teratasi
+- **Code Cleanup** — Bersihkan 800+ baris kode yang tidak terpakai
 
-- **Versi Aplikasi:** Pembaruan versi aplikasi ke 1.4.0.
+---
 
-## [1.3.0] - 2026-04-01
+## [1.3.0] — 1 April 2026
 
-### Ditambahkan
+### ✨ Perbaikan
+- **Dashboard Lebih Indah** — Kartu saldo dan grafik dengan visual baru
+- **Dokumentasi Lengkap** — README.md diperbarui dengan info terbaru
 
-- **Optimasi UI Dashboard:** Perbaikan visual pada kartu saldo dan grafik interaktif.
-- **Pembaruan README:** Dokumentasi yang lebih modern dan informatif.
+---
 
-### Diperbarui
-- **Sistem Gradle:** Penyesuaian konfigurasi Android Gradle ke versi 1.3.0 untuk stabilitas build.
-- **Versi Aplikasi:** Sinkronisasi versi ke 1.3.0.
+## [1.2.0] — 31 Maret 2026
 
-## [1.2.0] - 2026-03-31
+### ✨ Fitur Baru
+- **Scan Struk OCR** — Deteksi nominal otomatis dari foto struk
+- **Sistem Profil** — Pilih avatar dan atur nama permanen
+- **Dashboard Premium** — Efek visual saat sentuh kartu saldo
+- **Sinkronisasi Keluarga** — Database terintegrasi untuk anggota grup
 
-### Ditambahkan
+### ✨ Perbaikan
+- **Tema Tidak Reset** — Pilihan tema tetap simpan setelah tutup aplikasi
+- **Akses Grup Lebih Lancar** — Error di halaman grup sudah diperbaiki
 
-- **Fitur Scan Struk (OCR):** Deteksi otomatis nominal belanja dari foto struk fisik.
-- **Sistem Profil:** Kustomisasi nickname dan pemilihan avatar secara permanen.
-- **Ink-Well Dashboard:** Efek visual premium saat menyentuh kartu saldo.
-- **Manajemen Tabungan Keluarga:** Sinkronisasi database antar perangkat anggota keluarga.
+---
 
-### Diperbaiki
+## [1.1.0] — Maret 2026
 
-- Sinkronisasi kustomisasi tema agar tidak kembali ke pengaturan awal saat aplikasi ditutup.
-- Penanganan error saat akses pertama kali ke halaman grup keluarga.
+### ✨ Fitur Baru
+- **Firebase Firestore** — Cloud sync untuk data keluarga
+- **Dashboard Interaktif** — Grafik pendapatan vs pengeluaran
+- **Target Menabung** — Buat impian finansial dan track progress
 
-## [1.1.0] - Mar 2026
+---
 
-### Ditambahkan
+## [1.0.0] — Februari 2026
 
-- Implementasi awal database Firebase Firestore.
-- Dashboard utama dengan grafik pendapatan vs pengeluaran.
-- Fitur target menabung (saving goals).
-
-## [1.0.0] - Feb 2026
-
-- Rilis awal aplikasi TabunganKu.
-- Fitur pencatatan transaksi manual.
-- Autentikasi lokal (biometrik sederhana).
+### ✨ Rilis Perdana
+- **Pencatatan Transaksi** — Catat pemasukan dan pengeluaran harian
+- **Keamanan Biometrik** — Login dengan fingerprint/face recognition

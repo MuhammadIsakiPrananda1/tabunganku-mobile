@@ -13,8 +13,6 @@ import 'package:tabunganku/models/transaction_model.dart';
 import 'package:tabunganku/features/settings/presentation/providers/security_provider.dart';
 import 'package:tabunganku/features/settings/presentation/providers/achievement_provider.dart';
 import 'package:tabunganku/providers/budget_provider.dart';
-import 'package:tabunganku/models/budget_model.dart';
-import 'package:tabunganku/features/home/presentation/widgets/budget_form_sheet.dart';
 import 'package:intl/intl.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
@@ -271,10 +269,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             _buildAchievementList(achievements, isDarkMode),
             const SizedBox(height: 16),
 
-            // ── Budget Bulanan ─────────────────────────────────────
-            _buildSectionHeader('Budget Bulanan'),
-            _buildBudgetTrackingSection(budgets, budgetConsumption, isDarkMode),
-            const SizedBox(height: 16),
             
             _buildSectionHeader('Preferensi'),
             _buildSettingTile(
@@ -350,7 +344,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             _buildSettingTile(Icons.info_outline_rounded, 'Tentang Aplikasi', () => _showAboutDialog()),
             const SizedBox(height: 16),
 
-            const Text('Versi 1.4.3',
+            const Text('Versi 1.4.4',
                 style:
                     TextStyle(color: AppColors.textSecondary, fontSize: 12)),
           ],
@@ -830,198 +824,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     );
   }
 
-  Widget _buildBudgetTrackingSection(
-      List<BudgetModel> budgets,
-      Map<String, double> consumption,
-      bool isDarkMode) {
-    if (budgets.isEmpty) {
-      return Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: isDarkMode ? 0.3 : 0.05),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          children: [
-            const SizedBox(height: 8),
-            Icon(
-              Icons.account_balance_rounded,
-              size: 36,
-              color: isDarkMode ? Colors.white12 : Colors.grey.shade200,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Belum ada budget bulan ini.',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.bold,
-                color: isDarkMode ? Colors.white38 : Colors.black38,
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextButton.icon(
-              onPressed: () => BudgetFormSheet.show(context),
-              icon: const Icon(Icons.add, size: 16, color: AppColors.primary),
-              label: const Text(
-                'Set Budget Sekarang',
-                style: TextStyle(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-          ],
-        ),
-      );
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Align(
-          alignment: Alignment.centerRight,
-          child: TextButton.icon(
-            onPressed: () => BudgetFormSheet.show(context),
-            icon: const Icon(Icons.add, size: 16, color: AppColors.primary),
-            label: const Text(
-              'Tambah',
-              style: TextStyle(
-                color: AppColors.primary,
-                fontWeight: FontWeight.bold,
-                fontSize: 12,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 4),
-        ...budgets.map((budget) {
-          final spent = consumption[budget.category] ?? 0;
-          return _buildBudgetProgressBar(budget, spent, isDarkMode);
-        }),
-      ],
-    );
-  }
-
-  Widget _buildBudgetProgressBar(
-      BudgetModel budget, double spent, bool isDarkMode) {
-    final category = budget.category;
-    final limit = budget.limitAmount;
-    final progress = (spent / limit).clamp(0.0, 1.0);
-    final isExceeded = spent > limit;
-    final color = isExceeded
-        ? Colors.red
-        : (progress > 0.8 ? Colors.orange : AppColors.primary);
-
-    final currencyFormatter =
-        NumberFormat.currency(locale: 'id_ID', symbol: 'Rp', decimalDigits: 0);
-
-    return GestureDetector(
-      onTap: () => BudgetFormSheet.show(context, budget: budget),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: isDarkMode ? 0.25 : 0.04),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    category,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 13,
-                      color: isDarkMode ? Colors.white : Colors.black87,
-                    ),
-                  ),
-                ),
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: color.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        '${(progress * 100).toInt()}%',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 11,
-                          color: color,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Icon(
-                      Icons.edit_outlined,
-                      size: 14,
-                      color: isDarkMode ? Colors.white24 : Colors.black26,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(6),
-              child: LinearProgressIndicator(
-                value: progress,
-                minHeight: 7,
-                backgroundColor:
-                    isDarkMode ? Colors.white10 : Colors.grey.shade100,
-                valueColor: AlwaysStoppedAnimation<Color>(color),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  currencyFormatter.format(spent),
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    color: isDarkMode ? Colors.white70 : Colors.black87,
-                  ),
-                ),
-                Text(
-                  'Limit: ${currencyFormatter.format(limit)}',
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: isDarkMode ? Colors.white38 : Colors.grey,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-
 
   Widget _buildSettingTile(IconData icon, String title, VoidCallback onTap,
       {Widget? trailing, String? subtitle, Color? color}) {
@@ -1126,7 +928,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             ),
             const SizedBox(height: 24),
             const Text('TabunganKu', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-            const Text('Versi 1.4.3', style: TextStyle(color: Colors.grey, fontSize: 13)),
+            const Text('Versi 1.4.4', style: TextStyle(color: Colors.grey, fontSize: 13)),
             const SizedBox(height: 24),
             const Text(
               'Aplikasi pengelola keuangan pribadi yang cerdas dan estetik untuk membantu kamu mencapai tujuan finansial.',

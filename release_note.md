@@ -1,8 +1,8 @@
-# TabunganKu Mobile - Versi 1.2.0
+# TabunganKu Mobile - Versi 1.4.4
 
-![Release Banner](https://raw.githubusercontent.com/MuhammadIsakiPrananda1/tabunganku-mobile/main/assets/banner_v120.png)
+![Release Banner](https://raw.githubusercontent.com/MuhammadIsakiPrananda1/tabunganku-mobile/main/assets/banner_v144.png)
 
-## 🚀 Versi 1.2.0: The Challenge Mastery Update
+## 🚀 Versi 1.4.4: The Challenge Mastery Update
 
 Kami sangat bersemangat untuk memperkenalkan pembaruan terbaru **TabunganKu Mobile**! Fokus utama versi ini adalah memberikan fleksibilitas penuh dalam mencapai target finansialmu melalui sistem Tantangan (Challenge) yang lebih cerdas dan personal.
 
@@ -33,7 +33,7 @@ Kami sangat bersemangat untuk memperkenalkan pembaruan terbaru **TabunganKu Mobi
 ---
 
 ### 🔧 Detail Teknis
-*   **Build**: v1.2.0-stable
+*   **Build**: v1.4.4-stable
 *   **Engine**: Flutter 3.x
 *   **OS Support**: Android 6.0+ (Marshmallow)
 *   **Size**: Optimized for better performance on mid-range devices.

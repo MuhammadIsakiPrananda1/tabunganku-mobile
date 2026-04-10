@@ -5,37 +5,7 @@ import 'package:tabunganku/core/theme/app_colors.dart';
 import 'package:tabunganku/core/theme/theme_provider.dart';
 import 'package:tabunganku/models/budget_model.dart';
 import 'package:tabunganku/providers/budget_provider.dart';
-
-// ── Ribuan formatter (titik sebagai pemisah) ────────────────────────────────
-class _RibuanFormatter extends TextInputFormatter {
-  @override
-  TextEditingValue formatEditUpdate(
-      TextEditingValue oldValue, TextEditingValue newValue) {
-    if (newValue.text.isEmpty) return newValue;
-    final digits = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
-    if (digits.isEmpty) return const TextEditingValue(text: '');
-    final formatted = digits.replaceAllMapped(
-      RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
-      (m) => '${m[1]}.',
-    );
-    // Posisi kursor
-    int digitsBefore = newValue.selection.end -
-        newValue.text
-            .substring(0, newValue.selection.end)
-            .replaceAll(RegExp(r'[0-9]'), '')
-            .length;
-    int idx = 0;
-    int count = 0;
-    while (count < digitsBefore && idx < formatted.length) {
-      if (RegExp(r'[0-9]').hasMatch(formatted[idx])) count++;
-      idx++;
-    }
-    return TextEditingValue(
-      text: formatted,
-      selection: TextSelection.collapsed(offset: idx),
-    );
-  }
-}
+import 'package:tabunganku/core/utils/currency_formatter.dart';
 
 // ────────────────────────────────────────────────────────────────────────────
 
@@ -374,7 +344,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     // "Rp" prefix — selalu terlihat
-                    Text(
+                    const Text(
                       'Rp',
                       style: TextStyle(
                         fontSize: 22,
@@ -389,7 +359,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
                         keyboardType: TextInputType.number,
                         inputFormatters: [
                           FilteringTextInputFormatter.digitsOnly,
-                          _RibuanFormatter(),
+                          RibuanFormatter(),
                         ],
                         style: TextStyle(
                           fontSize: 24,

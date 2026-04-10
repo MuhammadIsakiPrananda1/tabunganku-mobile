@@ -3,6 +3,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:tabunganku/core/theme/app_colors.dart';
 import 'package:tabunganku/models/transaction_model.dart';
 import 'package:tabunganku/widgets/transaction_tile.dart';
+import 'package:tabunganku/core/constants/app_version.dart';
 import 'package:intl/intl.dart';
 
 class HomePage extends StatelessWidget {
@@ -124,7 +125,7 @@ class HomePage extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         const Text(
-                          'v1.4.4',
+                          AppVersion.fullVersion,
                           style: TextStyle(fontSize: 8, color: Colors.grey),
                         ),
                       ],

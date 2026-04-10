@@ -4,6 +4,19 @@ Semua update dan perbaikan aplikasi **TabunganKu** terdokumentasi di sini.
 
 ---
 
+## [1.4.5] — 10 April 2026
+
+### ✨ Fitur Baru
+- **Smart Finance & Langganan** — Monitor pengeluaran rutin (Netflix, Spotify, dll) secara otomatis
+- **Estimasi Akhir Bulan** — Prediksi saldo harian berdasarkan tren pengeluaran kamu
+- **Biaya Admin Cepat** — Pilih biaya admin top-up (Bank, E-Wallet) dengan satu klik + tombol batal
+
+### ✨ Yang Diperbaiki
+- **Fix Router & Dashboard Layer** — Perbaikan error dependensi Riverpod dan routing
+- **Rp Selalu Terlihat** — Simbol mata uang di form rutin sekarang selalu muncul
+
+---
+
 ## [1.4.4] — 9 April 2026
 
 ### ✨ Yang Berubah

@@ -13,6 +13,7 @@ import 'package:tabunganku/models/transaction_model.dart';
 import 'package:tabunganku/features/settings/presentation/providers/security_provider.dart';
 import 'package:tabunganku/features/settings/presentation/providers/achievement_provider.dart';
 import 'package:tabunganku/providers/budget_provider.dart';
+import 'package:tabunganku/core/constants/app_version.dart';
 import 'package:intl/intl.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
@@ -344,7 +345,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             _buildSettingTile(Icons.info_outline_rounded, 'Tentang Aplikasi', () => _showAboutDialog()),
             const SizedBox(height: 16),
 
-            const Text('Versi 1.4.4',
+            const Text('Versi ${AppVersion.version}',
                 style:
                     TextStyle(color: AppColors.textSecondary, fontSize: 12)),
           ],
@@ -928,7 +929,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             ),
             const SizedBox(height: 24),
             const Text('TabunganKu', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-            const Text('Versi 1.4.4', style: TextStyle(color: Colors.grey, fontSize: 13)),
+            const Text('Versi ${AppVersion.version}', style: TextStyle(color: Colors.grey, fontSize: 13)),
             const SizedBox(height: 24),
             const Text(
               'Aplikasi pengelola keuangan pribadi yang cerdas dan estetik untuk membantu kamu mencapai tujuan finansial.',

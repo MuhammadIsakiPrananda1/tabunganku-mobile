@@ -9,21 +9,26 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:tabunganku/main.dart' show flutterLocalNotificationsPlugin;
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tabunganku/models/transaction_model.dart';
-import 'package:tabunganku/models/saving_target_model.dart';
+import 'package:tabunganku/services/recurring_service.dart';
 import 'package:tabunganku/providers/transaction_provider.dart';
 import 'package:tabunganku/providers/family_group_provider.dart';
 import 'package:tabunganku/features/transaction/presentation/widgets/transaction_detail_sheet.dart';
 import 'package:tabunganku/features/friends/presentation/pages/family_group_page.dart';
 import 'package:tabunganku/providers/saving_target_provider.dart';
 import 'package:tabunganku/core/theme/app_colors.dart';
+import 'package:tabunganku/core/constants/app_version.dart';
 import 'package:tabunganku/core/theme/theme_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:tabunganku/features/transaction/presentation/pages/debt_list_page.dart';
 import 'package:tabunganku/features/shopping/presentation/pages/shopping_list_page.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tabunganku/models/transaction_model.dart';
+import 'package:tabunganku/models/saving_target_model.dart';
 import 'package:tabunganku/features/settings/presentation/pages/settings_page.dart';
+import 'package:tabunganku/features/transaction/presentation/pages/recurring_list_page.dart';
+import 'package:tabunganku/core/constants/app_constants.dart';
+import 'package:tabunganku/core/utils/currency_formatter.dart';
 
 
 class DashboardPage extends ConsumerStatefulWidget {
@@ -69,6 +74,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     _startTimer();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _loadLocalData();
+      // Proses transaksi rutin otomatis
+      await ref.read(recurringServiceProvider).processRecurring();
     });
   }
 
@@ -503,6 +510,59 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                           ),
                         ],
                       ),
+                      const SizedBox(height: 12),
+                      // Estimasi Akhir Bulan (Feature #3)
+                      Builder(
+                        builder: (context) {
+                          final now = DateTime.now();
+                          final totalDays = DateTime(now.year, now.month + 1, 0).day;
+                          final day = now.day;
+                          
+                          // Linear extrapolation (Min 1 day to avoid div by zero)
+                          final currentDay = day > 0 ? day : 1;
+                          final estIncome = (totalIncome / currentDay) * totalDays;
+                          final estExpense = (totalExpense / currentDay) * totalDays;
+                          final estBalance = estIncome - estExpense;
+                          final isDanger = estBalance < 0;
+
+                          return Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: isDanger 
+                                ? Colors.red.withValues(alpha: 0.1) 
+                                : (isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.teal.shade50.withValues(alpha: 0.3)),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  isDanger ? Icons.warning_amber_rounded : Icons.auto_graph_rounded,
+                                  size: 14,
+                                  color: isDanger ? Colors.red : Colors.teal,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Estimasi Akhir Bulan: ',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w500,
+                                    color: isDarkMode ? Colors.white38 : Colors.teal.shade900.withValues(alpha: 0.5),
+                                  ),
+                                ),
+                                Text(
+                                  _showBalance ? _formatRupiah(estBalance) : '••••••',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                    color: isDanger ? Colors.red : (isDarkMode ? Colors.white70 : Colors.teal.shade900),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
                       const SizedBox(height: 24),
 
                       // Stats Row Divider
@@ -568,6 +628,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
               _buildToolAction(Icons.document_scanner_rounded, 'Scan Bukti', _QuickActionType.scanReceipt),
               _buildToolAction(Icons.emoji_events_rounded, 'Challenge', _QuickActionType.challenge),
               _buildToolAction(Icons.track_changes_rounded, 'Target', _QuickActionType.savingTarget),
+              _buildToolAction(Icons.loop_rounded, 'Langganan', _QuickActionType.recurring),
             ],
           ),
 
@@ -767,7 +828,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Text('Edisi Mint Fresh v1.4.4',
+                  Text(AppVersion.edition,
                       style: TextStyle(
                           fontSize: 8,
                           color: isDarkMode ? Colors.white38 : Colors.grey)),
@@ -935,58 +996,67 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     if (type == _QuickActionType.debt) iconColor = Colors.orange.shade500;
     if (type == _QuickActionType.family) iconColor = Colors.blue.shade500;
     if (type == _QuickActionType.shoppingList) iconColor = Colors.purple.shade300;
-    if (type == _QuickActionType.scanReceipt)
+    if (type == _QuickActionType.scanReceipt) {
       iconColor = Colors.tealAccent.shade700;
+    }
 
-    return Material(
-      color: Colors.transparent,
-      borderRadius: BorderRadius.circular(20),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: () => _handleQuickActionTap(
-            _QuickAction(icon: icon, label: label, type: type)),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: isDarkMode ? AppColors.surfaceDark : Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: isDarkMode ? 0.2 : 0.04),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
+    return GestureDetector(
+      onTap: () => _handleQuickActionTap(
+          _QuickAction(icon: icon, label: label, type: type)),
+      behavior: HitTestBehavior.opaque,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: isDarkMode ? 0.2 : 0.04),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Material(
+              color: isDarkMode ? AppColors.surfaceDark : Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              clipBehavior: Clip.antiAlias,
+              child: InkWell(
+                onTap: () => _handleQuickActionTap(
+                    _QuickAction(icon: icon, label: label, type: type)),
+                child: Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isDarkMode
+                          ? Colors.white.withValues(alpha: 0.05)
+                          : Colors.black.withValues(alpha: 0.02),
+                      width: 1.2,
                     ),
-                  ],
-                  border: Border.all(
-                    color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.02),
-                    width: 1.2,
                   ),
-                ),
-                child: Icon(icon, color: iconColor, size: 24),
-              ),
-              const SizedBox(height: 8),
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  label.toUpperCase(),
-                  style: TextStyle(
-                    fontSize: 9,
-                    fontWeight: FontWeight.bold,
-                    color: isDarkMode
-                        ? Colors.white38
-                        : Colors.teal.shade900.withValues(alpha: 0.5),
-                    letterSpacing: 1.2,
-                  ),
+                  child: Icon(icon, color: iconColor, size: 24),
                 ),
               ),
-            ],
+            ),
           ),
-        ),
+          const SizedBox(height: 8),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              label.toUpperCase(),
+              style: TextStyle(
+                fontSize: 9,
+                fontWeight: FontWeight.bold,
+                color: isDarkMode
+                    ? Colors.white38
+                    : Colors.teal.shade900.withValues(alpha: 0.5),
+                letterSpacing: 1.2,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -996,84 +1066,88 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
         (ref.watch(themeProvider) == ThemeMode.system &&
             theme.brightness == Brightness.dark);
-    final isExpense = t.type == TransactionType.expense;
-    final IconData catIcon =
-        isExpense ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded;
+    final bool isExpense = t.type == TransactionType.expense;
+    final IconData catIcon = AppConstants.categoryIcons[t.category] ??
+        (isExpense ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded);
     final Color catColor = isExpense ? Colors.red : Colors.green;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(20),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: () => _showTransactionDetailSheet(t),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            decoration: BoxDecoration(
-              color: theme.cardColor,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                  color:
-                      Colors.white.withValues(alpha: isDarkMode ? 0.05 : 0.01)),
-              boxShadow: [
-                BoxShadow(
-                  color:
-                      Colors.black.withValues(alpha: isDarkMode ? 0.2 : 0.01),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDarkMode ? 0.2 : 0.01),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
-            child: Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: catColor.withValues(alpha: isDarkMode ? 0.2 : 0.08),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(catIcon, color: catColor, size: 18),
+          ],
+        ),
+        child: Material(
+          color: theme.cardColor,
+          borderRadius: BorderRadius.circular(20),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: () => _showTransactionDetailSheet(t),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: Colors.white
+                      .withValues(alpha: isDarkMode ? 0.05 : 0.01),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(t.title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
-                              color: isDarkMode
-                                  ? Colors.white
-                                  : Colors.teal.shade900)),
-                      const SizedBox(height: 2),
-                      Text(DateFormat('dd MMM').format(t.date),
-                          style: TextStyle(
-                              fontSize: 10,
-                              color: isDarkMode
-                                  ? Colors.white54
-                                  : Colors.grey.shade500)),
-                    ],
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: catColor.withValues(alpha: isDarkMode ? 0.2 : 0.08),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(catIcon, color: catColor, size: 18),
                   ),
-                ),
-                Text(
-                  '${isExpense ? '- ' : '+ '}${_formatRupiah(t.amount)}',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                    color: isExpense
-                        ? (isDarkMode ? Colors.redAccent : Colors.red.shade700)
-                        : (isDarkMode
-                            ? Colors.greenAccent
-                            : Colors.green.shade700),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(t.title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                                color: isDarkMode
+                                    ? Colors.white
+                                    : Colors.teal.shade900)),
+                        const SizedBox(height: 2),
+                        Text(DateFormat('dd MMM').format(t.date),
+                            style: TextStyle(
+                                fontSize: 10,
+                                color: isDarkMode
+                                    ? Colors.white54
+                                    : Colors.grey.shade500)),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                  Text(
+                    '${isExpense ? '- ' : '+ '}${_formatRupiah(t.amount)}',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: isExpense
+                          ? (isDarkMode ? Colors.redAccent : Colors.red.shade700)
+                          : (isDarkMode
+                              ? Colors.greenAccent
+                              : Colors.green.shade700),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -1159,144 +1233,150 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
 
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: Material(
-                  color: theme.cardColor,
-                  borderRadius: BorderRadius.circular(32),
-                  clipBehavior: Clip.antiAlias,
-                  child: InkWell(
-                    onTap: () => _showTargetDetailSheet(target, totalBalance),
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(24),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(32),
-                        border: Border.all(
-                            color: Colors.white
-                                .withValues(alpha: isDarkMode ? 0.05 : 0.01)),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black
-                                .withValues(alpha: isDarkMode ? 0.2 : 0.01),
-                            blurRadius: 20,
-                            offset: const Offset(0, 10),
-                          ),
-                        ],
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(32),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black
+                            .withValues(alpha: isDarkMode ? 0.2 : 0.01),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text('TARGET TABUNGAN #${index + 1}',
-                                  style: TextStyle(
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 1.5,
-                                    color: isDarkMode
-                                        ? Colors.white54
-                                        : Colors.teal.shade800
-                                            .withValues(alpha: 0.4),
-                                  )),
-                            ],
+                    ],
+                  ),
+                  child: Material(
+                    color: theme.cardColor,
+                    borderRadius: BorderRadius.circular(32),
+                    clipBehavior: Clip.antiAlias,
+                    child: InkWell(
+                      onTap: () => _showTargetDetailSheet(target, totalBalance),
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(32),
+                          border: Border.all(
+                            color: Colors.white.withValues(
+                                alpha: isDarkMode ? 0.05 : 0.01),
                           ),
-                          const SizedBox(height: 16),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(target.name,
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 22,
-                                        color: isDarkMode
-                                            ? Colors.white
-                                            : Colors.teal.shade900,
-                                        letterSpacing: -0.5)),
-                              ),
-                              if (progress >= 1.0)
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 10, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: Colors.green.shade500,
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: const Text('TERCAPAI! 🎊',
-                                      style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 9,
-                                          fontWeight: FontWeight.bold)),
-                                ),
-                            ],
-                          ),
-                          const SizedBox(height: 20),
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: Stack(
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Container(
-                                    height: 12,
-                                    color: isDarkMode
-                                        ? Colors.white.withValues(alpha: 0.05)
-                                        : Colors.teal.shade50),
-                                AnimatedContainer(
-                                  duration: const Duration(milliseconds: 1200),
-                                  curve: Curves.easeOutBack,
-                                  height: 12,
-                                  width:
-                                      (MediaQuery.of(context).size.width - 88) *
-                                          progress,
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: progress >= 1.0
-                                          ? [
-                                              Colors.tealAccent.shade400,
-                                              AppColors.primary
-                                            ]
-                                          : [
-                                              AppColors.primaryLight,
-                                              AppColors.primary
-                                            ],
-                                    ),
-                                    borderRadius: BorderRadius.circular(10),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: (progress >= 1.0
-                                                ? Colors.greenAccent
-                                                : AppColors.primary)
-                                            .withValues(
-                                                alpha: isDarkMode ? 0.2 : 0.4),
-                                        blurRadius: progress >= 1.0 ? 15 : 10,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
-                                  ),
-                                ),
+                                Text('TARGET TABUNGAN #${index + 1}',
+                                    style: TextStyle(
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 1.5,
+                                      color: isDarkMode
+                                          ? Colors.white54
+                                          : Colors.teal.shade800
+                                              .withValues(alpha: 0.4),
+                                    )),
                               ],
                             ),
-                          ),
-                          const SizedBox(height: 24),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              _buildTargetStat(
-                                  'Terkumpul',
-                                  _formatRupiah(totalBalance),
-                                  Icons.wallet_rounded,
-                                  Colors.green),
-                              _buildTargetStat(
-                                  'Target',
-                                  _formatRupiah(target.targetAmount),
-                                  Icons.track_changes_rounded,
-                                  Colors.teal),
-                              _buildTargetStat(
-                                  'Sisa Waktu',
-                                  remaining < 0 ? 'Tempo' : '$remaining Hari',
-                                  Icons.access_time_rounded,
-                                  Colors.orange),
-                            ],
-                          ),
-                        ],
+                            const SizedBox(height: 16),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(target.name,
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 22,
+                                          color: isDarkMode
+                                              ? Colors.white
+                                              : Colors.teal.shade900,
+                                          letterSpacing: -0.5)),
+                                ),
+                                if (progress >= 1.0)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: Colors.green.shade500,
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: const Text('TERCAPAI! 🎊',
+                                        style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 9,
+                                            fontWeight: FontWeight.bold)),
+                                  ),
+                              ],
+                            ),
+                            const SizedBox(height: 20),
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: Stack(
+                                children: [
+                                  Container(
+                                      height: 12,
+                                      color: isDarkMode
+                                          ? Colors.white.withValues(alpha: 0.05)
+                                          : Colors.teal.shade50),
+                                  AnimatedContainer(
+                                    duration: const Duration(milliseconds: 1200),
+                                    curve: Curves.easeOutBack,
+                                    height: 12,
+                                    width:
+                                        (MediaQuery.of(context).size.width - 88) *
+                                            progress,
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: progress >= 1.0
+                                            ? [
+                                                Colors.tealAccent.shade400,
+                                                AppColors.primary
+                                              ]
+                                            : [
+                                                AppColors.primaryLight,
+                                                AppColors.primary
+                                              ],
+                                      ),
+                                      borderRadius: BorderRadius.circular(10),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: (progress >= 1.0
+                                                  ? Colors.greenAccent
+                                                  : AppColors.primary)
+                                              .withValues(
+                                                  alpha: isDarkMode ? 0.2 : 0.4),
+                                          blurRadius: progress >= 1.0 ? 15 : 10,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                _buildTargetStat(
+                                    'Terkumpul',
+                                    _formatRupiah(totalBalance),
+                                    Icons.wallet_rounded,
+                                    Colors.green),
+                                _buildTargetStat(
+                                    'Target',
+                                    _formatRupiah(target.targetAmount),
+                                    Icons.track_changes_rounded,
+                                    Colors.teal),
+                                _buildTargetStat(
+                                    'Sisa Waktu',
+                                    remaining < 0 ? 'Tempo' : '$remaining Hari',
+                                    Icons.access_time_rounded,
+                                    Colors.orange),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -1419,6 +1499,14 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         break;
       case _QuickActionType.challenge:
         context.push('/challenge');
+        break;
+      case _QuickActionType.recurring:
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const RecurringListPage(),
+          ),
+        );
         break;
     }
   }
@@ -1718,6 +1806,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     final customCategoryController = TextEditingController();
     var selectedCategory = type == TransactionType.expense ? 'Makanan & Minuman' : 'Gaji';
     var noteText = '';
+    String? selectedTopUpSource;
+    String topUpBankName = '';
 
     final theme = Theme.of(context);
     final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
@@ -1745,8 +1835,20 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             {'label': 'Zakat & Donasi', 'icon': Icons.volunteer_activism_rounded},
             {'label': 'Cicilan', 'icon': Icons.credit_card_rounded},
             {'label': 'Pulsa & Data', 'icon': Icons.tap_and_play_rounded},
+            {'label': 'Biaya Admin', 'icon': Icons.account_balance_rounded},
             {'label': 'Lainnya', 'icon': Icons.more_horiz_rounded},
           ];
+
+    final topUpSources = [
+      {'label': 'Bank', 'icon': Icons.account_balance_rounded},
+      {'label': 'GoPay', 'icon': Icons.account_balance_wallet_rounded},
+      {'label': 'OVO', 'icon': Icons.account_balance_wallet_rounded},
+      {'label': 'Dana', 'icon': Icons.account_balance_wallet_rounded},
+      {'label': 'ShopeePay', 'icon': Icons.account_balance_wallet_rounded},
+      {'label': 'LinkAja', 'icon': Icons.account_balance_wallet_rounded},
+    ];
+
+
 
     await showModalBottomSheet<void>(
       context: context,
@@ -1852,7 +1954,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                     letterSpacing: -1.5),
                                 inputFormatters: [
                                   FilteringTextInputFormatter.digitsOnly,
-                                  _RibuanSeparatorInputFormatter(),
+                                  RibuanFormatter(),
                                 ],
                                 onChanged: (val) => setSheetState(() {}),
                                 decoration: InputDecoration(
@@ -1872,6 +1974,134 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                           ],
                         ),
                       ),
+                      if (type == TransactionType.expense) ...[
+                        const SizedBox(height: 12),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 28),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('BIAYA ADMIN TOP-UP (CEPAT)',
+                                  style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      color: isDarkMode
+                                          ? Colors.white24
+                                          : Colors.teal.shade800
+                                              .withValues(alpha: 0.4),
+                                      letterSpacing: 1.2)),
+                              const SizedBox(height: 12),
+                               DropdownButtonFormField<String>(
+                                  value: selectedTopUpSource,
+                                  isExpanded: true,
+                                  dropdownColor: isDarkMode
+                                      ? AppColors.surfaceDark
+                                      : Colors.white,
+                                  decoration: InputDecoration(
+                                    labelText: 'Pilih Sumber Top-up',
+                                    filled: true,
+                                    fillColor: isDarkMode
+                                        ? Colors.white.withValues(alpha: 0.05)
+                                        : Colors.grey.shade50,
+                                    border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                        borderSide: BorderSide(
+                                            color: isDarkMode
+                                                ? Colors.white10
+                                                : Colors.grey.shade200)),
+                                    enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                        borderSide: BorderSide(
+                                            color: isDarkMode
+                                                ? Colors.white10
+                                                : Colors.grey.shade200)),
+                                    prefixIcon: const Icon(Icons.account_balance_wallet_rounded, color: Colors.teal),
+                                    labelStyle: TextStyle(
+                                        color: isDarkMode
+                                            ? Colors.white38
+                                            : Colors.black45),
+                                  ),
+                                  items: [
+                                    const DropdownMenuItem<String>(
+                                      value: null,
+                                      child: Text('Bukan Top-up / Bersihkan'),
+                                    ),
+                                    ...topUpSources.map((source) {
+                                      final label = source['label'] as String;
+                                      return DropdownMenuItem<String>(
+                                        value: label,
+                                        child: Row(
+                                          children: [
+                                            Icon(source['icon'] as IconData, size: 18, color: Colors.teal.shade700),
+                                            const SizedBox(width: 12),
+                                            Text(label, style: TextStyle(color: isDarkMode ? Colors.white70 : Colors.black87)),
+                                          ],
+                                        ),
+                                      );
+                                    }),
+                                  ],
+                                  onChanged: (val) {
+                                    setSheetState(() {
+                                      selectedTopUpSource = val;
+                                      if (val == null) {
+                                        nameController.clear();
+                                        selectedCategory = type == TransactionType.expense ? 'Makanan & Minuman' : 'Gaji';
+                                      } else if (val != 'Bank') {
+                                        nameController.text = 'Biaya Admin $val';
+                                        selectedCategory = 'Biaya Admin';
+                                      } else {
+                                        nameController.text = 'Biaya Admin Bank ${topUpBankName.trim()}'.trim();
+                                        selectedCategory = 'Biaya Admin';
+                                      }
+                                    });
+                                  },
+                                ),
+                                if (selectedTopUpSource == 'Bank') ...[
+                                  const SizedBox(height: 16),
+                                  TextFormField(
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: isDarkMode
+                                            ? Colors.white
+                                            : Colors.black87),
+                                    decoration: InputDecoration(
+                                      labelText: 'Nama Bank',
+                                      hintText: 'Misal: BRI, BCA, Mandiri...',
+                                      filled: true,
+                                      fillColor: isDarkMode
+                                          ? Colors.white.withValues(alpha: 0.05)
+                                          : Colors.grey.shade50,
+                                      border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(16),
+                                          borderSide: BorderSide(
+                                              color: isDarkMode
+                                                  ? Colors.white10
+                                                  : Colors.grey.shade200)),
+                                      enabledBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(16),
+                                          borderSide: BorderSide(
+                                              color: isDarkMode
+                                                  ? Colors.white10
+                                                  : Colors.grey.shade200)),
+                                      prefixIcon: const Icon(Icons.account_balance_rounded, color: Colors.teal),
+                                      labelStyle: TextStyle(
+                                          color: isDarkMode
+                                              ? Colors.white38
+                                              : Colors.black45),
+                                    ),
+                                    onChanged: (val) {
+                                      topUpBankName = val;
+                                      setSheetState(() {
+                                        nameController.text = 'Biaya Admin Bank ${val.trim()}'.trim();
+                                      });
+                                    },
+                                  ),
+                                ],
+
+                            ],
+                          ),
+                        ),
+                      ],
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 28),
                         child: Column(
@@ -1928,7 +2158,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                     letterSpacing: 1.2)),
                             const SizedBox(height: 24),
                             DropdownButtonFormField<String>(
-                              value: selectedCategory,
+                              initialValue: selectedCategory,
                               dropdownColor: isDarkMode
                                   ? AppColors.surfaceDark
                                   : Colors.white,
@@ -1951,9 +2181,11 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                             ? Colors.white10
                                             : Colors.grey.shade200)),
                                 prefixIcon: Icon(
-                                  categories.firstWhere((c) =>
-                                      c['label'] ==
-                                      selectedCategory)['icon'] as IconData,
+                                  categories.any((c) => c['label'] == selectedCategory)
+                                      ? (categories.firstWhere((c) =>
+                                          c['label'] ==
+                                          selectedCategory)['icon'] as IconData)
+                                      : Icons.more_horiz_rounded,
                                   color: Colors.teal,
                                 ),
                                 labelStyle: TextStyle(
@@ -2080,7 +2312,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                 if (sheetContext.mounted) {
                                   Navigator.pop(sheetContext);
                                 }
-                                if (mounted) {
+                                if (sheetContext.mounted && mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
                                           content: Text(
@@ -2116,6 +2348,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         );
       },
     );
+
   }
 
   Future<void> _showSavingTargetDialog(double totalBalance) async {
@@ -2279,7 +2512,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                           color: isDarkMode ? Colors.white : Colors.black87),
                       inputFormatters: [
                         FilteringTextInputFormatter.digitsOnly,
-                        _RibuanSeparatorInputFormatter(),
+                        RibuanFormatter(),
                       ],
                       decoration: InputDecoration(
                         hintText: '0',
@@ -3425,34 +3658,39 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     final color = isSelected ? AppColors.primary : const Color(0xFF94A3B8);
 
     return Expanded(
-      child: GestureDetector(
-        onTap: () => setState(() => _currentIndex = index),
-        behavior: HitTestBehavior.opaque,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? AppColors.primary.withValues(alpha: 0.1)
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(12),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => setState(() => _currentIndex = index),
+          splashColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? AppColors.primary.withValues(alpha: 0.1)
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(item.icon, color: color, size: 22),
               ),
-              child: Icon(item.icon, color: color, size: 22),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              item.label,
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-                color: color,
-                letterSpacing: 0.2,
+              const SizedBox(height: 4),
+              Text(
+                item.label,
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                  color: color,
+                  letterSpacing: 0.2,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -3468,10 +3706,12 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
   }
 
   String _formatCompactRupiah(double value) {
-    if (value >= 1000000000)
+    if (value >= 1000000000) {
       return 'Rp ${(value / 1000000000).toStringAsFixed(1)} M';
-    if (value >= 1000000)
+    }
+    if (value >= 1000000) {
       return 'Rp ${(value / 1000000).toStringAsFixed(1)} jt';
+    }
     if (value >= 1000) return 'Rp ${(value / 1000).toStringAsFixed(0)} rb';
     return _formatRupiah(value);
   }
@@ -3548,7 +3788,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                         keyboardType: TextInputType.number,
                         inputFormatters: [
                           FilteringTextInputFormatter.digitsOnly,
-                          _RibuanSeparatorInputFormatter()
+                          RibuanFormatter()
                         ],
                         style: TextStyle(
                             fontSize: 28,
@@ -3668,7 +3908,8 @@ enum _QuickActionType {
   shoppingList,
   budget,
   scanReceipt,
-  challenge
+  challenge,
+  recurring
 }
 
 class _NavItem {
@@ -3684,46 +3925,6 @@ const List<_NavItem> _navItems = [
   _NavItem(icon: Icons.receipt_long_rounded, label: 'Riwayat'),
   _NavItem(icon: Icons.person_outline_rounded, label: 'Profil'),
 ];
-
-class _RibuanSeparatorInputFormatter extends TextInputFormatter {
-  @override
-  TextEditingValue formatEditUpdate(
-      TextEditingValue oldValue, TextEditingValue newValue) {
-    if (newValue.text.isEmpty) return newValue;
-
-    // Clean for processing
-    String digitsOnly = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
-    if (digitsOnly.isEmpty) return const TextEditingValue(text: '');
-
-    // Format with dots
-    final formatted = digitsOnly.replaceAllMapped(
-      RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
-      (match) => '${match[1]}.',
-    );
-
-    // Precise cursor positioning by counting digits
-    int numDigitsBefore = newValue.selection.end -
-        newValue.text
-            .substring(0, newValue.selection.end)
-            .replaceAll(RegExp(r'[0-9]'), '')
-            .length;
-
-    int newSelectionIndex = 0;
-    int digitsCount = 0;
-    while (
-        digitsCount < numDigitsBefore && newSelectionIndex < formatted.length) {
-      if (RegExp(r'[0-9]').hasMatch(formatted[newSelectionIndex])) {
-        digitsCount++;
-      }
-      newSelectionIndex++;
-    }
-
-    return TextEditingValue(
-      text: formatted,
-      selection: TextSelection.collapsed(offset: newSelectionIndex),
-    );
-  }
-}
 
 class _CalculatorSheetContent extends ConsumerStatefulWidget {
   const _CalculatorSheetContent();

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tabunganku/core/theme/app_colors.dart';
 import 'package:tabunganku/features/settings/presentation/providers/security_provider.dart';
+import 'package:tabunganku/core/constants/app_version.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -242,7 +243,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                   ),
                   const SizedBox(height: 20),
                   const Text(
-                    'v1.4.4',
+                    AppVersion.fullVersion,
                     style: TextStyle(
                       color: AppColors.textTertiary,
                       fontSize: 14,

@@ -6,6 +6,17 @@ plugins {
     id("com.google.gms.google-services")
 }
 
+import java.util.Properties
+
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.inputStream().use { localProperties.load(it) }
+}
+
+val flutterVersionName = localProperties.getProperty("flutter.versionName") ?: "1.0.0"
+val flutterVersionCode = localProperties.getProperty("flutter.versionCode")?.toInt() ?: 1
+
 android {
     namespace = "com.tabunganku"
     compileSdk = 36
@@ -25,8 +36,8 @@ android {
         applicationId = "com.tabunganku"
         minSdk = flutter.minSdkVersion
         targetSdk = 36
-        versionCode = 142
-        versionName = "1.4.3"
+        versionCode = flutterVersionCode
+        versionName = flutterVersionName
     }
 
     buildTypes {

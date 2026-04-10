@@ -36,9 +36,41 @@ jobs:
       - name: Extract Changelog Entry
         id: changelog_reader
         run: |
-          # Extract the latest entry (from the first ## to the first ---)
-          sed -n '/^## \[.*/,/^---/p' CHANGELOG.md | sed '1d;$d' > release_note.md
+          # 1. Extract the latest entry (from the first ## to the first ---)
+          sed -n '/^## \[.*/,/^---/p' CHANGELOG.md | sed '1d;$d' > changelog_content.md
           
+          # 2. Determine Banner URL
+          TAG_NAME=${{ github.ref_name }}
+          VERSION=${TAG_NAME#v}
+          BANNER_URL="https://raw.githubusercontent.com/MuhammadIsakiPrananda1/tabunganku-mobile/main/assets/releases/$TAG_NAME.png"
+          
+          # Check if banner exists in current branch, otherwise use default
+          if [ ! -f "assets/releases/$TAG_NAME.png" ]; then
+            BANNER_URL="https://raw.githubusercontent.com/MuhammadIsakiPrananda1/tabunganku-mobile/main/assets/releases/default.png"
+          fi
+          
+          # 3. Construct Final Release Note
+          echo "![$TAG_NAME Update Banner]($BANNER_URL)" > release_note.md
+          echo "" >> release_note.md
+          echo "## 🚀 Apa yang baru di $TAG_NAME?" >> release_note.md
+          echo "" >> release_note.md
+          cat changelog_content.md >> release_note.md
+          echo "" >> release_note.md
+          echo "---" >> release_note.md
+          echo "" >> release_note.md
+          echo "### 🔧 Detail Teknis" >> release_note.md
+          echo "*   **Build**: $TAG_NAME-stable" >> release_note.md
+          echo "*   **Engine**: Flutter 3.x" >> release_note.md
+          echo "*   **OS Support**: Android 6.0+ (Marshmallow)" >> release_note.md
+          echo "*   **Environment**: Github Action Production Build" >> release_note.md
+          echo "" >> release_note.md
+          echo "---" >> release_note.md
+          echo "" >> release_note.md
+          echo "### 💖 Dukung Kami" >> release_note.md
+          echo "Jika kamu menyukai aplikasi ini, jangan ragu untuk memberikan **Star ⭐** di repository kami!" >> release_note.md
+          echo "" >> release_note.md
+          echo "Made with ❤️ by **Muhammad Isaki Prananda** & **Antigravity AI**" >> release_note.md
+
       - name: Create Release and Upload Assets
         uses: softprops/action-gh-release@v2
         with:

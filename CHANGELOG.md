@@ -4,14 +4,17 @@ Semua update dan perbaikan aplikasi **TabunganKu** terdokumentasi di sini.
 
 ---
 
-## [1.4.5] — 10 April 2026
+## [1.4.5] — 11 April 2026
 
 ### ✨ Fitur Baru
+- **Export Laporan (PDF/Text)** — Generate laporan keuangan bulanan secara instan dan bagikan dengan mudah 📥
+- **Advanced Search & Filter** — Temukan transaksi history lebih cepat dengan fitur pencarian dan filter kategori 🔍
 - **Smart Finance & Langganan** — Monitor pengeluaran rutin (Netflix, Spotify, dll) secara otomatis
 - **Estimasi Akhir Bulan** — Prediksi saldo harian berdasarkan tren pengeluaran kamu
 - **Biaya Admin Cepat** — Pilih biaya admin top-up (Bank, E-Wallet) dengan satu klik + tombol batal
 
 ### ✨ Yang Diperbaiki
+- **UI Dashboard Refresh** — Tombol export yang menyatu elegan dengan monthly header 🎨
 - **Fix Router & Dashboard Layer** — Perbaikan error dependensi Riverpod dan routing
 - **Rp Selalu Terlihat** — Simbol mata uang di form rutin sekarang selalu muncul
 

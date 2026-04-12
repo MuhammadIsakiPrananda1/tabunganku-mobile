@@ -95,6 +95,13 @@ class UserProfileNotifier extends StateNotifier<UserProfile> {
       await prefs.remove('user_name');
       name = '';
     }
+
+    if (name.isEmpty) {
+      // Generate a random user ID: user-XXXX
+      final randomId = Random().nextInt(9000) + 1000;
+      name = 'user-$randomId';
+      await prefs.setString('user_name', name);
+    }
     
     state = UserProfile(name: name, avatarIndex: avatar, colorIndex: color, photoUrl: photoUrl);
   }
@@ -158,15 +165,8 @@ class UserProfileNotifier extends StateNotifier<UserProfile> {
       await prefs.setString('user_photo_url', savedImage.path);
       state = state.copyWith(photoUrl: savedImage.path);
 
-      print("DEBUG: Foto berhasil disimpan secara lokal.");
+      print("DEBUG: Foto berhasil disimpan secara lokal dan tidak di-sync ke grup sesuai permintaan.");
       
-      // Sync ke Firestore grup (opsional, karena path lokal tidak berguna buat orang lain)
-      // Tapi kita kirim saja agar field di Firestore terupdate (atau biarkan kosong jika ingin orang lain tidak melihat path lokal kita)
-      final groupId = ref.read(userGroupIdProvider);
-      if (groupId != null && groupId.isNotEmpty) {
-        await ref.read(familyGroupServiceProvider).updateMemberPhoto(userName, savedImage.path);
-      }
-
       return savedImage.path;
     } catch (e) {
       print("CRITICAL ERROR: Gagal simpan foto ke lokal: $e");
@@ -175,6 +175,29 @@ class UserProfileNotifier extends StateNotifier<UserProfile> {
   }
 
   Future<void> setName(String name) => updateProfile(name: name);
+
+  /// Menghapus foto profil kustom dan kembali ke default siluet
+  Future<void> deletePhoto() async {
+    try {
+      // Hapus file fisik jika ada
+      if (state.photoUrl != null && state.photoUrl!.startsWith('/')) {
+        final file = File(state.photoUrl!);
+        if (await file.exists()) {
+          await file.delete();
+        }
+      }
+
+      // Hapus dari SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('user_photo_url');
+
+      // Update state
+      state = state.copyWith(clearPhoto: true);
+      print("DEBUG: Foto profil berhasil dihapus.");
+    } catch (e) {
+      print("ERROR: Gagal menghapus foto profil: $e");
+    }
+  }
 }
 
 // User Group ID Provider (Locally Stored in SharedPreferences)

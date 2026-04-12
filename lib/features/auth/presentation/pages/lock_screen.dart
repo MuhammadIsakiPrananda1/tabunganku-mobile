@@ -132,10 +132,11 @@ class _LockScreenState extends ConsumerState<LockScreen> with TickerProviderStat
                     : Image.file(File(profile.photoUrl!), fit: BoxFit.cover))
                 : Container(
                     color: AppColors.primary.withValues(alpha: 0.1),
-                    child: Center(
-                      child: Text(
-                        profile.name.isNotEmpty ? profile.name[0].toUpperCase() : '?',
-                        style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: AppColors.primary),
+                    child: const Center(
+                      child: Icon(
+                        Icons.person,
+                        size: 48,
+                        color: AppColors.primary,
                       ),
                     ),
                   ),
@@ -147,7 +148,7 @@ class _LockScreenState extends ConsumerState<LockScreen> with TickerProviderStat
           style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
         ),
         Text(
-          profile.name.isNotEmpty ? profile.name : 'Pengguna TabunganKu',
+          profile.name,
           style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.primaryDark),
         ),
       ],

@@ -10,6 +10,7 @@ import 'package:tabunganku/features/home/presentation/pages/saving_simulator_pag
 import 'package:tabunganku/features/transaction/presentation/pages/scan_receipt_page.dart';
 import 'package:tabunganku/features/challenge/presentation/pages/challenge_page.dart';
 import 'package:tabunganku/features/budget/presentation/pages/monthly_budget_page.dart';
+import 'package:tabunganku/features/home/presentation/pages/zakat_page.dart';
 final appRouterProvider = Provider((ref) {
   return GoRouter(
     initialLocation: '/splash',
@@ -74,6 +75,13 @@ final appRouterProvider = Provider((ref) {
         path: '/monthly-budget',
         name: 'monthly-budget',
         builder: (context, state) => const MonthlyBudgetPage(),
+      ),
+
+      // Zakat & Infaq Page
+      GoRoute(
+        path: '/zakat',
+        name: 'zakat',
+        builder: (context, state) => const ZakatPage(),
       ),
 
       // Catch-all redirect to splash

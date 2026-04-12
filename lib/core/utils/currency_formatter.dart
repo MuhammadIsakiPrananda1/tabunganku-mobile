@@ -12,14 +12,9 @@ class RibuanFormatter extends TextInputFormatter {
     String digitsOnly = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
     if (digitsOnly.isEmpty) return const TextEditingValue(text: '');
 
-    // Tambahkan titik setiap 3 digit dari belakang
-    final formatted = digitsOnly.replaceAllMapped(
-      RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
-      (match) => '${match[1]}.',
-    );
+    final formatted = formatNumber(digitsOnly);
 
     // Hitung posisi kursor agar tetap di belakang angka yang baru diketik
-    // Caranya dengan menghitung jumlah digit murni sebelum kursor di input lama
     int numDigitsBefore = newValue.selection.end -
         newValue.text
             .substring(0, newValue.selection.end)
@@ -39,6 +34,17 @@ class RibuanFormatter extends TextInputFormatter {
     return TextEditingValue(
       text: formatted,
       selection: TextSelection.collapsed(offset: newSelectionIndex),
+    );
+  }
+
+  /// Memformat angka (String atau int) menjadi pemisah ribuan
+  static String formatNumber(dynamic value) {
+    if (value == null) return '0';
+    String digitsOnly = value.toString().replaceAll(RegExp(r'[^0-9]'), '');
+    if (digitsOnly.isEmpty) return '0';
+    return digitsOnly.replaceAllMapped(
+      RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
+      (match) => '${match[1]}.',
     );
   }
 }

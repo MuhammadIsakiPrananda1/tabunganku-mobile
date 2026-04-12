@@ -27,6 +27,9 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
   bool _isFabExtended = true;
   Timer? _hideTimer;
   bool _isLoading = false;
+  
+  // Inline feedback state
+  String? _joinError;
 
   @override
   void initState() {
@@ -83,13 +86,16 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
       return;
     }
 
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+      _joinError = null;
+    });
     try {
       await ref.read(familyGroupServiceProvider).joinGroup(code);
       _joinCodeController.clear();
       _showSuccess('Berhasil bergabung ke keluarga!');
     } catch (e) {
-      _showError(e.toString().replaceAll("Exception: ", ""));
+      setState(() => _joinError = e.toString().replaceAll("Exception: ", ""));
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -106,6 +112,7 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) {
+        String? createError;
         bool isCreating = false;
         final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark || (ref.watch(themeProvider) == ThemeMode.system && Theme.of(context).brightness == Brightness.dark);
         return StatefulBuilder(builder: (context, setModalState) {
@@ -163,14 +170,19 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
                     onPressed: isCreating ? null : () async {
                       final name = _createGroupController.text.trim();
                       if (name.isEmpty) return;
-                      setModalState(() => isCreating = true);
+                      setModalState(() {
+                        isCreating = true;
+                        createError = null;
+                      });
                       try {
                         await ref.read(familyGroupServiceProvider).createGroup(name);
                         _createGroupController.clear();
                         if (context.mounted) Navigator.pop(context);
                         _showSuccess('Keluarga baru berhasil dibuat!');
                       } catch (e) {
-                        if (context.mounted) _showError(e.toString().replaceAll("Exception: ", ""));
+                        setModalState(() {
+                          createError = e.toString().replaceAll("Exception: ", "");
+                        });
                       } finally {
                         if (mounted) setModalState(() => isCreating = false);
                       }
@@ -354,7 +366,7 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
                   const SizedBox(height: 12),
                   
                   DropdownButtonFormField<String>(
-                    initialValue: selectedCategory,
+                    value: selectedCategory,
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: isDarkMode ? Colors.white.withValues(alpha: 0.05) : AppColors.background,
@@ -614,57 +626,8 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
           }
           return _buildGroupDashboard(group, userName);
         },
-        loading: () => const Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CircularProgressIndicator(color: AppColors.primary),
-              SizedBox(height: 16),
-              Text('Menghubungkan ke Cloud...', style: TextStyle(color: Colors.grey)),
-            ],
-          ),
-        ),
-        error: (e, st) => Container(
-          padding: const EdgeInsets.all(24),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.error_outline_rounded, color: Colors.redAccent, size: 64),
-                const SizedBox(height: 16),
-                const Text(
-                  'Koneksi Gagal',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'Terjadi kesalahan saat memuat data keluarga. Pastikan internet aktif atau cek aturan Firestore Anda.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.grey.shade600),
-                ),
-                const SizedBox(height: 24),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.red.withValues(alpha: 0.05),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    'Detail: $e',
-                    style: const TextStyle(fontSize: 10, color: Colors.redAccent, fontFamily: 'monospace'),
-                  ),
-                ),
-                const SizedBox(height: 32),
-                ElevatedButton.icon(
-                  onPressed: () => ref.invalidate(familyGroupStreamProvider),
-                  icon: const Icon(Icons.refresh_rounded),
-                  label: const Text('Coba Lagi'),
-                  style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
-                ),
-              ],
-            ),
-          ),
-        ),
+        loading: () => _buildPremiumLoading(isDarkMode),
+        error: (e, st) => _buildPremiumError(e.toString(), isDarkMode),
       ),
       floatingActionButton: (groupId != null && groupId.isNotEmpty)
           ? groupAsync.when(
@@ -673,6 +636,202 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
               error: (_, __) => const SizedBox(),
             )
           : null,
+    );
+  }
+
+  Widget _buildPremiumLoading(bool isDarkMode) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0.0, end: 1.0),
+                duration: const Duration(seconds: 2),
+                builder: (context, value, child) {
+                  return Container(
+                    width: 100 + (20 * value),
+                    height: 100 + (20 * value),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.primary.withValues(alpha: 0.1 * (1.0 - value)),
+                    ),
+                  );
+                },
+                onEnd: () {},
+              ),
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withValues(alpha: 0.2),
+                      blurRadius: 20,
+                      spreadRadius: 5,
+                    ),
+                  ],
+                ),
+                child: const Padding(
+                  padding: EdgeInsets.all(20.0),
+                  child: CircularProgressIndicator(
+                    strokeWidth: 3,
+                    valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                  ),
+                ),
+              ),
+              Icon(Icons.cloud_sync_rounded, color: AppColors.primary.withValues(alpha: 0.4), size: 24),
+            ],
+          ),
+          const SizedBox(height: 32),
+          Text(
+            'Menghubungkan ke Cloud',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: isDarkMode ? Colors.white70 : Colors.black54,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: const Text(
+              'Sinkronisasi Data Keluarga...',
+              style: TextStyle(
+                fontSize: 10,
+                color: AppColors.primary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPremiumError(String error, bool isDarkMode) {
+    bool isNoInternet = error.toLowerCase().contains('connection') || 
+                       error.toLowerCase().contains('network') ||
+                       error.toLowerCase().contains('offline');
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(32),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 140,
+              height: 140,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Colors.redAccent.withValues(alpha: 0.2),
+                    Colors.orangeAccent.withValues(alpha: 0.1),
+                  ],
+                ),
+              ),
+              child: Center(
+                child: Container(
+                  width: 100,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.redAccent.withValues(alpha: 0.2),
+                        blurRadius: 30,
+                        spreadRadius: 5,
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    isNoInternet ? Icons.wifi_off_rounded : Icons.cloud_off_rounded,
+                    size: 48,
+                    color: Colors.redAccent,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 40),
+            Text(
+              isNoInternet ? 'Koneksi Terputus' : 'Gagal Terhubung',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: isDarkMode ? Colors.white : AppColors.primaryDark,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              isNoInternet 
+                ? 'Ups! Sepertinya aplikasi kehilangan koneksi internet. Pastikan WiFi atau Data Seluler kamu aktif ya.'
+                : 'Terjadi kesalahan saat mencoba memuat data keluarga kamu dari cloud.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 15,
+                color: isDarkMode ? Colors.white38 : Colors.grey.shade600,
+                height: 1.5,
+              ),
+            ),
+            const SizedBox(height: 48),
+            ElevatedButton(
+              onPressed: () => ref.invalidate(familyGroupStreamProvider),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 18),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                elevation: 8,
+                shadowColor: AppColors.primary.withValues(alpha: 0.5),
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.refresh_rounded, size: 20),
+                  SizedBox(width: 12),
+                  Text(
+                    'Coba Lagi',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 32),
+            if (!isNoInternet)
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: isDarkMode ? Colors.white.withValues(alpha: 0.02) : Colors.black.withValues(alpha: 0.02),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.redAccent.withValues(alpha: 0.1)),
+                ),
+                child: Text(
+                  'Detail: $error',
+                  style: TextStyle(
+                    fontSize: 9,
+                    color: Colors.redAccent.withValues(alpha: 0.6),
+                    fontFamily: 'monospace',
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -839,6 +998,7 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, letterSpacing: 2, color: isDarkMode ? Colors.white : Colors.black),
                   decoration: InputDecoration(
                     hintText: 'Ketik Kode',
+                    errorText: _joinError,
                     hintStyle: TextStyle(fontWeight: FontWeight.normal, fontSize: 16, letterSpacing: 0, color: isDarkMode ? Colors.white12 : Colors.grey.shade400),
                     filled: true,
                     fillColor: isDarkMode ? Colors.white.withValues(alpha: 0.05) : AppColors.background,
@@ -1140,22 +1300,12 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
                                       photoUrl,
                                       fit: BoxFit.cover,
                                       errorBuilder: (_, __, ___) => Container(
-                                        color: isCurrentUser
-                                            ? AppColors.primary
-                                            : (isDarkMode
-                                                ? Colors.white.withValues(alpha: 0.07)
-                                                : Colors.grey.shade200),
+                                        color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : const Color(0xFFE9EDEF),
                                         child: Center(
-                                          child: Text(
-                                            member.substring(0, 1).toUpperCase(),
-                                            style: TextStyle(
-                                              color: isCurrentUser
-                                                  ? Colors.white
-                                                  : (isDarkMode
-                                                      ? Colors.white70
-                                                      : Colors.grey.shade700),
-                                              fontWeight: FontWeight.bold,
-                                            ),
+                                          child: Icon(
+                                            Icons.person,
+                                            size: 28,
+                                            color: isDarkMode ? Colors.white24 : const Color(0xFF919191),
                                           ),
                                         ),
                                       ),
@@ -1165,22 +1315,12 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
                                       File(photoUrl),
                                       fit: BoxFit.cover,
                                       errorBuilder: (_, __, ___) => Container(
-                                        color: isCurrentUser
-                                            ? AppColors.primary
-                                            : (isDarkMode
-                                                ? Colors.white.withValues(alpha: 0.07)
-                                                : Colors.grey.shade200),
+                                        color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : const Color(0xFFE9EDEF),
                                         child: Center(
-                                          child: Text(
-                                            member.substring(0, 1).toUpperCase(),
-                                            style: TextStyle(
-                                              color: isCurrentUser
-                                                  ? Colors.white
-                                                  : (isDarkMode
-                                                      ? Colors.white70
-                                                      : Colors.grey.shade700),
-                                              fontWeight: FontWeight.bold,
-                                            ),
+                                          child: Icon(
+                                            Icons.person,
+                                            size: 28,
+                                            color: isDarkMode ? Colors.white24 : const Color(0xFF919191),
                                           ),
                                         ),
                                       ),
@@ -1189,23 +1329,12 @@ class _FamilyGroupPageState extends ConsumerState<FamilyGroupPage> {
                                 },
                               )
                             : Container(
-                                color: isCurrentUser
-                                    ? AppColors.primary
-                                    : (isDarkMode
-                                        ? Colors.white.withValues(alpha: 0.07)
-                                        : Colors.grey.shade200),
+                                color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : const Color(0xFFE9EDEF),
                                 child: Center(
-                                  child: Text(
-                                    member.substring(0, 1).toUpperCase(),
-                                    style: TextStyle(
-                                      color: isCurrentUser
-                                          ? Colors.white
-                                          : (isDarkMode
-                                              ? Colors.white70
-                                              : Colors.grey.shade700),
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                    ),
+                                  child: Icon(
+                                    Icons.person,
+                                    size: 28,
+                                    color: isDarkMode ? Colors.white24 : const Color(0xFF919191),
                                   ),
                                 ),
                               ),

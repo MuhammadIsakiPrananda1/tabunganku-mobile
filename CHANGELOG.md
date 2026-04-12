@@ -7,10 +7,14 @@ Semua update dan perbaikan aplikasi **TabunganKu** terdokumentasi di sini.
 ## [1.4.5] — 11 April 2026
 
 ### ✨ Fitur Baru
+- **Social & Community Links** — Akses langsung ke Instagram & GitHub Developer dari halaman Settings 🌐
+- **Zakat & Infaq Page** — Kalkulator zakat profesi, maal, dan fitrah yang terintegrasi langsung dengan catatan transaksi ✨
+- **Premium Scan Experience** — Animasi Laser Scan AI + Smart Auto-fill merchant & nominal dari bukti transfer 📸
+- **Smart Allocation Helper** — Kalkulator alokasi pintar (50/30/20 & Zakat) otomatis saat input pemasukan
+- **Estimasi Akhir Bulan** — Prediksi saldo harian berdasarkan tren pengeluaran kamu
 - **Export Laporan (PDF/Text)** — Generate laporan keuangan bulanan secara instan dan bagikan dengan mudah 📥
 - **Advanced Search & Filter** — Temukan transaksi history lebih cepat dengan fitur pencarian dan filter kategori 🔍
 - **Smart Finance & Langganan** — Monitor pengeluaran rutin (Netflix, Spotify, dll) secara otomatis
-- **Estimasi Akhir Bulan** — Prediksi saldo harian berdasarkan tren pengeluaran kamu
 - **Biaya Admin Cepat** — Pilih biaya admin top-up (Bank, E-Wallet) dengan satu klik + tombol batal
 
 ### ✨ Yang Diperbaiki

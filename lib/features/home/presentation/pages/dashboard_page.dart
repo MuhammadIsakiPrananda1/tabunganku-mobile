@@ -31,7 +31,6 @@ import 'package:tabunganku/core/constants/app_constants.dart';
 import 'package:tabunganku/core/utils/currency_formatter.dart';
 import 'package:tabunganku/core/services/export_service.dart';
 
-
 class DashboardPage extends ConsumerStatefulWidget {
   const DashboardPage({super.key});
 
@@ -102,7 +101,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
 
   @override
   Widget build(BuildContext context) {
-    final activeUserId = 'default_user';
+    const activeUserId = 'default_user';
     if (_loadedUserId != activeUserId) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _loadLocalData();
@@ -155,9 +154,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                             .format(_currentTime),
                         style: TextStyle(
                             fontSize: 12,
-                            color: isDarkMode
-                                ? Colors.white70
-                                : Colors.teal.shade700,
+                            color: isDarkMode ? Colors.white70 : Colors.teal,
                             fontWeight: FontWeight.normal),
                       ),
                     ),
@@ -246,11 +243,12 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                             end: Alignment.bottomRight,
                             colors: [AppColors.primaryLight, AppColors.primary],
                           ),
-                          boxShadow: [
+                          boxShadow: const [
                             BoxShadow(
-                              color: AppColors.primary.withValues(alpha: 0.3),
+                              color: Color(
+                                  0x4D00BFA5), // AppColors.primary with alpha 0.3
                               blurRadius: 15,
-                              offset: const Offset(0, 6),
+                              offset: Offset(0, 6),
                             ),
                           ],
                           border: Border.all(
@@ -261,7 +259,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Text(
+                    const Text(
                       'Kalkulator',
                       style: TextStyle(
                         color: AppColors.primary,
@@ -283,11 +281,11 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
   // Notifikasi sudah diinisialisasi di main.dart
 
   Future<void> _loadLocalData() async {
-    final userId = 'default_user';
+    const userId = 'default_user';
     final prefs = await SharedPreferences.getInstance();
 
     // Migration logic for old single-target data
-    final migrationKey =
+    const migrationKey =
         'migration_saving_target_v3_done_$userId'; // Use v3 to be sure
     if (prefs.getBool(migrationKey) != true) {
       final oldAmount = prefs.getString('saving_target_amount_$userId');
@@ -516,29 +514,38 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                       Builder(
                         builder: (context) {
                           final now = DateTime.now();
-                          final totalDays = DateTime(now.year, now.month + 1, 0).day;
+                          final totalDays =
+                              DateTime(now.year, now.month + 1, 0).day;
                           final day = now.day;
-                          
+
                           // Linear extrapolation (Min 1 day to avoid div by zero)
                           final currentDay = day > 0 ? day : 1;
-                          final estIncome = (totalIncome / currentDay) * totalDays;
-                          final estExpense = (totalExpense / currentDay) * totalDays;
+                          final estIncome =
+                              (totalIncome / currentDay) * totalDays;
+                          final estExpense =
+                              (totalExpense / currentDay) * totalDays;
                           final estBalance = estIncome - estExpense;
                           final isDanger = estBalance < 0;
 
                           return Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 14, vertical: 8),
                             decoration: BoxDecoration(
-                              color: isDanger 
-                                ? Colors.red.withValues(alpha: 0.1) 
-                                : (isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.teal.shade50.withValues(alpha: 0.3)),
+                              color: isDanger
+                                  ? Colors.red.withValues(alpha: 0.1)
+                                  : (isDarkMode
+                                      ? Colors.white.withValues(alpha: 0.05)
+                                      : Colors.teal.shade50
+                                          .withValues(alpha: 0.3)),
                               borderRadius: BorderRadius.circular(16),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Icon(
-                                  isDanger ? Icons.warning_amber_rounded : Icons.auto_graph_rounded,
+                                  isDanger
+                                      ? Icons.warning_amber_rounded
+                                      : Icons.auto_graph_rounded,
                                   size: 14,
                                   color: isDanger ? Colors.red : Colors.teal,
                                 ),
@@ -548,15 +555,24 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                   style: TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w500,
-                                    color: isDarkMode ? Colors.white38 : Colors.teal.shade900.withValues(alpha: 0.5),
+                                    color: isDarkMode
+                                        ? Colors.white38
+                                        : Colors.teal.shade900
+                                            .withValues(alpha: 0.5),
                                   ),
                                 ),
                                 Text(
-                                  _showBalance ? _formatRupiah(estBalance) : '••••••',
+                                  _showBalance
+                                      ? _formatRupiah(estBalance)
+                                      : '••••••',
                                   style: TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.bold,
-                                    color: isDanger ? Colors.red : (isDarkMode ? Colors.white70 : Colors.teal.shade900),
+                                    color: isDanger
+                                        ? Colors.red
+                                        : (isDarkMode
+                                            ? Colors.white70
+                                            : Colors.teal.shade900),
                                   ),
                                 ),
                               ],
@@ -620,16 +636,30 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             crossAxisSpacing: 0,
             childAspectRatio: 0.85,
             children: [
-              _buildToolAction(Icons.add_circle_outline_rounded, 'Pemasukan', _QuickActionType.income),
-              _buildToolAction(Icons.remove_circle_outline_rounded, 'Pengeluaran', _QuickActionType.expense),
-              _buildToolAction(Icons.account_balance_wallet_rounded, 'Budget', _QuickActionType.budget),
-              _buildToolAction(Icons.auto_stories_rounded, 'Hutang/Piutang', _QuickActionType.debt),
-              _buildToolAction(Icons.family_restroom_rounded, 'Keluarga', _QuickActionType.family),
-              _buildToolAction(Icons.shopping_cart_outlined, 'Belanja', _QuickActionType.shoppingList),
-              _buildToolAction(Icons.document_scanner_rounded, 'Scan Bukti', _QuickActionType.scanReceipt),
-              _buildToolAction(Icons.emoji_events_rounded, 'Challenge', _QuickActionType.challenge),
-              _buildToolAction(Icons.track_changes_rounded, 'Target', _QuickActionType.savingTarget),
-              _buildToolAction(Icons.loop_rounded, 'Langganan', _QuickActionType.recurring),
+              _buildToolAction(Icons.add_circle_outline_rounded, 'Pemasukan',
+                  _QuickActionType.income),
+              _buildToolAction(Icons.remove_circle_outline_rounded,
+                  'Pengeluaran', _QuickActionType.expense),
+              _buildToolAction(Icons.account_balance_wallet_rounded, 'Budget',
+                  _QuickActionType.budget),
+              _buildToolAction(Icons.auto_stories_rounded, 'Hutang/Piutang',
+                  _QuickActionType.debt),
+              _buildToolAction(Icons.family_restroom_rounded, 'Keluarga',
+                  _QuickActionType.family),
+              _buildToolAction(Icons.shopping_cart_outlined, 'Belanja',
+                  _QuickActionType.shoppingList),
+              _buildToolAction(Icons.document_scanner_rounded, 'Scan Bukti',
+                  _QuickActionType.scanReceipt),
+              _buildToolAction(Icons.emoji_events_rounded, 'Challenge',
+                  _QuickActionType.challenge),
+              _buildToolAction(Icons.track_changes_rounded, 'Target',
+                  _QuickActionType.savingTarget),
+              _buildToolAction(
+                  Icons.loop_rounded, 'Langganan', _QuickActionType.recurring),
+              _buildToolAction(Icons.volunteer_activism_rounded, 'Zakat/Infaq',
+                  _QuickActionType.zakat),
+              _buildToolAction(Icons.calculate_outlined, 'Simulasi',
+                  _QuickActionType.simulator),
             ],
           ),
 
@@ -992,14 +1022,18 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     Color iconColor = AppColors.primary;
     if (type == _QuickActionType.income) iconColor = Colors.green.shade400;
     if (type == _QuickActionType.expense) iconColor = Colors.red.shade400;
-    if (type == _QuickActionType.savingTarget) iconColor = Colors.amber.shade500;
+    if (type == _QuickActionType.savingTarget)
+      iconColor = Colors.amber.shade500;
     if (type == _QuickActionType.budget) iconColor = Colors.cyan.shade400;
     if (type == _QuickActionType.debt) iconColor = Colors.orange.shade500;
     if (type == _QuickActionType.family) iconColor = Colors.blue.shade500;
-    if (type == _QuickActionType.shoppingList) iconColor = Colors.purple.shade300;
+    if (type == _QuickActionType.shoppingList)
+      iconColor = Colors.purple.shade300;
     if (type == _QuickActionType.scanReceipt) {
       iconColor = Colors.tealAccent.shade700;
     }
+    if (type == _QuickActionType.zakat) iconColor = Colors.teal.shade400;
+    if (type == _QuickActionType.simulator) iconColor = Colors.cyan.shade600;
 
     return GestureDetector(
       onTap: () => _handleQuickActionTap(
@@ -1013,7 +1047,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: isDarkMode ? 0.2 : 0.04),
+                  color:
+                      Colors.black.withValues(alpha: isDarkMode ? 0.2 : 0.04),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
@@ -1096,8 +1131,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: Colors.white
-                      .withValues(alpha: isDarkMode ? 0.05 : 0.01),
+                  color:
+                      Colors.white.withValues(alpha: isDarkMode ? 0.05 : 0.01),
                 ),
               ),
               child: Row(
@@ -1106,7 +1141,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: catColor.withValues(alpha: isDarkMode ? 0.2 : 0.08),
+                      color:
+                          catColor.withValues(alpha: isDarkMode ? 0.2 : 0.08),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(catIcon, color: catColor, size: 18),
@@ -1141,7 +1177,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
                       color: isExpense
-                          ? (isDarkMode ? Colors.redAccent : Colors.red.shade700)
+                          ? (isDarkMode
+                              ? Colors.redAccent
+                              : Colors.red.shade700)
                           : (isDarkMode
                               ? Colors.greenAccent
                               : Colors.green.shade700),
@@ -1258,8 +1296,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(32),
                           border: Border.all(
-                            color: Colors.white.withValues(
-                                alpha: isDarkMode ? 0.05 : 0.01),
+                            color: Colors.white
+                                .withValues(alpha: isDarkMode ? 0.05 : 0.01),
                           ),
                         ),
                         child: Column(
@@ -1320,12 +1358,13 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                           ? Colors.white.withValues(alpha: 0.05)
                                           : Colors.teal.shade50),
                                   AnimatedContainer(
-                                    duration: const Duration(milliseconds: 1200),
+                                    duration:
+                                        const Duration(milliseconds: 1200),
                                     curve: Curves.easeOutBack,
                                     height: 12,
-                                    width:
-                                        (MediaQuery.of(context).size.width - 88) *
-                                            progress,
+                                    width: (MediaQuery.of(context).size.width -
+                                            88) *
+                                        progress,
                                     decoration: BoxDecoration(
                                       gradient: LinearGradient(
                                         colors: progress >= 1.0
@@ -1345,7 +1384,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                                   ? Colors.greenAccent
                                                   : AppColors.primary)
                                               .withValues(
-                                                  alpha: isDarkMode ? 0.2 : 0.4),
+                                                  alpha:
+                                                      isDarkMode ? 0.2 : 0.4),
                                           blurRadius: progress >= 1.0 ? 15 : 10,
                                           offset: const Offset(0, 2),
                                         ),
@@ -1508,6 +1548,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             builder: (context) => const RecurringListPage(),
           ),
         );
+        break;
+      case _QuickActionType.zakat:
+        context.push('/zakat');
         break;
     }
   }
@@ -1801,11 +1844,97 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     );
   }
 
+  Widget _buildSmartAllocationPlanner(double amount, bool isDarkMode) {
+    if (amount <= 0) return const SizedBox.shrink();
+
+    final needs = amount * 0.5;
+    final wants = amount * 0.3;
+    final savings = amount * 0.2;
+    final zakat = amount * 0.025;
+
+    Widget allocationChip(
+        String label, double val, Color color, IconData icon) {
+      return Container(
+        margin: const EdgeInsets.only(right: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: isDarkMode ? 0.15 : 0.08),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: color.withValues(alpha: 0.2)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 14, color: color),
+            const SizedBox(width: 8),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(label,
+                    style: TextStyle(
+                        fontSize: 9,
+                        fontWeight: FontWeight.bold,
+                        color: isDarkMode ? Colors.white38 : Colors.black38)),
+                Text(_formatRupiah(val),
+                    style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: isDarkMode ? Colors.white70 : Colors.black87)),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 24),
+        Row(
+          children: [
+            Icon(Icons.auto_awesome_rounded,
+                size: 14, color: Colors.amber.shade600),
+            const SizedBox(width: 8),
+            Text('ALOKASI CERDAS (50/30/20)',
+                style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: isDarkMode
+                        ? Colors.white24
+                        : Colors.teal.shade800.withValues(alpha: 0.4),
+                    letterSpacing: 1.2)),
+          ],
+        ),
+        const SizedBox(height: 16),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          physics: const BouncingScrollPhysics(),
+          child: Row(
+            children: [
+              allocationChip(
+                  'Kebutuhan (50%)', needs, Colors.blue, Icons.home_rounded),
+              allocationChip('Keinginan (30%)', wants, Colors.orange,
+                  Icons.shopping_bag_rounded),
+              allocationChip('Tabungan (20%)', savings, Colors.green,
+                  Icons.savings_rounded),
+              allocationChip('Zakat (2.5%)', zakat, Colors.purple,
+                  Icons.volunteer_activism_rounded),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   Future<void> _showManualTransactionSheet(TransactionType type) async {
     final amountController = TextEditingController();
     final nameController = TextEditingController();
     final customCategoryController = TextEditingController();
-    var selectedCategory = type == TransactionType.expense ? 'Makanan & Minuman' : 'Gaji';
+    final formKey = GlobalKey<FormState>();
+    var selectedCategory =
+        type == TransactionType.expense ? 'Makanan & Minuman' : 'Gaji';
     var noteText = '';
     String? selectedTopUpSource;
     String topUpBankName = '';
@@ -1828,12 +1957,18 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         : [
             {'label': 'Makanan & Minuman', 'icon': Icons.restaurant_rounded},
             {'label': 'Transportasi', 'icon': Icons.directions_bus_rounded},
-            {'label': 'Belanja & Keperluan', 'icon': Icons.shopping_bag_rounded},
+            {
+              'label': 'Belanja & Keperluan',
+              'icon': Icons.shopping_bag_rounded
+            },
             {'label': 'Tagihan', 'icon': Icons.receipt_rounded},
             {'label': 'Hiburan', 'icon': Icons.movie_rounded},
             {'label': 'Kesehatan', 'icon': Icons.medical_services_rounded},
             {'label': 'Pendidikan', 'icon': Icons.school_rounded},
-            {'label': 'Zakat & Donasi', 'icon': Icons.volunteer_activism_rounded},
+            {
+              'label': 'Zakat & Donasi',
+              'icon': Icons.volunteer_activism_rounded
+            },
             {'label': 'Cicilan', 'icon': Icons.credit_card_rounded},
             {'label': 'Pulsa & Data', 'icon': Icons.tap_and_play_rounded},
             {'label': 'Biaya Admin', 'icon': Icons.account_balance_rounded},
@@ -1848,8 +1983,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       {'label': 'ShopeePay', 'icon': Icons.account_balance_wallet_rounded},
       {'label': 'LinkAja', 'icon': Icons.account_balance_wallet_rounded},
     ];
-
-
 
     await showModalBottomSheet<void>(
       context: context,
@@ -1872,127 +2005,141 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 duration: const Duration(milliseconds: 180),
                 curve: Curves.easeOut,
                 padding: EdgeInsets.only(bottom: inset),
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 12),
-                      Center(
-                        child: Container(
-                          width: 40,
-                          height: 4,
-                          decoration: BoxDecoration(
-                            color: isDarkMode
-                                ? Colors.white10
-                                : Colors.grey.shade300,
-                            borderRadius: BorderRadius.circular(2),
+                child: Form(
+                  key: formKey,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 12),
+                        Center(
+                          child: Container(
+                            width: 40,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: isDarkMode
+                                  ? Colors.white10
+                                  : Colors.grey.shade300,
+                              borderRadius: BorderRadius.circular(2),
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 20),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 28),
-                        child: Center(
-                          child: Text(
-                            type == TransactionType.expense
-                                ? 'Catat Pengeluaran'
-                                : 'Tambah Pemasukan',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 22,
-                                color: isDarkMode
-                                    ? Colors.white
-                                    : Colors.teal.shade900),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 28),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text(
-                              'Rp',
+                        const SizedBox(height: 20),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 28),
+                          child: Center(
+                            child: Text(
+                              type == TransactionType.expense
+                                  ? 'Catat Pengeluaran'
+                                  : 'Tambah Pemasukan',
+                              textAlign: TextAlign.center,
                               style: TextStyle(
-                                fontSize:
-                                    amountController.text.length > 10 ? 24 : 32,
-                                fontWeight: FontWeight.bold,
-                                color: type == TransactionType.income
-                                    ? (isDarkMode
-                                        ? Colors.greenAccent.shade200
-                                        : Colors.green.shade200)
-                                    : (isDarkMode
-                                        ? Colors.redAccent.shade100
-                                        : Colors.red.shade200),
-                              ),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 22,
+                                  color: isDarkMode
+                                      ? Colors.white
+                                      : Colors.teal.shade900),
                             ),
-                            Expanded(
-                              child: TextFormField(
-                                controller: amountController,
-                                autofocus: true,
-                                keyboardType: TextInputType.number,
-                                textAlign: TextAlign.left,
-                                style: TextStyle(
-                                    fontSize: amountController.text.length > 18
-                                        ? 24
-                                        : amountController.text.length > 14
-                                            ? 32
-                                            : amountController.text.length > 10
-                                                ? 40
-                                                : 48,
-                                    fontWeight: FontWeight.bold,
-                                    color: type == TransactionType.income
-                                        ? (isDarkMode
-                                            ? Colors.greenAccent.shade400
-                                            : Colors.green.shade700)
-                                        : (isDarkMode
-                                            ? Colors.redAccent.shade200
-                                            : Colors.red.shade700),
-                                    letterSpacing: -1.5),
-                                inputFormatters: [
-                                  FilteringTextInputFormatter.digitsOnly,
-                                  RibuanFormatter(),
-                                ],
-                                onChanged: (val) => setSheetState(() {}),
-                                decoration: InputDecoration(
-                                  hintText: '0',
-                                  hintStyle: TextStyle(
-                                      fontSize: 45,
-                                      fontWeight: FontWeight.bold,
-                                      color: isDarkMode
-                                          ? Colors.white10
-                                          : Colors.teal.shade50),
-                                  border: InputBorder.none,
-                                  contentPadding:
-                                      const EdgeInsets.symmetric(vertical: 8),
-                                ),
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
-                      ),
-                      if (type == TransactionType.expense) ...[
                         const SizedBox(height: 12),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 28),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('BIAYA ADMIN TOP-UP (CEPAT)',
-                                  style: TextStyle(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                      color: isDarkMode
-                                          ? Colors.white24
-                                          : Colors.teal.shade800
-                                              .withValues(alpha: 0.4),
-                                      letterSpacing: 1.2)),
-                              const SizedBox(height: 12),
-                               DropdownButtonFormField<String>(
+                          child: TextFormField(
+                            controller: amountController,
+                            autofocus: true,
+                            keyboardType: TextInputType.number,
+                            textAlign: TextAlign.left,
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: isDarkMode
+                                  ? Colors.white
+                                  : AppColors.primaryDark,
+                            ),
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                              RibuanFormatter(),
+                            ],
+                            onChanged: (val) => setSheetState(() {}),
+                            decoration: InputDecoration(
+                              hintText: '0',
+                              hintStyle: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: isDarkMode
+                                    ? Colors.white10
+                                    : Colors.teal.shade50,
+                              ),
+                              prefixIcon: Container(
+                                padding:
+                                    const EdgeInsets.only(left: 20, right: 8),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.payments_rounded,
+                                      color: type == TransactionType.income
+                                          ? AppColors.success
+                                          : AppColors.error,
+                                      size: 20,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Rp',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: type == TransactionType.income
+                                            ? AppColors.success
+                                            : AppColors.error,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              filled: true,
+                              fillColor: isDarkMode
+                                  ? Colors.white.withValues(alpha: 0.05)
+                                  : AppColors.background,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: BorderSide.none,
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 16),
+                            ),
+                            validator: (val) {
+                              if (val == null || val.trim().isEmpty) {
+                                return 'Nominal tidak boleh kosong!';
+                              }
+                              final amount = _toAmount(val);
+                              if (amount == null || amount <= 0) {
+                                return 'Nominal transaksi tidak valid.';
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                        if (type == TransactionType.expense) ...[
+                          const SizedBox(height: 12),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 28),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('BIAYA ADMIN TOP-UP (CEPAT)',
+                                    style: TextStyle(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                        color: isDarkMode
+                                            ? Colors.white24
+                                            : Colors.teal.shade800
+                                                .withValues(alpha: 0.4),
+                                        letterSpacing: 1.2)),
+                                const SizedBox(height: 12),
+                                DropdownButtonFormField<String>(
                                   value: selectedTopUpSource,
                                   isExpanded: true,
                                   dropdownColor: isDarkMode
@@ -2016,7 +2163,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                             color: isDarkMode
                                                 ? Colors.white10
                                                 : Colors.grey.shade200)),
-                                    prefixIcon: const Icon(Icons.account_balance_wallet_rounded, color: Colors.teal),
+                                    prefixIcon: const Icon(
+                                        Icons.account_balance_wallet_rounded,
+                                        color: Colors.teal),
                                     labelStyle: TextStyle(
                                         color: isDarkMode
                                             ? Colors.white38
@@ -2033,9 +2182,15 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                         value: label,
                                         child: Row(
                                           children: [
-                                            Icon(source['icon'] as IconData, size: 18, color: Colors.teal.shade700),
+                                            Icon(source['icon'] as IconData,
+                                                size: 18,
+                                                color: Colors.teal.shade700),
                                             const SizedBox(width: 12),
-                                            Text(label, style: TextStyle(color: isDarkMode ? Colors.white70 : Colors.black87)),
+                                            Text(label,
+                                                style: TextStyle(
+                                                    color: isDarkMode
+                                                        ? Colors.white70
+                                                        : Colors.black87)),
                                           ],
                                         ),
                                       );
@@ -2046,12 +2201,18 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                       selectedTopUpSource = val;
                                       if (val == null) {
                                         nameController.clear();
-                                        selectedCategory = type == TransactionType.expense ? 'Makanan & Minuman' : 'Gaji';
+                                        selectedCategory =
+                                            type == TransactionType.expense
+                                                ? 'Makanan & Minuman'
+                                                : 'Gaji';
                                       } else if (val != 'Bank') {
-                                        nameController.text = 'Biaya Admin $val';
+                                        nameController.text =
+                                            'Biaya Admin $val';
                                         selectedCategory = 'Biaya Admin';
                                       } else {
-                                        nameController.text = 'Biaya Admin Bank ${topUpBankName.trim()}'.trim();
+                                        nameController.text =
+                                            'Biaya Admin Bank ${topUpBankName.trim()}'
+                                                .trim();
                                         selectedCategory = 'Biaya Admin';
                                       }
                                     });
@@ -2073,18 +2234,22 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                           ? Colors.white.withValues(alpha: 0.05)
                                           : Colors.grey.shade50,
                                       border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(16),
+                                          borderRadius:
+                                              BorderRadius.circular(16),
                                           borderSide: BorderSide(
                                               color: isDarkMode
                                                   ? Colors.white10
                                                   : Colors.grey.shade200)),
                                       enabledBorder: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(16),
+                                          borderRadius:
+                                              BorderRadius.circular(16),
                                           borderSide: BorderSide(
                                               color: isDarkMode
                                                   ? Colors.white10
                                                   : Colors.grey.shade200)),
-                                      prefixIcon: const Icon(Icons.account_balance_rounded, color: Colors.teal),
+                                      prefixIcon: const Icon(
+                                          Icons.account_balance_rounded,
+                                          color: Colors.teal),
                                       labelStyle: TextStyle(
                                           color: isDarkMode
                                               ? Colors.white38
@@ -2093,254 +2258,276 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                     onChanged: (val) {
                                       topUpBankName = val;
                                       setSheetState(() {
-                                        nameController.text = 'Biaya Admin Bank ${val.trim()}'.trim();
+                                        nameController.text =
+                                            'Biaya Admin Bank ${val.trim()}'
+                                                .trim();
                                       });
                                     },
                                   ),
                                 ],
-
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 28),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: 24),
-                            TextFormField(
-                              controller: nameController,
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: isDarkMode
-                                      ? Colors.white
-                                      : Colors.black87),
-                              decoration: InputDecoration(
-                                labelText: 'Keterangan Transaksi *',
-                                hintText: 'Input Keterangan',
-                                filled: true,
-                                fillColor: isDarkMode
-                                    ? Colors.white.withValues(alpha: 0.05)
-                                    : Colors.grey.shade50,
-                                border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                    borderSide: BorderSide(
-                                        color: isDarkMode
-                                            ? Colors.white10
-                                            : Colors.grey.shade200)),
-                                enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                    borderSide: BorderSide(
-                                        color: isDarkMode
-                                            ? Colors.white10
-                                            : Colors.grey.shade200)),
-                                prefixIcon: const Icon(Icons.edit_note_rounded,
-                                    color: Colors.teal),
-                                labelStyle: TextStyle(
-                                    color: isDarkMode
-                                        ? Colors.white38
-                                        : Colors.black45),
-                                hintStyle: TextStyle(
-                                    color: isDarkMode
-                                        ? Colors.white12
-                                        : Colors.black26),
-                              ),
-                            ),
-                            const SizedBox(height: 24),
-                            Text('PILIH KATEGORI *',
-                                style: TextStyle(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                    color: isDarkMode
-                                        ? Colors.white24
-                                        : Colors.teal.shade800
-                                            .withValues(alpha: 0.4),
-                                    letterSpacing: 1.2)),
-                            const SizedBox(height: 24),
-                            DropdownButtonFormField<String>(
-                              initialValue: selectedCategory,
-                              dropdownColor: isDarkMode
-                                  ? AppColors.surfaceDark
-                                  : Colors.white,
-                              decoration: InputDecoration(
-                                labelText: 'Pilih Kategori',
-                                filled: true,
-                                fillColor: isDarkMode
-                                    ? Colors.white.withValues(alpha: 0.05)
-                                    : Colors.grey.shade50,
-                                border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                    borderSide: BorderSide(
-                                        color: isDarkMode
-                                            ? Colors.white10
-                                            : Colors.grey.shade200)),
-                                enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                    borderSide: BorderSide(
-                                        color: isDarkMode
-                                            ? Colors.white10
-                                            : Colors.grey.shade200)),
-                                prefixIcon: Icon(
-                                  categories.any((c) => c['label'] == selectedCategory)
-                                      ? (categories.firstWhere((c) =>
-                                          c['label'] ==
-                                          selectedCategory)['icon'] as IconData)
-                                      : Icons.more_horiz_rounded,
-                                  color: Colors.teal,
-                                ),
-                                labelStyle: TextStyle(
-                                    color: isDarkMode
-                                        ? Colors.white38
-                                        : Colors.black45),
-                              ),
-                              selectedItemBuilder: (context) {
-                                return categories.map((cat) {
-                                  return Text(
-                                    cat['label'] as String,
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                        color: isDarkMode
-                                            ? Colors.white
-                                            : Colors.black87),
-                                  );
-                                }).toList();
-                              },
-                              items: categories.map((cat) {
-                                return DropdownMenuItem<String>(
-                                  value: cat['label'] as String,
-                                  child: Row(
-                                    children: [
-                                      Icon(cat['icon'] as IconData,
-                                          size: 18,
-                                          color: Colors.teal.shade700),
-                                      const SizedBox(width: 12),
-                                      Text(cat['label'] as String,
-                                          style: TextStyle(
-                                              color: isDarkMode
-                                                  ? Colors.white70
-                                                  : Colors.black87)),
-                                    ],
-                                  ),
-                                );
-                              }).toList(),
-                              onChanged: (val) {
-                                if (val != null) {
-                                  setSheetState(() {
-                                    selectedCategory = val;
-                                  });
-                                }
-                              },
-                            ),
-                            if (selectedCategory == 'Lainnya') ...[
+                        ],
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 28),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
                               const SizedBox(height: 24),
                               TextFormField(
-                                controller: customCategoryController,
-                                autofocus: true,
+                                controller: nameController,
                                 style: TextStyle(
+                                    fontWeight: FontWeight.bold,
                                     color: isDarkMode
                                         ? Colors.white
                                         : Colors.black87),
                                 decoration: InputDecoration(
-                                  labelText: 'Kategori Kustom',
-                                  hintText: 'Misal: Sedekah, Investasi...',
+                                  labelText: 'Keterangan Transaksi *',
+                                  hintText: 'Input Keterangan',
                                   filled: true,
                                   fillColor: isDarkMode
-                                      ? Colors.amber.shade900
-                                          .withValues(alpha: 0.1)
-                                      : Colors.amber.shade50
-                                          .withValues(alpha: 0.2),
+                                      ? Colors.white.withValues(alpha: 0.05)
+                                      : Colors.grey.shade50,
                                   border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(16),
                                       borderSide: BorderSide(
                                           color: isDarkMode
-                                              ? Colors.amber.shade900
-                                                  .withValues(alpha: 0.3)
-                                              : Colors.amber.shade100)),
-                                  prefixIcon: const Icon(Icons.star_rounded,
-                                      color: Colors.amber),
+                                              ? Colors.white10
+                                              : Colors.grey.shade200)),
+                                  enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                      borderSide: BorderSide(
+                                          color: isDarkMode
+                                              ? Colors.white10
+                                              : Colors.grey.shade200)),
+                                  prefixIcon: const Icon(
+                                      Icons.edit_note_rounded,
+                                      color: Colors.teal),
                                   labelStyle: TextStyle(
                                       color: isDarkMode
-                                          ? Colors.amber.shade200
+                                          ? Colors.white38
                                           : Colors.black45),
                                   hintStyle: TextStyle(
                                       color: isDarkMode
                                           ? Colors.white12
                                           : Colors.black26),
                                 ),
+                                validator: (val) {
+                                  if (val == null || val.trim().isEmpty) {
+                                    return 'Keterangan transaksi harus diisi!';
+                                  }
+                                  return null;
+                                },
                               ),
-                            ],
-                            const SizedBox(height: 32),
-                            ElevatedButton(
-                              onPressed: () async {
-                                final amount = _toAmount(amountController.text);
-                                if (amount == null || amount <= 0) {
-                                  ScaffoldMessenger.of(sheetContext)
-                                      .showSnackBar(
-                                    const SnackBar(
-                                        content: Text(
-                                            'Nominal transaksi tidak valid.')),
-                                  );
-                                  return;
-                                }
-
-                                final finalCategory =
-                                    (selectedCategory == 'Lainnya' &&
-                                            customCategoryController.text
-                                                .trim()
-                                                .isNotEmpty)
-                                        ? customCategoryController.text.trim()
-                                        : selectedCategory;
-
-                                final tx = TransactionModel(
-                                  id: DateTime.now()
-                                      .millisecondsSinceEpoch
-                                      .toString(),
-                                  title: nameController.text.trim().isEmpty
-                                      ? finalCategory
-                                      : nameController.text.trim(),
-                                  description: noteText.trim(),
-                                  amount: amount,
-                                  type: type,
-                                  date: DateTime.now(),
-                                  category: finalCategory,
-                                  creatorName: ref.read(userNameProvider),
-                                );
-
-                                await ref
-                                    .read(transactionServiceProvider)
-                                    .addTransaction(tx);
-                                if (sheetContext.mounted) {
-                                  Navigator.pop(sheetContext);
-                                }
-                                if (sheetContext.mounted && mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                          content: Text(
-                                              'Berhasil mencatat transaksi! ✨')));
-                                }
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.primary,
-                                foregroundColor: Colors.white,
-                                minimumSize: const Size(double.infinity, 64),
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20)),
-                                elevation: 8,
-                                shadowColor:
-                                    AppColors.primary.withValues(alpha: 0.4),
-                              ),
-                              child: const Text('Simpan Transaksi',
+                              const SizedBox(height: 24),
+                              Text('PILIH KATEGORI *',
                                   style: TextStyle(
+                                      fontSize: 10,
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 17,
-                                      letterSpacing: 0.5)),
-                            ),
-                            const SizedBox(height: 32),
-                          ],
+                                      color: isDarkMode
+                                          ? Colors.white24
+                                          : Colors.teal.shade800
+                                              .withValues(alpha: 0.4),
+                                      letterSpacing: 1.2)),
+                              const SizedBox(height: 24),
+                              DropdownButtonFormField<String>(
+                                value: selectedCategory,
+                                dropdownColor: isDarkMode
+                                    ? AppColors.surfaceDark
+                                    : Colors.white,
+                                decoration: InputDecoration(
+                                  labelText: 'Pilih Kategori',
+                                  filled: true,
+                                  fillColor: isDarkMode
+                                      ? Colors.white.withValues(alpha: 0.05)
+                                      : Colors.grey.shade50,
+                                  border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                      borderSide: BorderSide(
+                                          color: isDarkMode
+                                              ? Colors.white10
+                                              : Colors.grey.shade200)),
+                                  enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                      borderSide: BorderSide(
+                                          color: isDarkMode
+                                              ? Colors.white10
+                                              : Colors.grey.shade200)),
+                                  prefixIcon: Icon(
+                                    categories.any((c) =>
+                                            c['label'] == selectedCategory)
+                                        ? (categories.firstWhere((c) =>
+                                                c['label'] ==
+                                                selectedCategory)['icon']
+                                            as IconData)
+                                        : Icons.more_horiz_rounded,
+                                    color: Colors.teal,
+                                  ),
+                                  labelStyle: TextStyle(
+                                      color: isDarkMode
+                                          ? Colors.white38
+                                          : Colors.black45),
+                                ),
+                                selectedItemBuilder: (context) {
+                                  return categories.map((cat) {
+                                    return Text(
+                                      cat['label'] as String,
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          color: isDarkMode
+                                              ? Colors.white
+                                              : Colors.black87),
+                                    );
+                                  }).toList();
+                                },
+                                items: categories.map((cat) {
+                                  return DropdownMenuItem<String>(
+                                    value: cat['label'] as String,
+                                    child: Row(
+                                      children: [
+                                        Icon(cat['icon'] as IconData,
+                                            size: 18,
+                                            color: Colors.teal.shade700),
+                                        const SizedBox(width: 12),
+                                        Text(cat['label'] as String,
+                                            style: TextStyle(
+                                                color: isDarkMode
+                                                    ? Colors.white70
+                                                    : Colors.black87)),
+                                      ],
+                                    ),
+                                  );
+                                }).toList(),
+                                onChanged: (val) {
+                                  if (val != null) {
+                                    setSheetState(() {
+                                      selectedCategory = val;
+                                    });
+                                  }
+                                },
+                              ),
+                              if (selectedCategory == 'Lainnya') ...[
+                                const SizedBox(height: 24),
+                                TextFormField(
+                                  controller: customCategoryController,
+                                  autofocus: true,
+                                  style: TextStyle(
+                                      color: isDarkMode
+                                          ? Colors.white
+                                          : Colors.black87),
+                                  decoration: InputDecoration(
+                                    labelText: 'Kategori Kustom',
+                                    hintText: 'Misal: Sedekah, Investasi...',
+                                    filled: true,
+                                    fillColor: isDarkMode
+                                        ? Colors.white.withValues(alpha: 0.05)
+                                        : Colors.grey.shade50,
+                                    border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                        borderSide: BorderSide(
+                                            color: isDarkMode
+                                                ? Colors.white10
+                                                : Colors.grey.shade200)),
+                                    enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                        borderSide: BorderSide(
+                                            color: isDarkMode
+                                                ? Colors.white10
+                                                : Colors.grey.shade200)),
+                                    prefixIcon: const Icon(Icons.star_rounded,
+                                        color: Colors.teal),
+                                    labelStyle: TextStyle(
+                                        color: isDarkMode
+                                            ? Colors.white38
+                                            : Colors.black45),
+                                    hintStyle: TextStyle(
+                                        color: isDarkMode
+                                            ? Colors.white12
+                                            : Colors.black26),
+                                  ),
+                                  validator: (val) {
+                                    if (selectedCategory == 'Lainnya' &&
+                                        (val == null || val.trim().isEmpty)) {
+                                      return 'Kategori kustom harus diisi!';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              ],
+                              if (type == TransactionType.income)
+                                _buildSmartAllocationPlanner(
+                                    _toAmount(amountController.text) ?? 0,
+                                    isDarkMode),
+                              const SizedBox(height: 32),
+                              ElevatedButton(
+                                onPressed: () async {
+                                  if (!formKey.currentState!.validate()) {
+                                    return;
+                                  }
+
+                                  final amount =
+                                      _toAmount(amountController.text);
+                                  if (amount == null) return; // Should be handled by validator
+
+                                  final finalCategory =
+                                      (selectedCategory == 'Lainnya' &&
+                                              customCategoryController.text
+                                                  .trim()
+                                                  .isNotEmpty)
+                                          ? customCategoryController.text.trim()
+                                          : selectedCategory;
+
+                                  final tx = TransactionModel(
+                                    id: DateTime.now()
+                                        .millisecondsSinceEpoch
+                                        .toString(),
+                                    title: nameController.text.trim().isEmpty
+                                        ? finalCategory
+                                        : nameController.text.trim(),
+                                    description: noteText.trim(),
+                                    amount: amount,
+                                    type: type,
+                                    date: DateTime.now(),
+                                    category: finalCategory,
+                                    creatorName: ref.read(userNameProvider),
+                                  );
+
+                                  await ref
+                                      .read(transactionServiceProvider)
+                                      .addTransaction(tx);
+                                  if (sheetContext.mounted) {
+                                    Navigator.pop(sheetContext);
+                                  }
+                                  if (sheetContext.mounted && mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                            content: Text(
+                                                'Berhasil mencatat transaksi! ✨')));
+                                  }
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.primary,
+                                  foregroundColor: Colors.white,
+                                  minimumSize: const Size(double.infinity, 64),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(20)),
+                                  elevation: 8,
+                                  shadowColor:
+                                      AppColors.primary.withValues(alpha: 0.4),
+                                ),
+                                child: const Text('Simpan Transaksi',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 17,
+                                        letterSpacing: 0.5)),
+                              ),
+                              const SizedBox(height: 32),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -2349,7 +2536,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         );
       },
     );
-
   }
 
   Future<void> _showSavingTargetDialog(double totalBalance) async {
@@ -2520,19 +2706,19 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                         hintStyle: TextStyle(
                             color:
                                 isDarkMode ? Colors.white12 : Colors.black26),
-                        prefixIcon: Row(
+                        prefixIcon: const Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const SizedBox(width: 16),
-                            const Icon(Icons.account_balance_wallet_rounded,
+                            SizedBox(width: 16),
+                            Icon(Icons.account_balance_wallet_rounded,
                                 color: Colors.teal, size: 20),
-                            const SizedBox(width: 8),
-                            const Text('Rp',
+                            SizedBox(width: 8),
+                            Text('Rp',
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     color: Colors.teal,
                                     fontSize: 16)),
-                            const SizedBox(width: 8),
+                            SizedBox(width: 8),
                           ],
                         ),
                         filled: true,
@@ -2685,7 +2871,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                             return;
                           }
 
-                          final userId = 'default_user';
+                          const userId = 'default_user';
                           if (isEdit) {
                             final updated = target.copyWith(
                               name: name,
@@ -2714,9 +2900,11 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                           if (dialogContext.mounted) {
                             Navigator.pop(dialogContext);
                           }
-                          if (isEdit && mounted) {
-                            Navigator.pop(
-                                context); // Close management sheet if edit
+                          if (isEdit && context.mounted) {
+                            if (Navigator.canPop(context)) {
+                              Navigator.pop(
+                                  context); // Close management sheet if edit
+                            }
                           }
                         },
                         style: ElevatedButton.styleFrom(
@@ -2752,8 +2940,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     AsyncValue<List<TransactionModel>> transactionsAsync,
     List<TransactionModel> transactions,
   ) {
-    if (transactionsAsync.isLoading)
+    if (transactionsAsync.isLoading) {
       return const Center(child: CircularProgressIndicator());
+    }
 
     final totalExpense = transactions
         .where((t) => t.type == TransactionType.expense)
@@ -2958,11 +3147,13 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                               reservedSize: 32,
                               interval: 1,
                               getTitlesWidget: (value, meta) {
-                                if (value != value.toInt())
+                                if (value != value.toInt()) {
                                   return const SizedBox.shrink();
+                                }
                                 final index = value.toInt();
-                                if (index < 0 || index >= trendData.length)
+                                if (index < 0 || index >= trendData.length) {
                                   return const SizedBox.shrink();
+                                }
                                 return Padding(
                                   padding: const EdgeInsets.only(top: 8.0),
                                   child: Text(
@@ -3461,8 +3652,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     AsyncValue<List<TransactionModel>> transactionsAsync,
     List<TransactionModel> transactions,
   ) {
-    if (transactionsAsync.isLoading)
+    if (transactionsAsync.isLoading) {
       return const Center(child: CircularProgressIndicator());
+    }
 
     final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
         (ref.watch(themeProvider) == ThemeMode.system &&
@@ -3501,8 +3693,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     final expense = regular
         .where((t) => t.type == TransactionType.expense)
         .fold(0.0, (s, t) => s + t.amount);
-    final fmtNum = NumberFormat.currency(
-        locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+    final fmtNum =
+        NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
 
     if (!mounted) return;
 
@@ -3512,7 +3704,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       backgroundColor: Colors.transparent,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx2, setSheet) {
-          bool loading = false;
           return Container(
             padding: const EdgeInsets.fromLTRB(28, 12, 28, 36),
             decoration: BoxDecoration(
@@ -3530,8 +3721,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                     height: 4,
                     margin: const EdgeInsets.only(bottom: 24),
                     decoration: BoxDecoration(
-                        color:
-                            isDark ? Colors.white10 : Colors.grey.shade200,
+                        color: isDark ? Colors.white10 : Colors.grey.shade200,
                         borderRadius: BorderRadius.circular(2)),
                   ),
                 ),
@@ -3555,16 +3745,14 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                               style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
-                                  color: isDark
-                                      ? Colors.white
-                                      : Colors.black87)),
+                                  color:
+                                      isDark ? Colors.white : Colors.black87)),
                           Text(
                               'Bulan $monthLabel (${regular.length} transaksi)',
                               style: TextStyle(
                                   fontSize: 12,
-                                  color: isDark
-                                      ? Colors.white38
-                                      : Colors.black45,
+                                  color:
+                                      isDark ? Colors.white38 : Colors.black45,
                                   fontWeight: FontWeight.w500)),
                         ],
                       ),
@@ -3581,29 +3769,25 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                         : Colors.grey.shade50,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                        color: isDark
-                            ? Colors.white10
-                            : Colors.grey.shade100),
+                        color: isDark ? Colors.white10 : Colors.grey.shade100),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      _miniExportStat(
-                          isDark, 'PEMASUKAN', fmtNum.format(income), Colors.green),
+                      _miniExportStat(isDark, 'PEMASUKAN',
+                          fmtNum.format(income), Colors.green),
                       Container(
                           width: 1,
                           height: 32,
-                          color: isDark
-                              ? Colors.white10
-                              : Colors.grey.shade200),
-                      _miniExportStat(
-                          isDark, 'PENGELUARAN', fmtNum.format(expense), Colors.red),
+                          color:
+                              isDark ? Colors.white10 : Colors.grey.shade200),
+                      _miniExportStat(isDark, 'PENGELUARAN',
+                          fmtNum.format(expense), Colors.red),
                       Container(
                           width: 1,
                           height: 32,
-                          color: isDark
-                              ? Colors.white10
-                              : Colors.grey.shade200),
+                          color:
+                              isDark ? Colors.white10 : Colors.grey.shade200),
                       _miniExportStat(
                           isDark,
                           'SALDO',
@@ -3662,8 +3846,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     );
   }
 
-  Widget _miniExportStat(
-      bool isDark, String label, String value, Color color) {
+  Widget _miniExportStat(bool isDark, String label, String value, Color color) {
     return Column(
       children: [
         Text(label,
@@ -3690,9 +3873,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     required VoidCallback onTap,
   }) {
     return Material(
-      color: isDark
-          ? Colors.white.withValues(alpha: 0.04)
-          : Colors.grey.shade50,
+      color:
+          isDark ? Colors.white.withValues(alpha: 0.04) : Colors.grey.shade50,
       borderRadius: BorderRadius.circular(18),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -3728,8 +3910,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 ),
               ),
               Icon(Icons.chevron_right_rounded,
-                  size: 20,
-                  color: isDark ? Colors.white24 : Colors.black26),
+                  size: 20, color: isDark ? Colors.white24 : Colors.black26),
             ],
           ),
         ),
@@ -3928,7 +4109,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             children: [
               AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                 decoration: BoxDecoration(
                   color: isSelected
                       ? AppColors.primary.withValues(alpha: 0.1)
@@ -4057,19 +4239,19 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                           labelStyle: TextStyle(
                               color:
                                   isDarkMode ? Colors.white38 : Colors.black45),
-                          prefixIcon: Row(
+                          prefixIcon: const Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const SizedBox(width: 16),
-                              const Icon(Icons.account_balance_wallet_rounded,
+                              SizedBox(width: 16),
+                              Icon(Icons.account_balance_wallet_rounded,
                                   color: Colors.teal, size: 20),
-                              const SizedBox(width: 8),
-                              const Text('Rp',
+                              SizedBox(width: 8),
+                              Text('Rp',
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       color: Colors.teal,
                                       fontSize: 16)),
-                              const SizedBox(width: 8),
+                              SizedBox(width: 8),
                             ],
                           ),
                           filled: true,
@@ -4141,9 +4323,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       },
     );
   }
-
 }
-
 
 class _QuickAction {
   final IconData icon;
@@ -4167,7 +4347,8 @@ enum _QuickActionType {
   budget,
   scanReceipt,
   challenge,
-  recurring
+  recurring,
+  zakat
 }
 
 class _NavItem {
@@ -4611,8 +4792,7 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
               const SizedBox(width: 8),
               _typeChip(isDark, 1, 'Pemasukan', Icons.arrow_downward_rounded),
               const SizedBox(width: 8),
-              _typeChip(
-                  isDark, 2, 'Pengeluaran', Icons.arrow_upward_rounded),
+              _typeChip(isDark, 2, 'Pengeluaran', Icons.arrow_upward_rounded),
               if (categories.isNotEmpty) ...[const SizedBox(width: 16)],
               ...categories.map((cat) => Padding(
                     padding: const EdgeInsets.only(right: 8),
@@ -4643,9 +4823,7 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
                   : Colors.grey.shade100),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-              color: selected
-                  ? AppColors.primary
-                  : Colors.transparent,
+              color: selected ? AppColors.primary : Colors.transparent,
               width: 1.2),
         ),
         child: Row(
@@ -4660,8 +4838,7 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
             Text(label,
                 style: TextStyle(
                     fontSize: 12,
-                    fontWeight:
-                        selected ? FontWeight.bold : FontWeight.w600,
+                    fontWeight: selected ? FontWeight.bold : FontWeight.w600,
                     color: selected
                         ? AppColors.primary
                         : (isDark ? Colors.white54 : Colors.black54))),
@@ -4697,8 +4874,7 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
           '# $category',
           style: TextStyle(
               fontSize: 11,
-              fontWeight:
-                  selected ? FontWeight.bold : FontWeight.w600,
+              fontWeight: selected ? FontWeight.bold : FontWeight.w600,
               color: selected
                   ? (isDark ? Colors.tealAccent : Colors.teal.shade700)
                   : (isDark ? Colors.white38 : Colors.black45)),
@@ -4876,7 +5052,8 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
       if (_typeFilter == 1 && t.type != TransactionType.income) return false;
       if (_typeFilter == 2 && t.type != TransactionType.expense) return false;
       // Category filter
-      if (_categoryFilter != null && t.category != _categoryFilter) return false;
+      if (_categoryFilter != null && t.category != _categoryFilter)
+        return false;
       // Search query
       if (_searchQuery.isNotEmpty) {
         final q = _searchQuery;
@@ -4889,9 +5066,8 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
       return true;
     }).toList();
 
-    final isFiltering = _searchQuery.isNotEmpty ||
-        _typeFilter != 0 ||
-        _categoryFilter != null;
+    final isFiltering =
+        _searchQuery.isNotEmpty || _typeFilter != 0 || _categoryFilter != null;
 
     if (regularList.isEmpty) {
       return _emptyState(isDark,
@@ -4967,8 +5143,12 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
                                 isDark
                                     ? Colors.greenAccent.shade400
                                     : Colors.green),
-                            widget.miniHeaderStat('KELUAR', totalOut,
-                                isDark ? Colors.redAccent.shade200 : Colors.red),
+                            widget.miniHeaderStat(
+                                'KELUAR',
+                                totalOut,
+                                isDark
+                                    ? Colors.redAccent.shade200
+                                    : Colors.red),
                             // ── Tombol ekspor per bulan ────────────────
                             GestureDetector(
                               onTap: () => widget.onExportMonth(
@@ -4983,13 +5163,12 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
                                       .withValues(alpha: isDark ? 0.18 : 0.10),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                child: Row(
+                                child: const Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Icon(Icons.share_rounded,
-                                        size: 13,
-                                        color: AppColors.primary),
-                                    const SizedBox(width: 4),
+                                        size: 13, color: AppColors.primary),
+                                    SizedBox(width: 4),
                                     Text('EKSPOR',
                                         style: TextStyle(
                                             fontSize: 11,
@@ -5324,5 +5503,3 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
     );
   }
 }
-
-

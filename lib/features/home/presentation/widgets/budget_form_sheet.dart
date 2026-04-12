@@ -169,8 +169,15 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
       decoration: BoxDecoration(
         color: isDarkMode ? AppColors.surfaceDark : Colors.white,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDarkMode ? 0.3 : 0.05),
+            blurRadius: 20,
+            offset: const Offset(0, -5),
+          ),
+        ],
       ),
-      padding: EdgeInsets.only(bottom: inset),
+      padding: EdgeInsets.only(bottom: inset + 24),
       child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -178,46 +185,95 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
             const SizedBox(height: 12),
             // Handle bar
             Container(
-              width: 40,
-              height: 4,
+              width: 48,
+              height: 5,
               decoration: BoxDecoration(
                 color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
-                borderRadius: BorderRadius.circular(2),
+                borderRadius: BorderRadius.circular(10),
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
 
             // Header: judul + tombol hapus (jika edit)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Row(
                 children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      isEditing ? Icons.edit_calendar_rounded : Icons.add_chart_rounded,
+                      color: AppColors.primary,
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
                   Expanded(
-                    child: Text(
-                      isEditing ? 'Edit Budget' : 'Set Budget Bulanan',
-                      style: const TextStyle(
-                          fontSize: 20, fontWeight: FontWeight.bold),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          isEditing ? 'Perbarui Budget' : 'Budget Baru',
+                          style: TextStyle(
+                            fontSize: 20, 
+                            fontWeight: FontWeight.bold,
+                            color: isDarkMode ? Colors.white : AppColors.primaryDark,
+                          ),
+                        ),
+                        Text(
+                          'Atur batas pengeluaran bulanan Anda',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isDarkMode ? Colors.white38 : Colors.grey.shade600,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   if (isEditing)
                     IconButton(
                       onPressed: _deleteBudget,
-                      icon: const Icon(Icons.delete_outline_rounded,
-                          color: Colors.red),
+                      icon: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.red.withValues(alpha: 0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.delete_outline_rounded, color: Colors.red, size: 20),
+                      ),
                       tooltip: 'Hapus budget ini',
                     ),
                 ],
               ),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 32),
 
             // ── Pilih Kategori ────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.only(left: 24, bottom: 12),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Pilih Kategori',
+                  style: TextStyle(
+                    fontSize: 14, 
+                    fontWeight: FontWeight.bold,
+                    color: isDarkMode ? Colors.white70 : Colors.black87,
+                  ),
+                ),
+              ),
+            ),
             SizedBox(
-              height: 100,
+              height: 110,
               child: ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 24),
                 scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
                 itemCount: _fixedCategories.length,
                 itemBuilder: (context, index) {
                   final cat = _fixedCategories[index];
@@ -227,25 +283,39 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
 
                   return GestureDetector(
                     onTap: () {
+                      HapticFeedback.lightImpact();
                       setState(() {
                         _selectedCategory = label;
                         _isCustomCategory = isLainnya;
                       });
                     },
-                    child: Container(
-                      width: 80,
-                      margin: const EdgeInsets.only(right: 12),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      width: 85,
+                      margin: const EdgeInsets.only(right: 16, bottom: 8, top: 2),
                       decoration: BoxDecoration(
                         color: isSelected
-                            ? AppColors.primary.withValues(alpha: 0.1)
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(16),
+                            ? AppColors.primary
+                            : (isDarkMode ? Colors.white.withValues(alpha: 0.03) : Colors.white),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          if (isSelected)
+                            BoxShadow(
+                              color: AppColors.primary.withValues(alpha: 0.3),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            )
+                          else
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.02),
+                              blurRadius: 5,
+                              offset: const Offset(0, 2),
+                            ),
+                        ],
                         border: Border.all(
                           color: isSelected
                               ? AppColors.primary
-                              : (isDarkMode
-                                  ? Colors.white10
-                                  : Colors.grey.shade200),
+                              : (isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade200),
                         ),
                       ),
                       child: Column(
@@ -254,25 +324,19 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
                           Icon(
                             cat['icon'] as IconData,
                             color: isSelected
-                                ? AppColors.primary
-                                : (isDarkMode
-                                    ? Colors.white30
-                                    : Colors.grey),
+                                ? Colors.white
+                                : (isDarkMode ? Colors.white30 : Colors.grey.shade600),
                             size: 28,
                           ),
-                          const SizedBox(height: 6),
+                          const SizedBox(height: 8),
                           Text(
                             label,
                             style: TextStyle(
                               fontSize: 10,
-                              fontWeight: isSelected
-                                  ? FontWeight.bold
-                                  : FontWeight.normal,
+                              fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
                               color: isSelected
-                                  ? AppColors.primary
-                                  : (isDarkMode
-                                      ? Colors.white30
-                                      : Colors.grey),
+                                  ? Colors.white
+                                  : (isDarkMode ? Colors.white38 : Colors.grey.shade700),
                             ),
                             textAlign: TextAlign.center,
                             maxLines: 1,
@@ -286,7 +350,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
               ),
             ),
 
-            // ── Custom kategori input (muncul jika "Lainnya" dipilih) ─────
+            // ── Custom kategori input ─────
             if (_isCustomCategory) ...[
               const SizedBox(height: 20),
               Padding(
@@ -301,115 +365,120 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
                     color: isDarkMode ? Colors.white : Colors.black87,
                   ),
                   decoration: InputDecoration(
-                    labelText: 'Nama Kategori Custom',
-                    hintText: 'cth: Gym, Netflix, Skincare...',
-                    prefixIcon: const Icon(Icons.label_outline_rounded,
-                        color: AppColors.primary),
+                    labelText: 'Nama Kategori Kustom',
+                    hintText: 'Misal: Gym, Netflix, Skincare...',
+                    prefixIcon: const Icon(Icons.label_outline_rounded, color: AppColors.primary),
                     filled: true,
-                    fillColor: isDarkMode
-                        ? Colors.white.withValues(alpha: 0.05)
-                        : Colors.grey.shade50,
+                    fillColor: isDarkMode ? Colors.white.withValues(alpha: 0.03) : Colors.grey.shade50,
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(20),
                       borderSide: BorderSide.none,
                     ),
-                    labelStyle: TextStyle(
-                      color: isDarkMode ? Colors.white38 : Colors.black45,
-                    ),
+                    labelStyle: TextStyle(color: isDarkMode ? Colors.white38 : Colors.grey),
                   ),
                 ),
               ),
             ],
 
-            const SizedBox(height: 28),
+            const SizedBox(height: 32),
 
             // ── Input Nominal ─────────────────────────────────────────────
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                decoration: BoxDecoration(
-                  color: isDarkMode
-                      ? Colors.white.withValues(alpha: 0.05)
-                      : Colors.grey.shade50,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: isDarkMode
-                        ? Colors.white10
-                        : Colors.grey.shade200,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Limit Anggaran',
+                    style: TextStyle(
+                      fontSize: 14, 
+                      fontWeight: FontWeight.bold,
+                      color: isDarkMode ? Colors.white70 : Colors.black87,
+                    ),
                   ),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // "Rp" prefix — selalu terlihat
-                    const Text(
-                      'Rp',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: isDarkMode ? Colors.white.withValues(alpha: 0.03) : Colors.grey.shade50,
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(
+                        color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade200,
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: TextField(
-                        controller: _amountController,
-                        keyboardType: TextInputType.number,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                          RibuanFormatter(),
-                        ],
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: isDarkMode ? Colors.white : Colors.black87,
-                        ),
-                        decoration: InputDecoration(
-                          border: InputBorder.none,
-                          hintText: '0',
-                          hintStyle: TextStyle(
-                            color: isDarkMode
-                                ? Colors.white12
-                                : Colors.grey.shade300,
-                            fontWeight: FontWeight.bold,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const Text(
+                          'Rp',
+                          style: TextStyle(
                             fontSize: 24,
+                            fontWeight: FontWeight.w900,
+                            color: AppColors.primary,
                           ),
                         ),
-                      ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: TextField(
+                            controller: _amountController,
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                              RibuanFormatter(),
+                            ],
+                            style: TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.w900,
+                              color: isDarkMode ? Colors.white : Colors.black87,
+                              letterSpacing: -0.5,
+                            ),
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              hintText: '0',
+                              hintStyle: TextStyle(
+                                color: isDarkMode ? Colors.white12 : Colors.grey.shade300,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
 
-            const SizedBox(height: 28),
+            const SizedBox(height: 48),
 
             // ── Tombol Simpan ─────────────────────────────────────────────
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: SizedBox(
                 width: double.infinity,
-                height: 56,
+                height: 64,
                 child: ElevatedButton(
                   onPressed: _saveBudget,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16)),
-                    elevation: 0,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                    elevation: 10,
+                    shadowColor: AppColors.primary.withValues(alpha: 0.4),
                   ),
-                  child: Text(
-                    isEditing ? 'Perbarui Budget' : 'Simpan Budget',
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(isEditing ? Icons.update_rounded : Icons.check_circle_rounded, size: 22),
+                      const SizedBox(width: 12),
+                      Text(
+                        isEditing ? 'Perbarui Anggaran' : 'Simpan Anggaran',
+                        style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 18),
+                      ),
+                    ],
                   ),
                 ),
               ),
             ),
-            const SizedBox(height: 32),
           ],
         ),
       ),

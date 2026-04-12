@@ -1,9 +1,12 @@
+import 'dart:async';
+import 'dart:ui';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:tabunganku/core/theme/app_colors.dart';
 import 'package:tabunganku/core/theme/theme_provider.dart';
@@ -25,6 +28,12 @@ class SettingsPage extends ConsumerStatefulWidget {
 
 class _SettingsPageState extends ConsumerState<SettingsPage> {
   bool _isUploadingPhoto = false;
+  String? _uploadError;
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
 
   Future<void> _pickAndUploadPhoto() async {
     final picker = ImagePicker();
@@ -57,102 +66,104 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         .uploadAndSetPhoto(File(pickedFile.path));
 
     if (!mounted) return;
-    setState(() => _isUploadingPhoto = false);
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(result != null
-            ? 'Foto profil berhasil diperbarui! ✓'
-            : 'Gagal mengupload foto. Coba lagi.'),
-        backgroundColor: result != null ? Colors.green : Colors.red,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-    );
+    setState(() {
+      _isUploadingPhoto = false;
+      _uploadError = result != null ? null : 'Gagal mengupload foto. Coba lagi.';
+    });
   }
 
   Future<ImageSource?> _showImageSourceDialog() async {
-    final isDarkMode = ref.read(themeProvider) == ThemeMode.dark ||
-        (ref.read(themeProvider) == ThemeMode.system &&
-            Theme.of(context).brightness == Brightness.dark);
+    final profile = ref.watch(userProfileProvider);
+    final hasCustomPhoto = profile.photoUrl != null && profile.photoUrl!.isNotEmpty;
 
     return showModalBottomSheet<ImageSource>(
       context: context,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
+        padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: isDarkMode ? AppColors.surfaceDark : Colors.white,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+          color: Theme.of(context).canvasColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: isDarkMode ? Colors.white12 : Colors.grey.shade200,
-                borderRadius: BorderRadius.circular(2),
-              ),
+            const Text(
+              'Ubah Foto Profil',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 24),
-            Text(
-              'Ganti Foto Profil',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: isDarkMode ? Colors.white : Colors.black87,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildSourceOption(context, Icons.camera_alt_rounded, 'Kamera', ImageSource.camera),
+                _buildSourceOption(context, Icons.photo_library_rounded, 'Galeri', ImageSource.gallery),
+                if (hasCustomPhoto)
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pop(context);
+                      _confirmDeletePhoto();
+                    },
+                    child: Column(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.red.withValues(alpha: 0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.delete_outline_rounded, color: Colors.red, size: 30),
+                        ),
+                        const SizedBox(height: 8),
+                        const Text('Hapus', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                  ),
+              ],
             ),
             const SizedBox(height: 24),
-            ListTile(
-              onTap: () => Navigator.pop(context, ImageSource.camera),
-              leading: Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(Icons.camera_alt_rounded,
-                    color: AppColors.primary),
-              ),
-              title: Text('Buka Kamera',
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: isDarkMode ? Colors.white : Colors.black87)),
-              subtitle: Text('Ambil foto langsung',
-                  style: TextStyle(
-                      color: isDarkMode ? Colors.white38 : Colors.black38,
-                      fontSize: 12)),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16)),
-            ),
-            ListTile(
-              onTap: () => Navigator.pop(context, ImageSource.gallery),
-              leading: Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.purple.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(Icons.photo_library_rounded,
-                    color: Colors.purple),
-              ),
-              title: Text('Pilih dari Galeri',
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: isDarkMode ? Colors.white : Colors.black87)),
-              subtitle: Text('Gunakan foto yang sudah ada',
-                  style: TextStyle(
-                      color: isDarkMode ? Colors.white38 : Colors.black38,
-                      fontSize: 12)),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16)),
-            ),
-            const SizedBox(height: 8),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildSourceOption(BuildContext context, IconData icon, String label, ImageSource source) {
+    return GestureDetector(
+      onTap: () => Navigator.pop(context, source),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: AppColors.primary, size: 30),
+          ),
+          const SizedBox(height: 8),
+          Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
+        ],
+      ),
+    );
+  }
+
+  void _confirmDeletePhoto() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Hapus Foto Profil?'),
+        content: const Text('Apakah Anda yakin ingin menghapus foto profil dan kembali ke avatar default?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Batal')),
+          TextButton(
+            onPressed: () {
+              ref.read(userProfileProvider.notifier).deletePhoto();
+              Navigator.pop(context);
+            },
+            child: const Text('Hapus', style: TextStyle(color: Colors.red)),
+          ),
+        ],
       ),
     );
   }
@@ -273,10 +284,25 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             
             _buildSectionHeader('Preferensi'),
             _buildSettingTile(
-              Icons.calculate_outlined,
-              'Simulasi Tabungan',
-              () => context.push('/saving-simulator'),
-              subtitle: 'Hitung target tabungan Anda',
+              Icons.campaign_outlined,
+              'Saluran WhatsApp',
+              () async {
+                final url = Uri.parse('https://whatsapp.com/channel/0029Vb7hUrM23n3a6dSem72v');
+                try {
+                  await launchUrl(
+                    url,
+                    mode: LaunchMode.externalApplication,
+                  );
+                } catch (e) {
+                  // Fallback to in-app browser if external fails
+                  await launchUrl(
+                    url,
+                    mode: LaunchMode.platformDefault,
+                  );
+                }
+              },
+              subtitle: 'Join untuk update aplikasi terbaru',
+              color: Colors.green,
             ),
             _buildSettingTile(
               Icons.dark_mode_outlined,
@@ -324,13 +350,37 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               ),
             const SizedBox(height: 32),
 
-            _buildSectionHeader('Sosial'),
+            _buildSectionHeader('Sosial & Komunitas'),
             _buildSettingTile(
               Icons.people_alt_outlined,
               'Undang Keluarga',
               () => context.push('/family-group'),
               subtitle: 'Ajak keluarga menabung bersama',
               color: Colors.blue,
+            ),
+            _buildSettingTile(
+              Icons.camera_alt_outlined,
+              'Instagram',
+              () async {
+                final url = Uri.parse('https://www.instagram.com/tuanmudazaky_/');
+                if (await canLaunchUrl(url)) {
+                  await launchUrl(url, mode: LaunchMode.externalApplication);
+                }
+              },
+              subtitle: 'Follow untuk update visual',
+              color: Colors.purple,
+            ),
+            _buildSettingTile(
+              Icons.code_rounded,
+              'GitHub Developer',
+              () async {
+                final url = Uri.parse('https://github.com/MuhammadIsakiPrananda1');
+                if (await canLaunchUrl(url)) {
+                  await launchUrl(url, mode: LaunchMode.externalApplication);
+                }
+              },
+              subtitle: 'Cek source code aplikasi',
+              color: Colors.black87,
             ),
             _buildSettingTile(
               Icons.share_rounded,
@@ -410,21 +460,41 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                                       photoUrl,
                                       fit: BoxFit.cover,
                                       errorBuilder: (_, __, ___) =>
-                                          _buildDefaultAvatar(profile.name),
+                                          _buildDefaultAvatar(profile.name, isDarkMode),
                                     );
                                   } else {
                                     return Image.file(
                                       File(photoUrl),
                                       fit: BoxFit.cover,
                                       errorBuilder: (_, __, ___) =>
-                                          _buildDefaultAvatar(profile.name),
+                                          _buildDefaultAvatar(profile.name, isDarkMode),
                                     );
                                   }
                                 },
                               )
-                            : _buildDefaultAvatar(profile.name),
+                            : _buildDefaultAvatar(profile.name, isDarkMode),
                   ),
                 ),
+                // Error indicator if upload failed
+                if (_uploadError != null)
+                  Positioned(
+                    bottom: -15,
+                    left: 0,
+                    right: 0,
+                    child: Center(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.red.withValues(alpha: 0.8),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          'Gagal!',
+                          style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                  ),
                 // Badge kamera
                 Positioned(
                   bottom: 0,
@@ -660,27 +730,37 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
   void _showEditNameDialog(String currentName) {
     final controller = TextEditingController(text: currentName);
+    final formKey = GlobalKey<FormState>();
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: Theme.of(context).canvasColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: const Text('Ganti Nama', style: TextStyle(fontWeight: FontWeight.bold)),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          decoration: InputDecoration(
-            hintText: 'Masukkan nama baru',
-            fillColor: AppColors.primary.withValues(alpha: 0.05),
-            filled: true,
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+        content: Form(
+          key: formKey,
+          child: TextFormField(
+            controller: controller,
+            autofocus: true,
+            decoration: InputDecoration(
+              hintText: 'Masukkan nama baru',
+              fillColor: AppColors.primary.withValues(alpha: 0.05),
+              filled: true,
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+            ),
+            validator: (val) {
+              if (val == null || val.trim().isEmpty) {
+                return 'Nama tidak boleh kosong!';
+              }
+              return null;
+            },
           ),
         ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context), child: const Text('Batal')),
           ElevatedButton(
             onPressed: () {
-              if (controller.text.trim().isNotEmpty) {
+              if (formKey.currentState!.validate()) {
                 ref.read(userProfileProvider.notifier).setName(controller.text.trim());
                 Navigator.pop(context);
               }
@@ -697,19 +777,14 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     );
   }
 
-  Widget _buildDefaultAvatar(String name) {
-    final initial =
-        name.isNotEmpty ? name[0].toUpperCase() : '?';
+  Widget _buildDefaultAvatar(String name, bool isDark) {
     return Container(
-      color: AppColors.primary.withValues(alpha: 0.15),
+      color: isDark ? Colors.white.withValues(alpha: 0.05) : const Color(0xFFE9EDEF),
       child: Center(
-        child: Text(
-          initial,
-          style: TextStyle(
-            fontSize: 30,
-            fontWeight: FontWeight.bold,
-            color: AppColors.primary,
-          ),
+        child: Icon(
+          Icons.person,
+          size: 48,
+          color: isDark ? Colors.white24 : const Color(0xFF919191),
         ),
       ),
     );
@@ -731,7 +806,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   }
 
   void _shareApp() {
-    Share.share('Ayo raih target finansialmu lebih mudah dengan TabunganKu! Download sekarang di Neverland Studio. 🎉');
+    Share.share('Ayo raih target finansialmu lebih mudah dengan TabunganKu! Download aplikasi resmi di sini: https://www.mediafire.com/folder/djw53hap89l4l/TabunganKu 🎉');
   }
 
   // ── Health Score & Budget ──────────────────────────────────────

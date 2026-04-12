@@ -27,12 +27,25 @@ class _ScanReceiptPageState extends ConsumerState<ScanReceiptPage> {
   // Scanned Data
   double _amount = 0.0;
   TransactionType _type = TransactionType.expense;
-  final TextEditingController _amountController = TextEditingController();
+  String _detectedTitle = '';
   
+  final TextEditingController _amountController = TextEditingController();
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _noteController = TextEditingController();
+  
+  // Tips for scanning
+  final List<Map<String, dynamic>> _scanTips = [
+    {'icon': Icons.wb_sunny_rounded, 'title': 'Cahaya Terang', 'subtitle': 'Hindari bayangan'},
+    {'icon': Icons.center_focus_strong_rounded, 'title': 'Fokus & Jelas', 'subtitle': 'Pastikan teks terbaca'},
+    {'icon': Icons.crop_free_rounded, 'title': 'Seluruh Bukti', 'subtitle': 'Potret hingga tepi'},
+  ];
+
   @override
   void dispose() {
     _ocrService.dispose();
     _amountController.dispose();
+    _titleController.dispose();
+    _noteController.dispose();
     super.dispose();
   }
 
@@ -54,7 +67,10 @@ class _ScanReceiptPageState extends ConsumerState<ScanReceiptPage> {
         setState(() {
           _amount = result['amount'];
           _type = result['type'];
+          _detectedTitle = result['brandName'] ?? 'Bukti Transaksi';
+          
           _amountController.text = _formatDigitsWithDots(_amount.toStringAsFixed(0));
+          _titleController.text = _detectedTitle;
           _isScanning = false;
         });
       }
@@ -73,12 +89,12 @@ class _ScanReceiptPageState extends ConsumerState<ScanReceiptPage> {
 
     final transaction = TransactionModel(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
-      title: 'Transfer',
-      description: 'Transfer',
+      title: _titleController.text.trim().isEmpty ? _detectedTitle : _titleController.text.trim(),
+      description: _noteController.text.trim().isEmpty ? 'Bukti Transaksi' : _noteController.text.trim(),
       amount: amount,
       type: _type,
       date: DateTime.now(),
-      category: 'Transfer',
+      category: _type == TransactionType.income ? 'Pemasukan' : 'Lainnya',
       groupId: null, // Personal history only
     );
 
@@ -114,76 +130,105 @@ class _ScanReceiptPageState extends ConsumerState<ScanReceiptPage> {
             children: [
               // Image Preview Area
               GestureDetector(
-                onTap: () => _showPickerOptions(),
+                onTap: () => _isScanning ? null : _showPickerOptions(),
                 child: Container(
-                  height: 300,
+                  height: 320,
                   decoration: BoxDecoration(
                     color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100,
-                    borderRadius: BorderRadius.circular(24),
+                    borderRadius: BorderRadius.circular(32),
                     border: Border.all(
-                      color: isDarkMode ? Colors.white12 : Colors.grey.shade200,
+                      color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
                       width: 2,
                     ),
+                    boxShadow: [
+                      if (_image == null)
+                        BoxShadow(
+                          color: AppColors.primary.withValues(alpha: isDarkMode ? 0.05 : 0.02),
+                          blurRadius: 40,
+                          offset: const Offset(0, 10),
+                        ),
+                    ],
                   ),
                   child: _image != null
                       ? ClipRRect(
-                          borderRadius: BorderRadius.circular(22),
+                          borderRadius: BorderRadius.circular(30),
                           child: Stack(
                             fit: StackFit.expand,
                             children: [
                               Image.file(_image!, fit: BoxFit.cover),
-                              if (_isScanning)
-                                Container(
-                                  color: Colors.black45,
-                                  child: const Center(
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        CircularProgressIndicator(color: AppColors.primary),
-                                        SizedBox(height: 16),
-                                        Text('Sedang Memindai...', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                                      ],
-                                    ),
-                                  ),
-                                ),
+                              if (_isScanning) _buildScanningEffect(isDarkMode),
                             ],
                           ),
                         )
-                      : Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.add_a_photo_outlined, size: 64, color: AppColors.primary.withValues(alpha: 0.5)),
-                            const SizedBox(height: 16),
-                            const Text('Tap untuk upload bukti transfer', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w500)),
-                            const SizedBox(height: 8),
-                            const Text('(Pemasukan maupun Pengeluaran)', style: TextStyle(color: Colors.grey, fontSize: 12)),
-                          ],
-                        ),
+                      : _buildPlaceholder(isDarkMode),
                 ),
               ),
+              if (_image == null) ...[
+                const SizedBox(height: 32),
+                _buildScanningTips(isDarkMode),
+              ],
               const SizedBox(height: 32),
               
               if (_image != null && !_isScanning) ...[
                 // Extraction Result Form
                 Container(
-                  padding: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.all(28),
                   decoration: BoxDecoration(
-                    color: theme.cardColor,
-                    borderRadius: BorderRadius.circular(24),
+                    color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.white,
+                    borderRadius: BorderRadius.circular(32),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: isDarkMode ? 0.2 : 0.02),
-                        blurRadius: 20,
-                        offset: const Offset(0, 10),
+                        color: Colors.black.withValues(alpha: isDarkMode ? 0.3 : 0.04),
+                        blurRadius: 30,
+                        offset: const Offset(0, 15),
                       ),
                     ],
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('HASIL SCAN', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5, color: Colors.grey)),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('HASIL ANALISA AI', 
+                            style: TextStyle(
+                              fontSize: 10, 
+                              fontWeight: FontWeight.bold, 
+                              letterSpacing: 2.0, 
+                              color: isDarkMode ? Colors.white38 : Colors.black38
+                            )),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Colors.green.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Row(
+                              children: [
+                                Icon(Icons.check_circle_outline_rounded, size: 12, color: Colors.green),
+                                SizedBox(width: 4),
+                                Text('CONFIRMED', style: TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: Colors.green)),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                       const SizedBox(height: 24),
                       
+                      // Title Input (Auto-filled)
+                      TextField(
+                        controller: _titleController,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                        decoration: InputDecoration(
+                          labelText: 'Keterangan Transaksi',
+                          prefixIcon: const Icon(Icons.edit_note_rounded, color: Colors.teal),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                          filled: true,
+                          fillColor: actsAsSurface(isDarkMode),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+
                       // Type Selector
                       Row(
                         children: [
@@ -192,6 +237,7 @@ class _ScanReceiptPageState extends ConsumerState<ScanReceiptPage> {
                               label: 'Pemasukan',
                               isSelected: _type == TransactionType.income,
                               color: Colors.green,
+                              isDarkMode: isDarkMode,
                               onTap: () => setState(() => _type = TransactionType.income),
                             ),
                           ),
@@ -200,13 +246,14 @@ class _ScanReceiptPageState extends ConsumerState<ScanReceiptPage> {
                             child: _typeButton(
                               label: 'Pengeluaran',
                               isSelected: _type == TransactionType.expense,
+                              isDarkMode: isDarkMode,
                               color: Colors.red,
                               onTap: () => setState(() => _type = TransactionType.expense),
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 20),
                       
                       // Amount Input
                       TextField(
@@ -216,53 +263,52 @@ class _ScanReceiptPageState extends ConsumerState<ScanReceiptPage> {
                           FilteringTextInputFormatter.digitsOnly,
                           _RibuanSeparatorInputFormatter(),
                         ],
-                        style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                        style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
                         decoration: InputDecoration(
-                          labelText: 'Nominal Transfer',
+                          labelText: 'Nominal yang Terdeteksi',
                           prefixText: 'Rp ',
+                          prefixStyle: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.teal),
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
                           filled: true,
-                          fillColor: Colors.transparent,
+                          fillColor: actsAsSurface(isDarkMode),
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 24),
                       
-                      const Row(
-                        children: [
-                          Icon(Icons.info_outline_rounded, size: 14, color: Colors.orange),
-                          SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              'Cek kembali nominal dan jenis transaksi sebelum menyimpan.',
-                              style: TextStyle(fontSize: 11, color: Colors.grey),
-                            ),
-                          ),
-                        ],
-                      ),
+                      _buildInfoRow(isDarkMode),
                     ],
                   ),
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 24),
                 
                 // Action Buttons
-                ElevatedButton(
-                  onPressed: _saveTransaction,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 18),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    elevation: 4,
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _saveTransaction,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 22),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                      elevation: 8,
+                      shadowColor: AppColors.primary.withValues(alpha: 0.4),
+                    ),
+                    child: const Text('Simpan Transaksi', style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
                   ),
-                  child: const Text('Simpan ke Riwayat', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 ),
                 const SizedBox(height: 12),
-                TextButton(
-                  onPressed: () => setState(() {
-                    _image = null;
-                    _amountController.clear();
-                  }),
-                  child: const Text('Batal & Scan Ulang', style: TextStyle(color: Colors.red)),
+                Center(
+                  child: TextButton.icon(
+                    onPressed: () => setState(() {
+                      _image = null;
+                      _amountController.clear();
+                      _titleController.clear();
+                    }),
+                    icon: const Icon(Icons.refresh_rounded, size: 18),
+                    label: const Text('Abaikan & Scan Ulang', style: TextStyle(fontWeight: FontWeight.bold)),
+                    style: TextButton.styleFrom(foregroundColor: Colors.red.shade400),
+                  ),
                 ),
               ],
             ],
@@ -276,17 +322,19 @@ class _ScanReceiptPageState extends ConsumerState<ScanReceiptPage> {
     required String label,
     required bool isSelected,
     required Color color,
+    required bool isDarkMode,
     required VoidCallback onTap,
   }) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: isSelected ? color.withValues(alpha: 0.1) : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
+          color: isSelected ? color.withValues(alpha: isDarkMode ? 0.15 : 0.08) : Colors.transparent,
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? color : Colors.grey.withValues(alpha: 0.3),
+            color: isSelected ? color : (isDarkMode ? Colors.white10 : Colors.grey.shade200),
             width: 2,
           ),
         ),
@@ -294,14 +342,182 @@ class _ScanReceiptPageState extends ConsumerState<ScanReceiptPage> {
           child: Text(
             label,
             style: TextStyle(
-              color: isSelected ? color : Colors.grey,
+              color: isSelected ? color : (isDarkMode ? Colors.white38 : Colors.black38),
               fontWeight: FontWeight.bold,
+              fontSize: 13,
             ),
           ),
         ),
       ),
     );
   }
+
+  Widget _buildPlaceholder(bool isDarkMode) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: AppColors.primary.withValues(alpha: 0.1),
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(Icons.qr_code_scanner_rounded, size: 64, color: AppColors.primary),
+        ),
+        const SizedBox(height: 24),
+        Text('Scan Bukti Transaksi', 
+          style: TextStyle(
+            fontSize: 18, 
+            fontWeight: FontWeight.bold, 
+            color: isDarkMode ? Colors.white70 : Colors.black87
+          )),
+        const SizedBox(height: 8),
+        Text('Ambil foto struk atau screenshot transfer', 
+          style: TextStyle(
+            fontSize: 13, 
+            color: isDarkMode ? Colors.white38 : Colors.black38
+          )),
+      ],
+    );
+  }
+
+  Widget _buildScanningEffect(bool isDarkMode) {
+    return Stack(
+      children: [
+        Container(color: Colors.black.withValues(alpha: 0.6)),
+        Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(
+                width: 60,
+                height: 60,
+                child: CircularProgressIndicator(
+                  color: AppColors.primary,
+                  strokeWidth: 3,
+                ),
+              ),
+              const SizedBox(height: 24),
+              Text('MEMINDAI DATA...', 
+                style: TextStyle(
+                  color: Colors.white, 
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 2.0,
+                  fontSize: 12,
+                  shadows: [Shadow(color: Colors.black.withValues(alpha: 0.5), blurRadius: 10)]
+                )),
+            ],
+          ),
+        ),
+        // Laser Scan Line
+        TweenAnimationBuilder<double>(
+          tween: Tween(begin: 0.0, end: 1.0),
+          duration: const Duration(seconds: 2),
+          builder: (context, value, child) {
+            return Positioned(
+              top: value * 320,
+              left: 0,
+              right: 0,
+              child: Container(
+                height: 3,
+                decoration: BoxDecoration(
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withValues(alpha: 0.8),
+                      blurRadius: 15,
+                      spreadRadius: 2,
+                    )
+                  ],
+                  gradient: LinearGradient(
+                    colors: [
+                      AppColors.primary.withValues(alpha: 0),
+                      AppColors.primary,
+                      AppColors.primary.withValues(alpha: 0),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+          onEnd: () {}, // Handled by continuous rebuild during _isScanning
+        )
+      ],
+    );
+  }
+
+  Widget _buildScanningTips(bool isDarkMode) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('TIPS SCANNING', 
+          style: TextStyle(
+            fontSize: 10, 
+            fontWeight: FontWeight.bold, 
+            letterSpacing: 1.5,
+            color: isDarkMode ? Colors.white24 : Colors.black26
+          )),
+        const SizedBox(height: 16),
+        SizedBox(
+          height: 100,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: _scanTips.length,
+            itemBuilder: (context, index) {
+              final tip = _scanTips[index];
+              return Container(
+                width: 160,
+                margin: const EdgeInsets.only(right: 12),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: isDarkMode ? Colors.white.withValues(alpha: 0.03) : Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: isDarkMode ? Colors.white10 : Colors.grey.shade100),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(tip['icon'] as IconData, size: 20, color: AppColors.primary),
+                    const SizedBox(height: 8),
+                    Text(tip['title'] as String, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                    Text(tip['subtitle'] as String, style: TextStyle(fontSize: 9, color: isDarkMode ? Colors.white38 : Colors.black38)),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInfoRow(bool isDarkMode) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.orange.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.info_outline_rounded, size: 16, color: Colors.orange),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              'Pastikan nominal dan judul sudah sesuai dengan bukti transfer kamu.',
+              style: TextStyle(
+                fontSize: 11, 
+                fontWeight: FontWeight.w500,
+                color: isDarkMode ? Colors.orange.shade200 : Colors.orange.shade800
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Color actsAsSurface(bool isDarkMode) => isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade50;
 
   void _showPickerOptions() {
     showModalBottomSheet(

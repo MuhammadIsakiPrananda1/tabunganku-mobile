@@ -23,13 +23,30 @@ class OcrService {
         await _textRecognizer.processImage(inputImage);
 
     double? detectedAmount = _parseAmount(recognizedText);
-    TransactionType? detectedType = _detectType(recognizedText.text);
+    TransactionType detectedType = _detectType(recognizedText.text);
+    ReceiptBrand brand = _detectBrand(recognizedText.text);
 
     return {
       'amount': detectedAmount ?? 0.0,
       'type': detectedType,
+      'brand': brand,
+      'brandName': _getBrandDisplayName(brand),
       'text': recognizedText.text,
     };
+  }
+
+  String _getBrandDisplayName(ReceiptBrand brand) {
+    switch (brand) {
+      case ReceiptBrand.bca: return 'BCA Transfer';
+      case ReceiptBrand.mandiri: return 'Mandiri Transfer';
+      case ReceiptBrand.bri: return 'BRI Transfer';
+      case ReceiptBrand.bni: return 'BNI Transfer';
+      case ReceiptBrand.dana: return 'DANA Top-up';
+      case ReceiptBrand.gopay: return 'GoPay Top-up';
+      case ReceiptBrand.ovo: return 'OVO Top-up';
+      case ReceiptBrand.shopeepay: return 'ShopeePay Top-up';
+      default: return 'Bukti Transaksi';
+    }
   }
 
   void dispose() {

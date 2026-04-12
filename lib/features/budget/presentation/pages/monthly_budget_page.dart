@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tabunganku/core/theme/app_colors.dart';
+import 'package:tabunganku/core/theme/theme_provider.dart';
 import 'package:tabunganku/models/transaction_model.dart';
 import 'package:tabunganku/providers/transaction_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -49,7 +50,8 @@ class _MonthlyBudgetPageState extends ConsumerState<MonthlyBudgetPage> {
     final monthKey = 'monthly_budget_${_selectedYear}_${_selectedMonth}';
     
     setState(() {
-      _budgetLimit = prefs.getDouble(monthKey) ?? prefs.getDouble('monthly_budget') ?? 0.0;
+      // Hanya ambil budget spesifik bulan ini, jangan gunakan fallback global
+      _budgetLimit = prefs.getDouble(monthKey) ?? 0.0;
       _budgetController.clear(); // Bersihkan form saat me-load
     });
   }
@@ -90,142 +92,294 @@ class _MonthlyBudgetPageState extends ConsumerState<MonthlyBudgetPage> {
   @override
   Widget build(BuildContext context) {
     final txsMap = ref.watch(transactionsByGroupProvider(null));
-    
+
     double selectedMonthExpense = 0.0;
     for (final t in txsMap) {
-      if (t.type == TransactionType.expense && t.date.year == _selectedYear && t.date.month == _selectedMonth) {
+      if (t.type == TransactionType.expense &&
+          t.date.year == _selectedYear &&
+          t.date.month == _selectedMonth) {
         selectedMonthExpense += t.amount;
       }
     }
 
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    
-    // Strict Color Rules per user request
-    final bgColor = isDark ? Colors.black : Colors.white;
-    final textColor = isDark ? Colors.white : Colors.black;
-    final cardBgColor = isDark ? const Color(0xFF1A1A1A) : Colors.white;
-    final borderColor = isDark ? Colors.white24 : Colors.black12;
-    
+    final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
+        (ref.watch(themeProvider) == ThemeMode.system &&
+            theme.brightness == Brightness.dark);
+
+    final bgColor = isDarkMode ? AppColors.backgroundDark : AppColors.background;
+    final surfaceColor = isDarkMode ? AppColors.surfaceDark : Colors.white;
+
     double progress = _budgetLimit > 0 ? (selectedMonthExpense / _budgetLimit) : 0.0;
-    if (progress > 1.0) progress = 1.0;
+    const maxProgress = 1.0;
+    final displayedProgress = progress > maxProgress ? maxProgress : progress;
 
     final formatter = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
-    
+
     final monthsIndo = [
-      '', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 
+      '', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
       'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
     ];
     final dateDisplay = '${monthsIndo[_selectedMonth]} $_selectedYear';
 
     return Scaffold(
-      backgroundColor: bgColor,
-      appBar: AppBar(
-        title: Text('Budget Bulanan', style: TextStyle(fontWeight: FontWeight.bold, color: textColor)),
-        backgroundColor: bgColor,
-        foregroundColor: textColor,
-        elevation: 0,
-        iconTheme: IconThemeData(color: textColor),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
+      backgroundColor: isDarkMode ? Colors.black : Colors.white,
+      body: SafeArea(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Month Picker Area
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                IconButton(
-                  onPressed: () => _changeMonth(-1),
-                  icon: Icon(Icons.chevron_left_rounded, color: textColor),
-                  style: IconButton.styleFrom(backgroundColor: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
-                ),
-                Text(
-                  dateDisplay,
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: textColor),
-                ),
-                IconButton(
-                  onPressed: () => _changeMonth(1),
-                  icon: Icon(Icons.chevron_right_rounded, color: textColor),
-                  style: IconButton.styleFrom(backgroundColor: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            
-            // Stats Card
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: cardBgColor,
-                border: Border.all(color: borderColor),
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: [
-                  if (!isDark)
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05), 
-                      blurRadius: 16, 
-                      offset: const Offset(0, 8),
-                    ),
-                ]
-              ),
-              child: Column(
+            // ── App Bar Area ──────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Row(
                 children: [
-                  Text(
-                    'PENGELUARAN BULAN INI',
-                    style: GoogleFonts.comicNeue(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 2,
-                      color: isDark ? Colors.white70 : Colors.black54,
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: Icon(
+                      Icons.arrow_back_ios_new_rounded,
+                      color: isDarkMode ? Colors.white : AppColors.primaryDark,
+                      size: 20,
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  FittedBox(
-                    fit: BoxFit.scaleDown,
+                  Expanded(
                     child: Text(
-                      formatter.format(selectedMonthExpense),
+                      'Budget Bulanan',
+                      textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 32,
+                        fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: textColor,
+                        color: isDarkMode ? Colors.white : AppColors.primaryDark,
+                        letterSpacing: 0.5,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 24),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: LinearProgressIndicator(
-                      value: progress,
-                      minHeight: 12,
-                      backgroundColor: isDark ? Colors.white12 : Colors.black12,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        progress > 0.8 ? Colors.red.shade400 : (progress > 0.5 ? Colors.orange.shade400 : Colors.green.shade400),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('${(progress * 100).toStringAsFixed(1)}% Terpakai', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: isDark ? Colors.white70 : Colors.black87)),
-                      Text('Limit: ${formatter.format(_budgetLimit)}', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: isDark ? Colors.white70 : Colors.black87)),
-                    ],
-                  )
+                  const SizedBox(width: 48), // Spacer for balance
                 ],
               ),
             ),
-            
-            const SizedBox(height: 32),
-            Text('Atur Limit Bulanan', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: textColor)),
-            const SizedBox(height: 16),
-            TextField(
+
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(24, 12, 24, 100),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // ── Month Selector ────────────────────────────────────
+                        _buildMonthPicker(isDarkMode, dateDisplay),
+                        
+                        const SizedBox(height: 24),
+
+                        // ── Premium Stats Card (Glassmorphism) ─────────────────
+                        _buildPremiumStatsCard(isDarkMode, selectedMonthExpense, _budgetLimit, displayedProgress, formatter),
+
+                        const SizedBox(height: 32),
+                        
+                        // ── Set Limit Section ──────────────────────────────────
+                        _buildSetLimitSection(isDarkMode, dateDisplay),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+    );
+  }
+
+  Widget _buildMonthPicker(bool isDarkMode, String dateDisplay) {
+    final pickerBg = isDarkMode ? Colors.white.withValues(alpha: 0.05) : AppColors.primary.withValues(alpha: 0.05);
+    final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+      decoration: BoxDecoration(
+        color: pickerBg,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: contentColor.withValues(alpha: 0.1)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          IconButton(
+            onPressed: () => _changeMonth(-1),
+            icon: Icon(Icons.chevron_left_rounded, color: contentColor),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+          ),
+          Text(
+            dateDisplay,
+            style: TextStyle(
+              fontSize: 15, 
+              fontWeight: FontWeight.bold, 
+              color: contentColor,
+            ),
+          ),
+          IconButton(
+            onPressed: () => _changeMonth(1),
+            icon: Icon(Icons.chevron_right_rounded, color: contentColor),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPremiumStatsCard(bool isDarkMode, double spent, double limit, double progress, NumberFormat formatter) {
+    final statusColor = progress >= 0.9 ? Colors.redAccent : (progress >= 0.7 ? Colors.orangeAccent : AppColors.primaryLight);
+    
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: isDarkMode ? AppColors.surfaceDark.withValues(alpha: 0.8) : Colors.white,
+        borderRadius: BorderRadius.circular(32),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDarkMode ? 0.3 : 0.08),
+            blurRadius: 30,
+            offset: const Offset(0, 15),
+          ),
+        ],
+        border: isDarkMode ? Border.all(color: Colors.white.withValues(alpha: 0.05)) : null,
+      ),
+      child: Column(
+        children: [
+          Text(
+            'TOTAL PENGELUARAN',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 2,
+              color: isDarkMode ? Colors.white38 : Colors.grey.shade400,
+            ),
+          ),
+          const SizedBox(height: 12),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              formatter.format(spent),
+              style: TextStyle(
+                fontSize: 36,
+                fontWeight: FontWeight.w900,
+                color: isDarkMode ? Colors.white : AppColors.primaryDark,
+                letterSpacing: -1,
+              ),
+            ),
+          ),
+          const SizedBox(height: 32),
+          
+          // ── Custom Premium Progress Bar ────────────────────────────────
+          Stack(
+            children: [
+              Container(
+                height: 14,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 800),
+                curve: Curves.easeOutCubic,
+                height: 14,
+                width: MediaQuery.of(context).size.width * 0.7 * progress, // Approximation for simple animation
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [statusColor, statusColor.withValues(alpha: 0.6)],
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: statusColor.withValues(alpha: 0.4),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          
+          const SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Terpakai', style: TextStyle(fontSize: 11, color: isDarkMode ? Colors.white38 : Colors.grey)),
+                  Text('${(progress * 100).toStringAsFixed(1)}%', 
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: statusColor)),
+                ],
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text('Sisa Limit', style: TextStyle(fontSize: 11, color: isDarkMode ? Colors.white38 : Colors.grey)),
+                  Text(formatter.format((limit - spent).clamp(0, double.infinity)), 
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : Colors.black87)),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSetLimitSection(bool isDarkMode, String dateDisplay) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(Icons.settings_suggest_rounded, color: AppColors.primary, size: 20),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              'Atur Limit Baru',
+              style: TextStyle(
+                fontSize: 18, 
+                fontWeight: FontWeight.bold, 
+                color: isDarkMode ? Colors.white : AppColors.primaryDark,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        
+        // ── Standardized Target Input ──
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 4, bottom: 8),
+              child: Text(
+                'TARGET MAKSIMAL ($dateDisplay)',
+                style: TextStyle(
+                  fontSize: 11, 
+                  fontWeight: FontWeight.bold, 
+                  color: (isDarkMode ? Colors.white : AppColors.primaryDark).withValues(alpha: 0.5),
+                  letterSpacing: 1.2
+                ),
+              ),
+            ),
+            TextFormField(
               controller: _budgetController,
               keyboardType: TextInputType.number,
-              style: TextStyle(color: textColor),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: isDarkMode ? Colors.white : AppColors.primaryDark,
+              ),
               onChanged: (value) {
-                if (value.isEmpty) return;
                 final number = value.replaceAll(RegExp(r'[^0-9]'), '');
                 if (number.isEmpty) {
                   _budgetController.clear();
@@ -238,45 +392,71 @@ class _MonthlyBudgetPageState extends ConsumerState<MonthlyBudgetPage> {
                 );
               },
               decoration: InputDecoration(
-                labelText: 'Target Maksimal Pengeluaran ($dateDisplay)',
-                labelStyle: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
-                hintText: 'Misal: 3.000.000',
-                hintStyle: TextStyle(color: isDark ? Colors.white30 : Colors.black26),
-                prefixIcon: Icon(Icons.account_balance_wallet_rounded, color: isDark ? Colors.white70 : Colors.black54),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(color: borderColor),
+                hintText: '0',
+                hintStyle: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: isDarkMode ? Colors.white10 : Colors.grey.shade300,
                 ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(color: borderColor),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(color: isDark ? Colors.white : Colors.black, width: 2),
+                prefixIcon: Container(
+                  padding: const EdgeInsets.only(left: 20, right: 8),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.account_balance_wallet_rounded, color: AppColors.primary, size: 20),
+                      SizedBox(width: 8),
+                      Text(
+                        'Rp',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primary,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
                 filled: true,
-                fillColor: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.03),
-              ),
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              height: 54,
-              child: ElevatedButton(
-                onPressed: _saveBudget,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: isDark ? Colors.white : Colors.black,
-                  foregroundColor: isDark ? Colors.black : Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  elevation: 0,
+                fillColor: isDarkMode ? Colors.white.withValues(alpha: 0.05) : AppColors.background,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
                 ),
-                child: Text('Simpan Target $dateDisplay', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               ),
             ),
           ],
         ),
-      ),
+        
+        const SizedBox(height: 24),
+        
+        // ── Save Button ──
+        SizedBox(
+          width: double.infinity,
+          height: 60,
+          child: ElevatedButton(
+            onPressed: _saveBudget,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              elevation: 8,
+              shadowColor: AppColors.primary.withValues(alpha: 0.4),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.check_circle_outline_rounded, size: 22),
+                const SizedBox(width: 12),
+                Text(
+                  'Simpan Target $dateDisplay', 
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

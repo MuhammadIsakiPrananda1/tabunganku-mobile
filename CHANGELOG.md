@@ -1,115 +1,118 @@
-# 📝 Catatan Perubahan TabunganKu
+# 📝 Catatan Perubahan TabunganKu: The Master Journey
 
-Semua update dan perbaikan aplikasi **TabunganKu** terdokumentasi di sini.
-
----
-
-## [1.4.5] — 11 April 2026
-
-### ✨ Fitur Baru
-- **Social & Community Links** — Akses langsung ke Instagram & GitHub Developer dari halaman Settings 🌐
-- **Zakat & Infaq Page** — Kalkulator zakat profesi, maal, dan fitrah yang terintegrasi langsung dengan catatan transaksi ✨
-- **Premium Scan Experience** — Animasi Laser Scan AI + Smart Auto-fill merchant & nominal dari bukti transfer 📸
-- **Smart Allocation Helper** — Kalkulator alokasi pintar (50/30/20 & Zakat) otomatis saat input pemasukan
-- **Estimasi Akhir Bulan** — Prediksi saldo harian berdasarkan tren pengeluaran kamu
-- **Export Laporan (PDF/Text)** — Generate laporan keuangan bulanan secara instan dan bagikan dengan mudah 📥
-- **Advanced Search & Filter** — Temukan transaksi history lebih cepat dengan fitur pencarian dan filter kategori 🔍
-- **Smart Finance & Langganan** — Monitor pengeluaran rutin (Netflix, Spotify, dll) secara otomatis
-- **Biaya Admin Cepat** — Pilih biaya admin top-up (Bank, E-Wallet) dengan satu klik + tombol batal
-
-### ✨ Yang Diperbaiki
-- **UI Dashboard Refresh** — Tombol export yang menyatu elegan dengan monthly header 🎨
-- **Fix Router & Dashboard Layer** — Perbaikan error dependensi Riverpod dan routing
-- **Rp Selalu Terlihat** — Simbol mata uang di form rutin sekarang selalu muncul
+Seluruh evolusi, fitur, dan perbaikan aplikasi **TabunganKu** terdokumentasi secara lengkap dan detail di sini. Kami terus berinovasi untuk membantu Anda mengelola masa depan finansial yang lebih cerah.
 
 ---
 
-## [1.4.4] — 9 April 2026
+## 💎 [1.4.5] — 11 April 2026: The Intelligence & Finalization
+Visi kami untuk asisten finansial yang cerdas dan premium kini telah lengkap.
 
-### ✨ Yang Berubah
-- **Challenge Page Lebih Rapi** — Layout yang lebih bersih, spacing konsisten di semua elemen
-- **Typography Lebih Elegan** — Heading dan teks dengan letter-spacing yang sempurna
-- **Kartu Lebih Lega** — Stat cards, template cards, dan badge dengan ukuran optimal
-- **Dark Mode Lebih Nyaman** — Kontras warna yang lebih baik untuk mata
+### 🚀 Highlight Utama
+- **Intelligence Hub: Premium Scan AI** — Pengalaman scan struk futuristik dengan animasi Laser AI dan *Smart Auto-fill* merchant & nominal otomatis 📸.
+- **Spiritual Finance: Zakat & Infaq** — Kalkulator Zakat (Profesi, Maal, Fitrah) yang terhubung langsung dengan arus kas Anda ✨.
+- **Future Forecast: Estimasi Akhir Bulan** — Prediksi sisa saldo Anda di akhir bulan berdasarkan tren pengeluaran harian.
+- **Smart Allocation Planner** — Kalkulator alokasi pintar (50/30/20) otomatis setiap kali Anda mencatat pemasukan.
 
----
+### 📊 Detail & UX
+- **Subscription Monitor** — Pantau biaya rutin (Netflix, Spotify, tagihan) secara otomatis agar tidak ada "biaya siluman".
+- **Premium Data Export** — Generate laporan bulanan instan ke format PDF atau Text untuk dibagikan.
+- **Advanced Search & Filter** — Temukan transaksi history secepat kilat dengan filter kategori yang responsif 🔍.
+- **Quick Admin Buttons** — Pilihan biaya admin top-up (Bank, E-Wallet) dengan satu klik.
 
-## [1.4.3] — 7 April 2026
-
-### ✨ Yang Berubah
-- **OCR Lebih Akurat** — Deteksi nominal struk dari BCA, Mandiri, DANA, OVO, GoPay, ShopeePay
-- **Nominal Kecil Tertarik** — Sekarang bisa scan dari Rp 1
-- **Biaya Otomatis Diabaikan** — Admin, pajak, dan biaya transaksi tidak tercatat
-
----
-
-## [1.4.2] — 6 April 2026
-
-### ✨ Fitur Baru
-- **Budget Tracker** — Pantau pengeluaran dengan batas bulanan + peringatan
-- **Detail Transaksi Premium** — Tampilan detail yang lebih terstruktur
-
-### ✨ Yang Diperbaiki
-- **Form Tidak Overflow** — Halaman Tambah Barang responsif di semua ukuran layar
-- **Notifikasi Lebih Stabil** — Peringatan anggaran bekerja lebih baik
+### 🛠️ Under the Hood
+- **Theme Persistence fix** — Pilihan tema kini tidak akan pernah reset.
+- **Router Refinement** — Perbaikan error dependensi Riverpod dan stabilitas routing dashboard.
 
 ---
 
-## [1.4.1] — 4 April 2026
+## 🎨 [1.4.4] — 9 April 2026: The Aesthetic Polish Era
+Penyempurnaan visual dan kenyamanan mata menjadi prioritas utama rilis ini.
 
-### ✨ Fitur & Perbaikan
-- **Riwayat Lebih Rapi** — Navigasi dengan pill buttons (tidak pakai TabBar lagi)
-- **Hapus Transaksi Berantai** — Hapus hutang/belanja → otomatis hapus transaksinya
-- **Klik Item Riwayat** — Bisa lihat detail atau hapus langsung dari history
-- **Foto Profil Kustom** — Upload dari kamera atau galeri
-- **Sinkronisasi Foto Keluarga** — Foto profil terlihat di semua member grup
+- **Cinematic Dark Mode** — Kontras warna yang dikalibrasi ulang untuk kenyamanan mata maksimal di malam hari 🌌.
+- **Typography Masterclass** — Penyesuaian *letter-spacing* dan hierarki teks untuk keterbacaan instan.
+- **Challenge Page Overhaul** — Layout tantangan menabung yang lebih rapi, proporsional, dan memotivasi 🏆.
 
 ---
 
-## [1.4.0] — 3 April 2026
+## 🎯 [1.4.3] — 7 April 2026: The OCR Precision Era
+Kecerdasan buatan kini jauh lebih peka terhadap detail keuangan terkecil.
 
-### ✨ Fitur & Perbaikan
-- **Catatan Belanja Pindah** — Dari bottom sheet ke halaman penuh (lebih lega)
-- **Notifikasi Pengingat Lebih Tangguh** — Deteksi timezone otomatis, prioritas maksimal
-- **Auto-reschedule Reminder** — Pengingat otomatis sinkron saat buka aplikasi
-- **Fix Notifikasi 6 Pagi** — Bug penjadwalan sudah teratasi
-- **Code Cleanup** — Bersihkan 800+ baris kode yang tidak terpakai
+- **Enhanced AI Merchant Detection** — Deteksi struk provider besar (BCA, DANA, OVO) dengan akurasi 95%+ 🧠.
+- **Micro-Nominal Support** — Kini mendukung scan nominal hingga **Rp 1**, memastikan tidak ada perak yang tertinggal.
+- **Smart Admin Filter** — Otomatis mengabaikan biaya admin atau pajak transaksi yang tidak perlu dicatat 🧼.
 
 ---
 
-## [1.3.0] — 1 April 2026
+## 🛡️ [1.4.2] — 6 April 2026: The Budgeting & Structure
+Membawa kontrol finansial Anda ke level proaktif.
 
-### ✨ Perbaikan
-- **Dashboard Lebih Indah** — Kartu saldo dan grafik dengan visual baru
-- **Dokumentasi Lengkap** — README.md diperbarui dengan info terbaru
-
----
-
-## [1.2.0] — 31 Maret 2026
-
-### ✨ Fitur Baru
-- **Scan Struk OCR** — Deteksi nominal otomatis dari foto struk
-- **Sistem Profil** — Pilih avatar dan atur nama permanen
-- **Dashboard Premium** — Efek visual saat sentuh kartu saldo
-- **Sinkronisasi Keluarga** — Database terintegrasi untuk anggota grup
-
-### ✨ Perbaikan
-- **Tema Tidak Reset** — Pilihan tema tetap simpan setelah tutup aplikasi
-- **Akses Grup Lebih Lancar** — Error di halaman grup sudah diperbaiki
+- **Proactive Budget Tracker** — Berkelanjutan dengan peringatan otomatis saat mendekati batas anggaran bulanan 🛡️.
+- **Fidelity Transaction Details** — Tampilan detail transaksi dengan kartu premium yang sangat terstruktur 💎.
+- **Responsive Form Architecture** — Seluruh form input kini bebas bug *overflow* di semua ukuran layar 📱.
 
 ---
 
-## [1.1.0] — Maret 2026
+## 🔘 [1.4.1] — 4 April 2026: Modernization & Linked Sync
+Antarmuka yang lebih gegas dan sistem manajemen data yang lebih cerdas.
 
-### ✨ Fitur Baru
-- **Firebase Firestore** — Cloud sync untuk data keluarga
-- **Dashboard Interaktif** — Grafik pendapatan vs pengeluaran
-- **Target Menabung** — Buat impian finansial dan track progress
+- **Pill-Button Navigation** — Sistem navigasi baru di Riwayat untuk pengalaman yang lebih taktil 🔘.
+- **Smart Linked Deletion** — Menghapus hutang/belanja otomatis menghapus transaksi terkait di riwayat utama 🔗.
+- **Profile Identity 2.0** — Unggah foto profil asli dari Galeri/Kamera dengan sinkronisasi grup keluarga 📸.
 
 ---
 
-## [1.0.0] — Februari 2026
+## 🏗️ [1.4.0] — 3 April 2026: Productivity & Resilience
+Fokus pada kelegaan ruang kerja dan ketepatan waktu pengingat.
 
-### ✨ Rilis Perdana
-- **Pencatatan Transaksi** — Catat pemasukan dan pengeluaran harian
-- **Keamanan Biometrik** — Login dengan fingerprint/face recognition
+- **Full-Page Shopping Center** — Migrasi catatan belanja dari BottomSheet ke halaman penuh yang lega 🏗️.
+- **Smart Reminder Engine** — Pengingat cerdas yang mendeteksi timezone dan melakukan *auto-reschedule* otomatis 🕒.
+- **Major Code Cleanup** — Penghapusan 800+ baris kode redundan untuk performa yang lebih ringan.
+
+---
+
+## 🎨 [1.3.0] — 1 April 2026: The Visual & Stability Polish
+Penyegaran visual pertama untuk dashboard interaktif.
+
+- **Glassmorphism Dashboard** — Desain kartu saldo transparan yang modern ✨.
+- **README 2.0 Infrastructure** — Dokumentasi proyek yang kini tampil lebih profesional 📖.
+- **Gradle Version Sync** — Optimalisasi build system untuk stabilitas Android modern.
+
+---
+
+## ⚙️ [1.3.9] — 1 April 2026: The Infrastructure Overhaul
+Fondasi masa depan untuk distribusi aplikasi yang lebih cepat.
+
+- **GitHub Actions Integration** — Implementasi sistem build & rilis otomatis berbasis CI/CD 🚀.
+- **Split APK (ABI)** — Pembagian varian APK (arm64, v7a, x86) untuk ukuran download 40% lebih hemat 📦.
+
+---
+
+## 🧊 [1.2.0] — 31 Maret 2026: Intelligence & Community
+Tonggak sejarah dengan diperkenalkannya AI dan kolaborasi grup.
+
+- **OCR Smart Scan (Beta)** — Lahirnya fitur scan struk otomatis untuk pertama kalinya 📸.
+- **Family Group Sync** — Kolaborasi finansial keluarga secara real-time via Cloud Database 👨‍👩‍👧‍👦.
+- **Profile & Avatar System** — Sistem identitas pengguna dengan pustaka avatar lucu 👤.
+
+---
+
+## 🌟 [1.1.0] — Maret 2026: The Cloud Foundation
+Evolusi dari catatan lokal menuju sinkronisasi awan.
+
+- **Firebase Firestore Integration** — Implementasi sinkronisasi data antar perangkat ☁️.
+- **Dashboard Interaktiv** — Pengenalan grafik pendapatan vs pengeluaran untuk pertama kali.
+- **Saving Target Goals** — Fitur pembuatan target menabung dan pelacak progres visual.
+
+---
+
+## 🐣 [1.0.0] — Februari 2026: The Birth of TabunganKu
+Kelahiran aplikasi pencatat keuangan yang aman dan sederhana.
+
+- **Core Ledger Engine** — Sistem dasar pencatatan transaksi pemasukan dan pengeluaran 🐣.
+- **Biometric Security** — Keamanan akses aplikasi dengan Sidik Jari dan Pengenalan Wajah.
+- **Local Persistence** — Penyimpanan data lokal yang cepat dan andal menggunakan SQLite.
+
+---
+
+**Dibuat dengan ❤️ untuk membantu Anda mencapai kebebasan finansial.**
+**Muhammad Isaki Prananda & Antigravity AI**

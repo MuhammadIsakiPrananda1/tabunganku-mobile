@@ -44,7 +44,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     try {
       // SET external operation to true to prevent appraisal lockout
       ref.read(securityProvider.notifier).setExternalOperation(true);
-      
+
       pickedFile = await picker.pickImage(
         source: source,
         maxWidth: 800,
@@ -68,13 +68,15 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     if (!mounted) return;
     setState(() {
       _isUploadingPhoto = false;
-      _uploadError = result != null ? null : 'Gagal mengupload foto. Coba lagi.';
+      _uploadError =
+          result != null ? null : 'Gagal mengupload foto. Coba lagi.';
     });
   }
 
   Future<ImageSource?> _showImageSourceDialog() async {
     final profile = ref.watch(userProfileProvider);
-    final hasCustomPhoto = profile.photoUrl != null && profile.photoUrl!.isNotEmpty;
+    final hasCustomPhoto =
+        profile.photoUrl != null && profile.photoUrl!.isNotEmpty;
 
     return showModalBottomSheet<ImageSource>(
       context: context,
@@ -96,8 +98,10 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _buildSourceOption(context, Icons.camera_alt_rounded, 'Kamera', ImageSource.camera),
-                _buildSourceOption(context, Icons.photo_library_rounded, 'Galeri', ImageSource.gallery),
+                _buildSourceOption(context, Icons.camera_alt_rounded, 'Kamera',
+                    ImageSource.camera),
+                _buildSourceOption(context, Icons.photo_library_rounded,
+                    'Galeri', ImageSource.gallery),
                 if (hasCustomPhoto)
                   GestureDetector(
                     onTap: () {
@@ -112,10 +116,14 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                             color: Colors.red.withValues(alpha: 0.1),
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(Icons.delete_outline_rounded, color: Colors.red, size: 30),
+                          child: const Icon(Icons.delete_outline_rounded,
+                              color: Colors.red, size: 30),
                         ),
                         const SizedBox(height: 8),
-                        const Text('Hapus', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                        const Text('Hapus',
+                            style: TextStyle(
+                                color: Colors.red,
+                                fontWeight: FontWeight.bold)),
                       ],
                     ),
                   ),
@@ -128,7 +136,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     );
   }
 
-  Widget _buildSourceOption(BuildContext context, IconData icon, String label, ImageSource source) {
+  Widget _buildSourceOption(
+      BuildContext context, IconData icon, String label, ImageSource source) {
     return GestureDetector(
       onTap: () => Navigator.pop(context, source),
       child: Column(
@@ -153,9 +162,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Hapus Foto Profil?'),
-        content: const Text('Apakah Anda yakin ingin menghapus foto profil dan kembali ke avatar default?'),
+        content: const Text(
+            'Apakah Anda yakin ingin menghapus foto profil dan kembali ke avatar default?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Batal')),
+          TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Batal')),
           TextButton(
             onPressed: () {
               ref.read(userProfileProvider.notifier).deletePhoto();
@@ -185,11 +197,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     final transactions = (transactionsAsync.value ?? [])
         .where((t) => t.groupId == null)
         .toList();
-        
+
     final totalIncome = transactions
         .where((t) => t.type == TransactionType.income)
         .fold(0.0, (sum, t) => sum + t.amount);
-        
+
     final totalExpense = transactions
         .where((t) => t.type == TransactionType.expense)
         .fold(0.0, (sum, t) => sum + t.amount);
@@ -234,22 +246,24 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       if (incomeDates.isNotEmpty) {
         DateTime checkDate = DateTime(
             DateTime.now().year, DateTime.now().month, DateTime.now().day);
-        
-        if (incomeDates.first.isAtSameMomentAs(checkDate) || 
-            incomeDates.first.isAtSameMomentAs(checkDate.subtract(const Duration(days: 1)))) {
-           for (int i = 0; i < incomeDates.length; i++) {
-             if (i == 0) {
-               streak = 1;
-               checkDate = incomeDates[i];
-               continue;
-             }
-             if (incomeDates[i].isAtSameMomentAs(checkDate.subtract(const Duration(days: 1)))) {
-               streak++;
-               checkDate = incomeDates[i];
-             } else {
-               break;
-             }
-           }
+
+        if (incomeDates.first.isAtSameMomentAs(checkDate) ||
+            incomeDates.first.isAtSameMomentAs(
+                checkDate.subtract(const Duration(days: 1)))) {
+          for (int i = 0; i < incomeDates.length; i++) {
+            if (i == 0) {
+              streak = 1;
+              checkDate = incomeDates[i];
+              continue;
+            }
+            if (incomeDates[i].isAtSameMomentAs(
+                checkDate.subtract(const Duration(days: 1)))) {
+              streak++;
+              checkDate = incomeDates[i];
+            } else {
+              break;
+            }
+          }
         }
       }
     }
@@ -258,18 +272,21 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         NumberFormat.currency(locale: 'id_ID', symbol: 'Rp', decimalDigits: 0);
 
     return Scaffold(
-      backgroundColor: Colors.transparent, // Let DashboardPage handle the bg color
+      backgroundColor:
+          Colors.transparent, // Let DashboardPage handle the bg color
       // Removed redundant appBar as it caused double title issues
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
             // ── Kartu Profil ──────────────────────────────────────
-            _buildProfileCard(profile, isDarkMode, rankName, rankIcon, rankColor),
+            _buildProfileCard(
+                profile, isDarkMode, rankName, rankIcon, rankColor),
             const SizedBox(height: 24),
-            
+
             // ── Statistik Baris ───────────────────────────────────
-            _buildStatsRow(streak, currentBalance, unlockedCount, currencyFormatter, isDarkMode),
+            _buildStatsRow(streak, currentBalance, unlockedCount,
+                currencyFormatter, isDarkMode),
             const SizedBox(height: 16),
 
             // ── Kesehatan Keuangan ─────────────────────────────────
@@ -281,13 +298,13 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             _buildAchievementList(achievements, isDarkMode),
             const SizedBox(height: 16),
 
-            
             _buildSectionHeader('Preferensi'),
             _buildSettingTile(
               Icons.campaign_outlined,
               'Saluran WhatsApp',
               () async {
-                final url = Uri.parse('https://whatsapp.com/channel/0029Vb7hUrM23n3a6dSem72v');
+                final url = Uri.parse(
+                    'https://whatsapp.com/channel/0029Vb7hUrM23n3a6dSem72v');
                 try {
                   await launchUrl(
                     url,
@@ -316,16 +333,18 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               ),
             ),
             const SizedBox(height: 16),
-            
+
             _buildSectionHeader('Keamanan'),
             _buildSettingTile(
               Icons.fingerprint_rounded,
               'Kunci Biometrik',
               () {}, // Empty now as logic is in Switch
               trailing: Opacity(
-                opacity: 1.0, // Making it always appear active to encourage setup
+                opacity:
+                    1.0, // Making it always appear active to encourage setup
                 child: Switch(
-                  value: securityState.isBiometricEnabled && securityState.hasPin,
+                  value:
+                      securityState.isBiometricEnabled && securityState.hasPin,
                   onChanged: (val) {
                     if (!securityState.hasPin) {
                       context.push('/pin-setup');
@@ -336,14 +355,21 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   activeThumbColor: AppColors.primary,
                 ),
               ),
-              subtitle: securityState.hasPin ? 'Gunakan sidik jari/wajah' : 'Pasang PIN terlebih dahulu',
+              subtitle: securityState.hasPin
+                  ? 'Gunakan sidik jari/wajah'
+                  : 'Pasang PIN terlebih dahulu',
             ),
-            _buildSettingTile(Icons.lock_outline_rounded, securityState.hasPin ? 'Ubah PIN Keamanan' : 'Pasang PIN Keamanan', () => context.push('/pin-setup')),
-            
+            _buildSettingTile(
+                Icons.lock_outline_rounded,
+                securityState.hasPin
+                    ? 'Ubah PIN Keamanan'
+                    : 'Pasang PIN Keamanan',
+                () => context.push('/pin-setup')),
+
             if (securityState.hasPin)
               _buildSettingTile(
-                Icons.lock_reset_rounded, 
-                'Hapus PIN Keamanan', 
+                Icons.lock_reset_rounded,
+                'Hapus PIN Keamanan',
                 () => _showDeletePinDialog(),
                 color: Colors.red,
                 subtitle: 'Matikan semua fitur keamanan',
@@ -362,7 +388,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               Icons.camera_alt_outlined,
               'Instagram',
               () async {
-                final url = Uri.parse('https://www.instagram.com/tuanmudazaky_/');
+                final url =
+                    Uri.parse('https://www.instagram.com/tuanmudazaky_/');
                 if (await canLaunchUrl(url)) {
                   await launchUrl(url, mode: LaunchMode.externalApplication);
                 }
@@ -374,7 +401,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               Icons.code_rounded,
               'GitHub Developer',
               () async {
-                final url = Uri.parse('https://github.com/MuhammadIsakiPrananda1');
+                final url =
+                    Uri.parse('https://github.com/MuhammadIsakiPrananda1');
                 if (await canLaunchUrl(url)) {
                   await launchUrl(url, mode: LaunchMode.externalApplication);
                 }
@@ -391,20 +419,22 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             const SizedBox(height: 16),
 
             _buildSectionHeader('Bantuan & Informasi'),
-            _buildSettingTile(Icons.help_outline_rounded, 'Pusat Bantuan', () => _showHelpDialog()),
-            _buildSettingTile(Icons.info_outline_rounded, 'Tentang Aplikasi', () => _showAboutDialog()),
+            _buildSettingTile(Icons.help_outline_rounded, 'Pusat Bantuan',
+                () => _showHelpDialog()),
+            _buildSettingTile(Icons.info_outline_rounded, 'Tentang Aplikasi',
+                () => _showAboutDialog()),
             const SizedBox(height: 16),
 
             const Text('Versi ${AppVersion.version}',
-                style:
-                    TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+                style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildProfileCard(UserProfile profile, bool isDarkMode, String rank, IconData rankIcon, Color rankColor) {
+  Widget _buildProfileCard(UserProfile profile, bool isDarkMode, String rank,
+      IconData rankIcon, Color rankColor) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -460,14 +490,16 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                                       photoUrl,
                                       fit: BoxFit.cover,
                                       errorBuilder: (_, __, ___) =>
-                                          _buildDefaultAvatar(profile.name, isDarkMode),
+                                          _buildDefaultAvatar(
+                                              profile.name, isDarkMode),
                                     );
                                   } else {
                                     return Image.file(
                                       File(photoUrl),
                                       fit: BoxFit.cover,
                                       errorBuilder: (_, __, ___) =>
-                                          _buildDefaultAvatar(profile.name, isDarkMode),
+                                          _buildDefaultAvatar(
+                                              profile.name, isDarkMode),
                                     );
                                   }
                                 },
@@ -483,14 +515,18 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     right: 0,
                     child: Center(
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
                           color: Colors.red.withValues(alpha: 0.8),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
                           'Gagal!',
-                          style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold),
                         ),
                       ),
                     ),
@@ -603,15 +639,15 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           _buildStatCard('Total Saldo', formatter.format(currentBalance),
               Icons.account_balance_wallet_rounded, Colors.blue, isDarkMode),
           const SizedBox(width: 8),
-          _buildStatCard('Lencana', '$unlockedCount/10', Icons.emoji_events_rounded,
-              Colors.amber, isDarkMode),
+          _buildStatCard('Lencana', '$unlockedCount/10',
+              Icons.emoji_events_rounded, Colors.amber, isDarkMode),
         ],
       ),
     );
   }
 
-  Widget _buildStatCard(String label, String value, IconData icon, Color color,
-      bool isDarkMode) {
+  Widget _buildStatCard(
+      String label, String value, IconData icon, Color color, bool isDarkMode) {
     return Expanded(
       child: Container(
         height: 110, // Fixed height for perfect alignment
@@ -663,7 +699,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     );
   }
 
-  Widget _buildAchievementList(List<Achievement> achievements, bool isDarkMode) {
+  Widget _buildAchievementList(
+      List<Achievement> achievements, bool isDarkMode) {
     return SizedBox(
       height: 110,
       child: ListView.separated(
@@ -687,15 +724,18 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                         : (isDarkMode ? Colors.white10 : Colors.grey.shade100),
                     shape: BoxShape.circle,
                     border: unlocked
-                        ? Border.all(color: AppColors.primary.withValues(alpha: 0.3))
+                        ? Border.all(
+                            color: AppColors.primary.withValues(alpha: 0.3))
                         : null,
-                    boxShadow: unlocked ? [
-                      BoxShadow(
-                        color: AppColors.primary.withValues(alpha: 0.2),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      )
-                    ] : null,
+                    boxShadow: unlocked
+                        ? [
+                            BoxShadow(
+                              color: AppColors.primary.withValues(alpha: 0.2),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            )
+                          ]
+                        : null,
                   ),
                   child: Icon(
                     item.icon,
@@ -736,7 +776,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       builder: (context) => AlertDialog(
         backgroundColor: Theme.of(context).canvasColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: const Text('Ganti Nama', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text('Ganti Nama',
+            style: TextStyle(fontWeight: FontWeight.bold)),
         content: Form(
           key: formKey,
           child: TextFormField(
@@ -746,7 +787,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               hintText: 'Masukkan nama baru',
               fillColor: AppColors.primary.withValues(alpha: 0.05),
               filled: true,
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+              border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none),
             ),
             validator: (val) {
               if (val == null || val.trim().isEmpty) {
@@ -757,18 +800,23 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Batal')),
+          TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Batal')),
           ElevatedButton(
             onPressed: () {
               if (formKey.currentState!.validate()) {
-                ref.read(userProfileProvider.notifier).setName(controller.text.trim());
+                ref
+                    .read(userProfileProvider.notifier)
+                    .setName(controller.text.trim());
                 Navigator.pop(context);
               }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
             ),
             child: const Text('Simpan'),
           ),
@@ -779,7 +827,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
   Widget _buildDefaultAvatar(String name, bool isDark) {
     return Container(
-      color: isDark ? Colors.white.withValues(alpha: 0.05) : const Color(0xFFE9EDEF),
+      color: isDark
+          ? Colors.white.withValues(alpha: 0.05)
+          : const Color(0xFFE9EDEF),
       child: Center(
         child: Icon(
           Icons.person,
@@ -806,7 +856,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   }
 
   void _shareApp() {
-    Share.share('Ayo raih target finansialmu lebih mudah dengan TabunganKu! Download aplikasi resmi di sini: https://www.mediafire.com/folder/djw53hap89l4l/TabunganKu 🎉');
+    Share.share(
+        'Ayo raih target finansialmu lebih mudah dengan TabunganKu! Download aplikasi resmi di sini: https://tabunganku.neverlandstudio.my.id/ 🎉');
   }
 
   // ── Health Score & Budget ──────────────────────────────────────
@@ -900,7 +951,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     );
   }
 
-
   Widget _buildSettingTile(IconData icon, String title, VoidCallback onTap,
       {Widget? trailing, String? subtitle, Color? color}) {
     return Container(
@@ -918,7 +968,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             leading: Icon(icon, color: color ?? AppColors.primary),
             title: Text(title,
                 style: TextStyle(
-                    color: color ?? Theme.of(context).textTheme.bodyLarge?.color,
+                    color:
+                        color ?? Theme.of(context).textTheme.bodyLarge?.color,
                     fontWeight: FontWeight.w500)),
             subtitle: subtitle != null
                 ? Text(subtitle,
@@ -940,13 +991,16 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       builder: (context) => AlertDialog(
         backgroundColor: Theme.of(context).canvasColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: const Text('Hapus PIN?', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red)),
+        title: const Text('Hapus PIN?',
+            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red)),
         content: const Text(
           'Apakah kamu yakin ingin menghapus PIN keamanan? Ini akan mematikan kunci aplikasi dan biometrik.',
           style: TextStyle(fontSize: 14),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Batal')),
+          TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Batal')),
           ElevatedButton(
             onPressed: () {
               ref.read(securityProvider.notifier).clearPin();
@@ -961,7 +1015,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
             ),
             child: const Text('Hapus Sekarang'),
           ),
@@ -969,8 +1024,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       ),
     );
   }
-
-
 
   void _showHelpDialog() {
     showDialog(
@@ -1000,11 +1053,17 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             const SizedBox(height: 16),
             ClipRRect(
               borderRadius: BorderRadius.circular(16),
-              child: Image.asset('assets/icon.png', width: 72, height: 72, errorBuilder: (_, __, ___) => const Icon(Icons.wallet, size: 72, color: AppColors.primary)),
+              child: Image.asset('assets/icon.png',
+                  width: 72,
+                  height: 72,
+                  errorBuilder: (_, __, ___) => const Icon(Icons.wallet,
+                      size: 72, color: AppColors.primary)),
             ),
             const SizedBox(height: 24),
-            const Text('TabunganKu', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-            const Text('Versi ${AppVersion.version}', style: TextStyle(color: Colors.grey, fontSize: 13)),
+            const Text('TabunganKu',
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+            const Text('Versi ${AppVersion.version}',
+                style: TextStyle(color: Colors.grey, fontSize: 13)),
             const SizedBox(height: 24),
             const Text(
               'Aplikasi pengelola keuangan pribadi yang cerdas dan estetik untuk membantu kamu mencapai tujuan finansial.',
@@ -1020,9 +1079,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16)),
                 ),
-                child: const Text('Tutup', style: TextStyle(fontWeight: FontWeight.bold)),
+                child: const Text('Tutup',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
               ),
             ),
           ],
@@ -1030,8 +1091,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       ),
     );
   }
-
-
 
   IconData _getRankIcon(double totalSaved) {
     if (totalSaved < 100000) return Icons.eco_rounded;

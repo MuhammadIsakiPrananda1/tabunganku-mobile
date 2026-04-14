@@ -81,6 +81,7 @@ class HomeTabView extends ConsumerWidget {
                 ),
               ],
             ),
+            clipBehavior: Clip.antiAlias,
             child: Stack(
               children: [
                 // Decoration Circles (Simplified for performance)

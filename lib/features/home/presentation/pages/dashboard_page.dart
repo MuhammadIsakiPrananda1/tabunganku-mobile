@@ -148,6 +148,46 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
               ),
           ],
         ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: IconButton(
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Row(
+                      children: [
+                        const Icon(Icons.notifications_active_outlined,
+                            color: Colors.white, size: 20),
+                        const SizedBox(width: 12),
+                        const Text('Belum ada notifikasi baru untuk Anda'),
+                      ],
+                    ),
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15)),
+                    backgroundColor: AppColors.primary,
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+              },
+              icon: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: isDarkMode
+                      ? Colors.white.withValues(alpha: 0.05)
+                      : Colors.black.withValues(alpha: 0.03),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.notifications_none_rounded,
+                  color: isDarkMode ? Colors.white70 : Colors.black87,
+                  size: 24,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
       body: IndexedStack(
         index: _currentIndex,

@@ -1,4 +1,4 @@
-# 📝 Catatan Perubahan TabunganKu: The Master Journey
+# 📝 Catatan Perubahan TabunganKu
 
 Seluruh evolusi, fitur, dan perbaikan aplikasi **TabunganKu** terdokumentasi secara lengkap dan detail di sini. Kami terus berinovasi untuk membantu Anda mengelola masa depan finansial yang lebih cerah.
 
@@ -8,8 +8,9 @@ Seluruh evolusi, fitur, dan perbaikan aplikasi **TabunganKu** terdokumentasi sec
 Penyempurnaan performa dan stabilitas sistem untuk pengalaman yang lebih mulus.
 
 ### 🛠️ Detail Perubahan
+- **UI Architecture Fix** — Memperbaiki masalah clipping pada kartu saldo utama agar dekorasi tidak bocor keluar sudut 💎.
+- **UI Restoration** — Mengembalikan ikon lonceng notifikasi di Dashboard dengan feedback yang lebih modern 🔔.
 - **System Stability Enhancement** — Perbaikan bug minor dan optimalisasi penggunaan memori untuk performa yang lebih gegas 🚀.
-- **UI Refinement** — Penyesuaian mikro pada antarmuka untuk kenyamanan navigasi yang lebih baik.
 - **Version Bump** — Sinkronisasi versi aplikasi ke 1.4.6 untuk persiapan distribusi terbaru.
 
 ---
@@ -124,5 +125,4 @@ Kelahiran aplikasi pencatat keuangan yang aman dan sederhana.
 
 ---
 
-**Dibuat dengan ❤️ untuk membantu Anda mencapai kebebasan finansial.**
-**Muhammad Isaki Prananda & Antigravity AI**
+

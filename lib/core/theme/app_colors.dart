@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class AppColors {
   // Primary Colors
-  // Primary Colors (Mint Fresh Edition)
+  // Primary Colors (Stellar Sky Edition)
   static const Color primary = Color(0xFF00897B); // Teal 600
   static const Color primaryLight = Color(0xFF26A69A); // Teal 400
   static const Color primaryDark = Color(0xFF00695C); // Teal 800

@@ -2,7 +2,7 @@
 
 ![Banner Utama](assets/banner.png)
 
-**TabunganKu** adalah ekosistem manajemen keuangan modern yang dirancang untuk menghadirkan transparansi dan kebiasaan menabung yang sehat bagi keluarga Indonesia. Dengan pendekatan **Premium UI/UX (Mint Fresh Design)** dan integrasi awan yang cerdas, kami mengubah cara Anda melihat uang Anda.
+**TabunganKu** adalah ekosistem manajemen keuangan modern yang dirancang untuk menghadirkan transparansi dan kebiasaan menabung yang sehat bagi keluarga Indonesia. Dengan pendekatan **Premium UI/UX (Stellar Sky Design)** dan integrasi awan yang cerdas, kami mengubah cara Anda melihat uang Anda.
 
 ---
 
@@ -26,7 +26,7 @@
 | **State Management** | [Riverpod](https://riverpod.dev) |
 | **Backend & Sync** | [Google Firebase](https://firebase.google.com) (Firestore & Auth) |
 | **Notifications** | [Flutter Local Notifications](https://pub.dev/packages/flutter_local_notifications) |
-| **UI/UX Design** | Custom Mint Fresh Aesthetic (Vanilla CSS + Poppins Fonts) |
+| **UI/UX Design** | Custom Stellar Sky Aesthetic (Vanilla CSS + Poppins Fonts) |
 | **Charts** | [FL Chart](https://pub.dev/packages/fl_chart) |
 
 ---

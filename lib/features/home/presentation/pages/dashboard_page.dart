@@ -3,7 +3,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:flutter/services.dart';
@@ -16,7 +15,6 @@ import 'package:tabunganku/features/transaction/presentation/widgets/transaction
 import 'package:tabunganku/features/friends/presentation/pages/family_group_page.dart';
 import 'package:tabunganku/providers/saving_target_provider.dart';
 import 'package:tabunganku/core/theme/app_colors.dart';
-import 'package:tabunganku/core/constants/app_version.dart';
 import 'package:tabunganku/core/theme/theme_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -27,9 +25,12 @@ import 'package:tabunganku/models/transaction_model.dart';
 import 'package:tabunganku/models/saving_target_model.dart';
 import 'package:tabunganku/features/settings/presentation/pages/settings_page.dart';
 import 'package:tabunganku/features/transaction/presentation/pages/recurring_list_page.dart';
-import 'package:tabunganku/core/constants/app_constants.dart';
 import 'package:tabunganku/core/utils/currency_formatter.dart';
 import 'package:tabunganku/core/services/export_service.dart';
+import 'package:tabunganku/features/home/presentation/widgets/smart_clock_widgets.dart';
+import 'package:tabunganku/core/constants/quick_action_type.dart';
+import 'package:tabunganku/features/home/presentation/widgets/home_tab_view.dart'
+    as widgets;
 
 class DashboardPage extends ConsumerStatefulWidget {
   const DashboardPage({super.key});
@@ -42,8 +43,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
   bool _showBalance = true;
   final PageController _targetPageController = PageController();
   int _currentTargetIndex = 0;
-  DateTime _currentTime = DateTime.now();
-  Timer? _timer;
+  // Timer removed for optimization - isolated in specialized widgets
 
   // --- Fitur Simulasi Tabungan ---
   void _showSavingSimulatorSheet() {
@@ -62,7 +62,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
   // Pindahkan ke atas agar bisa direferensikan sebelum _buildProfileTab
 
   // Pindahkan ke atas agar bisa direferensikan
-  // Primary Colors (Mint Fresh Edition)
+  // Primary Colors (Stellar Sky Edition)
   // Gunakan instance global dari main.dart
 
   int _currentIndex = 0;
@@ -71,7 +71,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
   @override
   void initState() {
     super.initState();
-    _startTimer();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _loadLocalData();
       // Proses transaksi rutin otomatis
@@ -79,22 +78,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     });
   }
 
-  void _startTimer() {
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (mounted) {
-        // Optimization: Hanya update state lokal jika benar-benar diperlukan
-        // Namun untuk kesederhanaan saat ini kita biarkan dulu,
-        // tapi kita pindahkan penggunaan waktunya ke widget yang lebih spesifik.
-        setState(() {
-          _currentTime = DateTime.now();
-        });
-      }
-    });
-  }
-
   @override
   void dispose() {
-    _timer?.cancel();
     _targetPageController.dispose();
     super.dispose();
   }
@@ -149,14 +134,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                     FittedBox(
                       fit: BoxFit.scaleDown,
                       alignment: Alignment.centerLeft,
-                      child: Text(
-                        DateFormat('EEEE, d MMMM yyyy', 'id_ID')
-                            .format(_currentTime),
-                        style: TextStyle(
-                            fontSize: 12,
-                            color: isDarkMode ? Colors.white70 : Colors.teal,
-                            fontWeight: FontWeight.normal),
-                      ),
+                      child: SmartDateDisplay(isDarkMode: isDarkMode),
                     ),
                   ],
                 ],
@@ -164,17 +142,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             ),
             const SizedBox(width: 16),
             if (_currentIndex != 3)
-              FittedBox(
+              const FittedBox(
                 fit: BoxFit.scaleDown,
-                child: Text(
-                  DateFormat('HH:mm:ss').format(_currentTime),
-                  style: GoogleFonts.comicNeue(
-                    fontSize: 26,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
-                    letterSpacing: 2.0,
-                  ),
-                ),
+                child: SmartDigitalClock(),
               ),
           ],
         ),
@@ -182,7 +152,14 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       body: IndexedStack(
         index: _currentIndex,
         children: [
-          _buildHomeTab(transactionsAsync, transactions),
+          widgets.HomeTabView(
+            showBalance: _showBalance,
+            onToggleBalance: () => setState(() => _showBalance = !_showBalance),
+            onTransactionTap: _showTransactionDetailSheet,
+            onTargetTap: _showTargetDetailSheet,
+            onActionTap: (type) => _handleQuickActionTap(
+                _QuickAction(icon: Icons.add, label: '', type: type)),
+          ),
           _buildFinanceTab(transactionsAsync, transactions),
           _buildHistoryTab(transactionsAsync, transactions),
           const SettingsPage(),
@@ -361,837 +338,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       details,
     );
     await prefs.setString(notifiedKey, todayKey);
-  }
-
-  Widget _buildHomeTab(
-    AsyncValue<List<TransactionModel>> transactionsAsync,
-    List<TransactionModel> transactions,
-  ) {
-    final totalIncome = transactions
-        .where((t) => t.type == TransactionType.income)
-        .fold<double>(0, (sum, t) => sum + t.amount);
-    final totalExpense = transactions
-        .where((t) => t.type == TransactionType.expense)
-        .fold<double>(0, (sum, t) => sum + t.amount);
-    final totalBalance = totalIncome - totalExpense;
-
-    final targetsAsync = ref.watch(savingTargetsStreamProvider);
-    final targets = targetsAsync.valueOrNull ?? [];
-
-    final theme = Theme.of(context);
-    final themeMode = ref.watch(themeProvider);
-    final isDarkMode = themeMode == ThemeMode.dark ||
-        (themeMode == ThemeMode.system && theme.brightness == Brightness.dark);
-
-    return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 110),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 12),
-
-          // Main Finance Card (Consolidated)
-          Container(
-            width: double.infinity,
-            clipBehavior: Clip.antiAlias,
-            decoration: BoxDecoration(
-              color: theme.cardColor,
-              borderRadius: BorderRadius.circular(32),
-              boxShadow: [
-                BoxShadow(
-                  color:
-                      Colors.black.withValues(alpha: isDarkMode ? 0.2 : 0.02),
-                  blurRadius: 20,
-                  offset: const Offset(0, 10),
-                ),
-              ],
-            ),
-            child: Stack(
-              children: [
-                // Dekorasi Lingkaran
-                Positioned(
-                  top: -40,
-                  right: -30,
-                  child: Container(
-                    width: 140,
-                    height: 140,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          Colors.amber
-                              .withValues(alpha: isDarkMode ? 0.1 : 0.15),
-                          Colors.amber.withValues(alpha: 0.05),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  bottom: -50,
-                  left: -20,
-                  child: Container(
-                    width: 120,
-                    height: 120,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: LinearGradient(
-                        begin: Alignment.bottomRight,
-                        end: Alignment.topLeft,
-                        colors: [
-                          Colors.lightBlue
-                              .withValues(alpha: isDarkMode ? 0.08 : 0.12),
-                          Colors.lightBlue.withValues(alpha: 0.04),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                // Content Utama
-                Padding(
-                  padding: const EdgeInsets.all(28),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        'TOTAL SALDO TERKUMPUL',
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.comicNeue(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 2.5,
-                          color: isDarkMode
-                              ? Colors.white30
-                              : Colors.teal.shade800.withValues(alpha: 0.4),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          const SizedBox(width: 40),
-                          Flexible(
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Text(
-                                _showBalance
-                                    ? _formatRupiah(totalBalance)
-                                    : '••••••',
-                                style: GoogleFonts.comicNeue(
-                                  color: isDarkMode
-                                      ? Colors.white
-                                      : Colors.teal.shade900,
-                                  fontSize: 42,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 1.5,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          IconButton(
-                            constraints: const BoxConstraints(),
-                            padding: EdgeInsets.zero,
-                            icon: Icon(
-                              _showBalance
-                                  ? Icons.visibility_outlined
-                                  : Icons.visibility_off_outlined,
-                              color: isDarkMode
-                                  ? Colors.white24
-                                  : Colors.teal.shade700.withValues(alpha: 0.3),
-                              size: 22,
-                            ),
-                            onPressed: () =>
-                                setState(() => _showBalance = !_showBalance),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      // Estimasi Akhir Bulan (Feature #3)
-                      Builder(
-                        builder: (context) {
-                          final now = DateTime.now();
-                          final totalDays =
-                              DateTime(now.year, now.month + 1, 0).day;
-                          final day = now.day;
-
-                          // Linear extrapolation (Min 1 day to avoid div by zero)
-                          final currentDay = day > 0 ? day : 1;
-                          final estIncome =
-                              (totalIncome / currentDay) * totalDays;
-                          final estExpense =
-                              (totalExpense / currentDay) * totalDays;
-                          final estBalance = estIncome - estExpense;
-                          final isDanger = estBalance < 0;
-
-                          return Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 14, vertical: 8),
-                            decoration: BoxDecoration(
-                              color: isDanger
-                                  ? Colors.red.withValues(alpha: 0.1)
-                                  : (isDarkMode
-                                      ? Colors.white.withValues(alpha: 0.05)
-                                      : Colors.teal.shade50
-                                          .withValues(alpha: 0.3)),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  isDanger
-                                      ? Icons.warning_amber_rounded
-                                      : Icons.auto_graph_rounded,
-                                  size: 14,
-                                  color: isDanger ? Colors.red : Colors.teal,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  'Estimasi Akhir Bulan: ',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w500,
-                                    color: isDarkMode
-                                        ? Colors.white38
-                                        : Colors.teal.shade900
-                                            .withValues(alpha: 0.5),
-                                  ),
-                                ),
-                                Text(
-                                  _showBalance
-                                      ? _formatRupiah(estBalance)
-                                      : '••••••',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.bold,
-                                    color: isDanger
-                                        ? Colors.red
-                                        : (isDarkMode
-                                            ? Colors.white70
-                                            : Colors.teal.shade900),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 24),
-
-                      // Stats Row Divider
-                      Container(
-                        height: 1,
-                        width: double.infinity,
-                        color: isDarkMode
-                            ? Colors.white.withValues(alpha: 0.05)
-                            : Colors.teal.shade50.withValues(alpha: 0.5),
-                      ),
-                      const SizedBox(height: 24),
-
-                      // Stats Row within Card
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Expanded(
-                              child: _miniStat('Pemasukan', totalIncome,
-                                  Colors.green.shade600,
-                                  center: true)),
-                          const SizedBox(width: 24),
-                          Container(
-                              width: 1.2,
-                              height: 48,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(1),
-                                color: isDarkMode
-                                    ? Colors.white.withValues(alpha: 0.05)
-                                    : Colors.teal.shade50,
-                              )),
-                          const SizedBox(width: 24),
-                          Expanded(
-                              child: _miniStat('Pengeluaran', totalExpense,
-                                  Colors.red.shade600,
-                                  center: true)),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 40),
-
-          // Primary Navigation / Actions
-          // Primary Navigation / Actions Grid (4-column layout)
-          GridView.count(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            crossAxisCount: 4,
-            mainAxisSpacing: 0,
-            crossAxisSpacing: 0,
-            childAspectRatio: 0.85,
-            children: [
-              _buildToolAction(Icons.add_circle_outline_rounded, 'Pemasukan',
-                  _QuickActionType.income),
-              _buildToolAction(Icons.remove_circle_outline_rounded,
-                  'Pengeluaran', _QuickActionType.expense),
-              _buildToolAction(Icons.account_balance_wallet_rounded, 'Budget',
-                  _QuickActionType.budget),
-              _buildToolAction(Icons.auto_stories_rounded, 'Hutang/Piutang',
-                  _QuickActionType.debt),
-              _buildToolAction(Icons.family_restroom_rounded, 'Keluarga',
-                  _QuickActionType.family),
-              _buildToolAction(Icons.shopping_cart_outlined, 'Belanja',
-                  _QuickActionType.shoppingList),
-              _buildToolAction(Icons.document_scanner_rounded, 'Scan Bukti',
-                  _QuickActionType.scanReceipt),
-              _buildToolAction(Icons.emoji_events_rounded, 'Challenge',
-                  _QuickActionType.challenge),
-              _buildToolAction(Icons.track_changes_rounded, 'Target',
-                  _QuickActionType.savingTarget),
-              _buildToolAction(
-                  Icons.loop_rounded, 'Langganan', _QuickActionType.recurring),
-              _buildToolAction(Icons.volunteer_activism_rounded, 'Zakat/Infaq',
-                  _QuickActionType.zakat),
-              _buildToolAction(Icons.calculate_outlined, 'Simulasi',
-                  _QuickActionType.simulator),
-            ],
-          ),
-
-          const SizedBox(height: 40),
-
-          // Primary Saving Target Card
-          _buildSavingTargetSection(totalBalance, targets),
-
-          const SizedBox(height: 40),
-
-          // Integrated Allocation Section
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: theme.cardColor,
-              borderRadius: BorderRadius.circular(32),
-              boxShadow: [
-                BoxShadow(
-                    color:
-                        Colors.black.withValues(alpha: isDarkMode ? 0.2 : 0.02),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10))
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('ALOKASI KEUANGAN',
-                    style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1.5,
-                        color: isDarkMode
-                            ? Colors.white30
-                            : Colors.teal.shade800.withValues(alpha: 0.4))),
-                const SizedBox(height: 24),
-                if (totalIncome == 0 && totalExpense == 0)
-                  Center(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 20),
-                      child: Column(
-                        children: [
-                          Icon(Icons.pie_chart_outline_rounded,
-                              size: 48,
-                              color: isDarkMode
-                                  ? Colors.white24
-                                  : Colors.teal.shade50),
-                          const SizedBox(height: 12),
-                          Text('Belum ada data untuk dianalisis.',
-                              style: TextStyle(
-                                  color: isDarkMode
-                                      ? Colors.white38
-                                      : Colors.black26,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.bold)),
-                        ],
-                      ),
-                    ),
-                  )
-                else
-                  Column(
-                    children: [
-                      // Centered Pie Chart with Percentages
-                      Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          SizedBox(
-                            width: 160,
-                            height: 160,
-                            child: PieChart(
-                              PieChartData(
-                                sectionsSpace: 2,
-                                centerSpaceRadius: 50,
-                                sections: [
-                                  if (totalIncome > 0)
-                                    PieChartSectionData(
-                                      color: Colors.green.shade400,
-                                      value: totalIncome,
-                                      title:
-                                          '${(totalIncome / (totalIncome + totalExpense) * 100).toInt()}%',
-                                      radius: 12,
-                                      titleStyle: TextStyle(
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.bold,
-                                          color: isDarkMode
-                                              ? Colors.white
-                                              : Colors.green.shade900),
-                                      titlePositionPercentageOffset: 2.2,
-                                    ),
-                                  if (totalExpense > 0)
-                                    PieChartSectionData(
-                                      color: Colors.red.shade400,
-                                      value: totalExpense,
-                                      title:
-                                          '${(totalExpense / (totalIncome + totalExpense) * 100).toInt()}%',
-                                      radius: 12,
-                                      titleStyle: TextStyle(
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.bold,
-                                          color: isDarkMode
-                                              ? Colors.white
-                                              : Colors.red.shade900),
-                                      titlePositionPercentageOffset: 2.2,
-                                    ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text('Total',
-                                  style: TextStyle(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                      color: isDarkMode
-                                          ? Colors.white30
-                                          : Colors.teal.shade800
-                                              .withValues(alpha: 0.4))),
-                              Text(
-                                  _formatCompactRupiah(
-                                      totalIncome + totalExpense),
-                                  style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      color: isDarkMode
-                                          ? Colors.white
-                                          : Colors.black87)),
-                            ],
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      // Centered Indicators below
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          _buildCenteredIndicator(
-                              'Pemasukan', totalIncome, Colors.green),
-                          const SizedBox(width: 32),
-                          _buildCenteredIndicator(
-                              'Pengeluaran', totalExpense, Colors.red),
-                        ],
-                      ),
-                      const SizedBox(height: 32),
-                      _buildCategoryBreakdown(transactions, isDarkMode),
-                    ],
-                  ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 32),
-
-          // Recent Activity Section
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text('Aktivitas Terakhir',
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      letterSpacing: -0.5)),
-              TextButton(
-                onPressed: () => setState(() => _currentIndex = 2),
-                child: const Text('Semua',
-                    style:
-                        TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          if (transactionsAsync.isLoading)
-            const Center(child: CircularProgressIndicator())
-          else if (transactions.isEmpty)
-            Text('Belum ada aktivitas',
-                style: TextStyle(
-                    color: isDarkMode ? Colors.white54 : Colors.black38,
-                    fontSize: 13))
-          else
-            ...transactions.take(3).map((t) => _minimalTile(t)),
-
-          const SizedBox(height: 60),
-
-          // Subtle Watermark
-          Center(
-            child: Opacity(
-              opacity: 0.25,
-              child: Column(
-                children: [
-                  const Text(
-                    'NEVERLAND STUDIO',
-                    style: TextStyle(
-                      color: AppColors.primary,
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 2,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(AppVersion.edition,
-                      style: TextStyle(
-                          fontSize: 8,
-                          color: isDarkMode ? Colors.white38 : Colors.grey)),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _miniStat(String label, double amount, Color color,
-      {bool center = false}) {
-    final theme = Theme.of(context);
-    final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
-        (ref.watch(themeProvider) == ThemeMode.system &&
-            theme.brightness == Brightness.dark);
-
-    return Column(
-      crossAxisAlignment:
-          center ? CrossAxisAlignment.center : CrossAxisAlignment.start,
-      children: [
-        Text(label.toUpperCase(),
-            textAlign: center ? TextAlign.center : TextAlign.start,
-            style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-                color: isDarkMode ? Colors.white54 : Colors.grey.shade500,
-                letterSpacing: 1.2)),
-        const SizedBox(height: 4),
-        FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Text(
-            _showBalance ? _formatRupiah(amount) : '••••',
-            textAlign: center ? TextAlign.center : TextAlign.start,
-            style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.bold,
-                color: color.withValues(alpha: isDarkMode ? 0.9 : 0.8)),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCategoryBreakdown(
-      List<TransactionModel> transactions, bool isDarkMode) {
-    final expenses =
-        transactions.where((t) => t.type == TransactionType.expense).toList();
-    if (expenses.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    final categoryMap = <String, double>{};
-    double totalExpense = 0;
-    for (var t in expenses) {
-      categoryMap[t.category] = (categoryMap[t.category] ?? 0) + t.amount;
-      totalExpense += t.amount;
-    }
-
-    final sortedCategories = categoryMap.entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text('DETAIL PENGELUARAN',
-                style: TextStyle(
-                    fontSize: 9,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.2,
-                    color: isDarkMode ? Colors.white24 : Colors.black26)),
-            Text('Persentase',
-                style: TextStyle(
-                    fontSize: 9,
-                    fontWeight: FontWeight.bold,
-                    color: isDarkMode ? Colors.white24 : Colors.black26)),
-          ],
-        ),
-        const SizedBox(height: 16),
-        ...sortedCategories.take(4).map((entry) {
-          final percentage = entry.value / totalExpense;
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 16),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(entry.key,
-                        style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: isDarkMode
-                                ? Colors.white70
-                                : Colors.teal.shade900)),
-                    Text(_formatCompactRupiah(entry.value),
-                        style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: isDarkMode ? Colors.white : Colors.black87)),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Stack(
-                  children: [
-                    Container(
-                      height: 6,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: isDarkMode
-                            ? Colors.white.withValues(alpha: 0.05)
-                            : Colors.teal.shade50,
-                        borderRadius: BorderRadius.circular(3),
-                      ),
-                    ),
-                    FractionallySizedBox(
-                      widthFactor: percentage,
-                      child: Container(
-                        height: 6,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              AppColors.primary,
-                              AppColors.primary.withValues(alpha: 0.6)
-                            ],
-                          ),
-                          borderRadius: BorderRadius.circular(3),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.primary.withValues(alpha: 0.2),
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          );
-        }),
-      ],
-    );
-  }
-
-  Widget _buildToolAction(IconData icon, String label, _QuickActionType type) {
-    final theme = Theme.of(context);
-    final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
-        (ref.watch(themeProvider) == ThemeMode.system &&
-            theme.brightness == Brightness.dark);
-
-    // Special colors for each action to make them stand out as requested
-    Color iconColor = AppColors.primary;
-    if (type == _QuickActionType.income) iconColor = Colors.green.shade400;
-    if (type == _QuickActionType.expense) iconColor = Colors.red.shade400;
-    if (type == _QuickActionType.savingTarget)
-      iconColor = Colors.amber.shade500;
-    if (type == _QuickActionType.budget) iconColor = Colors.cyan.shade400;
-    if (type == _QuickActionType.debt) iconColor = Colors.orange.shade500;
-    if (type == _QuickActionType.family) iconColor = Colors.blue.shade500;
-    if (type == _QuickActionType.shoppingList)
-      iconColor = Colors.purple.shade300;
-    if (type == _QuickActionType.scanReceipt) {
-      iconColor = Colors.tealAccent.shade700;
-    }
-    if (type == _QuickActionType.zakat) iconColor = Colors.teal.shade400;
-    if (type == _QuickActionType.simulator) iconColor = Colors.cyan.shade600;
-
-    return GestureDetector(
-      onTap: () => _handleQuickActionTap(
-          _QuickAction(icon: icon, label: label, type: type)),
-      behavior: HitTestBehavior.opaque,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color:
-                      Colors.black.withValues(alpha: isDarkMode ? 0.2 : 0.04),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Material(
-              color: isDarkMode ? AppColors.surfaceDark : Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              clipBehavior: Clip.antiAlias,
-              child: InkWell(
-                onTap: () => _handleQuickActionTap(
-                    _QuickAction(icon: icon, label: label, type: type)),
-                child: Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: isDarkMode
-                          ? Colors.white.withValues(alpha: 0.05)
-                          : Colors.black.withValues(alpha: 0.02),
-                      width: 1.2,
-                    ),
-                  ),
-                  child: Icon(icon, color: iconColor, size: 24),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 8),
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Text(
-              label.toUpperCase(),
-              style: TextStyle(
-                fontSize: 9,
-                fontWeight: FontWeight.bold,
-                color: isDarkMode
-                    ? Colors.white38
-                    : Colors.teal.shade900.withValues(alpha: 0.5),
-                letterSpacing: 1.2,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _minimalTile(TransactionModel t) {
-    final theme = Theme.of(context);
-    final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
-        (ref.watch(themeProvider) == ThemeMode.system &&
-            theme.brightness == Brightness.dark);
-    final bool isExpense = t.type == TransactionType.expense;
-    final IconData catIcon = AppConstants.categoryIcons[t.category] ??
-        (isExpense ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded);
-    final Color catColor = isExpense ? Colors.red : Colors.green;
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: isDarkMode ? 0.2 : 0.01),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Material(
-          color: theme.cardColor,
-          borderRadius: BorderRadius.circular(20),
-          clipBehavior: Clip.antiAlias,
-          child: InkWell(
-            onTap: () => _showTransactionDetailSheet(t),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color:
-                      Colors.white.withValues(alpha: isDarkMode ? 0.05 : 0.01),
-                ),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color:
-                          catColor.withValues(alpha: isDarkMode ? 0.2 : 0.08),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(catIcon, color: catColor, size: 18),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(t.title,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 14,
-                                color: isDarkMode
-                                    ? Colors.white
-                                    : Colors.teal.shade900)),
-                        const SizedBox(height: 2),
-                        Text(DateFormat('dd MMM').format(t.date),
-                            style: TextStyle(
-                                fontSize: 10,
-                                color: isDarkMode
-                                    ? Colors.white54
-                                    : Colors.grey.shade500)),
-                      ],
-                    ),
-                  ),
-                  Text(
-                    '${isExpense ? '- ' : '+ '}${_formatRupiah(t.amount)}',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                      color: isExpense
-                          ? (isDarkMode
-                              ? Colors.redAccent
-                              : Colors.red.shade700)
-                          : (isDarkMode
-                              ? Colors.greenAccent
-                              : Colors.green.shade700),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
   }
 
   Widget _buildSavingTargetSection(
@@ -1484,13 +630,13 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
 
   Future<void> _handleQuickActionTap(_QuickAction action) async {
     switch (action.type) {
-      case _QuickActionType.expense:
+      case QuickActionType.expense:
         await _showManualTransactionSheet(TransactionType.expense);
         break;
-      case _QuickActionType.income:
+      case QuickActionType.income:
         await _showManualTransactionSheet(TransactionType.income);
         break;
-      case _QuickActionType.savingTarget:
+      case QuickActionType.savingTarget:
         final txs = ref.read(transactionsByGroupProvider(null));
         final bal = txs.fold<double>(
             0,
@@ -1499,19 +645,19 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 (t.type == TransactionType.income ? t.amount : -t.amount));
         await _showSavingTargetDialog(bal);
         break;
-      case _QuickActionType.budget:
+      case QuickActionType.budget:
         context.push('/monthly-budget');
         break;
-      case _QuickActionType.calculator:
+      case QuickActionType.calculator:
         _showCalculatorSheet();
         break;
-      case _QuickActionType.history:
+      case QuickActionType.history:
         setState(() => _currentIndex = 2);
         break;
-      case _QuickActionType.simulator:
+      case QuickActionType.simulator:
         _showSavingSimulatorSheet();
         break;
-      case _QuickActionType.family:
+      case QuickActionType.family:
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -1519,7 +665,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           ),
         );
         break;
-      case _QuickActionType.debt:
+      case QuickActionType.debt:
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -1527,7 +673,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           ),
         );
         break;
-      case _QuickActionType.shoppingList:
+      case QuickActionType.shoppingList:
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -1535,13 +681,13 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           ),
         );
         break;
-      case _QuickActionType.scanReceipt:
+      case QuickActionType.scanReceipt:
         context.push('/scan-receipt');
         break;
-      case _QuickActionType.challenge:
+      case QuickActionType.challenge:
         context.push('/challenge');
         break;
-      case _QuickActionType.recurring:
+      case QuickActionType.recurring:
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -1549,7 +695,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           ),
         );
         break;
-      case _QuickActionType.zakat:
+      case QuickActionType.zakat:
         context.push('/zakat');
         break;
     }
@@ -1947,32 +1093,35 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     final List<Map<String, dynamic>> categories = type == TransactionType.income
         ? [
             {'label': 'Gaji', 'icon': Icons.payments_rounded},
-            {'label': 'Jualan', 'icon': Icons.storefront_rounded},
-            {'label': 'Bonus', 'icon': Icons.redeem_rounded},
-            {'label': 'Hadiah', 'icon': Icons.card_giftcard_rounded},
-            {'label': 'Investasi', 'icon': Icons.trending_up_rounded},
+            {'label': 'Hasil Jualan', 'icon': Icons.storefront_rounded},
+            {'label': 'Bonus & Insentif', 'icon': Icons.stars_rounded},
+            {'label': 'Hadiah / THR', 'icon': Icons.card_giftcard_rounded},
+            {'label': 'Dividen / Investasi', 'icon': Icons.trending_up_rounded},
             {'label': 'Tabungan', 'icon': Icons.savings_rounded},
             {'label': 'Lainnya', 'icon': Icons.more_horiz_rounded},
           ]
         : [
-            {'label': 'Makanan & Minuman', 'icon': Icons.restaurant_rounded},
-            {'label': 'Transportasi', 'icon': Icons.directions_bus_rounded},
-            {
-              'label': 'Belanja & Keperluan',
-              'icon': Icons.shopping_bag_rounded
-            },
-            {'label': 'Tagihan', 'icon': Icons.receipt_rounded},
-            {'label': 'Hiburan', 'icon': Icons.movie_rounded},
+            {'label': 'Makanan & Minuman', 'icon': Icons.fastfood_rounded},
+            {'label': 'Transportasi', 'icon': Icons.directions_car_rounded},
+            {'label': 'Kebutuhan Rumah', 'icon': Icons.home_work_rounded},
+            {'label': 'Belanja Bulanan', 'icon': Icons.shopping_cart_rounded},
+            {'label': 'Tagihan & Listrik', 'icon': Icons.bolt_rounded},
+            {'label': 'Hiburan & Hobi', 'icon': Icons.smart_display_rounded},
             {'label': 'Kesehatan', 'icon': Icons.medical_services_rounded},
             {'label': 'Pendidikan', 'icon': Icons.school_rounded},
             {
-              'label': 'Zakat & Donasi',
+              'label': 'Zakat & Sedekah',
               'icon': Icons.volunteer_activism_rounded
             },
-            {'label': 'Cicilan', 'icon': Icons.credit_card_rounded},
-            {'label': 'Pulsa & Data', 'icon': Icons.tap_and_play_rounded},
+            {'label': 'Cicilan & Hutang', 'icon': Icons.credit_card_rounded},
+            {'label': 'Pulsa & Internet', 'icon': Icons.wifi_rounded},
+            {
+              'label': 'Perbaikan Rumah',
+              'icon': Icons.home_repair_service_rounded
+            },
+            {'label': 'Gaya Hidup', 'icon': Icons.style_rounded},
             {'label': 'Biaya Admin', 'icon': Icons.account_balance_rounded},
-            {'label': 'Lainnya', 'icon': Icons.more_horiz_rounded},
+            {'label': 'Lain-lain', 'icon': Icons.more_horiz_rounded},
           ];
 
     final topUpSources = [
@@ -2468,7 +1617,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
 
                                   final amount =
                                       _toAmount(amountController.text);
-                                  if (amount == null) return; // Should be handled by validator
+                                  if (amount == null)
+                                    return; // Should be handled by validator
 
                                   final finalCategory =
                                       (selectedCategory == 'Lainnya' &&
@@ -3278,12 +2428,14 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _miniStat('Total Pemasukan', totalIncome, Colors.green),
+                _miniStat(
+                    'Total Pemasukan', totalIncome, Colors.green, isDarkMode),
                 Container(
                     width: 1,
                     height: 32,
                     color: isDarkMode ? Colors.white10 : Colors.teal.shade50),
-                _miniStat('Total Pengeluaran', totalExpense, Colors.red),
+                _miniStat(
+                    'Total Pengeluaran', totalExpense, Colors.red, isDarkMode),
               ],
             ),
           ),
@@ -4323,39 +3475,35 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       },
     );
   }
-}
 
-class _QuickAction {
-  final IconData icon;
-  final String label;
-  final _QuickActionType type;
-
-  const _QuickAction(
-      {required this.icon, required this.label, required this.type});
-}
-
-enum _QuickActionType {
-  expense,
-  income,
-  savingTarget,
-  calculator,
-  history,
-  family,
-  simulator,
-  debt,
-  shoppingList,
-  budget,
-  scanReceipt,
-  challenge,
-  recurring,
-  zakat
-}
-
-class _NavItem {
-  final IconData icon;
-  final String label;
-
-  const _NavItem({required this.icon, required this.label});
+  Widget _miniStat(String label, double amount, Color color, bool isDarkMode,
+      {bool center = false}) {
+    return Column(
+      crossAxisAlignment:
+          center ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+      children: [
+        Text(label.toUpperCase(),
+            textAlign: center ? TextAlign.center : TextAlign.start,
+            style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                color: isDarkMode ? Colors.white54 : Colors.grey.shade500,
+                letterSpacing: 1.2)),
+        const SizedBox(height: 4),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            _showBalance ? _formatRupiah(amount) : '••••',
+            textAlign: center ? TextAlign.center : TextAlign.start,
+            style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: color.withValues(alpha: isDarkMode ? 0.9 : 0.8)),
+          ),
+        ),
+      ],
+    );
+  }
 }
 
 const List<_NavItem> _navItems = [
@@ -5502,4 +4650,20 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
       ),
     );
   }
+}
+
+class _QuickAction {
+  final IconData icon;
+  final String label;
+  final QuickActionType type;
+
+  const _QuickAction(
+      {required this.icon, required this.label, required this.type});
+}
+
+class _NavItem {
+  final IconData icon;
+  final String label;
+
+  const _NavItem({required this.icon, required this.label});
 }

@@ -37,20 +37,21 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
   bool _isCustomCategory = false;
 
   static const _fixedCategories = [
-    {'label': 'Makan', 'icon': Icons.restaurant_rounded},
-    {'label': 'Transport', 'icon': Icons.directions_bus_rounded},
-    {'label': 'Belanja', 'icon': Icons.shopping_bag_rounded},
-    {'label': 'Tagihan', 'icon': Icons.receipt_rounded},
-    {'label': 'Hiburan', 'icon': Icons.movie_rounded},
-    {'label': 'Kopi', 'icon': Icons.coffee_rounded},
+    {'label': 'Makanan & Minuman', 'icon': Icons.fastfood_rounded},
+    {'label': 'Transportasi', 'icon': Icons.directions_car_rounded},
+    {'label': 'Kebutuhan Rumah', 'icon': Icons.home_work_rounded},
+    {'label': 'Belanja Bulanan', 'icon': Icons.shopping_cart_rounded},
+    {'label': 'Tagihan & Listrik', 'icon': Icons.bolt_rounded},
+    {'label': 'Hiburan & Hobi', 'icon': Icons.smart_display_rounded},
     {'label': 'Kesehatan', 'icon': Icons.medical_services_rounded},
     {'label': 'Pendidikan', 'icon': Icons.school_rounded},
-    {'label': 'Hobi', 'icon': Icons.sports_esports_rounded},
-    {'label': 'Cicilan', 'icon': Icons.credit_card_rounded},
-    {'label': 'Zakat', 'icon': Icons.volunteer_activism_rounded},
-    {'label': 'Keperluan Rumah', 'icon': Icons.home_work_rounded},
-    {'label': 'Pulsa/Data', 'icon': Icons.tap_and_play_rounded},
-    {'label': 'Lainnya', 'icon': Icons.edit_note_rounded},
+    {'label': 'Zakat & Sedekah', 'icon': Icons.volunteer_activism_rounded},
+    {'label': 'Cicilan & Hutang', 'icon': Icons.credit_card_rounded},
+    {'label': 'Pulsa & Internet', 'icon': Icons.wifi_rounded},
+    {'label': 'Perbaikan Rumah', 'icon': Icons.home_repair_service_rounded},
+    {'label': 'Gaya Hidup', 'icon': Icons.style_rounded},
+    {'label': 'Biaya Admin', 'icon': Icons.account_balance_rounded},
+    {'label': 'Lain-lain', 'icon': Icons.more_horiz_rounded},
   ];
 
   @override

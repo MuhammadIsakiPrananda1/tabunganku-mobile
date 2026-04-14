@@ -44,13 +44,16 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
   final ImagePicker _picker = ImagePicker();
 
   final List<String> _categories = [
-    'Belanja',
-    'Makan & Minum',
+    'Makanan & Minuman',
     'Transportasi',
-    'Hiburan',
+    'Belanja Bulanan',
+    'Kebutuhan Rumah',
+    'Tagihan & Listrik',
+    'Hiburan & Hobi',
     'Kesehatan',
     'Pendidikan',
-    'Tagihan',
+    'Zakat & Sedekah',
+    'Gaya Hidup',
     'Lainnya',
   ];
 

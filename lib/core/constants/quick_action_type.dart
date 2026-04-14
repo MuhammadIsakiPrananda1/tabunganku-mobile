@@ -1,0 +1,16 @@
+enum QuickActionType {
+  income,
+  expense,
+  budget,
+  debt,
+  family,
+  shoppingList,
+  scanReceipt,
+  challenge,
+  savingTarget,
+  recurring,
+  zakat,
+  simulator,
+  calculator,
+  history,
+}

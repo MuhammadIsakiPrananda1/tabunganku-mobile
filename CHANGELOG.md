@@ -4,6 +4,16 @@ Seluruh evolusi, fitur, dan perbaikan aplikasi **TabunganKu** terdokumentasi sec
 
 ---
 
+## 🚀 [1.4.6] — 14 April 2026: Stability & Performance Optimization
+Penyempurnaan performa dan stabilitas sistem untuk pengalaman yang lebih mulus.
+
+### 🛠️ Detail Perubahan
+- **System Stability Enhancement** — Perbaikan bug minor dan optimalisasi penggunaan memori untuk performa yang lebih gegas 🚀.
+- **UI Refinement** — Penyesuaian mikro pada antarmuka untuk kenyamanan navigasi yang lebih baik.
+- **Version Bump** — Sinkronisasi versi aplikasi ke 1.4.6 untuk persiapan distribusi terbaru.
+
+---
+
 ## 💎 [1.4.5] — 11 April 2026: The Intelligence & Finalization
 Visi kami untuk asisten finansial yang cerdas dan premium kini telah lengkap.
 

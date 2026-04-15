@@ -1,9 +1,9 @@
 # 💰 TabunganKu - Aplikasi Tabungan Keluarga Cerdas
 
-[![Flutter Version](https://img.shields.io/badge/Flutter-3.0.0+-02569B?logo=flutter&logoColor=white)](https://flutter.dev)
-[![State management](https://img.shields.io/badge/State-Riverpod-764ABC?logo=riverpod&logoColor=white)](https://riverpod.dev)
-[![Backend](https://img.shields.io/badge/Backend-Firebase-FFCA28?logo=firebase&logoColor=black)](https://firebase.google.com)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Flutter Version](https://img.shields.io/badge/Flutter-3.0.0+-02569B?style=for-the-badge&logo=flutter&logoColor=white)](https://flutter.dev)
+[![State management](https://img.shields.io/badge/State-Riverpod-764ABC?style=for-the-badge&logo=riverpod&logoColor=white)](https://riverpod.dev)
+[![Backend](https://img.shields.io/badge/Backend-Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com)
+[![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
 
 ![TabunganKu Banner](assets/promo_banner.png)
 

@@ -8,12 +8,19 @@ Seluruh evolusi, fitur, dan perbaikan aplikasi **TabunganKu** terdokumentasi sec
 
 Penyempurnaan performa, stabilitas sistem, dan penambahan fitur keuangan cerdas untuk pengalaman yang lebih mulus dan lengkap.
 
-### 🏦 Fitur Baru: Bunga Tabungan SeaBank (CEPAT)
-- **SeaBank Interest Quick-Fill** — Fitur pengisian cepat bunga tabungan SeaBank langsung dari form **Tambah Pemasukan** 💚.
-  - Pilih **Bunga Harian Premium** (7,4% p.a. untuk saldo ≥ Rp 1 juta) atau **Bunga Harian Standar** (4% p.a. untuk semua saldo).
-  - Nama transaksi terisi otomatis: *"Bunga SeaBank [Bulan] [Tahun]"*.
-  - Kategori otomatis terpilih: **Bunga Tabungan** (kategori baru yang ditambahkan).
-  - Info card informatif menampilkan penjelasan rate & cara kerja bunga SeaBank.
+### 🏦 Fitur Baru: Bunga Tabungan Multi-Bank (CEPAT)
+- **Multi-Bank Interest Quick-Fill** — Fitur pengisian cepat bunga tabungan dari berbagai bank langsung dari form **Tambah Pemasukan** 💚.
+  - Mendukung **10 pilihan bank** sekaligus dalam satu dropdown terintegrasi:
+    - 🟢 **SeaBank (Premium)** — 7,4% p.a. untuk saldo ≥ Rp 1 juta (dikreditkan harian)
+    - 🔵 **SeaBank (Standar)** — 4% p.a. untuk semua saldo (dikreditkan harian)
+    - ⚡ **Bank Neo Commerce** — Bunga cair harian
+    - 🟠 **Bank Jago** — Bunga cair bulanan
+    - 💧 **Blu by BCA Digital** — Bunga cair bulanan
+    - 🔷 **Bank BRI, BCA, Mandiri, BNI** — Bunga tabungan bulanan konvensional
+    - ⚫ **Bank Lainnya** — Untuk bank digital/konvensional lainnya
+  - Nama transaksi terisi otomatis cerdas: *"Bunga [Nama Bank] [Bulan] [Tahun]"*.
+  - Kategori otomatis terpilih: **Bunga Tabungan**.
+  - Info card dinamis menampilkan penjelasan rate sesuai bank yang dipilih.
 - **Kategori Pemasukan Baru: Bunga Tabungan** — Kategori khusus untuk mencatat pendapatan bunga dari rekening tabungan 🏦.
 
 ### 🛠️ Detail Perubahan Lainnya

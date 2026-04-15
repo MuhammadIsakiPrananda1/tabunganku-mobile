@@ -1117,7 +1117,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     var noteText = '';
     String? selectedTopUpSource;
     String topUpBankName = '';
-    String? selectedSeaBankType;
+    String? selectedInterestBank;
 
     final theme = Theme.of(context);
     final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
@@ -1327,7 +1327,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                         ),
                                         borderRadius: BorderRadius.circular(6),
                                       ),
-                                      child: const Text('SeaBank',
+                                      child: const Text('INSTAN',
                                           style: TextStyle(
                                               color: Colors.white,
                                               fontSize: 9,
@@ -1348,13 +1348,13 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                 ),
                                 const SizedBox(height: 12),
                                 DropdownButtonFormField<String>(
-                                  value: selectedSeaBankType,
+                                  value: selectedInterestBank,
                                   isExpanded: true,
                                   dropdownColor: isDarkMode
                                       ? AppColors.surfaceDark
                                       : Colors.white,
                                   decoration: InputDecoration(
-                                    labelText: 'Pilih Jenis Bunga SeaBank',
+                                    labelText: 'Pilih Bank / Jenis Bunga',
                                     filled: true,
                                     fillColor: isDarkMode
                                         ? Colors.white.withValues(alpha: 0.05)
@@ -1396,20 +1396,76 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                     ),
                                     ...([
                                       {
-                                        'value': 'Bunga Harian Premium',
-                                        'label': 'Bunga Harian Premium',
+                                        'value': 'SeaBank (Premium)',
+                                        'label': 'SeaBank (Premium)',
                                         'subtitle':
                                             '7,4% p.a. – Saldo ≥ Rp 1 juta',
                                         'icon': Icons.star_rounded,
                                         'color': const Color(0xFF1DA462),
                                       },
                                       {
-                                        'value': 'Bunga Harian',
-                                        'label': 'Bunga Harian Standar',
+                                        'value': 'SeaBank (Standar)',
+                                        'label': 'SeaBank (Standar)',
                                         'subtitle':
                                             '4% p.a. – Semua saldo',
                                         'icon': Icons.savings_rounded,
                                         'color': Colors.teal,
+                                      },
+                                      {
+                                        'value': 'Bank Neo',
+                                        'label': 'Bank Neo Commerce',
+                                        'subtitle': 'Bunga cair harian',
+                                        'icon': Icons.bolt_rounded,
+                                        'color': Colors.amber.shade700,
+                                      },
+                                      {
+                                        'value': 'Bank Jago',
+                                        'label': 'Bank Jago',
+                                        'subtitle': 'Bunga cair bulanan',
+                                        'icon': Icons.account_balance_wallet_rounded,
+                                        'color': Colors.orange.shade800,
+                                      },
+                                      {
+                                        'value': 'Blu by BCA',
+                                        'label': 'Blu by BCA Digital',
+                                        'subtitle': 'Bunga cair bulanan',
+                                        'icon': Icons.water_drop_rounded,
+                                        'color': Colors.blue.shade500,
+                                      },
+                                      {
+                                        'value': 'Bank BRI',
+                                        'label': 'Bank BRI',
+                                        'subtitle': 'Bunga bulanan',
+                                        'icon': Icons.account_balance_rounded,
+                                        'color': Colors.blue.shade900,
+                                      },
+                                      {
+                                        'value': 'Bank BCA',
+                                        'label': 'Bank BCA',
+                                        'subtitle': 'Bunga bulanan',
+                                        'icon': Icons.account_balance_rounded,
+                                        'color': Colors.blue.shade800,
+                                      },
+                                      {
+                                        'value': 'Bank Mandiri',
+                                        'label': 'Bank Mandiri',
+                                        'subtitle': 'Bunga bulanan',
+                                        'icon': Icons.account_balance_rounded,
+                                        'color': Colors.yellow.shade800,
+                                      },
+                                      {
+                                        'value': 'Bank BNI',
+                                        'label': 'Bank BNI',
+                                        'subtitle': 'Bunga bulanan',
+                                        'icon': Icons.account_balance_rounded,
+                                        'color': Colors.orange.shade600,
+                                      },
+                                      {
+                                        'value': 'Bank Lainnya',
+                                        'label': 'Bank Lainnya',
+                                        'subtitle': 'Bank digital/konvensional',
+                                        'icon': Icons.more_horiz_rounded,
+                                        'color': Colors.grey.shade600,
                                       },
                                     ].map((item) {
                                       return DropdownMenuItem<String>(
@@ -1456,7 +1512,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                   ],
                                   onChanged: (val) {
                                     setSheetState(() {
-                                      selectedSeaBankType = val;
+                                      selectedInterestBank = val;
                                       if (val == null) {
                                         nameController.clear();
                                         selectedCategory = 'Gaji';
@@ -1477,14 +1533,15 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                           'November',
                                           'Desember'
                                         ][now.month];
+                                        String bankClean = val.replaceAll(' (Premium)', '').replaceAll(' (Standar)', '');
                                         nameController.text =
-                                            'Bunga SeaBank $monthName ${now.year}';
+                                            'Bunga $bankClean $monthName ${now.year}';
                                         selectedCategory = 'Bunga Tabungan';
                                       }
                                     });
                                   },
                                 ),
-                                if (selectedSeaBankType != null) ...[
+                                if (selectedInterestBank != null) ...[
                                   const SizedBox(height: 12),
                                   Container(
                                     padding: const EdgeInsets.all(14),
@@ -1532,10 +1589,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                                 CrossAxisAlignment.start,
                                             children: [
                                               Text(
-                                                selectedSeaBankType ==
-                                                        'Bunga Harian Premium'
-                                                    ? 'Bunga Premium SeaBank'
-                                                    : 'Bunga Standar SeaBank',
+                                                'Bunga $selectedInterestBank',
                                                 style: const TextStyle(
                                                     fontWeight: FontWeight.bold,
                                                     fontSize: 12,
@@ -1543,10 +1597,13 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                               ),
                                               const SizedBox(height: 2),
                                               Text(
-                                                selectedSeaBankType ==
-                                                        'Bunga Harian Premium'
+                                                selectedInterestBank ==
+                                                        'SeaBank (Premium)'
                                                     ? '7,4% p.a. dihitung harian untuk saldo ≥ Rp 1 juta. Dikreditkan otomatis setiap hari.'
-                                                    : '4% p.a. untuk semua saldo. Bunga dihitung & dikreditkan harian ke rekening SeaBank Anda.',
+                                                    : selectedInterestBank ==
+                                                            'SeaBank (Standar)'
+                                                        ? '4% p.a. untuk semua saldo. Bunga dihitung & dikreditkan otomatis setiap hari.'
+                                                        : 'Bunga tabungan dari $selectedInterestBank. Tambahkan catatan nominal pajak jika diperlukan.',
                                                 style: TextStyle(
                                                     fontSize: 11,
                                                     color: isDarkMode

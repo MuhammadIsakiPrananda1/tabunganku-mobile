@@ -31,6 +31,8 @@ import 'package:tabunganku/features/home/presentation/widgets/smart_clock_widget
 import 'package:tabunganku/core/constants/quick_action_type.dart';
 import 'package:tabunganku/features/home/presentation/widgets/home_tab_view.dart'
     as widgets;
+import 'package:tabunganku/providers/notification_provider.dart';
+import 'package:tabunganku/features/home/presentation/widgets/notification_sheet.dart';
 
 class DashboardPage extends ConsumerStatefulWidget {
   const DashboardPage({super.key});
@@ -57,6 +59,15 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Target tabungan dihapus.')));
     }
+  }
+
+  void _showNotificationSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => const NotificationSheet(),
+    );
   }
 
   // Pindahkan ke atas agar bisa direferensikan sebelum _buildProfileTab
@@ -151,31 +162,30 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 8),
-            child: IconButton(
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Row(
-                      children: [
-                        const Icon(Icons.notifications_active_outlined,
-                            color: Colors.white, size: 20),
-                        const SizedBox(width: 12),
-                        const Text('Belum ada notifikasi baru untuk Anda'),
-                      ],
+            child: Consumer(
+              builder: (context, ref, child) {
+                final unreadCountAsync = ref.watch(unreadNotificationsCountProvider);
+                return Badge(
+                  label: unreadCountAsync.maybeWhen(
+                    data: (count) => count > 0 ? Text(count.toString()) : null,
+                    orElse: () => null,
+                  ),
+                  isLabelVisible: unreadCountAsync.maybeWhen(
+                    data: (count) => count > 0,
+                    orElse: () => false,
+                  ),
+                  backgroundColor: Colors.redAccent,
+                  offset: const Offset(-4, 4),
+                  child: IconButton(
+                    onPressed: _showNotificationSheet,
+                    icon: Icon(
+                      Icons.notifications_none_rounded,
+                      color: isDarkMode ? Colors.white70 : Colors.black87,
+                      size: 28,
                     ),
-                    behavior: SnackBarBehavior.floating,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15)),
-                    backgroundColor: AppColors.primary,
-                    duration: const Duration(seconds: 2),
                   ),
                 );
               },
-              icon: Icon(
-                Icons.notifications_none_rounded,
-                color: isDarkMode ? Colors.white70 : Colors.black87,
-                size: 28,
-              ),
             ),
           ),
         ],
@@ -1118,6 +1128,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     String? selectedTopUpSource;
     String topUpBankName = '';
     String? selectedInterestBank;
+    String interestOtherBankName = '';
 
     final theme = Theme.of(context);
     final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
@@ -1388,7 +1399,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                   items: [
                                     DropdownMenuItem<String>(
                                       value: null,
-                                      child: Text('Bukan Bunga / Bersihkan',
+                                      child: Text('None',
                                           style: TextStyle(
                                               color: isDarkMode
                                                   ? Colors.white54
@@ -1513,9 +1524,13 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                   onChanged: (val) {
                                     setSheetState(() {
                                       selectedInterestBank = val;
+                                      interestOtherBankName = '';
                                       if (val == null) {
                                         nameController.clear();
                                         selectedCategory = 'Gaji';
+                                      } else if (val == 'Bank Lainnya') {
+                                        nameController.clear();
+                                        selectedCategory = 'Bunga Tabungan';
                                       } else {
                                         final now = DateTime.now();
                                         final monthName = [
@@ -1541,6 +1556,73 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                     });
                                   },
                                 ),
+                                if (selectedInterestBank == 'Bank Lainnya') ...[
+                                  const SizedBox(height: 16),
+                                  TextFormField(
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: isDarkMode
+                                            ? Colors.white
+                                            : Colors.black87),
+                                    decoration: InputDecoration(
+                                      labelText: 'Nama Bank',
+                                      hintText: 'Misal: Bank Raya, OCBC, Allo...',
+                                      filled: true,
+                                      fillColor: isDarkMode
+                                          ? Colors.white.withValues(alpha: 0.05)
+                                          : const Color(0xFFF0FBF6),
+                                      border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(16),
+                                          borderSide: BorderSide(
+                                              color: isDarkMode
+                                                  ? Colors.white10
+                                                  : const Color(0xFF1DA462)
+                                                      .withValues(alpha: 0.3))),
+                                      enabledBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(16),
+                                          borderSide: BorderSide(
+                                              color: isDarkMode
+                                                  ? Colors.white10
+                                                  : const Color(0xFF1DA462)
+                                                      .withValues(alpha: 0.3))),
+                                      focusedBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(16),
+                                          borderSide: const BorderSide(
+                                              color: Color(0xFF1DA462), width: 1.5)),
+                                      prefixIcon: const Icon(
+                                          Icons.account_balance_rounded,
+                                          color: Color(0xFF1DA462)),
+                                      labelStyle: TextStyle(
+                                          color: isDarkMode
+                                              ? Colors.white38
+                                              : Colors.black45),
+                                    ),
+                                    onChanged: (val) {
+                                      interestOtherBankName = val;
+                                      setSheetState(() {
+                                        final now = DateTime.now();
+                                        final monthName = [
+                                          '',
+                                          'Januari',
+                                          'Februari',
+                                          'Maret',
+                                          'April',
+                                          'Mei',
+                                          'Juni',
+                                          'Juli',
+                                          'Agustus',
+                                          'September',
+                                          'Oktober',
+                                          'November',
+                                          'Desember'
+                                        ][now.month];
+                                        nameController.text = val.trim().isEmpty
+                                            ? ''
+                                            : 'Bunga ${val.trim()} $monthName ${now.year}';
+                                      });
+                                    },
+                                  ),
+                                ],
                                 if (selectedInterestBank != null) ...[
                                   const SizedBox(height: 12),
                                   Container(
@@ -1589,7 +1671,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                                 CrossAxisAlignment.start,
                                             children: [
                                               Text(
-                                                'Bunga $selectedInterestBank',
+                                                selectedInterestBank == 'Bank Lainnya' && interestOtherBankName.trim().isNotEmpty
+                                                    ? 'Bunga ${interestOtherBankName.trim()}'
+                                                    : 'Bunga $selectedInterestBank',
                                                 style: const TextStyle(
                                                     fontWeight: FontWeight.bold,
                                                     fontSize: 12,
@@ -1603,7 +1687,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                                     : selectedInterestBank ==
                                                             'SeaBank (Standar)'
                                                         ? '4% p.a. untuk semua saldo. Bunga dihitung & dikreditkan otomatis setiap hari.'
-                                                        : 'Bunga tabungan dari $selectedInterestBank. Tambahkan catatan nominal pajak jika diperlukan.',
+                                                        : selectedInterestBank == 'Bank Lainnya'
+                                                            ? 'Masukkan nama bank Anda di kolom atas. Nama transaksi akan terisi otomatis.'
+                                                            : 'Bunga tabungan dari $selectedInterestBank. Tambahkan catatan nominal pajak jika diperlukan.',
                                                 style: TextStyle(
                                                     fontSize: 11,
                                                     color: isDarkMode
@@ -1674,7 +1760,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                   items: [
                                     const DropdownMenuItem<String>(
                                       value: null,
-                                      child: Text('Bukan Top-up / Bersihkan'),
+                                      child: Text('None'),
                                     ),
                                     ...topUpSources.map((source) {
                                       final label = source['label'] as String;
@@ -3316,26 +3402,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                         transactions: regular,
                         monthLabel: monthLabel,
                         asPdf: true,
-                      );
-                    } catch (_) {}
-                  },
-                ),
-                const SizedBox(height: 12),
-                _exportOptionTile(
-                  ctx2,
-                  isDark: isDark,
-                  icon: Icons.content_copy_rounded,
-                  iconColor: Colors.blue.shade500,
-                  title: 'Salin Ringkasan Teks',
-                  subtitle: 'Ringkasan singkat siap kirim via WhatsApp, dll.',
-                  onTap: () async {
-                    Navigator.pop(ctx2);
-                    try {
-                      await ExportService.shareMonthlyReport(
-                        context: ctx2,
-                        transactions: regular,
-                        monthLabel: monthLabel,
-                        asPdf: false,
                       );
                     } catch (_) {}
                   },

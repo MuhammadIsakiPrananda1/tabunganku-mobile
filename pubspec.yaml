@@ -1,7 +1,7 @@
 name: tabunganku
 description: A new Flutter project for saving money online.
 publish_to: 'none'
-version: 1.4.6+146
+version: 1.4.7+147
 
 environment:
   sdk: '>=3.0.0 <4.0.0'

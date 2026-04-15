@@ -4,6 +4,8 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tabunganku/core/security/secure_storage_service.dart';
 import 'package:tabunganku/models/badge_model.dart';
+import 'package:tabunganku/models/notification_model.dart';
+import 'package:tabunganku/services/notification_service.dart';
 
 /// Service untuk mengelola Badge System
 abstract class BadgeService {
@@ -17,6 +19,10 @@ abstract class BadgeService {
 
 /// Mock implementation dengan SharedPreferences
 class MockBadgeService implements BadgeService {
+  final NotificationService _notificationService;
+  
+  MockBadgeService(this._notificationService);
+
   static const String _earnedBadgesKey = 'earned_badges_';
   
   static final SecureStorageService _secureStorage = SecureStorageService();
@@ -229,6 +235,21 @@ class MockBadgeService implements BadgeService {
     if (!earnedIds.contains(badgeId)) {
       earnedIds.add(badgeId);
       await _saveEarnedBadgeIds(earnedIds);
+
+      // Trigger notification
+      final badge = await getBadgeById(badgeId);
+      if (badge != null) {
+        await _notificationService.addNotification(
+          NotificationModel(
+            id: 'badge_$badgeId\_${DateTime.now().millisecondsSinceEpoch}',
+            title: 'Badge Baru Terbuka! 🏆',
+            message: 'Selamat! Kamu baru saja mendapatkan badge "${badge.name}".',
+            timestamp: DateTime.now(),
+            type: NotificationType.badge,
+            actionData: badgeId,
+          ),
+        );
+      }
     }
   }
 

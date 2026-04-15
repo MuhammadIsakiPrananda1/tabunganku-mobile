@@ -4,7 +4,13 @@ Seluruh evolusi, fitur, dan perbaikan aplikasi **TabunganKu** terdokumentasi sec
 
 ---
 
-## 🚀 [1.4.6] — 14–15 April 2026: Stability, Performance & Smart Income
+## 🚀 [1.4.7] — 15 April 2026: Comprehensive System Synchronization
+
+Pembaruan sistem secara menyeluruh untuk sinkronisasi versi aplikasi di semua platform, memastikan konsistensi antara backend, internal constants, dan konfigurasi build Android.
+
+---
+
+## 💎 [1.4.6] — 14–15 April 2026: Stability, Performance & Smart Income
 
 Penyempurnaan performa, stabilitas sistem, dan penambahan fitur keuangan cerdas untuk pengalaman yang lebih mulus dan lengkap.
 

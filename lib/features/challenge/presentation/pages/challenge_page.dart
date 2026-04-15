@@ -1281,7 +1281,7 @@ class _BadgesTab extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 3,
-                  childAspectRatio: 0.88,
+                  childAspectRatio: 0.78, // Taller cards to accommodate text
                   crossAxisSpacing: 14,
                   mainAxisSpacing: 14,
                 ),
@@ -1334,15 +1334,15 @@ class _BadgeItem extends StatelessWidget {
         onTap: () => _showBadgeDetail(context),
         borderRadius: BorderRadius.circular(14),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            spacing: 10,
+            spacing: 4, // Reduced spacing
             children: [
             // 🎖️ Badge Icon
             Container(
-                width: 56,
-                height: 56,
+                width: 48, // Reduced from 56
+                height: 48, // Reduced from 56
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: badge.isEarned 
@@ -1361,7 +1361,7 @@ class _BadgeItem extends StatelessWidget {
                 child: Icon(
                   _getCategoryIcon(),
                   color: Colors.white,
-                  size: 28,
+                  size: 24, // Reduced from 28
                 ),
               ),
               Text(

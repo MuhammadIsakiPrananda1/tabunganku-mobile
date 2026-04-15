@@ -1,55 +1,67 @@
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tabunganku/main.dart';
+import 'package:tabunganku/models/notification_model.dart';
+import 'package:tabunganku/services/notification_service.dart';
 
-class NotificationService {
-  Future<void> showAchievementNotification(String title, String description) async {
-    const androidDetails = AndroidNotificationDetails(
-      'achievement_channel_v2',
-      'Pencapaian Baru',
-      channelDescription: 'Notifikasi saat mendapatkan pencapaian baru',
-      importance: Importance.max,
-      priority: Priority.high,
-      playSound: true,
-      enableVibration: true,
-      icon: '@mipmap/ic_launcher',
-    );
-    const notificationDetails = NotificationDetails(
-      android: androidDetails,
-      iOS: DarwinNotificationDetails(presentAlert: true, presentBadge: true, presentSound: true),
-    );
+final notificationServiceProvider = Provider<NotificationService>((ref) {
+  return MockNotificationService();
+});
 
-    await flutterLocalNotificationsPlugin.show(
-      title.hashCode,
-      'Pencapaian Baru Terbuka! 🎉',
-      '$title: $description',
-      notificationDetails,
-    );
+final allNotificationsProvider = FutureProvider<List<NotificationModel>>((ref) async {
+  final service = ref.watch(notificationServiceProvider);
+  return service.getNotifications();
+});
+
+final unreadNotificationsCountProvider = FutureProvider<int>((ref) async {
+  final service = ref.watch(notificationServiceProvider);
+  // Watch all notifications so this re-evaluates when they change
+  ref.watch(allNotificationsProvider);
+  return service.getUnreadCount();
+});
+
+class NotificationNotifier extends StateNotifier<AsyncValue<List<NotificationModel>>> {
+  final NotificationService _service;
+  final Ref _ref;
+
+  NotificationNotifier(this._service, this._ref) : super(const AsyncValue.loading()) {
+    loadNotifications();
   }
 
-  Future<void> showTargetReachedNotification(String targetName, String amount) async {
-    const androidDetails = AndroidNotificationDetails(
-      'target_reached_channel_v2',
-      'Target Tercapai',
-      channelDescription: 'Notifikasi saat target tabungan terpenuhi',
-      importance: Importance.max,
-      priority: Priority.high,
-      playSound: true,
-      enableVibration: true,
-      icon: '@mipmap/ic_launcher',
-    );
-    const notificationDetails = NotificationDetails(
-      android: androidDetails,
-      iOS: DarwinNotificationDetails(presentAlert: true, presentBadge: true, presentSound: true),
-    );
+  Future<void> loadNotifications() async {
+    state = const AsyncValue.loading();
+    try {
+      final notifications = await _service.getNotifications();
+      state = AsyncValue.data(notifications);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+    }
+  }
 
-    await flutterLocalNotificationsPlugin.show(
-      targetName.hashCode,
-      'Target Tabungan Tercapai! 💰',
-      'Selamat! Target "$targetName" senilai $amount telah terpenuhi.',
-      notificationDetails,
-    );
+  Future<void> addNotification(NotificationModel notification) async {
+    await _service.addNotification(notification);
+    await loadNotifications();
+    _ref.invalidate(unreadNotificationsCountProvider);
+  }
+
+  Future<void> markAsRead(String id) async {
+    await _service.markAsRead(id);
+    await loadNotifications();
+    _ref.invalidate(unreadNotificationsCountProvider);
+  }
+
+  Future<void> markAllAsRead() async {
+    await _service.markAllAsRead();
+    await loadNotifications();
+    _ref.invalidate(unreadNotificationsCountProvider);
+  }
+
+  Future<void> clearAll() async {
+    await _service.clearAll();
+    await loadNotifications();
+    _ref.invalidate(unreadNotificationsCountProvider);
   }
 }
 
-final notificationServiceProvider = Provider((ref) => NotificationService());
+final notificationNotifierProvider = StateNotifierProvider<NotificationNotifier, AsyncValue<List<NotificationModel>>>((ref) {
+  final service = ref.watch(notificationServiceProvider);
+  return NotificationNotifier(service, ref);
+});

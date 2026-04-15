@@ -320,7 +320,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             // ── Lencana Pencapaian ─────────────────────────────────
             _buildSectionHeader('Pencapaian'),
             _buildAchievementList(achievements, isDarkMode),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8), // Reduced from 16 to 8
 
             _buildSectionHeader('Preferensi'),
             _buildSettingTile(
@@ -674,8 +674,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       String label, String value, IconData icon, Color color, bool isDarkMode) {
     return Expanded(
       child: Container(
-        height: 110, // Fixed height for perfect alignment
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+        height: 110, // Fixed height kept as original
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8), // Reduced vertical padding from 16 to 10
         decoration: BoxDecoration(
           color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(24),
@@ -698,7 +698,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 letterSpacing: 0.3,
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8), // Reduced spacing from 12 to 8
             Expanded(
               child: Center(
                 child: FittedBox(
@@ -715,7 +715,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 ),
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 6), // Reduced spacing from 8 to 6
             Icon(icon, color: color, size: 20),
           ],
         ),
@@ -726,7 +726,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   Widget _buildAchievementList(
       List<Achievement> achievements, bool isDarkMode) {
     return SizedBox(
-      height: 110,
+      height: 95, // Reduced from 110 to tighten the gap with the next section
       child: ListView.separated(
         padding: const EdgeInsets.symmetric(horizontal: 4),
         scrollDirection: Axis.horizontal,
@@ -740,8 +740,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             child: Column(
               children: [
                 Container(
-                  width: 56,
-                  height: 56,
+                  width: 50, // Reduced from 56
+                  height: 50, // Reduced from 56
                   decoration: BoxDecoration(
                     color: unlocked
                         ? AppColors.primary.withValues(alpha: 0.1)
@@ -769,7 +769,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                         : (isDarkMode ? Colors.white24 : Colors.grey.shade300),
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 4), // Reduced spacing from 8 to 4
                 Text(
                   item.title,
                   textAlign: TextAlign.center,

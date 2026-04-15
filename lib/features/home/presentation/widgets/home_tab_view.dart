@@ -188,11 +188,8 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Expanded(
-                              child: _miniStat(
-                                  'Pemasukan',
-                                  totalIncome,
-                                  Colors.green.shade600,
-                                  isDarkMode,
+                              child: _miniStat('Pemasukan', totalIncome,
+                                  Colors.green.shade600, isDarkMode,
                                   center: true)),
                           const SizedBox(width: 24),
                           Container(
@@ -206,11 +203,8 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                               )),
                           const SizedBox(width: 24),
                           Expanded(
-                              child: _miniStat(
-                                  'Pengeluaran',
-                                  totalExpense,
-                                  Colors.red.shade600,
-                                  isDarkMode,
+                              child: _miniStat('Pengeluaran', totalExpense,
+                                  Colors.red.shade600, isDarkMode,
                                   center: true)),
                         ],
                       ),
@@ -297,33 +291,41 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                 : Colors.teal.shade50.withValues(alpha: 0.3)),
         borderRadius: BorderRadius.circular(16),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(isDanger ? Icons.warning_amber_rounded : Icons.auto_graph_rounded,
-              size: 14, color: isDanger ? Colors.red : Colors.teal),
-          const SizedBox(width: 8),
-          Text(
-            'Estimasi Akhir Bulan: ',
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
-              color: isDarkMode
-                  ? Colors.white38
-                  : Colors.teal.shade900.withValues(alpha: 0.5),
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        alignment: Alignment.centerLeft,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+                isDanger
+                    ? Icons.warning_amber_rounded
+                    : Icons.auto_graph_rounded,
+                size: 14,
+                color: isDanger ? Colors.red : Colors.teal),
+            const SizedBox(width: 8),
+            Text(
+              'Estimasi Bulan Ini: ',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+                color: isDarkMode
+                    ? Colors.white38
+                    : Colors.teal.shade900.withValues(alpha: 0.5),
+              ),
             ),
-          ),
-          Text(
-            widget.showBalance ? _formatRupiah(estBalance) : '••••••',
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.bold,
-              color: isDanger
-                  ? Colors.red
-                  : (isDarkMode ? Colors.white70 : Colors.teal.shade900),
+            Text(
+              widget.showBalance ? _formatRupiah(estBalance) : '••••••',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+                color: isDanger
+                    ? Colors.red
+                    : (isDarkMode ? Colors.white70 : Colors.teal.shade900),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -564,20 +566,22 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                                 letterSpacing: 1.2,
                                 color:
                                     AppColors.primary.withValues(alpha: 0.6))),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: AppColors.primary.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(8),
+                        Flexible(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(target.name,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.primary)),
                           ),
-                          child: Text(target.name,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.primary)),
                         ),
                       ],
                     ),
@@ -590,8 +594,9 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                             style: TextStyle(
                                 fontSize: 32,
                                 fontWeight: FontWeight.bold,
-                                color:
-                                    isDarkMode ? Colors.white : Colors.black87)),
+                                color: isDarkMode
+                                    ? Colors.white
+                                    : Colors.black87)),
                         const SizedBox(width: 8),
                         Text('/ 100%',
                             style: TextStyle(
@@ -678,79 +683,76 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                   children: [
                     PieChart(
                       PieChartData(
-                        sectionsSpace: 2,
-                        centerSpaceRadius: 46,
+                        sectionsSpace: 4,
+                        centerSpaceRadius: 40, // Smaller donut hole
                         sections: [
                           if (totalIncome > 0)
                             PieChartSectionData(
                               color: Colors.green.shade400,
                               value: totalIncome,
-                              radius: 20, // Thinner slices for premium look
+                              radius: 12, // Thinner donut slices
                               title: '$incomePercent%',
                               showTitle: true,
-                              titlePositionPercentageOffset: 1.85, // Balanced distance
+                              titlePositionPercentageOffset: 3.2, // Pushed far outside
                               titleStyle: GoogleFonts.comicNeue(
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold,
-                                color: isDarkMode ? Colors.green.shade300 : Colors.green.shade700,
+                                color: isDarkMode
+                                    ? Colors.green.shade300
+                                    : Colors.green.shade700,
                               ),
                             ),
                           if (totalExpense > 0)
                             PieChartSectionData(
                               color: Colors.red.shade400,
                               value: totalExpense,
-                              radius: 20, // Thinner slices for premium look
+                              radius: 12, // Thinner donut slices
                               title: '$expensePercent%',
                               showTitle: true,
-                              titlePositionPercentageOffset: 1.85, // Balanced distance
+                              titlePositionPercentageOffset: 3.2, // Pushed far outside
                               titleStyle: GoogleFonts.comicNeue(
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold,
-                                color: isDarkMode ? Colors.red.shade300 : Colors.red.shade700,
+                                color: isDarkMode
+                                    ? Colors.red.shade300
+                                    : Colors.red.shade700,
                               ),
                             ),
                         ],
                       ),
                     ),
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'TOTAL',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1.2,
-                            color: isDarkMode ? Colors.white30 : Colors.grey.shade400,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Text(
-                            _formatRupiah(totalVal),
-                            style: GoogleFonts.comicNeue(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                              color: isDarkMode ? Colors.white : Colors.black87,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                    // Icon in center
+                    Icon(Icons.auto_awesome_mosaic_rounded,
+                        size: 20,
+                        color:
+                            isDarkMode ? Colors.white10 : Colors.grey.shade100),
                   ],
                 ),
               ),
-              const SizedBox(height: 32),
-              // Centered Indicators below
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+              const SizedBox(height: 24),
+              // Reordered Indicators
+              Column(
                 children: [
-                  _buildCenteredIndicator(
-                      'Pemasukan', totalIncome, Colors.green),
-                  const SizedBox(width: 32),
-                  _buildCenteredIndicator(
-                      'Pengeluaran', totalExpense, Colors.red),
+                  // TOTAL ON TOP
+                  _buildCenteredIndicator('Total Alokasi', totalVal,
+                      isDarkMode ? Colors.white : Colors.black87),
+                  const SizedBox(height: 16),
+                  // INCOME & EXPENSE BERDEKATAN DI BAWAH
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: _buildCenteredIndicator(
+                            'Pemasukan', totalIncome, Colors.green),
+                      ),
+                      const SizedBox(
+                          width: 48), // Spasi yang cukup tapi tetap "dekat"
+                      Expanded(
+                        child: _buildCenteredIndicator(
+                            'Pengeluaran', totalExpense, Colors.red),
+                      ),
+                    ],
+                  ),
                 ],
               ),
               const SizedBox(height: 32),
@@ -771,18 +773,36 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
           decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const SizedBox(height: 8),
-        Text(label, style: const TextStyle(fontSize: 10, color: Colors.grey)),
-        Text(_formatRupiah(val),
-            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 10, color: Colors.grey),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: 2),
+        SizedBox(
+          width: double.infinity,
+          height: 20,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              _formatRupiah(val),
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+            ),
+          ),
+        ),
       ],
     );
   }
 
   Widget _buildCategoryBreakdown(
       List<TransactionModel> transactions, bool isDarkMode) {
-    final expenses = transactions
-        .where((t) => t.type == TransactionType.expense)
-        .toList();
+    final expenses =
+        transactions.where((t) => t.type == TransactionType.expense).toList();
     if (expenses.isEmpty) return const SizedBox.shrink();
 
     // Group by category
@@ -865,7 +885,9 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
       children: [
         const Text('Aktivitas Terakhir',
             style: TextStyle(
-                fontWeight: FontWeight.bold, fontSize: 16, letterSpacing: -0.5)),
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                letterSpacing: -0.5)),
         const SizedBox(height: 16),
         ...transactions.take(3).map((t) => _minimalTile(t, isDarkMode)),
       ],
@@ -875,9 +897,7 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
   Widget _minimalTile(TransactionModel t, bool isDarkMode) {
     final bool isExpense = t.type == TransactionType.expense;
     final IconData catIcon = AppConstants.categoryIcons[t.category] ??
-        (isExpense
-            ? Icons.arrow_upward_rounded
-            : Icons.arrow_downward_rounded);
+        (isExpense ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded);
     final Color catColor = isExpense ? Colors.red : Colors.green;
 
     return Padding(
@@ -930,17 +950,24 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
   Widget _buildWatermark(bool isDarkMode) {
     return Center(
       child: Opacity(
-        opacity: 0.2,
+        opacity: 0.4,
         child: Column(
           children: [
             const Text('NEVERLAND STUDIO',
                 style: TextStyle(
                     color: AppColors.primary,
-                    fontSize: 10,
+                    fontSize: 12,
                     fontWeight: FontWeight.bold,
-                    letterSpacing: 2)),
-            const SizedBox(height: 4),
-            Text(AppVersion.edition, style: const TextStyle(fontSize: 8)),
+                    letterSpacing: 3)),
+            const SizedBox(height: 6),
+            Text(
+              AppVersion.fullVersion,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: isDarkMode ? Colors.white70 : Colors.black54,
+              ),
+            ),
           ],
         ),
       ),

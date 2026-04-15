@@ -5,6 +5,7 @@ import 'package:tabunganku/features/settings/presentation/providers/achievement_
 import 'package:tabunganku/providers/saving_target_provider.dart';
 import 'package:tabunganku/providers/transaction_provider.dart';
 import 'package:tabunganku/providers/notification_provider.dart';
+import 'package:tabunganku/models/notification_model.dart';
 import 'package:tabunganku/models/transaction_model.dart';
 import 'package:intl/intl.dart';
 
@@ -40,7 +41,6 @@ class _NotificationObserverState extends ConsumerState<NotificationObserver> {
 
   @override
   Widget build(BuildContext context) {
-    final notificationService = ref.read(notificationServiceProvider);
     final currencyFormatter = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp', decimalDigits: 0);
 
     // ── Achievement Listener ───────────────────────────────────
@@ -49,7 +49,16 @@ class _NotificationObserverState extends ConsumerState<NotificationObserver> {
       
       for (final achievement in next) {
         if (achievement.isUnlocked && !_isNotified('achievement_${achievement.id}')) {
-          notificationService.showAchievementNotification(achievement.title, achievement.description);
+          ref.read(notificationNotifierProvider.notifier).addNotification(
+            NotificationModel(
+              id: 'achievement_${achievement.id}_${DateTime.now().millisecondsSinceEpoch}',
+              title: 'Pencapaian Baru! 🏅',
+              message: '${achievement.title}: ${achievement.description}',
+              timestamp: DateTime.now(),
+              type: NotificationType.badge,
+              actionData: achievement.id,
+            ),
+          );
           _markAsNotified('achievement_${achievement.id}');
         }
       }
@@ -73,9 +82,15 @@ class _NotificationObserverState extends ConsumerState<NotificationObserver> {
 
         for (final target in targets) {
           if (currentBalance >= target.targetAmount && !_isNotified('target_reached_${target.id}')) {
-            notificationService.showTargetReachedNotification(
-              target.name,
-              currencyFormatter.format(target.targetAmount),
+            ref.read(notificationNotifierProvider.notifier).addNotification(
+              NotificationModel(
+                id: 'target_reached_${target.id}_${DateTime.now().millisecondsSinceEpoch}',
+                title: 'Target Tercapai! 🎯',
+                message: 'Selamat! Saldo Anda telah mencapai target "${target.name}" sebesar ${currencyFormatter.format(target.targetAmount)}.',
+                timestamp: DateTime.now(),
+                type: NotificationType.savings,
+                actionData: target.id,
+              ),
             );
             _markAsNotified('target_reached_${target.id}');
           }

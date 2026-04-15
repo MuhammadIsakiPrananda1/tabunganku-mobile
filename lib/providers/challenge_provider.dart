@@ -4,6 +4,7 @@ import 'package:tabunganku/models/challenge_template_model.dart';
 import 'package:tabunganku/models/badge_model.dart';
 import 'package:tabunganku/services/challenge_service.dart';
 import 'package:tabunganku/services/badge_service.dart';
+import 'package:tabunganku/providers/notification_provider.dart';
 
 // ==================== SERVICE PROVIDERS ====================
 
@@ -12,7 +13,8 @@ final challengeServiceProvider = Provider<ChallengeService>((ref) {
 });
 
 final badgeServiceProvider = Provider<BadgeService>((ref) {
-  return MockBadgeService();
+  final notificationService = ref.watch(notificationServiceProvider);
+  return MockBadgeService(notificationService);
 });
 
 // ==================== CHALLENGE PROVIDERS ====================

@@ -41,7 +41,6 @@ Future<void> _initNotifications() async {
   
   if (androidPlugin != null) {
     await androidPlugin.requestNotificationsPermission();
-    await androidPlugin.requestExactAlarmsPermission();
   }
 }
 

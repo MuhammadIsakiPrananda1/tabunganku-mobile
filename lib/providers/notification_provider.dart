@@ -5,11 +5,13 @@ import 'package:tabunganku/main.dart';
 class NotificationService {
   Future<void> showAchievementNotification(String title, String description) async {
     const androidDetails = AndroidNotificationDetails(
-      'achievement_channel',
+      'achievement_channel_v2',
       'Pencapaian Baru',
       channelDescription: 'Notifikasi saat mendapatkan pencapaian baru',
-      importance: Importance.high,
+      importance: Importance.max,
       priority: Priority.high,
+      playSound: true,
+      enableVibration: true,
       icon: '@mipmap/ic_launcher',
     );
     const notificationDetails = NotificationDetails(
@@ -27,11 +29,13 @@ class NotificationService {
 
   Future<void> showTargetReachedNotification(String targetName, String amount) async {
     const androidDetails = AndroidNotificationDetails(
-      'target_reached_channel',
+      'target_reached_channel_v2',
       'Target Tercapai',
       channelDescription: 'Notifikasi saat target tabungan terpenuhi',
       importance: Importance.max,
       priority: Priority.high,
+      playSound: true,
+      enableVibration: true,
       icon: '@mipmap/ic_launcher',
     );
     const notificationDetails = NotificationDetails(

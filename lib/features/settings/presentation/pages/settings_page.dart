@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:tabunganku/core/services/permission_service.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -44,6 +46,28 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     try {
       // SET external operation to true to prevent appraisal lockout
       ref.read(securityProvider.notifier).setExternalOperation(true);
+
+      // Check permissions based on source
+      bool hasPermission = false;
+      if (source == ImageSource.camera) {
+        hasPermission = await PermissionService.requestPermission(
+          context,
+          permission: Permission.camera,
+          title: 'Kamera',
+          description: 'Aplikasi membutuhkan akses kamera untuk mengambil foto profil baru Anda secara langsung.',
+          icon: Icons.camera_alt_rounded,
+        );
+      } else {
+        hasPermission = await PermissionService.requestPermission(
+          context,
+          permission: Permission.photos,
+          title: 'Galeri',
+          description: 'Aplikasi membutuhkan akses galeri untuk memilih foto profil terbaik dari koleksi foto Anda.',
+          icon: Icons.photo_library_rounded,
+        );
+      }
+
+      if (!hasPermission) return;
 
       pickedFile = await picker.pickImage(
         source: source,

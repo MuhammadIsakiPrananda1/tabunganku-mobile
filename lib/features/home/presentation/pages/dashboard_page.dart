@@ -171,19 +171,10 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   ),
                 );
               },
-              icon: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: isDarkMode
-                      ? Colors.white.withValues(alpha: 0.05)
-                      : Colors.black.withValues(alpha: 0.03),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.notifications_none_rounded,
-                  color: isDarkMode ? Colors.white70 : Colors.black87,
-                  size: 24,
-                ),
+              icon: Icon(
+                Icons.notifications_none_rounded,
+                color: isDarkMode ? Colors.white70 : Colors.black87,
+                size: 28,
               ),
             ),
           ),
@@ -362,13 +353,15 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
 
     const details = NotificationDetails(
       android: AndroidNotificationDetails(
-        'saving_target_channel',
+        'saving_target_channel_v2',
         'Saving Target Reminder',
         channelDescription: 'Pengingat target tabungan',
-        importance: Importance.high,
+        importance: Importance.max,
         priority: Priority.high,
+        playSound: true,
+        enableVibration: true,
       ),
-      iOS: DarwinNotificationDetails(),
+      iOS: DarwinNotificationDetails(presentAlert: true, presentBadge: true, presentSound: true),
     );
 
     await flutterLocalNotificationsPlugin.show(
@@ -1124,6 +1117,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     var noteText = '';
     String? selectedTopUpSource;
     String topUpBankName = '';
+    String? selectedSeaBankType;
 
     final theme = Theme.of(context);
     final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
@@ -1138,6 +1132,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             {'label': 'Hadiah / THR', 'icon': Icons.card_giftcard_rounded},
             {'label': 'Dividen / Investasi', 'icon': Icons.trending_up_rounded},
             {'label': 'Tabungan', 'icon': Icons.savings_rounded},
+            {'label': 'Bunga Tabungan', 'icon': Icons.account_balance_rounded},
             {'label': 'Lainnya', 'icon': Icons.more_horiz_rounded},
           ]
         : [
@@ -1311,6 +1306,265 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                             },
                           ),
                         ),
+                        if (type == TransactionType.income) ...[
+                          const SizedBox(height: 16),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 28),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        gradient: const LinearGradient(
+                                          colors: [
+                                            Color(0xFF1DA462),
+                                            Color(0xFF0C7A45)
+                                          ],
+                                        ),
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: const Text('SeaBank',
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 9,
+                                              fontWeight: FontWeight.bold,
+                                              letterSpacing: 0.5)),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text('BUNGA TABUNGAN (CEPAT)',
+                                        style: TextStyle(
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.bold,
+                                            color: isDarkMode
+                                                ? Colors.white24
+                                                : Colors.teal.shade800
+                                                    .withValues(alpha: 0.4),
+                                            letterSpacing: 1.2)),
+                                  ],
+                                ),
+                                const SizedBox(height: 12),
+                                DropdownButtonFormField<String>(
+                                  value: selectedSeaBankType,
+                                  isExpanded: true,
+                                  dropdownColor: isDarkMode
+                                      ? AppColors.surfaceDark
+                                      : Colors.white,
+                                  decoration: InputDecoration(
+                                    labelText: 'Pilih Jenis Bunga SeaBank',
+                                    filled: true,
+                                    fillColor: isDarkMode
+                                        ? Colors.white.withValues(alpha: 0.05)
+                                        : const Color(0xFFF0FBF6),
+                                    border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                        borderSide: BorderSide(
+                                            color: isDarkMode
+                                                ? Colors.white10
+                                                : const Color(0xFF1DA462)
+                                                    .withValues(alpha: 0.3))),
+                                    enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                        borderSide: BorderSide(
+                                            color: isDarkMode
+                                                ? Colors.white10
+                                                : const Color(0xFF1DA462)
+                                                    .withValues(alpha: 0.3))),
+                                    focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                        borderSide: const BorderSide(
+                                            color: Color(0xFF1DA462), width: 1.5)),
+                                    prefixIcon: const Icon(
+                                        Icons.account_balance_rounded,
+                                        color: Color(0xFF1DA462)),
+                                    labelStyle: TextStyle(
+                                        color: isDarkMode
+                                            ? Colors.white38
+                                            : Colors.black45),
+                                  ),
+                                  items: [
+                                    DropdownMenuItem<String>(
+                                      value: null,
+                                      child: Text('Bukan Bunga / Bersihkan',
+                                          style: TextStyle(
+                                              color: isDarkMode
+                                                  ? Colors.white54
+                                                  : Colors.black54)),
+                                    ),
+                                    ...([
+                                      {
+                                        'value': 'Bunga Harian Premium',
+                                        'label': 'Bunga Harian Premium',
+                                        'subtitle':
+                                            '7,4% p.a. – Saldo ≥ Rp 1 juta',
+                                        'icon': Icons.star_rounded,
+                                        'color': const Color(0xFF1DA462),
+                                      },
+                                      {
+                                        'value': 'Bunga Harian',
+                                        'label': 'Bunga Harian Standar',
+                                        'subtitle':
+                                            '4% p.a. – Semua saldo',
+                                        'icon': Icons.savings_rounded,
+                                        'color': Colors.teal,
+                                      },
+                                    ].map((item) {
+                                      return DropdownMenuItem<String>(
+                                        value: item['value'] as String,
+                                        child: Row(
+                                          children: [
+                                            Icon(
+                                              item['icon'] as IconData,
+                                              size: 18,
+                                              color: item['color'] as Color,
+                                            ),
+                                            const SizedBox(width: 12),
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Text(
+                                                    item['label'] as String,
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize: 13,
+                                                        color: isDarkMode
+                                                            ? Colors.white70
+                                                            : Colors.black87),
+                                                  ),
+                                                  Text(
+                                                    item['subtitle'] as String,
+                                                    style: TextStyle(
+                                                        fontSize: 10,
+                                                        color: isDarkMode
+                                                            ? Colors.white38
+                                                            : Colors.black38),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    })),
+                                  ],
+                                  onChanged: (val) {
+                                    setSheetState(() {
+                                      selectedSeaBankType = val;
+                                      if (val == null) {
+                                        nameController.clear();
+                                        selectedCategory = 'Gaji';
+                                      } else {
+                                        final now = DateTime.now();
+                                        final monthName = [
+                                          '',
+                                          'Januari',
+                                          'Februari',
+                                          'Maret',
+                                          'April',
+                                          'Mei',
+                                          'Juni',
+                                          'Juli',
+                                          'Agustus',
+                                          'September',
+                                          'Oktober',
+                                          'November',
+                                          'Desember'
+                                        ][now.month];
+                                        nameController.text =
+                                            'Bunga SeaBank $monthName ${now.year}';
+                                        selectedCategory = 'Bunga Tabungan';
+                                      }
+                                    });
+                                  },
+                                ),
+                                if (selectedSeaBankType != null) ...[
+                                  const SizedBox(height: 12),
+                                  Container(
+                                    padding: const EdgeInsets.all(14),
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                        colors: isDarkMode
+                                            ? [
+                                                const Color(0xFF0C7A45)
+                                                    .withValues(alpha: 0.25),
+                                                const Color(0xFF1DA462)
+                                                    .withValues(alpha: 0.15),
+                                              ]
+                                            : [
+                                                const Color(0xFFE8F8F1),
+                                                const Color(0xFFF0FBF6),
+                                              ],
+                                      ),
+                                      borderRadius: BorderRadius.circular(14),
+                                      border: Border.all(
+                                          color: const Color(0xFF1DA462)
+                                              .withValues(alpha: 0.25)),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(8),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFF1DA462)
+                                                .withValues(alpha: 0.15),
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                          ),
+                                          child: const Icon(
+                                            Icons.info_outline_rounded,
+                                            color: Color(0xFF1DA462),
+                                            size: 18,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                selectedSeaBankType ==
+                                                        'Bunga Harian Premium'
+                                                    ? 'Bunga Premium SeaBank'
+                                                    : 'Bunga Standar SeaBank',
+                                                style: const TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 12,
+                                                    color: Color(0xFF0C7A45)),
+                                              ),
+                                              const SizedBox(height: 2),
+                                              Text(
+                                                selectedSeaBankType ==
+                                                        'Bunga Harian Premium'
+                                                    ? '7,4% p.a. dihitung harian untuk saldo ≥ Rp 1 juta. Dikreditkan otomatis setiap hari.'
+                                                    : '4% p.a. untuk semua saldo. Bunga dihitung & dikreditkan harian ke rekening SeaBank Anda.',
+                                                style: TextStyle(
+                                                    fontSize: 11,
+                                                    color: isDarkMode
+                                                        ? Colors.white54
+                                                        : const Color(
+                                                            0xFF0C7A45)),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ],
                         if (type == TransactionType.expense) ...[
                           const SizedBox(height: 12),
                           Padding(

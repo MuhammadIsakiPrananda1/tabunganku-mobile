@@ -4,14 +4,27 @@ Seluruh evolusi, fitur, dan perbaikan aplikasi **TabunganKu** terdokumentasi sec
 
 ---
 
-## 🚀 [1.4.6] — 14 April 2026: Stability & Performance Optimization
-Penyempurnaan performa dan stabilitas sistem untuk pengalaman yang lebih mulus.
+## 🚀 [1.4.6] — 14–15 April 2026: Stability, Performance & Smart Income
 
-### 🛠️ Detail Perubahan
+Penyempurnaan performa, stabilitas sistem, dan penambahan fitur keuangan cerdas untuk pengalaman yang lebih mulus dan lengkap.
+
+### 🏦 Fitur Baru: Bunga Tabungan SeaBank (CEPAT)
+- **SeaBank Interest Quick-Fill** — Fitur pengisian cepat bunga tabungan SeaBank langsung dari form **Tambah Pemasukan** 💚.
+  - Pilih **Bunga Harian Premium** (7,4% p.a. untuk saldo ≥ Rp 1 juta) atau **Bunga Harian Standar** (4% p.a. untuk semua saldo).
+  - Nama transaksi terisi otomatis: *"Bunga SeaBank [Bulan] [Tahun]"*.
+  - Kategori otomatis terpilih: **Bunga Tabungan** (kategori baru yang ditambahkan).
+  - Info card informatif menampilkan penjelasan rate & cara kerja bunga SeaBank.
+- **Kategori Pemasukan Baru: Bunga Tabungan** — Kategori khusus untuk mencatat pendapatan bunga dari rekening tabungan 🏦.
+
+### 🛠️ Detail Perubahan Lainnya
 - **UI Architecture Fix** — Memperbaiki masalah clipping pada kartu saldo utama agar dekorasi tidak bocor keluar sudut 💎.
-- **UI Restoration** — Mengembalikan ikon lonceng notifikasi di Dashboard dengan feedback yang lebih modern 🔔.
+- **UI Restoration & Perfection** — Mengembalikan ikon lonceng notifikasi dan merestorasi desain **Target Tabungan** ke versi PageView slider yang interaktif 🔔.
+- **Premium Style Matching** — Menyelaraskan seksi **Alokasi Keuangan** agar persis dengan desain premium (Comic Neue Italic & Teal Accent shades) sesuai referensi visual 🎨.
+- **Enhanced Data Visualization** — Optimalisasi **Pie Chart** dengan tampilan persentase di luar segmen untuk keterbacaan maksimal, informasi total di tengah grafik, dan ketebalan proporsional (standard thickness) 📊.
+- **Strict Permission Security** — Implementasi sistem perizinan ketat dengan dialog edukasi premium (*BackdropBlur*) sebelum akses kamera/galeri untuk privasi maksimal 🛡️.
+- **High-Priority Notifications** — Upgrade sistem notifikasi ke mode **Heads-up (Banner)** dengan dukungan suara dan getaran sesuai preferensi sistem untuk peringatan yang lebih sigap 🔊.
+- **Permission & Privacy Optimization** — Menghapus permintaan izin "Alarm & Reminder" (Exact Alarm) yang redundan untuk privasi yang lebih baik 🛡️.
 - **System Stability Enhancement** — Perbaikan bug minor dan optimalisasi penggunaan memori untuk performa yang lebih gegas 🚀.
-- **Version Bump** — Sinkronisasi versi aplikasi ke 1.4.6 untuk persiapan distribusi terbaru.
 
 ---
 

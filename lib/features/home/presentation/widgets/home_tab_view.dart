@@ -12,6 +12,13 @@ import 'package:tabunganku/providers/saving_target_provider.dart';
 import 'package:tabunganku/core/constants/app_constants.dart';
 import 'package:tabunganku/core/constants/quick_action_type.dart';
 import '../../../../core/constants/app_version.dart';
+import 'package:tabunganku/core/constants/transaction_categories.dart';
+import 'package:tabunganku/services/insurance_service.dart';
+import 'package:tabunganku/models/gold_investment_model.dart';
+import 'package:tabunganku/providers/gold_provider.dart';
+import 'package:tabunganku/providers/bills_provider.dart';
+import 'package:tabunganku/providers/investment_provider.dart';
+import 'package:tabunganku/providers/insurance_provider.dart';
 
 class HomeTabView extends ConsumerStatefulWidget {
   final bool showBalance;
@@ -61,6 +68,19 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
 
     final targetsAsync = ref.watch(savingTargetsStreamProvider);
     final targets = targetsAsync.valueOrNull ?? [];
+
+    // Fetch feature balances
+    final goldTxs = ref.watch(goldTransactionsStreamProvider).valueOrNull ?? [];
+    final goldGramBalance = goldTxs.fold<double>(0, (sum, t) => sum + (t.type == GoldTransactionType.buy ? t.grams : -t.grams));
+    
+    final bills = ref.watch(billsStreamProvider).valueOrNull ?? [];
+    final unpaidBillsTotal = bills.fold<double>(0, (sum, b) => sum + (b.isPaid ? 0 : b.amount));
+    
+    final investments = ref.watch(investmentStreamProvider).valueOrNull ?? [];
+    final totalInvestmentValuation = investments.fold<double>(0, (sum, i) => sum + i.currentValuation);
+    
+    final insurances = ref.watch(insuranceStreamProvider).valueOrNull ?? [];
+    final totalMonthlyInsurance = insurances.fold<double>(0, (sum, i) => sum + i.premiumAmount);
 
     final theme = Theme.of(context);
     final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
@@ -215,42 +235,16 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
             ),
           ),
 
-          const SizedBox(height: 40),
+          const SizedBox(height: 16),
 
-          // Primary Navigation grid
-          GridView.count(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            crossAxisCount: 4,
-            mainAxisSpacing: 0,
-            crossAxisSpacing: 0,
-            childAspectRatio: 0.85,
-            children: [
-              _buildToolAction(Icons.add_circle_outline_rounded, 'Pemasukan',
-                  QuickActionType.income, isDarkMode),
-              _buildToolAction(Icons.remove_circle_outline_rounded,
-                  'Pengeluaran', QuickActionType.expense, isDarkMode),
-              _buildToolAction(Icons.account_balance_wallet_rounded, 'Budget',
-                  QuickActionType.budget, isDarkMode),
-              _buildToolAction(Icons.auto_stories_rounded, 'Hutang/Piutang',
-                  QuickActionType.debt, isDarkMode),
-              _buildToolAction(Icons.family_restroom_rounded, 'Keluarga',
-                  QuickActionType.family, isDarkMode),
-              _buildToolAction(Icons.shopping_cart_outlined, 'Belanja',
-                  QuickActionType.shoppingList, isDarkMode),
-              _buildToolAction(Icons.document_scanner_rounded, 'Scan Bukti',
-                  QuickActionType.scanReceipt, isDarkMode),
-              _buildToolAction(Icons.emoji_events_rounded, 'Challenge',
-                  QuickActionType.challenge, isDarkMode),
-              _buildToolAction(Icons.track_changes_rounded, 'Target',
-                  QuickActionType.savingTarget, isDarkMode),
-              _buildToolAction(Icons.loop_rounded, 'Langganan',
-                  QuickActionType.recurring, isDarkMode),
-              _buildToolAction(Icons.volunteer_activism_rounded, 'Zakat/Infaq',
-                  QuickActionType.zakat, isDarkMode),
-              _buildToolAction(Icons.calculate_outlined, 'Simulasi',
-                  QuickActionType.simulator, isDarkMode),
-            ],
+          // Primary Navigation grid (GoPay Style)
+          _buildActionGrid(
+            isDarkMode,
+            goldGramBalance: goldGramBalance,
+            unpaidBillsTotal: unpaidBillsTotal,
+            totalInvestmentValuation: totalInvestmentValuation,
+            totalMonthlyInsurance: totalMonthlyInsurance,
+            targets: targets,
           ),
 
           const SizedBox(height: 40),
@@ -359,91 +353,167 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
     );
   }
 
-  Widget _buildToolAction(
-      IconData icon, String label, QuickActionType type, bool isDarkMode) {
-    Color iconColor = AppColors.primary;
-    switch (type) {
-      case QuickActionType.income:
-        iconColor = Colors.green.shade400;
-        break;
-      case QuickActionType.expense:
-        iconColor = Colors.red.shade400;
-        break;
-      case QuickActionType.savingTarget:
-        iconColor = Colors.amber.shade500;
-        break;
-      case QuickActionType.budget:
-        iconColor = Colors.cyan.shade400;
-        break;
-      case QuickActionType.debt:
-        iconColor = Colors.orange.shade500;
-        break;
-      case QuickActionType.family:
-        iconColor = Colors.blue.shade500;
-        break;
-      case QuickActionType.shoppingList:
-        iconColor = Colors.purple.shade300;
-        break;
-      case QuickActionType.scanReceipt:
-        iconColor = Colors.tealAccent.shade700;
-        break;
-      case QuickActionType.zakat:
-        iconColor = Colors.teal.shade400;
-        break;
-      case QuickActionType.simulator:
-        iconColor = Colors.cyan.shade600;
-        break;
-      default:
-        break;
-    }
+  Widget _buildActionGrid(bool isDarkMode, {
+    required double goldGramBalance,
+    required double unpaidBillsTotal,
+    required double totalInvestmentValuation,
+    required double totalMonthlyInsurance,
+    required List<SavingTargetModel> targets,
+  }) {
+    final Map<QuickActionType, String> balances = {
+      QuickActionType.goldSavings: goldGramBalance > 0 ? '${goldGramBalance.toStringAsFixed(3)} Gr' : '',
+      QuickActionType.bills: unpaidBillsTotal > 0 ? _formatRupiah(unpaidBillsTotal) : '',
+      QuickActionType.investment: totalInvestmentValuation > 0 ? _formatRupiah(totalInvestmentValuation) : '',
+      QuickActionType.insurance: totalMonthlyInsurance > 0 ? '${_formatRupiah(totalMonthlyInsurance)}/bln' : '',
+      QuickActionType.savingPlans: _getPlansTotal(targets),
+      QuickActionType.buyingTarget: _getBuyingTotal(targets),
+    };
 
+    final primaryActions = _allActions.take(7).toList();
+
+    return GridView.count(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      crossAxisCount: 4,
+      mainAxisSpacing: 16,
+      crossAxisSpacing: 8,
+      childAspectRatio: 0.72,
+      children: [
+        for (var action in primaryActions)
+          _buildToolAction(
+            action.icon,
+            action.label,
+            action.type,
+            isDarkMode,
+            color: action.baseColor,
+            subLabel: balances[action.type],
+          ),
+        // More button
+        _buildToolAction(
+          Icons.apps_rounded,
+          'Lainnya',
+          null, // Special case for "More"
+          isDarkMode,
+          color: Colors.blueGrey,
+          onTap: () => _showMoreActionsSheet(isDarkMode, balances),
+        ),
+      ],
+    );
+  }
+
+  String _getPlansTotal(List<SavingTargetModel> targets) {
+    final planCategories = ['Darurat', 'Pendidikan', 'Pensiun', 'Kurban'];
+    final total = targets.where((t) => planCategories.contains(t.category)).fold<double>(0, (sum, t) => sum + t.targetAmount);
+    return total > 0 ? _formatRupiah(total) : '';
+  }
+
+  String _getBuyingTotal(List<SavingTargetModel> targets) {
+    final total = targets.where((t) => t.category == 'Pembelian' || t.category == 'Umum').fold<double>(0, (sum, t) => sum + t.targetAmount);
+    return total > 0 ? _formatRupiah(total) : '';
+  }
+
+  String _getCategoryTotal(List<SavingTargetModel> targets, String keyword) {
+    final total = targets.where((t) => t.name.toLowerCase().contains(keyword)).fold<double>(0, (sum, t) => sum + t.targetAmount);
+    return total > 0 ? _formatRupiah(total) : '';
+  }
+
+  void _showMoreActionsSheet(bool isDarkMode, Map<QuickActionType, String> balances) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        padding: const EdgeInsets.fromLTRB(24, 12, 24, 40),
+        decoration: BoxDecoration(
+          color: isDarkMode ? AppColors.surfaceDark : Colors.white,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'SEMUA LAYANAN',
+              style: GoogleFonts.comicNeue(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 2,
+                color: isDarkMode ? Colors.white30 : Colors.grey.shade400,
+              ),
+            ),
+            const SizedBox(height: 24),
+            GridView.count(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisCount: 4,
+              mainAxisSpacing: 16,
+              crossAxisSpacing: 8,
+              childAspectRatio: 0.72,
+              children: [
+                for (var action in _allActions.skip(7))
+                  _buildToolAction(
+                    action.icon,
+                    action.label,
+                    action.type,
+                    isDarkMode,
+                    color: action.baseColor,
+                    subLabel: balances[action.type],
+                  ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildToolAction(
+    IconData icon,
+    String label,
+    QuickActionType? type,
+    bool isDarkMode, {
+    required Color color,
+    VoidCallback? onTap,
+    String? subLabel,
+  }) {
     return GestureDetector(
-      onTap: () => widget.onActionTap(type),
+      onTap: onTap ?? () => widget.onActionTap(type!),
       behavior: HitTestBehavior.opaque,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
+              color: color.withValues(alpha: isDarkMode ? 0.15 : 0.08),
+              borderRadius: BorderRadius.circular(18),
             ),
-            child: Material(
-              color: isDarkMode ? AppColors.surfaceDark : Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              elevation: isDarkMode
-                  ? 0
-                  : 1, // Use standard elevation instead of custom shadows
-              child: InkWell(
-                onTap: () => widget.onActionTap(type),
-                borderRadius: BorderRadius.circular(20),
-                child: Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: isDarkMode
-                          ? Colors.white.withValues(alpha: 0.05)
-                          : Colors.black.withValues(alpha: 0.02),
-                      width: 1.2,
-                    ),
-                  ),
-                  child: Icon(icon, color: iconColor, size: 24),
-                ),
-              ),
+            child: Icon(
+              icon,
+              color: isDarkMode ? color.withValues(alpha: 0.9) : color,
+              size: 28,
             ),
           ),
           const SizedBox(height: 8),
           FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(
-              label.toUpperCase(),
-              style: TextStyle(
-                fontSize: 9,
+              label,
+              style: GoogleFonts.comicNeue(
+                fontSize: 11,
                 fontWeight: FontWeight.bold,
-                color: isDarkMode
-                    ? Colors.white38
-                    : Colors.teal.shade900.withValues(alpha: 0.5),
-                letterSpacing: 1.2,
+                color: isDarkMode ? Colors.white70 : Colors.black87,
               ),
             ),
           ),
@@ -452,9 +522,128 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
     );
   }
 
+  static const List<_QuickActionItem> _allActions = [
+    _QuickActionItem(
+      icon: Icons.add_circle_outline_rounded,
+      label: 'Pemasukan',
+      type: QuickActionType.income,
+      baseColor: Colors.green,
+    ),
+    _QuickActionItem(
+      icon: Icons.remove_circle_outline_rounded,
+      label: 'Pengeluaran',
+      type: QuickActionType.expense,
+      baseColor: Colors.red,
+    ),
+    _QuickActionItem(
+      icon: Icons.account_balance_wallet_rounded,
+      label: 'Budget',
+      type: QuickActionType.budget,
+      baseColor: Colors.cyan,
+    ),
+    _QuickActionItem(
+      icon: Icons.auto_stories_rounded,
+      label: 'Pinjaman',
+      type: QuickActionType.debt,
+      baseColor: Colors.orange,
+    ),
+    _QuickActionItem(
+      icon: Icons.family_restroom_rounded,
+      label: 'Keluarga',
+      type: QuickActionType.family,
+      baseColor: Colors.indigo,
+    ),
+    _QuickActionItem(
+      icon: Icons.shopping_cart_outlined,
+      label: 'Belanja',
+      type: QuickActionType.shoppingList,
+      baseColor: Colors.purple,
+    ),
+    _QuickActionItem(
+      icon: Icons.track_changes_rounded,
+      label: 'Target Saya',
+      type: QuickActionType.buyingTarget,
+      baseColor: Colors.amber,
+    ),
+    _QuickActionItem(
+      icon: Icons.document_scanner_rounded,
+      label: 'Scan Bukti',
+      type: QuickActionType.scanReceipt,
+      baseColor: Colors.teal,
+    ),
+    _QuickActionItem(
+      icon: Icons.emoji_events_rounded,
+      label: 'Challenge',
+      type: QuickActionType.challenge,
+      baseColor: Colors.amber,
+    ),
+    _QuickActionItem(
+      icon: Icons.loop_rounded,
+      label: 'Langganan',
+      type: QuickActionType.recurring,
+      baseColor: Colors.blue,
+    ),
+    _QuickActionItem(
+      icon: Icons.volunteer_activism_rounded,
+      label: 'Zakat/Infaq',
+      type: QuickActionType.zakat,
+      baseColor: Colors.teal,
+    ),
+    _QuickActionItem(
+      icon: Icons.calculate_outlined,
+      label: 'Simulasi',
+      type: QuickActionType.simulator,
+      baseColor: Colors.cyan,
+    ),
+    _QuickActionItem(
+      icon: Icons.monetization_on_rounded,
+      label: 'Nabung Emas',
+      type: QuickActionType.goldSavings,
+      baseColor: Colors.amber,
+    ),
+    _QuickActionItem(
+      icon: Icons.assignment_turned_in_rounded,
+      label: 'Dana Rencana',
+      type: QuickActionType.savingPlans,
+      baseColor: Colors.teal,
+    ),
+    _QuickActionItem(
+      icon: Icons.request_quote_rounded,
+      label: 'Pajak',
+      type: QuickActionType.tax,
+      baseColor: Colors.orange,
+    ),
+    _QuickActionItem(
+      icon: Icons.receipt_long_rounded,
+      label: 'Tagihan',
+      type: QuickActionType.bills,
+      baseColor: Colors.lightBlue,
+    ),
+    _QuickActionItem(
+      icon: Icons.wb_sunny_rounded,
+      label: 'Sedekah Subuh',
+      type: QuickActionType.morningCharity,
+      baseColor: Colors.orangeAccent,
+    ),
+    _QuickActionItem(
+      icon: Icons.trending_up_rounded,
+      label: 'Investasi',
+      type: QuickActionType.investment,
+      baseColor: Colors.indigo,
+    ),
+    _QuickActionItem(
+      icon: Icons.shield_rounded,
+      label: 'Asuransi',
+      type: QuickActionType.insurance,
+      baseColor: Colors.blueGrey,
+    ),
+  ];
+
   Widget _buildSavingTargetSection(
       double totalBalance, List<SavingTargetModel> targets, bool isDarkMode) {
-    if (targets.isEmpty) return const SizedBox.shrink();
+    // Filter out specialized plans from the general target section
+    final buyingTargets = targets.where((t) => t.category == 'Pembelian' || t.category == 'Umum').toList();
+    if (buyingTargets.isEmpty) return const SizedBox.shrink();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -462,7 +651,7 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('TARGET TABUNGAN',
+            Text('TARGET PEMBELIAN SAYA',
                 style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
@@ -470,8 +659,8 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                     color: isDarkMode
                         ? Colors.white30
                         : Colors.teal.shade800.withValues(alpha: 0.4))),
-            if (targets.length > 1)
-              Text('${targets.length} Target Aktif',
+            if (buyingTargets.length > 1)
+              Text('${buyingTargets.length} Barang Impian',
                   style: TextStyle(
                       fontSize: 9,
                       fontWeight: FontWeight.bold,
@@ -482,10 +671,10 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
         SizedBox(
           height: 180,
           child: PageView.builder(
-            itemCount: targets.length,
+            itemCount: buyingTargets.length,
             onPageChanged: (idx) => setState(() => _currentTargetIndex = idx),
             itemBuilder: (context, index) {
-              final target = targets[index];
+              final target = buyingTargets[index];
               return _targetCardMinimalist(
                   target, totalBalance, isDarkMode, index);
             },
@@ -495,7 +684,7 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
         // Custom Page Indicator
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(targets.length, (index) {
+          children: List.generate(buyingTargets.length, (index) {
             return AnimatedContainer(
               duration: const Duration(milliseconds: 300),
               margin: const EdgeInsets.symmetric(horizontal: 4),
@@ -513,6 +702,7 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
       ],
     );
   }
+
 
   Widget _targetCardMinimalist(SavingTargetModel target, double totalBalance,
       bool isDarkMode, int index) {
@@ -542,7 +732,7 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
           child: Stack(
             children: [
               // Background decoration
-              Positioned(
+              const Positioned(
                 top: -20,
                 right: -20,
                 child: Opacity(
@@ -693,7 +883,8 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                               radius: 12, // Thinner donut slices
                               title: '$incomePercent%',
                               showTitle: true,
-                              titlePositionPercentageOffset: 3.2, // Pushed far outside
+                              titlePositionPercentageOffset:
+                                  3.2, // Pushed far outside
                               titleStyle: GoogleFonts.comicNeue(
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold,
@@ -709,7 +900,8 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                               radius: 12, // Thinner donut slices
                               title: '$expensePercent%',
                               showTitle: true,
-                              titlePositionPercentageOffset: 3.2, // Pushed far outside
+                              titlePositionPercentageOffset:
+                                  3.2, // Pushed far outside
                               titleStyle: GoogleFonts.comicNeue(
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold,
@@ -896,8 +1088,7 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
 
   Widget _minimalTile(TransactionModel t, bool isDarkMode) {
     final bool isExpense = t.type == TransactionType.expense;
-    final IconData catIcon = AppConstants.categoryIcons[t.category] ??
-        (isExpense ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded);
+    final IconData catIcon = AppCategories.getIconForCategory(t.category);
     final Color catColor = isExpense ? Colors.red : Colors.green;
 
     return Padding(
@@ -973,4 +1164,18 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
       ),
     );
   }
+}
+
+class _QuickActionItem {
+  final IconData icon;
+  final String label;
+  final QuickActionType type;
+  final Color baseColor;
+
+  const _QuickActionItem({
+    required this.icon,
+    required this.label,
+    required this.type,
+    required this.baseColor,
+  });
 }

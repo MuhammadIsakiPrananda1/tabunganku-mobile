@@ -432,7 +432,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 }
               },
               subtitle: 'Cek source code aplikasi',
-              color: Colors.black87,
+              color: isDarkMode ? Colors.white : Colors.black87,
             ),
             _buildSettingTile(
               Icons.share_rounded,

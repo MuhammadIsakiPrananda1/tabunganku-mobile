@@ -5,6 +5,7 @@ class SavingTargetModel {
   final double targetAmount;
   final DateTime dueDate;
   final DateTime createdAt;
+  final String category; // Added category
 
   SavingTargetModel({
     required this.id,
@@ -12,6 +13,7 @@ class SavingTargetModel {
     required this.targetAmount,
     required this.dueDate,
     required this.createdAt,
+    this.category = 'Umum', // Default category
   });
 
   Map<String, dynamic> toJson() {
@@ -21,6 +23,7 @@ class SavingTargetModel {
       'targetAmount': targetAmount,
       'dueDate': dueDate.toIso8601String(),
       'createdAt': createdAt.toIso8601String(),
+      'category': category,
     };
   }
 
@@ -35,6 +38,7 @@ class SavingTargetModel {
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'] as String)
           : DateTime.now(),
+      category: json['category'] as String? ?? 'Umum',
     );
   }
 
@@ -44,6 +48,7 @@ class SavingTargetModel {
     double? targetAmount,
     DateTime? dueDate,
     DateTime? createdAt,
+    String? category,
   }) {
     return SavingTargetModel(
       id: id ?? this.id,
@@ -51,6 +56,8 @@ class SavingTargetModel {
       targetAmount: targetAmount ?? this.targetAmount,
       dueDate: dueDate ?? this.dueDate,
       createdAt: createdAt ?? this.createdAt,
+      category: category ?? this.category,
     );
   }
 }
+

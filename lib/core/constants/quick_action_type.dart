@@ -13,4 +13,17 @@ enum QuickActionType {
   simulator,
   calculator,
   history,
+  goldSavings,
+  emergencyFund,
+  educationFund,
+  retirementFund,
+  tax,
+  bills,
+  morningCharity,
+  qurban,
+  investment,
+  insurance,
+  savingPlans,
+  buyingTarget,
 }
+

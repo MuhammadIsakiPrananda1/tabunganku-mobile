@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 
@@ -17,7 +16,6 @@ import 'package:tabunganku/providers/saving_target_provider.dart';
 import 'package:tabunganku/core/theme/app_colors.dart';
 import 'package:tabunganku/core/theme/theme_provider.dart';
 import 'package:intl/intl.dart';
-import 'package:fl_chart/fl_chart.dart';
 import 'package:tabunganku/features/transaction/presentation/pages/debt_list_page.dart';
 import 'package:tabunganku/features/shopping/presentation/pages/shopping_list_page.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -33,6 +31,7 @@ import 'package:tabunganku/features/home/presentation/widgets/home_tab_view.dart
     as widgets;
 import 'package:tabunganku/providers/notification_provider.dart';
 import 'package:tabunganku/features/home/presentation/widgets/notification_sheet.dart';
+import 'package:tabunganku/core/constants/transaction_categories.dart';
 
 class DashboardPage extends ConsumerStatefulWidget {
   const DashboardPage({super.key});
@@ -44,7 +43,6 @@ class DashboardPage extends ConsumerStatefulWidget {
 class _DashboardPageState extends ConsumerState<DashboardPage> {
   bool _showBalance = true;
   final PageController _targetPageController = PageController();
-  int _currentTargetIndex = 0;
   // Timer removed for optimization - isolated in specialized widgets
 
   // --- Fitur Simulasi Tabungan ---
@@ -164,7 +162,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             padding: const EdgeInsets.only(right: 8),
             child: Consumer(
               builder: (context, ref, child) {
-                final unreadCountAsync = ref.watch(unreadNotificationsCountProvider);
+                final unreadCountAsync =
+                    ref.watch(unreadNotificationsCountProvider);
                 return Badge(
                   label: unreadCountAsync.maybeWhen(
                     data: (count) => count > 0 ? Text(count.toString()) : null,
@@ -371,7 +370,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         playSound: true,
         enableVibration: true,
       ),
-      iOS: DarwinNotificationDetails(presentAlert: true, presentBadge: true, presentSound: true),
+      iOS: DarwinNotificationDetails(
+          presentAlert: true, presentBadge: true, presentSound: true),
     );
 
     await flutterLocalNotificationsPlugin.show(
@@ -381,294 +381,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       details,
     );
     await prefs.setString(notifiedKey, todayKey);
-  }
-
-  Widget _buildSavingTargetSection(
-      double totalBalance, List<SavingTargetModel> targets) {
-    final theme = Theme.of(context);
-    final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
-        (ref.watch(themeProvider) == ThemeMode.system &&
-            theme.brightness == Brightness.dark);
-
-    if (targets.isEmpty) {
-      return Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(28),
-        decoration: BoxDecoration(
-          color: theme.cardColor,
-          borderRadius: BorderRadius.circular(32),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: isDarkMode ? 0.2 : 0.02),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
-            ),
-          ],
-        ),
-        child: Column(
-          children: [
-            Icon(Icons.track_changes_rounded,
-                color: isDarkMode ? Colors.white10 : Colors.teal.shade100,
-                size: 48),
-            const SizedBox(height: 16),
-            Text('Belum Ada Target',
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    color: isDarkMode ? Colors.white : Colors.black87)),
-            const SizedBox(height: 8),
-            Text('Mulai menabung untuk impian Anda',
-                style: TextStyle(
-                    color: isDarkMode ? Colors.white24 : Colors.black38,
-                    fontSize: 13)),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () => _showSavingTargetDialog(totalBalance),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-                foregroundColor: AppColors.primary,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
-              ),
-              child: const Text('Buat Target Pertama'),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return Column(
-      children: [
-        const SizedBox(height: 8),
-        SizedBox(
-          height: 265, // Slightly taller for some padding
-          child: PageView.builder(
-            controller: _targetPageController,
-            onPageChanged: (index) {
-              setState(() {
-                _currentTargetIndex = index;
-              });
-            },
-            itemCount: targets.length,
-            itemBuilder: (context, index) {
-              final target = targets[index];
-              final progress = (target.targetAmount > 0)
-                  ? (totalBalance / target.targetAmount).clamp(0.0, 1.0)
-                  : 0.0;
-              final remaining =
-                  target.dueDate.difference(DateTime.now()).inDays;
-
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(32),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black
-                            .withValues(alpha: isDarkMode ? 0.2 : 0.01),
-                        blurRadius: 20,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
-                  ),
-                  child: Material(
-                    color: theme.cardColor,
-                    borderRadius: BorderRadius.circular(32),
-                    clipBehavior: Clip.antiAlias,
-                    child: InkWell(
-                      onTap: () => _showTargetDetailSheet(target, totalBalance),
-                      child: Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(24),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(32),
-                          border: Border.all(
-                            color: Colors.white
-                                .withValues(alpha: isDarkMode ? 0.05 : 0.01),
-                          ),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text('TARGET TABUNGAN #${index + 1}',
-                                    style: TextStyle(
-                                      fontSize: 9,
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: 1.5,
-                                      color: isDarkMode
-                                          ? Colors.white54
-                                          : Colors.teal.shade800
-                                              .withValues(alpha: 0.4),
-                                    )),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Text(target.name,
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 22,
-                                          color: isDarkMode
-                                              ? Colors.white
-                                              : Colors.teal.shade900,
-                                          letterSpacing: -0.5)),
-                                ),
-                                if (progress >= 1.0)
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 10, vertical: 4),
-                                    decoration: BoxDecoration(
-                                      color: Colors.green.shade500,
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: const Text('TERCAPAI! 🎊',
-                                        style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 9,
-                                            fontWeight: FontWeight.bold)),
-                                  ),
-                              ],
-                            ),
-                            const SizedBox(height: 20),
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(10),
-                              child: Stack(
-                                children: [
-                                  Container(
-                                      height: 12,
-                                      color: isDarkMode
-                                          ? Colors.white.withValues(alpha: 0.05)
-                                          : Colors.teal.shade50),
-                                  AnimatedContainer(
-                                    duration:
-                                        const Duration(milliseconds: 1200),
-                                    curve: Curves.easeOutBack,
-                                    height: 12,
-                                    width: (MediaQuery.of(context).size.width -
-                                            88) *
-                                        progress,
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        colors: progress >= 1.0
-                                            ? [
-                                                Colors.tealAccent.shade400,
-                                                AppColors.primary
-                                              ]
-                                            : [
-                                                AppColors.primaryLight,
-                                                AppColors.primary
-                                              ],
-                                      ),
-                                      borderRadius: BorderRadius.circular(10),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: (progress >= 1.0
-                                                  ? Colors.greenAccent
-                                                  : AppColors.primary)
-                                              .withValues(
-                                                  alpha:
-                                                      isDarkMode ? 0.2 : 0.4),
-                                          blurRadius: progress >= 1.0 ? 15 : 10,
-                                          offset: const Offset(0, 2),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 24),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                _buildTargetStat(
-                                    'Terkumpul',
-                                    _formatRupiah(totalBalance),
-                                    Icons.wallet_rounded,
-                                    Colors.green),
-                                _buildTargetStat(
-                                    'Target',
-                                    _formatRupiah(target.targetAmount),
-                                    Icons.track_changes_rounded,
-                                    Colors.teal),
-                                _buildTargetStat(
-                                    'Sisa Waktu',
-                                    remaining < 0 ? 'Tempo' : '$remaining Hari',
-                                    Icons.access_time_rounded,
-                                    Colors.orange),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-        const SizedBox(height: 12),
-        // Custom Page Indicator
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(targets.length, (index) {
-            return AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              margin: const EdgeInsets.symmetric(horizontal: 4),
-              height: 6,
-              width: _currentTargetIndex == index ? 24 : 6,
-              decoration: BoxDecoration(
-                color: _currentTargetIndex == index
-                    ? AppColors.primary
-                    : AppColors.primary.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(3),
-              ),
-            );
-          }),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTargetStat(
-      String label, String value, IconData icon, Color color) {
-    final theme = Theme.of(context);
-    final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
-        (ref.watch(themeProvider) == ThemeMode.system &&
-            theme.brightness == Brightness.dark);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(icon,
-                size: 12,
-                color: color.withValues(alpha: isDarkMode ? 0.4 : 0.6)),
-            const SizedBox(width: 4),
-            Text(label,
-                style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    color: isDarkMode ? Colors.white54 : Colors.black38)),
-          ],
-        ),
-        const SizedBox(height: 6),
-        Text(value,
-            style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.bold,
-                color: isDarkMode ? Colors.white : Colors.teal.shade900)),
-      ],
-    );
   }
 
   Future<void> _handleQuickActionTap(_QuickAction action) async {
@@ -687,6 +399,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 sum +
                 (t.type == TransactionType.income ? t.amount : -t.amount));
         await _showSavingTargetDialog(bal);
+        break;
+      case QuickActionType.buyingTarget:
+        context.push('/buying-targets');
         break;
       case QuickActionType.budget:
         context.push('/monthly-budget');
@@ -740,6 +455,39 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         break;
       case QuickActionType.zakat:
         context.push('/zakat');
+        break;
+      case QuickActionType.goldSavings:
+        context.push('/gold');
+        break;
+      case QuickActionType.emergencyFund:
+        context.push('/emergency-fund');
+        break;
+      case QuickActionType.educationFund:
+        context.push('/education-fund');
+        break;
+      case QuickActionType.retirementFund:
+        context.push('/retirement-fund');
+        break;
+      case QuickActionType.tax:
+        context.push('/tax');
+        break;
+      case QuickActionType.bills:
+        context.push('/bills');
+        break;
+      case QuickActionType.morningCharity:
+        _showMorningCharitySheet();
+        break;
+      case QuickActionType.qurban:
+        context.push('/qurban');
+        break;
+      case QuickActionType.investment:
+        context.push('/investment');
+        break;
+      case QuickActionType.insurance:
+        context.push('/insurance');
+        break;
+      case QuickActionType.savingPlans:
+        context.push('/saving-plans');
         break;
     }
   }
@@ -859,7 +607,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                         value: progress,
                         strokeWidth: 12,
                         backgroundColor: isDarkMode
-                            ? Colors.white.withValues(alpha: 0.05)
+                            ? Colors.white.withOpacity(0.05)
                             : Colors.teal.shade50,
                         valueColor: AlwaysStoppedAnimation<Color>(isCompleted
                             ? Colors.green.shade400
@@ -1033,6 +781,239 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     );
   }
 
+  void _showMorningCharitySheet() {
+    final amountController = TextEditingController(text: '');
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom + 32,
+          top: 32,
+          left: 24,
+          right: 24,
+        ),
+        decoration: BoxDecoration(
+          color: isDarkMode ? AppColors.surfaceDark : Colors.white,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40, height: 4,
+              decoration: BoxDecoration(color: Colors.grey.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(2)),
+            ),
+            const SizedBox(height: 24),
+            TextField(
+              controller: amountController,
+              autofocus: true,
+              keyboardType: TextInputType.number,
+              inputFormatters: [_RibuanFormatter()],
+              textAlign: TextAlign.start,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: isDarkMode ? Colors.white : AppColors.primaryDark,
+              ),
+              decoration: InputDecoration(
+                labelText: 'Nominal Sedekah',
+                labelStyle: TextStyle(
+                    color: isDarkMode ? Colors.white38 : Colors.black45),
+                hintText: 'Masukkan Nominal',
+                hintStyle: TextStyle(
+                    color: isDarkMode ? Colors.white24 : Colors.black38),
+                prefixIcon: Container(
+                  padding: const EdgeInsets.only(left: 20, right: 12),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.wb_sunny_rounded,
+                          color: Colors.orange, size: 20),
+                      const SizedBox(width: 12),
+                      const Text('Rp',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.orange,
+                              fontSize: 14)),
+                    ],
+                  ),
+                ),
+                filled: true,
+                fillColor: isDarkMode
+                    ? Colors.white.withValues(alpha: 0.03)
+                    : AppColors.background,
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide.none),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              ),
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: ElevatedButton(
+                onPressed: () async {
+                  final amount = double.tryParse(amountController.text.replaceAll('.', '')) ?? 0;
+                  if (amount > 0) {
+                    final transaction = TransactionModel(
+                      id: DateTime.now().millisecondsSinceEpoch.toString(),
+                      title: 'Sedekah Subuh',
+                      description: 'Sedekah rutin harian',
+                      amount: amount,
+                      type: TransactionType.expense,
+                      date: DateTime.now(),
+                      category: 'Gift',
+                    );
+                    await ref.read(transactionServiceProvider).addTransaction(transaction);
+                    if (mounted) {
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                        content: Text('Alhamdulillah, sedekah berhasil dicatat!'),
+                        backgroundColor: AppColors.primary,
+                      ));
+                    }
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                ),
+                child: const Text('Catat Sedekah', style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showFeatureSheet({
+    required String title,
+    required IconData icon,
+    required Color color,
+    required String description,
+    bool comingSoon = false,
+  }) {
+    final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
+        (ref.watch(themeProvider) == ThemeMode.system &&
+            Theme.of(context).brightness == Brightness.dark);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        padding: const EdgeInsets.fromLTRB(28, 12, 28, 48),
+        decoration: BoxDecoration(
+          color: isDarkMode ? AppColors.surfaceDark : Colors.white,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 32),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: isDarkMode ? 0.2 : 0.1),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Icon(icon, color: color, size: 32),
+                ),
+                const SizedBox(width: 20),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: isDarkMode ? Colors.white : Colors.black87,
+                        ),
+                      ),
+                      if (comingSoon)
+                        Container(
+                          margin: const EdgeInsets.only(top: 4),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.amber.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: const Text(
+                            'SEGERA HADIR',
+                            style: TextStyle(
+                              color: Colors.amber,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 32),
+            Text(
+              description,
+              style: TextStyle(
+                fontSize: 16,
+                color: isDarkMode ? Colors.white70 : Colors.black54,
+                height: 1.5,
+              ),
+            ),
+            const SizedBox(height: 40),
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: color,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+                child: const Text(
+                  'Mengerti',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildSmartAllocationPlanner(double amount, bool isDarkMode) {
     if (amount <= 0) return const SizedBox.shrink();
 
@@ -1122,8 +1103,22 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     final nameController = TextEditingController();
     final customCategoryController = TextEditingController();
     final formKey = GlobalKey<FormState>();
+    final List<TransactionCategory> categoryObjects =
+        type == TransactionType.income
+            ? AppCategories.incomeCategories
+            : AppCategories.expenseCategories;
+
+    // Grouping categories by their 'group' field
+    final Map<String, List<TransactionCategory>> groupedCategories = {};
+    for (var cat in categoryObjects) {
+      groupedCategories.putIfAbsent(cat.group, () => []).add(cat);
+    }
+
     var selectedCategory =
-        type == TransactionType.expense ? 'Makanan & Minuman' : 'Gaji';
+        type == TransactionType.expense ? 'Makanan & Minuman' : 'Gaji & Upah';
+    var selectedGroup = categoryObjects
+        .firstWhere((cat) => cat.label == selectedCategory)
+        .group;
     var noteText = '';
     String? selectedTopUpSource;
     String topUpBankName = '';
@@ -1134,41 +1129,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
         (ref.watch(themeProvider) == ThemeMode.system &&
             theme.brightness == Brightness.dark);
-
-    final List<Map<String, dynamic>> categories = type == TransactionType.income
-        ? [
-            {'label': 'Gaji', 'icon': Icons.payments_rounded},
-            {'label': 'Hasil Jualan', 'icon': Icons.storefront_rounded},
-            {'label': 'Bonus & Insentif', 'icon': Icons.stars_rounded},
-            {'label': 'Hadiah / THR', 'icon': Icons.card_giftcard_rounded},
-            {'label': 'Dividen / Investasi', 'icon': Icons.trending_up_rounded},
-            {'label': 'Tabungan', 'icon': Icons.savings_rounded},
-            {'label': 'Bunga Tabungan', 'icon': Icons.account_balance_rounded},
-            {'label': 'Lainnya', 'icon': Icons.more_horiz_rounded},
-          ]
-        : [
-            {'label': 'Makanan & Minuman', 'icon': Icons.fastfood_rounded},
-            {'label': 'Transportasi', 'icon': Icons.directions_car_rounded},
-            {'label': 'Kebutuhan Rumah', 'icon': Icons.home_work_rounded},
-            {'label': 'Belanja Bulanan', 'icon': Icons.shopping_cart_rounded},
-            {'label': 'Tagihan & Listrik', 'icon': Icons.bolt_rounded},
-            {'label': 'Hiburan & Hobi', 'icon': Icons.smart_display_rounded},
-            {'label': 'Kesehatan', 'icon': Icons.medical_services_rounded},
-            {'label': 'Pendidikan', 'icon': Icons.school_rounded},
-            {
-              'label': 'Zakat & Sedekah',
-              'icon': Icons.volunteer_activism_rounded
-            },
-            {'label': 'Cicilan & Hutang', 'icon': Icons.credit_card_rounded},
-            {'label': 'Pulsa & Internet', 'icon': Icons.wifi_rounded},
-            {
-              'label': 'Perbaikan Rumah',
-              'icon': Icons.home_repair_service_rounded
-            },
-            {'label': 'Gaya Hidup', 'icon': Icons.style_rounded},
-            {'label': 'Biaya Admin', 'icon': Icons.account_balance_rounded},
-            {'label': 'Lain-lain', 'icon': Icons.more_horiz_rounded},
-          ];
 
     final topUpSources = [
       {'label': 'Bank', 'icon': Icons.account_balance_rounded},
@@ -1387,7 +1347,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                     focusedBorder: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(16),
                                         borderSide: const BorderSide(
-                                            color: Color(0xFF1DA462), width: 1.5)),
+                                            color: Color(0xFF1DA462),
+                                            width: 1.5)),
                                     prefixIcon: const Icon(
                                         Icons.account_balance_rounded,
                                         color: Color(0xFF1DA462)),
@@ -1417,8 +1378,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                       {
                                         'value': 'SeaBank (Standar)',
                                         'label': 'SeaBank (Standar)',
-                                        'subtitle':
-                                            '4% p.a. – Semua saldo',
+                                        'subtitle': '4% p.a. – Semua saldo',
                                         'icon': Icons.savings_rounded,
                                         'color': Colors.teal,
                                       },
@@ -1433,7 +1393,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                         'value': 'Bank Jago',
                                         'label': 'Bank Jago',
                                         'subtitle': 'Bunga cair bulanan',
-                                        'icon': Icons.account_balance_wallet_rounded,
+                                        'icon': Icons
+                                            .account_balance_wallet_rounded,
                                         'color': Colors.orange.shade800,
                                       },
                                       {
@@ -1527,10 +1488,14 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                       interestOtherBankName = '';
                                       if (val == null) {
                                         nameController.clear();
-                                        selectedCategory = 'Gaji';
+                                        selectedCategory = 'Gaji & Upah';
+                                        selectedGroup =
+                                            'Pekerjaan & Profesional';
                                       } else if (val == 'Bank Lainnya') {
                                         nameController.clear();
-                                        selectedCategory = 'Bunga Tabungan';
+                                        selectedCategory =
+                                            'Bunga Tabungan / Deposito';
+                                        selectedGroup = 'Investasi & Pasif';
                                       } else {
                                         final now = DateTime.now();
                                         final monthName = [
@@ -1548,10 +1513,14 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                           'November',
                                           'Desember'
                                         ][now.month];
-                                        String bankClean = val.replaceAll(' (Premium)', '').replaceAll(' (Standar)', '');
+                                        String bankClean = val
+                                            .replaceAll(' (Premium)', '')
+                                            .replaceAll(' (Standar)', '');
                                         nameController.text =
                                             'Bunga $bankClean $monthName ${now.year}';
-                                        selectedCategory = 'Bunga Tabungan';
+                                        selectedCategory =
+                                            'Bunga Tabungan / Deposito';
+                                        selectedGroup = 'Investasi & Pasif';
                                       }
                                     });
                                   },
@@ -1566,29 +1535,33 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                             : Colors.black87),
                                     decoration: InputDecoration(
                                       labelText: 'Nama Bank',
-                                      hintText: 'Misal: Bank Raya, OCBC, Allo...',
+                                      hintText: 'Masukkan Nama Bank',
                                       filled: true,
                                       fillColor: isDarkMode
                                           ? Colors.white.withValues(alpha: 0.05)
                                           : const Color(0xFFF0FBF6),
                                       border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(16),
+                                          borderRadius:
+                                              BorderRadius.circular(16),
                                           borderSide: BorderSide(
                                               color: isDarkMode
                                                   ? Colors.white10
                                                   : const Color(0xFF1DA462)
                                                       .withValues(alpha: 0.3))),
                                       enabledBorder: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(16),
+                                          borderRadius:
+                                              BorderRadius.circular(16),
                                           borderSide: BorderSide(
                                               color: isDarkMode
                                                   ? Colors.white10
                                                   : const Color(0xFF1DA462)
                                                       .withValues(alpha: 0.3))),
                                       focusedBorder: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(16),
+                                          borderRadius:
+                                              BorderRadius.circular(16),
                                           borderSide: const BorderSide(
-                                              color: Color(0xFF1DA462), width: 1.5)),
+                                              color: Color(0xFF1DA462),
+                                              width: 1.5)),
                                       prefixIcon: const Icon(
                                           Icons.account_balance_rounded,
                                           color: Color(0xFF1DA462)),
@@ -1671,7 +1644,11 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                                 CrossAxisAlignment.start,
                                             children: [
                                               Text(
-                                                selectedInterestBank == 'Bank Lainnya' && interestOtherBankName.trim().isNotEmpty
+                                                selectedInterestBank ==
+                                                            'Bank Lainnya' &&
+                                                        interestOtherBankName
+                                                            .trim()
+                                                            .isNotEmpty
                                                     ? 'Bunga ${interestOtherBankName.trim()}'
                                                     : 'Bunga $selectedInterestBank',
                                                 style: const TextStyle(
@@ -1687,7 +1664,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                                     : selectedInterestBank ==
                                                             'SeaBank (Standar)'
                                                         ? '4% p.a. untuk semua saldo. Bunga dihitung & dikreditkan otomatis setiap hari.'
-                                                        : selectedInterestBank == 'Bank Lainnya'
+                                                        : selectedInterestBank ==
+                                                                'Bank Lainnya'
                                                             ? 'Masukkan nama bank Anda di kolom atas. Nama transaksi akan terisi otomatis.'
                                                             : 'Bunga tabungan dari $selectedInterestBank. Tambahkan catatan nominal pajak jika diperlukan.',
                                                 style: TextStyle(
@@ -1790,16 +1768,22 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                         selectedCategory =
                                             type == TransactionType.expense
                                                 ? 'Makanan & Minuman'
-                                                : 'Gaji';
+                                                : 'Gaji & Upah';
+                                        selectedGroup =
+                                            type == TransactionType.expense
+                                                ? 'Kebutuhan Pokok'
+                                                : 'Pekerjaan & Profesional';
                                       } else if (val != 'Bank') {
                                         nameController.text =
                                             'Biaya Admin $val';
-                                        selectedCategory = 'Biaya Admin';
+                                        selectedCategory = 'Tagihan & Utilitas';
+                                        selectedGroup = 'Kebutuhan Pokok';
                                       } else {
                                         nameController.text =
                                             'Biaya Admin Bank ${topUpBankName.trim()}'
                                                 .trim();
-                                        selectedCategory = 'Biaya Admin';
+                                        selectedCategory = 'Tagihan & Utilitas';
+                                        selectedGroup = 'Kebutuhan Pokok';
                                       }
                                     });
                                   },
@@ -1814,7 +1798,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                             : Colors.black87),
                                     decoration: InputDecoration(
                                       labelText: 'Nama Bank',
-                                      hintText: 'Misal: BRI, BCA, Mandiri...',
+                                      hintText: 'Masukkan Nama Bank',
                                       filled: true,
                                       fillColor: isDarkMode
                                           ? Colors.white.withValues(alpha: 0.05)
@@ -1870,7 +1854,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                         : Colors.black87),
                                 decoration: InputDecoration(
                                   labelText: 'Keterangan Transaksi *',
-                                  hintText: 'Input Keterangan',
+                                  hintText: 'Masukkan Keterangan',
                                   filled: true,
                                   fillColor: isDarkMode
                                       ? Colors.white.withValues(alpha: 0.05)
@@ -1896,8 +1880,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                           : Colors.black45),
                                   hintStyle: TextStyle(
                                       color: isDarkMode
-                                          ? Colors.white12
-                                          : Colors.black26),
+                                          ? Colors.white24
+                                          : Colors.black38),
                                 ),
                                 validator: (val) {
                                   if (val == null || val.trim().isEmpty) {
@@ -1917,37 +1901,76 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                               .withValues(alpha: 0.4),
                                       letterSpacing: 1.2)),
                               const SizedBox(height: 24),
+                              // Group Dropdown
                               DropdownButtonFormField<String>(
-                                value: selectedCategory,
+                                initialValue: selectedGroup,
                                 dropdownColor: isDarkMode
                                     ? AppColors.surfaceDark
                                     : Colors.white,
                                 decoration: InputDecoration(
-                                  labelText: 'Pilih Kategori',
+                                  labelText: 'Grup Kategori',
                                   filled: true,
                                   fillColor: isDarkMode
                                       ? Colors.white.withValues(alpha: 0.05)
                                       : Colors.grey.shade50,
                                   border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(16),
-                                      borderSide: BorderSide(
-                                          color: isDarkMode
-                                              ? Colors.white10
-                                              : Colors.grey.shade200)),
-                                  enabledBorder: OutlineInputBorder(
+                                      borderSide: BorderSide.none),
+                                  prefixIcon: const Icon(
+                                      Icons.grid_view_rounded,
+                                      color: Colors.teal),
+                                  labelStyle: TextStyle(
+                                      color: isDarkMode
+                                          ? Colors.white38
+                                          : Colors.black45),
+                                ),
+                                items: groupedCategories.keys
+                                    .map((group) => DropdownMenuItem(
+                                          value: group,
+                                          child: Text(group,
+                                              style: TextStyle(
+                                                  color: isDarkMode
+                                                      ? Colors.white
+                                                      : Colors.black87,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 13)),
+                                        ))
+                                    .toList(),
+                                onChanged: (val) {
+                                  if (val != null) {
+                                    setSheetState(() {
+                                      selectedGroup = val;
+                                      // Default to first category in new group
+                                      selectedCategory =
+                                          groupedCategories[val]!.first.label;
+                                    });
+                                  }
+                                },
+                              ),
+                              const SizedBox(height: 16),
+                              // Category Dropdown
+                              DropdownButtonFormField<String>(
+                                initialValue: selectedCategory,
+                                dropdownColor: isDarkMode
+                                    ? AppColors.surfaceDark
+                                    : Colors.white,
+                                decoration: InputDecoration(
+                                  labelText: 'Kategori',
+                                  filled: true,
+                                  fillColor: isDarkMode
+                                      ? Colors.white.withValues(alpha: 0.05)
+                                      : Colors.grey.shade50,
+                                  border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(16),
-                                      borderSide: BorderSide(
-                                          color: isDarkMode
-                                              ? Colors.white10
-                                              : Colors.grey.shade200)),
+                                      borderSide: BorderSide.none),
                                   prefixIcon: Icon(
-                                    categories.any((c) =>
-                                            c['label'] == selectedCategory)
-                                        ? (categories.firstWhere((c) =>
-                                                c['label'] ==
-                                                selectedCategory)['icon']
-                                            as IconData)
-                                        : Icons.more_horiz_rounded,
+                                    categoryObjects.any(
+                                            (c) => c.label == selectedCategory)
+                                        ? categoryObjects
+                                            .firstWhere((c) =>
+                                                c.label == selectedCategory)
+                                            .icon
+                                        : Icons.help_outline_rounded,
                                     color: Colors.teal,
                                   ),
                                   labelStyle: TextStyle(
@@ -1955,36 +1978,17 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                           ? Colors.white38
                                           : Colors.black45),
                                 ),
-                                selectedItemBuilder: (context) {
-                                  return categories.map((cat) {
-                                    return Text(
-                                      cat['label'] as String,
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.w600,
-                                          color: isDarkMode
-                                              ? Colors.white
-                                              : Colors.black87),
-                                    );
-                                  }).toList();
-                                },
-                                items: categories.map((cat) {
-                                  return DropdownMenuItem<String>(
-                                    value: cat['label'] as String,
-                                    child: Row(
-                                      children: [
-                                        Icon(cat['icon'] as IconData,
-                                            size: 18,
-                                            color: Colors.teal.shade700),
-                                        const SizedBox(width: 12),
-                                        Text(cat['label'] as String,
-                                            style: TextStyle(
-                                                color: isDarkMode
-                                                    ? Colors.white70
-                                                    : Colors.black87)),
-                                      ],
-                                    ),
-                                  );
-                                }).toList(),
+                                items: groupedCategories[selectedGroup]!
+                                    .map((cat) => DropdownMenuItem(
+                                          value: cat.label,
+                                          child: Text(cat.label,
+                                              style: TextStyle(
+                                                  color: isDarkMode
+                                                      ? Colors.white
+                                                      : Colors.black87,
+                                                  fontSize: 13)),
+                                        ))
+                                    .toList(),
                                 onChanged: (val) {
                                   if (val != null) {
                                     setSheetState(() {
@@ -2004,7 +2008,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                           : Colors.black87),
                                   decoration: InputDecoration(
                                     labelText: 'Kategori Kustom',
-                                    hintText: 'Misal: Sedekah, Investasi...',
+                                    hintText: 'Masukkan Nama Kategori',
                                     filled: true,
                                     fillColor: isDarkMode
                                         ? Colors.white.withValues(alpha: 0.05)
@@ -2054,8 +2058,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
 
                                   final amount =
                                       _toAmount(amountController.text);
-                                  if (amount == null)
+                                  if (amount == null) {
                                     return; // Should be handled by validator
+                                  }
 
                                   final finalCategory =
                                       (selectedCategory == 'Lainnya' &&
@@ -2573,41 +2578,35 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       healthIcon = Icons.info_outline_rounded;
     }
 
-    final Map<int, Map<String, double>> monthlyDataMap = {};
-    for (int day = 1; day <= lastDayOfMonth.day; day++) {
-      monthlyDataMap[day] = {'income': 0.0, 'expense': 0.0};
-    }
+    // CALCULATE MONTHLY HIGHLIGHTS
+    final currentMonthTx = transactions
+        .where((t) => t.date.year == now.year && t.date.month == now.month)
+        .toList();
 
-    // Filter transactions for current month only
-    for (var t in transactions) {
-      if (t.date.year == now.year && t.date.month == now.month) {
-        if (t.type == TransactionType.income) {
-          monthlyDataMap[t.date.day]!['income'] =
-              (monthlyDataMap[t.date.day]!['income'] ?? 0) + t.amount;
-        } else {
-          monthlyDataMap[t.date.day]!['expense'] =
-              (monthlyDataMap[t.date.day]!['expense'] ?? 0) + t.amount;
-        }
-      }
+    // 1. Top Category
+    final categoryTotals = <String, double>{};
+    for (var t
+        in currentMonthTx.where((t) => t.type == TransactionType.expense)) {
+      categoryTotals[t.category] = (categoryTotals[t.category] ?? 0) + t.amount;
     }
+    final topCategory = categoryTotals.entries.isEmpty
+        ? null
+        : categoryTotals.entries.reduce((a, b) => a.value > b.value ? a : b);
 
-    final List<Map<String, dynamic>> trendData = [];
-    for (int day = 1; day <= lastDayOfMonth.day; day++) {
-      trendData.add({
-        'day': day,
-        'label': '$day',
-        'income': monthlyDataMap[day]!['income'] ?? 0.0,
-        'expense': monthlyDataMap[day]!['expense'] ?? 0.0,
-        'index': (day - 1).toDouble()
-      });
-    }
+    // 2. Largest Transaction
+    final largestTransaction = currentMonthTx.isEmpty
+        ? null
+        : currentMonthTx.reduce((a, b) => a.amount > b.amount ? a : b);
+
+    // 3. Activity Count
+    final monthlyActivity = currentMonthTx.length;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 110),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Visual Header: Balance & Trend
+          // Visual Header: Balance & Highlights
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
@@ -2647,194 +2646,56 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                         color: isDarkMode
                             ? Colors.white38
                             : Colors.teal.shade700)),
-                // Premium Wealth Trend Chart (Scrollable Line Chart)
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Container(
-                    padding: const EdgeInsets.only(
-                        top: 24, right: 32, left: 24, bottom: 8),
-                    height: 220,
-                    width: math.max(MediaQuery.of(context).size.width - 80,
-                        trendData.length * 48.0),
-                    child: LineChart(
-                      LineChartData(
-                        minX: -1.0,
-                        maxX: trendData.length - 0.5,
-                        minY: 0,
-                        maxY: trendData.fold<double>(0, (max, d) {
-                              final val = d['income'] > d['expense']
-                                  ? d['income']
-                                  : d['expense'];
-                              return val > max ? val : max;
-                            }) *
-                            1.5,
-                        lineTouchData: LineTouchData(
-                          getTouchedSpotIndicator: (LineChartBarData barData,
-                              List<int> spotIndexes) {
-                            return spotIndexes.map((index) {
-                              return TouchedSpotIndicatorData(
-                                FlLine(
-                                    color:
-                                        barData.color?.withValues(alpha: 0.4),
-                                    strokeWidth: 2,
-                                    dashArray: [4, 4]),
-                                FlDotData(
-                                  show: true,
-                                  getDotPainter:
-                                      (spot, percent, barData, index) =>
-                                          FlDotCirclePainter(
-                                    radius: 6,
-                                    color: barData.color ?? Colors.teal,
-                                    strokeWidth: 2,
-                                    strokeColor: isDarkMode
-                                        ? AppColors.surfaceDark
-                                        : Colors.white,
-                                  ),
-                                ),
-                              );
-                            }).toList();
-                          },
-                          touchTooltipData: LineTouchTooltipData(
-                            tooltipBgColor: isDarkMode
-                                ? Colors.indigo.shade900
-                                : Colors.indigo.shade800,
-                            tooltipRoundedRadius: 12,
-                            tooltipPadding: const EdgeInsets.all(8),
-                            tooltipMargin: 8,
-                            fitInsideHorizontally: true,
-                            fitInsideVertically: true,
-                            getTooltipItems: (touchedSpots) {
-                              return touchedSpots.map((spot) {
-                                final d = trendData[spot.x.toInt()];
-                                final isIncome = spot.barIndex == 0;
-                                final val =
-                                    isIncome ? d['income'] : d['expense'];
-                                return LineTooltipItem(
-                                  "${isIncome ? '+' : '-'}${_formatCompactRupiah(val)}",
-                                  TextStyle(
-                                      color: isIncome
-                                          ? (isDarkMode
-                                              ? Colors.greenAccent.shade200
-                                              : Colors.greenAccent.shade400)
-                                          : (isDarkMode
-                                              ? Colors.redAccent.shade100
-                                              : Colors.redAccent.shade400),
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14),
-                                );
-                              }).toList();
-                            },
-                          ),
-                        ),
-                        titlesData: FlTitlesData(
-                          show: true,
-                          bottomTitles: AxisTitles(
-                            sideTitles: SideTitles(
-                              showTitles: true,
-                              reservedSize: 32,
-                              interval: 1,
-                              getTitlesWidget: (value, meta) {
-                                if (value != value.toInt()) {
-                                  return const SizedBox.shrink();
-                                }
-                                final index = value.toInt();
-                                if (index < 0 || index >= trendData.length) {
-                                  return const SizedBox.shrink();
-                                }
-                                return Padding(
-                                  padding: const EdgeInsets.only(top: 8.0),
-                                  child: Text(
-                                    trendData[index]['label'],
-                                    style: TextStyle(
-                                      color: isDarkMode
-                                          ? Colors.white24
-                                          : Colors.teal.shade800
-                                              .withValues(alpha: 0.4),
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                          leftTitles: const AxisTitles(
-                              sideTitles: SideTitles(showTitles: false)),
-                          topTitles: const AxisTitles(
-                              sideTitles: SideTitles(showTitles: false)),
-                          rightTitles: const AxisTitles(
-                              sideTitles: SideTitles(showTitles: false)),
-                        ),
-                        gridData: FlGridData(
-                          show: true,
-                          drawVerticalLine: true,
-                          drawHorizontalLine: true,
-                          verticalInterval: 1,
-                          getDrawingHorizontalLine: (value) => FlLine(
-                            color: isDarkMode
-                                ? Colors.white.withValues(alpha: 0.05)
-                                : Colors.teal.shade50.withValues(alpha: 0.3),
-                            strokeWidth: 1,
-                            dashArray: [5, 5],
-                          ),
-                          getDrawingVerticalLine: (value) => FlLine(
-                            color: isDarkMode
-                                ? Colors.white.withValues(alpha: 0.05)
-                                : Colors.teal.shade50.withValues(alpha: 0.3),
-                            strokeWidth: 1,
-                            dashArray: [5, 5],
-                          ),
-                        ),
-                        borderData: FlBorderData(show: false),
-                        lineBarsData: [
-                          LineChartBarData(
-                            spots: trendData
-                                .map((d) => FlSpot(d['index'] as double,
-                                    d['income'] as double))
-                                .toList(),
-                            isCurved: false,
-                            color: isDarkMode
-                                ? Colors.greenAccent.shade400
-                                : Colors.green.shade400,
-                            barWidth: 3,
-                            isStrokeCapRound: true,
-                            dotData: const FlDotData(show: false),
-                            belowBarData: BarAreaData(
-                              show: true,
-                              color: (isDarkMode
-                                      ? Colors.greenAccent.shade400
-                                      : Colors.green.shade400)
-                                  .withValues(alpha: 0.1),
-                            ),
-                          ),
-                          LineChartBarData(
-                            spots: trendData
-                                .map((d) => FlSpot(d['index'] as double,
-                                    d['expense'] as double))
-                                .toList(),
-                            isCurved: false,
-                            color: isDarkMode
-                                ? Colors.redAccent.shade200
-                                : Colors.red.shade400,
-                            barWidth: 3,
-                            isStrokeCapRound: true,
-                            dotData: const FlDotData(show: false),
-                            belowBarData: BarAreaData(
-                              show: true,
-                              color: (isDarkMode
-                                      ? Colors.redAccent.shade200
-                                      : Colors.red.shade400)
-                                  .withValues(alpha: 0.1),
-                            ),
-                          ),
-                        ],
+                const SizedBox(height: 32),
+
+                // NEW FEATURE: MONTHLY HIGHLIGHTS GRID
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildHighlightCard(
+                        context,
+                        'KATEGORI TERBOROS',
+                        topCategory?.key ?? 'Belum ada',
+                        topCategory != null
+                            ? _formatCompactRupiah(topCategory.value)
+                            : '-',
+                        AppCategories.getIconForCategory(
+                            topCategory?.key ?? ''),
+                        Colors.orange,
+                        isDarkMode,
                       ),
                     ),
-                  ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _buildHighlightCard(
+                        context,
+                        'TRANSAKSI TERBESAR',
+                        largestTransaction?.title ?? 'Belum ada',
+                        largestTransaction != null
+                            ? _formatCompactRupiah(largestTransaction.amount)
+                            : '-',
+                        Icons.payments_rounded,
+                        Colors.blue,
+                        isDarkMode,
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 12),
+                _buildHighlightCard(
+                  context,
+                  'AKTIVITAS BULAN INI',
+                  '$monthlyActivity Transaksi Tercatat',
+                  'Total frekuensi penggunaan aplikasi',
+                  Icons.analytics_rounded,
+                  Colors.teal,
+                  isDarkMode,
+                  fullWidth: true,
+                ),
+
+                const SizedBox(height: 20),
                 Center(
-                    child: Text('GRAFIK PEMASUKAN vs PENGELUARAN',
+                    child: Text('RINGKASAN AKTIVITAS & INSIGHT',
                         style: TextStyle(
                             fontSize: 8,
                             fontWeight: FontWeight.bold,
@@ -3203,37 +3064,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildCenteredIndicator(String label, double amount, Color color) {
-    final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
-        (ref.watch(themeProvider) == ThemeMode.system &&
-            Theme.of(context).brightness == Brightness.dark);
-
-    return Column(
-      children: [
-        Row(
-          children: [
-            Container(
-                width: 8,
-                height: 8,
-                decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.6),
-                    shape: BoxShape.circle)),
-            const SizedBox(width: 8),
-            Text(label,
-                style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    color: isDarkMode ? Colors.white54 : Colors.black45)),
-          ],
-        ),
-        const SizedBox(height: 4),
-        Text(_formatCompactRupiah(amount),
-            style: TextStyle(
-                fontSize: 13, fontWeight: FontWeight.bold, color: color)),
-      ],
     );
   }
 
@@ -3919,6 +3749,84 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildHighlightCard(
+    BuildContext context,
+    String label,
+    String value,
+    String subtitle,
+    IconData icon,
+    Color color,
+    bool isDarkMode, {
+    bool fullWidth = false,
+  }) {
+    return Container(
+      width: fullWidth ? double.infinity : null,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDarkMode
+            ? color.withValues(alpha: 0.1)
+            : color.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDarkMode
+              ? color.withValues(alpha: 0.2)
+              : color.withValues(alpha: 0.1),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, color: color, size: 16),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 8,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                    color: isDarkMode ? Colors.white38 : Colors.black38,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: isDarkMode ? Colors.white : Colors.black87,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            subtitle,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 9,
+              fontWeight: FontWeight.bold,
+              color: isDarkMode ? Colors.white24 : Colors.black26,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -5083,4 +4991,21 @@ class _NavItem {
   final String label;
 
   const _NavItem({required this.icon, required this.label});
+}
+
+class _RibuanFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
+    if (newValue.text.isEmpty) return newValue;
+    final intValue = int.tryParse(newValue.text.replaceAll('.', ''));
+    if (intValue == null) return oldValue;
+    final newText = NumberFormat.currency(
+            locale: 'id_ID', symbol: '', decimalDigits: 0)
+        .format(intValue)
+        .trim();
+    return TextEditingValue(
+        text: newText,
+        selection: TextSelection.collapsed(offset: newText.length));
+  }
 }

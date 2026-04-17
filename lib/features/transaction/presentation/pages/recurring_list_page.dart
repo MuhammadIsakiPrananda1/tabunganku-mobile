@@ -9,6 +9,7 @@ import 'package:tabunganku/core/theme/app_colors.dart';
 import 'package:tabunganku/core/theme/theme_provider.dart';
 
 import 'package:tabunganku/core/utils/currency_formatter.dart';
+import 'package:tabunganku/core/constants/transaction_categories.dart';
 
 class RecurringListPage extends ConsumerStatefulWidget {
   const RecurringListPage({super.key});
@@ -46,7 +47,7 @@ class _RecurringListPageState extends ConsumerState<RecurringListPage> {
     final titleController = TextEditingController();
     TransactionType selectedType = TransactionType.expense;
     RecurringFrequency selectedFreq = RecurringFrequency.monthly;
-    String selectedCategory = 'Tagihan';
+    String selectedCategory = 'Tagihan \u0026 Listrik';
 
     showModalBottomSheet(
       context: context,

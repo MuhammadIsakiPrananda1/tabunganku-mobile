@@ -11,6 +11,15 @@ import 'package:tabunganku/features/transaction/presentation/pages/scan_receipt_
 import 'package:tabunganku/features/challenge/presentation/pages/challenge_page.dart';
 import 'package:tabunganku/features/budget/presentation/pages/monthly_budget_page.dart';
 import 'package:tabunganku/features/home/presentation/pages/zakat_page.dart';
+import 'package:tabunganku/features/home/presentation/pages/gold_savings_page.dart';
+import 'package:tabunganku/features/home/presentation/pages/specialized_saving_page.dart';
+import 'package:tabunganku/features/home/presentation/pages/bills_tracker_page.dart';
+import 'package:tabunganku/features/home/presentation/pages/tax_calculator_page.dart';
+import 'package:tabunganku/features/home/presentation/pages/investment_tracker_page.dart';
+import 'package:tabunganku/features/home/presentation/pages/insurance_tracker_page.dart';
+import 'package:tabunganku/features/home/presentation/pages/saving_plans_page.dart';
+import 'package:tabunganku/features/home/presentation/pages/buying_targets_page.dart';
+
 final appRouterProvider = Provider((ref) {
   return GoRouter(
     initialLocation: '/splash',
@@ -82,6 +91,94 @@ final appRouterProvider = Provider((ref) {
         path: '/zakat',
         name: 'zakat',
         builder: (context, state) => const ZakatPage(),
+      ),
+
+      // Gold Savings Page
+      GoRoute(
+        path: '/gold',
+        name: 'gold',
+        builder: (context, state) => const GoldSavingsPage(),
+      ),
+
+      // Specialized Savings Pages
+      GoRoute(
+        path: '/emergency-fund',
+        name: 'emergency-fund',
+        builder: (context, state) => const SpecializedSavingPage(
+          title: 'Dana Darurat',
+          category: 'Darurat',
+          icon: Icons.health_and_safety_rounded,
+          baseColor: Colors.redAccent,
+        ),
+      ),
+      GoRoute(
+        path: '/education-fund',
+        name: 'education-fund',
+        builder: (context, state) => const SpecializedSavingPage(
+          title: 'Dana Pendidikan',
+          category: 'Pendidikan',
+          icon: Icons.school_rounded,
+          baseColor: Colors.blueAccent,
+        ),
+      ),
+      GoRoute(
+        path: '/retirement-fund',
+        name: 'retirement-fund',
+        builder: (context, state) => const SpecializedSavingPage(
+          title: 'Dana Pensiun',
+          category: 'Pensiun',
+          icon: Icons.elderly_rounded,
+          baseColor: Colors.brown,
+        ),
+      ),
+      GoRoute(
+        path: '/qurban',
+        name: 'qurban',
+        builder: (context, state) => const SpecializedSavingPage(
+          title: 'Tabungan Kurban',
+          category: 'Kurban',
+          icon: Icons.pets_rounded,
+          baseColor: Colors.green,
+        ),
+      ),
+
+      GoRoute(
+        path: '/saving-plans',
+        name: 'saving-plans',
+        builder: (context, state) => const SavingPlansPage(),
+      ),
+      GoRoute(
+        path: '/buying-targets',
+        name: 'buying-targets',
+        builder: (context, state) => const BuyingTargetsPage(),
+      ),
+
+      // Bills Tracker Page
+      GoRoute(
+        path: '/bills',
+        name: 'bills',
+        builder: (context, state) => const BillsTrackerPage(),
+      ),
+
+      // Tax Calculator Page
+      GoRoute(
+        path: '/tax',
+        name: 'tax',
+        builder: (context, state) => const TaxCalculatorPage(),
+      ),
+
+      // Investment Tracker Page
+      GoRoute(
+        path: '/investment',
+        name: 'investment',
+        builder: (context, state) => const InvestmentTrackerPage(),
+      ),
+
+      // Insurance Tracker Page
+      GoRoute(
+        path: '/insurance',
+        name: 'insurance',
+        builder: (context, state) => const InsuranceTrackerPage(),
       ),
 
       // Catch-all redirect to splash

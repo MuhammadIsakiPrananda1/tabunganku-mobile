@@ -11,6 +11,7 @@ import 'package:tabunganku/core/theme/theme_provider.dart';
 import 'package:tabunganku/models/shopping_item_model.dart';
 import 'package:tabunganku/providers/shopping_item_provider.dart';
 import 'package:tabunganku/features/settings/presentation/providers/security_provider.dart';
+import 'package:tabunganku/core/constants/transaction_categories.dart';
 
 class ShoppingFormSheet extends ConsumerStatefulWidget {
   final ShoppingItem? item;
@@ -39,39 +40,58 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _nameController;
   late TextEditingController _priceController;
+  late TextEditingController _customCategoryController;
   late String _selectedCategory;
+  String? _selectedGroup;
+  bool _isCustomCategory = false;
   String? _imagePath;
   final ImagePicker _picker = ImagePicker();
 
-  final List<String> _categories = [
-    'Makanan & Minuman',
-    'Transportasi',
-    'Belanja Bulanan',
-    'Kebutuhan Rumah',
-    'Tagihan & Listrik',
-    'Hiburan & Hobi',
-    'Kesehatan',
-    'Pendidikan',
-    'Zakat & Sedekah',
-    'Gaya Hidup',
-    'Lainnya',
-  ];
+  final List<String> _categories =
+      AppCategories.expenseCategories.map((c) => c.label).toList();
+  final Map<String, List<TransactionCategory>> _groupedCategories = {};
 
   @override
   void initState() {
     super.initState();
+
+    // Group categories
+    for (var cat in AppCategories.expenseCategories) {
+      _groupedCategories.putIfAbsent(cat.group, () => []).add(cat);
+    }
+
     _nameController = TextEditingController(text: widget.item?.name ?? '');
     _priceController = TextEditingController(
-        text: widget.item != null ? widget.item!.estimatedPrice.toInt().toString() : '');
-    _selectedCategory = widget.item?.category ?? 'Belanja';
+        text: widget.item != null
+            ? widget.item!.estimatedPrice.toInt().toString()
+            : '');
+    _customCategoryController = TextEditingController();
+
+    final initialCat = widget.item?.category ?? 'Belanja Bulanan';
+    final isKnown = _categories.contains(initialCat) &&
+        initialCat != AppCategories.otherLabel;
+
+    if (isKnown) {
+      _selectedCategory = initialCat;
+      _isCustomCategory = false;
+      _selectedGroup = AppCategories.expenseCategories.firstWhere((c) => c.label == initialCat).group;
+    } else {
+      _selectedCategory = AppCategories.otherLabel;
+      _isCustomCategory = true;
+      _customCategoryController.text =
+          initialCat == AppCategories.otherLabel ? '' : initialCat;
+      _selectedGroup = AppCategories.expenseCategories.firstWhere((c) => c.label == AppCategories.otherLabel).group;
+    }
     _imagePath = widget.item?.imagePath;
 
     // Trigger formatting if price exists
     if (_priceController.text.isNotEmpty) {
       final val = _priceController.text;
-      _priceController.value = _RibuanSeparatorInputFormatter().formatEditUpdate(
+      _priceController.value =
+          _RibuanSeparatorInputFormatter().formatEditUpdate(
         const TextEditingValue(text: ''),
-        TextEditingValue(text: val, selection: TextSelection.collapsed(offset: val.length)),
+        TextEditingValue(
+            text: val, selection: TextSelection.collapsed(offset: val.length)),
       );
     }
   }
@@ -141,12 +161,11 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
               ),
             ),
             const SizedBox(height: 32),
-            Text('Pilih Sumber Foto', 
-              style: TextStyle(
-                fontWeight: FontWeight.bold, 
-                fontSize: 18,
-                color: isDarkMode ? Colors.white : Colors.black87
-              )),
+            Text('Pilih Sumber Foto',
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                    color: isDarkMode ? Colors.white : Colors.black87)),
             const SizedBox(height: 24),
             Row(
               children: [
@@ -194,7 +213,9 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.teal.shade50.withValues(alpha: 0.3),
+          color: isDarkMode
+              ? Colors.white.withValues(alpha: 0.05)
+              : Colors.teal.shade50.withValues(alpha: 0.3),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isDarkMode ? Colors.white10 : Colors.teal.shade50,
@@ -204,11 +225,12 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
           children: [
             Icon(icon, color: AppColors.primary, size: 32),
             const SizedBox(height: 8),
-            Text(label, style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-              color: isDarkMode ? Colors.white70 : Colors.teal.shade900,
-            )),
+            Text(label,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  color: isDarkMode ? Colors.white70 : Colors.teal.shade900,
+                )),
           ],
         ),
       ),
@@ -217,15 +239,21 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
 
   void _submit() async {
     if (_formKey.currentState!.validate()) {
-      final cleanAmount = _priceController.text.replaceAll(RegExp(r'[^0-9]'), '');
+      final cleanAmount =
+          _priceController.text.replaceAll(RegExp(r'[^0-9]'), '');
       final price = double.tryParse(cleanAmount) ?? 0;
-      
+
+      final finalCategory = (_selectedCategory == AppCategories.otherLabel &&
+              _customCategoryController.text.trim().isNotEmpty)
+          ? _customCategoryController.text.trim()
+          : _selectedCategory;
+
       final newItem = ShoppingItem(
         id: widget.item?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
         name: _nameController.text.trim(),
         estimatedPrice: price,
         createdAt: widget.item?.createdAt ?? DateTime.now(),
-        category: _selectedCategory,
+        category: finalCategory,
         imagePath: _imagePath,
         isBought: widget.item?.isBought ?? false,
       );
@@ -290,7 +318,7 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
               ),
             ),
             const SizedBox(height: 24),
-            
+
             // Photo Picker Preview
             GestureDetector(
               onTap: _showImageSourceSheet,
@@ -298,7 +326,9 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
                 width: double.infinity,
                 height: 120,
                 decoration: BoxDecoration(
-                  color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100,
+                  color: isDarkMode
+                      ? Colors.white.withValues(alpha: 0.05)
+                      : Colors.grey.shade100,
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
                     color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
@@ -327,7 +357,8 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
                                   color: Colors.red,
                                   shape: BoxShape.circle,
                                 ),
-                                child: const Icon(Icons.close, color: Colors.white, size: 16),
+                                child: const Icon(Icons.close,
+                                    color: Colors.white, size: 16),
                               ),
                             ),
                           ),
@@ -336,17 +367,18 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
                     : Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.add_a_photo_rounded, 
-                            color: isDarkMode ? Colors.white24 : Colors.grey, 
-                            size: 32),
+                          Icon(Icons.add_a_photo_rounded,
+                              color: isDarkMode ? Colors.white24 : Colors.grey,
+                              size: 32),
                           const SizedBox(height: 8),
-                          Text('TAMBAH FOTO BARANG', 
-                            style: TextStyle(
-                              fontSize: 10, 
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 1.2,
-                              color: isDarkMode ? Colors.white24 : Colors.grey
-                            )),
+                          Text('TAMBAH FOTO BARANG',
+                              style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1.2,
+                                  color: isDarkMode
+                                      ? Colors.white24
+                                      : Colors.grey)),
                         ],
                       ),
               ),
@@ -370,7 +402,8 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildLabel('Estimasi Harga', isDarkMode, isRequired: true),
+                      _buildLabel('Estimasi Harga', isDarkMode,
+                          isRequired: true),
                       _buildTextField(
                         controller: _priceController,
                         hint: '0',
@@ -382,51 +415,91 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
                         ],
                         isDarkMode: isDarkMode,
                         prefixText: 'Rp',
-                        validator: (v) => v!.isEmpty ? 'Harga harus diisi' : null,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  flex: 2,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildLabel('Kategori', isDarkMode),
-                      DropdownButtonFormField<String>(
-                        value: _selectedCategory,
-                        dropdownColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
-                        items: _categories.map((cat) => DropdownMenuItem(
-                          value: cat,
-                          child: Text(cat, style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: isDarkMode ? Colors.white : Colors.black87,
-                          )),
-                        )).toList(),
-                        onChanged: (val) {
-                          if (val != null) setState(() => _selectedCategory = val);
-                        },
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade50,
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: BorderSide(color: isDarkMode ? Colors.white10 : Colors.grey.shade200),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: BorderSide(color: isDarkMode ? Colors.white10 : Colors.grey.shade200),
-                          ),
-                        ),
+                        validator: (v) =>
+                            v!.isEmpty ? 'Harga harus diisi' : null,
                       ),
                     ],
                   ),
                 ),
               ],
             ),
+            // Category Section (Grouped)
+            // Category Section (Grouped Dropdowns)
+            const SizedBox(height: 24),
+            _buildLabel('Pilih Kategori', isDarkMode),
+            const SizedBox(height: 8),
+            // Group Dropdown
+            DropdownButtonFormField<String>(
+              value: _selectedGroup,
+              dropdownColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
+              style: TextStyle(color: isDarkMode ? Colors.white : Colors.black87, fontWeight: FontWeight.w600),
+              decoration: InputDecoration(
+                labelText: 'Grup Kategori',
+                filled: true,
+                fillColor: isDarkMode ? Colors.white.withValues(alpha: 0.03) : Colors.grey.shade50,
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                prefixIcon: const Icon(Icons.grid_view_rounded, color: AppColors.primary),
+                labelStyle: TextStyle(color: isDarkMode ? Colors.white38 : Colors.grey),
+              ),
+              items: _groupedCategories.keys.map((group) => DropdownMenuItem(
+                value: group,
+                child: Text(group, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+              )).toList(),
+              onChanged: (val) {
+                if (val != null) {
+                  setState(() {
+                    _selectedGroup = val;
+                    _selectedCategory = _groupedCategories[val]!.first.label;
+                    _isCustomCategory = _selectedCategory == AppCategories.otherLabel;
+                  });
+                }
+              },
+            ),
+            const SizedBox(height: 16),
+            // Category Dropdown
+            DropdownButtonFormField<String>(
+              value: _selectedCategory,
+              dropdownColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
+              style: TextStyle(color: isDarkMode ? Colors.white : Colors.black87, fontWeight: FontWeight.w600),
+              decoration: InputDecoration(
+                labelText: 'Kategori Barang',
+                filled: true,
+                fillColor: isDarkMode ? Colors.white.withValues(alpha: 0.03) : Colors.grey.shade50,
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                prefixIcon: Icon(
+                  AppCategories.expenseCategories.firstWhere((c) => c.label == _selectedCategory).icon,
+                  color: AppColors.primary,
+                ),
+                labelStyle: TextStyle(color: isDarkMode ? Colors.white38 : Colors.grey),
+              ),
+              items: _groupedCategories[_selectedGroup]!.map((cat) => DropdownMenuItem(
+                value: cat.label,
+                child: Text(cat.label, style: const TextStyle(fontSize: 13)),
+              )).toList(),
+              onChanged: (val) {
+                if (val != null) {
+                  setState(() {
+                    _selectedCategory = val;
+                    _isCustomCategory = val == AppCategories.otherLabel;
+                  });
+                }
+              },
+            ),
+            if (_isCustomCategory) ...[
+              const SizedBox(height: 20),
+              _buildLabel('Kategori Kustom', isDarkMode, isRequired: true),
+              _buildTextField(
+                controller: _customCategoryController,
+                hint: 'Misal: Bengkel, Skincare...',
+                icon: Icons.label_important_outline_rounded,
+                isDarkMode: isDarkMode,
+                validator: (v) =>
+                    (_selectedCategory == AppCategories.otherLabel &&
+                            v!.isEmpty)
+                        ? 'Kategori kustom harus diisi'
+                        : null,
+              ),
+            ],
             const SizedBox(height: 32),
 
             SizedBox(
@@ -437,12 +510,15 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16)),
                   elevation: 8,
                   shadowColor: AppColors.primary.withValues(alpha: 0.3),
                 ),
-                child: Text(widget.item == null ? 'Simpan Rencana' : 'Simpan Perubahan',
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                child: Text(
+                    widget.item == null ? 'Simpan Rencana' : 'Simpan Perubahan',
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 16)),
               ),
             ),
           ],
@@ -497,7 +573,8 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
       inputFormatters: inputFormatters,
       validator: validator,
       style: TextStyle(
-          color: isDarkMode ? Colors.white : Colors.black87, fontWeight: FontWeight.bold),
+          color: isDarkMode ? Colors.white : Colors.black87,
+          fontWeight: FontWeight.bold),
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: TextStyle(
@@ -506,7 +583,8 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
           mainAxisSize: MainAxisSize.min,
           children: [
             const SizedBox(width: 16),
-            Icon(icon, color: isDarkMode ? Colors.white24 : Colors.grey, size: 20),
+            Icon(icon,
+                color: isDarkMode ? Colors.white24 : Colors.grey, size: 20),
             if (prefixText != null) ...[
               const SizedBox(width: 8),
               Text(
@@ -521,15 +599,20 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
           ],
         ),
         filled: true,
-        fillColor: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade50,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        fillColor: isDarkMode
+            ? Colors.white.withValues(alpha: 0.05)
+            : Colors.grey.shade50,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: isDarkMode ? Colors.white10 : Colors.grey.shade200),
+          borderSide: BorderSide(
+              color: isDarkMode ? Colors.white10 : Colors.grey.shade200),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: isDarkMode ? Colors.white10 : Colors.grey.shade200),
+          borderSide: BorderSide(
+              color: isDarkMode ? Colors.white10 : Colors.grey.shade200),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
@@ -553,12 +636,14 @@ class _RibuanSeparatorInputFormatter extends TextInputFormatter {
     );
     int numDigitsBefore = newValue.selection.end -
         newValue.text
-            .substring(0, math.min(newValue.selection.end, newValue.text.length))
+            .substring(
+                0, math.min(newValue.selection.end, newValue.text.length))
             .replaceAll(RegExp(r'[0-9]'), '')
             .length;
     int newSelectionIndex = 0;
     int digitsCount = 0;
-    while (digitsCount < numDigitsBefore && newSelectionIndex < formatted.length) {
+    while (
+        digitsCount < numDigitsBefore && newSelectionIndex < formatted.length) {
       if (RegExp(r'[0-9]').hasMatch(formatted[newSelectionIndex])) {
         digitsCount++;
       }

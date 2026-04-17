@@ -101,17 +101,16 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
-        (ref.watch(themeProvider) == ThemeMode.system &&
-            Theme.of(context).brightness == Brightness.dark);
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
-      backgroundColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded, color: isDarkMode ? Colors.white : Colors.black),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: colorScheme.onSurface),
           onPressed: () => context.pop(),
         ),
       ),
@@ -131,14 +130,14 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage> {
                           ? Icons.lock_outline_rounded 
                           : (_isConfirmStage ? Icons.verified_user_rounded : Icons.vpn_key_rounded),
                         size: 64,
-                        color: AppColors.primary,
+                        color: colorScheme.primary,
                       ),
                       const SizedBox(height: 20),
                       Text(
                         _isOldPinStage 
                           ? 'PIN Lama' 
                           : (_isConfirmStage ? 'Konfirmasi PIN Baru' : 'Atur PIN Baru'),
-                        style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                        style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold, color: colorScheme.onSurface),
                       ),
                       const SizedBox(height: 8),
                       Text(
@@ -148,7 +147,7 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage> {
                             ? 'Masukkan kembali PIN baru kamu'
                             : 'Gunakan 4 digit angka rahasia'),
                         textAlign: TextAlign.center,
-                        style: const TextStyle(color: Colors.grey, fontSize: 13),
+                        style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
                       ),
                       const SizedBox(height: 40),
                       
@@ -164,14 +163,14 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage> {
                             margin: const EdgeInsets.symmetric(horizontal: 14),
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: isActive ? AppColors.primary : Colors.transparent,
+                              color: isActive ? colorScheme.primary : Colors.transparent,
                               border: Border.all(
-                                color: isActive ? AppColors.primary : Colors.grey.withValues(alpha: 0.3),
+                                color: isActive ? colorScheme.primary : colorScheme.outline.withValues(alpha: 0.3),
                                 width: 2,
                               ),
                               boxShadow: isActive ? [
                                 BoxShadow(
-                                  color: AppColors.primary.withValues(alpha: 0.2),
+                                  color: colorScheme.primary.withValues(alpha: 0.2),
                                   blurRadius: 8,
                                 )
                               ] : null,
@@ -184,7 +183,7 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage> {
                       const SizedBox(height: 40),
                       
                       // Numeric Keypad
-                      _buildKeypad(isDarkMode),
+                      _buildKeypad(),
                       const SizedBox(height: 24),
                     ],
                   ),
@@ -197,7 +196,7 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage> {
     );
   }
 
-  Widget _buildKeypad(bool isDarkMode) {
+  Widget _buildKeypad() {
     return Column(
       children: [
         for (var row in [['1', '2', '3'], ['4', '5', '6'], ['7', '8', '9'], [null, '0', 'back']])
@@ -209,7 +208,7 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage> {
                 for (var key in row)
                   key == null 
                     ? const SizedBox(width: 80)
-                    : _buildKeypadButton(key, isDarkMode),
+                    : _buildKeypadButton(key),
               ],
             ),
           ),
@@ -217,8 +216,11 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage> {
     );
   }
 
-  Widget _buildKeypadButton(String key, bool isDarkMode) {
+  Widget _buildKeypadButton(String key) {
     final isBack = key == "back";
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -229,14 +231,17 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage> {
           height: 80,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.withValues(alpha: 0.05),
+            color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
           ),
           child: Center(
             child: isBack
-              ? const Icon(Icons.backspace_rounded, size: 28, color: AppColors.primary)
+              ? Icon(Icons.backspace_rounded, size: 28, color: colorScheme.primary)
               : Text(
                   key,
-                  style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+                  style: textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.onSurface,
+                  ),
                 ),
           ),
         ),

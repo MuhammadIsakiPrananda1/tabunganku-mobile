@@ -83,25 +83,26 @@ class _LockScreenState extends ConsumerState<LockScreen> with TickerProviderStat
   Widget build(BuildContext context) {
     final profile = ref.watch(userProfileProvider);
     final security = ref.watch(securityProvider);
+    final colorScheme = Theme.of(context).colorScheme;
     
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
             const Spacer(flex: 2),
             // Profile / Logo Section
-            _buildProfileHeader(profile),
+            _buildProfileHeader(profile, colorScheme),
             const SizedBox(height: 32),
             
             // PIN Dots
-            _buildPinDots(),
+            _buildPinDots(colorScheme),
             const SizedBox(height: 16),
             
             if (_isError)
-              const Text(
+              Text(
                 'PIN Salah. Coba lagi.',
-                style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                style: TextStyle(color: colorScheme.error, fontWeight: FontWeight.bold),
               ),
               
             const Spacer(flex: 1),
@@ -115,7 +116,8 @@ class _LockScreenState extends ConsumerState<LockScreen> with TickerProviderStat
     );
   }
 
-  Widget _buildProfileHeader(UserProfile profile) {
+  Widget _buildProfileHeader(UserProfile profile, ColorScheme colorScheme) {
+    final textTheme = Theme.of(context).textTheme;
     return Column(
       children: [
         Container(
@@ -123,7 +125,7 @@ class _LockScreenState extends ConsumerState<LockScreen> with TickerProviderStat
           height: 90,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            border: Border.all(color: AppColors.primary, width: 3),
+            border: Border.all(color: colorScheme.primary, width: 3),
           ),
           child: ClipOval(
             child: profile.photoUrl != null
@@ -131,12 +133,12 @@ class _LockScreenState extends ConsumerState<LockScreen> with TickerProviderStat
                     ? Image.network(profile.photoUrl!, fit: BoxFit.cover)
                     : Image.file(File(profile.photoUrl!), fit: BoxFit.cover))
                 : Container(
-                    color: AppColors.primary.withValues(alpha: 0.1),
-                    child: const Center(
+                    color: colorScheme.primary.withValues(alpha: 0.1),
+                    child: Center(
                       child: Icon(
                         Icons.person,
                         size: 48,
-                        color: AppColors.primary,
+                        color: colorScheme.primary,
                       ),
                     ),
                   ),
@@ -145,17 +147,20 @@ class _LockScreenState extends ConsumerState<LockScreen> with TickerProviderStat
         const SizedBox(height: 16),
         Text(
           'Selamat Datang Kembali,',
-          style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+          style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
         ),
         Text(
           profile.name,
-          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.primaryDark),
+          style: textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: colorScheme.onSurface,
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildPinDots() {
+  Widget _buildPinDots(ColorScheme colorScheme) {
     return AnimatedBuilder(
       animation: _shakeController,
       builder: (context, child) {
@@ -172,8 +177,8 @@ class _LockScreenState extends ConsumerState<LockScreen> with TickerProviderStat
                 height: 16,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: active ? AppColors.primary : AppColors.primary.withValues(alpha: 0.15),
-                  border: Border.all(color: AppColors.primary, width: 1.5),
+                  color: active ? colorScheme.primary : colorScheme.primary.withValues(alpha: 0.15),
+                  border: Border.all(color: colorScheme.primary, width: 1.5),
                 ),
               );
             }),
@@ -217,6 +222,7 @@ class _LockScreenState extends ConsumerState<LockScreen> with TickerProviderStat
   }
 
   Widget _buildKeypadButton(String value) {
+    final colorScheme = Theme.of(context).colorScheme;
     return InkWell(
       onTap: () => _onNumberPressed(value),
       borderRadius: BorderRadius.circular(40),
@@ -225,7 +231,7 @@ class _LockScreenState extends ConsumerState<LockScreen> with TickerProviderStat
         height: 70,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: Colors.white,
+          color: colorScheme.surface,
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.05),
@@ -237,10 +243,10 @@ class _LockScreenState extends ConsumerState<LockScreen> with TickerProviderStat
         child: Center(
           child: Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Colors.black87,
+              color: colorScheme.onSurface,
             ),
           ),
         ),
@@ -249,6 +255,7 @@ class _LockScreenState extends ConsumerState<LockScreen> with TickerProviderStat
   }
 
   Widget _buildKeypadIconButton(IconData icon, VoidCallback onTap) {
+    final colorScheme = Theme.of(context).colorScheme;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(40),
@@ -257,7 +264,7 @@ class _LockScreenState extends ConsumerState<LockScreen> with TickerProviderStat
         height: 70,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: Colors.white,
+          color: colorScheme.surface,
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.05),
@@ -267,7 +274,7 @@ class _LockScreenState extends ConsumerState<LockScreen> with TickerProviderStat
           ],
         ),
         child: Center(
-          child: Icon(icon, color: AppColors.primary, size: 28),
+          child: Icon(icon, color: colorScheme.primary, size: 28),
         ),
       ),
     );

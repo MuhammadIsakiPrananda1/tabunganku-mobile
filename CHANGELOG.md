@@ -4,9 +4,66 @@ Seluruh evolusi, fitur, dan perbaikan aplikasi **TabunganKu** terdokumentasi sec
 
 ---
 
-## 🚀 [1.4.7] — 15 April 2026: Comprehensive System Synchronization
+## 💎 [1.4.8] — 17–18 April 2026: The UX & Aesthetic Revolution
 
-Pembaruan sistem secara menyeluruh untuk sinkronisasi versi aplikasi di semua platform, memastikan konsistensi antara backend, internal constants, dan konfigurasi build Android.
+Rilis ini membawa transformasi besar pada antarmuka pengguna untuk menciptakan pengalaman yang lebih premium, intuitif, dan selaras dengan standar aplikasi finansial modern. Fokus utama adalah pada personalisasi demografi, visualisasi data yang mendalam, dan estetika premium yang konsisten.
+
+### 🍱 Dashboard: Smart Activity Pulse & GoPay-Style UI
+- **Intelligent Financial Summary** — Menggantikan grafik batang yang redundan dengan widget **Monthly Highlights** yang dinamis. Widget ini secara otomatis merangkum kesehatan finansial Anda dalam satu pandangan sekilas yang elegan 📊.
+- **Top Category Detection** — Algoritma cerdas yang mendeteksi otomatis kategori dengan pengeluaran terbesar secara real-time, memberikan *alert* visual untuk membantu pengendalian budget yang lebih proaktif.
+- **Largest Transaction Spotlight** — Highlight otomatis transaksi tunggal terbesar (Single Largest Expense) untuk membantu Anda mengevaluasi pengeluaran besar yang mungkin terlewatkan.
+- **Premium Action Grid** — Redesain total tombol aksi utama dengan estetika kotak rounded dan warna pastel yang lembut (Soft Colors) terinspirasi dari GoPay. Memberikan kesan bersih, modern, dan sangat nyaman untuk navigasi jari 🍱.
+- **Smart Expansion "Lainnya"** — Menyeimbangkan kelegaan dashboard dengan menyembunyikan fitur sekunder di balik tombol "Lainnya". Menu ini kini dilengkapi dengan filter cerdas yang hanya menampilkan aksi yang belum ada di grid utama untuk efisiensi ruang.
+- **Dynamic Interaction Flow** — Animasi transisi yang lebih halus dan *visual feedback* yang responsif saat berinteraksi dengan elemen dashboard untuk pengalaman yang lebih taktil.
+
+### 🎨 Visual & Identity: Typography Standardization
+- **Full Comic Neue Integration** — Standardisasi font **Comic Neue** di seluruh aplikasi. Font ini dipilih untuk memperkuat identitas brand TabunganKu yang ramah, hangat, namun tetap profesional dan mudah dibaca 🎨.
+- **Typography Hierarchy IQ** — Penyesuaian cerdas pada ukuran, ketebalan, dan *letter-spacing* teks. Kini informasi penting tampil lebih menonjol sementara teks pendukung tetap proporsional dan tidak melelahkan mata.
+- **High-Contrast Light Mode** — Optimalisasi palet warna pada Mode Terang (Light Mode). Peningkatan kontras teks dan ikon memastikan aplikasi tetap nyaman digunakan bahkan di bawah sinar matahari langsung ☀️.
+
+### 💰 Nabung Emas & Modern Form System
+- **Rupiah Input Mode (Emas)** — Fitur baru yang memungkinkan pengguna menginput nominal Rupiah saat menabung emas. Sistem akan mengkonversi otomatis ke Gram secara real-time berdasarkan harga pasar terintegrasi 💰.
+- **Compact Form Standards** — Redesain seluruh form input (Tambah Transaksi, Budget, dll) menjadi lebih compact dan rapi. Mengurangi *clutter* visual dan mempercepat proses penginputan data dengan tata letak yang lebih intuitif ✨.
+- **Morning Charity Refresh** — Form Sedekah Subuh kini hadir dengan tema visual yang lebih menyejukkan dan selaras dengan dashboard premium, memotivasi pengguna untuk memulai hari dengan kebaikan.
+
+### 🌙 Stability: Theme Persistence & IQ
+- **Theme Persistence Engine** — Implementasi mesin penyimpanan preferensi tema yang lebih tangguh. Pilihan Dark/Light Mode kini terkunci aman dan tidak akan reset meskipun aplikasi ditutup paksa oleh sistem 🌙.
+- **Adaptive Lock Screen** — Sinkronisasi real-time layar PIN (Lock Screen) dengan tema sistem. Transisi antara cahaya dan gelap kini terjadi secara instan tanpa jeda visual demi keamanan yang estetik 🛡️.
+
+### 📊 Visualisasi Keuangan & Insight (Visual Analytics)
+- **Financial Activity Pulse** — Fitur baru untuk memantau frekuensi transaksi bulanan. Memberikan gambaran seberapa aktif Anda dalam mengelola uang setiap harinya dengan grafik frekuensi yang cerdas.
+- **Side-by-Side Bar Chart** — Transformasi grafik tren dari garis ke batang paralel. Memudahkan perbandingan volume Pemasukan vs Pengeluaran harian dengan kontras warna yang tegas dan informatif 📊.
+- **Horizontal Infinite Scroll** — Panel grafik kini mendukung scroll horizontal penuh 31 hari. Dilengkapi dengan Tooltip IQ yang menampilkan nominal presisi saat setiap batang diketuk secara interaktif.
+
+### 🛠️ Inclusive System: Demographic Expansion
+- **Universal Age Support** — Ekspansi kategori transaksi dan tabungan yang disesuaikan dengan kebutuhan spesifik berbagai kelompok usia untuk inklusivitas maksimal 🛠️:
+  - **Anak-anak & Remaja**: Fokus pada pendidikan finansial dini (Tabungan Mainan, Uang Jajan, Sekolah).
+  - **Siswa & Mahasiswa**: Kategori gaya hidup aktif (Kopi, Nongkrong, Kursus, Self-Improvement).
+  - **Pekerja & Freelance**: Manajemen arus kas profesional (Gaji Berjalan, Operasional, Dana Darurat).
+  - **Keluarga & IRT**: Optimalisasi kebutuhan rumah tangga (Belanja Bulanan, Zakat, Kebutuhan Anak).
+  - **Lansia & Pensiunan**: Kategori khusus kesehatan dan hobi masa tua yang bermakna.
+- **Zero White Screen Fix** — Perbaikan bug *layout overflow* dan "White Screen" saat pemilihan kategori kosong, menjamin aplikasi tetap stabil dalam kondisi input apapun 🛡️.
+- **Enhanced Tooltip IQ** — Informasi nominal transaksi yang muncul secara instan dan jelas saat batang grafik diketuk, memberikan transparansi data yang lebih baik.
+
+### 🚀 Technical & Production Build
+- **Github Action Production Optimization** — Peningkatan alur CI/CD untuk pembuatan *Production Build* yang lebih efisien dan terverifikasi secara otomatis.
+- **Resource Management IQ** — Optimasi penggunaan memori pada komponen grafik berat, memastikan navigasi tetap gegas dan responsif di berbagai spesifikasi perangkat.
+
+---
+
+## 🚀 [1.4.7] — 15 April 2026: Layanan Tanpa Batas & Visual Sempurna
+
+Pembaruan v1.4.7 adalah rilis pemeliharaan dan polesan visual yang memastikan aplikasi berjalan tanpa hambatan teknis. Fokus utama adalah pada perbaikan stabilitas rendering dan sinkronisasi versi sistem.
+
+### 🛠️ Perbaikan Layout Kritis (Critical UI Fixes)
+- **Zero-Crash Dashboard** — Memperbaiki pengecualian *"RenderBox was not laid out"* pada dashboard alokasi, memastikan transisi data yang mulus tanpa crash mendadak 🛡️.
+- **Donut Chart Optimization** — Menghilangkan tumpang tindih label pada grafik donat. Kini persentase diletakkan lebih jauh ke luar (outside labels) untuk keterbacaan yang jauh lebih baik 📊.
+- **Badge Grid Fix** — Memperbaiki masalah *overflow* sistem pada koleksi lencana (Badge Collection). Kini tampilan lencana tertata rapi dan responsif di semua ukuran layar smartphone.
+
+### ⚡ Stabilitas & Performa
+- **Constraint Polishing** — Optimalisasi batasan lebar (constraints) pada berbagai widget utama untuk mencegah kesalahan render (Pixel Overflow) di masa mendatang ⚡.
+- **System Integrity** — Penyelarasan versi build di seluruh file konfigurasi internal untuk konsistensi sistem antara backend dan internal constants.
+- **Production Infrastructure** — Integrasi build produksi yang lebih stabil melalui sistem CI/CD GitHub Actions.
 
 ---
 
@@ -150,5 +207,3 @@ Kelahiran aplikasi pencatat keuangan yang aman dan sederhana.
 - **Local Persistence** — Penyimpanan data lokal yang cepat dan andal menggunakan SQLite.
 
 ---
-
-

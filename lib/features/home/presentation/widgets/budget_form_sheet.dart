@@ -6,6 +6,7 @@ import 'package:tabunganku/core/theme/theme_provider.dart';
 import 'package:tabunganku/models/budget_model.dart';
 import 'package:tabunganku/providers/budget_provider.dart';
 import 'package:tabunganku/core/utils/currency_formatter.dart';
+import 'package:tabunganku/core/constants/transaction_categories.dart';
 
 // ────────────────────────────────────────────────────────────────────────────
 
@@ -34,29 +35,24 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
   final _amountController = TextEditingController();
   final _customCategoryController = TextEditingController();
   String? _selectedCategory;
+  String? _selectedGroup;
   bool _isCustomCategory = false;
 
-  static const _fixedCategories = [
-    {'label': 'Makanan & Minuman', 'icon': Icons.fastfood_rounded},
-    {'label': 'Transportasi', 'icon': Icons.directions_car_rounded},
-    {'label': 'Kebutuhan Rumah', 'icon': Icons.home_work_rounded},
-    {'label': 'Belanja Bulanan', 'icon': Icons.shopping_cart_rounded},
-    {'label': 'Tagihan & Listrik', 'icon': Icons.bolt_rounded},
-    {'label': 'Hiburan & Hobi', 'icon': Icons.smart_display_rounded},
-    {'label': 'Kesehatan', 'icon': Icons.medical_services_rounded},
-    {'label': 'Pendidikan', 'icon': Icons.school_rounded},
-    {'label': 'Zakat & Sedekah', 'icon': Icons.volunteer_activism_rounded},
-    {'label': 'Cicilan & Hutang', 'icon': Icons.credit_card_rounded},
-    {'label': 'Pulsa & Internet', 'icon': Icons.wifi_rounded},
-    {'label': 'Perbaikan Rumah', 'icon': Icons.home_repair_service_rounded},
-    {'label': 'Gaya Hidup', 'icon': Icons.style_rounded},
-    {'label': 'Biaya Admin', 'icon': Icons.account_balance_rounded},
-    {'label': 'Lain-lain', 'icon': Icons.more_horiz_rounded},
-  ];
+  static final _fixedCategories = AppCategories.expenseCategories
+      .map((c) => {'label': c.label, 'icon': c.icon})
+      .toList();
+
+  final Map<String, List<TransactionCategory>> groupedCategories = {};
 
   @override
   void initState() {
     super.initState();
+    
+    // Group categories
+    for (var cat in AppCategories.expenseCategories) {
+      groupedCategories.putIfAbsent(cat.group, () => []).add(cat);
+    }
+    
     if (widget.budget != null) {
       final rawAmount = widget.budget!.limitAmount.toInt().toString();
       // Format dengan titik saat load existing
@@ -69,18 +65,30 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
       final existingCat = widget.budget!.category;
       final isKnown =
           _fixedCategories.any((c) => c['label'] == existingCat) &&
-              existingCat != 'Lainnya';
+              existingCat != AppCategories.otherLabel;
       if (isKnown) {
         _selectedCategory = existingCat;
         _isCustomCategory = false;
+        // Resolve group
+        _selectedGroup = AppCategories.expenseCategories.firstWhere((c) => c.label == existingCat).group;
       } else {
-        _selectedCategory = 'Lainnya';
+        _selectedCategory = AppCategories.otherLabel;
         _isCustomCategory = true;
         _customCategoryController.text =
-            existingCat == 'Lainnya' ? '' : existingCat;
+            existingCat == AppCategories.otherLabel ? '' : existingCat;
+        _selectedGroup = AppCategories.expenseCategories.firstWhere((c) => c.label == AppCategories.otherLabel).group;
       }
     } else if (widget.initialCategory != null) {
       _selectedCategory = widget.initialCategory;
+      try {
+        _selectedGroup = AppCategories.expenseCategories.firstWhere((c) => c.label == _selectedCategory).group;
+      } catch (_) {
+        _selectedGroup = AppCategories.expenseCategories.first.group;
+      }
+    } else {
+      // Default initial
+      _selectedCategory = 'Makanan & Minuman';
+      _selectedGroup = 'Kebutuhan Pokok';
     }
   }
 
@@ -94,7 +102,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
   String get _effectiveCategory {
     if (_isCustomCategory) {
       final custom = _customCategoryController.text.trim();
-      return custom.isEmpty ? 'Lainnya' : custom;
+      return custom.isEmpty ? AppCategories.otherLabel : custom;
     }
     return _selectedCategory ?? '';
   }
@@ -254,100 +262,69 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
 
             const SizedBox(height: 32),
 
-            // ── Pilih Kategori ────────────────────────────────────────────
+            // ── Pilih Kategori (Grouped Dropdowns) ────────────────────────
             Padding(
-              padding: const EdgeInsets.only(left: 24, bottom: 12),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Pilih Kategori',
-                  style: TextStyle(
-                    fontSize: 14, 
-                    fontWeight: FontWeight.bold,
-                    color: isDarkMode ? Colors.white70 : Colors.black87,
-                  ),
-                ),
-              ),
-            ),
-            SizedBox(
-              height: 110,
-              child: ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                scrollDirection: Axis.horizontal,
-                physics: const BouncingScrollPhysics(),
-                itemCount: _fixedCategories.length,
-                itemBuilder: (context, index) {
-                  final cat = _fixedCategories[index];
-                  final label = cat['label'] as String;
-                  final isLainnya = label == 'Lainnya';
-                  final isSelected = _selectedCategory == label;
-
-                  return GestureDetector(
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      setState(() {
-                        _selectedCategory = label;
-                        _isCustomCategory = isLainnya;
-                      });
-                    },
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      width: 85,
-                      margin: const EdgeInsets.only(right: 16, bottom: 8, top: 2),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? AppColors.primary
-                            : (isDarkMode ? Colors.white.withValues(alpha: 0.03) : Colors.white),
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          if (isSelected)
-                            BoxShadow(
-                              color: AppColors.primary.withValues(alpha: 0.3),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
-                            )
-                          else
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.02),
-                              blurRadius: 5,
-                              offset: const Offset(0, 2),
-                            ),
-                        ],
-                        border: Border.all(
-                          color: isSelected
-                              ? AppColors.primary
-                              : (isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade200),
-                        ),
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            cat['icon'] as IconData,
-                            color: isSelected
-                                ? Colors.white
-                                : (isDarkMode ? Colors.white30 : Colors.grey.shade600),
-                            size: 28,
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            label,
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-                              color: isSelected
-                                  ? Colors.white
-                                  : (isDarkMode ? Colors.white38 : Colors.grey.shade700),
-                            ),
-                            textAlign: TextAlign.center,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
+                children: [
+                  // Group Dropdown
+                  DropdownButtonFormField<String>(
+                    value: _selectedGroup,
+                    dropdownColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
+                    style: TextStyle(color: isDarkMode ? Colors.white : Colors.black87, fontWeight: FontWeight.w600),
+                    decoration: InputDecoration(
+                      labelText: 'Grup Kategori',
+                      filled: true,
+                      fillColor: isDarkMode ? Colors.white.withValues(alpha: 0.03) : Colors.grey.shade50,
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
+                      prefixIcon: const Icon(Icons.grid_view_rounded, color: AppColors.primary),
+                      labelStyle: TextStyle(color: isDarkMode ? Colors.white38 : Colors.grey),
                     ),
-                  );
-                },
+                    items: groupedCategories.keys.map((group) => DropdownMenuItem(
+                      value: group,
+                      child: Text(group, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                    )).toList(),
+                    onChanged: (val) {
+                      if (val != null) {
+                        setState(() {
+                          _selectedGroup = val;
+                          _selectedCategory = groupedCategories[val]!.first.label;
+                          _isCustomCategory = _selectedCategory == AppCategories.otherLabel;
+                        });
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  // Category Dropdown
+                  DropdownButtonFormField<String>(
+                    value: _selectedCategory,
+                    dropdownColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
+                    style: TextStyle(color: isDarkMode ? Colors.white : Colors.black87, fontWeight: FontWeight.w600),
+                    decoration: InputDecoration(
+                      labelText: 'Kategori Budget',
+                      filled: true,
+                      fillColor: isDarkMode ? Colors.white.withValues(alpha: 0.03) : Colors.grey.shade50,
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
+                      prefixIcon: Icon(
+                        AppCategories.expenseCategories.firstWhere((c) => c.label == _selectedCategory).icon,
+                        color: AppColors.primary,
+                      ),
+                      labelStyle: TextStyle(color: isDarkMode ? Colors.white38 : Colors.grey),
+                    ),
+                    items: groupedCategories[_selectedGroup]!.map((cat) => DropdownMenuItem(
+                      value: cat.label,
+                      child: Text(cat.label, style: const TextStyle(fontSize: 13)),
+                    )).toList(),
+                    onChanged: (val) {
+                      if (val != null) {
+                        setState(() {
+                          _selectedCategory = val;
+                          _isCustomCategory = val == AppCategories.otherLabel;
+                        });
+                      }
+                    },
+                  ),
+                ],
               ),
             ),
 

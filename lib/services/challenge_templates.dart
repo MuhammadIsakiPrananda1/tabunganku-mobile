@@ -124,7 +124,7 @@ class ChallengeTemplates {
       difficulty: ChallengeDifficulty.medium,
       defaultDurationDays: 7,
       targetType: ChallengeTargetType.noTransactionType,
-      targetCategory: 'Belanja Online',
+      targetCategory: 'Belanja / Lifestyle',
       tips: [
         'Uninstall aplikasi e-commerce sementara',
         'Block notifikasi promo',
@@ -160,7 +160,7 @@ class ChallengeTemplates {
       difficulty: ChallengeDifficulty.easy,
       defaultDurationDays: 7,
       targetType: ChallengeTargetType.categoryLimit,
-      targetCategory: 'Transportasi',
+      targetCategory: 'Transportasi \u0026 Bensin',
       tips: [
         'Gunakan transportasi umum',
         'Jalan kaki untuk jarak dekat',
@@ -200,7 +200,7 @@ class ChallengeTemplates {
       defaultDurationDays: 30,
       targetType: ChallengeTargetType.categoryLimit,
       suggestedTargetAmount: 200000,
-      targetCategory: 'Hiburan',
+      targetCategory: 'Hiburan \u0026 Langganan',
       tips: [
         'Cari hiburan gratis atau murah',
         'Manfaatkan promo dan diskon',
@@ -253,7 +253,7 @@ class ChallengeTemplates {
       difficulty: ChallengeDifficulty.easy,
       defaultDurationDays: 30,
       targetType: ChallengeTargetType.categoryLimit,
-      targetCategory: 'Jasa & Services',
+      targetCategory: 'Biaya Admin & Lainnya',
       tips: [
         'Belajar dari YouTube',
         'Mulai dari yang sederhana',

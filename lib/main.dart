@@ -135,7 +135,9 @@ class _TabunganKuAppState extends ConsumerState<TabunganKuApp>
         if (currentLocation != '/lock' &&
             currentLocation != '/splash' &&
             currentLocation != '/pin-setup') {
-          router.go('/lock');
+          // Encode the path to safely pass as query parameter
+          final encodedPath = Uri.encodeComponent(currentLocation);
+          router.go('/lock?from=$encodedPath');
         }
       }
     }

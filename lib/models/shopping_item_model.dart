@@ -2,6 +2,8 @@ class ShoppingItem {
   final String id;
   final String name;
   final double estimatedPrice;
+  final double quantity; // Added
+  final String unit; // Added
   final bool isBought;
   final DateTime createdAt;
   final String? url;
@@ -14,6 +16,8 @@ class ShoppingItem {
     required this.id,
     required this.name,
     required this.estimatedPrice,
+    this.quantity = 1,
+    this.unit = 'unit',
     this.isBought = false,
     required this.createdAt,
     this.url,
@@ -28,6 +32,8 @@ class ShoppingItem {
       id: json['id'] as String,
       name: json['name'] as String,
       estimatedPrice: (json['estimatedPrice'] as num).toDouble(),
+      quantity: (json['quantity'] as num?)?.toDouble() ?? 1.0,
+      unit: json['unit'] as String? ?? 'unit',
       isBought: json['isBought'] as bool? ?? false,
       createdAt: json['createdAt'] != null 
           ? DateTime.parse(json['createdAt'] as String) 
@@ -45,6 +51,8 @@ class ShoppingItem {
       'id': id,
       'name': name,
       'estimatedPrice': estimatedPrice,
+      'quantity': quantity,
+      'unit': unit,
       'isBought': isBought,
       'createdAt': createdAt.toIso8601String(),
       'url': url,
@@ -59,6 +67,8 @@ class ShoppingItem {
     String? id,
     String? name,
     double? estimatedPrice,
+    double? quantity,
+    String? unit,
     bool? isBought,
     DateTime? createdAt,
     String? url,
@@ -71,6 +81,8 @@ class ShoppingItem {
       id: id ?? this.id,
       name: name ?? this.name,
       estimatedPrice: estimatedPrice ?? this.estimatedPrice,
+      quantity: quantity ?? this.quantity,
+      unit: unit ?? this.unit,
       isBought: isBought ?? this.isBought,
       createdAt: createdAt ?? this.createdAt,
       url: url ?? this.url,

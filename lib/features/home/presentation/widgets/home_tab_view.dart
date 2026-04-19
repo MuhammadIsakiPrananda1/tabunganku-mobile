@@ -235,7 +235,7 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
             ),
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 40), // Lega (tidak mepet atas)
 
           // Primary Navigation grid (GoPay Style)
           _buildActionGrid(
@@ -247,7 +247,7 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
             targets: targets,
           ),
 
-          const SizedBox(height: 40),
+          const SizedBox(height: 32), // Seimbang (tidak terlalu rapat)
           _buildSavingTargetSection(totalBalance, targets, isDarkMode),
 
           const SizedBox(height: 40),
@@ -374,10 +374,11 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
     return GridView.count(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       crossAxisCount: 4,
-      mainAxisSpacing: 16,
-      crossAxisSpacing: 8,
-      childAspectRatio: 0.72,
+      mainAxisSpacing: 24,
+      crossAxisSpacing: 12,
+      childAspectRatio: 0.82,
       children: [
         for (var action in primaryActions)
           _buildToolAction(
@@ -457,9 +458,9 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               crossAxisCount: 4,
-              mainAxisSpacing: 16,
-              crossAxisSpacing: 8,
-              childAspectRatio: 0.72,
+              mainAxisSpacing: 24,
+              crossAxisSpacing: 12,
+              childAspectRatio: 0.82,
               children: [
                 for (var action in _allActions.skip(7))
                   _buildToolAction(
@@ -511,7 +512,7 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
             child: Text(
               label,
               style: GoogleFonts.comicNeue(
-                fontSize: 11,
+                fontSize: 12,
                 fontWeight: FontWeight.bold,
                 color: isDarkMode ? Colors.white70 : Colors.black87,
               ),
@@ -1025,7 +1026,8 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                         width: 8,
                         height: 8,
                         decoration: BoxDecoration(
-                            color: brandTeal, shape: BoxShape.circle),
+                            color: AppCategories.getColorForCategory(entry.key), 
+                            shape: BoxShape.circle),
                       ),
                       const SizedBox(width: 10),
                       Text(
@@ -1057,7 +1059,7 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                   value: percentage,
                   backgroundColor:
                       isDarkMode ? Colors.white10 : Colors.grey.shade100,
-                  color: brandTeal,
+                  color: AppCategories.getColorForCategory(entry.key),
                   minHeight: 4.5,
                 ),
               ),
@@ -1088,8 +1090,8 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
 
   Widget _minimalTile(TransactionModel t, bool isDarkMode) {
     final bool isExpense = t.type == TransactionType.expense;
-    final IconData catIcon = AppCategories.getIconForCategory(t.category);
-    final Color catColor = isExpense ? Colors.red : Colors.green;
+    final IconData icon = isExpense ? Icons.arrow_outward_rounded : Icons.call_received_rounded;
+    final Color color = isExpense ? Colors.red : Colors.green;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
@@ -1107,9 +1109,9 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                      color: catColor.withValues(alpha: 0.1),
+                      color: color.withValues(alpha: 0.1),
                       shape: BoxShape.circle),
-                  child: Icon(catIcon, color: catColor, size: 18),
+                  child: Icon(icon, color: color, size: 18),
                 ),
                 const SizedBox(width: 16),
                 Expanded(

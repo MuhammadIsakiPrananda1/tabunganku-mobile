@@ -39,7 +39,10 @@ class ShoppingFormSheet extends ConsumerStatefulWidget {
 class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _nameController;
-  late TextEditingController _priceController;
+  late TextEditingController _priceController; // Total Price
+  late TextEditingController _pricePerUnitController; // Added
+  late TextEditingController _quantityController; // Added
+  late TextEditingController _unitController; // Added
   late TextEditingController _customCategoryController;
   late String _selectedCategory;
   String? _selectedGroup;
@@ -61,13 +64,33 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
     }
 
     _nameController = TextEditingController(text: widget.item?.name ?? '');
+    
+    _quantityController = TextEditingController(
+        text: widget.item != null ? widget.item!.quantity.toString() : '');
+    _unitController = TextEditingController(
+        text: widget.item?.unit ?? '');
+    
+    // Calculate initial price per unit if editing
+    double initialPricePerUnit = 0;
+    if (widget.item != null) {
+      initialPricePerUnit = widget.item!.estimatedPrice / widget.item!.quantity;
+    }
+    
+    _pricePerUnitController = TextEditingController(
+        text: initialPricePerUnit > 0 ? initialPricePerUnit.toInt().toString() : '');
+    
     _priceController = TextEditingController(
         text: widget.item != null
             ? widget.item!.estimatedPrice.toInt().toString()
             : '');
     _customCategoryController = TextEditingController();
 
-    final initialCat = widget.item?.category ?? 'Belanja Bulanan';
+    // Add listeners for auto-calculation
+    _pricePerUnitController.addListener(_calculateTotalPrice);
+    _quantityController.addListener(_calculateTotalPrice);
+
+    final initialCat = widget.item?.category ?? 
+        (AppCategories.expenseCategories.isNotEmpty ? AppCategories.expenseCategories.first.label : '');
     final isKnown = _categories.contains(initialCat) &&
         initialCat != AppCategories.otherLabel;
 
@@ -75,11 +98,16 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
       _selectedCategory = initialCat;
       _isCustomCategory = false;
       _selectedGroup = AppCategories.expenseCategories.firstWhere((c) => c.label == initialCat).group;
-    } else {
+    } else if (initialCat == AppCategories.otherLabel) {
       _selectedCategory = AppCategories.otherLabel;
       _isCustomCategory = true;
-      _customCategoryController.text =
-          initialCat == AppCategories.otherLabel ? '' : initialCat;
+      _customCategoryController.text = '';
+      _selectedGroup = AppCategories.expenseCategories.firstWhere((c) => c.label == AppCategories.otherLabel).group;
+    } else {
+      // Fallback for custom categories
+      _selectedCategory = AppCategories.otherLabel;
+      _isCustomCategory = true;
+      _customCategoryController.text = initialCat;
       _selectedGroup = AppCategories.expenseCategories.firstWhere((c) => c.label == AppCategories.otherLabel).group;
     }
     _imagePath = widget.item?.imagePath;
@@ -100,7 +128,31 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
   void dispose() {
     _nameController.dispose();
     _priceController.dispose();
+    _pricePerUnitController.dispose();
+    _quantityController.dispose();
+    _unitController.dispose();
+    _customCategoryController.dispose();
     super.dispose();
+  }
+
+  void _calculateTotalPrice() {
+    final qtyStr = _quantityController.text.replaceAll(',', '.');
+    final priceStr = _pricePerUnitController.text.replaceAll(RegExp(r'[^0-9]'), '');
+    
+    final qty = double.tryParse(qtyStr) ?? 0;
+    final pricePerUnit = double.tryParse(priceStr) ?? 0;
+    
+    final total = qty * pricePerUnit;
+    
+    if (total > 0) {
+      final formattedTotal = _RibuanSeparatorInputFormatter().formatEditUpdate(
+        const TextEditingValue(text: ''),
+        TextEditingValue(
+            text: total.toInt().toString(), selection: TextSelection.collapsed(offset: 0)),
+      ).text;
+      
+      _priceController.text = formattedTotal;
+    }
   }
 
   Future<void> _pickImage(ImageSource source) async {
@@ -252,6 +304,8 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
         id: widget.item?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
         name: _nameController.text.trim(),
         estimatedPrice: price,
+        quantity: double.tryParse(_quantityController.text.replaceAll(',', '.')) ?? 1,
+        unit: _unitController.text.trim().isEmpty ? 'unit' : _unitController.text.trim(),
         createdAt: widget.item?.createdAt ?? DateTime.now(),
         category: finalCategory,
         imagePath: _imagePath,
@@ -287,242 +341,309 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
             theme.brightness == Brightness.dark);
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(28, 12, 28, 32),
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.9,
+      ),
       decoration: BoxDecoration(
         color: isDarkMode ? AppColors.surfaceDark : Colors.white,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
       ),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                    color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
-                    borderRadius: BorderRadius.circular(2)),
-              ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(height: 12),
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                  color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
+                  borderRadius: BorderRadius.circular(2)),
             ),
-            const SizedBox(height: 32),
-            Text(
-              widget.item == null ? 'Tambah Rencana Baru' : 'Edit Rencana',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: isDarkMode ? Colors.white : Colors.black87,
-                letterSpacing: -0.5,
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // Photo Picker Preview
-            GestureDetector(
-              onTap: _showImageSourceSheet,
-              child: Container(
-                width: double.infinity,
-                height: 120,
-                decoration: BoxDecoration(
-                  color: isDarkMode
-                      ? Colors.white.withValues(alpha: 0.05)
-                      : Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
-                  ),
-                ),
-                child: _imagePath != null
-                    ? Stack(
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(20),
-                            child: Image.file(
-                              File(_imagePath!),
-                              width: double.infinity,
-                              height: double.infinity,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                          Positioned(
-                            top: 8,
-                            right: 8,
-                            child: GestureDetector(
-                              onTap: () => setState(() => _imagePath = null),
-                              child: Container(
-                                padding: const EdgeInsets.all(4),
-                                decoration: const BoxDecoration(
-                                  color: Colors.red,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(Icons.close,
-                                    color: Colors.white, size: 16),
-                              ),
-                            ),
-                          ),
-                        ],
-                      )
-                    : Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.add_a_photo_rounded,
-                              color: isDarkMode ? Colors.white24 : Colors.grey,
-                              size: 32),
-                          const SizedBox(height: 8),
-                          Text('TAMBAH FOTO BARANG',
-                              style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 1.2,
-                                  color: isDarkMode
-                                      ? Colors.white24
-                                      : Colors.grey)),
-                        ],
-                      ),
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            _buildLabel('Apa yang akan dibeli?', isDarkMode, isRequired: true),
-            _buildTextField(
-              controller: _nameController,
-              hint: 'Misal: Kopi Kenangan, Beras Ramos...',
-              icon: Icons.shopping_bag_outlined,
-              isDarkMode: isDarkMode,
-              validator: (v) => v!.isEmpty ? 'Nama barang harus diisi' : null,
-            ),
-            const SizedBox(height: 20),
-
-            Row(
+          ),
+          const SizedBox(height: 20),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 28),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Expanded(
-                  flex: 3,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildLabel('Estimasi Harga', isDarkMode,
-                          isRequired: true),
-                      _buildTextField(
-                        controller: _priceController,
-                        hint: '0',
-                        icon: Icons.payments_outlined,
-                        keyboardType: TextInputType.number,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                          _RibuanSeparatorInputFormatter(),
-                        ],
-                        isDarkMode: isDarkMode,
-                        prefixText: 'Rp',
-                        validator: (v) =>
-                            v!.isEmpty ? 'Harga harus diisi' : null,
-                      ),
-                    ],
+                Text(
+                  widget.item == null ? 'Bikin Rencana' : 'Ubah Rencana',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: isDarkMode ? Colors.white : Colors.black87,
                   ),
                 ),
+                if (_priceController.text.isNotEmpty)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      'Rp ${_priceController.text}',
+                      style: const TextStyle(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
               ],
             ),
-            // Category Section (Grouped)
-            // Category Section (Grouped Dropdowns)
-            const SizedBox(height: 24),
-            _buildLabel('Pilih Kategori', isDarkMode),
-            const SizedBox(height: 8),
-            // Group Dropdown
-            DropdownButtonFormField<String>(
-              value: _selectedGroup,
-              dropdownColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
-              style: TextStyle(color: isDarkMode ? Colors.white : Colors.black87, fontWeight: FontWeight.w600),
-              decoration: InputDecoration(
-                labelText: 'Grup Kategori',
-                filled: true,
-                fillColor: isDarkMode ? Colors.white.withValues(alpha: 0.03) : Colors.grey.shade50,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-                prefixIcon: const Icon(Icons.grid_view_rounded, color: AppColors.primary),
-                labelStyle: TextStyle(color: isDarkMode ? Colors.white38 : Colors.grey),
-              ),
-              items: _groupedCategories.keys.map((group) => DropdownMenuItem(
-                value: group,
-                child: Text(group, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-              )).toList(),
-              onChanged: (val) {
-                if (val != null) {
-                  setState(() {
-                    _selectedGroup = val;
-                    _selectedCategory = _groupedCategories[val]!.first.label;
-                    _isCustomCategory = _selectedCategory == AppCategories.otherLabel;
-                  });
-                }
-              },
-            ),
-            const SizedBox(height: 16),
-            // Category Dropdown
-            DropdownButtonFormField<String>(
-              value: _selectedCategory,
-              dropdownColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
-              style: TextStyle(color: isDarkMode ? Colors.white : Colors.black87, fontWeight: FontWeight.w600),
-              decoration: InputDecoration(
-                labelText: 'Kategori Barang',
-                filled: true,
-                fillColor: isDarkMode ? Colors.white.withValues(alpha: 0.03) : Colors.grey.shade50,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-                prefixIcon: Icon(
-                  AppCategories.expenseCategories.firstWhere((c) => c.label == _selectedCategory).icon,
-                  color: AppColors.primary,
-                ),
-                labelStyle: TextStyle(color: isDarkMode ? Colors.white38 : Colors.grey),
-              ),
-              items: _groupedCategories[_selectedGroup]!.map((cat) => DropdownMenuItem(
-                value: cat.label,
-                child: Text(cat.label, style: const TextStyle(fontSize: 13)),
-              )).toList(),
-              onChanged: (val) {
-                if (val != null) {
-                  setState(() {
-                    _selectedCategory = val;
-                    _isCustomCategory = val == AppCategories.otherLabel;
-                  });
-                }
-              },
-            ),
-            if (_isCustomCategory) ...[
-              const SizedBox(height: 20),
-              _buildLabel('Kategori Kustom', isDarkMode, isRequired: true),
-              _buildTextField(
-                controller: _customCategoryController,
-                hint: 'Misal: Bengkel, Skincare...',
-                icon: Icons.label_important_outline_rounded,
-                isDarkMode: isDarkMode,
-                validator: (v) =>
-                    (_selectedCategory == AppCategories.otherLabel &&
-                            v!.isEmpty)
-                        ? 'Kategori kustom harus diisi'
-                        : null,
-              ),
-            ],
-            const SizedBox(height: 32),
+          ),
+          const SizedBox(height: 20),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(28, 0, 28, 32),
+              physics: const BouncingScrollPhysics(),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Photo Picker (Compact)
+                    GestureDetector(
+                      onTap: _showImageSourceSheet,
+                      child: Container(
+                        width: double.infinity,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          color: isDarkMode
+                              ? Colors.white.withValues(alpha: 0.03)
+                              : Colors.grey.shade50,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: isDarkMode ? Colors.white10 : Colors.grey.shade100,
+                          ),
+                        ),
+                        child: _imagePath != null
+                            ? Stack(
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(16),
+                                    child: Image.file(
+                                      File(_imagePath!),
+                                      width: double.infinity,
+                                      height: double.infinity,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                  Positioned(
+                                    top: 8,
+                                    right: 8,
+                                    child: GestureDetector(
+                                      onTap: () => setState(() => _imagePath = null),
+                                      child: Container(
+                                        padding: const EdgeInsets.all(4),
+                                        decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+                                        child: const Icon(Icons.close, color: Colors.white, size: 14),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.add_a_photo_rounded,
+                                      color: isDarkMode ? Colors.white24 : Colors.grey.shade400, size: 24),
+                                  const SizedBox(width: 12),
+                                  Text('Tambah Foto Barang',
+                                      style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                          color: isDarkMode ? Colors.white24 : Colors.grey.shade400)),
+                                ],
+                              ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
 
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: _submit,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16)),
-                  elevation: 8,
-                  shadowColor: AppColors.primary.withValues(alpha: 0.3),
+                    _buildLabel('Nama Barang', isDarkMode, isRequired: true),
+                    _buildTextField(
+                      controller: _nameController,
+                      hint: 'Misal: Kopi, Beras, dll...',
+                      icon: Icons.shopping_bag_outlined,
+                      isDarkMode: isDarkMode,
+                      validator: (v) => v!.isEmpty ? 'Wajib diisi' : null,
+                    ),
+                    const SizedBox(height: 16),
+
+                    Row(
+                      children: [
+                        Expanded(
+                          flex: 3,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildLabel('Harga/Unit', isDarkMode, isRequired: true),
+                              _buildTextField(
+                                controller: _pricePerUnitController,
+                                hint: '0',
+                                icon: Icons.payments_outlined,
+                                keyboardType: TextInputType.number,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                  _RibuanSeparatorInputFormatter(),
+                                ],
+                                isDarkMode: isDarkMode,
+                                prefixText: 'Rp',
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          flex: 2,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildLabel('Jumlah', isDarkMode, isRequired: true),
+                              _buildTextField(
+                                controller: _quantityController,
+                                hint: '1',
+                                icon: Icons.onetwothree_rounded,
+                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                isDarkMode: isDarkMode,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    _buildLabel('Satuan (Unit)', isDarkMode),
+                    _buildTextField(
+                      controller: _unitController,
+                      hint: 'pcs, kg, box...',
+                      icon: Icons.straighten_rounded,
+                      isDarkMode: isDarkMode,
+                    ),
+                    const SizedBox(height: 24),
+
+                    _buildLabel('Grup Kategori', isDarkMode),
+                    DropdownButtonFormField<String>(
+                      value: _selectedGroup,
+                      dropdownColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
+                      style: TextStyle(color: isDarkMode ? Colors.white : Colors.black87, fontWeight: FontWeight.bold),
+                      decoration: _getDropdownDecoration(isDarkMode, icon: Icons.grid_view_rounded),
+                      items: _groupedCategories.keys.map((group) => DropdownMenuItem(
+                        value: group,
+                        child: Text(group, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                      )).toList(),
+                      onChanged: (val) {
+                        if (val != null) {
+                          setState(() {
+                            _selectedGroup = val;
+                            _selectedCategory = _groupedCategories[val]!.first.label;
+                            _isCustomCategory = _selectedCategory == AppCategories.otherLabel;
+                          });
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 12),
+
+                    _buildLabel('Kategori', isDarkMode),
+                    DropdownButtonFormField<String>(
+                      value: _selectedCategory,
+                      dropdownColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
+                      style: TextStyle(color: isDarkMode ? Colors.white : Colors.black87, fontWeight: FontWeight.bold),
+                      decoration: _getDropdownDecoration(isDarkMode, 
+                        icon: AppCategories.expenseCategories.firstWhere((c) => c.label == _selectedCategory).icon,
+                        iconColor: AppCategories.getColorForCategory(_selectedCategory),
+                      ),
+                      items: _groupedCategories[_selectedGroup]!.map((cat) => DropdownMenuItem(
+                        value: cat.label,
+                        child: Text(cat.label, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                      )).toList(),
+                      onChanged: (val) {
+                        if (val != null) {
+                          setState(() {
+                            _selectedCategory = val;
+                            _isCustomCategory = val == AppCategories.otherLabel;
+                          });
+                        }
+                      },
+                    ),
+                    if (_isCustomCategory) ...[
+                      const SizedBox(height: 12),
+                      _buildTextField(
+                        controller: _customCategoryController,
+                        hint: 'Kategori kustom...',
+                        icon: Icons.label_important_outline_rounded,
+                        isDarkMode: isDarkMode,
+                        validator: (v) =>
+                            (_selectedCategory == AppCategories.otherLabel && v!.isEmpty) ? 'Wajib diisi' : null,
+                      ),
+                    ],
+                    const SizedBox(height: 32),
+
+                    // Total View (More subtle but clear)
+                    if (_priceController.text.isNotEmpty)
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16),
+                        margin: const EdgeInsets.only(bottom: 24),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: 0.05),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: AppColors.primary.withValues(alpha: 0.1)),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text('Total Estimasi', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.grey)),
+                            Text('Rp ${_priceController.text}', style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 18, color: AppColors.primary)),
+                          ],
+                        ),
+                      ),
+
+                    SizedBox(
+                      width: double.infinity,
+                      height: 56,
+                      child: ElevatedButton(
+                        onPressed: _submit,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          elevation: 0,
+                        ),
+                        child: Text(
+                            widget.item == null ? 'Simpan Rencana' : 'Simpan Perubahan',
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Center(
+                      child: TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: Text('Batal', style: TextStyle(color: isDarkMode ? Colors.white24 : Colors.grey)),
+                      ),
+                    ),
+                  ],
                 ),
-                child: Text(
-                    widget.item == null ? 'Simpan Rencana' : 'Simpan Perubahan',
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 16)),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  InputDecoration _getDropdownDecoration(bool isDarkMode, {required IconData icon, Color? iconColor}) {
+    return InputDecoration(
+      filled: true,
+      fillColor: isDarkMode ? Colors.white.withValues(alpha: 0.03) : Colors.grey.shade50,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      prefixIcon: Icon(icon, color: iconColor ?? AppColors.primary, size: 18),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide.none,
       ),
     );
   }
@@ -566,12 +687,14 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
     required bool isDarkMode,
     String? prefixText,
     String? Function(String?)? validator,
+    bool readOnly = false,
   }) {
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
       inputFormatters: inputFormatters,
       validator: validator,
+      readOnly: readOnly,
       style: TextStyle(
           color: isDarkMode ? Colors.white : Colors.black87,
           fontWeight: FontWeight.bold),

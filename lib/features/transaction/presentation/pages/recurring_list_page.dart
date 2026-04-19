@@ -47,7 +47,7 @@ class _RecurringListPageState extends ConsumerState<RecurringListPage> {
     final titleController = TextEditingController();
     TransactionType selectedType = TransactionType.expense;
     RecurringFrequency selectedFreq = RecurringFrequency.monthly;
-    String selectedCategory = 'Tagihan \u0026 Listrik';
+    String selectedCategory = 'Tagihan Listrik / Air';
 
     showModalBottomSheet(
       context: context,

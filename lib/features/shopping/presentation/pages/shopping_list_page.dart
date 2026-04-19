@@ -266,6 +266,14 @@ class ShoppingListPage extends ConsumerWidget {
                             : color,
                       ),
                     ),
+                    Text(
+                      '${item.quantity.toString().replaceAll('.0', '')} ${item.unit}',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: isDarkMode ? Colors.white24 : Colors.grey.shade400,
+                      ),
+                    ),
                     if (item.isBought)
                       Container(
                         margin: const EdgeInsets.only(top: 4),

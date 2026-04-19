@@ -16,9 +16,13 @@ class GoldSavingsPage extends ConsumerStatefulWidget {
 }
 
 class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
-  final double currentGoldPrice = 1250000; // Mock real-time price
+  final double buyPrice = 1250000;
+  final double sellPrice = 1185000;
   final _amountController = TextEditingController();
   GoldTransactionType _selectedType = GoldTransactionType.buy;
+
+  double get currentGoldPrice => 
+      _selectedType == GoldTransactionType.sell ? sellPrice : buyPrice;
 
   String _formatRupiah(double amount) {
     return NumberFormat.currency(
@@ -34,6 +38,8 @@ class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
 
+
+    
     return Scaffold(
       backgroundColor: isDarkMode ? AppColors.backgroundDark : const Color(0xFFF8FAF9),
       appBar: AppBar(
@@ -330,7 +336,10 @@ class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Harga Beli Hari Ini', style: TextStyle(color: contentColor.withValues(alpha: 0.4), fontSize: 11, fontWeight: FontWeight.bold)),
+                Text(
+                  _selectedType == GoldTransactionType.buy ? 'Harga Beli Hari Ini' : 'Harga Jual Hari Ini',
+                  style: TextStyle(color: contentColor.withValues(alpha: 0.4), fontSize: 11, fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 4),
                 FittedBox(
                   fit: BoxFit.scaleDown,

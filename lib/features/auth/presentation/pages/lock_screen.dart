@@ -8,7 +8,8 @@ import 'package:tabunganku/providers/family_group_provider.dart';
 import 'dart:io';
 
 class LockScreen extends ConsumerStatefulWidget {
-  const LockScreen({super.key});
+  final String? from;
+  const LockScreen({super.key, this.from});
 
   @override
   ConsumerState<LockScreen> createState() => _LockScreenState();
@@ -32,7 +33,7 @@ class _LockScreenState extends ConsumerState<LockScreen> with TickerProviderStat
   Future<void> _authenticateBiometric() async {
     final authenticated = await ref.read(securityProvider.notifier).authenticate();
     if (authenticated && mounted) {
-      context.go('/dashboard');
+      context.go(widget.from ?? '/dashboard');
     }
   }
 
@@ -62,7 +63,7 @@ class _LockScreenState extends ConsumerState<LockScreen> with TickerProviderStat
     final success = await ref.read(securityProvider.notifier).verifyPin(_inputPin);
     if (success) {
       ref.read(securityProvider.notifier).recordSuccessAuth();
-      if (mounted) context.go('/dashboard');
+      if (mounted) context.go(widget.from ?? '/dashboard');
     } else {
       setState(() {
         _isError = true;

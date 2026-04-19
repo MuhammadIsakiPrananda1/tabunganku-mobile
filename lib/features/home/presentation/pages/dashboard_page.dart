@@ -607,7 +607,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                         value: progress,
                         strokeWidth: 12,
                         backgroundColor: isDarkMode
-                            ? Colors.white.withOpacity(0.05)
+                            ? Colors.white.withValues(alpha: 0.05)
                             : Colors.teal.shade50,
                         valueColor: AlwaysStoppedAnimation<Color>(isCompleted
                             ? Colors.green.shade400
@@ -804,8 +804,11 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 40, height: 4,
-              decoration: BoxDecoration(color: Colors.grey.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(2)),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                  color: Colors.grey.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(2)),
             ),
             const SizedBox(height: 24),
             TextField(
@@ -859,7 +862,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
               height: 56,
               child: ElevatedButton(
                 onPressed: () async {
-                  final amount = double.tryParse(amountController.text.replaceAll('.', '')) ?? 0;
+                  final amount = double.tryParse(
+                          amountController.text.replaceAll('.', '')) ??
+                      0;
                   if (amount > 0) {
                     final transaction = TransactionModel(
                       id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -870,11 +875,14 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                       date: DateTime.now(),
                       category: 'Gift',
                     );
-                    await ref.read(transactionServiceProvider).addTransaction(transaction);
+                    await ref
+                        .read(transactionServiceProvider)
+                        .addTransaction(transaction);
                     if (mounted) {
                       Navigator.pop(context);
                       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                        content: Text('Alhamdulillah, sedekah berhasil dicatat!'),
+                        content:
+                            Text('Alhamdulillah, sedekah berhasil dicatat!'),
                         backgroundColor: AppColors.primary,
                       ));
                     }
@@ -883,129 +891,11 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                ),
-                child: const Text('Catat Sedekah', style: TextStyle(fontWeight: FontWeight.bold)),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showFeatureSheet({
-    required String title,
-    required IconData icon,
-    required Color color,
-    required String description,
-    bool comingSoon = false,
-  }) {
-    final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
-        (ref.watch(themeProvider) == ThemeMode.system &&
-            Theme.of(context).brightness == Brightness.dark);
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        padding: const EdgeInsets.fromLTRB(28, 12, 28, 48),
-        decoration: BoxDecoration(
-          color: isDarkMode ? AppColors.surfaceDark : Colors.white,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            const SizedBox(height: 32),
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: color.withValues(alpha: isDarkMode ? 0.2 : 0.1),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Icon(icon, color: color, size: 32),
-                ),
-                const SizedBox(width: 20),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: isDarkMode ? Colors.white : Colors.black87,
-                        ),
-                      ),
-                      if (comingSoon)
-                        Container(
-                          margin: const EdgeInsets.only(top: 4),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: Colors.amber.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: const Text(
-                            'SEGERA HADIR',
-                            style: TextStyle(
-                              color: Colors.amber,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 32),
-            Text(
-              description,
-              style: TextStyle(
-                fontSize: 16,
-                color: isDarkMode ? Colors.white70 : Colors.black54,
-                height: 1.5,
-              ),
-            ),
-            const SizedBox(height: 40),
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: color,
-                  foregroundColor: Colors.white,
-                  elevation: 0,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
+                      borderRadius: BorderRadius.circular(16)),
                 ),
-                child: const Text(
-                  'Mengerti',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                child: const Text('Catat Sedekah',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
               ),
             ),
           ],
@@ -1013,6 +903,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       ),
     );
   }
+
 
   Widget _buildSmartAllocationPlanner(double amount, bool isDarkMode) {
     if (amount <= 0) return const SizedBox.shrink();
@@ -1115,11 +1006,38 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     }
 
     var selectedCategory =
-        type == TransactionType.expense ? 'Makanan & Minuman' : 'Gaji & Upah';
+        type == TransactionType.expense ? 'Makanan & Minuman' : 'Gaji Pokok';
     var selectedGroup = categoryObjects
         .firstWhere((cat) => cat.label == selectedCategory)
         .group;
     var noteText = '';
+    StateSetter? sheetSetter;
+
+    // Add listener for auto-category detection
+    nameController.addListener(() {
+      if (type == TransactionType.expense) {
+        final text = nameController.text.toLowerCase();
+        final adminKeywords = [
+          'admin',
+          'dana',
+          'top up',
+          'fee',
+          'transfer',
+          'biaya'
+        ];
+
+        // Auto-select "Biaya Admin Bank" if keywords match and user hasn't deviated much from basics
+        if (adminKeywords.any((k) => text.contains(k))) {
+          final adminCat = 'Biaya Admin Bank';
+          if (selectedCategory != adminCat) {
+            sheetSetter?.call(() {
+              selectedCategory = adminCat;
+              selectedGroup = 'Keuangan';
+            });
+          }
+        }
+      }
+    });
     String? selectedTopUpSource;
     String topUpBankName = '';
     String? selectedInterestBank;
@@ -1146,6 +1064,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       builder: (sheetContext) {
         return StatefulBuilder(
           builder: (context, setSheetState) {
+            sheetSetter = setSheetState;
             final inset = MediaQuery.of(context).viewInsets.bottom;
             return Container(
               clipBehavior: Clip.antiAlias,
@@ -1319,7 +1238,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                 ),
                                 const SizedBox(height: 12),
                                 DropdownButtonFormField<String>(
-                                  value: selectedInterestBank,
+                                  initialValue: selectedInterestBank,
                                   isExpanded: true,
                                   dropdownColor: isDarkMode
                                       ? AppColors.surfaceDark
@@ -1488,14 +1407,13 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                       interestOtherBankName = '';
                                       if (val == null) {
                                         nameController.clear();
-                                        selectedCategory = 'Gaji & Upah';
-                                        selectedGroup =
-                                            'Pekerjaan & Profesional';
+                                        selectedCategory = 'Gaji Pokok';
+                                        selectedGroup = 'Pekerjaan';
                                       } else if (val == 'Bank Lainnya') {
                                         nameController.clear();
                                         selectedCategory =
-                                            'Bunga Tabungan / Deposito';
-                                        selectedGroup = 'Investasi & Pasif';
+                                            'Bunga Deposito / Tabungan';
+                                        selectedGroup = 'Investasi';
                                       } else {
                                         final now = DateTime.now();
                                         final monthName = [
@@ -1519,8 +1437,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                         nameController.text =
                                             'Bunga $bankClean $monthName ${now.year}';
                                         selectedCategory =
-                                            'Bunga Tabungan / Deposito';
-                                        selectedGroup = 'Investasi & Pasif';
+                                            'Bunga Deposito / Tabungan';
+                                        selectedGroup = 'Investasi';
                                       }
                                     });
                                   },
@@ -1592,6 +1510,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                         nameController.text = val.trim().isEmpty
                                             ? ''
                                             : 'Bunga ${val.trim()} $monthName ${now.year}';
+                                        selectedCategory =
+                                            'Bunga Deposito / Tabungan';
+                                        selectedGroup = 'Investasi';
                                       });
                                     },
                                   ),
@@ -1704,7 +1625,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                         letterSpacing: 1.2)),
                                 const SizedBox(height: 12),
                                 DropdownButtonFormField<String>(
-                                  value: selectedTopUpSource,
+                                  initialValue: selectedTopUpSource,
                                   isExpanded: true,
                                   dropdownColor: isDarkMode
                                       ? AppColors.surfaceDark
@@ -1768,22 +1689,22 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                         selectedCategory =
                                             type == TransactionType.expense
                                                 ? 'Makanan & Minuman'
-                                                : 'Gaji & Upah';
+                                                : 'Gaji Pokok';
                                         selectedGroup =
                                             type == TransactionType.expense
                                                 ? 'Kebutuhan Pokok'
-                                                : 'Pekerjaan & Profesional';
+                                                : 'Pekerjaan';
                                       } else if (val != 'Bank') {
                                         nameController.text =
                                             'Biaya Admin $val';
-                                        selectedCategory = 'Tagihan & Utilitas';
-                                        selectedGroup = 'Kebutuhan Pokok';
+                                        selectedCategory = 'Biaya Admin Bank';
+                                        selectedGroup = 'Keuangan';
                                       } else {
                                         nameController.text =
                                             'Biaya Admin Bank ${topUpBankName.trim()}'
                                                 .trim();
-                                        selectedCategory = 'Tagihan & Utilitas';
-                                        selectedGroup = 'Kebutuhan Pokok';
+                                        selectedCategory = 'Biaya Admin Bank';
+                                        selectedGroup = 'Keuangan';
                                       }
                                     });
                                   },
@@ -1883,6 +1804,29 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                           ? Colors.white24
                                           : Colors.black38),
                                 ),
+                                onChanged: (val) {
+                                  if (type ==
+                                      TransactionType.expense) {
+                                    final lowerVal = val.toLowerCase();
+                                    if (lowerVal.contains('biaya admin')) {
+                                      setSheetState(() {
+                                        selectedGroup = 'Keuangan';
+                                        if (lowerVal.contains('dana') ||
+                                            lowerVal.contains('gopay') ||
+                                            lowerVal.contains('ovo') ||
+                                            lowerVal.contains('shopee') ||
+                                            lowerVal.contains('ewallet') ||
+                                            lowerVal.contains('aplikasi') ||
+                                            lowerVal.contains('top up')) {
+                                          selectedCategory =
+                                              'Biaya Admin Aplikasi / Top Up';
+                                        } else {
+                                          selectedCategory = 'Biaya Admin Bank';
+                                        }
+                                      });
+                                    }
+                                  }
+                                },
                                 validator: (val) {
                                   if (val == null || val.trim().isEmpty) {
                                     return 'Keterangan transaksi harus diisi!';
@@ -1971,7 +1915,13 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                                 c.label == selectedCategory)
                                             .icon
                                         : Icons.help_outline_rounded,
-                                    color: Colors.teal,
+                                    color: categoryObjects.any(
+                                            (c) => c.label == selectedCategory)
+                                        ? categoryObjects
+                                            .firstWhere((c) =>
+                                                c.label == selectedCategory)
+                                            .color
+                                        : Colors.teal,
                                   ),
                                   labelStyle: TextStyle(
                                       color: isDarkMode
@@ -1986,7 +1936,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                                   color: isDarkMode
                                                       ? Colors.white
                                                       : Colors.black87,
-                                                  fontSize: 13)),
+                                                  fontSize: 13,
+                                                  fontWeight: FontWeight.w600)),
                                         ))
                                     .toList(),
                                 onChanged: (val) {
@@ -3854,6 +3805,35 @@ class _CalculatorSheetContentState
   double? _num2;
   String? _operand;
 
+  void _calculate() {
+    if (_num1 == null || _operand == null) return;
+    _num2 = double.tryParse(_output.replaceAll('.', '').replaceAll(',', '.'));
+    if (_num2 == null) return;
+
+    double result = 0;
+    switch (_operand) {
+      case "+":
+        result = _num1! + _num2!;
+        break;
+      case "-":
+        result = _num1! - _num2!;
+        break;
+      case "×":
+        result = _num1! * _num2!;
+        break;
+      case "÷":
+        result = _num2 == 0 ? 0 : _num1! / _num2!;
+        break;
+    }
+
+    _output = result % 1 == 0
+        ? result.toInt().toString()
+        : result.toStringAsFixed(2).replaceAll('.', ',');
+    _num1 = result;
+    _num2 = null;
+    _operand = null;
+  }
+
   void _buttonPressed(String buttonText) {
     setState(() {
       if (buttonText == "AC") {
@@ -3872,11 +3852,35 @@ class _CalculatorSheetContentState
           buttonText == "-" ||
           buttonText == "×" ||
           buttonText == "÷") {
-        _num1 =
-            double.tryParse(_output.replaceAll('.', '').replaceAll(',', '.'));
-        _operand = buttonText;
-        _expression = "$_output $buttonText";
-        _output = "0";
+        double currentVal =
+            double.tryParse(_output.replaceAll('.', '').replaceAll(',', '.')) ??
+                0;
+
+        if (_num1 == null) {
+          _num1 = currentVal;
+          _operand = buttonText;
+          _expression = "$_output $buttonText";
+          _output = "0";
+        } else if (_operand != null) {
+          if (_output == "0") {
+            // User just changed their mind about the operator
+            _operand = buttonText;
+            _expression =
+                _expression.substring(0, _expression.length - 1) + buttonText;
+          } else {
+            // Chaining: 10 + 20 + ... -> calculate 10+20 first
+            _calculate();
+            _operand = buttonText;
+            _expression = "$_output $buttonText";
+            _output = "0";
+          }
+        } else {
+          // Case where user just pressed = then immediately an operator
+          _num1 = currentVal;
+          _operand = buttonText;
+          _expression = "$_output $buttonText";
+          _output = "0";
+        }
       } else if (buttonText == "%") {
         double val =
             double.tryParse(_output.replaceAll('.', '').replaceAll(',', '.')) ??
@@ -3889,21 +3893,11 @@ class _CalculatorSheetContentState
           _output = "-$_output";
         }
       } else if (buttonText == "=") {
-        _num2 =
-            double.tryParse(_output.replaceAll('.', '').replaceAll(',', '.'));
-        if (_num1 != null && _operand != null && _num2 != null) {
-          double result = 0;
-          if (_operand == "+") result = _num1! + _num2!;
-          if (_operand == "-") result = _num1! - _num2!;
-          if (_operand == "×") result = _num1! * _num2!;
-          if (_operand == "÷") result = _num1! / _num2!;
-
-          _output = result % 1 == 0
-              ? result.toInt().toString()
-              : result.toStringAsFixed(2).replaceAll('.', ',');
-          _expression = "";
+        if (_num1 != null && _operand != null) {
+          _expression = ""; // Clear expression on final result
+          _calculate();
+          // After final calculate, we want to clear everything except _output
           _num1 = null;
-          _num2 = null;
           _operand = null;
         }
       } else {
@@ -4521,12 +4515,16 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
       List<TransactionModel> regularList, bool isDark) {
     // Apply search + type + category filter
     final filtered = regularList.where((t) {
-      // Type filter
-      if (_typeFilter == 1 && t.type != TransactionType.income) return false;
-      if (_typeFilter == 2 && t.type != TransactionType.expense) return false;
-      // Category filter
-      if (_categoryFilter != null && t.category != _categoryFilter)
+      if (_typeFilter == 1 && t.type != TransactionType.income) {
         return false;
+      }
+      if (_typeFilter == 2 && t.type != TransactionType.expense) {
+        return false;
+      }
+      // Category filter
+      if (_categoryFilter != null && t.category != _categoryFilter) {
+        return false;
+      }
       // Search query
       if (_searchQuery.isNotEmpty) {
         final q = _searchQuery;
@@ -5000,10 +4998,10 @@ class _RibuanFormatter extends TextInputFormatter {
     if (newValue.text.isEmpty) return newValue;
     final intValue = int.tryParse(newValue.text.replaceAll('.', ''));
     if (intValue == null) return oldValue;
-    final newText = NumberFormat.currency(
-            locale: 'id_ID', symbol: '', decimalDigits: 0)
-        .format(intValue)
-        .trim();
+    final newText =
+        NumberFormat.currency(locale: 'id_ID', symbol: '', decimalDigits: 0)
+            .format(intValue)
+            .trim();
     return TextEditingValue(
         text: newText,
         selection: TextSelection.collapsed(offset: newText.length));

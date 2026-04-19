@@ -42,7 +42,10 @@ final appRouterProvider = Provider((ref) {
       GoRoute(
         path: '/lock',
         name: 'lock',
-        builder: (context, state) => const LockScreen(),
+        builder: (context, state) {
+          final from = state.uri.queryParameters['from'];
+          return LockScreen(from: from);
+        },
       ),
 
       // Family Group

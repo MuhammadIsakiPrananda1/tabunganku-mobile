@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:tabunganku/core/theme/app_colors.dart';
-import 'package:tabunganku/core/theme/theme_provider.dart';
 import 'package:tabunganku/providers/saving_target_provider.dart';
 import 'package:tabunganku/providers/transaction_provider.dart';
 import 'package:tabunganku/models/saving_target_model.dart';
@@ -52,9 +51,8 @@ class _SavingPlansPageState extends ConsumerState<SavingPlansPage> {
     },
   ];
 
-  // Logic from SpecializedSavingPage
   final _amountControllers = List.generate(4, (_) => TextEditingController());
-  final _nameControllers = List.generate(4, (i) => TextEditingController());
+  final _nameControllers = List.generate(4, (i) => TextEditingController(text: ''));
   final List<DateTime> _selectedDates = List.generate(4, (_) => DateTime.now().add(const Duration(days: 365)));
 
   @override
@@ -62,7 +60,7 @@ class _SavingPlansPageState extends ConsumerState<SavingPlansPage> {
     super.initState();
     _pageController = PageController();
     for (int i = 0; i < _tabs.length; i++) {
-        _nameControllers[i].text = '${_tabs[i]['category']} ';
+        _nameControllers[i].text = '';
     }
   }
 
@@ -80,12 +78,19 @@ class _SavingPlansPageState extends ConsumerState<SavingPlansPage> {
 
   void _onTabChanged(int index) {
     HapticFeedback.selectionClick();
+    final int distance = (index - _activeTabIndex).abs();
+    
     setState(() => _activeTabIndex = index);
-    _pageController.animateToPage(
-      index,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOutCubic,
-    );
+    
+    if (distance > 1) {
+      _pageController.jumpToPage(index);
+    } else {
+      _pageController.animateToPage(
+        index,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOutCubic,
+      );
+    }
   }
 
   String _formatRupiah(double amount) {
@@ -97,6 +102,8 @@ class _SavingPlansPageState extends ConsumerState<SavingPlansPage> {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
     final bgColor = isDarkMode ? AppColors.backgroundDark : const Color(0xFFF8FAF9);
+    
+    final targetsAsync = ref.watch(savingTargetsStreamProvider);
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -110,36 +117,49 @@ class _SavingPlansPageState extends ConsumerState<SavingPlansPage> {
         ),
         title: Text('Dana Rencana', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: contentColor)),
       ),
-      body: Column(
-        children: [
-          // Navigation Tabs (Zakat Style)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 20),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              physics: const BouncingScrollPhysics(),
-              child: Row(
-                children: List.generate(_tabs.length, (index) {
-                  return _buildNavChip(index, _tabs[index]['title'], _tabs[index]['icon'], contentColor);
-                }),
+      body: targetsAsync.when(
+        data: (targets) => Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 20),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                physics: const BouncingScrollPhysics(),
+                child: Row(
+                  children: List.generate(_tabs.length, (index) {
+                    return _buildNavChip(index, _tabs[index]['title'], _tabs[index]['icon'], contentColor);
+                  }),
+                ),
               ),
             ),
-          ),
-
-          // Main Page View
-          Expanded(
-            child: PageView.builder(
-              controller: _pageController,
-              onPageChanged: (index) => setState(() => _activeTabIndex = index),
-              physics: const BouncingScrollPhysics(),
-              itemCount: _tabs.length,
-              itemBuilder: (context, index) {
-                return _buildTabContent(index, isDarkMode);
-              },
+            Expanded(
+              child: PageView.builder(
+                controller: _pageController,
+                onPageChanged: (index) => setState(() => _activeTabIndex = index),
+                physics: const BouncingScrollPhysics(),
+                itemCount: _tabs.length,
+                itemBuilder: (context, index) {
+                  return _SavingPlanTabContent(
+                    index: index,
+                    tab: _tabs[index],
+                    isDarkMode: isDarkMode,
+                    targets: targets,
+                    onAmountControllers: _amountControllers,
+                    onNameControllers: _nameControllers,
+                    onSelectedDates: _selectedDates,
+                    onPickDate: _pickDateInline,
+                    onDelete: _deleteTarget,
+                    onEdit: _showEditTargetDialog,
+                    formatRupiah: _formatRupiah,
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, _) => Center(child: Text('Error: $e')),
       ),
     );
   }
@@ -168,7 +188,7 @@ class _SavingPlansPageState extends ConsumerState<SavingPlansPage> {
               ),
               const SizedBox(width: 8),
               Text(
-                label.split(' ').last, // Use short label
+                label.split(' ').last,
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
@@ -178,185 +198,6 @@ class _SavingPlansPageState extends ConsumerState<SavingPlansPage> {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildTabContent(int index, bool isDarkMode) {
-    final tab = _tabs[index];
-    final category = tab['category'] as String;
-    final baseColor = tab['color'] as Color;
-    final targetsAsync = ref.watch(savingTargetsStreamProvider);
-    final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
-
-    return targetsAsync.when(
-      data: (targets) {
-        final filteredTargets = targets.where((t) => t.name.toLowerCase().contains(category.toLowerCase())).toList();
-        
-        return SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildHeaderCard(tab, isDarkMode),
-              const SizedBox(height: 32),
-
-              _buildInlineInputForm(index, baseColor, isDarkMode, category),
-              const SizedBox(height: 32),
-
-              Text('DAFTAR ${tab['title'].toUpperCase()}', 
-                style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5, color: contentColor.withValues(alpha: 0.4))),
-              const SizedBox(height: 16),
-              if (filteredTargets.where((t) => t.category == category).isEmpty)
-                _buildEmptyState(tab['icon'], isDarkMode)
-              else
-                ...filteredTargets.where((t) => t.category == category).map((t) => _buildTargetItem(t, baseColor, isDarkMode)),
-              const SizedBox(height: 40),
-            ],
-          ),
-        );
-      },
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('Error: $e')),
-    );
-  }
-
-  Widget _buildHeaderCard(Map<String, dynamic> tab, bool isDarkMode) {
-    final Color baseColor = tab['color'];
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: baseColor.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: baseColor.withValues(alpha: 0.2)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: baseColor.withValues(alpha: 0.2),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(tab['icon'], size: 28, color: baseColor),
-          ),
-          const SizedBox(width: 20),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(tab['title'], style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: baseColor)),
-                const SizedBox(height: 4),
-                Text(
-                  tab['desc'],
-                  style: TextStyle(fontSize: 11, color: baseColor.withValues(alpha: 0.8), fontWeight: FontWeight.w500),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInlineInputForm(int index, Color baseColor, bool isDarkMode, String category) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: isDarkMode ? AppColors.surfaceDark : Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: isDarkMode ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildHighVisInput(
-            controller: _nameControllers[index],
-            icon: Icons.edit_note_rounded,
-            label: 'Nama Rencana',
-            unit: '',
-            color: AppColors.primary,
-            isDarkMode: isDarkMode,
-            hint: 'Masukkan Nama Rencana',
-          ),
-          const SizedBox(height: 16),
-          _buildHighVisInput(
-            controller: _amountControllers[index],
-            icon: Icons.account_balance_wallet_rounded,
-            label: 'Dana yang Dibutuhkan',
-            unit: 'Rp',
-            color: Colors.green,
-            isDarkMode: isDarkMode,
-            isPremium: true,
-          ),
-          const SizedBox(height: 20),
-          Column(
-            children: [
-              InkWell(
-                onTap: () => _pickDateInline(index, isDarkMode),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                  decoration: BoxDecoration(
-                    color: isDarkMode ? Colors.white.withValues(alpha: 0.03) : AppColors.background,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.calendar_today_rounded, size: 18, color: AppColors.primary),
-                      const SizedBox(width: 12),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Target Terkumpul', style: TextStyle(fontSize: 10, color: (isDarkMode ? Colors.white38 : Colors.grey.shade500), fontWeight: FontWeight.bold)),
-                          Text(DateFormat('d MMMM yyyy', 'id_ID').format(_selectedDates[index]), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                        ],
-                      ),
-                      const Spacer(),
-                      Icon(Icons.arrow_drop_down_rounded, color: isDarkMode ? Colors.white24 : Colors.grey.shade400),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    final amount = double.tryParse(_amountControllers[index].text.replaceAll('.', '')) ?? 0;
-                    if (amount > 0) {
-                      final target = SavingTargetModel(
-                        id: DateTime.now().millisecondsSinceEpoch.toString(),
-                        name: _nameControllers[index].text,
-                        targetAmount: amount,
-                        dueDate: _selectedDates[index],
-                        createdAt: DateTime.now(),
-                        category: category,
-                      );
-                      await ref.read(savingTargetServiceProvider).addTarget(target);
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                          content: Text('Rencana Berhasil Dibuat'),
-                          backgroundColor: AppColors.primary,
-                        ));
-                      }
-                      _nameControllers[index].clear();
-                      _amountControllers[index].clear();
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    elevation: 0,
-                  ),
-                  child: const Text('Buat Rencana Sekarang', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                ),
-              ),
-            ],
-          ),
-        ],
       ),
     );
   }
@@ -371,49 +212,6 @@ class _SavingPlansPageState extends ConsumerState<SavingPlansPage> {
     if (picked != null) {
       setState(() => _selectedDates[index] = picked);
     }
-  }
-
-  Widget _buildHighVisInput({
-    required TextEditingController controller,
-    required IconData icon,
-    required String label,
-    required String unit,
-    required Color color,
-    required bool isDarkMode,
-    bool isPremium = false,
-    String? hint,
-  }) {
-    final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
-    
-    return TextFormField(
-      controller: controller,
-      keyboardType: isPremium ? TextInputType.number : TextInputType.text,
-      inputFormatters: isPremium ? [_RibuanFormatter()] : null,
-      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: contentColor),
-      decoration: InputDecoration(
-        hintText: hint ?? '0',
-        hintStyle: TextStyle(
-            fontSize: 16,
-            color: isDarkMode ? Colors.white10 : Colors.black38),
-        prefixIcon: Container(
-          padding: const EdgeInsets.only(left: 16, right: 8),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, color: color, size: 20),
-              if (unit.isNotEmpty) ...[
-                const SizedBox(width: 8),
-                Text(unit, style: TextStyle(fontWeight: FontWeight.bold, color: color, fontSize: 16)),
-              ],
-            ],
-          ),
-        ),
-        filled: true,
-        fillColor: isDarkMode ? Colors.white.withValues(alpha: 0.03) : AppColors.background,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      ),
-    );
   }
 
   Future<void> _deleteTarget(String? targetId) async {
@@ -437,11 +235,13 @@ class _SavingPlansPageState extends ConsumerState<SavingPlansPage> {
         ],
       ),
     );
-
+ 
     if (confirmed == true) {
       await ref.read(savingTargetServiceProvider).deleteTarget(targetId);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Rencana berhasil dihapus.')));
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Rencana berhasil dihapus.')));
+        }
       }
     }
   }
@@ -465,7 +265,7 @@ class _SavingPlansPageState extends ConsumerState<SavingPlansPage> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildHighVisInput(
+                _buildHighVisInputForDialog(
                   controller: nameController,
                   icon: Icons.edit_note_rounded,
                   label: 'Nama Rencana',
@@ -475,7 +275,7 @@ class _SavingPlansPageState extends ConsumerState<SavingPlansPage> {
                   hint: 'Masukkan nama...',
                 ),
                 const SizedBox(height: 16),
-                _buildHighVisInput(
+                _buildHighVisInputForDialog(
                   controller: amountController,
                   icon: Icons.account_balance_wallet_rounded,
                   label: 'Dana yang Dibutuhkan',
@@ -556,6 +356,261 @@ class _SavingPlansPageState extends ConsumerState<SavingPlansPage> {
     return digits.replaceAllMapped(RegExp(r'(\d)(?=(\d{3})+(?!\d))'), (match) => '${match[1]}.');
   }
 
+  Widget _buildHighVisInputForDialog({
+    required TextEditingController controller,
+    required IconData icon,
+    required String label,
+    required String unit,
+    required Color color,
+    required bool isDarkMode,
+    bool isPremium = false,
+    String? hint,
+  }) {
+    final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
+    
+    return TextFormField(
+      controller: controller,
+      keyboardType: isPremium ? TextInputType.number : TextInputType.text,
+      inputFormatters: isPremium ? [_RibuanFormatter()] : null,
+      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: contentColor),
+      decoration: InputDecoration(
+        hintText: hint ?? '0',
+        hintStyle: TextStyle(
+            fontSize: 16,
+            color: isDarkMode ? Colors.white10 : Colors.black38),
+        prefixIcon: Container(
+          padding: const EdgeInsets.only(left: 16, right: 8),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, color: color, size: 20),
+              if (unit.isNotEmpty) ...[
+                const SizedBox(width: 8),
+                Text(unit, style: TextStyle(fontWeight: FontWeight.bold, color: color, fontSize: 16)),
+              ],
+            ],
+          ),
+        ),
+        filled: true,
+        fillColor: isDarkMode ? Colors.white.withValues(alpha: 0.03) : AppColors.background,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      ),
+    );
+  }
+}
+
+class _SavingPlanTabContent extends ConsumerStatefulWidget {
+  final int index;
+  final Map<String, dynamic> tab;
+  final bool isDarkMode;
+  final List<SavingTargetModel> targets;
+  final List<TextEditingController> onAmountControllers;
+  final List<TextEditingController> onNameControllers;
+  final List<DateTime> onSelectedDates;
+  final Function(int, bool) onPickDate;
+  final Function(String?) onDelete;
+  final Function(SavingTargetModel, Color) onEdit;
+  final String Function(double) formatRupiah;
+
+  const _SavingPlanTabContent({
+    required this.index,
+    required this.tab,
+    required this.isDarkMode,
+    required this.targets,
+    required this.onAmountControllers,
+    required this.onNameControllers,
+    required this.onSelectedDates,
+    required this.onPickDate,
+    required this.onDelete,
+    required this.onEdit,
+    required this.formatRupiah,
+  });
+
+  @override
+  ConsumerState<_SavingPlanTabContent> createState() => _SavingPlanTabContentState();
+}
+
+class _SavingPlanTabContentState extends ConsumerState<_SavingPlanTabContent> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    final tab = widget.tab;
+    final category = tab['category'] as String;
+    final isDarkMode = widget.isDarkMode;
+    final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
+    
+    final filteredTargets = widget.targets.where((t) => t.category == category).toList();
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildHeaderCard(tab, isDarkMode),
+          const SizedBox(height: 32),
+          _buildInlineInputForm(),
+          const SizedBox(height: 32),
+          Text('DAFTAR ${tab['title'].toUpperCase()}', 
+            style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5, color: contentColor.withValues(alpha: 0.4))),
+          const SizedBox(height: 16),
+          if (filteredTargets.isEmpty)
+            _buildEmptyState(tab['icon'], isDarkMode)
+          else
+            ...filteredTargets.map((t) => _buildTargetItem(t, tab['color'], isDarkMode)),
+          const SizedBox(height: 40),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeaderCard(Map<String, dynamic> tab, bool isDarkMode) {
+    final Color baseColor = tab['color'];
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: baseColor.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: baseColor.withValues(alpha: 0.2)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: baseColor.withValues(alpha: 0.2),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(tab['icon'], size: 28, color: baseColor),
+          ),
+          const SizedBox(width: 20),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(tab['title'], style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: baseColor)),
+                const SizedBox(height: 4),
+                Text(
+                  tab['desc'],
+                  style: TextStyle(fontSize: 11, color: baseColor.withValues(alpha: 0.8), fontWeight: FontWeight.w500),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInlineInputForm() {
+    final index = widget.index;
+    final isDarkMode = widget.isDarkMode;
+    final category = widget.tab['category'] as String;
+
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: isDarkMode ? AppColors.surfaceDark : Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: isDarkMode ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildHighVisInput(
+            controller: widget.onNameControllers[index],
+            icon: Icons.edit_note_rounded,
+            label: 'Nama Rencana',
+            unit: '',
+            color: AppColors.primary,
+            isDarkMode: isDarkMode,
+            hint: 'Masukkan Nama Rencana',
+          ),
+          const SizedBox(height: 16),
+          _buildHighVisInput(
+            controller: widget.onAmountControllers[index],
+            icon: Icons.account_balance_wallet_rounded,
+            label: 'Dana yang Dibutuhkan',
+            unit: 'Rp',
+            color: Colors.green,
+            isDarkMode: isDarkMode,
+            isPremium: true,
+          ),
+          const SizedBox(height: 20),
+          Column(
+            children: [
+              InkWell(
+                onTap: () => widget.onPickDate(index, isDarkMode),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  decoration: BoxDecoration(
+                    color: isDarkMode ? Colors.white.withValues(alpha: 0.03) : AppColors.background,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.calendar_today_rounded, size: 18, color: AppColors.primary),
+                      const SizedBox(width: 12),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Target Terkumpul', style: TextStyle(fontSize: 10, color: (isDarkMode ? Colors.white38 : Colors.grey.shade500), fontWeight: FontWeight.bold)),
+                          Text(DateFormat('d MMMM yyyy', 'id_ID').format(widget.onSelectedDates[index]), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                        ],
+                      ),
+                      const Spacer(),
+                      Icon(Icons.arrow_drop_down_rounded, color: isDarkMode ? Colors.white24 : Colors.grey.shade400),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    final amount = double.tryParse(widget.onAmountControllers[index].text.replaceAll('.', '')) ?? 0;
+                    if (amount > 0) {
+                      final target = SavingTargetModel(
+                        id: DateTime.now().millisecondsSinceEpoch.toString(),
+                        name: widget.onNameControllers[index].text,
+                        targetAmount: amount,
+                        dueDate: widget.onSelectedDates[index],
+                        createdAt: DateTime.now(),
+                        category: category,
+                      );
+                      await ref.read(savingTargetServiceProvider).addTarget(target);
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                          content: Text('Rencana Berhasil Dibuat'),
+                          backgroundColor: AppColors.primary,
+                        ));
+                      }
+                      widget.onNameControllers[index].clear();
+                      widget.onAmountControllers[index].clear();
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    elevation: 0,
+                  ),
+                  child: const Text('Buat Rencana Sekarang', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildTargetItem(SavingTargetModel target, Color baseColor, bool isDarkMode) {
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
     final transactions = ref.watch(transactionsByGroupProvider(null));
@@ -599,7 +654,7 @@ class _SavingPlansPageState extends ConsumerState<SavingPlansPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildMiniInfo('Dana Dibutuhkan', _formatRupiah(target.targetAmount), isDarkMode),
+              _buildMiniInfo('Dana Dibutuhkan', widget.formatRupiah(target.targetAmount), isDarkMode),
               _buildMiniInfo('Rencana Selesai', DateFormat('d MMM yyyy').format(target.dueDate), isDarkMode),
             ],
           ),
@@ -608,7 +663,7 @@ class _SavingPlansPageState extends ConsumerState<SavingPlansPage> {
             children: [
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: () => _showEditTargetDialog(target, baseColor),
+                  onPressed: () => widget.onEdit(target, baseColor),
                   icon: const Icon(Icons.edit_rounded, size: 16),
                   label: const Text('Ubah', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
                   style: OutlinedButton.styleFrom(
@@ -622,7 +677,7 @@ class _SavingPlansPageState extends ConsumerState<SavingPlansPage> {
               const SizedBox(width: 12),
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: () => _deleteTarget(target.id),
+                  onPressed: () => widget.onDelete(target.id),
                   icon: const Icon(Icons.delete_outline_rounded, size: 16),
                   label: const Text('Hapus', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
                   style: OutlinedButton.styleFrom(
@@ -639,7 +694,6 @@ class _SavingPlansPageState extends ConsumerState<SavingPlansPage> {
       ),
     );
   }
-
 
   Widget _buildMiniInfo(String label, String value, bool isDarkMode) {
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
@@ -664,6 +718,48 @@ class _SavingPlansPageState extends ConsumerState<SavingPlansPage> {
             const Text('Belum ada rencana yang dibuat.', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w500)),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildHighVisInput({
+    required TextEditingController controller,
+    required IconData icon,
+    required String label,
+    required String unit,
+    required Color color,
+    required bool isDarkMode,
+    bool isPremium = false,
+    String? hint,
+  }) {
+    final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
+    return TextFormField(
+      controller: controller,
+      keyboardType: isPremium ? TextInputType.number : TextInputType.text,
+      inputFormatters: isPremium ? [_RibuanFormatter()] : null,
+      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: contentColor),
+      decoration: InputDecoration(
+        hintText: hint ?? '0',
+        hintStyle: TextStyle(
+            fontSize: 16,
+            color: isDarkMode ? Colors.white10 : Colors.black38),
+        prefixIcon: Container(
+          padding: const EdgeInsets.only(left: 16, right: 8),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, color: color, size: 20),
+              if (unit.isNotEmpty) ...[
+                const SizedBox(width: 8),
+                Text(unit, style: TextStyle(fontWeight: FontWeight.bold, color: color, fontSize: 16)),
+              ],
+            ],
+          ),
+        ),
+        filled: true,
+        fillColor: isDarkMode ? Colors.white.withValues(alpha: 0.03) : AppColors.background,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       ),
     );
   }

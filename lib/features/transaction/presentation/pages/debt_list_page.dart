@@ -28,51 +28,78 @@ class DebtListPage extends ConsumerWidget {
         (ref.watch(themeProvider) == ThemeMode.system &&
             theme.brightness == Brightness.dark);
 
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: const Text('Catatan Hutang',
-            style: TextStyle(fontWeight: FontWeight.bold)),
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-      ),
-      body: debtsAsync.when(
-        data: (debts) {
-          if (debts.isEmpty) {
-            return _buildEmptyState(context, isDarkMode);
-          }
-
-          final unpaidDebts = debts.where((d) => !d.isPaid).toList();
-          final paidDebts = debts.where((d) => d.isPaid).toList();
-
-          return ListView(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
-            children: [
-              if (unpaidDebts.isNotEmpty) ...[
-                _buildSectionHeader('Belum Lunas', Colors.orange, isDarkMode),
-                const SizedBox(height: 12),
-                ...unpaidDebts.map((d) => _buildDebtTile(context, ref, d, isDarkMode)),
-              ],
-              if (paidDebts.isNotEmpty) ...[
-                const SizedBox(height: 32),
-                _buildSectionHeader('Sudah Lunas', Colors.green, isDarkMode),
-                const SizedBox(height: 12),
-                ...paidDebts.map((d) => _buildDebtTile(context, ref, d, isDarkMode)),
-              ],
+        appBar: AppBar(
+          title: const Text('Catatan Hutang',
+              style: TextStyle(fontWeight: FontWeight.bold)),
+          backgroundColor: theme.scaffoldBackgroundColor,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          bottom: TabBar(
+            dividerColor: Colors.transparent,
+            indicatorColor: AppColors.primary,
+            indicatorWeight: 3,
+            labelColor: AppColors.primary,
+            unselectedLabelColor: isDarkMode ? Colors.white38 : Colors.black38,
+            labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+            tabs: const [
+              Tab(text: 'HUTANG'),
+              Tab(text: 'PIUTANG'),
             ],
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, st) => Center(child: Text('Error: $e')),
+          ),
+        ),
+        body: debtsAsync.when(
+          data: (debts) {
+            final hutangList = debts.where((d) => d.type == DebtType.hutang).toList();
+            final piutangList = debts.where((d) => d.type == DebtType.piutang).toList();
+
+            return TabBarView(
+              children: [
+                _buildDebtListView(context, ref, hutangList, isDarkMode),
+                _buildDebtListView(context, ref, piutangList, isDarkMode),
+              ],
+            );
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (e, st) => Center(child: Text('Error: $e')),
+        ),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () => DebtFormSheet.show(context),
+          backgroundColor: AppColors.primary,
+          foregroundColor: Colors.white,
+          icon: const Icon(Icons.add_rounded),
+          label: const Text('Tambah Catatan', style: TextStyle(fontWeight: FontWeight.bold)),
+        ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => DebtFormSheet.show(context),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        icon: const Icon(Icons.add_rounded),
-        label: const Text('Tambah Catatan', style: TextStyle(fontWeight: FontWeight.bold)),
-      ),
+    );
+  }
+
+  Widget _buildDebtListView(BuildContext context, WidgetRef ref, List<DebtModel> filteredDebts, bool isDarkMode) {
+    if (filteredDebts.isEmpty) {
+      return _buildEmptyState(context, isDarkMode);
+    }
+
+    final unpaidDebts = filteredDebts.where((d) => !d.isPaid).toList();
+    final paidDebts = filteredDebts.where((d) => d.isPaid).toList();
+
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 100),
+      children: [
+        if (unpaidDebts.isNotEmpty) ...[
+          _buildSectionHeader('Belum Lunas', Colors.orange, isDarkMode),
+          const SizedBox(height: 12),
+          ...unpaidDebts.map((d) => _buildDebtTile(context, ref, d, isDarkMode)),
+        ],
+        if (paidDebts.isNotEmpty) ...[
+          if (unpaidDebts.isNotEmpty) const SizedBox(height: 32),
+          _buildSectionHeader('Sudah Lunas', Colors.green, isDarkMode),
+          const SizedBox(height: 12),
+          ...paidDebts.map((d) => _buildDebtTile(context, ref, d, isDarkMode)),
+        ],
+      ],
     );
   }
 

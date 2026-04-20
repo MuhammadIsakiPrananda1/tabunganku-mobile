@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:tabunganku/models/shopping_item_model.dart';
 import 'package:tabunganku/models/transaction_model.dart';
 import 'package:tabunganku/providers/shopping_item_provider.dart';
@@ -32,8 +33,8 @@ class ShoppingListPage extends ConsumerWidget {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('Catatan Belanja',
-            style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text('Catatan Belanja',
+            style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold)),
         backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
         scrolledUnderElevation: 0,
@@ -48,7 +49,7 @@ class ShoppingListPage extends ConsumerWidget {
           final boughtItems = items.where((i) => i.isBought).toList();
 
           return ListView(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
             children: [
               if (activeItems.isNotEmpty) ...[
                 _buildSectionHeader('Daftar Rencana', AppColors.primary, isDarkMode),
@@ -56,12 +57,12 @@ class ShoppingListPage extends ConsumerWidget {
                 ...activeItems.map((item) => _buildShoppingTile(context, ref, item, isDarkMode)),
               ],
               if (boughtItems.isNotEmpty) ...[
-                const SizedBox(height: 32),
-                _buildSectionHeader('Sudah Dibeli', Colors.green, isDarkMode),
+                const SizedBox(height: 24),
+                _buildSectionHeader('Sudah Dibeli', AppColors.primary, isDarkMode),
                 const SizedBox(height: 12),
                 ...boughtItems.map((item) => _buildShoppingTile(context, ref, item, isDarkMode)),
               ],
-              const SizedBox(height: 32),
+              const SizedBox(height: 24),
               _buildSummaryCard(items, isDarkMode),
             ],
           );
@@ -91,7 +92,7 @@ class ShoppingListPage extends ConsumerWidget {
               shape: BoxShape.circle,
             ),
             child: Icon(Icons.shopping_basket_outlined,
-                size: 80, color: AppColors.primary.withValues(alpha: 0.4)),
+                size: 80, color: AppColors.primary),
           ),
           const SizedBox(height: 24),
           Text(
@@ -126,12 +127,11 @@ class ShoppingListPage extends ConsumerWidget {
         ),
         const SizedBox(width: 12),
         Text(
-          title.toUpperCase(),
-          style: TextStyle(
-            fontSize: 11,
+          title,
+          style: GoogleFonts.comicNeue(
+            fontSize: 14,
             fontWeight: FontWeight.bold,
             color: isDarkMode ? Colors.white54 : Colors.black38,
-            letterSpacing: 1.2,
           ),
         ),
       ],
@@ -143,12 +143,12 @@ class ShoppingListPage extends ConsumerWidget {
     final theme = Theme.of(context);
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
         color: item.isBought 
             ? (isDarkMode ? Colors.white.withValues(alpha: 0.02) : Colors.grey.shade50)
             : theme.cardColor,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
             color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100),
         boxShadow: item.isBought ? [] : [
@@ -161,48 +161,48 @@ class ShoppingListPage extends ConsumerWidget {
       ),
       child: Material(
         color: Colors.transparent,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(20),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: () => _showOptions(context, ref, item, isDarkMode),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12),
             child: Row(
               children: [
                 Stack(
                   alignment: Alignment.bottomRight,
                   children: [
                     Container(
-                      width: 52,
-                      height: 52,
+                      width: 44,
+                      height: 44,
                       decoration: BoxDecoration(
                         color: color.withValues(alpha: isDarkMode ? 0.15 : 0.08),
-                        borderRadius: BorderRadius.circular(18),
+                        borderRadius: BorderRadius.circular(14),
                       ),
                       child: item.imagePath != null && item.imagePath!.isNotEmpty
                           ? ClipRRect(
-                              borderRadius: BorderRadius.circular(18),
+                              borderRadius: BorderRadius.circular(14),
                               child: Image.file(
                                 File(item.imagePath!),
                                 fit: BoxFit.cover,
                                 errorBuilder: (context, error, stackTrace) => 
-                                  Icon(Icons.shopping_bag_rounded, color: color, size: 24),
+                                  Icon(Icons.shopping_bag_rounded, color: color, size: 20),
                               ),
                             )
-                          : Icon(Icons.shopping_bag_rounded, color: color, size: 24),
+                          : Icon(Icons.shopping_bag_rounded, color: color, size: 20),
                     ),
                     if (item.isBought)
                       Container(
                         padding: const EdgeInsets.all(2),
                         decoration: const BoxDecoration(
-                          color: Colors.green,
+                          color: AppColors.primary,
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.check, color: Colors.white, size: 12),
+                        child: const Icon(Icons.check, color: Colors.white, size: 10),
                       ),
                   ],
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -259,7 +259,7 @@ class ShoppingListPage extends ConsumerWidget {
                     Text(
                       _formatRupiah(item.estimatedPrice),
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 15,
                         fontWeight: FontWeight.bold,
                         color: item.isBought
                             ? (isDarkMode ? Colors.white24 : Colors.grey.shade400)
@@ -279,7 +279,7 @@ class ShoppingListPage extends ConsumerWidget {
                         margin: const EdgeInsets.only(top: 4),
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
-                          color: Colors.green.withValues(alpha: 0.1),
+                          color: AppColors.primary.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: const Text(
@@ -287,7 +287,7 @@ class ShoppingListPage extends ConsumerWidget {
                           style: TextStyle(
                             fontSize: 9,
                             fontWeight: FontWeight.bold,
-                            color: Colors.green,
+                            color: AppColors.primary,
                           ),
                         ),
                       ),
@@ -306,10 +306,10 @@ class ShoppingListPage extends ConsumerWidget {
       context: context,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        padding: const EdgeInsets.fromLTRB(28, 12, 28, 32),
+        padding: const EdgeInsets.fromLTRB(20, 10, 20, 24),
         decoration: BoxDecoration(
           color: isDarkMode ? AppColors.surfaceDark : Colors.white,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -321,11 +321,11 @@ class ShoppingListPage extends ConsumerWidget {
                   color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
                   borderRadius: BorderRadius.circular(2)),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 24),
             _buildOptionTile(
               icon: item.isBought ? Icons.undo_rounded : Icons.check_circle_outline_rounded,
               label: item.isBought ? 'Tandai Belum Dibeli' : 'Tandai Sudah Dibeli',
-              color: item.isBought ? Colors.orange : Colors.green,
+              color: AppColors.primary,
               isDarkMode: isDarkMode,
               onTap: () async {
                 Navigator.pop(context);
@@ -363,7 +363,7 @@ class ShoppingListPage extends ConsumerWidget {
             _buildOptionTile(
               icon: Icons.edit_outlined,
               label: 'Edit Rencana',
-              color: Colors.blue,
+              color: AppColors.primary,
               isDarkMode: isDarkMode,
               onTap: () {
                 Navigator.pop(context);
@@ -373,7 +373,7 @@ class ShoppingListPage extends ConsumerWidget {
             _buildOptionTile(
               icon: Icons.delete_outline_rounded,
               label: 'Hapus Rencana',
-              color: Colors.red,
+              color: const Color(0xFFE53935),
               isDarkMode: isDarkMode,
               onTap: () async {
                 Navigator.pop(context);
@@ -424,10 +424,10 @@ class ShoppingListPage extends ConsumerWidget {
     final totalBought = items.where((i) => i.isBought).fold<double>(0, (sum, item) => sum + item.estimatedPrice);
 
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.primary.withValues(alpha: isDarkMode ? 0.1 : 0.05),
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppColors.primary.withValues(alpha: 0.1)),
       ),
       child: Row(
@@ -436,15 +436,15 @@ class ShoppingListPage extends ConsumerWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('ESTIMASI TOTAL', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1, color: isDarkMode ? Colors.white38 : Colors.black26)),
-              Text(_formatRupiah(totalEstimated), style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : Colors.teal.shade900)),
+              Text('ESTIMASI TOTAL', style: GoogleFonts.comicNeue(fontSize: 12, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white38 : Colors.black26)),
+              Text(_formatRupiah(totalEstimated), style: GoogleFonts.comicNeue(fontSize: 18, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : AppColors.primaryDark)),
             ],
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text('DIBELI', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1, color: isDarkMode ? Colors.green.shade900.withValues(alpha: 0.5) : Colors.green.shade700.withValues(alpha: 0.3))),
-              Text(_formatRupiah(totalBought), style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.green.shade600)),
+              Text('DIBELI', style: GoogleFonts.comicNeue(fontSize: 10, fontWeight: FontWeight.bold, color: isDarkMode ? AppColors.primary.withValues(alpha: 0.5) : AppColors.primaryDark.withValues(alpha: 0.4))),
+              Text(_formatRupiah(totalBought), style: GoogleFonts.comicNeue(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.primary)),
             ],
           ),
         ],

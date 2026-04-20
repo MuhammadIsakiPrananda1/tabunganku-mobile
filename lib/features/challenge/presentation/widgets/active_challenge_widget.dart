@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:tabunganku/models/challenge_model.dart';
 import 'package:tabunganku/providers/challenge_provider.dart';
 import 'package:tabunganku/core/theme/app_colors.dart';
@@ -29,99 +30,90 @@ class ActiveChallengeWidget extends ConsumerWidget {
   }
 
   Widget _buildEmptyState(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.all(16),
-      elevation: 3,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [AppColors.primary.withValues(alpha: 0.1), AppColors.primaryLight.withValues(alpha: 0.1)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.surfaceDark : Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100),
+      ),
+      child: Column(
+        children: [
+          Icon(Icons.emoji_events_outlined, size: 40, color: AppColors.primary.withValues(alpha: 0.5)),
+          const SizedBox(height: 12),
+          Text(
+            'MULAI CHALLENGE!',
+            style: GoogleFonts.comicNeue(
+              fontSize: 16,
+              fontWeight: FontWeight.w900,
+              color: AppColors.primary,
+            ),
           ),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          children: [
-            Icon(Icons.emoji_flags, size: 48, color: AppColors.primary),
-            const SizedBox(height: 12),
-            const Text(
-              'Mulai Challenge Menabung!',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+          const SizedBox(height: 4),
+          Text(
+            'Bangun kebiasaan menabung yang seru',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.comicNeue(
+              color: Colors.grey,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
             ),
-            const SizedBox(height: 8),
-            const Text(
-              'Bangun kebiasaan menabung dengan challenge seru',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
               onPressed: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const ChallengePage()),
                 );
               },
-              icon: const Icon(Icons.add_circle),
-              label: const Text('Mulai Sekarang'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                elevation: 0,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
+              child: Text('LIHAT DAFTAR', style: GoogleFonts.comicNeue(fontWeight: FontWeight.w900)),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildLoadingState() {
-    return Card(
-      margin: const EdgeInsets.all(16),
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: const Padding(
-        padding: EdgeInsets.all(20),
-        child: Center(
-          child: CircularProgressIndicator(),
-        ),
-      ),
-    );
+    return const SizedBox(height: 100, child: Center(child: CircularProgressIndicator()));
   }
 
   Widget _buildChallengeCard(BuildContext context, ChallengeModel challenge) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final progressPercent = challenge.progressPercentage / 100;
-    final daysLeft = challenge.daysRemaining;
-    final formatter = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+    const baseColor = AppColors.primary;
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color: isDark ? AppColors.surfaceDark : Colors.white,
         borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+            color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: Theme.of(context).brightness == Brightness.dark ? 0.2 : 0.05),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
+            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.03),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
-        border: Border.all(
-          color: Theme.of(context).brightness == Brightness.dark ? Colors.white10 : Colors.black12,
-          width: 1.5,
-        ),
       ),
       child: Material(
         color: Colors.transparent,
         borderRadius: BorderRadius.circular(24),
+        clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: () {
             Navigator.push(
@@ -129,196 +121,82 @@ class ActiveChallengeWidget extends ConsumerWidget {
               MaterialPageRoute(builder: (context) => const ChallengePage()),
             );
           },
-          borderRadius: BorderRadius.circular(24),
           child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            padding: const EdgeInsets.fromLTRB(16, 16, 20, 16),
+            child: Row(
               children: [
-                // ── Header ──────────────────────────────────────
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                // Leading: Circular Progress
+                Stack(
+                  alignment: Alignment.center,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [AppColors.primary, AppColors.primaryLight],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.primary.withValues(alpha: 0.3),
-                            blurRadius: 8,
-                            offset: const Offset(0, 4),
-                          )
-                        ],
-                      ),
-                      child: const Icon(Icons.emoji_flags_rounded, color: Colors.white, size: 28),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Challenge Aktif',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.primary,
-                              letterSpacing: 1.2,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            challenge.title,
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              height: 1.2,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
+                    SizedBox(
+                      width: 50,
+                      height: 50,
+                      child: CircularProgressIndicator(
+                        value: progressPercent,
+                        strokeWidth: 5,
+                        backgroundColor: baseColor.withValues(alpha: 0.1),
+                        valueColor: AlwaysStoppedAnimation<Color>(_getProgressColor(progressPercent)),
+                        strokeCap: StrokeCap.round,
                       ),
                     ),
+                    const Icon(Icons.flash_on_rounded, color: baseColor, size: 20),
                   ],
                 ),
-                const SizedBox(height: 20),
-
-                // ── Descriptions ────────────────────────────────
-                Text(
-                  challenge.description,
-                  style: TextStyle(
-                    color: Colors.grey.shade600,
-                    fontSize: 14,
-                    height: 1.5,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 24),
-
-                // Progress
-                if (challenge.targetAmount != null) ...[
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Progress',
-                            style: TextStyle(fontSize: 12, color: Colors.grey),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            formatter.format(challenge.currentProgress),
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                              color: AppColors.primary,
-                            ),
-                          ),
-                        ],
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          const Text(
-                            'Target',
-                            style: TextStyle(fontSize: 12, color: Colors.grey),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            formatter.format(challenge.targetAmount),
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-
-                  // Progress Bar
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: LinearProgressIndicator(
-                      value: progressPercent.clamp(0.0, 1.0),
-                      minHeight: 10,
-                      backgroundColor: Colors.grey[200],
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        _getProgressColor(progressPercent),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-
-                  // Percentage
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                const SizedBox(width: 16),
+                // Title and Info
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '${(progressPercent * 100).toStringAsFixed(1)}% tercapai',
-                        style: TextStyle(fontSize: 13, color: Colors.grey[700]),
-                      ),
-                      if (progressPercent >= 1.0)
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.green,
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: const Row(
-                            children: [
-                              Icon(Icons.check_circle, color: Colors.white, size: 14),
-                              SizedBox(width: 4),
-                              Text(
-                                'Selesai!',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
+                        'CHALLENGE AKTIF',
+                        style: GoogleFonts.comicNeue(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w900,
+                          color: AppColors.primary,
+                          letterSpacing: 0.5,
                         ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        challenge.title,
+                        style: GoogleFonts.comicNeue(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                          color: isDark ? Colors.white : AppColors.primaryDark,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Icon(Icons.timer_outlined, 
+                            size: 11, 
+                            color: isDark ? Colors.white24 : Colors.grey.shade400),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${challenge.daysRemaining} hari lagi',
+                            style: GoogleFonts.comicNeue(
+                              fontSize: 11,
+                              color: isDark ? Colors.white38 : Colors.grey.shade600,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
-                ],
-
-                const SizedBox(height: 12),
-
-                // Action Button
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const ChallengePage()),
-                          );
-                        },
-                        icon: const Icon(Icons.trending_up, size: 18),
-                        label: const Text('Lihat Detail'),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: AppColors.primary,
-                          side: BorderSide(color: AppColors.primary),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                        ),
-                      ),
-                    ),
-                  ],
+                ),
+                // Trailing: Percentage
+                Text(
+                  '${(progressPercent * 100).toInt()}%',
+                  style: GoogleFonts.comicNeue(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w900,
+                    color: _getProgressColor(progressPercent),
+                  ),
                 ),
               ],
             ),

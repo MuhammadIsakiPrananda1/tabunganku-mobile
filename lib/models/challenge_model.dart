@@ -16,6 +16,7 @@ enum ChallengeTargetType {
   zeroExpense, // Tidak boleh ada pengeluaran sama sekali
   categoryLimit, // Batasi pengeluaran kategori tertentu
   noTransactionType, // Tidak boleh ada transaksi tipe tertentu (misal: no online shopping)
+  custom, // Tantangan kustom (misal: input semua pengeluaran)
 }
 
 enum ChallengeStatus {

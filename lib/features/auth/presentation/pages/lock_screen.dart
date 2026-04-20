@@ -8,8 +8,7 @@ import 'package:tabunganku/providers/family_group_provider.dart';
 import 'dart:io';
 
 class LockScreen extends ConsumerStatefulWidget {
-  final String? from;
-  const LockScreen({super.key, this.from});
+  const LockScreen({super.key});
 
   @override
   ConsumerState<LockScreen> createState() => _LockScreenState();
@@ -23,7 +22,6 @@ class _LockScreenState extends ConsumerState<LockScreen> with TickerProviderStat
   @override
   void initState() {
     super.initState();
-    // Shake controller initialization
     _shakeController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 500),
@@ -33,7 +31,11 @@ class _LockScreenState extends ConsumerState<LockScreen> with TickerProviderStat
   Future<void> _authenticateBiometric() async {
     final authenticated = await ref.read(securityProvider.notifier).authenticate();
     if (authenticated && mounted) {
-      context.go(widget.from ?? '/dashboard');
+      // If we are currently on the full lock route (initial startup flow),
+      // we need to manually navigate to dashboard.
+      if (GoRouter.of(context).routerDelegate.currentConfiguration.fullPath == '/lock') {
+        context.go('/dashboard');
+      }
     }
   }
 
@@ -63,7 +65,13 @@ class _LockScreenState extends ConsumerState<LockScreen> with TickerProviderStat
     final success = await ref.read(securityProvider.notifier).verifyPin(_inputPin);
     if (success) {
       ref.read(securityProvider.notifier).recordSuccessAuth();
-      if (mounted) context.go(widget.from ?? '/dashboard');
+      // If we are currently on the full lock route (initial startup flow),
+      // we need to manually navigate to dashboard.
+      if (mounted && GoRouter.of(context).routerDelegate.currentConfiguration.fullPath == '/lock') {
+        context.go('/dashboard');
+      }
+      // If used as an overlay, the securityProvider state change will trigger 
+      // the overlay removal in main.dart automatically.
     } else {
       setState(() {
         _isError = true;
@@ -86,7 +94,9 @@ class _LockScreenState extends ConsumerState<LockScreen> with TickerProviderStat
     final security = ref.watch(securityProvider);
     final colorScheme = Theme.of(context).colorScheme;
     
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
@@ -114,8 +124,9 @@ class _LockScreenState extends ConsumerState<LockScreen> with TickerProviderStat
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildProfileHeader(UserProfile profile, ColorScheme colorScheme) {
     final textTheme = Theme.of(context).textTheme;

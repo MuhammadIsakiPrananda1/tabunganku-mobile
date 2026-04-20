@@ -5,7 +5,13 @@ import 'package:intl/intl.dart';
 import 'package:tabunganku/core/theme/app_colors.dart';
 
 class SmartDigitalClock extends StatefulWidget {
-  const SmartDigitalClock({super.key});
+  final bool isDarkMode;
+  final double fontSize;
+  const SmartDigitalClock({
+    super.key,
+    required this.isDarkMode,
+    this.fontSize = 26,
+  });
 
   @override
   State<SmartDigitalClock> createState() => _SmartDigitalClockState();
@@ -38,7 +44,7 @@ class _SmartDigitalClockState extends State<SmartDigitalClock> {
     return Text(
       DateFormat('HH:mm:ss').format(_currentTime),
       style: GoogleFonts.comicNeue(
-        fontSize: 26,
+        fontSize: widget.fontSize,
         fontWeight: FontWeight.bold,
         color: AppColors.primary,
         letterSpacing: 2.0,
@@ -84,8 +90,8 @@ class _SmartDateDisplayState extends State<SmartDateDisplay> {
       DateFormat('EEEE, d MMMM yyyy', 'id_ID').format(_currentDate),
       style: TextStyle(
         fontSize: 12,
-        color: widget.isDarkMode ? Colors.white70 : Colors.teal,
-        fontWeight: FontWeight.normal,
+        color: AppColors.primary.withValues(alpha: 0.8),
+        fontWeight: FontWeight.bold,
       ),
     );
   }

@@ -71,16 +71,22 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
 
     // Fetch feature balances
     final goldTxs = ref.watch(goldTransactionsStreamProvider).valueOrNull ?? [];
-    final goldGramBalance = goldTxs.fold<double>(0, (sum, t) => sum + (t.type == GoldTransactionType.buy ? t.grams : -t.grams));
-    
+    final goldGramBalance = goldTxs.fold<double>(
+        0,
+        (sum, t) =>
+            sum + (t.type == GoldTransactionType.buy ? t.grams : -t.grams));
+
     final bills = ref.watch(billsStreamProvider).valueOrNull ?? [];
-    final unpaidBillsTotal = bills.fold<double>(0, (sum, b) => sum + (b.isPaid ? 0 : b.amount));
-    
+    final unpaidBillsTotal =
+        bills.fold<double>(0, (sum, b) => sum + (b.isPaid ? 0 : b.amount));
+
     final investments = ref.watch(investmentStreamProvider).valueOrNull ?? [];
-    final totalInvestmentValuation = investments.fold<double>(0, (sum, i) => sum + i.currentValuation);
-    
+    final totalInvestmentValuation =
+        investments.fold<double>(0, (sum, i) => sum + i.currentValuation);
+
     final insurances = ref.watch(insuranceStreamProvider).valueOrNull ?? [];
-    final totalMonthlyInsurance = insurances.fold<double>(0, (sum, i) => sum + i.premiumAmount);
+    final totalMonthlyInsurance =
+        insurances.fold<double>(0, (sum, i) => sum + i.premiumAmount);
 
     final theme = Theme.of(context);
     final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
@@ -353,7 +359,8 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
     );
   }
 
-  Widget _buildActionGrid(bool isDarkMode, {
+  Widget _buildActionGrid(
+    bool isDarkMode, {
     required double goldGramBalance,
     required double unpaidBillsTotal,
     required double totalInvestmentValuation,
@@ -361,10 +368,16 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
     required List<SavingTargetModel> targets,
   }) {
     final Map<QuickActionType, String> balances = {
-      QuickActionType.goldSavings: goldGramBalance > 0 ? '${goldGramBalance.toStringAsFixed(3)} Gr' : '',
-      QuickActionType.bills: unpaidBillsTotal > 0 ? _formatRupiah(unpaidBillsTotal) : '',
-      QuickActionType.investment: totalInvestmentValuation > 0 ? _formatRupiah(totalInvestmentValuation) : '',
-      QuickActionType.insurance: totalMonthlyInsurance > 0 ? '${_formatRupiah(totalMonthlyInsurance)}/bln' : '',
+      QuickActionType.goldSavings:
+          goldGramBalance > 0 ? '${goldGramBalance.toStringAsFixed(3)} Gr' : '',
+      QuickActionType.bills:
+          unpaidBillsTotal > 0 ? _formatRupiah(unpaidBillsTotal) : '',
+      QuickActionType.investment: totalInvestmentValuation > 0
+          ? _formatRupiah(totalInvestmentValuation)
+          : '',
+      QuickActionType.insurance: totalMonthlyInsurance > 0
+          ? '${_formatRupiah(totalMonthlyInsurance)}/bln'
+          : '',
       QuickActionType.savingPlans: _getPlansTotal(targets),
       QuickActionType.buyingTarget: _getBuyingTotal(targets),
     };
@@ -404,21 +417,28 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
 
   String _getPlansTotal(List<SavingTargetModel> targets) {
     final planCategories = ['Darurat', 'Pendidikan', 'Pensiun', 'Kurban'];
-    final total = targets.where((t) => planCategories.contains(t.category)).fold<double>(0, (sum, t) => sum + t.targetAmount);
+    final total = targets
+        .where((t) => planCategories.contains(t.category))
+        .fold<double>(0, (sum, t) => sum + t.targetAmount);
     return total > 0 ? _formatRupiah(total) : '';
   }
 
   String _getBuyingTotal(List<SavingTargetModel> targets) {
-    final total = targets.where((t) => t.category == 'Pembelian' || t.category == 'Umum').fold<double>(0, (sum, t) => sum + t.targetAmount);
+    final total = targets
+        .where((t) => t.category == 'Pembelian' || t.category == 'Umum')
+        .fold<double>(0, (sum, t) => sum + t.targetAmount);
     return total > 0 ? _formatRupiah(total) : '';
   }
 
   String _getCategoryTotal(List<SavingTargetModel> targets, String keyword) {
-    final total = targets.where((t) => t.name.toLowerCase().contains(keyword)).fold<double>(0, (sum, t) => sum + t.targetAmount);
+    final total = targets
+        .where((t) => t.name.toLowerCase().contains(keyword))
+        .fold<double>(0, (sum, t) => sum + t.targetAmount);
     return total > 0 ? _formatRupiah(total) : '';
   }
 
-  void _showMoreActionsSheet(bool isDarkMode, Map<QuickActionType, String> balances) {
+  void _showMoreActionsSheet(
+      bool isDarkMode, Map<QuickActionType, String> balances) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -564,7 +584,7 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
       icon: Icons.track_changes_rounded,
       label: 'Target Saya',
       type: QuickActionType.buyingTarget,
-      baseColor: Colors.amber,
+      baseColor: AppColors.primary,
     ),
     _QuickActionItem(
       icon: Icons.document_scanner_rounded,
@@ -606,7 +626,7 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
       icon: Icons.assignment_turned_in_rounded,
       label: 'Dana Rencana',
       type: QuickActionType.savingPlans,
-      baseColor: Colors.teal,
+      baseColor: AppColors.primary,
     ),
     _QuickActionItem(
       icon: Icons.request_quote_rounded,
@@ -643,7 +663,9 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
   Widget _buildSavingTargetSection(
       double totalBalance, List<SavingTargetModel> targets, bool isDarkMode) {
     // Filter out specialized plans from the general target section
-    final buyingTargets = targets.where((t) => t.category == 'Pembelian' || t.category == 'Umum').toList();
+    final buyingTargets = targets
+        .where((t) => t.category == 'Pembelian' || t.category == 'Umum')
+        .toList();
     if (buyingTargets.isEmpty) return const SizedBox.shrink();
 
     return Column(
@@ -652,20 +674,19 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('TARGET PEMBELIAN SAYA',
-                style: TextStyle(
-                    fontSize: 10,
+            Text('Target Pembelian Saya',
+                style: GoogleFonts.comicNeue(
+                    fontSize: 14,
                     fontWeight: FontWeight.bold,
-                    letterSpacing: 1.5,
                     color: isDarkMode
                         ? Colors.white30
-                        : Colors.teal.shade800.withValues(alpha: 0.4))),
+                        : AppColors.primaryDark.withValues(alpha: 0.4))),
             if (buyingTargets.length > 1)
               Text('${buyingTargets.length} Barang Impian',
-                  style: TextStyle(
-                      fontSize: 9,
+                  style: GoogleFonts.comicNeue(
+                      fontSize: 11,
                       fontWeight: FontWeight.bold,
-                      color: Colors.amber.shade700)),
+                      color: AppColors.primary)),
           ],
         ),
         const SizedBox(height: 20),
@@ -703,7 +724,6 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
       ],
     );
   }
-
 
   Widget _targetCardMinimalist(SavingTargetModel target, double totalBalance,
       bool isDarkMode, int index) {
@@ -750,11 +770,10 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('TARGET #${index + 1}',
-                            style: TextStyle(
-                                fontSize: 10,
+                        Text('Target #${index + 1}',
+                            style: GoogleFonts.comicNeue(
+                                fontSize: 11,
                                 fontWeight: FontWeight.bold,
-                                letterSpacing: 1.2,
                                 color:
                                     AppColors.primary.withValues(alpha: 0.6))),
                         Flexible(
@@ -768,8 +787,8 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                             child: Text(target.name,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                    fontSize: 10,
+                                style: GoogleFonts.comicNeue(
+                                    fontSize: 11,
                                     fontWeight: FontWeight.bold,
                                     color: AppColors.primary)),
                           ),
@@ -782,15 +801,15 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                       textBaseline: TextBaseline.alphabetic,
                       children: [
                         Text('${(progress * 100).toInt()}%',
-                            style: TextStyle(
-                                fontSize: 32,
+                            style: GoogleFonts.comicNeue(
+                                fontSize: 36,
                                 fontWeight: FontWeight.bold,
                                 color: isDarkMode
                                     ? Colors.white
                                     : Colors.black87)),
                         const SizedBox(width: 8),
                         Text('/ 100%',
-                            style: TextStyle(
+                            style: GoogleFonts.comicNeue(
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
                                 color: isDarkMode
@@ -815,10 +834,12 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                       widget.showBalance
                           ? '${_formatRupiah(totalBalance)} / ${_formatRupiah(target.targetAmount)}'
                           : '••••••',
-                      style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: isDarkMode ? Colors.white30 : Colors.black26),
+                      style: GoogleFonts.comicNeue(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: isDarkMode
+                              ? Colors.white38
+                              : AppColors.primary.withValues(alpha: 0.5)),
                     ),
                   ],
                 ),
@@ -839,7 +860,7 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
     final expensePercent = (totalExpense / totalVal * 100).toStringAsFixed(0);
 
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(20), // More compact padding
       decoration: BoxDecoration(
         color: isDarkMode ? AppColors.surfaceDark : Colors.white,
         borderRadius: BorderRadius.circular(32),
@@ -863,29 +884,28 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                   color: isDarkMode ? Colors.white24 : Colors.grey.shade300),
             ],
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 16), // Reduced from 32
           Column(
             children: [
               // Centered Pie Chart with Stack for Total
               SizedBox(
-                height: 210,
+                height: 210, // Keeping chart size as requested
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
                     PieChart(
                       PieChartData(
                         sectionsSpace: 4,
-                        centerSpaceRadius: 40, // Smaller donut hole
+                        centerSpaceRadius: 60,
                         sections: [
                           if (totalIncome > 0)
                             PieChartSectionData(
-                              color: Colors.green.shade400,
+                              color: Colors.green,
                               value: totalIncome,
-                              radius: 12, // Thinner donut slices
+                              radius: 14,
                               title: '$incomePercent%',
                               showTitle: true,
-                              titlePositionPercentageOffset:
-                                  3.2, // Pushed far outside
+                              titlePositionPercentageOffset: 2.2,
                               titleStyle: GoogleFonts.comicNeue(
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold,
@@ -896,13 +916,12 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                             ),
                           if (totalExpense > 0)
                             PieChartSectionData(
-                              color: Colors.red.shade400,
+                              color: Colors.red,
                               value: totalExpense,
-                              radius: 12, // Thinner donut slices
+                              radius: 14,
                               title: '$expensePercent%',
                               showTitle: true,
-                              titlePositionPercentageOffset:
-                                  3.2, // Pushed far outside
+                              titlePositionPercentageOffset: 2.2,
                               titleStyle: GoogleFonts.comicNeue(
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold,
@@ -914,7 +933,7 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                         ],
                       ),
                     ),
-                    // Icon in center
+                    // Center is empty or subtle icon
                     Icon(Icons.auto_awesome_mosaic_rounded,
                         size: 20,
                         color:
@@ -922,33 +941,30 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
-              // Reordered Indicators
-              Column(
-                children: [
-                  // TOTAL ON TOP
-                  _buildCenteredIndicator('Total Alokasi', totalVal,
-                      isDarkMode ? Colors.white : Colors.black87),
-                  const SizedBox(height: 16),
-                  // INCOME & EXPENSE BERDEKATAN DI BAWAH
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Expanded(
-                        child: _buildCenteredIndicator(
-                            'Pemasukan', totalIncome, Colors.green),
-                      ),
-                      const SizedBox(
-                          width: 48), // Spasi yang cukup tapi tetap "dekat"
-                      Expanded(
-                        child: _buildCenteredIndicator(
-                            'Pengeluaran', totalExpense, Colors.red),
-                      ),
-                    ],
-                  ),
-                ],
+              const SizedBox(height: 12), // Reduced from 24
+              // Structured Table Layout instead of centered indicators
+              Container(
+                margin: const EdgeInsets.only(top: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: Table(
+                  columnWidths: const {
+                    0: IntrinsicColumnWidth(),
+                    1: FlexColumnWidth(),
+                    2: IntrinsicColumnWidth(),
+                  },
+                  defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                  children: [
+                    _buildTableRow(
+                        'Pemasukan', totalIncome, Colors.green, isDarkMode),
+                    _buildTableRow(
+                        'Pengeluaran', totalExpense, Colors.red, isDarkMode),
+                    _buildTableRow('Total Alokasi', totalVal,
+                        isDarkMode ? Colors.white : Colors.black87, isDarkMode,
+                        isTotal: true),
+                  ],
+                ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 24), // Reduced from 32
               _buildCategoryBreakdown(transactions, isDarkMode),
             ],
           ),
@@ -957,34 +973,42 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
     );
   }
 
-  Widget _buildCenteredIndicator(String label, double val, Color color) {
-    return Column(
+  TableRow _buildTableRow(
+      String label, double val, Color color, bool isDarkMode,
+      {bool isTotal = false}) {
+    return TableRow(
       children: [
-        Container(
-          width: 8,
-          height: 8,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          label,
-          style: const TextStyle(fontSize: 10, color: Colors.grey),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        const SizedBox(height: 2),
-        SizedBox(
-          width: double.infinity,
-          height: 20,
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Text(
-              _formatRupiah(val),
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.bold,
-                color: color,
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          child: Row(
+            children: [
+              Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(color: color, shape: BoxShape.circle),
               ),
+              const SizedBox(width: 12),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: isTotal ? FontWeight.bold : FontWeight.w500,
+                  color: isDarkMode ? Colors.white70 : Colors.black54,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(), // Spacer column
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          child: Text(
+            _formatRupiah(val),
+            textAlign: TextAlign.right,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: color,
             ),
           ),
         ),
@@ -1026,7 +1050,7 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                         width: 8,
                         height: 8,
                         decoration: BoxDecoration(
-                            color: AppCategories.getColorForCategory(entry.key), 
+                            color: AppCategories.getColorForCategory(entry.key),
                             shape: BoxShape.circle),
                       ),
                       const SizedBox(width: 10),
@@ -1090,7 +1114,8 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
 
   Widget _minimalTile(TransactionModel t, bool isDarkMode) {
     final bool isExpense = t.type == TransactionType.expense;
-    final IconData icon = isExpense ? Icons.arrow_outward_rounded : Icons.call_received_rounded;
+    final IconData icon =
+        isExpense ? Icons.arrow_outward_rounded : Icons.call_received_rounded;
     final Color color = isExpense ? Colors.red : Colors.green;
 
     return Padding(
@@ -1124,8 +1149,11 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                           style: const TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 14)),
                       Text(DateFormat('dd MMM').format(t.date),
-                          style: const TextStyle(
-                              fontSize: 10, color: Colors.grey)),
+                          style: TextStyle(
+                              fontSize: 10,
+                              color: isDarkMode
+                                  ? Colors.white38
+                                  : Colors.black54)),
                     ],
                   ),
                 ),

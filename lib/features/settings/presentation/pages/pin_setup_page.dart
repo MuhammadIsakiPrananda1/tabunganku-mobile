@@ -231,7 +231,11 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage> {
           height: 80,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+            color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.2),
+            border: Border.all(
+              color: colorScheme.outline.withValues(alpha: 0.3),
+              width: 1.2,
+            ),
           ),
           child: Center(
             child: isBack

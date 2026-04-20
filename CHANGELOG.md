@@ -4,50 +4,28 @@ Seluruh evolusi, fitur, dan perbaikan aplikasi **TabunganKu** terdokumentasi sec
 
 ---
 
-## 💎 [1.4.8] — 17–18 April 2026: The UX & Aesthetic Revolution
+## 💎 [1.4.8] — 19–20 April 2026: The Security & Transparency Revolution
 
-Rilis ini membawa transformasi besar pada antarmuka pengguna untuk menciptakan pengalaman yang lebih premium, intuitif, dan selaras dengan standar aplikasi finansial modern. Fokus utama adalah pada personalisasi demografi, visualisasi data yang mendalam, dan estetika premium yang konsisten.
+Rilis ini menghadirkan perombakan total pada sistem keamanan dan transparansi keluarga. Kami memperkenalkan sinkronisasi awan (cloud sync) yang lebih cerdas untuk memastikan seluruh anggota keluarga memiliki pandangan yang sama terhadap keuangan bersama.
 
-### 🍱 Dashboard: Smart Activity Pulse & GoPay-Style UI
-- **Intelligent Financial Summary** — Menggantikan grafik batang yang redundan dengan widget **Monthly Highlights** yang dinamis. Widget ini secara otomatis merangkum kesehatan finansial Anda dalam satu pandangan sekilas yang elegan 📊.
-- **Top Category Detection** — Algoritma cerdas yang mendeteksi otomatis kategori dengan pengeluaran terbesar secara real-time, memberikan *alert* visual untuk membantu pengendalian budget yang lebih proaktif.
-- **Largest Transaction Spotlight** — Highlight otomatis transaksi tunggal terbesar (Single Largest Expense) untuk membantu Anda mengevaluasi pengeluaran besar yang mungkin terlewatkan.
-- **Premium Action Grid** — Redesain total tombol aksi utama dengan estetika kotak rounded dan warna pastel yang lembut (Soft Colors) terinspirasi dari GoPay. Memberikan kesan bersih, modern, dan sangat nyaman untuk navigasi jari 🍱.
-- **Smart Expansion "Lainnya"** — Menyeimbangkan kelegaan dashboard dengan menyembunyikan fitur sekunder di balik tombol "Lainnya". Menu ini kini dilengkapi dengan filter cerdas yang hanya menampilkan aksi yang belum ada di grid utama untuk efisiensi ruang.
-- **Dynamic Interaction Flow** — Animasi transisi yang lebih halus dan *visual feedback* yang responsif saat berinteraksi dengan elemen dashboard untuk pengalaman yang lebih taktil.
+### 🚀 Tambah Fitur (New Features)
+- **Shared Family Transparency (Real-Sync)** — Implementasi sinkronisasi Firestore real-time. Kini setiap anggota keluarga bisa melihat seluruh riwayat transaksi grup secara instan saat ada perubahan 👨‍👩‍👧‍👦.
+- **Joint Account Management** — Memberikan akses penuh bagi seluruh anggota grup untuk mengedit atau menghapus catatan apa pun dalam buku kas keluarga (Shared Responsibility).
+- **Accurate Member Contribution** — Sistem pelacakan saldo individu yang kini lebih akurat, memastikan kontribusi tiap orang dihitung dan ditampilkan dengan benar di semua perangkat.
+- **Security Modernization** — Alur startup baru yang lebih aman (`Splash -> Lock Screen -> Dashboard`) dan implementasi *Security Overlay* saat aplikasi dibuka kembali dari background 🛡️.
+- **Ultra-Legible UI Upgrade** — Peningkatan keterbacaan signifikan dengan avatar anggota yang lebih besar (72px), badge pembuat transaksi yang lebih tegas ("Oleh Anda" vs "Oleh Nama"), dan font yang lebih besar.
+- **Haptic Interaction Feedback** — Penambahan getaran halus (Haptic Feedback) saat menyalin kode grup untuk pengalaman navigasi yang lebih taktil dan premium.
 
-### 🎨 Visual & Identity: Typography Standardization
-- **Full Comic Neue Integration** — Standardisasi font **Comic Neue** di seluruh aplikasi. Font ini dipilih untuk memperkuat identitas brand TabunganKu yang ramah, hangat, namun tetap profesional dan mudah dibaca 🎨.
-- **Typography Hierarchy IQ** — Penyesuaian cerdas pada ukuran, ketebalan, dan *letter-spacing* teks. Kini informasi penting tampil lebih menonjol sementara teks pendukung tetap proporsional dan tidak melelahkan mata.
-- **High-Contrast Light Mode** — Optimalisasi palet warna pada Mode Terang (Light Mode). Peningkatan kontras teks dan ikon memastikan aplikasi tetap nyaman digunakan bahkan di bawah sinar matahari langsung ☀️.
+### 🗑️ Hapus Fitur (Removed Features)
+- **Individual Ownership Lock** — Menghapus pembatasan kelola transaksi. Kini tidak ada lagi blokir "Hanya pembuat yang bisa mengedit", demi transparansi penuh antar anggota keluarga.
+- **Floating "Kode Disalin" SnackBar** — Menghapus bar hitam yang sering menutupi UI saat menyalin kode grup, digantikan dengan respon getaran yang lebih elegan dan bersih 🧹.
 
-### 💰 Nabung Emas & Modern Form System
-- **Rupiah Input Mode (Emas)** — Fitur baru yang memungkinkan pengguna menginput nominal Rupiah saat menabung emas. Sistem akan mengkonversi otomatis ke Gram secara real-time berdasarkan harga pasar terintegrasi 💰.
-- **Compact Form Standards** — Redesain seluruh form input (Tambah Transaksi, Budget, dll) menjadi lebih compact dan rapi. Mengurangi *clutter* visual dan mempercepat proses penginputan data dengan tata letak yang lebih intuitif ✨.
-- **Morning Charity Refresh** — Form Sedekah Subuh kini hadir dengan tema visual yang lebih menyejukkan dan selaras dengan dashboard premium, memotivasi pengguna untuk memulai hari dengan kebaikan.
+### 🛠️ Technical Improvements
+- **Hybrid Stream Logic** — Optimalisasi stream data yang menggabungkan penyimpanan lokal dan cloud secara otomatis tanpa jeda.
+- **RenderFlex Error Fix** — Memperbaiki error "Layout Overflow" pada daftar anggota keluarga dengan penyesuaian tinggi kontainer yang lebih proporsional (140px).
+- **Transaction Creator Badging** — Implementasi logic badge cerdas untuk membedakan catatan pribadi dan catatan yang dibuat oleh anggota keluarga lain secara visual.
 
-### 🌙 Stability: Theme Persistence & IQ
-- **Theme Persistence Engine** — Implementasi mesin penyimpanan preferensi tema yang lebih tangguh. Pilihan Dark/Light Mode kini terkunci aman dan tidak akan reset meskipun aplikasi ditutup paksa oleh sistem 🌙.
-- **Adaptive Lock Screen** — Sinkronisasi real-time layar PIN (Lock Screen) dengan tema sistem. Transisi antara cahaya dan gelap kini terjadi secara instan tanpa jeda visual demi keamanan yang estetik 🛡️.
-
-### 📊 Visualisasi Keuangan & Insight (Visual Analytics)
-- **Financial Activity Pulse** — Fitur baru untuk memantau frekuensi transaksi bulanan. Memberikan gambaran seberapa aktif Anda dalam mengelola uang setiap harinya dengan grafik frekuensi yang cerdas.
-- **Side-by-Side Bar Chart** — Transformasi grafik tren dari garis ke batang paralel. Memudahkan perbandingan volume Pemasukan vs Pengeluaran harian dengan kontras warna yang tegas dan informatif 📊.
-- **Horizontal Infinite Scroll** — Panel grafik kini mendukung scroll horizontal penuh 31 hari. Dilengkapi dengan Tooltip IQ yang menampilkan nominal presisi saat setiap batang diketuk secara interaktif.
-
-### 🛠️ Inclusive System: Demographic Expansion
-- **Universal Age Support** — Ekspansi kategori transaksi dan tabungan yang disesuaikan dengan kebutuhan spesifik berbagai kelompok usia untuk inklusivitas maksimal 🛠️:
-  - **Anak-anak & Remaja**: Fokus pada pendidikan finansial dini (Tabungan Mainan, Uang Jajan, Sekolah).
-  - **Siswa & Mahasiswa**: Kategori gaya hidup aktif (Kopi, Nongkrong, Kursus, Self-Improvement).
-  - **Pekerja & Freelance**: Manajemen arus kas profesional (Gaji Berjalan, Operasional, Dana Darurat).
-  - **Keluarga & IRT**: Optimalisasi kebutuhan rumah tangga (Belanja Bulanan, Zakat, Kebutuhan Anak).
-  - **Lansia & Pensiunan**: Kategori khusus kesehatan dan hobi masa tua yang bermakna.
-- **Zero White Screen Fix** — Perbaikan bug *layout overflow* dan "White Screen" saat pemilihan kategori kosong, menjamin aplikasi tetap stabil dalam kondisi input apapun 🛡️.
-- **Enhanced Tooltip IQ** — Informasi nominal transaksi yang muncul secara instan dan jelas saat batang grafik diketuk, memberikan transparansi data yang lebih baik.
-
-### 🚀 Technical & Production Build
-- **Github Action Production Optimization** — Peningkatan alur CI/CD untuk pembuatan *Production Build* yang lebih efisien dan terverifikasi secara otomatis.
-- **Resource Management IQ** — Optimasi penggunaan memori pada komponen grafik berat, memastikan navigasi tetap gegas dan responsif di berbagai spesifikasi perangkat.
+---
 
 ---
 

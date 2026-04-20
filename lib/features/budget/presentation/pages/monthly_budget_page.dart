@@ -159,19 +159,19 @@ class _MonthlyBudgetPageState extends ConsumerState<MonthlyBudgetPage> {
 
                 Expanded(
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(24, 12, 24, 100),
+                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 60),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // ── Month Selector ────────────────────────────────────
                         _buildMonthPicker(isDarkMode, dateDisplay),
                         
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 16),
 
                         // ── Premium Stats Card (Glassmorphism) ─────────────────
                         _buildPremiumStatsCard(isDarkMode, selectedMonthExpense, _budgetLimit, displayedProgress, formatter),
 
-                        const SizedBox(height: 32),
+                        const SizedBox(height: 20),
                         
                         // ── Set Limit Section ──────────────────────────────────
                         _buildSetLimitSection(isDarkMode, dateDisplay),
@@ -225,75 +225,83 @@ class _MonthlyBudgetPageState extends ConsumerState<MonthlyBudgetPage> {
   }
 
   Widget _buildPremiumStatsCard(bool isDarkMode, double spent, double limit, double progress, NumberFormat formatter) {
-    final statusColor = progress >= 0.9 ? Colors.redAccent : (progress >= 0.7 ? Colors.orangeAccent : AppColors.primaryLight);
+    // Red color used only if warning limit hit, otherwise strict mint green theme
+    final statusColor = progress >= 0.9 ? const Color(0xFFE53935) : AppColors.primary;
     
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
       decoration: BoxDecoration(
         color: isDarkMode ? AppColors.surfaceDark.withValues(alpha: 0.8) : Colors.white,
-        borderRadius: BorderRadius.circular(32),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDarkMode ? 0.3 : 0.08),
-            blurRadius: 30,
-            offset: const Offset(0, 15),
+            color: Colors.black.withValues(alpha: isDarkMode ? 0.3 : 0.05),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
           ),
         ],
-        border: isDarkMode ? Border.all(color: Colors.white.withValues(alpha: 0.05)) : null,
+        border: isDarkMode ? Border.all(color: Colors.white.withValues(alpha: 0.05)) : Border.all(color: AppColors.primary.withValues(alpha: 0.1)),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'TOTAL PENGELUARAN',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 2,
-              color: isDarkMode ? Colors.white38 : Colors.grey.shade400,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'TOTAL PENGELUARAN',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.5,
+                  color: isDarkMode ? Colors.white54 : Colors.black45,
+                ),
+              ),
+              Icon(Icons.pie_chart_rounded, size: 18, color: AppColors.primary.withValues(alpha: 0.6)),
+            ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(
               formatter.format(spent),
               style: TextStyle(
-                fontSize: 36,
+                fontSize: 32,
                 fontWeight: FontWeight.w900,
-                color: isDarkMode ? Colors.white : AppColors.primaryDark,
+                color: isDarkMode ? Colors.white : Colors.black87,
                 letterSpacing: -1,
               ),
             ),
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 20),
           
           // ── Custom Premium Progress Bar ────────────────────────────────
           Stack(
             children: [
               Container(
-                height: 14,
+                height: 10,
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100,
+                  color: isDarkMode ? Colors.white.withValues(alpha: 0.1) : Colors.grey.shade200,
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
               AnimatedContainer(
                 duration: const Duration(milliseconds: 800),
                 curve: Curves.easeOutCubic,
-                height: 14,
-                width: MediaQuery.of(context).size.width * 0.7 * progress, // Approximation for simple animation
+                height: 10,
+                width: MediaQuery.of(context).size.width * 0.7 * progress,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [statusColor, statusColor.withValues(alpha: 0.6)],
+                    colors: [statusColor, statusColor.withValues(alpha: 0.7)],
                   ),
                   borderRadius: BorderRadius.circular(10),
                   boxShadow: [
                     BoxShadow(
-                      color: statusColor.withValues(alpha: 0.4),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
+                      color: statusColor.withValues(alpha: 0.3),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
                     ),
                   ],
                 ),
@@ -301,24 +309,24 @@ class _MonthlyBudgetPageState extends ConsumerState<MonthlyBudgetPage> {
             ],
           ),
           
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Terpakai', style: TextStyle(fontSize: 11, color: isDarkMode ? Colors.white38 : Colors.grey)),
+                  Text('Terpakai', style: TextStyle(fontSize: 11, color: isDarkMode ? Colors.white38 : Colors.black54)),
                   Text('${(progress * 100).toStringAsFixed(1)}%', 
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: statusColor)),
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: statusColor)),
                 ],
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text('Sisa Limit', style: TextStyle(fontSize: 11, color: isDarkMode ? Colors.white38 : Colors.grey)),
+                  Text('Sisa Limit', style: TextStyle(fontSize: 11, color: isDarkMode ? Colors.white38 : Colors.black54)),
                   Text(formatter.format((limit - spent).clamp(0, double.infinity)), 
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : Colors.black87)),
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : Colors.black87)),
                 ],
               ),
             ],
@@ -335,122 +343,105 @@ class _MonthlyBudgetPageState extends ConsumerState<MonthlyBudgetPage> {
         Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
                 color: AppColors.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(8),
               ),
-              child: const Icon(Icons.settings_suggest_rounded, color: AppColors.primary, size: 20),
+              child: const Icon(Icons.settings_suggest_rounded, color: AppColors.primary, size: 16),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 8),
             Text(
               'Atur Limit Baru',
               style: TextStyle(
-                fontSize: 18, 
+                fontSize: 16, 
                 fontWeight: FontWeight.bold, 
-                color: isDarkMode ? Colors.white : AppColors.primaryDark,
+                color: isDarkMode ? Colors.white : Colors.black87,
               ),
             ),
           ],
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 12),
         
         // ── Standardized Target Input ──
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 4, bottom: 8),
-              child: Text(
-                'TARGET MAKSIMAL ($dateDisplay)',
-                style: TextStyle(
-                  fontSize: 11, 
-                  fontWeight: FontWeight.bold, 
-                  color: (isDarkMode ? Colors.white : AppColors.primaryDark).withValues(alpha: 0.5),
-                  letterSpacing: 1.2
-                ),
-              ),
+        TextFormField(
+          controller: _budgetController,
+          keyboardType: TextInputType.number,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: isDarkMode ? Colors.white : Colors.black87,
+          ),
+          onChanged: (value) {
+            final number = value.replaceAll(RegExp(r'[^0-9]'), '');
+            if (number.isEmpty) {
+              _budgetController.clear();
+              return;
+            }
+            final formatted = NumberFormat.currency(locale: 'id_ID', symbol: '', decimalDigits: 0).format(int.parse(number));
+            _budgetController.value = TextEditingValue(
+              text: formatted,
+              selection: TextSelection.collapsed(offset: formatted.length),
+            );
+          },
+          decoration: InputDecoration(
+            hintText: '0',
+            hintStyle: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: isDarkMode ? Colors.white24 : Colors.black26,
             ),
-            TextFormField(
-              controller: _budgetController,
-              keyboardType: TextInputType.number,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: isDarkMode ? Colors.white : AppColors.primaryDark,
-              ),
-              onChanged: (value) {
-                final number = value.replaceAll(RegExp(r'[^0-9]'), '');
-                if (number.isEmpty) {
-                  _budgetController.clear();
-                  return;
-                }
-                final formatted = NumberFormat.currency(locale: 'id_ID', symbol: '', decimalDigits: 0).format(int.parse(number));
-                _budgetController.value = TextEditingValue(
-                  text: formatted,
-                  selection: TextSelection.collapsed(offset: formatted.length),
-                );
-              },
-              decoration: InputDecoration(
-                hintText: '0',
-                hintStyle: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: isDarkMode ? Colors.white10 : Colors.grey.shade300,
-                ),
-                prefixIcon: Container(
-                  padding: const EdgeInsets.only(left: 20, right: 8),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.account_balance_wallet_rounded, color: AppColors.primary, size: 20),
-                      SizedBox(width: 8),
-                      Text(
-                        'Rp',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.primary,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
+            prefixIcon: Container(
+              padding: const EdgeInsets.only(left: 16, right: 8),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.account_balance_wallet_rounded, color: AppColors.primary, size: 18),
+                  SizedBox(width: 8),
+                  Text(
+                    'Rp',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary,
+                      fontSize: 15,
+                    ),
                   ),
-                ),
-                filled: true,
-                fillColor: isDarkMode ? Colors.white.withValues(alpha: 0.05) : AppColors.background,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide.none,
-                ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                ],
               ),
             ),
-          ],
+            filled: true,
+            fillColor: isDarkMode ? Colors.white.withValues(alpha: 0.05) : AppColors.background,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide.none,
+            ),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          ),
         ),
         
-        const SizedBox(height: 24),
+        const SizedBox(height: 16),
         
         // ── Save Button ──
         SizedBox(
           width: double.infinity,
-          height: 60,
+          height: 50,
           child: ElevatedButton(
             onPressed: _saveBudget,
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-              elevation: 8,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              elevation: 4,
               shadowColor: AppColors.primary.withValues(alpha: 0.4),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.check_circle_outline_rounded, size: 22),
-                const SizedBox(width: 12),
+                const Icon(Icons.check_circle_outline_rounded, size: 18),
+                const SizedBox(width: 8),
                 Text(
-                  'Simpan Target $dateDisplay', 
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  'Simpan Target', 
+                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, letterSpacing: 0.5),
                 ),
               ],
             ),

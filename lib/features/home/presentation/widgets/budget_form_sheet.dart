@@ -228,9 +228,10 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
                         Text(
                           isEditing ? 'Perbarui Budget' : 'Budget Baru',
                           style: TextStyle(
-                            fontSize: 20, 
+                            fontSize: 22, 
                             fontWeight: FontWeight.bold,
-                            color: isDarkMode ? Colors.white : AppColors.primaryDark,
+                            color: isDarkMode ? Colors.white : Colors.black87,
+                            letterSpacing: -0.5,
                           ),
                         ),
                         Text(
@@ -270,6 +271,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
                   // Group Dropdown
                   DropdownButtonFormField<String>(
                     value: _selectedGroup,
+                    isExpanded: true,
                     dropdownColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
                     style: TextStyle(color: isDarkMode ? Colors.white : Colors.black87, fontWeight: FontWeight.w600),
                     decoration: InputDecoration(
@@ -282,7 +284,9 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
                     ),
                     items: groupedCategories.keys.map((group) => DropdownMenuItem(
                       value: group,
-                      child: Text(group, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                      child: Text(group, 
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
                     )).toList(),
                     onChanged: (val) {
                       if (val != null) {
@@ -298,6 +302,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
                   // Category Dropdown
                   DropdownButtonFormField<String>(
                     value: _selectedCategory,
+                    isExpanded: true,
                     dropdownColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
                     style: TextStyle(color: isDarkMode ? Colors.white : Colors.black87, fontWeight: FontWeight.w600),
                     decoration: InputDecoration(
@@ -313,7 +318,9 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
                     ),
                     items: groupedCategories[_selectedGroup]!.map((cat) => DropdownMenuItem(
                       value: cat.label,
-                      child: Text(cat.label, style: const TextStyle(fontSize: 13)),
+                      child: Text(cat.label, 
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 13)),
                     )).toList(),
                     onChanged: (val) {
                       if (val != null) {

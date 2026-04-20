@@ -86,17 +86,17 @@ class DebtListPage extends ConsumerWidget {
     final paidDebts = filteredDebts.where((d) => d.isPaid).toList();
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 100),
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 80),
       children: [
         if (unpaidDebts.isNotEmpty) ...[
-          _buildSectionHeader('Belum Lunas', Colors.orange, isDarkMode),
-          const SizedBox(height: 12),
+          _buildSectionHeader('Belum Lunas', AppColors.primary, isDarkMode),
+          const SizedBox(height: 8),
           ...unpaidDebts.map((d) => _buildDebtTile(context, ref, d, isDarkMode)),
         ],
         if (paidDebts.isNotEmpty) ...[
-          if (unpaidDebts.isNotEmpty) const SizedBox(height: 32),
-          _buildSectionHeader('Sudah Lunas', Colors.green, isDarkMode),
-          const SizedBox(height: 12),
+          if (unpaidDebts.isNotEmpty) const SizedBox(height: 24),
+          _buildSectionHeader('Sudah Lunas', AppColors.primary, isDarkMode),
+          const SizedBox(height: 8),
           ...paidDebts.map((d) => _buildDebtTile(context, ref, d, isDarkMode)),
         ],
       ],
@@ -165,7 +165,7 @@ class DebtListPage extends ConsumerWidget {
   Widget _buildDebtTile(
       BuildContext context, WidgetRef ref, DebtModel debt, bool isDarkMode) {
     final isHutang = debt.type == DebtType.hutang;
-    final color = isHutang ? Colors.red : Colors.green;
+    final color = isHutang ? const Color(0xFFE53935) : AppColors.primary;
     final theme = Theme.of(context);
 
     return Container(
@@ -190,23 +190,23 @@ class DebtListPage extends ConsumerWidget {
         child: InkWell(
           onTap: () => _showOptions(context, ref, debt, isDarkMode),
           child: Padding(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(16),
             child: Row(
               children: [
                 Container(
-                  width: 48,
-                  height: 48,
+                  width: 44,
+                  height: 44,
                   decoration: BoxDecoration(
                     color: color.withValues(alpha: isDarkMode ? 0.15 : 0.08),
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(14),
                   ),
                   child: Icon(
                     isHutang ? Icons.call_made_rounded : Icons.call_received_rounded,
                     color: color,
-                    size: 24,
+                    size: 22,
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -214,17 +214,17 @@ class DebtListPage extends ConsumerWidget {
                       Text(
                         debt.contactName,
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 15,
                           fontWeight: FontWeight.bold,
                           color: isDarkMode ? Colors.white : Colors.black87,
                           decoration: debt.isPaid ? TextDecoration.lineThrough : null,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 2),
                       Text(
                         debt.title,
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: 11,
                           color: isDarkMode ? Colors.white38 : Colors.black45,
                         ),
                       ),
@@ -233,15 +233,15 @@ class DebtListPage extends ConsumerWidget {
                         Row(
                           children: [
                             Icon(Icons.event_rounded,
-                                size: 12,
-                                color: isDarkMode ? Colors.white24 : Colors.grey),
+                                size: 11,
+                                color: isDarkMode ? Colors.white : Colors.black54),
                             const SizedBox(width: 4),
                             Text(
                               DateFormat('dd MMM yyyy').format(debt.dueDate!),
                               style: TextStyle(
-                                fontSize: 11,
+                                fontSize: 10,
                                 fontWeight: FontWeight.bold,
-                                color: isDarkMode ? Colors.white24 : Colors.grey,
+                                color: isDarkMode ? Colors.white : Colors.black54,
                               ),
                             ),
                           ],
@@ -257,7 +257,7 @@ class DebtListPage extends ConsumerWidget {
                     Text(
                       _formatRupiah(debt.amount),
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 15,
                         fontWeight: FontWeight.bold,
                         color: debt.isPaid
                             ? (isDarkMode ? Colors.white24 : Colors.grey.shade400)
@@ -269,7 +269,7 @@ class DebtListPage extends ConsumerWidget {
                         margin: const EdgeInsets.only(top: 4),
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
-                          color: Colors.green.withValues(alpha: 0.1),
+                          color: AppColors.primary.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: const Text(
@@ -277,7 +277,7 @@ class DebtListPage extends ConsumerWidget {
                           style: TextStyle(
                             fontSize: 9,
                             fontWeight: FontWeight.bold,
-                            color: Colors.green,
+                            color: AppColors.primary,
                           ),
                         ),
                       ),
@@ -317,7 +317,7 @@ class DebtListPage extends ConsumerWidget {
               _buildOptionTile(
                 icon: Icons.check_circle_outline_rounded,
                 label: 'Tandai Sudah Lunas',
-                color: Colors.green,
+                color: AppColors.primary,
                 isDarkMode: isDarkMode,
                 onTap: () {
                   Navigator.pop(context);
@@ -327,7 +327,7 @@ class DebtListPage extends ConsumerWidget {
             _buildOptionTile(
               icon: Icons.edit_outlined,
               label: 'Edit Catatan',
-              color: Colors.blue,
+              color: AppColors.primary,
               isDarkMode: isDarkMode,
               onTap: () {
                 Navigator.pop(context);
@@ -337,7 +337,7 @@ class DebtListPage extends ConsumerWidget {
             _buildOptionTile(
               icon: Icons.delete_outline_rounded,
               label: 'Hapus Catatan',
-              color: Colors.red,
+              color: const Color(0xFFE53935),
               isDarkMode: isDarkMode,
               onTap: () {
                 Navigator.pop(context);

@@ -72,5 +72,7 @@
 	<string>Kami membutuhkan akses kamera untuk memindai struk belanja</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Kami membutuhkan akses galeri untuk mengunggah struk belanja</string>
+	<key>NSContactsUsageDescription</key>
+	<string>Kami membutuhkan akses kontak untuk memilih nama peminjam atau pemberi utang secara otomatis.</string>
 </dict>
 </plist>

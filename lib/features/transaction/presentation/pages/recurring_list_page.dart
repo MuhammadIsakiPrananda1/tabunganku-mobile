@@ -110,7 +110,11 @@ class _RecurringListPageState extends ConsumerState<RecurringListPage> {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  const Text('Frekuensi', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
+                  Text('Frekuensi',
+                      style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white70 : Colors.black54)),
                   const SizedBox(height: 8),
                   Row(
                     children: RecurringFrequency.values.map((f) {
@@ -232,7 +236,11 @@ class _RecurringListPageState extends ConsumerState<RecurringListPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(item.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                Text('${item.frequency.name.toUpperCase()} • ${_formatRupiah(item.amount)}', style: const TextStyle(color: Colors.grey, fontSize: 11)),
+                Text(
+                    '${item.frequency.name.toUpperCase()} • ${_formatRupiah(item.amount)}',
+                    style: TextStyle(
+                        color: isDark ? Colors.white38 : Colors.black54,
+                        fontSize: 11)),
               ],
             ),
           ),

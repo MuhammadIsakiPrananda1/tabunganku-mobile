@@ -54,7 +54,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           context,
           permission: Permission.camera,
           title: 'Kamera',
-          description: 'Aplikasi membutuhkan akses kamera untuk mengambil foto profil baru Anda secara langsung.',
+          description:
+              'Aplikasi membutuhkan akses kamera untuk mengambil foto profil baru Anda secara langsung.',
           icon: Icons.camera_alt_rounded,
         );
       } else {
@@ -62,7 +63,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           context,
           permission: Permission.photos,
           title: 'Galeri',
-          description: 'Aplikasi membutuhkan akses galeri untuk memilih foto profil terbaik dari koleksi foto Anda.',
+          description:
+              'Aplikasi membutuhkan akses galeri untuk memilih foto profil terbaik dari koleksi foto Anda.',
           icon: Icons.photo_library_rounded,
         );
       }
@@ -675,7 +677,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     return Expanded(
       child: Container(
         height: 110, // Fixed height kept as original
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8), // Reduced vertical padding from 16 to 10
+        padding: const EdgeInsets.symmetric(
+            vertical: 10,
+            horizontal: 8), // Reduced vertical padding from 16 to 10
         decoration: BoxDecoration(
           color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(24),
@@ -1055,7 +1059,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       builder: (context) => AlertDialog(
         title: const Text('Pusat Bantuan'),
         content: const Text(
-            'Ada kendala? Hubungi tim support kami melalui email support@neverlandstudio.com atau kunjungi website kami.'),
+            'Ada kendala? Hubungi tim support kami melalui email Arlianto032@gmail.com atau kunjungi website kami.'),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(context),

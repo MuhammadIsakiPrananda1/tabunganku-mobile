@@ -404,6 +404,18 @@ class AppCategories {
       color: Color(0xFF2E7D32), // Dark Green
     ),
     TransactionCategory(
+      label: 'Rapel Gaji / Kekurangan Gaji',
+      icon: Icons.history_rounded,
+      group: 'Pekerjaan',
+      color: Color(0xFF1B5E20), // Darker Green
+    ),
+    TransactionCategory(
+      label: 'Tunjangan Jabatan / Profesi',
+      icon: Icons.badge_rounded,
+      group: 'Pekerjaan',
+      color: Color(0xFF388E3C), // Green
+    ),
+    TransactionCategory(
       label: 'THR (Tunjangan Hari Raya)',
       icon: Icons.celebration_rounded,
       group: 'Pekerjaan',
@@ -456,37 +468,55 @@ class AppCategories {
     TransactionCategory(
       label: 'Hasil Jualan / Omzet Produk',
       icon: Icons.storefront_rounded,
-      group: 'Bisnis',
+      group: 'Bisnis & Digital',
       color: Color(0xFF00796B), // Teal
     ),
     TransactionCategory(
       label: 'Fee Jasa / Proyek Freelance',
       icon: Icons.laptop_mac_rounded,
-      group: 'Bisnis',
+      group: 'Bisnis & Digital',
       color: Color(0xFF5E35B1), // Deep Purple
+    ),
+    TransactionCategory(
+      label: 'Jasa Kreatif (Desain/Writing/Coding)',
+      icon: Icons.brush_rounded,
+      group: 'Bisnis & Digital',
+      color: Color(0xFF673AB7), // Deep Purple
+    ),
+    TransactionCategory(
+      label: 'Monetisasi Konten / Fans (Tip/Sawer)',
+      icon: Icons.favorite_rounded,
+      group: 'Bisnis & Digital',
+      color: Color(0xFFD81B60), // Pink
+    ),
+    TransactionCategory(
+      label: 'Jual Produk Digital (Ebook/Kursus)',
+      icon: Icons.auto_stories_rounded,
+      group: 'Bisnis & Digital',
+      color: Color(0xFF8E24AA), // Purple
     ),
     TransactionCategory(
       label: 'Konsultasi & Pengajaran',
       icon: Icons.school_rounded,
-      group: 'Bisnis',
+      group: 'Bisnis & Digital',
       color: Color(0xFF455A64), // Blue Grey
     ),
     TransactionCategory(
       label: 'Sharing Profit / Keuntungan Usaha',
       icon: Icons.monetization_on_rounded,
-      group: 'Bisnis',
+      group: 'Bisnis & Digital',
       color: Color(0xFFF57C00), // Orange
     ),
     TransactionCategory(
       label: 'Affiliate & Dropship',
       icon: Icons.hub_rounded,
-      group: 'Bisnis',
+      group: 'Bisnis & Digital',
       color: Color(0xFFC2185B), // Pink
     ),
     TransactionCategory(
       label: 'AdSense & Endorsement',
       icon: Icons.campaign_rounded,
-      group: 'Bisnis',
+      group: 'Bisnis & Digital',
       color: Color(0xFFE91E63), // Pink 500
     ),
 
@@ -494,112 +524,136 @@ class AppCategories {
     TransactionCategory(
       label: 'Dividen Saham',
       icon: Icons.trending_up_rounded,
-      group: 'Investasi',
+      group: 'Investasi & Pasif',
       color: Color(0xFF1B5E20), // Darker Green
+    ),
+    TransactionCategory(
+      label: 'Profit Trading (Crypto/Saham/Forex)',
+      icon: Icons.currency_exchange_rounded,
+      group: 'Investasi & Pasif',
+      color: Color(0xFF2E7D32), // Green
+    ),
+    TransactionCategory(
+      label: 'Staking / Yield Farming',
+      icon: Icons.account_balance_wallet_rounded,
+      group: 'Investasi & Pasif',
+      color: Color(0xFF009688), // Teal
     ),
     TransactionCategory(
       label: 'Bunga Deposito / Tabungan',
       icon: Icons.account_balance_rounded,
-      group: 'Investasi',
+      group: 'Investasi & Pasif',
       color: Color(0xFF0D47A1), // Darker Blue
     ),
     TransactionCategory(
       label: 'Kupon Obligasi / SBN',
       icon: Icons.description_rounded,
-      group: 'Investasi',
+      group: 'Investasi & Pasif',
       color: Color(0xFF00838F), // Dark Cyan
     ),
     TransactionCategory(
       label: 'Sewa Properti (Kost/Rumah)',
       icon: Icons.home_work_rounded,
-      group: 'Investasi',
+      group: 'Investasi & Pasif',
       color: Color(0xFF6D4C41), // Brown
     ),
     TransactionCategory(
       label: 'Sewa Kendaraan',
       icon: Icons.directions_car_rounded,
-      group: 'Investasi',
+      group: 'Investasi & Pasif',
       color: Color(0xFF455A64), // Blue Grey
     ),
     TransactionCategory(
       label: 'Profit Reksadana / Emas',
       icon: Icons.savings_rounded,
-      group: 'Investasi',
+      group: 'Investasi & Pasif',
       color: Color(0xFFF9A825), // Yellow 800
+    ),
+    TransactionCategory(
+      label: 'Capital Gain / Jual Aset',
+      icon: Icons.sell_rounded,
+      group: 'Investasi & Pasif',
+      color: Color(0xFFE65100), // Deep Orange 900
     ),
     TransactionCategory(
       label: 'Royalti Karya / Hak Cipta',
       icon: Icons.auto_stories_rounded,
-      group: 'Investasi',
+      group: 'Investasi & Pasif',
       color: Color(0xFFAD1457), // Pink 800
     ),
 
     // --- SOSIAL, HADIAH & HIBAH ---
     TransactionCategory(
+      label: 'Pengembalian Hutang (Teman Bayar)',
+      icon: Icons.handshake_rounded,
+      group: 'Sosial & Hadiah',
+      color: Color(0xFF2E7D32), // Green
+    ),
+    TransactionCategory(
       label: 'Uang Jajan Harian (Sekolah)',
       icon: Icons.payments_rounded,
-      group: 'Sosial',
+      group: 'Sosial & Hadiah',
       color: Color(0xFF43A047), // Green
     ),
     TransactionCategory(
       label: 'Uang Saku Mingguan / Bulanan',
       icon: Icons.account_balance_wallet_rounded,
-      group: 'Sosial',
+      group: 'Sosial & Hadiah',
       color: Color(0xFF00ACC1), // Cyan
     ),
     TransactionCategory(
       label: 'Hadiah Prestasi (Nilai / Ranking)',
       icon: Icons.stars_rounded,
-      group: 'Sosial',
+      group: 'Sosial & Hadiah',
       color: Color(0xFFFBC02D), // Yellow
     ),
     TransactionCategory(
       label: 'Pemberian Orang Tua / Keluarga',
       icon: Icons.family_restroom_rounded,
-      group: 'Sosial',
+      group: 'Sosial & Hadiah',
       color: Color(0xFFF06292), // Light Pink
     ),
     TransactionCategory(
-      label: 'Hasil Jualan ke Teman (Stiker, dsb)',
-      icon: Icons.store_rounded,
-      group: 'Sosial',
-      color: Color(0xFF00897B), // Teal
-    ),
-    TransactionCategory(
       label: 'Beasiswa (Scholarship)',
       icon: Icons.workspace_premium_rounded,
-      group: 'Sosial',
-      color: Color(0xFF7986CB), // Indigo 300
-    ),
-    TransactionCategory(
-      label: 'Beasiswa (Scholarship)',
-      icon: Icons.workspace_premium_rounded,
-      group: 'Sosial',
+      group: 'Sosial & Hadiah',
       color: Color(0xFF7986CB), // Indigo 300
     ),
     TransactionCategory(
       label: 'Kado / Hadiah Uang',
       icon: Icons.card_giftcard_rounded,
-      group: 'Sosial',
+      group: 'Sosial & Hadiah',
       color: Color(0xFFFF8A65), // Deep Orange 300
     ),
     TransactionCategory(
       label: 'Angpao / Salam Tempel',
       icon: Icons.mail_rounded,
-      group: 'Sosial',
+      group: 'Sosial & Hadiah',
       color: Color(0xFFE53935), // Red 600
     ),
     TransactionCategory(
       label: 'Menang Lomba / Giveaway',
       icon: Icons.emoji_events_rounded,
-      group: 'Sosial',
+      group: 'Sosial & Hadiah',
       color: Color(0xFFFFD54F), // Amber 300
+    ),
+    TransactionCategory(
+      label: 'Santunan / Donasi Diterima',
+      icon: Icons.volunteer_activism_rounded,
+      group: 'Sosial & Hadiah',
+      color: Color(0xFF009688), // Teal
     ),
     TransactionCategory(
       label: 'Warisan / Hibah / Santunan',
       icon: Icons.handshake_rounded,
-      group: 'Sosial',
+      group: 'Sosial & Hadiah',
       color: Color(0xFF8D6E63), // Brown 400
+    ),
+    TransactionCategory(
+      label: 'Uang Temuan (Rejeki Nomplok)',
+      icon: Icons.savings_rounded,
+      group: 'Sosial & Hadiah',
+      color: Color(0xFFFBC02D), // Yellow
     ),
 
     // --- LAIN-LAIN & REFUND ---
@@ -622,6 +676,12 @@ class AppCategories {
       color: Color(0xFF7CB342), // Light Green 600
     ),
     TransactionCategory(
+      label: 'Jual Sampah / Daur Ulang',
+      icon: Icons.recycling_rounded,
+      group: 'Lainnya',
+      color: Color(0xFF388E3C), // Green
+    ),
+    TransactionCategory(
       label: 'Klaim Asuransi / BPJS',
       icon: Icons.health_and_safety_rounded,
       group: 'Lainnya',
@@ -638,6 +698,24 @@ class AppCategories {
       icon: Icons.request_quote_rounded,
       group: 'Lainnya',
       color: Color(0xFF5E35B1), // Deep Purple 600
+    ),
+    TransactionCategory(
+      label: 'Hadiah Undian / Jackpot',
+      icon: Icons.workspace_premium_rounded,
+      group: 'Lainnya',
+      color: Color(0xFFFFA000), // Amber
+    ),
+    TransactionCategory(
+      label: 'Kompensasi / Ganti Rugi',
+      icon: Icons.gavel_rounded,
+      group: 'Lainnya',
+      color: Color(0xFF455A64), // Blue Grey
+    ),
+    TransactionCategory(
+      label: 'Bonus Referral / Sign-up',
+      icon: Icons.add_reaction_rounded,
+      group: 'Lainnya',
+      color: Color(0xFFD81B60), // Pink
     ),
     TransactionCategory(
       label: otherLabel,

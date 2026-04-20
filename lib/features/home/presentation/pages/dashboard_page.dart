@@ -3,6 +3,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -32,6 +33,10 @@ import 'package:tabunganku/features/home/presentation/widgets/home_tab_view.dart
 import 'package:tabunganku/providers/notification_provider.dart';
 import 'package:tabunganku/features/home/presentation/widgets/notification_sheet.dart';
 import 'package:tabunganku/core/constants/transaction_categories.dart';
+import 'package:tabunganku/providers/morning_charity_provider.dart';
+import 'package:tabunganku/providers/bills_provider.dart';
+import 'package:tabunganku/models/bill_model.dart';
+import 'package:tabunganku/features/home/presentation/widgets/connectivity_guard.dart';
 
 class DashboardPage extends ConsumerStatefulWidget {
   const DashboardPage({super.key});
@@ -151,42 +156,44 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             ),
             const SizedBox(width: 16),
             if (_currentIndex != 3)
-              const FittedBox(
+              FittedBox(
                 fit: BoxFit.scaleDown,
-                child: SmartDigitalClock(),
+                child: SmartDigitalClock(isDarkMode: isDarkMode),
               ),
           ],
         ),
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: Consumer(
-              builder: (context, ref, child) {
-                final unreadCountAsync =
-                    ref.watch(unreadNotificationsCountProvider);
-                return Badge(
-                  label: unreadCountAsync.maybeWhen(
-                    data: (count) => count > 0 ? Text(count.toString()) : null,
-                    orElse: () => null,
-                  ),
-                  isLabelVisible: unreadCountAsync.maybeWhen(
-                    data: (count) => count > 0,
-                    orElse: () => false,
-                  ),
-                  backgroundColor: Colors.redAccent,
-                  offset: const Offset(-4, 4),
-                  child: IconButton(
-                    onPressed: _showNotificationSheet,
-                    icon: Icon(
-                      Icons.notifications_none_rounded,
-                      color: isDarkMode ? Colors.white70 : Colors.black87,
-                      size: 28,
+          if (_currentIndex == 0)
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: Consumer(
+                builder: (context, ref, child) {
+                  final unreadCountAsync =
+                      ref.watch(unreadNotificationsCountProvider);
+                  return Badge(
+                    label: unreadCountAsync.maybeWhen(
+                      data: (count) =>
+                          count > 0 ? Text(count.toString()) : null,
+                      orElse: () => null,
                     ),
-                  ),
-                );
-              },
+                    isLabelVisible: unreadCountAsync.maybeWhen(
+                      data: (count) => count > 0,
+                      orElse: () => false,
+                    ),
+                    backgroundColor: const Color(0xFF1DA462),
+                    offset: const Offset(-4, 4),
+                    child: IconButton(
+                      onPressed: _showNotificationSheet,
+                      icon: const Icon(
+                        Icons.notifications_none_rounded,
+                        color: Color(0xFF1DA462),
+                        size: 28,
+                      ),
+                    ),
+                  );
+                },
+              ),
             ),
-          ),
         ],
       ),
       body: IndexedStack(
@@ -255,7 +262,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                         height: 64,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          gradient: LinearGradient(
+                          gradient: const LinearGradient(
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                             colors: [AppColors.primaryLight, AppColors.primary],
@@ -556,12 +563,12 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                           target.name,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                              fontSize: 24,
+                          style: GoogleFonts.comicNeue(
+                              fontSize: 26,
                               fontWeight: FontWeight.bold,
                               color: isDarkMode
                                   ? Colors.white
-                                  : Colors.teal.shade900),
+                                  : AppColors.primaryDark),
                         ),
                         const SizedBox(height: 4),
                         Container(
@@ -581,9 +588,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                             isCompleted
                                 ? 'TARGET TERCAPAI 🎊'
                                 : 'SEDANG BERJALAN 🚀',
-                            style: const TextStyle(
+                            style: GoogleFonts.comicNeue(
                                 color: Colors.white,
-                                fontSize: 10,
+                                fontSize: 11,
                                 fontWeight: FontWeight.bold),
                           ),
                         ),
@@ -608,7 +615,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                         strokeWidth: 12,
                         backgroundColor: isDarkMode
                             ? Colors.white.withValues(alpha: 0.05)
-                            : Colors.teal.shade50,
+                            : AppColors.primary.withValues(alpha: 0.05),
                         valueColor: AlwaysStoppedAnimation<Color>(isCompleted
                             ? Colors.green.shade400
                             : AppColors.primary),
@@ -619,22 +626,21 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                       children: [
                         Text(
                           '${(progress * 100).toInt()}%',
-                          style: TextStyle(
-                              fontSize: 32,
+                          style: GoogleFonts.comicNeue(
+                              fontSize: 36,
                               fontWeight: FontWeight.bold,
                               color: isDarkMode
                                   ? Colors.white
-                                  : Colors.teal.shade900),
+                                  : AppColors.primaryDark),
                         ),
                         Text(
-                          'Progress',
-                          style: TextStyle(
-                              fontSize: 12,
+                          'Tercapai',
+                          style: GoogleFonts.comicNeue(
+                              fontSize: 14,
                               fontWeight: FontWeight.bold,
                               color: isDarkMode
                                   ? Colors.white54
-                                  : Colors.teal.shade800
-                                      .withValues(alpha: 0.4)),
+                                  : AppColors.primary.withValues(alpha: 0.4)),
                         ),
                       ],
                     ),
@@ -646,7 +652,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
 
               // Detailed Stats Grid
               _buildDetailRow(
-                  'Target Nominal',
+                  'Nominal Target',
                   _formatRupiah(target.targetAmount),
                   Icons.flag_rounded,
                   Colors.teal),
@@ -698,15 +704,15 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                         _showAddEditTargetDialog(target: target);
                       },
                       icon: const Icon(Icons.edit_rounded, size: 18),
-                      label: const Text('Ubah Target',
-                          style: TextStyle(fontWeight: FontWeight.bold)),
+                      label: Text('Ubah Target',
+                          style: GoogleFonts.comicNeue(
+                              fontWeight: FontWeight.bold)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: isDarkMode
-                            ? Colors.teal.shade900.withValues(alpha: 0.2)
-                            : Colors.teal.shade50,
-                        foregroundColor: isDarkMode
-                            ? Colors.teal.shade300
-                            : AppColors.primary,
+                            ? AppColors.primary.withValues(alpha: 0.05)
+                            : AppColors.primary.withValues(alpha: 0.03),
+                        foregroundColor:
+                            isDarkMode ? Colors.white : AppColors.primary,
                         elevation: 0,
                         minimumSize: const Size(0, 56),
                         shape: RoundedRectangleBorder(
@@ -722,8 +728,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                         await _deleteSavingTarget(target.id);
                       },
                       icon: const Icon(Icons.delete_outline_rounded, size: 18),
-                      label: const Text('Hapus',
-                          style: TextStyle(fontWeight: FontWeight.bold)),
+                      label: Text('Hapus',
+                          style: GoogleFonts.comicNeue(
+                              fontWeight: FontWeight.bold)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: isDarkMode
                             ? Colors.red.shade900.withValues(alpha: 0.2)
@@ -760,14 +767,16 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         const SizedBox(width: 16),
         Expanded(
             child: Text(label,
-                style: TextStyle(
-                    fontWeight: FontWeight.w600,
+                style: GoogleFonts.comicNeue(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
                     color: isDarkMode ? Colors.white38 : Colors.black54))),
         const SizedBox(width: 8),
         Text(value,
-            style: TextStyle(
+            style: GoogleFonts.comicNeue(
                 fontWeight: FontWeight.bold,
-                color: isDarkMode ? Colors.white : Colors.teal.shade900)),
+                fontSize: 13,
+                color: isDarkMode ? Colors.white : AppColors.primaryDark)),
       ],
     );
   }
@@ -785,125 +794,160 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     final amountController = TextEditingController(text: '');
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
+    bool prevKeyboardVisible = false;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom + 32,
-          top: 32,
-          left: 24,
-          right: 24,
-        ),
-        decoration: BoxDecoration(
-          color: isDarkMode ? AppColors.surfaceDark : Colors.white,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                  color: Colors.grey.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(2)),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setSheetState) {
+          final inset = MediaQuery.of(context).viewInsets.bottom;
+          final isKeyboardVisible = inset > 0;
+
+          if (prevKeyboardVisible && !isKeyboardVisible) {
+            FocusManager.instance.primaryFocus?.unfocus();
+          }
+          prevKeyboardVisible = isKeyboardVisible;
+
+          return Container(
+            padding: EdgeInsets.only(
+              bottom: inset + 32,
+              top: 32,
+              left: 24,
+              right: 24,
             ),
-            const SizedBox(height: 24),
-            TextField(
-              controller: amountController,
-              autofocus: true,
-              keyboardType: TextInputType.number,
-              inputFormatters: [_RibuanFormatter()],
-              textAlign: TextAlign.start,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: isDarkMode ? Colors.white : AppColors.primaryDark,
-              ),
-              decoration: InputDecoration(
-                labelText: 'Nominal Sedekah',
-                labelStyle: TextStyle(
-                    color: isDarkMode ? Colors.white38 : Colors.black45),
-                hintText: 'Masukkan Nominal',
-                hintStyle: TextStyle(
-                    color: isDarkMode ? Colors.white24 : Colors.black38),
-                prefixIcon: Container(
-                  padding: const EdgeInsets.only(left: 20, right: 12),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.wb_sunny_rounded,
-                          color: Colors.orange, size: 20),
-                      const SizedBox(width: 12),
-                      const Text('Rp',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.orange,
-                              fontSize: 14)),
-                    ],
+            decoration: BoxDecoration(
+              color: isDarkMode ? AppColors.surfaceDark : Colors.white,
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(32)),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                      color: Colors.grey.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(2)),
+                ),
+                const SizedBox(height: 20),
+                Text('JUMLAH SEDEKAH *',
+                    style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: isDarkMode ? Colors.white24 : Colors.black38,
+                        letterSpacing: 1.2)),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: amountController,
+                  autofocus: false,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [_RibuanFormatter()],
+                  textAlign: TextAlign.start,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: isDarkMode ? Colors.white : Colors.black,
+                  ),
+                  onEditingComplete: () => FocusScope.of(context).unfocus(),
+                  onTapOutside: (event) => FocusScope.of(context).unfocus(),
+                  decoration: InputDecoration(
+                    prefixIcon: const Padding(
+                      padding: EdgeInsets.only(left: 16, right: 8),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.volunteer_activism_rounded,
+                              color: Colors.red, size: 20),
+                          SizedBox(width: 8),
+                          Text(
+                            'Rp',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.red,
+                                fontSize: 18),
+                          ),
+                        ],
+                      ),
+                    ),
+                    hintText: '0',
+                    hintStyle: TextStyle(
+                      color: (isDarkMode ? Colors.white : Colors.red)
+                          .withValues(alpha: 0.4),
+                    ),
+                    filled: true,
+                    fillColor: isDarkMode
+                        ? Colors.white.withValues(alpha: 0.03)
+                        : AppColors.background,
+                    enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide(
+                            color: Colors.red.withValues(alpha: 0.5))),
+                    focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide:
+                            const BorderSide(color: Colors.red, width: 2)),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16)),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 16),
                   ),
                 ),
-                filled: true,
-                fillColor: isDarkMode
-                    ? Colors.white.withValues(alpha: 0.03)
-                    : AppColors.background,
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide.none),
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-              ),
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: () async {
-                  final amount = double.tryParse(
-                          amountController.text.replaceAll('.', '')) ??
-                      0;
-                  if (amount > 0) {
-                    final transaction = TransactionModel(
-                      id: DateTime.now().millisecondsSinceEpoch.toString(),
-                      title: 'Sedekah Subuh',
-                      description: 'Sedekah rutin harian',
-                      amount: amount,
-                      type: TransactionType.expense,
-                      date: DateTime.now(),
-                      category: 'Gift',
-                    );
-                    await ref
-                        .read(transactionServiceProvider)
-                        .addTransaction(transaction);
-                    if (mounted) {
-                      Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                        content:
-                            Text('Alhamdulillah, sedekah berhasil dicatat!'),
-                        backgroundColor: AppColors.primary,
-                      ));
-                    }
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16)),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      final amount = double.tryParse(
+                              amountController.text.replaceAll('.', '')) ??
+                          0;
+                      if (amount > 0) {
+                        final transaction = TransactionModel(
+                          id: DateTime.now().millisecondsSinceEpoch.toString(),
+                          title: 'Sedekah Subuh',
+                          description: 'Sedekah rutin harian',
+                          amount: amount,
+                          type: TransactionType.expense,
+                          date: DateTime.now(),
+                          category: 'Gift',
+                        );
+                        await ref
+                            .read(transactionServiceProvider)
+                            .addTransaction(transaction);
+                        if (context.mounted) {
+                          Navigator.pop(context);
+                          ScaffoldMessenger.of(context)
+                              .showSnackBar(const SnackBar(
+                            content: Text(
+                                'Alhamdulillah, sedekah berhasil dicatat!'),
+                            backgroundColor: AppColors.primary,
+                          ));
+                        }
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16)),
+                    ),
+                    child: const Text('Catat Sedekah',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                            letterSpacing: 0.5)),
+                  ),
                 ),
-                child: const Text('Catat Sedekah',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-              ),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
-
 
   Widget _buildSmartAllocationPlanner(double amount, bool isDarkMode) {
     if (amount <= 0) return const SizedBox.shrink();
@@ -1028,7 +1072,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
 
         // Auto-select "Biaya Admin Bank" if keywords match and user hasn't deviated much from basics
         if (adminKeywords.any((k) => text.contains(k))) {
-          final adminCat = 'Biaya Admin Bank';
+          const adminCat = 'Biaya Admin Bank';
           if (selectedCategory != adminCat) {
             sheetSetter?.call(() {
               selectedCategory = adminCat;
@@ -1062,10 +1106,26 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (sheetContext) {
+        bool prevKeyboardVisible = false;
         return StatefulBuilder(
           builder: (context, setSheetState) {
             sheetSetter = setSheetState;
             final inset = MediaQuery.of(context).viewInsets.bottom;
+            final isKeyboardVisible = inset > 0;
+
+            if (prevKeyboardVisible && !isKeyboardVisible) {
+              FocusManager.instance.primaryFocus?.unfocus();
+            }
+            prevKeyboardVisible = isKeyboardVisible;
+
+            // Dynamic colors for high contrast and conditional branding
+            final formContrastColor =
+                type == TransactionType.income ? Colors.teal : Colors.black87;
+            final formLabelColor = isDarkMode ? Colors.white70 : Colors.black87;
+            final formSubTextColor =
+                isDarkMode ? Colors.white54 : Colors.black54;
+            final formBorderColor =
+                isDarkMode ? Colors.white10 : Colors.black26;
             return Container(
               clipBehavior: Clip.antiAlias,
               decoration: BoxDecoration(
@@ -1105,15 +1165,16 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                           child: Center(
                             child: Text(
                               type == TransactionType.expense
-                                  ? 'Catat Pengeluaran'
+                                  ? 'Tambah Pengeluaran'
                                   : 'Tambah Pemasukan',
                               textAlign: TextAlign.center,
                               style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 22,
-                                  color: isDarkMode
-                                      ? Colors.white
-                                      : Colors.teal.shade900),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 22,
+                                color:
+                                    isDarkMode ? Colors.white : Colors.black87,
+                                letterSpacing: -0.5,
+                              ),
                             ),
                           ),
                         ),
@@ -1122,21 +1183,23 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                           padding: const EdgeInsets.symmetric(horizontal: 28),
                           child: TextFormField(
                             controller: amountController,
-                            autofocus: true,
+                            autofocus: false,
                             keyboardType: TextInputType.number,
                             textAlign: TextAlign.left,
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
-                              color: isDarkMode
-                                  ? Colors.white
-                                  : AppColors.primaryDark,
+                              color: isDarkMode ? Colors.white : Colors.black87,
                             ),
                             inputFormatters: [
                               FilteringTextInputFormatter.digitsOnly,
                               RibuanFormatter(),
                             ],
                             onChanged: (val) => setSheetState(() {}),
+                            onEditingComplete: () =>
+                                FocusScope.of(context).unfocus(),
+                            onTapOutside: (event) =>
+                                FocusScope.of(context).unfocus(),
                             decoration: InputDecoration(
                               hintText: '0',
                               hintStyle: TextStyle(
@@ -1144,7 +1207,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                 fontWeight: FontWeight.bold,
                                 color: isDarkMode
                                     ? Colors.white10
-                                    : Colors.teal.shade50,
+                                    : formSubTextColor,
                               ),
                               prefixIcon: Container(
                                 padding:
@@ -1155,8 +1218,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                     Icon(
                                       Icons.payments_rounded,
                                       color: type == TransactionType.income
-                                          ? AppColors.success
-                                          : AppColors.error,
+                                          ? AppColors.primary
+                                          : const Color(0xFFE53935),
                                       size: 20,
                                     ),
                                     const SizedBox(width: 8),
@@ -1165,8 +1228,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         color: type == TransactionType.income
-                                            ? AppColors.success
-                                            : AppColors.error,
+                                            ? AppColors.primary
+                                            : const Color(0xFFE53935),
                                         fontSize: 16,
                                       ),
                                     ),
@@ -1231,8 +1294,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                             fontWeight: FontWeight.bold,
                                             color: isDarkMode
                                                 ? Colors.white24
-                                                : Colors.teal.shade800
-                                                    .withValues(alpha: 0.4),
+                                                : Colors.black38,
                                             letterSpacing: 1.2)),
                                   ],
                                 ),
@@ -1240,6 +1302,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                 DropdownButtonFormField<String>(
                                   initialValue: selectedInterestBank,
                                   isExpanded: true,
+                                  itemHeight: 60,
                                   dropdownColor: isDarkMode
                                       ? AppColors.surfaceDark
                                       : Colors.white,
@@ -1248,34 +1311,51 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                     filled: true,
                                     fillColor: isDarkMode
                                         ? Colors.white.withValues(alpha: 0.05)
-                                        : const Color(0xFFF0FBF6),
+                                        : Colors.grey.shade50,
                                     border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(16),
-                                        borderSide: BorderSide(
-                                            color: isDarkMode
-                                                ? Colors.white10
-                                                : const Color(0xFF1DA462)
-                                                    .withValues(alpha: 0.3))),
+                                        borderSide:
+                                            BorderSide(color: formBorderColor)),
                                     enabledBorder: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(16),
-                                        borderSide: BorderSide(
-                                            color: isDarkMode
-                                                ? Colors.white10
-                                                : const Color(0xFF1DA462)
-                                                    .withValues(alpha: 0.3))),
+                                        borderSide:
+                                            BorderSide(color: formBorderColor)),
                                     focusedBorder: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(16),
-                                        borderSide: const BorderSide(
-                                            color: Color(0xFF1DA462),
+                                        borderSide: BorderSide(
+                                            color: formContrastColor,
                                             width: 1.5)),
-                                    prefixIcon: const Icon(
+                                    prefixIcon: Icon(
                                         Icons.account_balance_rounded,
-                                        color: Color(0xFF1DA462)),
-                                    labelStyle: TextStyle(
-                                        color: isDarkMode
-                                            ? Colors.white38
-                                            : Colors.black45),
+                                        color: AppColors.primary),
+                                    labelStyle:
+                                        TextStyle(color: formLabelColor),
                                   ),
+                                  selectedItemBuilder: (context) {
+                                    return [
+                                      const Text('None'),
+                                      ...([
+                                        'SeaBank (Premium)',
+                                        'SeaBank (Standar)',
+                                        'Bank Neo Commerce',
+                                        'Bank Jago',
+                                        'Blu by BCA Digital',
+                                        'Bank BRI',
+                                        'Bank BCA',
+                                        'Bank Mandiri',
+                                        'Bank BNI',
+                                        'Bank Lainnya',
+                                      ].map((label) {
+                                        return Text(label,
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 14,
+                                                color: isDarkMode
+                                                    ? Colors.white70
+                                                    : Colors.black87));
+                                      }))
+                                    ];
+                                  },
                                   items: [
                                     DropdownMenuItem<String>(
                                       value: null,
@@ -1366,7 +1446,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                             Icon(
                                               item['icon'] as IconData,
                                               size: 18,
-                                              color: item['color'] as Color,
+                                              color: AppColors.primary,
                                             ),
                                             const SizedBox(width: 12),
                                             Expanded(
@@ -1377,21 +1457,26 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                                 children: [
                                                   Text(
                                                     item['label'] as String,
+                                                    maxLines: 1,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
                                                     style: TextStyle(
                                                         fontWeight:
                                                             FontWeight.bold,
-                                                        fontSize: 13,
+                                                        fontSize: 14,
                                                         color: isDarkMode
                                                             ? Colors.white70
                                                             : Colors.black87),
                                                   ),
                                                   Text(
                                                     item['subtitle'] as String,
+                                                    maxLines: 1,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
                                                     style: TextStyle(
-                                                        fontSize: 10,
-                                                        color: isDarkMode
-                                                            ? Colors.white38
-                                                            : Colors.black38),
+                                                        fontSize: 11,
+                                                        color:
+                                                            formSubTextColor),
                                                   ),
                                                 ],
                                               ),
@@ -1413,7 +1498,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                         nameController.clear();
                                         selectedCategory =
                                             'Bunga Deposito / Tabungan';
-                                        selectedGroup = 'Investasi';
+                                        selectedGroup = 'Investasi & Pasif';
                                       } else {
                                         final now = DateTime.now();
                                         final monthName = [
@@ -1438,7 +1523,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                             'Bunga $bankClean $monthName ${now.year}';
                                         selectedCategory =
                                             'Bunga Deposito / Tabungan';
-                                        selectedGroup = 'Investasi';
+                                        selectedGroup = 'Investasi & Pasif';
                                       }
                                     });
                                   },
@@ -1457,36 +1542,28 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                       filled: true,
                                       fillColor: isDarkMode
                                           ? Colors.white.withValues(alpha: 0.05)
-                                          : const Color(0xFFF0FBF6),
+                                          : Colors.grey.shade50,
                                       border: OutlineInputBorder(
                                           borderRadius:
                                               BorderRadius.circular(16),
                                           borderSide: BorderSide(
-                                              color: isDarkMode
-                                                  ? Colors.white10
-                                                  : const Color(0xFF1DA462)
-                                                      .withValues(alpha: 0.3))),
+                                              color: formBorderColor)),
                                       enabledBorder: OutlineInputBorder(
                                           borderRadius:
                                               BorderRadius.circular(16),
                                           borderSide: BorderSide(
-                                              color: isDarkMode
-                                                  ? Colors.white10
-                                                  : const Color(0xFF1DA462)
-                                                      .withValues(alpha: 0.3))),
+                                              color: formBorderColor)),
                                       focusedBorder: OutlineInputBorder(
                                           borderRadius:
                                               BorderRadius.circular(16),
-                                          borderSide: const BorderSide(
-                                              color: Color(0xFF1DA462),
+                                          borderSide: BorderSide(
+                                              color: formContrastColor,
                                               width: 1.5)),
-                                      prefixIcon: const Icon(
+                                      prefixIcon: Icon(
                                           Icons.account_balance_rounded,
-                                          color: Color(0xFF1DA462)),
-                                      labelStyle: TextStyle(
-                                          color: isDarkMode
-                                              ? Colors.white38
-                                              : Colors.black45),
+                                          color: AppColors.primary),
+                                      labelStyle:
+                                          TextStyle(color: formLabelColor),
                                     ),
                                     onChanged: (val) {
                                       interestOtherBankName = val;
@@ -1512,7 +1589,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                             : 'Bunga ${val.trim()} $monthName ${now.year}';
                                         selectedCategory =
                                             'Bunga Deposito / Tabungan';
-                                        selectedGroup = 'Investasi';
+                                        selectedGroup = 'Investasi & Pasif';
                                       });
                                     },
                                   ),
@@ -1527,19 +1604,19 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                         end: Alignment.bottomRight,
                                         colors: isDarkMode
                                             ? [
-                                                const Color(0xFF0C7A45)
+                                                AppColors.primary
                                                     .withValues(alpha: 0.25),
-                                                const Color(0xFF1DA462)
+                                                AppColors.primary
                                                     .withValues(alpha: 0.15),
                                               ]
                                             : [
-                                                const Color(0xFFE8F8F1),
-                                                const Color(0xFFF0FBF6),
+                                                Colors.grey.shade100,
+                                                Colors.white,
                                               ],
                                       ),
                                       borderRadius: BorderRadius.circular(14),
                                       border: Border.all(
-                                          color: const Color(0xFF1DA462)
+                                          color: AppColors.primary
                                               .withValues(alpha: 0.25)),
                                     ),
                                     child: Row(
@@ -1547,14 +1624,16 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                         Container(
                                           padding: const EdgeInsets.all(8),
                                           decoration: BoxDecoration(
-                                            color: const Color(0xFF1DA462)
+                                            color: AppColors.primary
                                                 .withValues(alpha: 0.15),
                                             borderRadius:
                                                 BorderRadius.circular(10),
                                           ),
-                                          child: const Icon(
+                                          child: Icon(
                                             Icons.info_outline_rounded,
-                                            color: Color(0xFF1DA462),
+                                            color: isDarkMode
+                                                ? Colors.white
+                                                : Colors.black87,
                                             size: 18,
                                           ),
                                         ),
@@ -1572,10 +1651,12 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                                             .isNotEmpty
                                                     ? 'Bunga ${interestOtherBankName.trim()}'
                                                     : 'Bunga $selectedInterestBank',
-                                                style: const TextStyle(
+                                                style: TextStyle(
                                                     fontWeight: FontWeight.bold,
                                                     fontSize: 12,
-                                                    color: Color(0xFF0C7A45)),
+                                                    color: isDarkMode
+                                                        ? Colors.white
+                                                        : Colors.black87),
                                               ),
                                               const SizedBox(height: 2),
                                               Text(
@@ -1593,8 +1674,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                                     fontSize: 11,
                                                     color: isDarkMode
                                                         ? Colors.white54
-                                                        : const Color(
-                                                            0xFF0C7A45)),
+                                                        : Colors.black54),
                                               ),
                                             ],
                                           ),
@@ -1614,16 +1694,15 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('BIAYA ADMIN TOP-UP (CEPAT)',
+                                Text('BIAYA ADMIN TOP-UP (CEPAT) *',
                                     style: TextStyle(
                                         fontSize: 10,
                                         fontWeight: FontWeight.bold,
                                         color: isDarkMode
                                             ? Colors.white24
-                                            : Colors.teal.shade800
-                                                .withValues(alpha: 0.4),
+                                            : formSubTextColor,
                                         letterSpacing: 1.2)),
-                                const SizedBox(height: 12),
+                                const SizedBox(height: 8),
                                 DropdownButtonFormField<String>(
                                   initialValue: selectedTopUpSource,
                                   isExpanded: true,
@@ -1631,26 +1710,25 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                       ? AppColors.surfaceDark
                                       : Colors.white,
                                   decoration: InputDecoration(
-                                    labelText: 'Pilih Sumber Top-up',
+                                    hintText: 'Pilih Sumber Top-up',
                                     filled: true,
                                     fillColor: isDarkMode
                                         ? Colors.white.withValues(alpha: 0.05)
                                         : Colors.grey.shade50,
                                     border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(16),
-                                        borderSide: BorderSide(
-                                            color: isDarkMode
-                                                ? Colors.white10
-                                                : Colors.grey.shade200)),
+                                        borderSide:
+                                            BorderSide(color: formBorderColor)),
                                     enabledBorder: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(16),
-                                        borderSide: BorderSide(
-                                            color: isDarkMode
-                                                ? Colors.white10
-                                                : Colors.grey.shade200)),
-                                    prefixIcon: const Icon(
-                                        Icons.account_balance_wallet_rounded,
-                                        color: Colors.teal),
+                                        borderSide:
+                                            BorderSide(color: formBorderColor)),
+                                    prefixIcon: Icon(
+                                        selectedTopUpSource == 'Bank'
+                                            ? Icons.account_balance_rounded
+                                            : Icons
+                                                .account_balance_wallet_rounded,
+                                        color: AppColors.primary),
                                     labelStyle: TextStyle(
                                         color: isDarkMode
                                             ? Colors.white38
@@ -1665,19 +1743,12 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                       final label = source['label'] as String;
                                       return DropdownMenuItem<String>(
                                         value: label,
-                                        child: Row(
-                                          children: [
-                                            Icon(source['icon'] as IconData,
-                                                size: 18,
-                                                color: Colors.teal.shade700),
-                                            const SizedBox(width: 12),
-                                            Text(label,
-                                                style: TextStyle(
-                                                    color: isDarkMode
-                                                        ? Colors.white70
-                                                        : Colors.black87)),
-                                          ],
-                                        ),
+                                        child: Text(label,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                                color: isDarkMode
+                                                    ? Colors.white70
+                                                    : Colors.black87)),
                                       );
                                     }),
                                   ],
@@ -1692,7 +1763,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                                 : 'Gaji Pokok';
                                         selectedGroup =
                                             type == TransactionType.expense
-                                                ? 'Kebutuhan Pokok'
+                                                ? 'Kebutuhan Harian'
                                                 : 'Pekerjaan';
                                       } else if (val != 'Bank') {
                                         nameController.text =
@@ -1728,19 +1799,15 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                           borderRadius:
                                               BorderRadius.circular(16),
                                           borderSide: BorderSide(
-                                              color: isDarkMode
-                                                  ? Colors.white10
-                                                  : Colors.grey.shade200)),
+                                              color: formBorderColor)),
                                       enabledBorder: OutlineInputBorder(
                                           borderRadius:
                                               BorderRadius.circular(16),
                                           borderSide: BorderSide(
-                                              color: isDarkMode
-                                                  ? Colors.white10
-                                                  : Colors.grey.shade200)),
-                                      prefixIcon: const Icon(
+                                              color: formBorderColor)),
+                                      prefixIcon: Icon(
                                           Icons.account_balance_rounded,
-                                          color: Colors.teal),
+                                          color: AppColors.primary),
                                       labelStyle: TextStyle(
                                           color: isDarkMode
                                               ? Colors.white38
@@ -1765,7 +1832,16 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const SizedBox(height: 24),
+                              const SizedBox(height: 20),
+                              Text('KETERANGAN TRANSAKSI *',
+                                  style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      color: isDarkMode
+                                          ? Colors.white24
+                                          : Colors.black38,
+                                      letterSpacing: 1.2)),
+                              const SizedBox(height: 8),
                               TextFormField(
                                 controller: nameController,
                                 style: TextStyle(
@@ -1774,7 +1850,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                         ? Colors.white
                                         : Colors.black87),
                                 decoration: InputDecoration(
-                                  labelText: 'Keterangan Transaksi *',
                                   hintText: 'Masukkan Keterangan',
                                   filled: true,
                                   fillColor: isDarkMode
@@ -1782,31 +1857,18 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                       : Colors.grey.shade50,
                                   border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(16),
-                                      borderSide: BorderSide(
-                                          color: isDarkMode
-                                              ? Colors.white10
-                                              : Colors.grey.shade200)),
+                                      borderSide:
+                                          BorderSide(color: formBorderColor)),
                                   enabledBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(16),
-                                      borderSide: BorderSide(
-                                          color: isDarkMode
-                                              ? Colors.white10
-                                              : Colors.grey.shade200)),
-                                  prefixIcon: const Icon(
-                                      Icons.edit_note_rounded,
-                                      color: Colors.teal),
-                                  labelStyle: TextStyle(
-                                      color: isDarkMode
-                                          ? Colors.white38
-                                          : Colors.black45),
-                                  hintStyle: TextStyle(
-                                      color: isDarkMode
-                                          ? Colors.white24
-                                          : Colors.black38),
+                                      borderSide:
+                                          BorderSide(color: formBorderColor)),
+                                  prefixIcon: Icon(Icons.edit_note_rounded,
+                                      color: AppColors.primary),
+                                  hintStyle: TextStyle(color: formSubTextColor),
                                 ),
                                 onChanged: (val) {
-                                  if (type ==
-                                      TransactionType.expense) {
+                                  if (type == TransactionType.expense) {
                                     final lowerVal = val.toLowerCase();
                                     if (lowerVal.contains('biaya admin')) {
                                       setSheetState(() {
@@ -1827,6 +1889,10 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                     }
                                   }
                                 },
+                                onEditingComplete: () =>
+                                    FocusScope.of(context).unfocus(),
+                                onTapOutside: (event) =>
+                                    FocusScope.of(context).unfocus(),
                                 validator: (val) {
                                   if (val == null || val.trim().isEmpty) {
                                     return 'Keterangan transaksi harus diisi!';
@@ -1834,20 +1900,20 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                   return null;
                                 },
                               ),
-                              const SizedBox(height: 24),
+                              const SizedBox(height: 20),
                               Text('PILIH KATEGORI *',
                                   style: TextStyle(
                                       fontSize: 10,
                                       fontWeight: FontWeight.bold,
                                       color: isDarkMode
                                           ? Colors.white24
-                                          : Colors.teal.shade800
-                                              .withValues(alpha: 0.4),
+                                          : formSubTextColor,
                                       letterSpacing: 1.2)),
-                              const SizedBox(height: 24),
+                              const SizedBox(height: 8),
                               // Group Dropdown
                               DropdownButtonFormField<String>(
                                 initialValue: selectedGroup,
+                                isExpanded: true,
                                 dropdownColor: isDarkMode
                                     ? AppColors.surfaceDark
                                     : Colors.white,
@@ -1860,13 +1926,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                   border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(16),
                                       borderSide: BorderSide.none),
-                                  prefixIcon: const Icon(
-                                      Icons.grid_view_rounded,
-                                      color: Colors.teal),
-                                  labelStyle: TextStyle(
-                                      color: isDarkMode
-                                          ? Colors.white38
-                                          : Colors.black45),
+                                  prefixIcon: Icon(Icons.grid_view_rounded,
+                                      color: AppColors.primary),
+                                  labelStyle: TextStyle(color: formLabelColor),
                                 ),
                                 items: groupedCategories.keys
                                     .map((group) => DropdownMenuItem(
@@ -1895,6 +1957,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                               // Category Dropdown
                               DropdownButtonFormField<String>(
                                 initialValue: selectedCategory,
+                                isExpanded: true,
                                 dropdownColor: isDarkMode
                                     ? AppColors.surfaceDark
                                     : Colors.white,
@@ -1915,18 +1978,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                                 c.label == selectedCategory)
                                             .icon
                                         : Icons.help_outline_rounded,
-                                    color: categoryObjects.any(
-                                            (c) => c.label == selectedCategory)
-                                        ? categoryObjects
-                                            .firstWhere((c) =>
-                                                c.label == selectedCategory)
-                                            .color
-                                        : Colors.teal,
+                                    color: AppColors.primary,
                                   ),
-                                  labelStyle: TextStyle(
-                                      color: isDarkMode
-                                          ? Colors.white38
-                                          : Colors.black45),
+                                  labelStyle: TextStyle(color: formLabelColor),
                                 ),
                                 items: groupedCategories[selectedGroup]!
                                     .map((cat) => DropdownMenuItem(
@@ -1949,7 +2003,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                 },
                               ),
                               if (selectedCategory == 'Lainnya') ...[
-                                const SizedBox(height: 24),
+                                const SizedBox(height: 20),
                                 TextFormField(
                                   controller: customCategoryController,
                                   autofocus: true,
@@ -1966,26 +2020,18 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                         : Colors.grey.shade50,
                                     border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(16),
-                                        borderSide: BorderSide(
-                                            color: isDarkMode
-                                                ? Colors.white10
-                                                : Colors.grey.shade200)),
+                                        borderSide:
+                                            BorderSide(color: formBorderColor)),
                                     enabledBorder: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(16),
-                                        borderSide: BorderSide(
-                                            color: isDarkMode
-                                                ? Colors.white10
-                                                : Colors.grey.shade200)),
-                                    prefixIcon: const Icon(Icons.star_rounded,
-                                        color: Colors.teal),
-                                    labelStyle: TextStyle(
-                                        color: isDarkMode
-                                            ? Colors.white38
-                                            : Colors.black45),
-                                    hintStyle: TextStyle(
-                                        color: isDarkMode
-                                            ? Colors.white12
-                                            : Colors.black26),
+                                        borderSide:
+                                            BorderSide(color: formBorderColor)),
+                                    prefixIcon: Icon(Icons.star_rounded,
+                                        color: AppColors.primary),
+                                    labelStyle:
+                                        TextStyle(color: formLabelColor),
+                                    hintStyle:
+                                        TextStyle(color: formSubTextColor),
                                   ),
                                   validator: (val) {
                                     if (selectedCategory == 'Lainnya' &&
@@ -2000,7 +2046,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                 _buildSmartAllocationPlanner(
                                     _toAmount(amountController.text) ?? 0,
                                     isDarkMode),
-                              const SizedBox(height: 32),
+                              const SizedBox(height: 24),
                               ElevatedButton(
                                 onPressed: () async {
                                   if (!formKey.currentState!.validate()) {
@@ -2052,20 +2098,20 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: AppColors.primary,
                                   foregroundColor: Colors.white,
-                                  minimumSize: const Size(double.infinity, 64),
+                                  minimumSize: const Size(double.infinity, 50),
                                   shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(20)),
-                                  elevation: 8,
+                                      borderRadius: BorderRadius.circular(16)),
+                                  elevation: 4,
                                   shadowColor:
-                                      AppColors.primary.withValues(alpha: 0.4),
+                                      AppColors.primary.withValues(alpha: 0.3),
                                 ),
                                 child: const Text('Simpan Transaksi',
                                     style: TextStyle(
                                         fontWeight: FontWeight.bold,
-                                        fontSize: 17,
+                                        fontSize: 15,
                                         letterSpacing: 0.5)),
                               ),
-                              const SizedBox(height: 32),
+                              const SizedBox(height: 24),
                             ],
                           ),
                         ),
@@ -2206,8 +2252,16 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     await showDialog<void>(
       context: context,
       builder: (dialogContext) {
+        bool prevKeyboardVisible = false;
         return StatefulBuilder(
           builder: (context, setDialogState) {
+            final inset = MediaQuery.of(context).viewInsets.bottom;
+            final isKeyboardVisible = inset > 0;
+
+            if (prevKeyboardVisible && !isKeyboardVisible) {
+              FocusManager.instance.primaryFocus?.unfocus();
+            }
+            prevKeyboardVisible = isKeyboardVisible;
             return AlertDialog(
               backgroundColor:
                   isDarkMode ? AppColors.surfaceDark : Colors.white,
@@ -2215,8 +2269,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   isDarkMode ? AppColors.surfaceDark : Colors.white,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(32)),
-              title: Text(isEdit ? 'Edit Target' : 'Target Baru',
-                  style: TextStyle(
+              title: Text(isEdit ? 'Ubah Target' : 'Target Baru',
+                  style: GoogleFonts.comicNeue(
                       fontWeight: FontWeight.bold,
                       fontSize: 22,
                       color: isDarkMode ? Colors.white : Colors.black87)),
@@ -2225,20 +2279,15 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('NOMINAL TARGET *',
-                        style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: isDarkMode ? Colors.white24 : Colors.black38,
-                            letterSpacing: 1.2)),
+                    _buildInputLabel('Nominal Target', isDarkMode),
                     const SizedBox(height: 12),
                     TextFormField(
                       controller: amountController,
                       autofocus: true,
                       keyboardType: TextInputType.number,
-                      style: TextStyle(
+                      style: GoogleFonts.comicNeue(
                           fontWeight: FontWeight.bold,
-                          fontSize: 18,
+                          fontSize: 20,
                           color: isDarkMode ? Colors.white : Colors.black87),
                       inputFormatters: [
                         FilteringTextInputFormatter.digitsOnly,
@@ -2249,41 +2298,38 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                         hintStyle: TextStyle(
                             color:
                                 isDarkMode ? Colors.white12 : Colors.black26),
-                        prefixIcon: const Row(
+                        prefixIcon: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            SizedBox(width: 16),
-                            Icon(Icons.account_balance_wallet_rounded,
-                                color: Colors.teal, size: 20),
-                            SizedBox(width: 8),
+                            const SizedBox(width: 16),
+                            const Icon(Icons.account_balance_wallet_rounded,
+                                color: AppColors.primary, size: 20),
+                            const SizedBox(width: 8),
                             Text('Rp',
-                                style: TextStyle(
+                                style: GoogleFonts.comicNeue(
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.teal,
-                                    fontSize: 16)),
-                            SizedBox(width: 8),
+                                    color: AppColors.primary,
+                                    fontSize: 18)),
+                            const SizedBox(width: 8),
                           ],
                         ),
                         filled: true,
                         fillColor: isDarkMode
-                            ? Colors.teal.shade900.withValues(alpha: 0.2)
-                            : Colors.teal.shade50.withValues(alpha: 0.3),
+                            ? AppColors.primary.withValues(alpha: 0.05)
+                            : AppColors.primary.withValues(alpha: 0.03),
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16),
                             borderSide: BorderSide.none),
                       ),
+                      onEditingComplete: () => FocusScope.of(context).unfocus(),
+                      onTapOutside: (event) => FocusScope.of(context).unfocus(),
                     ),
                     const SizedBox(height: 24),
-                    Text('TARGET PEMBELIAN *',
-                        style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: isDarkMode ? Colors.white24 : Colors.black38,
-                            letterSpacing: 1.2)),
+                    _buildInputLabel('Target Pembelian', isDarkMode),
                     const SizedBox(height: 12),
                     TextFormField(
                       controller: itemController,
-                      style: TextStyle(
+                      style: GoogleFonts.comicNeue(
                           fontWeight: FontWeight.bold,
                           color: isDarkMode ? Colors.white : Colors.black87),
                       decoration: InputDecoration(
@@ -2293,22 +2339,19 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                 isDarkMode ? Colors.white12 : Colors.black26),
                         filled: true,
                         fillColor: isDarkMode
-                            ? Colors.teal.shade900.withValues(alpha: 0.2)
-                            : Colors.teal.shade50.withValues(alpha: 0.3),
+                            ? AppColors.primary.withValues(alpha: 0.05)
+                            : AppColors.primary.withValues(alpha: 0.03),
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16),
                             borderSide: BorderSide.none),
                         prefixIcon: const Icon(Icons.shopping_bag_rounded,
-                            color: Colors.teal, size: 20),
+                            color: AppColors.primary, size: 20),
                       ),
+                      onEditingComplete: () => FocusScope.of(context).unfocus(),
+                      onTapOutside: (event) => FocusScope.of(context).unfocus(),
                     ),
                     const SizedBox(height: 24),
-                    Text('TANGGAL TARGET SELESAI *',
-                        style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: isDarkMode ? Colors.white24 : Colors.black38,
-                            letterSpacing: 1.2)),
+                    _buildInputLabel('Target Tanggal Selesai', isDarkMode),
                     const SizedBox(height: 12),
                     InkWell(
                       onTap: () async {
@@ -2346,23 +2389,23 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                       },
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 18),
+                            horizontal: 16, vertical: 16),
                         decoration: BoxDecoration(
                           color: isDarkMode
-                              ? Colors.teal.shade900.withValues(alpha: 0.2)
-                              : Colors.teal.shade50.withValues(alpha: 0.3),
+                              ? AppColors.primary.withValues(alpha: 0.05)
+                              : AppColors.primary.withValues(alpha: 0.03),
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Row(
                           children: [
                             const Icon(Icons.calendar_month_rounded,
-                                color: Colors.teal, size: 20),
+                                color: AppColors.primary, size: 20),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
                                 DateFormat('EEEE, d MMMM yyyy', 'id_ID')
                                     .format(selectedDate),
-                                style: TextStyle(
+                                style: GoogleFonts.comicNeue(
                                     fontWeight: FontWeight.bold,
                                     color: isDarkMode
                                         ? Colors.white70
@@ -2392,7 +2435,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                               : Colors.grey.shade50,
                         ),
                         child: Text('Batal',
-                            style: TextStyle(
+                            style: GoogleFonts.comicNeue(
                                 color: isDarkMode
                                     ? Colors.white38
                                     : Colors.grey.shade600,
@@ -2458,8 +2501,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                           elevation: 0,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                         ),
-                        child: const Text('Simpan',
-                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        child: Text('Simpan',
+                            style: GoogleFonts.comicNeue(
+                                fontWeight: FontWeight.bold)),
                       ),
                     ),
                   ],
@@ -2469,6 +2513,59 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           },
         );
       },
+    );
+  }
+
+  Widget _buildInputLabel(String label, bool isDarkMode) {
+    return Text(
+      label,
+      style: GoogleFonts.comicNeue(
+        fontSize: 14,
+        fontWeight: FontWeight.bold,
+        color: isDarkMode ? Colors.white70 : Colors.black87,
+      ),
+    );
+  }
+
+  Widget _buildPriorityCard({
+    required String title,
+    required String mainText,
+    required String subText,
+    required IconData icon,
+    required Color color,
+    required bool isDarkMode,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(icon,
+                size: 12,
+                color: isDarkMode ? color.withValues(alpha: 0.8) : color),
+            const SizedBox(width: 4),
+            Text(title,
+                style: TextStyle(
+                    fontSize: 7.5,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.4,
+                    color: isDarkMode ? Colors.white38 : Colors.black38)),
+          ],
+        ),
+        const SizedBox(height: 6),
+        Text(mainText,
+            style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                letterSpacing: -0.2,
+                color: isDarkMode ? Colors.white : Colors.black87)),
+        const SizedBox(height: 1),
+        Text(subText,
+            style: TextStyle(
+                fontSize: 8.5,
+                fontWeight: FontWeight.w500,
+                color: isDarkMode ? Colors.white24 : Colors.black26)),
+      ],
     );
   }
 
@@ -2498,36 +2595,10 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     final now = DateTime.now();
     final lastDayOfMonth = DateTime(now.year, now.month + 1, 0);
 
-    // Financial Insight Logic
-    final remainingDays = lastDayOfMonth.day - now.day + 1;
-    final totalBalance = totalIncome - totalExpense;
-    final dailyAllowance =
-        totalBalance > 0 ? totalBalance / remainingDays : 0.0;
-    final savingsRate =
-        totalIncome > 0 ? ((totalBalance / totalIncome) * 100) : 0.0;
-
     final theme = Theme.of(context);
     final themeMode = ref.watch(themeProvider);
     final isDarkMode = themeMode == ThemeMode.dark ||
         (themeMode == ThemeMode.system && theme.brightness == Brightness.dark);
-
-    String healthStatus = "Boros";
-    Color healthColor =
-        isDarkMode ? Colors.redAccent.shade100 : Colors.redAccent.shade200;
-    IconData healthIcon = Icons.warning_amber_rounded;
-    if (savingsRate >= 50) {
-      healthStatus = "SANGAT HEMAT";
-      healthColor = isDarkMode
-          ? Colors.greenAccent.shade700
-          : Colors.greenAccent.shade400;
-      healthIcon = Icons.verified_rounded;
-    } else if (savingsRate >= 20) {
-      healthStatus = "WAJAR / STABIL";
-      healthColor = isDarkMode
-          ? Colors.orangeAccent.shade700
-          : Colors.orangeAccent.shade200;
-      healthIcon = Icons.info_outline_rounded;
-    }
 
     // CALCULATE MONTHLY HIGHLIGHTS
     final currentMonthTx = transactions
@@ -2552,6 +2623,33 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     // 3. Activity Count
     final monthlyActivity = currentMonthTx.length;
 
+    // 4. NEW: Charity & Bill Logic
+    final charityStats = ref.watch(morningCharityProvider);
+    final billsAsync = ref.watch(billsStreamProvider);
+    final bills =
+        billsAsync.maybeWhen(data: (d) => d, orElse: () => <BillModel>[]);
+
+    BillModel? closestBill;
+    int? daysUntilDue;
+    if (bills.isNotEmpty) {
+      final unpaid = bills.where((b) => !b.isPaid).toList();
+      if (unpaid.isNotEmpty) {
+        unpaid.sort((a, b) {
+          int daysA = a.dueDay >= now.day
+              ? a.dueDay - now.day
+              : (30 - now.day + a.dueDay);
+          int daysB = b.dueDay >= now.day
+              ? b.dueDay - now.day
+              : (30 - now.day + b.dueDay);
+          return daysA.compareTo(daysB);
+        });
+        closestBill = unpaid.first;
+        daysUntilDue = closestBill.dueDay >= now.day
+            ? closestBill.dueDay - now.day
+            : (30 - now.day + closestBill.dueDay);
+      }
+    }
+
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 110),
       child: Column(
@@ -2559,10 +2657,10 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         children: [
           // Visual Header: Balance & Highlights
           Container(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
             decoration: BoxDecoration(
               color: theme.cardColor,
-              borderRadius: BorderRadius.circular(32),
+              borderRadius: BorderRadius.circular(24),
               boxShadow: [
                 BoxShadow(
                     color:
@@ -2574,7 +2672,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('TOTAL SALDO',
+                Text('DASHBOARD HABIT & TAGIHAN',
                     style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
@@ -2582,22 +2680,39 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                         color: isDarkMode
                             ? Colors.white30
                             : Colors.teal.shade800.withValues(alpha: 0.4))),
-                const SizedBox(height: 8),
-                Text(_formatRupiah(totalIncome - totalExpense),
-                    style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: isDarkMode ? Colors.white : Colors.teal.shade900,
-                        letterSpacing: -1)),
-                const SizedBox(height: 4),
-                Text(DateFormat('MMMM yyyy', 'id_ID').format(DateTime.now()),
-                    style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: isDarkMode
-                            ? Colors.white38
-                            : Colors.teal.shade700)),
-                const SizedBox(height: 32),
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildPriorityCard(
+                        title: 'SEDERAH SUBUH',
+                        mainText: charityStats.currentStreak > 0
+                            ? '${charityStats.currentStreak} Hari'
+                            : 'Belum Mulai',
+                        subText: charityStats.currentStreak > 0
+                            ? 'Istikamah luar biasa!'
+                            : 'Mulai habit baikmu hari ini',
+                        icon: Icons.auto_awesome_rounded,
+                        color: Colors.orange,
+                        isDarkMode: isDarkMode,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _buildPriorityCard(
+                        title: 'TAGIHAN TERDEKAT',
+                        mainText: closestBill?.name ?? 'Lunas Semua',
+                        subText: daysUntilDue != null
+                            ? '$daysUntilDue hari lagi'
+                            : 'Tidak ada tagihan tertunda',
+                        icon: Icons.event_available_rounded,
+                        color: Colors.teal,
+                        isDarkMode: isDarkMode,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
 
                 // NEW FEATURE: MONTHLY HIGHLIGHTS GRID
                 Row(
@@ -2655,177 +2770,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                 ? Colors.white10
                                 : Colors.teal.shade800
                                     .withValues(alpha: 0.15)))),
-              ],
-            ),
-          ),
-          const SizedBox(height: 20),
-
-          // Total Stats Center Row
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: theme.cardColor,
-              borderRadius: BorderRadius.circular(32),
-              boxShadow: [
-                BoxShadow(
-                    color:
-                        Colors.black.withValues(alpha: isDarkMode ? 0.2 : 0.02),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10))
-              ],
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _miniStat(
-                    'Total Pemasukan', totalIncome, Colors.green, isDarkMode),
-                Container(
-                    width: 1,
-                    height: 32,
-                    color: isDarkMode ? Colors.white10 : Colors.teal.shade50),
-                _miniStat(
-                    'Total Pengeluaran', totalExpense, Colors.red, isDarkMode),
-              ],
-            ),
-          ),
-          const SizedBox(height: 24),
-
-          // INSIGHT KEUANGAN
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(28),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: isDarkMode
-                    ? [Colors.indigo.shade900, Colors.deepPurple.shade900]
-                    : [Colors.indigo.shade700, Colors.deepPurple.shade600],
-              ),
-              borderRadius: BorderRadius.circular(32),
-              boxShadow: [
-                BoxShadow(
-                    color: (isDarkMode ? AppColors.primary : Colors.teal)
-                        .withValues(alpha: 0.3),
-                    blurRadius: 15,
-                    offset: const Offset(0, 8))
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('INSIGHT KEUANGAN',
-                        style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1.5,
-                            color: Colors.white.withValues(alpha: 0.5))),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: healthColor.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(healthIcon, size: 10, color: healthColor),
-                          const SizedBox(width: 4),
-                          Text(healthStatus,
-                              style: TextStyle(
-                                  fontSize: 8,
-                                  fontWeight: FontWeight.bold,
-                                  color: healthColor)),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text('Jatah Harian',
-                              style: TextStyle(
-                                  color: Colors.white70,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold)),
-                          const SizedBox(height: 4),
-                          Text(_formatRupiah(dailyAllowance),
-                              style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.bold)),
-                          Text('Sisa $remainingDays hari bulan ini',
-                              style: TextStyle(
-                                  color: Colors.white.withValues(alpha: 0.4),
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold)),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      width: 60,
-                      height: 60,
-                      padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.1),
-                            width: 4),
-                      ),
-                      child: Center(
-                        child: Text('${savingsRate.toInt()}%',
-                            style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold)),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: Stack(
-                    children: [
-                      Container(
-                          height: 6,
-                          color: Colors.white.withValues(alpha: 0.1)),
-                      AnimatedContainer(
-                        duration: const Duration(milliseconds: 1000),
-                        height: 6,
-                        width: (MediaQuery.of(context).size.width - 110) *
-                            (savingsRate / 100).clamp(0, 1),
-                        decoration: BoxDecoration(
-                          color: healthColor,
-                          borderRadius: BorderRadius.circular(10),
-                          boxShadow: [
-                            BoxShadow(
-                                color: healthColor.withValues(alpha: 0.5),
-                                blurRadius: 10)
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  savingsRate >= 20
-                      ? 'Kondisi keuanganmu sehat. Pertahankan rasio tabungan di atas 20%!'
-                      : 'Ayo hemat lagi! Rasio tabunganmu saat ini masih di bawah target minimal 20%.',
-                  style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.7),
-                      fontSize: 10,
-                      fontStyle: FontStyle.italic),
-                ),
               ],
             ),
           ),
@@ -3574,7 +3518,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                       // Amount Input
                       TextFormField(
                         controller: amountController,
-                        autofocus: true,
+                        autofocus: t.type == TransactionType.expense,
                         keyboardType: TextInputType.number,
                         inputFormatters: [
                           FilteringTextInputFormatter.digitsOnly,
@@ -3674,34 +3618,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     );
   }
 
-  Widget _miniStat(String label, double amount, Color color, bool isDarkMode,
-      {bool center = false}) {
-    return Column(
-      crossAxisAlignment:
-          center ? CrossAxisAlignment.center : CrossAxisAlignment.start,
-      children: [
-        Text(label.toUpperCase(),
-            textAlign: center ? TextAlign.center : TextAlign.start,
-            style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-                color: isDarkMode ? Colors.white54 : Colors.grey.shade500,
-                letterSpacing: 1.2)),
-        const SizedBox(height: 4),
-        FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Text(
-            _showBalance ? _formatRupiah(amount) : '••••',
-            textAlign: center ? TextAlign.center : TextAlign.start,
-            style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.bold,
-                color: color.withValues(alpha: isDarkMode ? 0.9 : 0.8)),
-          ),
-        ),
-      ],
-    );
-  }
 
   Widget _buildHighlightCard(
     BuildContext context,
@@ -3715,11 +3631,11 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
   }) {
     return Container(
       width: fullWidth ? double.infinity : null,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: isDarkMode
-            ? color.withValues(alpha: 0.1)
-            : color.withValues(alpha: 0.05),
+            ? color.withValues(alpha: 0.12)
+            : color.withValues(alpha: 0.04),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: isDarkMode
@@ -3733,19 +3649,19 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.2),
+                  color: color.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(icon, color: color, size: 16),
+                child: Icon(icon, color: color, size: 14),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   label,
                   style: TextStyle(
-                    fontSize: 8,
+                    fontSize: 7.5,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 0.5,
                     color: isDarkMode ? Colors.white38 : Colors.black38,
@@ -3754,24 +3670,25 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           Text(
             value,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              fontSize: 14,
+              fontSize: 13,
               fontWeight: FontWeight.bold,
+              letterSpacing: -0.2,
               color: isDarkMode ? Colors.white : Colors.black87,
             ),
           ),
-          const SizedBox(height: 2),
+          const SizedBox(height: 1),
           Text(
             subtitle,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              fontSize: 9,
+              fontSize: 8.5,
               fontWeight: FontWeight.bold,
               color: isDarkMode ? Colors.white24 : Colors.black26,
             ),
@@ -4307,7 +4224,7 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
                     fontSize: 12,
                     fontWeight: selected ? FontWeight.bold : FontWeight.w600,
                     color: selected
-                        ? AppColors.primary
+                        ? (isDark ? Colors.white : Colors.black87)
                         : (isDark ? Colors.white54 : Colors.black54))),
           ],
         ),
@@ -4326,14 +4243,14 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           color: selected
-              ? Colors.teal.withValues(alpha: isDark ? 0.25 : 0.1)
+              ? AppColors.primary.withValues(alpha: isDark ? 0.25 : 0.1)
               : (isDark
                   ? Colors.white.withValues(alpha: 0.04)
                   : Colors.grey.shade50),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
               color: selected
-                  ? Colors.teal
+                  ? AppColors.primary
                   : (isDark ? Colors.white10 : Colors.grey.shade200),
               width: 1),
         ),
@@ -4343,7 +4260,7 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
               fontSize: 11,
               fontWeight: selected ? FontWeight.bold : FontWeight.w600,
               color: selected
-                  ? (isDark ? Colors.tealAccent : Colors.teal.shade700)
+                  ? (isDark ? Colors.white : Colors.black87)
                   : (isDark ? Colors.white38 : Colors.black45)),
         ),
       ),
@@ -4973,6 +4890,7 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
       ),
     );
   }
+
 }
 
 class _QuickAction {

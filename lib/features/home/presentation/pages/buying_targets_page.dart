@@ -49,7 +49,7 @@ class _BuyingTargetsPageState extends ConsumerState<BuyingTargetsPage> {
           onPressed: () => Navigator.pop(context),
           icon: Icon(Icons.arrow_back_ios_new_rounded, color: contentColor, size: 20),
         ),
-        title: Text('Target Saya', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: contentColor)),
+        title: Text('Target Saya', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 18, color: contentColor)),
       ),
       body: targetsAsync.when(
         data: (targets) {
@@ -64,8 +64,8 @@ class _BuyingTargetsPageState extends ConsumerState<BuyingTargetsPage> {
                 const SizedBox(height: 32),
                 _buildInputForm(isDarkMode),
                 const SizedBox(height: 32),
-                Text('DAFTAR TARGET PEMBELIAN', 
-                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5, color: contentColor.withValues(alpha: 0.4))),
+                Text('Daftar Target Pembelian', 
+                  style: GoogleFonts.comicNeue(fontSize: 14, fontWeight: FontWeight.bold, color: contentColor.withValues(alpha: 0.5))),
                 const SizedBox(height: 16),
                 if (buyingTargets.isEmpty)
                   _buildEmptyState(isDarkMode)
@@ -85,42 +85,31 @@ class _BuyingTargetsPageState extends ConsumerState<BuyingTargetsPage> {
   Widget _buildHeader(bool isDarkMode) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.primary, Color(0xFF009688)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
+        color: AppColors.primary.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
+              color: AppColors.primary.withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.shopping_cart_checkout_rounded, size: 28, color: Colors.white),
+            child: const Icon(Icons.stars_rounded, size: 24, color: AppColors.primary),
           ),
-          const SizedBox(width: 20),
-          const Expanded(
+          const SizedBox(width: 16),
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Target Belanja', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white)),
-                SizedBox(height: 4),
+                Text('Target Belanja', 
+                  style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 18, color: isDarkMode ? Colors.white : AppColors.primaryDark)),
                 Text(
-                  'Wujudkan barang impianmu dengan menabung konsisten.',
-                  style: TextStyle(fontSize: 11, color: Colors.white70, fontWeight: FontWeight.w500),
+                  'Mulai cicil tabungan untuk barang impianmu.',
+                  style: GoogleFonts.comicNeue(fontSize: 11, color: isDarkMode ? Colors.white38 : Colors.black38, fontWeight: FontWeight.w500),
                 ),
               ],
             ),
@@ -141,92 +130,102 @@ class _BuyingTargetsPageState extends ConsumerState<BuyingTargetsPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          _buildInputLabel('Barang Impian', isDarkMode),
+          const SizedBox(height: 8),
           _buildHighVisInput(
             controller: _nameController,
             icon: Icons.label_important_rounded,
-            label: 'Barang Impian',
             unit: '',
             color: AppColors.primary,
             isDarkMode: isDarkMode,
-            hint: 'Masukkan Nama Barang',
+            hint: 'Contoh: iPhone 15 Pro',
           ),
           const SizedBox(height: 16),
+          _buildInputLabel('Harga Estimasi', isDarkMode),
+          const SizedBox(height: 8),
           _buildHighVisInput(
             controller: _amountController,
             icon: Icons.price_check_rounded,
-            label: 'Harga Estimasi',
             unit: 'Rp',
-            color: Colors.green,
+            color: AppColors.primary,
             isDarkMode: isDarkMode,
             isPremium: true,
           ),
-          const SizedBox(height: 20),
-          Column(
-            children: [
-              InkWell(
-                onTap: () => _pickDate(isDarkMode),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                  decoration: BoxDecoration(
-                    color: isDarkMode ? Colors.white.withValues(alpha: 0.03) : AppColors.background,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Row(
+          const SizedBox(height: 16),
+          InkWell(
+            onTap: () => _pickDate(isDarkMode),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              decoration: BoxDecoration(
+                color: isDarkMode ? Colors.white.withValues(alpha: 0.03) : AppColors.background,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.calendar_today_rounded, size: 18, color: AppColors.primary),
+                  const SizedBox(width: 12),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.calendar_today_rounded, size: 18, color: AppColors.primary),
-                      const SizedBox(width: 12),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Target Terkumpul', style: TextStyle(fontSize: 10, color: (isDarkMode ? Colors.white38 : Colors.grey.shade500), fontWeight: FontWeight.bold)),
-                          Text(DateFormat('d MMMM yyyy', 'id_ID').format(_selectedDate), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                        ],
-                      ),
-                      const Spacer(),
-                      Icon(Icons.arrow_drop_down_rounded, color: isDarkMode ? Colors.white24 : Colors.grey.shade400),
+                      Text('Target Tanggal', style: GoogleFonts.comicNeue(fontSize: 10, color: (isDarkMode ? Colors.white38 : Colors.grey.shade500), fontWeight: FontWeight.bold)),
+                      Text(DateFormat('d MMMM yyyy', 'id_ID').format(_selectedDate), style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 13)),
                     ],
                   ),
-                ),
+                  const Spacer(),
+                  Icon(Icons.arrow_drop_down_rounded, color: isDarkMode ? Colors.white24 : Colors.grey.shade400),
+                ],
               ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    final amount = double.tryParse(_amountController.text.replaceAll('.', '')) ?? 0;
-                    if (amount > 0 && _nameController.text.isNotEmpty) {
-                      final target = SavingTargetModel(
-                        id: DateTime.now().millisecondsSinceEpoch.toString(),
-                        name: _nameController.text,
-                        targetAmount: amount,
-                        dueDate: _selectedDate,
-                        createdAt: DateTime.now(),
-                        category: 'Pembelian',
-                      );
-                      await ref.read(savingTargetServiceProvider).addTarget(target);
-                      _amountController.clear();
-                      _nameController.clear();
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                          content: Text('Target Berhasil Ditambahkan!'),
-                          backgroundColor: AppColors.primary,
-                        ));
-                      }
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    elevation: 0,
-                  ),
-                  child: const Text('Buat Target Sekarang', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: ElevatedButton.icon(
+              onPressed: () async {
+                final amount = double.tryParse(_amountController.text.replaceAll('.', '')) ?? 0;
+                if (amount > 0 && _nameController.text.isNotEmpty) {
+                  final target = SavingTargetModel(
+                    id: DateTime.now().millisecondsSinceEpoch.toString(),
+                    name: _nameController.text,
+                    targetAmount: amount,
+                    dueDate: _selectedDate,
+                    createdAt: DateTime.now(),
+                    category: 'Pembelian',
+                  );
+                  await ref.read(savingTargetServiceProvider).addTarget(target);
+                  _amountController.clear();
+                  _nameController.clear();
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                      content: Text('Target Berhasil Ditambahkan!'),
+                      backgroundColor: AppColors.primary,
+                    ));
+                  }
+                }
+              },
+              icon: const Icon(Icons.add_rounded, size: 20),
+              label: Text('Tambah Target', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 15)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               ),
-            ],
+            ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildInputLabel(String label, bool isDarkMode) {
+    return Text(
+      label,
+      style: GoogleFonts.comicNeue(
+        fontSize: 14,
+        fontWeight: FontWeight.bold,
+        color: isDarkMode ? Colors.white70 : Colors.black87,
       ),
     );
   }
@@ -246,7 +245,6 @@ class _BuyingTargetsPageState extends ConsumerState<BuyingTargetsPage> {
   Widget _buildHighVisInput({
     required TextEditingController controller,
     required IconData icon,
-    required String label,
     required String unit,
     required Color color,
     required bool isDarkMode,
@@ -259,7 +257,7 @@ class _BuyingTargetsPageState extends ConsumerState<BuyingTargetsPage> {
       controller: controller,
       keyboardType: isPremium ? TextInputType.number : TextInputType.text,
       inputFormatters: isPremium ? [_RibuanFormatter()] : null,
-      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: contentColor),
+      style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 16, color: contentColor),
       decoration: InputDecoration(
         hintText: hint ?? '0',
         hintStyle: TextStyle(
@@ -287,82 +285,139 @@ class _BuyingTargetsPageState extends ConsumerState<BuyingTargetsPage> {
   }
 
   Widget _buildTargetItem(SavingTargetModel target, bool isDarkMode) {
-    final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
     final transactions = ref.watch(transactionsByGroupProvider(null));
     final balance = transactions.fold<double>(0, (s, t) => s + (t.type == TransactionType.income ? t.amount : -t.amount));
     final progress = (target.targetAmount > 0) ? (balance / target.targetAmount).clamp(0.0, 1.0) : 0.0;
     const baseColor = AppColors.primary;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(24),
+      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: isDarkMode ? Colors.white.withValues(alpha: 0.02) : Colors.white,
+        color: isDarkMode ? AppColors.surfaceDark : Colors.white,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: isDarkMode ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(target.name, 
-                  maxLines: 1, overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: contentColor)),
-              ),
-              const SizedBox(width: 8),
-              Text('${(progress * 100).toInt()}%', style: const TextStyle(fontWeight: FontWeight.bold, color: baseColor, fontSize: 16)),
-            ],
-          ),
-          const SizedBox(height: 16),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: LinearProgressIndicator(
-              value: progress,
-              minHeight: 10,
-              backgroundColor: baseColor.withValues(alpha: 0.1),
-              color: baseColor,
-            ),
-          ),
-          const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildMiniInfo('Harga', _formatRupiah(target.targetAmount), isDarkMode),
-              _buildMiniInfo('Target Tanggal', DateFormat('d MMM yyyy').format(target.dueDate), isDarkMode),
-            ],
-          ),
-          const SizedBox(height: 24),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () => _showEditDialog(target),
-                  icon: const Icon(Icons.edit_note_rounded, size: 18),
-                  label: const Text('Ubah', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: baseColor,
-                    side: BorderSide(color: baseColor.withValues(alpha: 0.3)),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              IconButton(
-                onPressed: () => _deleteTarget(target.id),
-                icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 20),
-                style: IconButton.styleFrom(
-                  backgroundColor: Colors.redAccent.withValues(alpha: 0.05),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  padding: const EdgeInsets.all(12),
-                ),
-              ),
-            ],
+        border: Border.all(
+            color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDarkMode ? 0.3 : 0.03),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(24),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: () => _showEditDialog(target),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 20, 16),
+            child: Row(
+              children: [
+                // Leading: Circular Progress
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    SizedBox(
+                      width: 54,
+                      height: 54,
+                      child: CircularProgressIndicator(
+                        value: progress,
+                        strokeWidth: 5,
+                        backgroundColor: baseColor.withValues(alpha: 0.1),
+                        valueColor: const AlwaysStoppedAnimation<Color>(baseColor),
+                        strokeCap: StrokeCap.round,
+                      ),
+                    ),
+                    Container(
+                      width: 38,
+                      height: 38,
+                      decoration: BoxDecoration(
+                        color: baseColor.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.stars_rounded, color: baseColor, size: 20),
+                    ),
+                  ],
+                ),
+                const SizedBox(width: 16),
+                // Title and Info
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        target.name.toUpperCase(),
+                        style: GoogleFonts.comicNeue(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.5,
+                          color: isDarkMode ? Colors.white : AppColors.primaryDark,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          Icon(Icons.account_balance_wallet_rounded, 
+                            size: 12, 
+                            color: isDarkMode ? Colors.white24 : Colors.grey.shade400),
+                          const SizedBox(width: 4),
+                          Text(
+                            _formatRupiah(target.targetAmount),
+                            style: GoogleFonts.comicNeue(
+                              fontSize: 12,
+                              color: isDarkMode ? Colors.white38 : Colors.grey.shade600,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text('•', style: TextStyle(color: isDarkMode ? Colors.white12 : Colors.grey.shade300)),
+                          const SizedBox(width: 8),
+                          Icon(Icons.calendar_month_rounded, 
+                            size: 12, 
+                            color: isDarkMode ? Colors.white24 : Colors.grey.shade400),
+                          const SizedBox(width: 4),
+                          Text(
+                            DateFormat('d MMM').format(target.dueDate),
+                            style: GoogleFonts.comicNeue(
+                              fontSize: 12,
+                              color: isDarkMode ? Colors.white38 : Colors.grey.shade600,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                // Trailing: Percentage and Delete
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      '${(progress * 100).toInt()}%',
+                      style: GoogleFonts.comicNeue(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w900,
+                        color: baseColor,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    GestureDetector(
+                      onTap: () => _deleteTarget(target.id),
+                      child: Icon(
+                        Icons.delete_outline_rounded, 
+                        color: isDarkMode ? Colors.white12 : Colors.redAccent.withValues(alpha: 0.3), 
+                        size: 18
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -371,9 +426,9 @@ class _BuyingTargetsPageState extends ConsumerState<BuyingTargetsPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(fontSize: 10, color: Colors.grey.shade500, fontWeight: FontWeight.bold)),
+        Text(label, style: GoogleFonts.comicNeue(fontSize: 12, color: Colors.grey.shade500, fontWeight: FontWeight.bold)),
         const SizedBox(height: 4),
-        Text(value, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: isDarkMode ? Colors.white70 : AppColors.primaryDark)),
+        Text(value, style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 12, color: isDarkMode ? Colors.white70 : AppColors.primaryDark)),
       ],
     );
   }
@@ -389,14 +444,18 @@ class _BuyingTargetsPageState extends ConsumerState<BuyingTargetsPage> {
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
           backgroundColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-          title: const Text('Ubah Target', style: TextStyle(fontWeight: FontWeight.bold)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          title: Text('Ubah Target', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _buildHighVisInput(controller: nameController, icon: Icons.label_important_rounded, label: 'Nama', unit: '', color: const Color(0xFF6366F1), isDarkMode: isDarkMode),
+              _buildInputLabel('Nama Barang', isDarkMode),
+              const SizedBox(height: 8),
+              _buildHighVisInput(controller: nameController, icon: Icons.label_important_rounded, unit: '', color: AppColors.primary, isDarkMode: isDarkMode),
               const SizedBox(height: 16),
-              _buildHighVisInput(controller: amountController, icon: Icons.price_check_rounded, label: 'Harga', unit: 'Rp', color: Colors.green, isDarkMode: isDarkMode, isPremium: true),
+              _buildInputLabel('Harga Estimasi', isDarkMode),
+              const SizedBox(height: 8),
+              _buildHighVisInput(controller: amountController, icon: Icons.price_check_rounded, unit: 'Rp', color: AppColors.primary, isDarkMode: isDarkMode, isPremium: true),
               const SizedBox(height: 16),
               InkWell(
                 onTap: () async {
@@ -413,17 +472,23 @@ class _BuyingTargetsPageState extends ConsumerState<BuyingTargetsPage> {
           ),
           actions: [
             TextButton(onPressed: () => Navigator.pop(context), child: const Text('Batal')),
-            ElevatedButton(
-              onPressed: () async {
-                final amount = double.tryParse(amountController.text.replaceAll('.', '')) ?? 0;
-                if (amount > 0) {
-                  await ref.read(savingTargetServiceProvider).updateTarget(target.copyWith(name: nameController.text, targetAmount: amount, dueDate: selectedDate));
-                  if (context.mounted) Navigator.pop(context);
-                }
-              },
-              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
-              child: const Text('Simpan'),
+          ElevatedButton(
+            onPressed: () async {
+              final amount = double.tryParse(amountController.text.replaceAll('.', '')) ?? 0;
+              if (amount > 0) {
+                await ref.read(savingTargetServiceProvider).updateTarget(target.copyWith(name: nameController.text, targetAmount: amount, dueDate: selectedDate));
+                if (context.mounted) Navigator.pop(context);
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             ),
+            child: Text('Simpan', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold)),
+          ),
           ],
         ),
       ),
@@ -455,7 +520,7 @@ class _BuyingTargetsPageState extends ConsumerState<BuyingTargetsPage> {
           children: [
             Icon(Icons.shopping_bag_outlined, size: 64, color: isDarkMode ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
             const SizedBox(height: 16),
-            const Text('Belum ada target pembelian.', style: TextStyle(color: Colors.grey)),
+            Text('Belum ada target pembelian.', style: GoogleFonts.comicNeue(color: Colors.grey, fontWeight: FontWeight.w600)),
           ],
         ),
       ),

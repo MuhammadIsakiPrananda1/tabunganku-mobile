@@ -191,8 +191,8 @@ class TransactionDetailSheet extends ConsumerWidget {
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                   color: isDarkMode
-                      ? Colors.white24
-                      : Colors.teal.shade800.withValues(alpha: 0.3))),
+                      ? Colors.white38
+                      : Colors.black54)),
         ),
         Expanded(
           child: Text(value,
@@ -200,7 +200,7 @@ class TransactionDetailSheet extends ConsumerWidget {
               style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: isDarkMode ? Colors.white70 : Colors.teal.shade900)),
+                  color: isDarkMode ? Colors.white : Colors.black87)),
         ),
       ],
     );

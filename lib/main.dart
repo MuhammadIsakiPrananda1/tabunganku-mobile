@@ -12,6 +12,7 @@ import 'core/theme/app_theme.dart';
 import 'core/theme/theme_provider.dart';
 import 'core/routing/app_router.dart';
 import 'features/settings/presentation/providers/security_provider.dart';
+import 'features/auth/presentation/pages/lock_screen.dart';
 import 'core/widgets/notification_observer.dart';
 
 /// Global instance agar bisa diakses dari mana saja
@@ -126,21 +127,8 @@ class _TabunganKuAppState extends ConsumerState<TabunganKuApp>
           !security.isExternalOperationInProgress) {
         ref.read(securityProvider.notifier).deauthorize();
       }
-    } else if (state == AppLifecycleState.resumed) {
-      if (security.hasPin && !security.isAuthorized) {
-        final String currentLocation =
-            router.routerDelegate.currentConfiguration.fullPath;
-
-        // Final guard for routes that should never be locked
-        if (currentLocation != '/lock' &&
-            currentLocation != '/splash' &&
-            currentLocation != '/pin-setup') {
-          // Encode the path to safely pass as query parameter
-          final encodedPath = Uri.encodeComponent(currentLocation);
-          router.go('/lock?from=$encodedPath');
-        }
-      }
     }
+    // Logic for resumed moved to MaterialApp.builder to preserve state
   }
 
   @override
@@ -156,6 +144,35 @@ class _TabunganKuAppState extends ConsumerState<TabunganKuApp>
         darkTheme: AppTheme.darkTheme,
         themeMode: themeMode,
         routerConfig: appRouter,
+        builder: (context, child) {
+          return Consumer(
+            builder: (context, ref, _) {
+              final security = ref.watch(securityProvider);
+              final router = ref.watch(appRouterProvider);
+              
+              // Get current location safely to exclude lock from splash/setup
+              String location = '/';
+              try {
+                location = router.routerDelegate.currentConfiguration.fullPath;
+              } catch (_) {}
+
+              final isLockableRoute = location != '/' &&
+                                    location != '/splash' && 
+                                    location != '/pin-setup' && 
+                                    location != '/lock';
+
+              if (security.hasPin && !security.isAuthorized && isLockableRoute) {
+                return Stack(
+                  children: [
+                    if (child != null) child,
+                    const LockScreen(),
+                  ],
+                );
+              }
+              return child ?? const SizedBox();
+            },
+          );
+        },
       ),
     );
   }

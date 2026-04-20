@@ -29,13 +29,25 @@ class TransactionModel {
   });
 
   factory TransactionModel.fromJson(Map<String, dynamic> json) {
+    DateTime parsedDate;
+    final dateVal = json['date'];
+    if (dateVal is String) {
+      parsedDate = DateTime.parse(dateVal);
+    } else if (dateVal is dynamic && dateVal.runtimeType.toString() == 'Timestamp') {
+      // Handle Firestore Timestamp without direct import if possible, 
+      // or just check for .toDate() presence
+      parsedDate = dateVal.toDate();
+    } else {
+      parsedDate = DateTime.now();
+    }
+
     return TransactionModel(
       id: json['id'] as String,
       title: json['title'] as String,
       description: json['description'] as String,
       amount: (json['amount'] as num).toDouble(),
       type: TransactionType.values[json['type'] as int],
-      date: DateTime.parse(json['date'] as String),
+      date: parsedDate,
       category: json['category'] as String,
       imageUrl: json['imageUrl'] as String?,
       groupId: json['groupId'] as String?,

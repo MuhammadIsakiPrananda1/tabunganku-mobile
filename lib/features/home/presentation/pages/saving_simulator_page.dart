@@ -201,7 +201,7 @@ class _SavingSimulatorPageState extends ConsumerState<SavingSimulatorPage> {
                                       borderRadius: BorderRadius.circular(16),
                                       style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: isDarkMode ? Colors.white : Colors.black87),
                                       items: ['Hari', 'Minggu', 'Bulan', 'Tahun']
-                                          .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                                          .map((e) => DropdownMenuItem(value: e, child: Text(e, overflow: TextOverflow.ellipsis)))
                                           .toList(),
                                       onChanged: (v) {
                                         setState(() => _unit = v!);

@@ -43,8 +43,7 @@ final appRouterProvider = Provider((ref) {
         path: '/lock',
         name: 'lock',
         builder: (context, state) {
-          final from = state.uri.queryParameters['from'];
-          return LockScreen(from: from);
+          return const LockScreen();
         },
       ),
 

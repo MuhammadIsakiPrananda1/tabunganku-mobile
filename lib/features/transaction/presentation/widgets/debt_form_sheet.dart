@@ -2,7 +2,9 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_native_contact_picker/flutter_native_contact_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:tabunganku/core/theme/app_colors.dart';
 import 'package:tabunganku/core/theme/theme_provider.dart';
 import 'package:tabunganku/models/debt_model.dart';
@@ -39,13 +41,22 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
   late TextEditingController _descriptionController;
   late DebtType _type;
   DateTime? _dueDate;
+  final FlutterNativeContactPicker _contactPicker = FlutterNativeContactPicker();
 
   @override
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.debt?.title ?? '');
-    _amountController = TextEditingController(
-        text: widget.debt != null ? widget.debt!.amount.toInt().toString() : '');
+    String formattedAmount = '';
+    if (widget.debt != null) {
+      final rawAmount = widget.debt!.amount.toInt().toString();
+      formattedAmount = rawAmount.replaceAllMapped(
+        RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
+        (m) => '${m[1]}.',
+      );
+    }
+    
+    _amountController = TextEditingController(text: formattedAmount);
     _contactController = TextEditingController(text: widget.debt?.contactName ?? '');
     _descriptionController =
         TextEditingController(text: widget.debt?.description ?? '');
@@ -107,14 +118,15 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
             theme.brightness == Brightness.dark);
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(28, 12, 28, 32),
+      padding: const EdgeInsets.fromLTRB(20, 10, 20, 24),
       decoration: BoxDecoration(
         color: isDarkMode ? AppColors.surfaceDark : Colors.white,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Form(
         key: _formKey,
-        child: Column(
+        child: SingleChildScrollView(
+          child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -127,17 +139,17 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                     borderRadius: BorderRadius.circular(2)),
               ),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 20),
             Text(
               widget.debt == null ? 'Catatan Baru' : 'Edit Catatan',
               style: TextStyle(
-                fontSize: 24,
+                fontSize: 22,
                 fontWeight: FontWeight.bold,
                 color: isDarkMode ? Colors.white : Colors.black87,
                 letterSpacing: -0.5,
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
             
             // Type Selector
             Row(
@@ -148,7 +160,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                     isSelected: _type == DebtType.hutang,
                     onTap: () => setState(() => _type = DebtType.hutang),
                     icon: Icons.call_made_rounded,
-                    color: Colors.red,
+                    color: const Color(0xFFE53935),
                     isDarkMode: isDarkMode,
                   ),
                 ),
@@ -159,23 +171,44 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                     isSelected: _type == DebtType.piutang,
                     onTap: () => setState(() => _type = DebtType.piutang),
                     icon: Icons.call_received_rounded,
-                    color: Colors.green,
+                    color: AppColors.primary,
                     isDarkMode: isDarkMode,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
 
-            _buildLabel('Siapa?', isDarkMode, isRequired: true),
+            _buildLabel('Nama Kontak', isDarkMode, isRequired: true),
             _buildTextField(
               controller: _contactController,
               hint: 'Nama orang/kontak',
               icon: Icons.person_outline_rounded,
               isDarkMode: isDarkMode,
+              iconColor: AppColors.primary,
               validator: (v) => v!.isEmpty ? 'Nama harus diisi' : null,
+              suffixIcon: IconButton(
+                icon: const Icon(Icons.contact_phone_rounded),
+                color: AppColors.primary,
+                onPressed: () async {
+                  try {
+                    final contact = await _contactPicker.selectContact();
+                    if (contact != null && contact.fullName != null) {
+                      String phoneStr = '';
+                      if (contact.phoneNumbers != null && contact.phoneNumbers!.isNotEmpty) {
+                        phoneStr = ' (${contact.phoneNumbers!.first})';
+                      }
+                      setState(() {
+                        _contactController.text = '${contact.fullName}$phoneStr';
+                      });
+                    }
+                  } catch (e) {
+                    // Ignoring if permission denied or no contact picker
+                  }
+                },
+              ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 12),
 
             _buildLabel('Nominal', isDarkMode, isRequired: true),
             _buildTextField(
@@ -189,9 +222,10 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
               ],
               isDarkMode: isDarkMode,
               prefixText: 'Rp',
+              iconColor: _type == DebtType.hutang ? const Color(0xFFE53935) : AppColors.primary,
               validator: (v) => v!.isEmpty ? 'Nominal harus diisi' : null,
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 12),
 
             _buildLabel('Keterangan', isDarkMode, isRequired: true),
             _buildTextField(
@@ -199,9 +233,10 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
               hint: 'Contoh: Pinjam buat makan',
               icon: Icons.title_rounded,
               isDarkMode: isDarkMode,
+              iconColor: AppColors.primary,
               validator: (v) => v!.isEmpty ? 'Keterangan harus diisi' : null,
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 12),
 
             Row(
               children: [
@@ -223,7 +258,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                           }
                         },
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                           decoration: BoxDecoration(
                             color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade50,
                             borderRadius: BorderRadius.circular(16),
@@ -233,8 +268,8 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                           child: Row(
                             children: [
                               Icon(Icons.calendar_today_rounded,
-                                  size: 20,
-                                  color: isDarkMode ? Colors.white38 : Colors.grey),
+                                  size: 18,
+                                  color: AppColors.primary),
                               const SizedBox(width: 12),
                               Text(
                                 _dueDate == null
@@ -252,11 +287,11 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                 ),
               ],
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 20),
 
             SizedBox(
               width: double.infinity,
-              height: 56,
+              height: 50,
               child: ElevatedButton(
                 onPressed: _submit,
                 style: ElevatedButton.styleFrom(
@@ -271,6 +306,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
             ),
           ],
         ),
+        ),
       ),
     );
   }
@@ -283,7 +319,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
           children: [
             TextSpan(
               text: text,
-              style: TextStyle(
+              style: GoogleFonts.comicNeue(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
                 color: isDarkMode ? Colors.white30 : Colors.black38,
@@ -313,6 +349,8 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
     List<TextInputFormatter>? inputFormatters,
     required bool isDarkMode,
     String? prefixText,
+    Color? iconColor,
+    Widget? suffixIcon,
     String? Function(String?)? validator,
   }) {
     return TextFormField(
@@ -325,19 +363,21 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: TextStyle(
-            color: isDarkMode ? Colors.white12 : Colors.black26, fontSize: 14),
+            color: isDarkMode ? Colors.white12 : Colors.black26, fontSize: 13),
+        suffixIcon: suffixIcon,
         prefixIcon: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             const SizedBox(width: 16),
-            Icon(icon, color: isDarkMode ? Colors.white24 : Colors.grey, size: 20),
+            Icon(icon, color: iconColor ?? (isDarkMode ? Colors.white24 : Colors.grey), size: 18),
             if (prefixText != null) ...[
               const SizedBox(width: 8),
               Text(
                 prefixText,
                 style: TextStyle(
-                  color: isDarkMode ? Colors.white70 : Colors.black87,
+                  color: iconColor ?? (isDarkMode ? Colors.white70 : Colors.black87),
                   fontWeight: FontWeight.bold,
+                  fontSize: 15,
                 ),
               ),
             ],

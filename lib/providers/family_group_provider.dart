@@ -15,11 +15,14 @@ final familyBalanceSyncProvider = Provider.autoDispose<void>((ref) {
   if (groupId == null || groupId.isEmpty) return;
 
   ref.listen(transactionsByGroupProvider(groupId), (previous, next) {
-    final totalBalance = next.fold(0.0, (acc, t) => 
-      acc + (t.type == TransactionType.income ? t.amount : -t.amount));
+    final userName = ref.read(userNameProvider);
+    // Only calculate the contribution of the current user
+    final myContribution = next
+        .where((t) => t.creatorName == userName)
+        .fold(0.0, (acc, t) => acc + (t.type == TransactionType.income ? t.amount : -t.amount));
     
-    // Perform sync in background
-    ref.read(familyGroupServiceProvider).syncLocalBalance(totalBalance);
+    // Sync our specific contribution to the cloud
+    ref.read(familyGroupServiceProvider).syncLocalBalance(myContribution);
   }, fireImmediately: true);
 });
 

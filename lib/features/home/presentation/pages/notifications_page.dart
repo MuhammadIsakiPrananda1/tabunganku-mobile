@@ -6,8 +6,8 @@ import 'package:tabunganku/core/theme/theme_provider.dart';
 import 'package:tabunganku/models/notification_model.dart';
 import 'package:tabunganku/providers/notification_provider.dart';
 
-class NotificationSheet extends ConsumerWidget {
-  const NotificationSheet({super.key});
+class NotificationsPage extends ConsumerWidget {
+  const NotificationsPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -17,111 +17,104 @@ class NotificationSheet extends ConsumerWidget {
         (ref.watch(themeProvider) == ThemeMode.system &&
             theme.brightness == Brightness.dark);
 
-    return Container(
-      padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
-      decoration: BoxDecoration(
-        color: isDarkMode ? AppColors.surfaceDark : Colors.white,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+    return Scaffold(
+      backgroundColor: isDarkMode ? Colors.black : Colors.white,
+      appBar: AppBar(
+        backgroundColor: isDarkMode ? Colors.black : Colors.white,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        centerTitle: true,
+        leading: IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, 
+            color: isDarkMode ? Colors.white : AppColors.primaryDark, 
+            size: 20),
+        ),
+        title: Text(
+          'Notifikasi',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+            color: isDarkMode ? Colors.white : AppColors.primaryDark,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => ref.read(notificationNotifierProvider.notifier).markAllAsRead(),
+            child: const Text('Tandai Dibaca', style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+        ],
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-          const SizedBox(height: 24),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: notificationsAsync.when(
+        data: (notifications) {
+          if (notifications.isEmpty) {
+            return _buildEmptyState(isDarkMode);
+          }
+          return Column(
             children: [
-              Text(
-                'Notifikasi',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: isDarkMode ? Colors.white : AppColors.primaryDark,
-                ),
-              ),
-              TextButton(
-                onPressed: () => ref.read(notificationNotifierProvider.notifier).markAllAsRead(),
-                style: TextButton.styleFrom(foregroundColor: const Color(0xFF1DA462)),
-                child: const Text('Tandai Dibaca'),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          ConstrainedBox(
-            constraints: BoxConstraints(
-              maxHeight: MediaQuery.of(context).size.height * 0.6,
-            ),
-            child: notificationsAsync.when(
-              data: (notifications) {
-                if (notifications.isEmpty) {
-                  return _buildEmptyState(isDarkMode);
-                }
-                return ListView.builder(
-                  shrinkWrap: true,
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                   itemCount: notifications.length,
                   itemBuilder: (context, index) {
                     final n = notifications[index];
                     return _buildNotificationTile(context, ref, n, isDarkMode);
                   },
-                );
-              },
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (err, stack) => Center(child: Text('Error: $err')),
-            ),
-          ),
-          if (notificationsAsync.hasValue && notificationsAsync.value!.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 16),
-              child: SizedBox(
-                width: double.infinity,
-                child: OutlinedButton(
-                  onPressed: () => ref.read(notificationNotifierProvider.notifier).clearAll(),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.red,
-                    side: const BorderSide(color: Colors.redAccent, width: 0.5),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                  child: const Text('Hapus Semua Riwayat'),
                 ),
               ),
-            ),
-        ],
+              if (notifications.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 56,
+                    child: OutlinedButton(
+                      onPressed: () => ref.read(notificationNotifierProvider.notifier).clearAll(),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.red,
+                        side: BorderSide(color: Colors.red.withValues(alpha: 0.2), width: 1),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      ),
+                      child: const Text('Hapus Semua Riwayat', style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                ),
+            ],
+          );
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, stack) => Center(child: Text('Error: $err')),
       ),
     );
   }
 
   Widget _buildEmptyState(bool isDarkMode) {
-    return SizedBox(
-      width: double.infinity,
+    return Center(
       child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const SizedBox(height: 40),
           Icon(
             Icons.notifications_none_rounded,
-            size: 64,
+            size: 80,
             color: isDarkMode ? Colors.white10 : Colors.grey.shade100,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
           Text(
             'Belum Ada Notifikasi',
             style: TextStyle(
+              fontSize: 16,
               fontWeight: FontWeight.bold,
               color: isDarkMode ? Colors.white38 : Colors.grey.shade400,
             ),
           ),
-          const SizedBox(height: 40),
+          const SizedBox(height: 8),
+          Text(
+            'Semua kabar terbaru akan muncul di sini',
+            style: TextStyle(
+              fontSize: 12,
+              color: isDarkMode ? Colors.white12 : Colors.grey.shade300,
+            ),
+          ),
         ],
       ),
     );
@@ -139,7 +132,7 @@ class NotificationSheet extends ConsumerWidget {
         break;
       case NotificationType.savings:
         icon = Icons.track_changes_rounded;
-        color = const Color(0xFF1DA462);
+        color = AppColors.primary;
         break;
       case NotificationType.family:
         icon = Icons.family_restroom_rounded;
@@ -147,7 +140,7 @@ class NotificationSheet extends ConsumerWidget {
         break;
       case NotificationType.system:
         icon = Icons.info_outline_rounded;
-        color = const Color(0xFF1DA462);
+        color = Colors.teal;
         break;
     }
 
@@ -156,18 +149,19 @@ class NotificationSheet extends ConsumerWidget {
         if (!n.isRead) {
           ref.read(notificationNotifierProvider.notifier).markAsRead(n.id);
         }
-        // TODO: Handle navigation based on type?
       },
       child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
+        margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: n.isRead
-              ? Colors.transparent
-              : (isDarkMode ? Colors.white.withValues(alpha: 0.05) : AppColors.primary.withValues(alpha: 0.03)),
+              ? (isDarkMode ? const Color(0xFF121212) : AppColors.background.withValues(alpha: 0.5))
+              : (isDarkMode ? AppColors.primary.withValues(alpha: 0.05) : AppColors.primary.withValues(alpha: 0.03)),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: n.isRead ? Colors.transparent : AppColors.primary.withValues(alpha: 0.1),
+            color: n.isRead 
+              ? (isDarkMode ? Colors.white.withValues(alpha: 0.03) : Colors.grey.shade100)
+              : AppColors.primary.withValues(alpha: 0.1),
           ),
         ),
         child: Row(
@@ -203,7 +197,7 @@ class NotificationSheet extends ConsumerWidget {
                         DateFormat('HH:mm').format(n.timestamp),
                         style: TextStyle(
                           fontSize: 10,
-                          color: isDarkMode ? Colors.white38 : Colors.black54,
+                          color: isDarkMode ? Colors.white24 : Colors.grey,
                         ),
                       ),
                     ],
@@ -216,12 +210,12 @@ class NotificationSheet extends ConsumerWidget {
                       color: isDarkMode ? Colors.white54 : Colors.black54,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 8),
                   Text(
                     DateFormat('dd MMM yyyy').format(n.timestamp),
                     style: TextStyle(
                       fontSize: 9,
-                      color: isDarkMode ? Colors.white24 : Colors.black45,
+                      color: isDarkMode ? Colors.white12 : Colors.grey.shade400,
                     ),
                   ),
                 ],
@@ -233,7 +227,7 @@ class NotificationSheet extends ConsumerWidget {
                 height: 8,
                 margin: const EdgeInsets.only(left: 8, top: 4),
                 decoration: const BoxDecoration(
-                  color: Color(0xFF1DA462),
+                  color: AppColors.primary,
                   shape: BoxShape.circle,
                 ),
               ),

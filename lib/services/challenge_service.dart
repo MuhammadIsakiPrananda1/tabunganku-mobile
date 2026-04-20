@@ -15,7 +15,8 @@ abstract class ChallengeService {
   Future<List<ChallengeModel>> getActiveChallenges();
   Future<List<ChallengeModel>> getCompletedChallenges();
   Future<ChallengeModel> getChallenge(String id);
-  Future<ChallengeModel> createChallenge(ChallengeTemplateModel template, {
+  Future<ChallengeModel> createChallenge(
+    ChallengeTemplateModel template, {
     double? customTargetAmount,
     int? customDuration,
     bool isGroupChallenge = false,
@@ -26,7 +27,8 @@ abstract class ChallengeService {
   Future<void> deleteChallenge(String id);
   Future<void> abandonChallenge(String id);
   Future<void> updateChallengeProgress(String challengeId, double progress);
-  Future<void> checkAndUpdateChallengeFromTransaction(TransactionModel transaction);
+  Future<void> checkAndUpdateChallengeFromTransaction(
+      TransactionModel transaction);
   Future<int> getCurrentStreak();
   Future<int> getTotalPoints();
   Stream<List<ChallengeModel>> watchActiveChallenges();
@@ -40,7 +42,7 @@ class MockChallengeService implements ChallengeService {
   static const String _streakKey = 'challenge_streak_';
   static const String _pointsKey = 'challenge_points_';
   static const String _lastCompletionKey = 'last_challenge_completion_';
-  
+
   static final SecureStorageService _secureStorage = SecureStorageService();
   static Future<SharedPreferences>? _prefsFuture;
   static final Map<String, List<ChallengeModel>> _userChallenges = {};
@@ -112,7 +114,9 @@ class MockChallengeService implements ChallengeService {
   @override
   Future<List<ChallengeModel>> getCompletedChallenges() async {
     final challenges = await getChallenges();
-    return challenges.where((c) => c.status == ChallengeStatus.completed).toList();
+    return challenges
+        .where((c) => c.status == ChallengeStatus.completed)
+        .toList();
   }
 
   @override
@@ -138,7 +142,7 @@ class MockChallengeService implements ChallengeService {
       isGroupChallenge: isGroupChallenge,
       groupId: groupId,
     );
-    
+
     return await createCustomChallenge(challenge);
   }
 
@@ -159,7 +163,8 @@ class MockChallengeService implements ChallengeService {
     final userId = await _getCurrentUserId();
     await _ensureUserLoaded(userId);
 
-    final index = _userChallenges[userId]!.indexWhere((c) => c.id == challenge.id);
+    final index =
+        _userChallenges[userId]!.indexWhere((c) => c.id == challenge.id);
     if (index != -1) {
       _userChallenges[userId]![index] = challenge;
       await _saveUserChallenges(userId);
@@ -187,24 +192,26 @@ class MockChallengeService implements ChallengeService {
   }
 
   @override
-  Future<void> updateChallengeProgress(String challengeId, double progress) async {
+  Future<void> updateChallengeProgress(
+      String challengeId, double progress) async {
     final challenge = await getChallenge(challengeId);
-    
+
     // Check if challenge should be completed
     ChallengeStatus newStatus = challenge.status;
     DateTime? completedDate;
-    
+
     if (challenge.targetAmount != null && progress >= challenge.targetAmount!) {
       newStatus = ChallengeStatus.completed;
       completedDate = DateTime.now();
-      
+
       // Update streak and points
       await _updateStreakOnCompletion();
       await _addPoints(challenge.points);
     }
-    
+
     // Check if challenge expired
-    if (DateTime.now().isAfter(challenge.endDate) && newStatus != ChallengeStatus.completed) {
+    if (DateTime.now().isAfter(challenge.endDate) &&
+        newStatus != ChallengeStatus.completed) {
       newStatus = ChallengeStatus.failed;
     }
 
@@ -218,10 +225,12 @@ class MockChallengeService implements ChallengeService {
   }
 
   @override
-  Future<void> checkAndUpdateChallengeFromTransaction(TransactionModel transaction) async {
+  Future<void> checkAndUpdateChallengeFromTransaction(
+      TransactionModel transaction) async {
     final activeChallenges = await getActiveChallenges();
-    debugPrint('ChallengeService: Checking ${activeChallenges.length} active challenges for transaction: ${transaction.title} (${transaction.category})');
-    
+    debugPrint(
+        'ChallengeService: Checking ${activeChallenges.length} active challenges for transaction: ${transaction.title} (${transaction.category})');
+
     for (final challenge in activeChallenges) {
       final txCategory = transaction.category.toLowerCase().trim();
       final targetCategory = challenge.targetCategory?.toLowerCase().trim();
@@ -229,20 +238,24 @@ class MockChallengeService implements ChallengeService {
       switch (challenge.targetType) {
         case ChallengeTargetType.saveAmount:
           if (transaction.type == TransactionType.income) {
-            debugPrint('ChallengeService: Updating saveAmount challenge ${challenge.id}');
+            debugPrint(
+                'ChallengeService: Updating saveAmount challenge ${challenge.id}');
             await updateChallengeProgress(
               challenge.id,
               challenge.currentProgress + transaction.amount,
             );
           }
           break;
-          
+
         case ChallengeTargetType.limitExpense:
           if (transaction.type == TransactionType.expense) {
             final totalExpense = challenge.currentProgress + transaction.amount;
-            debugPrint('ChallengeService: Updating limitExpense challenge ${challenge.id}. Current total: $totalExpense');
-            if (challenge.targetAmount != null && totalExpense > challenge.targetAmount!) {
-              debugPrint('ChallengeService: Challenge ${challenge.id} FAILED (limit exceeded)');
+            debugPrint(
+                'ChallengeService: Updating limitExpense challenge ${challenge.id}. Current total: $totalExpense');
+            if (challenge.targetAmount != null &&
+                totalExpense > challenge.targetAmount!) {
+              debugPrint(
+                  'ChallengeService: Challenge ${challenge.id} FAILED (limit exceeded)');
               final failed = challenge.copyWith(status: ChallengeStatus.failed);
               await updateChallenge(failed);
             } else {
@@ -250,22 +263,27 @@ class MockChallengeService implements ChallengeService {
             }
           }
           break;
-          
+
         case ChallengeTargetType.zeroExpense:
           if (transaction.type == TransactionType.expense) {
-            debugPrint('ChallengeService: Challenge ${challenge.id} FAILED (zeroExpense violation)');
+            debugPrint(
+                'ChallengeService: Challenge ${challenge.id} FAILED (zeroExpense violation)');
             final failed = challenge.copyWith(status: ChallengeStatus.failed);
             await updateChallenge(failed);
           }
           break;
-          
+
         case ChallengeTargetType.categoryLimit:
-          if (transaction.type == TransactionType.expense && 
+          if (transaction.type == TransactionType.expense &&
               txCategory == targetCategory) {
-            final categoryExpense = challenge.currentProgress + transaction.amount;
-            debugPrint('ChallengeService: Updating categoryLimit challenge ${challenge.id}. New total: $categoryExpense');
-            if (challenge.targetAmount != null && categoryExpense > challenge.targetAmount!) {
-              debugPrint('ChallengeService: Challenge ${challenge.id} FAILED (category limit exceeded)');
+            final categoryExpense =
+                challenge.currentProgress + transaction.amount;
+            debugPrint(
+                'ChallengeService: Updating categoryLimit challenge ${challenge.id}. New total: $categoryExpense');
+            if (challenge.targetAmount != null &&
+                categoryExpense > challenge.targetAmount!) {
+              debugPrint(
+                  'ChallengeService: Challenge ${challenge.id} FAILED (category limit exceeded)');
               final failed = challenge.copyWith(status: ChallengeStatus.failed);
               await updateChallenge(failed);
             } else {
@@ -273,13 +291,20 @@ class MockChallengeService implements ChallengeService {
             }
           }
           break;
-          
+
         case ChallengeTargetType.noTransactionType:
           if (txCategory == targetCategory) {
-            debugPrint('ChallengeService: Challenge ${challenge.id} FAILED (forbidden category used)');
+            debugPrint(
+                'ChallengeService: Challenge ${challenge.id} FAILED (forbidden category used)');
             final failed = challenge.copyWith(status: ChallengeStatus.failed);
             await updateChallenge(failed);
           }
+          break;
+        case ChallengeTargetType.custom:
+          // For custom challenges, we might just track activity
+          // e.g., 'Input All Expense' simply increments progress by 1 for each transaction
+          await updateChallengeProgress(
+              challenge.id, challenge.currentProgress + 1);
           break;
       }
     }
@@ -290,18 +315,19 @@ class MockChallengeService implements ChallengeService {
     final userId = await _getCurrentUserId();
     final streakKey = '$_streakKey$userId';
     final lastCompletionKey = '$_lastCompletionKey$userId';
-    
+
     final currentStreak = prefs.getInt(streakKey) ?? 0;
     final lastCompletionStr = prefs.getString(lastCompletionKey);
-    
+
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    
+
     if (lastCompletionStr != null) {
       final lastCompletion = DateTime.parse(lastCompletionStr);
-      final lastDate = DateTime(lastCompletion.year, lastCompletion.month, lastCompletion.day);
+      final lastDate = DateTime(
+          lastCompletion.year, lastCompletion.month, lastCompletion.day);
       final daysDiff = today.difference(lastDate).inDays;
-      
+
       if (daysDiff == 1) {
         // Consecutive day
         await prefs.setInt(streakKey, currentStreak + 1);
@@ -314,7 +340,7 @@ class MockChallengeService implements ChallengeService {
       // First completion
       await prefs.setInt(streakKey, 1);
     }
-    
+
     await prefs.setString(lastCompletionKey, now.toIso8601String());
   }
 
@@ -322,7 +348,7 @@ class MockChallengeService implements ChallengeService {
     final prefs = await _getPrefs();
     final userId = await _getCurrentUserId();
     final pointsKey = '$_pointsKey$userId';
-    
+
     final currentPoints = prefs.getInt(pointsKey) ?? 0;
     await prefs.setInt(pointsKey, currentPoints + points);
   }

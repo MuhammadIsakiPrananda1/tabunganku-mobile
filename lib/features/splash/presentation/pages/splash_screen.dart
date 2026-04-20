@@ -90,7 +90,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
     final security = ref.read(securityProvider);
     
-    // Condition: Only show lock screen if Biometric OR PIN is enabled
+    // Handle sequential startup flow for absolute privacy
     if (security.isBiometricEnabled || security.hasPin) {
       context.go('/lock');
     } else {

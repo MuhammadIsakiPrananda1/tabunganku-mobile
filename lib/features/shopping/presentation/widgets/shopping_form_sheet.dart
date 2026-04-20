@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
@@ -27,7 +28,9 @@ class ShoppingFormSheet extends ConsumerStatefulWidget {
         padding: EdgeInsets.only(
           bottom: MediaQuery.of(context).viewInsets.bottom,
         ),
-        child: ShoppingFormSheet(item: item),
+        child: SingleChildScrollView(
+          child: ShoppingFormSheet(item: item),
+        ),
       ),
     );
   }
@@ -43,30 +46,22 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
   late TextEditingController _pricePerUnitController; // Added
   late TextEditingController _quantityController; // Added
   late TextEditingController _unitController; // Added
-  late TextEditingController _customCategoryController;
-  late String _selectedCategory;
-  String? _selectedGroup;
-  bool _isCustomCategory = false;
+  late TextEditingController _categoryController;
   String? _imagePath;
   final ImagePicker _picker = ImagePicker();
 
-  final List<String> _categories =
-      AppCategories.expenseCategories.map((c) => c.label).toList();
-  final Map<String, List<TransactionCategory>> _groupedCategories = {};
+
 
   @override
   void initState() {
     super.initState();
 
-    // Group categories
-    for (var cat in AppCategories.expenseCategories) {
-      _groupedCategories.putIfAbsent(cat.group, () => []).add(cat);
-    }
+
 
     _nameController = TextEditingController(text: widget.item?.name ?? '');
     
     _quantityController = TextEditingController(
-        text: widget.item != null ? widget.item!.quantity.toString() : '');
+        text: widget.item != null ? widget.item!.quantity.toString().replaceAll(RegExp(r'\.0$'), '') : '');
     _unitController = TextEditingController(
         text: widget.item?.unit ?? '');
     
@@ -76,41 +71,28 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
       initialPricePerUnit = widget.item!.estimatedPrice / widget.item!.quantity;
     }
     
-    _pricePerUnitController = TextEditingController(
-        text: initialPricePerUnit > 0 ? initialPricePerUnit.toInt().toString() : '');
+    // Calculate initial price per unit if editing
+    String initialPriceStr = '';
+    if (widget.item != null) {
+      final pricePerUnit = (widget.item!.estimatedPrice / widget.item!.quantity).toInt();
+      initialPriceStr = pricePerUnit.toString().replaceAllMapped(
+        RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
+        (m) => '${m[1]}.',
+      );
+    }
+    
+    _pricePerUnitController = TextEditingController(text: initialPriceStr);
     
     _priceController = TextEditingController(
         text: widget.item != null
             ? widget.item!.estimatedPrice.toInt().toString()
             : '');
-    _customCategoryController = TextEditingController();
+    _categoryController = TextEditingController(text: widget.item?.category ?? '');
+    _imagePath = widget.item?.imagePath;
 
     // Add listeners for auto-calculation
     _pricePerUnitController.addListener(_calculateTotalPrice);
     _quantityController.addListener(_calculateTotalPrice);
-
-    final initialCat = widget.item?.category ?? 
-        (AppCategories.expenseCategories.isNotEmpty ? AppCategories.expenseCategories.first.label : '');
-    final isKnown = _categories.contains(initialCat) &&
-        initialCat != AppCategories.otherLabel;
-
-    if (isKnown) {
-      _selectedCategory = initialCat;
-      _isCustomCategory = false;
-      _selectedGroup = AppCategories.expenseCategories.firstWhere((c) => c.label == initialCat).group;
-    } else if (initialCat == AppCategories.otherLabel) {
-      _selectedCategory = AppCategories.otherLabel;
-      _isCustomCategory = true;
-      _customCategoryController.text = '';
-      _selectedGroup = AppCategories.expenseCategories.firstWhere((c) => c.label == AppCategories.otherLabel).group;
-    } else {
-      // Fallback for custom categories
-      _selectedCategory = AppCategories.otherLabel;
-      _isCustomCategory = true;
-      _customCategoryController.text = initialCat;
-      _selectedGroup = AppCategories.expenseCategories.firstWhere((c) => c.label == AppCategories.otherLabel).group;
-    }
-    _imagePath = widget.item?.imagePath;
 
     // Trigger formatting if price exists
     if (_priceController.text.isNotEmpty) {
@@ -131,7 +113,7 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
     _pricePerUnitController.dispose();
     _quantityController.dispose();
     _unitController.dispose();
-    _customCategoryController.dispose();
+    _categoryController.dispose();
     super.dispose();
   }
 
@@ -144,15 +126,19 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
     
     final total = qty * pricePerUnit;
     
-    if (total > 0) {
-      final formattedTotal = _RibuanSeparatorInputFormatter().formatEditUpdate(
-        const TextEditingValue(text: ''),
-        TextEditingValue(
-            text: total.toInt().toString(), selection: TextSelection.collapsed(offset: 0)),
-      ).text;
-      
-      _priceController.text = formattedTotal;
-    }
+    setState(() {
+      if (total > 0) {
+        final formattedTotal = _RibuanSeparatorInputFormatter().formatEditUpdate(
+          const TextEditingValue(text: ''),
+          TextEditingValue(
+              text: total.toInt().toString(), selection: TextSelection.collapsed(offset: 0)),
+        ).text;
+        
+        _priceController.text = formattedTotal;
+      } else {
+        _priceController.text = '';
+      }
+    });
   }
 
   Future<void> _pickImage(ImageSource source) async {
@@ -295,10 +281,9 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
           _priceController.text.replaceAll(RegExp(r'[^0-9]'), '');
       final price = double.tryParse(cleanAmount) ?? 0;
 
-      final finalCategory = (_selectedCategory == AppCategories.otherLabel &&
-              _customCategoryController.text.trim().isNotEmpty)
-          ? _customCategoryController.text.trim()
-          : _selectedCategory;
+      final finalCategory = _categoryController.text.trim().isEmpty 
+          ? 'Belanja' 
+          : _categoryController.text.trim();
 
       final newItem = ShoppingItem(
         id: widget.item?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
@@ -346,12 +331,12 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
       ),
       decoration: BoxDecoration(
         color: isDarkMode ? AppColors.surfaceDark : Colors.white,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           Center(
             child: Container(
               width: 40,
@@ -369,18 +354,18 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
               children: [
                 Text(
                   widget.item == null ? 'Bikin Rencana' : 'Ubah Rencana',
-                  style: TextStyle(
-                    fontSize: 20,
+                  style: GoogleFonts.comicNeue(
+                    fontSize: 22,
                     fontWeight: FontWeight.bold,
                     color: isDarkMode ? Colors.white : Colors.black87,
                   ),
                 ),
                 if (_priceController.text.isNotEmpty)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
                       color: AppColors.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
                       'Rp ${_priceController.text}',
@@ -397,7 +382,7 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
           const SizedBox(height: 20),
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(28, 0, 28, 32),
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
               physics: const BouncingScrollPhysics(),
               child: Form(
                 key: _formKey,
@@ -449,7 +434,7 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Icon(Icons.add_a_photo_rounded,
-                                      color: isDarkMode ? Colors.white24 : Colors.grey.shade400, size: 24),
+                                      color: AppColors.primary, size: 24),
                                   const SizedBox(width: 12),
                                   Text('Tambah Foto Barang',
                                       style: TextStyle(
@@ -525,72 +510,24 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
                     ),
                     const SizedBox(height: 24),
 
-                    _buildLabel('Grup Kategori', isDarkMode),
-                    DropdownButtonFormField<String>(
-                      value: _selectedGroup,
-                      dropdownColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
-                      style: TextStyle(color: isDarkMode ? Colors.white : Colors.black87, fontWeight: FontWeight.bold),
-                      decoration: _getDropdownDecoration(isDarkMode, icon: Icons.grid_view_rounded),
-                      items: _groupedCategories.keys.map((group) => DropdownMenuItem(
-                        value: group,
-                        child: Text(group, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                      )).toList(),
-                      onChanged: (val) {
-                        if (val != null) {
-                          setState(() {
-                            _selectedGroup = val;
-                            _selectedCategory = _groupedCategories[val]!.first.label;
-                            _isCustomCategory = _selectedCategory == AppCategories.otherLabel;
-                          });
-                        }
-                      },
-                    ),
-                    const SizedBox(height: 12),
-
                     _buildLabel('Kategori', isDarkMode),
-                    DropdownButtonFormField<String>(
-                      value: _selectedCategory,
-                      dropdownColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
-                      style: TextStyle(color: isDarkMode ? Colors.white : Colors.black87, fontWeight: FontWeight.bold),
-                      decoration: _getDropdownDecoration(isDarkMode, 
-                        icon: AppCategories.expenseCategories.firstWhere((c) => c.label == _selectedCategory).icon,
-                        iconColor: AppCategories.getColorForCategory(_selectedCategory),
-                      ),
-                      items: _groupedCategories[_selectedGroup]!.map((cat) => DropdownMenuItem(
-                        value: cat.label,
-                        child: Text(cat.label, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
-                      )).toList(),
-                      onChanged: (val) {
-                        if (val != null) {
-                          setState(() {
-                            _selectedCategory = val;
-                            _isCustomCategory = val == AppCategories.otherLabel;
-                          });
-                        }
-                      },
+                    _buildTextField(
+                      controller: _categoryController,
+                      hint: 'Misal: Sembako, Kebutuhan Dapur...',
+                      icon: Icons.label_outline_rounded,
+                      isDarkMode: isDarkMode,
                     ),
-                    if (_isCustomCategory) ...[
-                      const SizedBox(height: 12),
-                      _buildTextField(
-                        controller: _customCategoryController,
-                        hint: 'Kategori kustom...',
-                        icon: Icons.label_important_outline_rounded,
-                        isDarkMode: isDarkMode,
-                        validator: (v) =>
-                            (_selectedCategory == AppCategories.otherLabel && v!.isEmpty) ? 'Wajib diisi' : null,
-                      ),
-                    ],
                     const SizedBox(height: 32),
 
                     // Total View (More subtle but clear)
                     if (_priceController.text.isNotEmpty)
                       Container(
                         width: double.infinity,
-                        padding: const EdgeInsets.all(16),
-                        margin: const EdgeInsets.only(bottom: 24),
+                        padding: const EdgeInsets.all(12),
+                        margin: const EdgeInsets.only(bottom: 20),
                         decoration: BoxDecoration(
                           color: AppColors.primary.withValues(alpha: 0.05),
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: AppColors.primary.withValues(alpha: 0.1)),
                         ),
                         child: Row(
@@ -635,18 +572,7 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
     );
   }
 
-  InputDecoration _getDropdownDecoration(bool isDarkMode, {required IconData icon, Color? iconColor}) {
-    return InputDecoration(
-      filled: true,
-      fillColor: isDarkMode ? Colors.white.withValues(alpha: 0.03) : Colors.grey.shade50,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      prefixIcon: Icon(icon, color: iconColor ?? AppColors.primary, size: 18),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide.none,
-      ),
-    );
-  }
+
 
   Widget _buildLabel(String text, bool isDarkMode, {bool isRequired = false}) {
     return Padding(
@@ -656,11 +582,10 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
           children: [
             TextSpan(
               text: text,
-              style: TextStyle(
-                fontSize: 12,
+              style: GoogleFonts.comicNeue(
+                fontSize: 14,
                 fontWeight: FontWeight.bold,
-                color: isDarkMode ? Colors.white30 : Colors.black38,
-                letterSpacing: 0.5,
+                color: isDarkMode ? Colors.white70 : Colors.black87,
               ),
             ),
             if (isRequired)
@@ -707,7 +632,7 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
           children: [
             const SizedBox(width: 16),
             Icon(icon,
-                color: isDarkMode ? Colors.white24 : Colors.grey, size: 20),
+                color: AppColors.primary, size: 20),
             if (prefixText != null) ...[
               const SizedBox(width: 8),
               Text(

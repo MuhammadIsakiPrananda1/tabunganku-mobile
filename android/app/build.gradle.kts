@@ -17,6 +17,12 @@ if (localPropertiesFile.exists()) {
 val flutterVersionName = localProperties.getProperty("flutter.versionName") ?: "1.0.0"
 val flutterVersionCode = localProperties.getProperty("flutter.versionCode")?.toInt() ?: 1
 
+val keystoreProperties = Properties()
+val keystorePropertiesFile = rootProject.file("key.properties")
+if (keystorePropertiesFile.exists()) {
+    keystorePropertiesFile.inputStream().use { keystoreProperties.load(it) }
+}
+
 android {
     namespace = "com.tabunganku"
     compileSdk = 36
@@ -32,6 +38,15 @@ android {
         jvmTarget = "17"
     }
 
+    signingConfigs {
+        create("release") {
+            keyAlias = keystoreProperties["keyAlias"] as String
+            keyPassword = keystoreProperties["keyPassword"] as String
+            storeFile = file(keystoreProperties["storeFile"] as String)
+            storePassword = keystoreProperties["storePassword"] as String
+        }
+    }
+
     defaultConfig {
         applicationId = "com.tabunganku"
         minSdk = flutter.minSdkVersion
@@ -42,7 +57,7 @@ android {
 
     buildTypes {
         release {
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(

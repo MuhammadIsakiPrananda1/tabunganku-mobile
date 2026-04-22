@@ -37,6 +37,10 @@ import 'package:tabunganku/providers/morning_charity_provider.dart';
 import 'package:tabunganku/providers/bills_provider.dart';
 import 'package:tabunganku/models/bill_model.dart';
 import 'package:tabunganku/features/home/presentation/widgets/connectivity_guard.dart';
+import 'package:tabunganku/providers/gold_provider.dart';
+import 'package:tabunganku/providers/investment_provider.dart';
+import 'package:tabunganku/models/gold_investment_model.dart';
+import 'package:tabunganku/models/investment_model.dart';
 
 class DashboardPage extends ConsumerStatefulWidget {
   const DashboardPage({super.key});
@@ -140,7 +144,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                     fit: BoxFit.scaleDown,
                     alignment: Alignment.centerLeft,
                     child: Text(_navItems[_currentIndex].label,
-                        style: const TextStyle(
+                        style: GoogleFonts.comicNeue(
                             fontWeight: FontWeight.bold, fontSize: 24)),
                   ),
                   if (_currentIndex != 3) ...[
@@ -180,13 +184,13 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                       data: (count) => count > 0,
                       orElse: () => false,
                     ),
-                    backgroundColor: const Color(0xFF1DA462),
+                    backgroundColor: AppColors.primary,
                     offset: const Offset(-4, 4),
                     child: IconButton(
                       onPressed: _showNotificationSheet,
                       icon: const Icon(
                         Icons.notifications_none_rounded,
-                        color: Color(0xFF1DA462),
+                        color: AppColors.primary,
                         size: 28,
                       ),
                     ),
@@ -283,9 +287,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    const Text(
+                    Text(
                       'Kalkulator',
-                      style: TextStyle(
+                      style: GoogleFonts.comicNeue(
                         color: AppColors.primary,
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
@@ -496,6 +500,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       case QuickActionType.savingPlans:
         context.push('/saving-plans');
         break;
+      case QuickActionType.financialHealth:
+        context.push('/financial-health');
+        break;
     }
   }
 
@@ -686,7 +693,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
               Center(
                 child: Text(
                   'Dibuat pada ${DateFormat('d MMM yyyy').format(target.createdAt)}',
-                  style: TextStyle(
+                  style: GoogleFonts.comicNeue(
                       fontSize: 12,
                       color: isDarkMode ? Colors.white12 : Colors.black26,
                       fontWeight: FontWeight.bold),
@@ -834,7 +841,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 ),
                 const SizedBox(height: 20),
                 Text('JUMLAH SEDEKAH *',
-                    style: TextStyle(
+                    style: GoogleFonts.comicNeue(
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
                         color: isDarkMode ? Colors.white24 : Colors.black38,
@@ -846,7 +853,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   keyboardType: TextInputType.number,
                   inputFormatters: [_RibuanFormatter()],
                   textAlign: TextAlign.start,
-                  style: TextStyle(
+                  style: GoogleFonts.comicNeue(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: isDarkMode ? Colors.white : Colors.black,
@@ -854,7 +861,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   onEditingComplete: () => FocusScope.of(context).unfocus(),
                   onTapOutside: (event) => FocusScope.of(context).unfocus(),
                   decoration: InputDecoration(
-                    prefixIcon: const Padding(
+                    prefixIcon: Padding(
                       padding: EdgeInsets.only(left: 16, right: 8),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -864,7 +871,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                           SizedBox(width: 8),
                           Text(
                             'Rp',
-                            style: TextStyle(
+                            style: GoogleFonts.comicNeue(
                                 fontWeight: FontWeight.bold,
                                 color: Colors.red,
                                 fontSize: 18),
@@ -873,7 +880,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                       ),
                     ),
                     hintText: '0',
-                    hintStyle: TextStyle(
+                    hintStyle: GoogleFonts.comicNeue(
                       color: (isDarkMode ? Colors.white : Colors.red)
                           .withValues(alpha: 0.4),
                     ),
@@ -934,8 +941,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16)),
                     ),
-                    child: const Text('Catat Sedekah',
-                        style: TextStyle(
+                    child: Text('Catat Sedekah',
+                        style: GoogleFonts.comicNeue(
                             fontWeight: FontWeight.bold,
                             fontSize: 15,
                             letterSpacing: 0.5)),
@@ -977,12 +984,12 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(label,
-                    style: TextStyle(
+                    style: GoogleFonts.comicNeue(
                         fontSize: 9,
                         fontWeight: FontWeight.bold,
                         color: isDarkMode ? Colors.white38 : Colors.black38)),
                 Text(_formatRupiah(val),
-                    style: TextStyle(
+                    style: GoogleFonts.comicNeue(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
                         color: isDarkMode ? Colors.white70 : Colors.black87)),
@@ -1003,7 +1010,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 size: 14, color: Colors.amber.shade600),
             const SizedBox(width: 8),
             Text('ALOKASI CERDAS (50/30/20)',
-                style: TextStyle(
+                style: GoogleFonts.comicNeue(
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
                     color: isDarkMode
@@ -1168,7 +1175,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                   ? 'Tambah Pengeluaran'
                                   : 'Tambah Pemasukan',
                               textAlign: TextAlign.center,
-                              style: TextStyle(
+                              style: GoogleFonts.comicNeue(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 22,
                                 color:
@@ -1186,7 +1193,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                             autofocus: false,
                             keyboardType: TextInputType.number,
                             textAlign: TextAlign.left,
-                            style: TextStyle(
+                            style: GoogleFonts.comicNeue(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                               color: isDarkMode ? Colors.white : Colors.black87,
@@ -1202,7 +1209,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                 FocusScope.of(context).unfocus(),
                             decoration: InputDecoration(
                               hintText: '0',
-                              hintStyle: TextStyle(
+                              hintStyle: GoogleFonts.comicNeue(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                                 color: isDarkMode
@@ -1225,7 +1232,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                     const SizedBox(width: 8),
                                     Text(
                                       'Rp',
-                                      style: TextStyle(
+                                      style: GoogleFonts.comicNeue(
                                         fontWeight: FontWeight.bold,
                                         color: type == TransactionType.income
                                             ? AppColors.primary
@@ -1280,8 +1287,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                         ),
                                         borderRadius: BorderRadius.circular(6),
                                       ),
-                                      child: const Text('INSTAN',
-                                          style: TextStyle(
+                                      child: Text('INSTAN',
+                                          style: GoogleFonts.comicNeue(
                                               color: Colors.white,
                                               fontSize: 9,
                                               fontWeight: FontWeight.bold,
@@ -1289,7 +1296,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                     ),
                                     const SizedBox(width: 8),
                                     Text('BUNGA TABUNGAN (CEPAT)',
-                                        style: TextStyle(
+                                        style: GoogleFonts.comicNeue(
                                             fontSize: 10,
                                             fontWeight: FontWeight.bold,
                                             color: isDarkMode
@@ -1329,7 +1336,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                         Icons.account_balance_rounded,
                                         color: AppColors.primary),
                                     labelStyle:
-                                        TextStyle(color: formLabelColor),
+                                        GoogleFonts.comicNeue(color: formLabelColor),
                                   ),
                                   selectedItemBuilder: (context) {
                                     return [
@@ -1347,7 +1354,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                         'Bank Lainnya',
                                       ].map((label) {
                                         return Text(label,
-                                            style: TextStyle(
+                                            style: GoogleFonts.comicNeue(
                                                 fontWeight: FontWeight.bold,
                                                 fontSize: 14,
                                                 color: isDarkMode
@@ -1360,7 +1367,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                     DropdownMenuItem<String>(
                                       value: null,
                                       child: Text('None',
-                                          style: TextStyle(
+                                          style: GoogleFonts.comicNeue(
                                               color: isDarkMode
                                                   ? Colors.white54
                                                   : Colors.black54)),
@@ -1460,7 +1467,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                                     maxLines: 1,
                                                     overflow:
                                                         TextOverflow.ellipsis,
-                                                    style: TextStyle(
+                                                    style: GoogleFonts.comicNeue(
                                                         fontWeight:
                                                             FontWeight.bold,
                                                         fontSize: 14,
@@ -1473,7 +1480,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                                     maxLines: 1,
                                                     overflow:
                                                         TextOverflow.ellipsis,
-                                                    style: TextStyle(
+                                                    style: GoogleFonts.comicNeue(
                                                         fontSize: 11,
                                                         color:
                                                             formSubTextColor),
@@ -1531,7 +1538,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                 if (selectedInterestBank == 'Bank Lainnya') ...[
                                   const SizedBox(height: 16),
                                   TextFormField(
-                                    style: TextStyle(
+                                    style: GoogleFonts.comicNeue(
                                         fontWeight: FontWeight.bold,
                                         color: isDarkMode
                                             ? Colors.white
@@ -1563,7 +1570,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                           Icons.account_balance_rounded,
                                           color: AppColors.primary),
                                       labelStyle:
-                                          TextStyle(color: formLabelColor),
+                                          GoogleFonts.comicNeue(color: formLabelColor),
                                     ),
                                     onChanged: (val) {
                                       interestOtherBankName = val;
@@ -1651,7 +1658,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                                             .isNotEmpty
                                                     ? 'Bunga ${interestOtherBankName.trim()}'
                                                     : 'Bunga $selectedInterestBank',
-                                                style: TextStyle(
+                                                style: GoogleFonts.comicNeue(
                                                     fontWeight: FontWeight.bold,
                                                     fontSize: 12,
                                                     color: isDarkMode
@@ -1670,7 +1677,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                                                 'Bank Lainnya'
                                                             ? 'Masukkan nama bank Anda di kolom atas. Nama transaksi akan terisi otomatis.'
                                                             : 'Bunga tabungan dari $selectedInterestBank. Tambahkan catatan nominal pajak jika diperlukan.',
-                                                style: TextStyle(
+                                                style: GoogleFonts.comicNeue(
                                                     fontSize: 11,
                                                     color: isDarkMode
                                                         ? Colors.white54
@@ -1695,7 +1702,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text('BIAYA ADMIN TOP-UP (CEPAT) *',
-                                    style: TextStyle(
+                                    style: GoogleFonts.comicNeue(
                                         fontSize: 10,
                                         fontWeight: FontWeight.bold,
                                         color: isDarkMode
@@ -1729,7 +1736,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                             : Icons
                                                 .account_balance_wallet_rounded,
                                         color: AppColors.primary),
-                                    labelStyle: TextStyle(
+                                    labelStyle: GoogleFonts.comicNeue(
                                         color: isDarkMode
                                             ? Colors.white38
                                             : Colors.black45),
@@ -1745,7 +1752,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                         value: label,
                                         child: Text(label,
                                             overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(
+                                            style: GoogleFonts.comicNeue(
                                                 color: isDarkMode
                                                     ? Colors.white70
                                                     : Colors.black87)),
@@ -1783,7 +1790,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                 if (selectedTopUpSource == 'Bank') ...[
                                   const SizedBox(height: 16),
                                   TextFormField(
-                                    style: TextStyle(
+                                    style: GoogleFonts.comicNeue(
                                         fontWeight: FontWeight.bold,
                                         color: isDarkMode
                                             ? Colors.white
@@ -1808,7 +1815,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                       prefixIcon: Icon(
                                           Icons.account_balance_rounded,
                                           color: AppColors.primary),
-                                      labelStyle: TextStyle(
+                                      labelStyle: GoogleFonts.comicNeue(
                                           color: isDarkMode
                                               ? Colors.white38
                                               : Colors.black45),
@@ -1834,7 +1841,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                             children: [
                               const SizedBox(height: 20),
                               Text('KETERANGAN TRANSAKSI *',
-                                  style: TextStyle(
+                                  style: GoogleFonts.comicNeue(
                                       fontSize: 10,
                                       fontWeight: FontWeight.bold,
                                       color: isDarkMode
@@ -1844,7 +1851,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                               const SizedBox(height: 8),
                               TextFormField(
                                 controller: nameController,
-                                style: TextStyle(
+                                style: GoogleFonts.comicNeue(
                                     fontWeight: FontWeight.bold,
                                     color: isDarkMode
                                         ? Colors.white
@@ -1865,7 +1872,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                           BorderSide(color: formBorderColor)),
                                   prefixIcon: Icon(Icons.edit_note_rounded,
                                       color: AppColors.primary),
-                                  hintStyle: TextStyle(color: formSubTextColor),
+                                  hintStyle: GoogleFonts.comicNeue(color: formSubTextColor),
                                 ),
                                 onChanged: (val) {
                                   if (type == TransactionType.expense) {
@@ -1902,7 +1909,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                               ),
                               const SizedBox(height: 20),
                               Text('PILIH KATEGORI *',
-                                  style: TextStyle(
+                                  style: GoogleFonts.comicNeue(
                                       fontSize: 10,
                                       fontWeight: FontWeight.bold,
                                       color: isDarkMode
@@ -1928,13 +1935,13 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                       borderSide: BorderSide.none),
                                   prefixIcon: Icon(Icons.grid_view_rounded,
                                       color: AppColors.primary),
-                                  labelStyle: TextStyle(color: formLabelColor),
+                                  labelStyle: GoogleFonts.comicNeue(color: formLabelColor),
                                 ),
                                 items: groupedCategories.keys
                                     .map((group) => DropdownMenuItem(
                                           value: group,
                                           child: Text(group,
-                                              style: TextStyle(
+                                              style: GoogleFonts.comicNeue(
                                                   color: isDarkMode
                                                       ? Colors.white
                                                       : Colors.black87,
@@ -1980,13 +1987,13 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                         : Icons.help_outline_rounded,
                                     color: AppColors.primary,
                                   ),
-                                  labelStyle: TextStyle(color: formLabelColor),
+                                  labelStyle: GoogleFonts.comicNeue(color: formLabelColor),
                                 ),
                                 items: groupedCategories[selectedGroup]!
                                     .map((cat) => DropdownMenuItem(
                                           value: cat.label,
                                           child: Text(cat.label,
-                                              style: TextStyle(
+                                              style: GoogleFonts.comicNeue(
                                                   color: isDarkMode
                                                       ? Colors.white
                                                       : Colors.black87,
@@ -2007,7 +2014,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                 TextFormField(
                                   controller: customCategoryController,
                                   autofocus: true,
-                                  style: TextStyle(
+                                  style: GoogleFonts.comicNeue(
                                       color: isDarkMode
                                           ? Colors.white
                                           : Colors.black87),
@@ -2029,9 +2036,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                     prefixIcon: Icon(Icons.star_rounded,
                                         color: AppColors.primary),
                                     labelStyle:
-                                        TextStyle(color: formLabelColor),
+                                        GoogleFonts.comicNeue(color: formLabelColor),
                                     hintStyle:
-                                        TextStyle(color: formSubTextColor),
+                                        GoogleFonts.comicNeue(color: formSubTextColor),
                                   ),
                                   validator: (val) {
                                     if (selectedCategory == 'Lainnya' &&
@@ -2105,8 +2112,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                   shadowColor:
                                       AppColors.primary.withValues(alpha: 0.3),
                                 ),
-                                child: const Text('Simpan Transaksi',
-                                    style: TextStyle(
+                                child: Text('Simpan Transaksi',
+                                    style: GoogleFonts.comicNeue(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 15,
                                         letterSpacing: 0.5)),
@@ -2160,7 +2167,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text('Daftar Target',
-                        style: TextStyle(
+                        style: GoogleFonts.comicNeue(
                             fontWeight: FontWeight.bold,
                             fontSize: 20,
                             color: isDarkMode ? Colors.white : Colors.black87)),
@@ -2182,7 +2189,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                         if (targets.isEmpty) {
                           return Center(
                               child: Text('Belum ada target.',
-                                  style: TextStyle(
+                                  style: GoogleFonts.comicNeue(
                                       color: isDarkMode
                                           ? Colors.white60
                                           : Colors.black38)));
@@ -2199,14 +2206,14 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                   child: const Icon(Icons.track_changes_rounded,
                                       color: AppColors.primary)),
                               title: Text(t.name,
-                                  style: TextStyle(
+                                  style: GoogleFonts.comicNeue(
                                       fontWeight: FontWeight.bold,
                                       color: isDarkMode
                                           ? Colors.white
                                           : Colors.black87)),
                               subtitle: Text(
                                   'Target: ${_formatRupiah(t.targetAmount)}',
-                                  style: TextStyle(
+                                  style: GoogleFonts.comicNeue(
                                       color: isDarkMode
                                           ? Colors.white24
                                           : Colors.black54)),
@@ -2295,7 +2302,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                       ],
                       decoration: InputDecoration(
                         hintText: '0',
-                        hintStyle: TextStyle(
+                        hintStyle: GoogleFonts.comicNeue(
                             color:
                                 isDarkMode ? Colors.white12 : Colors.black26),
                         prefixIcon: Row(
@@ -2334,7 +2341,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                           color: isDarkMode ? Colors.white : Colors.black87),
                       decoration: InputDecoration(
                         hintText: 'Contoh: Laptop, Motor, HP...',
-                        hintStyle: TextStyle(
+                        hintStyle: GoogleFonts.comicNeue(
                             color:
                                 isDarkMode ? Colors.white12 : Colors.black26),
                         filled: true,
@@ -2527,53 +2534,107 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     );
   }
 
-  Widget _buildPriorityCard({
-    required String title,
-    required String mainText,
-    required String subText,
-    required IconData icon,
-    required Color color,
-    required bool isDarkMode,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(icon,
-                size: 12,
-                color: isDarkMode ? color.withValues(alpha: 0.8) : color),
-            const SizedBox(width: 4),
-            Text(title,
-                style: TextStyle(
-                    fontSize: 7.5,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 0.4,
-                    color: isDarkMode ? Colors.white38 : Colors.black38)),
-          ],
-        ),
-        const SizedBox(height: 6),
-        Text(mainText,
-            style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.bold,
-                letterSpacing: -0.2,
-                color: isDarkMode ? Colors.white : Colors.black87)),
-        const SizedBox(height: 1),
-        Text(subText,
-            style: TextStyle(
-                fontSize: 8.5,
-                fontWeight: FontWeight.w500,
-                color: isDarkMode ? Colors.white24 : Colors.black26)),
-      ],
-    );
-  }
 
   double? _toAmount(String raw) {
     // Bersihkan dari karakter non-angka
     final digitsOnly = raw.replaceAll(RegExp(r'[^0-9]'), '');
     if (digitsOnly.isEmpty) return null;
     return double.tryParse(digitsOnly);
+  }
+
+
+  Widget _buildMiniAuditMetric(String label, String value, bool isDarkMode) {
+    return Column(
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.comicNeue(
+            fontSize: 9,
+            fontWeight: FontWeight.w600,
+            color: isDarkMode ? Colors.white24 : Colors.grey.shade500,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: GoogleFonts.comicNeue(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: isDarkMode ? Colors.white : AppColors.primaryDark,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInlineAsset(String label, double amount, Color color, bool isDarkMode) {
+    return Row(
+      children: [
+        Container(width: 6, height: 6, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+        const SizedBox(width: 8),
+        Text(
+          _showBalance ? _formatCompactRupiah(amount) : '••••',
+          style: GoogleFonts.comicNeue(
+            fontSize: 11,
+            fontWeight: FontWeight.bold,
+            color: isDarkMode ? Colors.white38 : Colors.teal.shade800.withValues(alpha: 0.6),
+          ),
+        ),
+      ],
+    );
+  }
+
+
+  Widget _buildCompactInsightCard(String label, String value, IconData icon, Color color, double width, bool isDarkMode) {
+    return Container(
+      width: width,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDarkMode ? AppColors.surfaceDark : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDarkMode ? Colors.white.withValues(alpha: 0.03) : Colors.grey.shade100,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: isDarkMode ? 0.1 : 0.05),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, color: color, size: 16),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: GoogleFonts.comicNeue(
+                    fontSize: 9,
+                    fontWeight: FontWeight.bold,
+                    color: isDarkMode ? Colors.white24 : Colors.grey.shade400,
+                  ),
+                ),
+                Text(
+                  value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.comicNeue(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: isDarkMode ? Colors.white70 : Colors.black87,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildFinanceTab(
@@ -2593,7 +2654,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
 
     // NEW DATA LOGIC: Daily trend for the entire current month
     final now = DateTime.now();
-    final lastDayOfMonth = DateTime(now.year, now.month + 1, 0);
 
     final theme = Theme.of(context);
     final themeMode = ref.watch(themeProvider);
@@ -2623,11 +2683,23 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     // 3. Activity Count
     final monthlyActivity = currentMonthTx.length;
 
+    // 3b. Saving Targets
+    final targetsAsync = ref.watch(savingTargetsStreamProvider);
+    final targets = targetsAsync.valueOrNull ?? [];
+
     // 4. NEW: Charity & Bill Logic
     final charityStats = ref.watch(morningCharityProvider);
     final billsAsync = ref.watch(billsStreamProvider);
     final bills =
         billsAsync.maybeWhen(data: (d) => d, orElse: () => <BillModel>[]);
+
+    // 5. Audit Data
+    final balance = totalIncome - totalExpense; 
+    final goldTxs = ref.watch(goldTransactionsStreamProvider).asData?.value ?? [];
+    final totalGoldGrams = goldTxs.fold(0.0, (s, t) => s + (t.type == GoldTransactionType.buy ? t.grams : -t.grams));
+    final investments = ref.watch(investmentStreamProvider).asData?.value ?? [];
+    final investmentValuation = investments.fold(0.0, (s, i) => s + i.currentValuation);
+    final unpaidBillsAmount = bills.where((b) => !b.isPaid).fold(0.0, (s, b) => s + b.amount);
 
     BillModel? closestBill;
     int? daysUntilDue;
@@ -2655,310 +2727,355 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Visual Header: Balance & Highlights
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-            decoration: BoxDecoration(
-              color: theme.cardColor,
-              borderRadius: BorderRadius.circular(24),
-              boxShadow: [
-                BoxShadow(
-                    color:
-                        Colors.black.withValues(alpha: isDarkMode ? 0.2 : 0.02),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10))
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('DASHBOARD HABIT & TAGIHAN',
-                    style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1.5,
-                        color: isDarkMode
-                            ? Colors.white30
-                            : Colors.teal.shade800.withValues(alpha: 0.4))),
-                const SizedBox(height: 20),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildPriorityCard(
-                        title: 'SEDERAH SUBUH',
-                        mainText: charityStats.currentStreak > 0
-                            ? '${charityStats.currentStreak} Hari'
-                            : 'Belum Mulai',
-                        subText: charityStats.currentStreak > 0
-                            ? 'Istikamah luar biasa!'
-                            : 'Mulai habit baikmu hari ini',
-                        icon: Icons.auto_awesome_rounded,
-                        color: Colors.orange,
-                        isDarkMode: isDarkMode,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: _buildPriorityCard(
-                        title: 'TAGIHAN TERDEKAT',
-                        mainText: closestBill?.name ?? 'Lunas Semua',
-                        subText: daysUntilDue != null
-                            ? '$daysUntilDue hari lagi'
-                            : 'Tidak ada tagihan tertunda',
-                        icon: Icons.event_available_rounded,
-                        color: Colors.teal,
-                        isDarkMode: isDarkMode,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-
-                // NEW FEATURE: MONTHLY HIGHLIGHTS GRID
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildHighlightCard(
-                        context,
-                        'KATEGORI TERBOROS',
-                        topCategory?.key ?? 'Belum ada',
-                        topCategory != null
-                            ? _formatCompactRupiah(topCategory.value)
-                            : '-',
-                        AppCategories.getIconForCategory(
-                            topCategory?.key ?? ''),
-                        Colors.orange,
-                        isDarkMode,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _buildHighlightCard(
-                        context,
-                        'TRANSAKSI TERBESAR',
-                        largestTransaction?.title ?? 'Belum ada',
-                        largestTransaction != null
-                            ? _formatCompactRupiah(largestTransaction.amount)
-                            : '-',
-                        Icons.payments_rounded,
-                        Colors.blue,
-                        isDarkMode,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                _buildHighlightCard(
-                  context,
-                  'AKTIVITAS BULAN INI',
-                  '$monthlyActivity Transaksi Tercatat',
-                  'Total frekuensi penggunaan aplikasi',
-                  Icons.analytics_rounded,
-                  Colors.teal,
-                  isDarkMode,
-                  fullWidth: true,
-                ),
-
-                const SizedBox(height: 20),
-                Center(
-                    child: Text('RINGKASAN AKTIVITAS & INSIGHT',
-                        style: TextStyle(
-                            fontSize: 8,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1.2,
-                            color: isDarkMode
-                                ? Colors.white10
-                                : Colors.teal.shade800
-                                    .withValues(alpha: 0.15)))),
-              ],
-            ),
-          ),
-          const SizedBox(height: 48),
-
-          // TIPS & MOTIVASI SECTION
-          Row(
-            children: [
-              Container(
-                width: 4,
-                height: 24,
-                decoration: BoxDecoration(
-                  color: AppColors.primary,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Text(
-                'Tips & Motivasi',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: isDarkMode ? Colors.white : Colors.black87,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-
-          // Motivational Quote Hero Card
+          // 1. FINANCE HERO: Unified Net Worth & Audit Status
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: isDarkMode
-                    ? [
-                        Colors.orange.shade700.withValues(alpha: 0.8),
-                        Colors.orange.shade900.withValues(alpha: 0.8)
-                      ]
-                    : [Colors.orange.shade400, Colors.orange.shade700],
+                colors: isDarkMode 
+                  ? [const Color(0xFF1E1E1E), const Color(0xFF121212)]
+                  : [const Color(0xFFF0FDF4), Colors.white],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(32),
-              boxShadow: [
+              border: Border.all(
+                color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.teal.shade50,
+              ),
+              boxShadow: isDarkMode ? [] : [
                 BoxShadow(
-                  color:
-                      Colors.orange.withValues(alpha: isDarkMode ? 0.2 : 0.3),
-                  blurRadius: 15,
-                  offset: const Offset(0, 8),
+                  color: Colors.teal.withValues(alpha: 0.05),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
                 )
               ],
             ),
             child: Column(
               children: [
-                const Icon(Icons.format_quote_rounded,
-                    color: Colors.white, size: 40),
-                const SizedBox(height: 12),
-                const Text(
-                  '"Jangan menabung apa yang tersisa setelah dibelanjakan, tapi belanjakan apa yang tersisa setelah ditabung."',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                    fontStyle: FontStyle.italic,
-                    height: 1.5,
+                Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    children: [
+                      Text(
+                        'KEKAYAAN BERSIH',
+                        style: GoogleFonts.comicNeue(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 2,
+                          color: isDarkMode ? Colors.white24 : Colors.teal.shade800.withValues(alpha: 0.4),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        _showBalance ? _formatRupiah(balance + totalGoldGrams * 1200000.0 + investmentValuation - unpaidBillsAmount) : '••••••',
+                        style: GoogleFonts.comicNeue(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          color: isDarkMode ? Colors.white : AppColors.primaryDark,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      // Audit Row (Compact)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          _buildMiniAuditMetric('Saving Rate', '${((totalIncome - totalExpense) / (totalIncome > 0 ? totalIncome : 1) * 100).toStringAsFixed(0)}%', isDarkMode),
+                          Container(width: 1, height: 24, color: isDarkMode ? Colors.white10 : Colors.teal.shade50),
+                          _buildMiniAuditMetric('Ketahanan', '${(totalExpense / 30 > 0 ? (balance / (totalExpense / 30)) : 0).toInt()} Hari', isDarkMode),
+                          Container(width: 1, height: 24, color: isDarkMode ? Colors.white10 : Colors.teal.shade50),
+                          _buildMiniAuditMetric('Tagihan', unpaidBillsAmount > 0 ? _formatCompactRupiah(unpaidBillsAmount) : 'Lunas', isDarkMode),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 12),
-                Text(
-                  '- Warren Buffett',
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.8),
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
+                // Asset Breakdown (Minimalist Inline)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  decoration: BoxDecoration(
+                    color: isDarkMode ? Colors.white.withValues(alpha: 0.02) : Colors.teal.shade50.withValues(alpha: 0.3),
+                    borderRadius: const BorderRadius.vertical(bottom: Radius.circular(32)),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _buildInlineAsset('Saldo', balance, Colors.teal, isDarkMode),
+                      _buildInlineAsset('Emas', totalGoldGrams * 1200000.0, Colors.amber, isDarkMode),
+                      _buildInlineAsset('Invest', investmentValuation, Colors.indigo, isDarkMode),
+                    ],
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 24),
+          
+          const SizedBox(height: 28),
 
-          // Horizontal Tips Scroll
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                _buildTipCard(
-                  'Aturan 50/30/20',
-                  '50% Kebutuhan, 30% Keinginan, dan 20% Tabungan.',
-                  Icons.pie_chart_rounded,
-                  Colors.blue,
-                ),
-                _buildTipCard(
-                  'Tunda 24 Jam',
-                  'Tunggu 24 jam sebelum membeli barang yang tidak direncanakan.',
-                  Icons.timer_rounded,
-                  Colors.purple,
-                ),
-                _buildTipCard(
-                  'Catat Pengeluaran',
-                  'Sekecil apapun uang yang keluar, pastikan tercatat di TabunganKu.',
-                  Icons.edit_note_rounded,
-                  Colors.teal,
-                ),
-                _buildTipCard(
-                  'Masak Sendiri',
-                  'Membawa bekal dan masak di rumah jauh lebih hemat & sehat.',
-                  Icons.restaurant_rounded,
-                  Colors.orange,
-                ),
-              ],
+          // 2. SMART SAVING PLANNER (NEW)
+          _buildSmartSavingPlannerSection(balance, targets, isDarkMode),
+
+          const SizedBox(height: 28),
+
+          
+          // 2. INSIGHTS GRID (Compact)
+          Text(
+            'INSIGHTS & HABITS',
+            style: GoogleFonts.comicNeue(
+              fontSize: 10,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.5,
+              color: isDarkMode ? Colors.white24 : Colors.grey.shade400,
             ),
           ),
+          const SizedBox(height: 16),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final itemWidth = (constraints.maxWidth - 12) / 2;
+              return Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                children: [
+                  _buildCompactInsightCard(
+                    'Sedekah',
+                    charityStats.currentStreak > 0 ? '${charityStats.currentStreak} Hari' : 'Rp 0',
+                    Icons.auto_awesome_rounded,
+                    Colors.orange,
+                    itemWidth,
+                    isDarkMode,
+                  ),
+                  _buildCompactInsightCard(
+                    'Terboros',
+                    topCategory != null 
+                      ? '${topCategory.key} (${_formatCompactRupiah(topCategory.value)})' 
+                      : 'Rp 0',
+                    AppCategories.getIconForCategory(topCategory?.key ?? ''),
+                    Colors.red,
+                    itemWidth,
+                    isDarkMode,
+                  ),
+                  _buildCompactInsightCard(
+                    'Terbesar',
+                    largestTransaction != null ? _formatCompactRupiah(largestTransaction.amount) : 'Rp 0',
+                    Icons.payments_rounded,
+                    Colors.blue,
+                    itemWidth,
+                    isDarkMode,
+                  ),
+                  _buildCompactInsightCard(
+                    'Aktivitas',
+                    '$monthlyActivity Transaksi',
+                    Icons.analytics_rounded,
+                    Colors.teal,
+                    itemWidth,
+                    isDarkMode,
+                  ),
+                ],
+              );
+            },
+          ),
+          const SizedBox(height: 28),
 
-          const SizedBox(height: 48), // Bottom padding
+          // 4. EXPENSE ALLOCATION (NEW)
+          _buildExpenseAllocationSection(categoryTotals, totalExpense, isDarkMode),
+
+          const SizedBox(height: 40),
+          const SizedBox(height: 24), // Final padding
         ],
       ),
     );
   }
 
-  Widget _buildTipCard(String title, String desc, IconData icon, Color color) {
-    final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
-        (ref.watch(themeProvider) == ThemeMode.system &&
-            Theme.of(context).brightness == Brightness.dark);
+  Widget _buildSmartSavingPlannerSection(double currentBalance, List<SavingTargetModel> targets, bool isDarkMode) {
+    if (targets.isEmpty) return const SizedBox.shrink();
 
-    return Padding(
-      padding: const EdgeInsets.only(right: 16),
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(24),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: () {},
-          borderRadius: BorderRadius.circular(24),
-          child: Ink(
-            width: 200,
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: isDarkMode
-                  ? Colors.white.withValues(alpha: 0.03)
-                  : Colors.transparent,
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(
-                  color: isDarkMode
-                      ? Colors.white10
-                      : color.withValues(alpha: 0.1)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: color.withValues(alpha: isDarkMode ? 0.2 : 0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(icon,
-                      color: isDarkMode ? color.withValues(alpha: 0.8) : color,
-                      size: 20),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                    color: isDarkMode
-                        ? Colors.white.withValues(alpha: 0.9)
-                        : Colors.black87,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  desc,
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: isDarkMode ? Colors.white54 : Colors.black54,
-                    height: 1.4,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
+    // Find the next incomplete target
+    final incomplete = targets.where((t) => currentBalance < t.targetAmount).toList();
+    if (incomplete.isEmpty) return const SizedBox.shrink();
+
+    // Sort by due date or proximity
+    incomplete.sort((a, b) => a.dueDate.compareTo(b.dueDate));
+    final target = incomplete.first;
+    
+    final remaining = target.targetAmount - currentBalance;
+    final daysLeft = target.dueDate.difference(DateTime.now()).inDays;
+    final dailyTarget = daysLeft > 0 ? (remaining / daysLeft) : remaining;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: isDarkMode ? AppColors.surfaceDark : Colors.white,
+        borderRadius: BorderRadius.circular(32),
+        border: Border.all(
+          color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.teal.shade50,
         ),
       ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.teal.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.bolt_rounded, color: Colors.teal, size: 20),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'RENCANA NABUNG HARIAN',
+                style: GoogleFonts.comicNeue(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.5,
+                  color: isDarkMode ? Colors.white24 : Colors.grey.shade400,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'Untuk mencapai ${target.name},',
+            style: GoogleFonts.comicNeue(
+              fontSize: 14,
+              color: isDarkMode ? Colors.white70 : Colors.black87,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                'Rp ${_formatCompactRupiah(dailyTarget)}',
+                style: GoogleFonts.comicNeue(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.teal,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                '/ hari',
+                style: GoogleFonts.comicNeue(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: isDarkMode ? Colors.white24 : Colors.grey.shade400,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: (currentBalance / target.targetAmount).clamp(0, 1),
+              backgroundColor: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100,
+              valueColor: const AlwaysStoppedAnimation<Color>(Colors.teal),
+              minHeight: 6,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Sisa Rp ${_formatCompactRupiah(remaining)} lagi dalam $daysLeft hari.',
+            style: GoogleFonts.comicNeue(
+              fontSize: 11,
+              color: isDarkMode ? Colors.white38 : Colors.grey.shade500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+
+
+  Widget _buildExpenseAllocationSection(Map<String, double> categoryTotals, double totalExpense, bool isDarkMode) {
+    if (categoryTotals.isEmpty) return const SizedBox.shrink();
+    
+    final sortedCategories = categoryTotals.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'DISTRIBUSI PENGELUARAN',
+          style: GoogleFonts.comicNeue(
+            fontSize: 10,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 1.5,
+            color: isDarkMode ? Colors.white24 : Colors.grey.shade400,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: isDarkMode ? AppColors.surfaceDark : Colors.white,
+            borderRadius: BorderRadius.circular(32),
+            border: Border.all(
+              color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.teal.shade50,
+            ),
+          ),
+          child: Column(
+            children: sortedCategories.take(4).map((entry) {
+              final percentage = totalExpense > 0 ? (entry.value / totalExpense) : 0.0;
+              final color = AppCategories.getColorForCategory(entry.key);
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              width: 8,
+                              height: 8,
+                              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              entry.key,
+                              style: GoogleFonts.comicNeue(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                color: isDarkMode ? Colors.white70 : Colors.black87,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Text(
+                          '${(percentage * 100).toStringAsFixed(1)}%',
+                          style: GoogleFonts.comicNeue(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: isDarkMode ? Colors.white38 : Colors.grey.shade600,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        value: percentage,
+                        backgroundColor: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100,
+                        valueColor: AlwaysStoppedAnimation<Color>(color),
+                        minHeight: 6,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+      ],
     );
   }
 
@@ -3056,14 +3173,14 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text('Ekspor Laporan',
-                              style: TextStyle(
+                              style: GoogleFonts.comicNeue(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
                                   color:
                                       isDark ? Colors.white : Colors.black87)),
                           Text(
                               'Bulan $monthLabel (${regular.length} transaksi)',
-                              style: TextStyle(
+                              style: GoogleFonts.comicNeue(
                                   fontSize: 12,
                                   color:
                                       isDark ? Colors.white38 : Colors.black45,
@@ -3144,14 +3261,14 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     return Column(
       children: [
         Text(label,
-            style: TextStyle(
+            style: GoogleFonts.comicNeue(
                 fontSize: 8,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 0.8,
                 color: isDark ? Colors.white38 : Colors.black38)),
         const SizedBox(height: 4),
         Text(value,
-            style: TextStyle(
+            style: GoogleFonts.comicNeue(
                 fontSize: 12, fontWeight: FontWeight.bold, color: color)),
       ],
     );
@@ -3190,13 +3307,13 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(title,
-                        style: TextStyle(
+                        style: GoogleFonts.comicNeue(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
                             color: isDark ? Colors.white : Colors.black87)),
                     const SizedBox(height: 2),
                     Text(subtitle,
-                        style: TextStyle(
+                        style: GoogleFonts.comicNeue(
                             fontSize: 11,
                             color: isDark ? Colors.white38 : Colors.black45,
                             fontWeight: FontWeight.w500)),
@@ -3227,10 +3344,10 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text('$label: ',
-              style: TextStyle(
+              style: GoogleFonts.comicNeue(
                   fontSize: 11, fontWeight: FontWeight.bold, color: color)),
           Text(_formatRupiah(amount),
-              style: TextStyle(
+              style: GoogleFonts.comicNeue(
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
                   color: isDarkMode ? color : color.withValues(alpha: 0.8))),
@@ -3293,7 +3410,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                       Text(t.title,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
+                          style: GoogleFonts.comicNeue(
                               fontWeight: FontWeight.w600,
                               fontSize: 14,
                               color: isDarkMode
@@ -3302,7 +3419,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                       const SizedBox(height: 2),
                       Text(
                           '${DateFormat('EEEE, dd MMM', 'id_ID').format(t.date)} • ${DateFormat('HH:mm', 'id_ID').format(t.date)}',
-                          style: TextStyle(
+                          style: GoogleFonts.comicNeue(
                               color:
                                   isDarkMode ? Colors.white54 : Colors.black26,
                               fontSize: 11,
@@ -3312,7 +3429,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 ),
                 Text(
                   '${isExpense ? '- ' : '+ '}${_formatRupiah(t.amount)}',
-                  style: TextStyle(
+                  style: GoogleFonts.comicNeue(
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
                     color: isExpense
@@ -3358,23 +3475,23 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         backgroundColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: Text('Hapus Transaksi?',
-            style: TextStyle(
+            style: GoogleFonts.comicNeue(
                 fontWeight: FontWeight.bold,
                 color: isDarkMode ? Colors.white : Colors.black87)),
         content: Text(
             'Yakin ingin menghapus ${t.title}? Langkah ini tidak bisa dibatalkan.',
             style:
-                TextStyle(color: isDarkMode ? Colors.white70 : Colors.black54)),
+                GoogleFonts.comicNeue(color: isDarkMode ? Colors.white70 : Colors.black54)),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx, false),
               child: Text('Batal',
-                  style: TextStyle(
+                  style: GoogleFonts.comicNeue(
                       color: isDarkMode ? Colors.white30 : Colors.grey))),
           TextButton(
               onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Hapus',
-                  style: TextStyle(
+              child: Text('Hapus',
+                  style: GoogleFonts.comicNeue(
                       color: Colors.red, fontWeight: FontWeight.bold))),
         ],
       ),
@@ -3416,7 +3533,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
               const SizedBox(height: 4),
               Text(
                 item.label,
-                style: TextStyle(
+                style: GoogleFonts.comicNeue(
                   fontSize: 10,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
                   color: color,
@@ -3499,14 +3616,14 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                   : Colors.grey.shade200,
                               borderRadius: BorderRadius.circular(2))),
                       Text('Edit Nominal',
-                          style: TextStyle(
+                          style: GoogleFonts.comicNeue(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                               color:
                                   isDarkMode ? Colors.white : Colors.black87)),
                       const SizedBox(height: 12),
                       Text(t.title,
-                          style: TextStyle(
+                          style: GoogleFonts.comicNeue(
                               fontSize: 13,
                               fontWeight: FontWeight.bold,
                               color: isDarkMode
@@ -3524,28 +3641,28 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                           FilteringTextInputFormatter.digitsOnly,
                           RibuanFormatter()
                         ],
-                        style: TextStyle(
+                        style: GoogleFonts.comicNeue(
                             fontSize: 28,
                             fontWeight: FontWeight.bold,
                             color: isDarkMode ? Colors.white : Colors.black87),
                         decoration: InputDecoration(
                           labelText: 'Input Nominal Baru *',
-                          labelStyle: TextStyle(
+                          labelStyle: GoogleFonts.comicNeue(
                               color:
                                   isDarkMode ? Colors.white38 : Colors.black45),
-                          prefixIcon: const Row(
+                          prefixIcon: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              SizedBox(width: 16),
-                              Icon(Icons.account_balance_wallet_rounded,
+                              const SizedBox(width: 16),
+                              const Icon(Icons.account_balance_wallet_rounded,
                                   color: Colors.teal, size: 20),
-                              SizedBox(width: 8),
+                              const SizedBox(width: 8),
                               Text('Rp',
-                                  style: TextStyle(
+                                  style: GoogleFonts.comicNeue(
                                       fontWeight: FontWeight.bold,
                                       color: Colors.teal,
                                       fontSize: 16)),
-                              SizedBox(width: 8),
+                              const SizedBox(width: 8),
                             ],
                           ),
                           filled: true,
@@ -3602,8 +3719,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(20)),
                           ),
-                          child: const Text('Simpan Perubahan',
-                              style: TextStyle(
+                          child: Text('Simpan Perubahan',
+                              style: GoogleFonts.comicNeue(
                                   fontWeight: FontWeight.bold, fontSize: 16)),
                         ),
                       ),
@@ -3619,84 +3736,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
   }
 
 
-  Widget _buildHighlightCard(
-    BuildContext context,
-    String label,
-    String value,
-    String subtitle,
-    IconData icon,
-    Color color,
-    bool isDarkMode, {
-    bool fullWidth = false,
-  }) {
-    return Container(
-      width: fullWidth ? double.infinity : null,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: isDarkMode
-            ? color.withValues(alpha: 0.12)
-            : color.withValues(alpha: 0.04),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isDarkMode
-              ? color.withValues(alpha: 0.2)
-              : color.withValues(alpha: 0.1),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.15),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(icon, color: color, size: 14),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 7.5,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 0.5,
-                    color: isDarkMode ? Colors.white38 : Colors.black38,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Text(
-            value,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.bold,
-              letterSpacing: -0.2,
-              color: isDarkMode ? Colors.white : Colors.black87,
-            ),
-          ),
-          const SizedBox(height: 1),
-          Text(
-            subtitle,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 8.5,
-              fontWeight: FontWeight.bold,
-              color: isDarkMode ? Colors.white24 : Colors.black26,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 const List<_NavItem> _navItems = [
@@ -3891,7 +3930,7 @@ class _CalculatorSheetContentState
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(_expression,
-                    style: TextStyle(
+                    style: GoogleFonts.comicNeue(
                         fontSize: 14,
                         color: isDarkMode
                             ? Colors.white24
@@ -3903,7 +3942,7 @@ class _CalculatorSheetContentState
                   reverse: true,
                   child: Text(
                     _formatDisplay(_output),
-                    style: TextStyle(
+                    style: GoogleFonts.comicNeue(
                         fontSize: 48,
                         fontWeight: FontWeight.bold,
                         color: isDarkMode ? Colors.white : Colors.teal.shade900,
@@ -3994,7 +4033,7 @@ class _CalculatorSheetContentState
           alignment: Alignment.center,
           child: Text(
             text,
-            style: TextStyle(
+            style: GoogleFonts.comicNeue(
               fontSize: 20,
               fontWeight: FontWeight.bold,
               color: textColor,
@@ -4117,13 +4156,13 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
             final isDk = isDark;
             return TextField(
               controller: _searchCtrl,
-              style: TextStyle(
+              style: GoogleFonts.comicNeue(
                   fontSize: 14,
                   color: isDk ? Colors.white : Colors.black87,
                   fontWeight: FontWeight.w500),
               decoration: InputDecoration(
                 hintText: 'Cari transaksi...',
-                hintStyle: TextStyle(
+                hintStyle: GoogleFonts.comicNeue(
                     fontSize: 14,
                     color: isDk ? Colors.white24 : Colors.black26,
                     fontWeight: FontWeight.w500),
@@ -4220,7 +4259,7 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
                     : (isDark ? Colors.white38 : Colors.black38)),
             const SizedBox(width: 6),
             Text(label,
-                style: TextStyle(
+                style: GoogleFonts.comicNeue(
                     fontSize: 12,
                     fontWeight: selected ? FontWeight.bold : FontWeight.w600,
                     color: selected
@@ -4256,7 +4295,7 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
         ),
         child: Text(
           '# $category',
-          style: TextStyle(
+          style: GoogleFonts.comicNeue(
               fontSize: 11,
               fontWeight: selected ? FontWeight.bold : FontWeight.w600,
               color: selected
@@ -4326,7 +4365,7 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
                                         : Colors.black38)),
                             const SizedBox(width: 12),
                             Text(categories[i],
-                                style: TextStyle(
+                                style: GoogleFonts.comicNeue(
                                   fontSize: 13,
                                   fontWeight: _filterIndex == i
                                       ? FontWeight.bold
@@ -4368,7 +4407,7 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
                     const SizedBox(width: 10),
                     Text(
                       categories[_filterIndex],
-                      style: TextStyle(
+                      style: GoogleFonts.comicNeue(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
                         color: isDark ? Colors.white : AppColors.primaryDark,
@@ -4397,7 +4436,7 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
                   : (_filterIndex == 1
                       ? '${hutangList.length} Item'
                       : '${belanjaList.length} Item'),
-              style: const TextStyle(
+              style: GoogleFonts.comicNeue(
                   fontSize: 10,
                   fontWeight: FontWeight.bold,
                   color: AppColors.primary),
@@ -4512,7 +4551,7 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(monthKey,
-                            style: TextStyle(
+                            style: GoogleFonts.comicNeue(
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
                                 color: isDark
@@ -4551,14 +4590,14 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
                                       .withValues(alpha: isDark ? 0.18 : 0.10),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                child: const Row(
+                                child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Icon(Icons.share_rounded,
                                         size: 13, color: AppColors.primary),
                                     SizedBox(width: 4),
                                     Text('EKSPOR',
-                                        style: TextStyle(
+                                        style: GoogleFonts.comicNeue(
                                             fontSize: 11,
                                             fontWeight: FontWeight.bold,
                                             color: AppColors.primary)),
@@ -4742,13 +4781,13 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(t.title,
-                          style: TextStyle(
+                          style: GoogleFonts.comicNeue(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
                               color: isDark ? Colors.white : Colors.black87)),
                       if (t.description.isNotEmpty)
                         Text(t.description,
-                            style: TextStyle(
+                            style: GoogleFonts.comicNeue(
                                 fontSize: 11,
                                 color:
                                     isDark ? Colors.white38 : Colors.black38)),
@@ -4756,7 +4795,7 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
                   ),
                 ),
                 Text(_fmtCur(t.amount),
-                    style: TextStyle(
+                    style: GoogleFonts.comicNeue(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
                         color: color)),
@@ -4801,13 +4840,13 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(t.title,
-                      style: TextStyle(
+                      style: GoogleFonts.comicNeue(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                           color: isDark ? Colors.white : Colors.black87)),
                 ),
                 Text(_fmtCur(t.amount),
-                    style: const TextStyle(
+                    style: GoogleFonts.comicNeue(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
                         color: AppColors.primary)),
@@ -4826,14 +4865,14 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
       bool isCurrency = true}) {
     return Column(children: [
       Text(label,
-          style: TextStyle(
+          style: GoogleFonts.comicNeue(
               fontSize: 8,
               fontWeight: FontWeight.bold,
               letterSpacing: 0.8,
               color: isDark ? Colors.white38 : Colors.black38)),
       const SizedBox(height: 5),
       Text(isCurrency ? _fmtCur(amount) : amount.toInt().toString(),
-          style: TextStyle(
+          style: GoogleFonts.comicNeue(
               fontSize: 14, fontWeight: FontWeight.bold, color: color)),
     ]);
   }
@@ -4847,7 +4886,7 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
               color: color, borderRadius: BorderRadius.circular(2))),
       const SizedBox(width: 10),
       Text(label,
-          style: TextStyle(
+          style: GoogleFonts.comicNeue(
               fontSize: 10,
               fontWeight: FontWeight.bold,
               letterSpacing: 1.2,
@@ -4871,7 +4910,7 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
           ),
           const SizedBox(height: 20),
           Text(label,
-              style: TextStyle(
+              style: GoogleFonts.comicNeue(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
                   color: isDark ? Colors.white38 : Colors.black38)),
@@ -4881,7 +4920,7 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
               padding: const EdgeInsets.symmetric(horizontal: 40),
               child: Text(subtitle,
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: GoogleFonts.comicNeue(
                       fontSize: 12,
                       color: isDark ? Colors.white24 : Colors.black26)),
             ),

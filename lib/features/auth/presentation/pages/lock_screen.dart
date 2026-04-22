@@ -99,29 +99,40 @@ class _LockScreenState extends ConsumerState<LockScreen> with TickerProviderStat
       child: Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
-        child: Column(
-          children: [
-            const Spacer(flex: 2),
-            // Profile / Logo Section
-            _buildProfileHeader(profile, colorScheme),
-            const SizedBox(height: 32),
-            
-            // PIN Dots
-            _buildPinDots(colorScheme),
-            const SizedBox(height: 16),
-            
-            if (_isError)
-              Text(
-                'PIN Salah. Coba lagi.',
-                style: TextStyle(color: colorScheme.error, fontWeight: FontWeight.bold),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: IntrinsicHeight(
+                  child: Column(
+                    children: [
+                      const Spacer(flex: 2),
+                      // Profile / Logo Section
+                      _buildProfileHeader(profile, colorScheme),
+                      const SizedBox(height: 32),
+                      
+                      // PIN Dots
+                      _buildPinDots(colorScheme),
+                      const SizedBox(height: 16),
+                      
+                      if (_isError)
+                        Text(
+                          'PIN Salah. Coba lagi.',
+                          style: TextStyle(color: colorScheme.error, fontWeight: FontWeight.bold),
+                        ),
+                        
+                      const Spacer(flex: 1),
+                      
+                      // Numeric Keypad
+                      _buildKeypad(security.isBiometricEnabled),
+                      const SizedBox(height: 48),
+                    ],
+                  ),
+                ),
               ),
-              
-            const Spacer(flex: 1),
-            
-            // Numeric Keypad
-            _buildKeypad(security.isBiometricEnabled),
-            const SizedBox(height: 48),
-          ],
+            );
+          },
         ),
       ),
     ),

@@ -16,10 +16,13 @@ class GoldSavingsPage extends ConsumerStatefulWidget {
 }
 
 class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
-  final double buyPrice = 1250000;
-  final double sellPrice = 1185000;
   final _amountController = TextEditingController();
   GoldTransactionType _selectedType = GoldTransactionType.buy;
+
+  // Real-time prices from provider
+  double buyPrice = 1250000;
+  double sellPrice = 1185000;
+  double priceChange = 1.25;
 
   double get currentGoldPrice => 
       _selectedType == GoldTransactionType.sell ? sellPrice : buyPrice;
@@ -68,9 +71,9 @@ class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildPortfolioCard(totalGrams, currentValue, profitLoss, isDarkMode),
-                const SizedBox(height: 32),
+                const SizedBox(height: 28),
                 
-                 _buildPriceCard(currentGoldPrice, isDarkMode),
+                _buildRealtimePriceCard(isDarkMode),
                 const SizedBox(height: 32),
 
                 _buildInlineInputForm(isDarkMode),
@@ -312,49 +315,79 @@ class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
     );
   }
 
-  Widget _buildPriceCard(double price, bool isDarkMode) {
+  Widget _buildRealtimePriceCard(bool isDarkMode) {
+    final priceAsync = ref.watch(goldPriceProvider);
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
+
+    return priceAsync.when(
+      data: (prices) {
+        // Update local state for calculations
+        buyPrice = prices['buy'] ?? buyPrice;
+        sellPrice = prices['sell'] ?? sellPrice;
+        priceChange = prices['change'] ?? priceChange;
+
+        return Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: isDarkMode ? AppColors.surfaceDark : Colors.white,
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(color: isDarkMode ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
+            boxShadow: isDarkMode ? [] : [
+              BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 20, offset: const Offset(0, 10)),
+            ],
+          ),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('HARGA EMAS TERKINI', 
+                    style: GoogleFonts.comicNeue(fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1.5, color: contentColor.withValues(alpha: 0.4))),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(color: Colors.green.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
+                    child: Text('${priceChange > 0 ? '+' : ''}${priceChange.toStringAsFixed(2)}%', 
+                      style: const TextStyle(color: Colors.green, fontSize: 10, fontWeight: FontWeight.bold)),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(child: _buildPriceInfo('HARGA BELI', buyPrice, Colors.amber, isDarkMode)),
+                  Container(width: 1, height: 40, color: isDarkMode ? Colors.white10 : Colors.grey.shade100),
+                  Expanded(child: _buildPriceInfo('HARGA JUAL', sellPrice, Colors.orange, isDarkMode)),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+      loading: () => _buildPriceLoading(isDarkMode),
+      error: (_, __) => _buildPriceLoading(isDarkMode),
+    );
+  }
+
+  Widget _buildPriceInfo(String label, double price, Color color, bool isDarkMode) {
+    final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
+    return Column(
+      children: [
+        Text(label, style: GoogleFonts.comicNeue(fontSize: 9, fontWeight: FontWeight.w900, color: contentColor.withValues(alpha: 0.4), letterSpacing: 1)),
+        const SizedBox(height: 4),
+        Text(_formatRupiah(price), style: GoogleFonts.comicNeue(fontSize: 18, fontWeight: FontWeight.bold, color: contentColor)),
+      ],
+    );
+  }
+
+  Widget _buildPriceLoading(bool isDarkMode) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      height: 120,
+      width: double.infinity,
       decoration: BoxDecoration(
-        color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: isDarkMode ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
+        color: isDarkMode ? AppColors.surfaceDark : Colors.white,
+        borderRadius: BorderRadius.circular(28),
       ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.amber.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: const Icon(Icons.auto_graph_rounded, color: Colors.amber, size: 24),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  _selectedType == GoldTransactionType.buy ? 'Harga Beli Hari Ini' : 'Harga Jual Hari Ini',
-                  style: TextStyle(color: contentColor.withValues(alpha: 0.4), fontSize: 11, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 4),
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text('${_formatRupiah(price)} /gram', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: contentColor)),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(color: Colors.green.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
-            child: const Text('+1.25%', style: TextStyle(color: Colors.green, fontSize: 10, fontWeight: FontWeight.bold)),
-          ),
-        ],
-      ),
+      child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
     );
   }
 
@@ -384,7 +417,12 @@ class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
   }
 
   void _showEditGoldTransactionSheet(GoldTransactionModel tx, bool isDarkMode) {
-    final amountController = TextEditingController(text: (tx.grams * tx.pricePerGram).toInt().toString());
+    final initialAmount = (tx.grams * tx.pricePerGram).toInt();
+    final amountController = TextEditingController(
+      text: NumberFormat.currency(locale: 'id_ID', symbol: '', decimalDigits: 0)
+          .format(initialAmount)
+          .trim(),
+    );
     GoldTransactionType type = tx.type;
 
     showModalBottomSheet(

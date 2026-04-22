@@ -51,7 +51,7 @@ class NotificationSheet extends ConsumerWidget {
               ),
               TextButton(
                 onPressed: () => ref.read(notificationNotifierProvider.notifier).markAllAsRead(),
-                style: TextButton.styleFrom(foregroundColor: const Color(0xFF1DA462)),
+                style: TextButton.styleFrom(foregroundColor: AppColors.primary),
                 child: const Text('Tandai Dibaca'),
               ),
             ],
@@ -139,7 +139,7 @@ class NotificationSheet extends ConsumerWidget {
         break;
       case NotificationType.savings:
         icon = Icons.track_changes_rounded;
-        color = const Color(0xFF1DA462);
+        color = AppColors.primary;
         break;
       case NotificationType.family:
         icon = Icons.family_restroom_rounded;
@@ -147,7 +147,7 @@ class NotificationSheet extends ConsumerWidget {
         break;
       case NotificationType.system:
         icon = Icons.info_outline_rounded;
-        color = const Color(0xFF1DA462);
+        color = AppColors.primary;
         break;
     }
 
@@ -232,8 +232,8 @@ class NotificationSheet extends ConsumerWidget {
                 width: 8,
                 height: 8,
                 margin: const EdgeInsets.only(left: 8, top: 4),
-                decoration: const BoxDecoration(
-                  color: Color(0xFF1DA462),
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
                   shape: BoxShape.circle,
                 ),
               ),

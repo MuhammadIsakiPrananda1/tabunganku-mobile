@@ -116,18 +116,18 @@ class _TabunganKuAppState extends ConsumerState<TabunganKuApp>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    final security = ref.read(securityProvider);
-    final router = ref.read(appRouterProvider);
+    // final security = ref.read(securityProvider);
+    // final router = ref.read(appRouterProvider);
 
-    if (state == AppLifecycleState.paused) {
-      // Deauthorize ONLY if we are not currently showing a biometric dialog
-      // AND NOT currently in an external operation (like Picking Image)
-      if (security.hasPin && 
-          !security.isAuthenticating && 
-          !security.isExternalOperationInProgress) {
-        ref.read(securityProvider.notifier).deauthorize();
-      }
-    }
+    // if (state == AppLifecycleState.paused) {
+    //   // Deauthorize ONLY if we are not currently showing a biometric dialog
+    //   // AND NOT currently in an external operation (like Picking Image)
+    //   if (security.hasPin && 
+    //       !security.isAuthenticating && 
+    //       !security.isExternalOperationInProgress) {
+    //     ref.read(securityProvider.notifier).deauthorize();
+    //   }
+    // }
     // Logic for resumed moved to MaterialApp.builder to preserve state
   }
 

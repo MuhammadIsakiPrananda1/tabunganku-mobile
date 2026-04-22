@@ -1,11 +1,16 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tabunganku/core/security/secure_storage_service.dart';
 import 'package:tabunganku/models/gold_investment_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final goldServiceProvider = Provider((ref) => MockGoldService());
+
+final goldPriceProvider = StreamProvider<Map<String, double>>((ref) {
+  return ref.watch(goldServiceProvider).watchPrices();
+});
 
 class MockGoldService {
   static const String _storagePrefix = 'gold_transactions_user_';
@@ -14,6 +19,12 @@ class MockGoldService {
   static final Map<String, List<GoldTransactionModel>> _userTransactions = {};
   static final StreamController<List<GoldTransactionModel>> _streamController =
       StreamController<List<GoldTransactionModel>>.broadcast();
+
+  // API Configuration
+  final String _primaryApiUrl = 'https://api.gold-api.com/price/XAU';
+  final String _secondaryApiUrl = 'https://www.gold-feed.com/prices/gold.json';
+  final double _usdToIdr = 16350.0;
+  final double _ozToGram = 31.1035;
 
   Future<SharedPreferences> _getPrefs() {
     _prefsFuture ??= SharedPreferences.getInstance();
@@ -38,7 +49,8 @@ class MockGoldService {
       if (decoded is List) {
         _userTransactions[userId] = decoded
             .whereType<Map>()
-            .map((item) => GoldTransactionModel.fromJson(Map<String, dynamic>.from(item)))
+            .map((item) =>
+                GoldTransactionModel.fromJson(Map<String, dynamic>.from(item)))
             .toList();
       } else {
         _userTransactions[userId] = [];
@@ -95,7 +107,6 @@ class MockGoldService {
     await _emitTransactions(userId);
   }
 
-
   Stream<List<GoldTransactionModel>> watchTransactions() {
     return Stream<List<GoldTransactionModel>>.multi((controller) {
       Future<void>(() async {
@@ -109,14 +120,81 @@ class MockGoldService {
   }
 
   double calculateTotalGrams(List<GoldTransactionModel> txs) {
-    return txs.fold(0.0, (sum, tx) => sum + (tx.type == GoldTransactionType.buy ? tx.grams : -tx.grams));
+    return txs.fold(
+        0.0,
+        (sum, tx) =>
+            sum + (tx.type == GoldTransactionType.buy ? tx.grams : -tx.grams));
   }
 
   double calculateAveragePrice(List<GoldTransactionModel> txs) {
-    final buyTxs = txs.where((tx) => tx.type == GoldTransactionType.buy).toList();
+    final buyTxs =
+        txs.where((tx) => tx.type == GoldTransactionType.buy).toList();
     if (buyTxs.isEmpty) return 0;
-    final totalSpent = buyTxs.fold(0.0, (sum, tx) => sum + (tx.grams * tx.pricePerGram));
+    final totalSpent =
+        buyTxs.fold(0.0, (sum, tx) => sum + (tx.grams * tx.pricePerGram));
     final totalGrams = buyTxs.fold(0.0, (sum, tx) => sum + tx.grams);
     return totalGrams > 0 ? totalSpent / totalGrams : 0;
+  }
+
+  Stream<Map<String, double>> watchPrices() async* {
+    // Initial fetch
+    yield await _fetchRealPrices();
+
+    // Periodic fetch every 1 minute to stay "real-time" without hitting limits
+    yield* Stream.periodic(
+            const Duration(minutes: 1), (_) => _fetchRealPrices())
+        .asyncMap((event) => event);
+  }
+
+  Future<Map<String, double>> _fetchRealPrices() async {
+    // Try Primary API
+    try {
+      final response = await http
+          .get(Uri.parse(_primaryApiUrl))
+          .timeout(const Duration(seconds: 15));
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = jsonDecode(response.body);
+        if (data.containsKey('price')) {
+          final goldPriceUsdOz = double.parse(data['price'].toString());
+          final goldPriceIdrGram = (goldPriceUsdOz * _usdToIdr) / _ozToGram;
+          return {
+            'buy': goldPriceIdrGram,
+            'sell': goldPriceIdrGram * 0.95,
+            'change': 0.85,
+          };
+        }
+      }
+    } catch (e) {
+      print('Primary Gold API failed: $e');
+    }
+
+    // Try Secondary API
+    try {
+      final response = await http
+          .get(Uri.parse(_secondaryApiUrl))
+          .timeout(const Duration(seconds: 15));
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = jsonDecode(response.body);
+        if (data.containsKey('gold_price_usd_ounce')) {
+          final goldPriceUsdOz =
+              double.parse(data['gold_price_usd_ounce'].toString());
+          final goldPriceIdrGram = (goldPriceUsdOz * _usdToIdr) / _ozToGram;
+          return {
+            'buy': goldPriceIdrGram,
+            'sell': goldPriceIdrGram * 0.95,
+            'change': 0.85,
+          };
+        }
+      }
+    } catch (e) {
+      print('Secondary Gold API failed: $e');
+    }
+
+    // Final Fallback (more realistic current price)
+    return {
+      'buy': 1238500.0,
+      'sell': 1176500.0,
+      'change': 0.85,
+    };
   }
 }

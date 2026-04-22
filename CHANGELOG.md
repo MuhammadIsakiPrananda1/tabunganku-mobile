@@ -4,28 +4,29 @@ Seluruh evolusi, fitur, dan perbaikan aplikasi **TabunganKu** terdokumentasi sec
 
 ---
 
-## 💎 [1.4.8] — 19–20 April 2026: The Security & Transparency Revolution
+## 💎 [1.4.8] — 19–22 April 2026: The Security, Transparency & Services Modernization
 
-Rilis ini menghadirkan perombakan total pada sistem keamanan dan transparansi keluarga. Kami memperkenalkan sinkronisasi awan (cloud sync) yang lebih cerdas untuk memastikan seluruh anggota keluarga memiliki pandangan yang sama terhadap keuangan bersama.
+Rilis ini menghadirkan perombakan total pada sistem keamanan, transparansi keluarga, serta modernisasi besar-besaran pada layanan tambahan (Other Services) seperti Sedekah Subuh dan Tabungan Emas.
 
 ### 🚀 Tambah Fitur (New Features)
-- **Shared Family Transparency (Real-Sync)** — Implementasi sinkronisasi Firestore real-time. Kini setiap anggota keluarga bisa melihat seluruh riwayat transaksi grup secara instan saat ada perubahan 👨‍👩‍👧‍👦.
-- **Joint Account Management** — Memberikan akses penuh bagi seluruh anggota grup untuk mengedit atau menghapus catatan apa pun dalam buku kas keluarga (Shared Responsibility).
-- **Accurate Member Contribution** — Sistem pelacakan saldo individu yang kini lebih akurat, memastikan kontribusi tiap orang dihitung dan ditampilkan dengan benar di semua perangkat.
-- **Security Modernization** — Alur startup baru yang lebih aman (`Splash -> Lock Screen -> Dashboard`) dan implementasi *Security Overlay* saat aplikasi dibuka kembali dari background 🛡️.
-- **Ultra-Legible UI Upgrade** — Peningkatan keterbacaan signifikan dengan avatar anggota yang lebih besar (72px), badge pembuat transaksi yang lebih tegas ("Oleh Anda" vs "Oleh Nama"), dan font yang lebih besar.
-- **Haptic Interaction Feedback** — Penambahan getaran halus (Haptic Feedback) saat menyalin kode grup untuk pengalaman navigasi yang lebih taktil dan premium.
+- **Financial Health Check (Cek Kesehatan Finansial)** — Fitur analisis kesehatan finansial instan yang terintegrasi di menu "Lainnya" untuk membantu pengguna memahami kondisi keuangan mereka secara mendalam 📊.
+- **Real-time Gold Price Simulation** — Simulasi nilai investasi emas secara real-time untuk memberikan gambaran akurat pada fitur Tabungan Emas berdasarkan harga pasar terkini.
+- **Shared Family Transparency (Real-Sync)** — Implementasi sinkronisasi Firestore real-time. Kini setiap anggota keluarga bisa melihat seluruh riwayat transaksi grup secara instan 👨‍👩‍👧‍👦.
+- **Joint Account Management** — Akses penuh bagi seluruh anggota grup untuk mengedit atau menghapus catatan dalam buku kas keluarga demi tanggung jawab bersama.
+- **Security Modernization** — Alur startup baru yang lebih aman (`Splash -> Lock Screen -> Dashboard`) dan implementasi *Security Overlay* untuk melindungi data saat aplikasi di background 🛡️.
+- **Haptic Interaction Feedback** — Penambahan getaran halus (Haptic Feedback) pada interaksi navigasi penting untuk pengalaman yang lebih premium.
+
+### 🔄 Perombakan & Peningkatan (Revamped & Improvements)
+- **Modernized "Sedekah Subuh" UI** — Refactoring total input form Sedekah Subuh menjadi lebih kompak, profesional, dan menggunakan aksen merah (expense-themed) yang konsisten 🔴.
+- **Ultra-Legible UI Upgrade** — Peningkatan keterbacaan signifikan dengan avatar anggota yang lebih besar (72px) dan badge pembuat transaksi yang lebih tegas agar mudah dibedakan.
+- **Smart Currency Formatting** — Implementasi pemisah ribuan (thousand separators) otomatis pada seluruh form input keuangan (Emas, Sedekah, Transaksi) untuk akurasi input maksimal.
+- **Accurate Member Contribution** — Sistem pelacakan saldo individu yang kini lebih akurat dan tersinkronisasi sempurna di semua perangkat anggota keluarga.
+- **Hybrid Stream Logic** — Optimalisasi stream data yang menggabungkan penyimpanan lokal dan cloud secara otomatis tanpa jeda render.
+- **RenderFlex Error Fix** — Perbaikan permanen pada error layout "Pixel Overflow" di daftar anggota keluarga dan berbagai form input lainnya.
 
 ### 🗑️ Hapus Fitur (Removed Features)
-- **Individual Ownership Lock** — Menghapus pembatasan kelola transaksi. Kini tidak ada lagi blokir "Hanya pembuat yang bisa mengedit", demi transparansi penuh antar anggota keluarga.
-- **Floating "Kode Disalin" SnackBar** — Menghapus bar hitam yang sering menutupi UI saat menyalin kode grup, digantikan dengan respon getaran yang lebih elegan dan bersih 🧹.
-
-### 🛠️ Technical Improvements
-- **Hybrid Stream Logic** — Optimalisasi stream data yang menggabungkan penyimpanan lokal dan cloud secara otomatis tanpa jeda.
-- **RenderFlex Error Fix** — Memperbaiki error "Layout Overflow" pada daftar anggota keluarga dengan penyesuaian tinggi kontainer yang lebih proporsional (140px).
-- **Transaction Creator Badging** — Implementasi logic badge cerdas untuk membedakan catatan pribadi dan catatan yang dibuat oleh anggota keluarga lain secara visual.
-
----
+- **Individual Ownership Lock** — Menghapus pembatasan kelola transaksi demi transparansi penuh antar anggota keluarga.
+- **Floating "Kode Disalin" SnackBar** — Digantikan dengan respon getaran (haptic) yang lebih elegan dan bersih dari gangguan visual.
 
 ---
 

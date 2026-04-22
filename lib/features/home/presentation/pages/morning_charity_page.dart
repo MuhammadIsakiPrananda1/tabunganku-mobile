@@ -47,10 +47,10 @@ class _MorningCharityPageState extends ConsumerState<MorningCharityPage> {
       HapticFeedback.heavyImpact();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Alhamdulillah, sedekah berhasil dicatat! ✨'),
+          content: Text('Alhamdulillah, sedekah berhasil dicatat! ✨', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold)),
           backgroundColor: AppColors.primary,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         ),
       );
     }
@@ -73,9 +73,9 @@ class _MorningCharityPageState extends ConsumerState<MorningCharityPage> {
             theme.brightness == Brightness.dark);
 
     return Scaffold(
-      backgroundColor: isDarkMode ? Colors.black : Colors.white,
+      backgroundColor: isDarkMode ? AppColors.backgroundDark : AppColors.background,
       appBar: AppBar(
-        backgroundColor: isDarkMode ? Colors.black : Colors.white,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
@@ -86,7 +86,7 @@ class _MorningCharityPageState extends ConsumerState<MorningCharityPage> {
         ),
         title: Text(
           'Sedekah Subuh',
-          style: TextStyle(
+          style: GoogleFonts.comicNeue(
             fontWeight: FontWeight.bold,
             fontSize: 18,
             color: isDarkMode ? Colors.white : AppColors.primaryDark,
@@ -94,102 +94,75 @@ class _MorningCharityPageState extends ConsumerState<MorningCharityPage> {
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.fromLTRB(24, 8, 24, 40),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Nominal Input Card (Matching TransactionEntryPage style)
+            // 1. HERO INPUT SECTION (Compact & Normal)
             Container(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               decoration: BoxDecoration(
-                color: isDarkMode ? const Color(0xFF121212) : AppColors.background,
-                borderRadius: BorderRadius.circular(24),
+                color: isDarkMode ? AppColors.surfaceDark : Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: isDarkMode ? Colors.white.withValues(alpha: 0.03) : Colors.grey.shade100,
+                ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'NOMINAL SEDEKAH',
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 2,
+                    style: GoogleFonts.comicNeue(
+                      fontSize: 9,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.5,
                       color: isDarkMode ? Colors.white24 : Colors.grey.shade400,
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 4),
                   TextField(
                     controller: _amountController,
                     focusNode: _amountFocusNode,
+                    textAlign: TextAlign.start,
                     keyboardType: TextInputType.number,
                     inputFormatters: [_RibuanFormatter()],
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 32,
+                    style: GoogleFonts.comicNeue(
+                      fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: isDarkMode ? Colors.white : Colors.black,
+                      color: AppColors.error,
                     ),
                     decoration: InputDecoration(
                       hintText: '0',
-                      hintStyle: GoogleFonts.plusJakartaSans(
-                        fontSize: 32,
+                      hintStyle: GoogleFonts.comicNeue(
+                        fontSize: 24,
                         fontWeight: FontWeight.bold,
-                        color: Colors.red.withValues(alpha: 0.4),
+                        color: AppColors.error.withValues(alpha: 0.1),
                       ),
                       prefixIcon: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('Rp',
-                              style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w900,
-                                  color: Colors.red)),
+                          Text('Rp', 
+                            style: GoogleFonts.comicNeue(
+                              fontSize: 14, 
+                              fontWeight: FontWeight.w900, 
+                              color: AppColors.error
+                            )
+                          ),
                         ],
                       ),
                       border: InputBorder.none,
+                      isDense: true,
+                      contentPadding: const EdgeInsets.symmetric(vertical: 8),
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 24),
+            
+            const SizedBox(height: 28),
 
-            // Stats Section
-            Row(
-              children: [
-                Expanded(
-                  child: _buildSmallStatCard(
-                    'Total Terkumpul',
-                    _formatRupiah(stats.totalAmount),
-                    Icons.volunteer_activism_rounded,
-                    Colors.orange,
-                    isDarkMode,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _buildSmallStatCard(
-                    'Streak Harian',
-                    '${stats.currentStreak} Hari',
-                    Icons.local_fire_department_rounded,
-                    Colors.redAccent,
-                    isDarkMode,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 32),
-
-            // Quick Amount Section
-            Text(
-              'PILIH NOMINAL CEPAT',
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 2,
-                color: isDarkMode ? Colors.white24 : Colors.grey.shade400,
-              ),
-            ),
-            const SizedBox(height: 12),
+            // 2. QUICK AMOUNTS
             Row(
               children: [
                 _buildQuickChip('2.000', isDarkMode),
@@ -198,12 +171,40 @@ class _MorningCharityPageState extends ConsumerState<MorningCharityPage> {
                 const SizedBox(width: 8),
                 _buildQuickChip('10.000', isDarkMode),
                 const SizedBox(width: 8),
-                _buildQuickChip('20.000', isDarkMode),
+                _buildQuickChip('50.000', isDarkMode),
               ],
             ),
-            const SizedBox(height: 48),
 
-            // Action Button
+            const SizedBox(height: 28),
+
+            // 3. STATS ROW
+            Row(
+              children: [
+                Expanded(
+                  child: _buildCompactStatCard(
+                    'TOTAL',
+                    _formatRupiah(stats.totalAmount),
+                    Icons.volunteer_activism_rounded,
+                    Colors.orange,
+                    isDarkMode,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildCompactStatCard(
+                    'STREAK',
+                    '${stats.currentStreak} Hari',
+                    Icons.local_fire_department_rounded,
+                    Colors.redAccent,
+                    isDarkMode,
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 32),
+
+            // 4. ACTION BUTTON
             SizedBox(
               width: double.infinity,
               height: 64,
@@ -213,28 +214,32 @@ class _MorningCharityPageState extends ConsumerState<MorningCharityPage> {
                   _recordCharity(amount);
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
+                  backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
                   elevation: 0,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                  shadowColor: AppColors.primary.withValues(alpha: 0.3),
+                ).copyWith(
+                  elevation: WidgetStateProperty.resolveWith((states) => states.contains(WidgetState.pressed) ? 0 : 8),
                 ),
-                child: const Text(
-                  'Catat Sedekah Sekarang',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                child: Text(
+                  'Catat Keberkahan Sekarang',
+                  style: GoogleFonts.comicNeue(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
-            const SizedBox(height: 48),
 
-            // History Section
+            const SizedBox(height: 40),
+
+            // 5. HISTORY SECTION
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'RIWAYAT TERAKHIR',
-                  style: TextStyle(
+                  'RIWAYAT KEBERKAHAN',
+                  style: GoogleFonts.comicNeue(
                     fontSize: 10,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w800,
                     letterSpacing: 2,
                     color: isDarkMode ? Colors.white24 : Colors.grey.shade400,
                   ),
@@ -244,44 +249,47 @@ class _MorningCharityPageState extends ConsumerState<MorningCharityPage> {
             ),
             const SizedBox(height: 16),
             _buildHistoryList(stats, isDarkMode),
-            const SizedBox(height: 40),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildSmallStatCard(String label, String value, IconData icon, Color color, bool isDarkMode) {
+  Widget _buildCompactStatCard(String label, String value, IconData icon, Color color, bool isDarkMode) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isDarkMode ? const Color(0xFF121212) : AppColors.background.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100),
+        color: isDarkMode ? AppColors.surfaceDark : Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: isDarkMode ? Colors.white.withValues(alpha: 0.03) : Colors.white),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: color, size: 18),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: color, size: 16),
+          ),
           const SizedBox(height: 12),
           Text(
             label,
-            style: TextStyle(
+            style: GoogleFonts.comicNeue(
               fontSize: 9,
               fontWeight: FontWeight.bold,
-              color: isDarkMode ? Colors.white24 : Colors.grey.shade500,
+              color: isDarkMode ? Colors.white24 : Colors.grey.shade400,
             ),
           ),
-          const SizedBox(height: 4),
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Text(
-              value,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: isDarkMode ? Colors.white : AppColors.primaryDark,
-              ),
+          const SizedBox(height: 2),
+          Text(
+            value,
+            style: GoogleFonts.comicNeue(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              color: isDarkMode ? Colors.white : AppColors.primaryDark,
             ),
           ),
         ],
@@ -291,18 +299,28 @@ class _MorningCharityPageState extends ConsumerState<MorningCharityPage> {
 
   Widget _buildQuickChip(String label, bool isDarkMode) {
     return Expanded(
-      child: ActionChip(
-        label: Text(label, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
-        onPressed: () {
+      child: InkWell(
+        onTap: () {
           _amountController.text = label;
-          HapticFeedback.lightImpact();
+          HapticFeedback.selectionClick();
         },
-        backgroundColor: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.white,
-        padding: EdgeInsets.zero,
-        labelPadding: const EdgeInsets.symmetric(vertical: 4),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: BorderSide(color: isDarkMode ? Colors.white10 : Colors.grey.shade200),
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: isDarkMode ? Colors.white.withValues(alpha: 0.03) : Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100),
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            label,
+            style: GoogleFonts.comicNeue(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              color: isDarkMode ? Colors.white60 : Colors.black87,
+            ),
+          ),
         ),
       ),
     );
@@ -314,8 +332,8 @@ class _MorningCharityPageState extends ConsumerState<MorningCharityPage> {
         padding: const EdgeInsets.symmetric(vertical: 40),
         alignment: Alignment.center,
         child: Text(
-          'Belum ada riwayat sedekah',
-          style: TextStyle(color: isDarkMode ? Colors.white12 : Colors.grey.shade400, fontSize: 13),
+          'Mulai langkah berkah pertamamu hari ini!',
+          style: GoogleFonts.comicNeue(color: isDarkMode ? Colors.white12 : Colors.grey.shade400, fontSize: 13),
         ),
       );
     }
@@ -331,19 +349,19 @@ class _MorningCharityPageState extends ConsumerState<MorningCharityPage> {
           margin: const EdgeInsets.only(bottom: 12),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: isDarkMode ? const Color(0xFF121212) : Colors.white,
+            color: isDarkMode ? AppColors.surfaceDark : Colors.white,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100),
+            border: Border.all(color: isDarkMode ? Colors.white.withValues(alpha: 0.03) : Colors.grey.shade50),
           ),
           child: Row(
             children: [
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: Colors.orange.withValues(alpha: 0.1),
+                  color: AppColors.primary.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.wb_sunny_rounded, color: Colors.orange, size: 18),
+                child: const Icon(Icons.wb_sunny_rounded, color: AppColors.primary, size: 18),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -352,7 +370,7 @@ class _MorningCharityPageState extends ConsumerState<MorningCharityPage> {
                   children: [
                     Text(
                       _formatRupiah(t.amount),
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.comicNeue(
                         fontWeight: FontWeight.bold,
                         fontSize: 15,
                         color: isDarkMode ? Colors.white : AppColors.primaryDark,
@@ -361,7 +379,7 @@ class _MorningCharityPageState extends ConsumerState<MorningCharityPage> {
                     const SizedBox(height: 4),
                     Text(
                       DateFormat('EEEE, dd MMM yyyy', 'id_ID').format(t.date),
-                      style: TextStyle(
+                      style: GoogleFonts.comicNeue(
                         fontSize: 11,
                         color: isDarkMode ? Colors.white24 : Colors.grey.shade500,
                       ),
@@ -369,7 +387,7 @@ class _MorningCharityPageState extends ConsumerState<MorningCharityPage> {
                   ],
                 ),
               ),
-              const Icon(Icons.check_circle_rounded, color: Colors.green, size: 18),
+              const Icon(Icons.check_circle_rounded, color: AppColors.primary, size: 18),
             ],
           ),
         );

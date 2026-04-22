@@ -19,6 +19,10 @@ import 'package:tabunganku/features/home/presentation/pages/investment_tracker_p
 import 'package:tabunganku/features/home/presentation/pages/insurance_tracker_page.dart';
 import 'package:tabunganku/features/home/presentation/pages/saving_plans_page.dart';
 import 'package:tabunganku/features/home/presentation/pages/buying_targets_page.dart';
+import 'package:tabunganku/features/home/presentation/pages/financial_health_page.dart';
+import 'package:tabunganku/features/home/presentation/pages/all_services_page.dart';
+import 'package:tabunganku/features/transaction/presentation/pages/recurring_list_page.dart';
+import 'package:tabunganku/features/home/presentation/pages/morning_charity_page.dart';
 
 final appRouterProvider = Provider((ref) {
   return GoRouter(
@@ -181,6 +185,27 @@ final appRouterProvider = Provider((ref) {
         path: '/insurance',
         name: 'insurance',
         builder: (context, state) => const InsuranceTrackerPage(),
+      ),
+
+      GoRoute(
+        path: '/financial-health',
+        name: 'financial-health',
+        builder: (context, state) => const FinancialHealthPage(),
+      ),
+      GoRoute(
+        path: '/all-services',
+        name: 'all-services',
+        builder: (context, state) => const AllServicesPage(),
+      ),
+      GoRoute(
+        path: '/recurring',
+        name: 'recurring',
+        builder: (context, state) => const RecurringListPage(),
+      ),
+      GoRoute(
+        path: '/morning-charity',
+        name: 'morning-charity',
+        builder: (context, state) => const MorningCharityPage(),
       ),
 
       // Catch-all redirect to splash

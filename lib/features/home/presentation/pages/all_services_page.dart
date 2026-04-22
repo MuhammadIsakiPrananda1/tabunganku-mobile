@@ -2,12 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:tabunganku/core/theme/app_colors.dart';
 import 'package:tabunganku/core/theme/theme_provider.dart';
-import 'package:tabunganku/models/transaction_model.dart';
+import 'package:tabunganku/providers/gold_provider.dart';
+import 'package:tabunganku/providers/bills_provider.dart';
+import 'package:tabunganku/providers/investment_provider.dart';
+import 'package:tabunganku/providers/insurance_provider.dart';
+import 'package:tabunganku/providers/saving_target_provider.dart';
+import 'package:tabunganku/models/gold_investment_model.dart';
 
 class AllServicesPage extends ConsumerWidget {
   const AllServicesPage({super.key});
+
+  String _formatRupiah(double amount) {
+    return NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    ).format(amount);
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -15,6 +29,23 @@ class AllServicesPage extends ConsumerWidget {
     final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
         (ref.watch(themeProvider) == ThemeMode.system &&
             theme.brightness == Brightness.dark);
+
+    // Watch providers for live data
+    final goldTxs = ref.watch(goldTransactionsStreamProvider).valueOrNull ?? [];
+    final goldGramBalance = goldTxs.fold<double>(
+        0, (sum, t) => sum + (t.type == GoldTransactionType.buy ? t.grams : -t.grams));
+
+    final bills = ref.watch(billsStreamProvider).valueOrNull ?? [];
+    final unpaidBillsTotal = bills.fold<double>(0, (sum, b) => sum + (b.isPaid ? 0 : b.amount));
+
+    final investments = ref.watch(investmentStreamProvider).valueOrNull ?? [];
+    final totalInvestmentValuation = investments.fold<double>(0, (sum, i) => sum + i.currentValuation);
+
+    final insurances = ref.watch(insuranceStreamProvider).valueOrNull ?? [];
+    final totalMonthlyInsurance = insurances.fold<double>(0, (sum, i) => sum + i.premiumAmount);
+
+    final targets = ref.watch(savingTargetsStreamProvider).valueOrNull ?? [];
+    final totalTargets = targets.length;
 
     return Scaffold(
       backgroundColor: isDarkMode ? Colors.black : const Color(0xFFF8FAFC),
@@ -26,197 +57,197 @@ class AllServicesPage extends ConsumerWidget {
           onPressed: () => context.pop(),
           icon: Icon(Icons.arrow_back_ios_new_rounded, 
             color: isDarkMode ? Colors.white : AppColors.primaryDark, 
-            size: 20),
+            size: 18),
         ),
         title: Text(
           'Semua Layanan',
-          style: GoogleFonts.plusJakartaSans(
+          style: GoogleFonts.comicNeue(
             fontWeight: FontWeight.bold,
-            fontSize: 18,
+            fontSize: 16,
             color: isDarkMode ? Colors.white : AppColors.primaryDark,
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-        child: Column(
-          children: [
-            _buildCategory(context, 'FINANSIAL & TRANSAKSI', [
-              _ServiceData(
-                icon: Icons.document_scanner_rounded,
-                title: 'Smart Receipt',
-                subtitle: 'Scan struk belanja otomatis',
-                color: Colors.teal,
-                route: '/scan-receipt',
-              ),
-              _ServiceData(
-                icon: Icons.loop_rounded,
-                title: 'Kelola Langganan',
-                subtitle: 'Tagihan rutin & hiburan',
-                color: Colors.blue,
-                route: '/recurring',
-              ),
-            ], isDarkMode),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 40),
+        children: [
+          _buildCompactCategoryCard(context, isDarkMode, [
+            // FINANSIAL & TRANSAKSI
+            _ServiceData(
+              icon: Icons.document_scanner_rounded,
+              title: 'Smart Receipt',
+              subtitle: 'Scan struk belanja otomatis',
+              color: Colors.teal,
+              route: '/scan-receipt',
+            ),
+            _ServiceData(
+              icon: Icons.loop_rounded,
+              title: 'Kelola Langganan',
+              subtitle: 'Tagihan rutin & hiburan',
+              color: Colors.blue,
+              route: '/recurring',
+            ),
+            
+            // TABUNGAN & RENCANA
+            _ServiceData(
+              icon: Icons.assignment_turned_in_rounded,
+              title: 'Dana Rencana',
+              subtitle: 'Masa depan cerah terencana',
+              color: AppColors.primary,
+              route: '/saving-plans',
+            ),
+            _ServiceData(
+              icon: Icons.monetization_on_rounded,
+              title: 'Simpanan Emas',
+              subtitle: goldGramBalance > 0 
+                  ? '${goldGramBalance.toStringAsFixed(3)} Gr tersimpan' 
+                  : 'Tabungan nilai aset stabil',
+              color: Colors.amber,
+              route: '/gold',
+            ),
 
-            _buildCategory(context, 'TABUNGAN & RENCANA', [
-              _ServiceData(
-                icon: Icons.assignment_turned_in_rounded,
-                title: 'Dana Rencana',
-                subtitle: 'Masa depan cerah terencana',
-                color: Colors.teal,
-                route: '/saving-plans',
-              ),
-              _ServiceData(
-                icon: Icons.monetization_on_rounded,
-                title: 'Simpanan Emas',
-                subtitle: 'Tabungan nilai aset stabil',
-                color: Colors.amber,
-                route: '/gold',
-              ),
-            ], isDarkMode),
+            // TOOLS & ANALISIS
+            _ServiceData(
+              icon: Icons.calculate_rounded,
+              title: 'Simulasi Tabungan',
+              subtitle: 'Hitung pertumbuhan bungamu',
+              color: Colors.cyan,
+              route: '/saving-simulator',
+            ),
+            _ServiceData(
+              icon: Icons.receipt_long_rounded,
+              title: 'Manajemen Tagihan',
+              subtitle: unpaidBillsTotal > 0 
+                  ? '${_formatRupiah(unpaidBillsTotal)} tertunggak' 
+                  : 'List tagihan bulanan wajib',
+              color: Colors.lightBlue,
+              route: '/bills',
+            ),
+            _ServiceData(
+              icon: Icons.health_and_safety_rounded,
+              title: 'Cek Kesehatan',
+              subtitle: 'Analisis kondisi keuanganmu',
+              color: Colors.green,
+              route: '/financial-health',
+            ),
 
-            _buildCategory(context, 'TOOLS & ANALISIS', [
-              _ServiceData(
-                icon: Icons.calculate_rounded,
-                title: 'Simulasi Tabungan',
-                subtitle: 'Hitung pertumbuhan bungamu',
-                color: Colors.cyan,
-                route: '/saving-simulator',
-              ),
-              _ServiceData(
-                icon: Icons.receipt_long_rounded,
-                title: 'Manajemen Tagihan',
-                subtitle: 'List tagihan bulanan wajib',
-                color: Colors.lightBlue,
-                route: '/bills',
-              ),
-              _ServiceData(
-                icon: Icons.request_quote_rounded,
-                title: 'Hitung Pajak',
-                subtitle: 'Kalkulator pajak praktis',
-                color: Colors.orange,
-                route: '/tax',
-              ),
-            ], isDarkMode),
+            // INVESTASI & PROTEKSI
+            _ServiceData(
+              icon: Icons.trending_up_rounded,
+              title: 'Portofolio Investasi',
+              subtitle: totalInvestmentValuation > 0 
+                  ? 'Valuasi: ${_formatRupiah(totalInvestmentValuation)}' 
+                  : 'Pantau aset investasimu',
+              color: Colors.indigo,
+              route: '/investment',
+            ),
+            _ServiceData(
+              icon: Icons.shield_rounded,
+              title: 'Proteksi Asuransi',
+              subtitle: totalMonthlyInsurance > 0 
+                  ? '${_formatRupiah(totalMonthlyInsurance)}/bln' 
+                  : 'Keamanan jangka panjang',
+              color: Colors.blueGrey,
+              route: '/insurance',
+            ),
 
-            _buildCategory(context, 'INVESTASI & PROTEKSI', [
-              _ServiceData(
-                icon: Icons.trending_up_rounded,
-                title: 'Portofolio Investasi',
-                subtitle: 'Pantau aset investasimu',
-                color: Colors.indigo,
-                route: '/investment',
-              ),
-              _ServiceData(
-                icon: Icons.shield_rounded,
-                title: 'Proteksi Asuransi',
-                subtitle: 'Keamanan jangka panjang',
-                color: Colors.blueGrey,
-                route: '/insurance',
-              ),
-            ], isDarkMode),
+            // SOSIAL & HADIAH
+            _ServiceData(
+              icon: Icons.volunteer_activism_rounded,
+              title: 'Zakat & Infaq',
+              subtitle: 'Donasi & ibadah harta',
+              color: Colors.teal,
+              route: '/zakat',
+            ),
+            _ServiceData(
+              icon: Icons.wb_sunny_rounded,
+              title: 'Sedekah Subuh',
+              subtitle: 'Keberkahan di setiap pagi',
+              color: Colors.orangeAccent,
+              route: '/morning-charity',
+            ),
+            _ServiceData(
+              icon: Icons.emoji_events_rounded,
+              title: 'Misi & Challenge',
+              subtitle: 'Mainkan misi, raih reward',
+              color: Colors.amber,
+              route: '/challenge',
+            ),
+          ]),
+        ],
+      ),
+    );
+  }
 
-            _buildCategory(context, 'SOSIAL & HADIAH', [
-              _ServiceData(
-                icon: Icons.volunteer_activism_rounded,
-                title: 'Zakat & Infaq',
-                subtitle: 'Donasi & ibadah harta',
-                color: Colors.teal,
-                route: '/zakat',
-              ),
-              _ServiceData(
-                icon: Icons.wb_sunny_rounded,
-                title: 'Sedekah Subuh',
-                subtitle: 'Rutinitas berkah setiap pagi',
-                color: Colors.orangeAccent,
-                route: '/morning-charity',
-              ),
-              _ServiceData(
-                icon: Icons.emoji_events_rounded,
-                title: 'Misi & Challenge',
-                subtitle: 'Mainkan misi, raih reward',
-                color: Colors.amber,
-                route: '/challenge',
-              ),
-            ], isDarkMode),
-            const SizedBox(height: 40),
-          ],
+  Widget _buildCategoryHeader(bool isDarkMode, String title) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4, top: 24, bottom: 12),
+      child: Text(
+        title,
+        style: GoogleFonts.comicNeue(
+          fontSize: 10,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 1.2,
+          color: isDarkMode ? Colors.white24 : Colors.grey.shade400,
         ),
       ),
     );
   }
 
-  Widget _buildCategory(BuildContext context, String title, List<_ServiceData> items, bool isDarkMode) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 8, top: 32, bottom: 16),
-          child: Text(
-            title,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 11,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 1.5,
-              color: isDarkMode ? Colors.white24 : Colors.grey.shade400,
-            ),
-          ),
+  Widget _buildCompactCategoryCard(BuildContext context, bool isDarkMode, List<_ServiceData> items) {
+    return Container(
+      decoration: BoxDecoration(
+        color: isDarkMode ? const Color(0xFF111111) : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100,
         ),
-        Container(
-          decoration: BoxDecoration(
-            color: isDarkMode ? const Color(0xFF111111) : Colors.white,
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(
-              color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100,
-            ),
-          ),
-          child: Column(
-            children: List.generate(items.length, (index) {
-              final item = items[index];
-              return Column(
-                children: [
-                  _buildListDetailItem(context, item, isDarkMode),
-                  if (index != items.length - 1)
-                    Divider(
-                      height: 1,
-                      indent: 72,
-                      endIndent: 20,
-                      color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade50,
-                    ),
-                ],
-              );
-            }),
-          ),
-        ),
-      ],
+      ),
+      child: Column(
+        children: List.generate(items.length, (index) {
+          final item = items[index];
+          return Column(
+            children: [
+              _buildCompactListItem(context, item, isDarkMode),
+              if (index != items.length - 1)
+                Divider(
+                  height: 1,
+                  indent: 64,
+                  endIndent: 16,
+                  color: isDarkMode ? Colors.white.withValues(alpha: 0.03) : Colors.grey.shade50,
+                ),
+            ],
+          );
+        }),
+      ),
     );
   }
 
-  Widget _buildListDetailItem(BuildContext context, _ServiceData item, bool isDarkMode) {
+  Widget _buildCompactListItem(BuildContext context, _ServiceData item, bool isDarkMode) {
     return InkWell(
       onTap: () => context.push(item.route, extra: item.extra),
-      borderRadius: BorderRadius.circular(24),
+      borderRadius: BorderRadius.circular(20),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: item.color.withValues(alpha: isDarkMode ? 0.15 : 0.08),
-                borderRadius: BorderRadius.circular(16),
+                color: item.color.withValues(alpha: isDarkMode ? 0.12 : 0.06),
+                borderRadius: BorderRadius.circular(14),
               ),
-              child: Icon(item.icon, color: item.color, size: 22),
+              child: Icon(item.icon, color: item.color, size: 20),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     item.title,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 15,
+                    style: GoogleFonts.comicNeue(
+                      fontSize: 14,
                       fontWeight: FontWeight.bold,
                       color: isDarkMode ? Colors.white : AppColors.primaryDark,
                     ),
@@ -224,7 +255,9 @@ class AllServicesPage extends ConsumerWidget {
                   const SizedBox(height: 2),
                   Text(
                     item.subtitle,
-                    style: GoogleFonts.plusJakartaSans(
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.comicNeue(
                       fontSize: 11,
                       fontWeight: FontWeight.w500,
                       color: isDarkMode ? Colors.white38 : Colors.grey.shade500,
@@ -235,8 +268,8 @@ class AllServicesPage extends ConsumerWidget {
             ),
             Icon(
               Icons.chevron_right_rounded,
-              size: 20,
-              color: isDarkMode ? Colors.white12 : Colors.grey.shade300,
+              size: 18,
+              color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
             ),
           ],
         ),

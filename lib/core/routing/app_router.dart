@@ -19,10 +19,11 @@ import 'package:tabunganku/features/home/presentation/pages/investment_tracker_p
 import 'package:tabunganku/features/home/presentation/pages/insurance_tracker_page.dart';
 import 'package:tabunganku/features/home/presentation/pages/saving_plans_page.dart';
 import 'package:tabunganku/features/home/presentation/pages/buying_targets_page.dart';
-import 'package:tabunganku/features/home/presentation/pages/financial_health_page.dart';
 import 'package:tabunganku/features/home/presentation/pages/all_services_page.dart';
 import 'package:tabunganku/features/transaction/presentation/pages/recurring_list_page.dart';
-import 'package:tabunganku/features/home/presentation/pages/morning_charity_page.dart';
+import 'package:tabunganku/features/transaction/presentation/pages/debt_list_page.dart';
+import 'package:tabunganku/features/shopping/presentation/pages/shopping_list_page.dart';
+import 'package:tabunganku/features/home/presentation/pages/tax_reminder_page.dart';
 
 final appRouterProvider = Provider((ref) {
   return GoRouter(
@@ -188,11 +189,6 @@ final appRouterProvider = Provider((ref) {
       ),
 
       GoRoute(
-        path: '/financial-health',
-        name: 'financial-health',
-        builder: (context, state) => const FinancialHealthPage(),
-      ),
-      GoRoute(
         path: '/all-services',
         name: 'all-services',
         builder: (context, state) => const AllServicesPage(),
@@ -202,10 +198,22 @@ final appRouterProvider = Provider((ref) {
         name: 'recurring',
         builder: (context, state) => const RecurringListPage(),
       ),
+
       GoRoute(
-        path: '/morning-charity',
-        name: 'morning-charity',
-        builder: (context, state) => const MorningCharityPage(),
+        path: '/debts',
+        name: 'debts',
+        builder: (context, state) => const DebtListPage(),
+      ),
+      GoRoute(
+        path: '/shopping',
+        name: 'shopping',
+        builder: (context, state) => const ShoppingListPage(),
+      ),
+
+      GoRoute(
+        path: '/tax-reminder',
+        name: 'tax-reminder',
+        builder: (context, state) => const TaxReminderPage(),
       ),
 
       // Catch-all redirect to splash

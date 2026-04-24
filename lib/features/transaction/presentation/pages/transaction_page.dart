@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:tabunganku/core/theme/app_colors.dart';
 import 'package:tabunganku/core/theme/theme_provider.dart';
 import 'package:tabunganku/models/transaction_model.dart';
@@ -15,20 +16,12 @@ class TransactionPage extends ConsumerStatefulWidget {
   ConsumerState<TransactionPage> createState() => _TransactionPageState();
 }
 
-class _TransactionPageState extends ConsumerState<TransactionPage>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+class _TransactionPageState extends ConsumerState<TransactionPage> {
+  String _filter = 'semua'; // semua, income, expense, Hutang, Piutang
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
   }
 
   String _formatRupiah(double amount) {
@@ -57,48 +50,83 @@ class _TransactionPageState extends ConsumerState<TransactionPage>
         backgroundColor: theme.appBarTheme.backgroundColor,
         elevation: 0,
         centerTitle: true,
-        bottom: TabBar(
-          controller: _tabController,
-          labelColor: AppColors.primary,
-          unselectedLabelColor:
-              isDarkMode ? Colors.white38 : AppColors.textSecondary,
-          indicatorColor: AppColors.primary,
-          indicatorSize: TabBarIndicatorSize.label,
-          labelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-          unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
-          tabs: const [
-            Tab(text: 'Transaksi'),
-            Tab(text: 'Hutang/Piutang'),
-            Tab(text: 'Belanja'),
-          ],
+        leading: IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, 
+            color: isDarkMode ? Colors.white : AppColors.primaryDark, 
+            size: 20),
         ),
       ),
       body: transactionsAsync.when(
         data: (allTransactions) {
-          // Filter berdasarkan kategori
-          final transaksiList = allTransactions
-              .where((t) =>
-                  t.groupId == null &&
-                  t.category != 'Hutang' &&
-                  t.category != 'Piutang' &&
-                  !t.id.startsWith('shopping_'))
-              .toList();
+          // Calculate summary from ALL relevant transactions
+          final income = allTransactions
+              .where((t) => t.type == TransactionType.income)
+              .fold<double>(0, (s, t) => s + t.amount);
+          final expense = allTransactions
+              .where((t) => t.type == TransactionType.expense)
+              .fold<double>(0, (s, t) => s + t.amount);
 
-          final hutangPiutangList = allTransactions
-              .where((t) =>
-                  t.category == 'Hutang' || t.category == 'Piutang')
-              .toList();
+          // Apply filters
+          final filteredList = allTransactions.where((t) {
+            if (_filter == 'income') return t.type == TransactionType.income && t.category != 'Piutang';
+            if (_filter == 'expense') return t.type == TransactionType.expense && t.category != 'Hutang' && !t.id.startsWith('shopping_');
+            if (_filter == 'Hutang') return t.category == 'Hutang';
+            if (_filter == 'Piutang') return t.category == 'Piutang';
+            return true;
+          }).toList();
 
-          final belanjaList = allTransactions
-              .where((t) => t.id.startsWith('shopping_'))
-              .toList();
-
-          return TabBarView(
-            controller: _tabController,
+          return Column(
             children: [
-              _buildTransactionTab(context, transaksiList, isDarkMode, 'transaksi'),
-              _buildHutangPiutangTab(context, hutangPiutangList, isDarkMode),
-              _buildBelanjaTab(context, belanjaList, isDarkMode),
+              _buildSummaryBar(isDarkMode, income: income, expense: expense),
+              
+              // Filter Chips (Scrollable for many options)
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                child: Row(
+                  children: [
+                    _buildFilterChip('Semua', 'semua', _filter, Icons.receipt_long_rounded, (val) => setState(() => _filter = val), isDarkMode),
+                    const SizedBox(width: 8),
+                    _buildFilterChip('Pemasukan', 'income', _filter, Icons.arrow_downward_rounded, (val) => setState(() => _filter = val), isDarkMode),
+                    const SizedBox(width: 8),
+                    _buildFilterChip('Pengeluaran', 'expense', _filter, Icons.arrow_upward_rounded, (val) => setState(() => _filter = val), isDarkMode),
+                    const SizedBox(width: 8),
+                    _buildFilterChip('Hutang', 'Hutang', _filter, Icons.call_made_rounded, (val) => setState(() => _filter = val), isDarkMode),
+                    const SizedBox(width: 8),
+                    _buildFilterChip('Piutang', 'Piutang', _filter, Icons.call_received_rounded, (val) => setState(() => _filter = val), isDarkMode),
+                  ],
+                ),
+              ),
+
+              Expanded(
+                child: filteredList.isEmpty
+                ? _buildEmptyState(isDarkMode, icon: Icons.filter_list_off_rounded, label: 'Tidak ada data yang cocok')
+                : ListView.builder(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 80),
+                    itemCount: filteredList.length,
+                    itemBuilder: (context, index) {
+                      final t = filteredList[index];
+                      if (t.category == 'Hutang' || t.category == 'Piutang') {
+                        return _buildDebtTile(context, ref, t, isDarkMode);
+                      }
+                      if (t.id.startsWith('shopping_')) {
+                        return _buildShoppingTile(context, ref, t, isDarkMode);
+                      }
+                      return InkWell(
+                        onTap: () => TransactionDetailSheet.show(
+                          context,
+                          ref,
+                          t,
+                          onEdit: () {},
+                          onDelete: () => _deleteTransaction(context, ref, t, isDarkMode),
+                        ),
+                        borderRadius: BorderRadius.circular(16),
+                        child: TransactionTile(transaction: t),
+                      );
+                    },
+                  ),
+              ),
             ],
           );
         },
@@ -111,235 +139,6 @@ class _TransactionPageState extends ConsumerState<TransactionPage>
   }
 
   // ─────────────────────────────────────────────
-  // TAB 1: Transaksi (Pemasukan & Pengeluaran)
-  // ─────────────────────────────────────────────
-  Widget _buildTransactionTab(
-    BuildContext context,
-    List<TransactionModel> transactions,
-    bool isDarkMode,
-    String type,
-  ) {
-    if (transactions.isEmpty) {
-      return _buildEmptyState(
-        isDarkMode,
-        icon: Icons.receipt_long_outlined,
-        label: 'Belum ada transaksi',
-      );
-    }
-
-    final income = transactions
-        .where((t) => t.type == TransactionType.income)
-        .fold<double>(0, (s, t) => s + t.amount);
-    final expense = transactions
-        .where((t) => t.type == TransactionType.expense)
-        .fold<double>(0, (s, t) => s + t.amount);
-
-    return Column(
-      children: [
-        // Summary bar
-        _buildSummaryBar(isDarkMode, income: income, expense: expense),
-        Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 80),
-            itemCount: transactions.length,
-            itemBuilder: (context, index) {
-              final t = transactions[index];
-              return InkWell(
-                onTap: () => TransactionDetailSheet.show(
-                  context,
-                  ref,
-                  t,
-                  onEdit: () {},
-                  onDelete: () => _deleteTransaction(context, ref, t, isDarkMode),
-                ),
-                borderRadius: BorderRadius.circular(16),
-                child: TransactionTile(transaction: t),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  // ─────────────────────────────────────────────
-  // TAB 2: Hutang & Piutang
-  // ─────────────────────────────────────────────
-  Widget _buildHutangPiutangTab(
-    BuildContext context,
-    List<TransactionModel> transactions,
-    bool isDarkMode,
-  ) {
-    if (transactions.isEmpty) {
-      return _buildEmptyState(
-        isDarkMode,
-        icon: Icons.account_balance_wallet_outlined,
-        label: 'Belum ada riwayat hutang/piutang',
-        subtitle: 'Akan muncul saat kamu menandai hutang/piutang sebagai lunas',
-      );
-    }
-
-    final hutangList =
-        transactions.where((t) => t.category == 'Hutang').toList();
-    final piutangList =
-        transactions.where((t) => t.category == 'Piutang').toList();
-
-    final totalHutang =
-        hutangList.fold<double>(0, (s, t) => s + t.amount);
-    final totalPiutang =
-        piutangList.fold<double>(0, (s, t) => s + t.amount);
-
-    return Column(
-      children: [
-        // Summary hutang vs piutang
-        Container(
-          margin: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: isDarkMode
-                ? Colors.white.withValues(alpha: 0.05)
-                : Colors.grey.shade50,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: isDarkMode
-                  ? Colors.white.withValues(alpha: 0.08)
-                  : Colors.grey.shade100,
-            ),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: _buildSumItem(
-                  isDarkMode,
-                  label: 'DIBAYAR (HUTANG)',
-                  amount: totalHutang,
-                  color: Colors.red.shade400,
-                  icon: Icons.call_made_rounded,
-                ),
-              ),
-              Container(
-                width: 1,
-                height: 40,
-                color: isDarkMode
-                    ? Colors.white12
-                    : Colors.grey.shade200,
-              ),
-              Expanded(
-                child: _buildSumItem(
-                  isDarkMode,
-                  label: 'DITERIMA (PIUTANG)',
-                  amount: totalPiutang,
-                  color: Colors.green.shade400,
-                  icon: Icons.call_received_rounded,
-                ),
-              ),
-            ],
-          ),
-        ),
-        Expanded(
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 80),
-            children: [
-              if (hutangList.isNotEmpty) ...[
-                _buildGroupHeader('HUTANG TERBAYAR', Colors.red.shade400, isDarkMode),
-                const SizedBox(height: 8),
-                ...hutangList.map((t) => _buildDebtTile(context, ref, t, isDarkMode)),
-                const SizedBox(height: 20),
-              ],
-              if (piutangList.isNotEmpty) ...[
-                _buildGroupHeader('PIUTANG DITERIMA', Colors.green.shade400, isDarkMode),
-                const SizedBox(height: 8),
-                ...piutangList.map((t) => _buildDebtTile(context, ref, t, isDarkMode)),
-              ],
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  // ─────────────────────────────────────────────
-  // TAB 3: Belanja
-  // ─────────────────────────────────────────────
-  Widget _buildBelanjaTab(
-    BuildContext context,
-    List<TransactionModel> transactions,
-    bool isDarkMode,
-  ) {
-    if (transactions.isEmpty) {
-      return _buildEmptyState(
-        isDarkMode,
-        icon: Icons.shopping_bag_outlined,
-        label: 'Belum ada riwayat belanja',
-        subtitle: 'Akan muncul saat kamu menandai item belanja sebagai dibeli',
-      );
-    }
-
-    final total = transactions.fold<double>(0, (s, t) => s + t.amount);
-
-    return Column(
-      children: [
-        // Summary total belanja
-        Container(
-          margin: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                AppColors.primary.withValues(alpha: isDarkMode ? 0.15 : 0.08),
-                AppColors.primary.withValues(alpha: isDarkMode ? 0.05 : 0.03),
-              ],
-            ),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-                color: AppColors.primary.withValues(alpha: 0.12)),
-          ),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(Icons.shopping_bag_rounded,
-                    color: AppColors.primary, size: 22),
-              ),
-              const SizedBox(width: 16),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'TOTAL BELANJA',
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1,
-                      color: isDarkMode ? Colors.white38 : Colors.black38,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    _formatRupiah(total),
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: isDarkMode ? Colors.white : Colors.teal.shade900,
-                    ),
-                  ),
-                ],
-              ),
-              const Spacer(),
-              Text(
-                '${transactions.length} item',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: isDarkMode ? Colors.white38 : Colors.black38,
-                ),
-              ),
-            ],
-          ),
         ),
         Expanded(
           child: ListView.builder(
@@ -358,6 +157,53 @@ class _TransactionPageState extends ConsumerState<TransactionPage>
   // ─────────────────────────────────────────────
   // SHARED WIDGETS
   // ─────────────────────────────────────────────
+  // Filter Chip Helper
+  Widget _buildFilterChip(String label, String value, String currentValue, IconData icon, Function(String) onSelected, bool isDarkMode) {
+    final isSelected = currentValue == value;
+    const activeColor = Color(0xFF00BFA5); // Teal from image
+    
+    return GestureDetector(
+      onTap: () => onSelected(value),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected 
+              ? activeColor.withValues(alpha: 0.15) 
+              : (isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100),
+          borderRadius: BorderRadius.circular(30), // Stadium shape
+          border: Border.all(
+            color: isSelected 
+                ? activeColor 
+                : Colors.transparent,
+            width: 1.5,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 14,
+              color: isSelected ? activeColor : (isDarkMode ? Colors.white38 : Colors.grey),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: GoogleFonts.comicNeue(
+                fontSize: 13,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                color: isSelected 
+                    ? (isDarkMode ? Colors.white : activeColor)
+                    : (isDarkMode ? Colors.white38 : Colors.grey),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildSummaryBar(bool isDarkMode,
       {required double income, required double expense}) {
     return Container(

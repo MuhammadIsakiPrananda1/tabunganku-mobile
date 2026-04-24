@@ -22,10 +22,49 @@ class _TaxCalculatorPageState extends ConsumerState<TaxCalculatorPage> {
     final text = _valController.text.replaceAll('.', '');
     final amount = double.tryParse(text) ?? 0;
     setState(() {
-      if (_taxType == 'PBB') {
-        _taxResult = amount * 0.001; // 0.1% of NJOP as a simple mock
-      } else {
-        _taxResult = amount * 0.02; // 2% of vehicle value as a simple mock
+      switch (_taxType) {
+        case 'PBB':
+          // Standar PBB: (NJOP - NJOPTKP) * 0.1% (Tarif minimal umum)
+          const njoptkp = 12000000;
+          _taxResult = amount > njoptkp ? (amount - njoptkp) * 0.001 : 0;
+          break;
+        case 'PKB':
+          // Standar PKB: NJKB * 2% (Tarif kendaraan pertama umum)
+          _taxResult = amount * 0.02;
+          break;
+        case 'PPh':
+          // Standar PPh 21 (Bulanan - Sederhana TK/0):
+          // PTKP TK/0 = 54jt/tahun = 4.5jt/bulan
+          const ptkpBulanan = 4500000;
+          double pkp = amount - ptkpBulanan;
+          if (pkp <= 0) {
+            _taxResult = 0;
+          } else {
+            // Progresif Layer 1: 5% up to 60jt/tahun (5jt/bulan PKP)
+            if (pkp <= 5000000) {
+              _taxResult = pkp * 0.05;
+            } else {
+              // Layer 2: 15% (untuk simulasi sederhana kita batasi atau tambahkan layer)
+              _taxResult = (5000000 * 0.05) + ((pkp - 5000000) * 0.15);
+            }
+          }
+          break;
+        case 'PPN':
+          // Standar PPN Indonesia: 11%
+          _taxResult = amount * 0.11;
+          break;
+        case 'BPHTB':
+          // Standar BPHTB: (Harga - NPOPTKP) * 5%
+          // NPOPTKP standar umum Rp 60jt
+          const npoptkp = 60000000;
+          _taxResult = amount > npoptkp ? (amount - npoptkp) * 0.05 : 0;
+          break;
+        case 'PB1':
+          // Standar Pajak Restoran/Hotel: 10%
+          _taxResult = amount * 0.10;
+          break;
+        default:
+          _taxResult = 0;
       }
     });
   }
@@ -53,33 +92,47 @@ class _TaxCalculatorPageState extends ConsumerState<TaxCalculatorPage> {
         centerTitle: true,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildInfoCard(isDarkMode),
-            const SizedBox(height: 32),
+            const SizedBox(height: 24),
             
             Text('TIPE PAJAK', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5, color: contentColor.withValues(alpha: 0.4))),
-            const SizedBox(height: 16),
-            Row(
+            const SizedBox(height: 12),
+            GridView.count(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisCount: 2,
+              childAspectRatio: 3.2,
+              mainAxisSpacing: 8,
+              crossAxisSpacing: 8,
               children: [
-                Expanded(child: _buildTypeCard('PBB', 'Pajak Bumi Bangunan', Icons.home_rounded, isDarkMode)),
-                const SizedBox(width: 12),
-                Expanded(child: _buildTypeCard('PKB', 'Pajak Kendaraan', Icons.directions_car_rounded, isDarkMode)),
+                _buildCompactTypeCard('PBB', 'Bumi & Bangunan', Icons.home_rounded, isDarkMode),
+                _buildCompactTypeCard('PKB', 'Kendaraan Bermotor', Icons.directions_car_rounded, isDarkMode),
+                _buildCompactTypeCard('PPh', 'Pajak Penghasilan', Icons.wallet_rounded, isDarkMode),
+                _buildCompactTypeCard('PPN', 'Pertambahan Nilai', Icons.receipt_rounded, isDarkMode),
+                _buildCompactTypeCard('BPHTB', 'Bea Perolehan Tanah', Icons.domain_rounded, isDarkMode),
+                _buildCompactTypeCard('PB1', 'Restoran & Hotel', Icons.restaurant_rounded, isDarkMode),
               ],
             ),
             
-            const SizedBox(height: 32),
+            const SizedBox(height: 24),
             _buildAlignedInput(
-              _taxType == 'PBB' ? 'Nilai Jual Objek Pajak (NJOP)' : 'Nilai Jual Kendaraan (NJKB)', 
+              _taxType == 'PBB' ? 'Nilai Jual (NJOP)' : 
+              _taxType == 'PKB' ? 'Nilai Jual (NJKB)' :
+              _taxType == 'PPh' ? 'Total Penghasilan' :
+              _taxType == 'PPN' ? 'Nilai Transaksi' :
+              _taxType == 'BPHTB' ? 'Harga Transaksi Properti' :
+              'Total Bill', 
               _valController, 
               (_) => _calculateTax(), 
-              _taxType == 'PBB' ? Icons.home_work_rounded : Icons.directions_car_filled_rounded, 
+              _taxType == 'PBB' ? Icons.home_work_rounded : Icons.payments_rounded, 
               isDarkMode
             ),
             
-            const SizedBox(height: 48),
+            const SizedBox(height: 24),
             _buildResultCard(isDarkMode),
           ],
         ),
@@ -87,7 +140,7 @@ class _TaxCalculatorPageState extends ConsumerState<TaxCalculatorPage> {
     );
   }
 
-  Widget _buildTypeCard(String type, String desc, IconData icon, bool isDarkMode) {
+  Widget _buildCompactTypeCard(String type, String label, IconData icon, bool isDarkMode) {
     final isSelected = _taxType == type;
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
     
@@ -98,20 +151,30 @@ class _TaxCalculatorPageState extends ConsumerState<TaxCalculatorPage> {
       }),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected ? AppColors.primary : (isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.white),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(12),
           border: Border.all(color: isSelected ? AppColors.primary : (isDarkMode ? Colors.white10 : Colors.black.withValues(alpha: 0.05))),
-          boxShadow: isSelected ? [BoxShadow(color: AppColors.primary.withValues(alpha: 0.3), blurRadius: 10, offset: const Offset(0, 4))] : [],
+          boxShadow: isSelected ? [BoxShadow(color: AppColors.primary.withValues(alpha: 0.2), blurRadius: 4, offset: const Offset(0, 2))] : [],
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: isSelected ? Colors.white : AppColors.primary, size: 24),
-            const SizedBox(height: 12),
-            Text(type, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: isSelected ? Colors.white : contentColor)),
-            Text(desc, style: TextStyle(fontSize: 10, color: isSelected ? Colors.white70 : Colors.grey, fontWeight: FontWeight.w500)),
+            Icon(icon,
+                color: isSelected ? Colors.white : AppColors.primary, size: 16),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 11,
+                    color: isSelected ? Colors.white : contentColor),
+              ),
+            ),
           ],
         ),
       ),
@@ -152,7 +215,7 @@ class _TaxCalculatorPageState extends ConsumerState<TaxCalculatorPage> {
             filled: true,
             fillColor: isDarkMode ? Colors.white.withValues(alpha: 0.05) : AppColors.background,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           ),
         ),
       ],
@@ -187,7 +250,7 @@ class _TaxCalculatorPageState extends ConsumerState<TaxCalculatorPage> {
     
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: hexBg,
         borderRadius: BorderRadius.circular(24),
@@ -205,10 +268,10 @@ class _TaxCalculatorPageState extends ConsumerState<TaxCalculatorPage> {
               style: GoogleFonts.plusJakartaSans(fontSize: 32, fontWeight: FontWeight.bold, color: _taxResult > 0 ? AppColors.primary : contentColor.withValues(alpha: 0.1))
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,
-            height: 54,
+            height: 48,
             child: ElevatedButton(
               onPressed: _taxResult > 0 ? () {} : null,
               style: ElevatedButton.styleFrom(

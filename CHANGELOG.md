@@ -4,7 +4,7 @@ Seluruh evolusi, fitur, dan perbaikan aplikasi **TabunganKu** terdokumentasi sec
 
 ---
 
-## 💎 [1.4.8] — 19–22 April 2026: The Security, Transparency & Services Modernization
+## 💎 [1.4.9] — 24 April 2026: The Security, Transparency & Services Modernization
 
 Rilis ini menghadirkan perombakan total pada sistem keamanan, transparansi keluarga, serta modernisasi besar-besaran pada layanan tambahan (Other Services) seperti Sedekah Subuh dan Tabungan Emas.
 
@@ -54,7 +54,7 @@ Penyempurnaan performa, stabilitas sistem, dan penambahan fitur keuangan cerdas 
 - **Multi-Bank Interest Quick-Fill** — Fitur pengisian cepat bunga tabungan dari berbagai bank langsung dari form **Tambah Pemasukan** 💚.
   - Mendukung **10 pilihan bank** sekaligus dalam satu dropdown terintegrasi:
     - 🟢 **SeaBank (Premium)** — 7,4% p.a. untuk saldo ≥ Rp 1 juta (dikreditkan harian)
-    - 🔵 **SeaBank (Standar)** — 4% p.a. untuk semua saldo (dikreditkan harian)
+    - 🔵 **SeaBank (Standar)** — 2,5% p.a. tanpa saldo minimum (bebas tarik)
     - ⚡ **Bank Neo Commerce** — Bunga cair harian
     - 🟠 **Bank Jago** — Bunga cair bulanan
     - 💧 **Blu by BCA Digital** — Bunga cair bulanan

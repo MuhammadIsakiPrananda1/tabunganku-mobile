@@ -19,7 +19,7 @@ enum QuickActionType {
   retirementFund,
   tax,
   bills,
-  morningCharity,
+
   qurban,
   investment,
   insurance,

@@ -574,12 +574,7 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
       type: QuickActionType.bills,
       baseColor: Colors.lightBlue,
     ),
-    _QuickActionItem(
-      icon: Icons.wb_sunny_rounded,
-      label: 'Sedekah Subuh',
-      type: QuickActionType.morningCharity,
-      baseColor: Colors.orangeAccent,
-    ),
+
     _QuickActionItem(
       icon: Icons.trending_up_rounded,
       label: 'Investasi',

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -16,7 +17,7 @@ class SavingSimulatorPage extends ConsumerStatefulWidget {
 
 class _SavingSimulatorPageState extends ConsumerState<SavingSimulatorPage> {
   final TextEditingController _amountController = TextEditingController();
-  final TextEditingController _durationController = TextEditingController(text: '12');
+  final TextEditingController _durationController = TextEditingController();
   String _unit = 'Bulan';
   double _targetAmount = 0;
   int _durationCount = 12;
@@ -66,15 +67,16 @@ class _SavingSimulatorPageState extends ConsumerState<SavingSimulatorPage> {
 
     return Scaffold(
       backgroundColor: isDarkMode ? AppColors.backgroundDark : const Color(0xFFF8FAF9),
-      extendBodyBehindAppBar: true,
+      extendBodyBehindAppBar: false,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: isDarkMode ? AppColors.backgroundDark : const Color(0xFFF8FAF9),
         elevation: 0,
+        scrolledUnderElevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('Simulasi Tabungan', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        title: Text('Simulasi Tabungan', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 16)),
         centerTitle: true,
       ),
       body: Stack(
@@ -90,13 +92,13 @@ class _SavingSimulatorPageState extends ConsumerState<SavingSimulatorPage> {
           ),
           
           SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(24, 120, 24, 40),
+            padding: const EdgeInsets.fromLTRB(24, 20, 24, 40),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Hitung Tabungan', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, letterSpacing: -1.5)),
+                Text('Hitung Tabungan', style: GoogleFonts.comicNeue(fontSize: 32, fontWeight: FontWeight.bold, letterSpacing: -1.5)),
                 const SizedBox(height: 8),
-                Text('Rencanakan masa depan finansialmu dengan tepat.', style: TextStyle(fontSize: 14, color: Colors.grey.shade500)),
+                Text('Rencanakan masa depan finansialmu dengan tepat.', style: GoogleFonts.comicNeue(fontSize: 14, color: Colors.grey.shade500)),
                 
                 const SizedBox(height: 32),
 
@@ -104,23 +106,23 @@ class _SavingSimulatorPageState extends ConsumerState<SavingSimulatorPage> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('TARGET DANA IMPIAN *', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white24 : Colors.black38, letterSpacing: 1.2)),
+                    Text('TARGET DANA IMPIAN *', style: GoogleFonts.comicNeue(fontSize: 10, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white24 : Colors.black38, letterSpacing: 1.2)),
                     const SizedBox(height: 12),
                     TextField(
                       controller: _amountController,
                       keyboardType: TextInputType.number,
                       inputFormatters: [_RibuanSeparatorInputFormatter()],
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: isDarkMode ? Colors.white : Colors.black87),
+                      style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 18, color: isDarkMode ? Colors.white : Colors.black87),
                       decoration: InputDecoration(
                         hintText: '0',
-                        hintStyle: TextStyle(color: isDarkMode ? Colors.white12 : Colors.black26),
+                        hintStyle: GoogleFonts.comicNeue(color: isDarkMode ? Colors.white12 : Colors.black26),
                         prefixIcon: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             const SizedBox(width: 16),
                             const Icon(Icons.account_balance_wallet_rounded, color: AppColors.primary, size: 20),
                             const SizedBox(width: 8),
-                            const Text('Rp', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 16)),
+                            Text('Rp', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 16)),
                             const SizedBox(width: 8),
                           ],
                         ),
@@ -147,14 +149,14 @@ class _SavingSimulatorPageState extends ConsumerState<SavingSimulatorPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('DURASI *', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white24 : Colors.black38, letterSpacing: 1.2)),
+                              Text('DURASI *', style: GoogleFonts.comicNeue(fontSize: 10, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white24 : Colors.black38, letterSpacing: 1.2)),
                               const SizedBox(height: 12),
                               TextField(
                                 controller: _durationController,
                                 keyboardType: TextInputType.number,
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: isDarkMode ? Colors.white : Colors.black87),
+                                style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 18, color: isDarkMode ? Colors.white : Colors.black87),
                                 decoration: InputDecoration(
-                                  hintText: '12',
+                                  hintText: '0',
                                   prefixIcon: const Icon(Icons.timer_outlined, color: AppColors.primary, size: 20),
                                   filled: false,
                                   enabledBorder: OutlineInputBorder(
@@ -178,7 +180,7 @@ class _SavingSimulatorPageState extends ConsumerState<SavingSimulatorPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('SATUAN *', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white24 : Colors.black38, letterSpacing: 1.2)),
+                              Text('SATUAN *', style: GoogleFonts.comicNeue(fontSize: 10, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white24 : Colors.black38, letterSpacing: 1.2)),
                               const SizedBox(height: 12),
                               Material(
                                 color: Colors.transparent,
@@ -199,9 +201,21 @@ class _SavingSimulatorPageState extends ConsumerState<SavingSimulatorPage> {
                                       ),
                                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8.5),
                                       borderRadius: BorderRadius.circular(16),
-                                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: isDarkMode ? Colors.white : Colors.black87),
+                                      style: GoogleFonts.comicNeue(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
+                                          color: isDarkMode
+                                              ? Colors.white
+                                              : Colors.black87),
                                       items: ['Hari', 'Minggu', 'Bulan', 'Tahun']
-                                          .map((e) => DropdownMenuItem(value: e, child: Text(e, overflow: TextOverflow.ellipsis)))
+                                          .map((e) => DropdownMenuItem(
+                                              value: e,
+                                              child: Text(e,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  style: GoogleFonts.comicNeue(
+                                                      fontWeight:
+                                                          FontWeight.bold))))
                                           .toList(),
                                       onChanged: (v) {
                                         setState(() => _unit = v!);
@@ -241,8 +255,8 @@ class _SavingSimulatorPageState extends ConsumerState<SavingSimulatorPage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text('PROGRES TABUNGAN', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5, color: Colors.grey)),
-                            Text('${(progress * 100).toStringAsFixed(0)}%', style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
+                            Text('PROGRES TABUNGAN', style: GoogleFonts.comicNeue(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5, color: Colors.grey)),
+                            Text('${(progress * 100).toStringAsFixed(0)}%', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, color: AppColors.primary)),
                           ],
                         ),
                         const SizedBox(height: 20),
@@ -278,7 +292,7 @@ class _SavingSimulatorPageState extends ConsumerState<SavingSimulatorPage> {
                   const SizedBox(height: 40),
 
                   // SETORAN RUTIN
-                  const Text('RENCANA SETORAN', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 2, color: Colors.grey)),
+                  Text('RENCANA SETORAN', style: GoogleFonts.comicNeue(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 2, color: Colors.grey)),
                   const SizedBox(height: 16),
                   Row(
                     children: [
@@ -306,7 +320,7 @@ class _SavingSimulatorPageState extends ConsumerState<SavingSimulatorPage> {
                         Expanded(
                           child: Text(
                             'Target akan tercapai pada ${ DateFormat('d MMMM yyyy', 'id_ID').format(DateTime.now().add(Duration(days: totalDays))) }',
-                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primary),
+                            style: GoogleFonts.comicNeue(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primary),
                           ),
                         ),
                       ],
@@ -320,7 +334,7 @@ class _SavingSimulatorPageState extends ConsumerState<SavingSimulatorPage> {
                          children: [
                            Icon(Icons.pie_chart_outline_rounded, size: 64, color: isDarkMode ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
                            const SizedBox(height: 24),
-                           const Text('Masukkan target dan durasi\nuntuk melihat perhitungan.', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w500)),
+                           Text('Masukkan target dan durasi\nuntuk melihat perhitungan.', textAlign: TextAlign.center, style: GoogleFonts.comicNeue(color: Colors.grey, fontWeight: FontWeight.w500)),
                          ],
                        ),
                      ),
@@ -347,12 +361,12 @@ class _InfoPiece extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(fontSize: 9, color: Colors.grey, fontWeight: FontWeight.bold)),
+          Text(label, style: GoogleFonts.comicNeue(fontSize: 9, color: Colors.grey, fontWeight: FontWeight.bold)),
           const SizedBox(height: 4),
           FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
-            child: Text(value, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: color)),
+            child: Text(value, style: GoogleFonts.comicNeue(fontSize: 16, fontWeight: FontWeight.bold, color: color)),
           ),
         ],
       ),
@@ -381,13 +395,13 @@ class _StatCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: isWide ? CrossAxisAlignment.start : CrossAxisAlignment.center,
         children: [
-          Text(label, style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.grey, letterSpacing: 1)),
+          Text(label, style: GoogleFonts.comicNeue(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.grey, letterSpacing: 1)),
           const SizedBox(height: 12),
           FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(
               NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(amount),
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: color),
+              style: GoogleFonts.comicNeue(fontSize: 20, fontWeight: FontWeight.bold, color: color),
             ),
           ),
         ],

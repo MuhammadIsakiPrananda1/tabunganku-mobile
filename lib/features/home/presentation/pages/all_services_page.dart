@@ -115,6 +115,20 @@ class AllServicesPage extends ConsumerWidget {
               route: '/saving-simulator',
             ),
             _ServiceData(
+              icon: Icons.calculate_rounded,
+              title: 'Kalkulator Pajak',
+              subtitle: 'Hitung estimasi PBB & PKB',
+              color: Colors.deepPurpleAccent,
+              route: '/tax',
+            ),
+            _ServiceData(
+              icon: Icons.notification_important_rounded,
+              title: 'Pengingat Pajak',
+              subtitle: 'Jangan lewatkan jatuh tempo',
+              color: Colors.orange,
+              route: '/tax-reminder',
+            ),
+            _ServiceData(
               icon: Icons.receipt_long_rounded,
               title: 'Manajemen Tagihan',
               subtitle: unpaidBillsTotal > 0 
@@ -122,13 +136,6 @@ class AllServicesPage extends ConsumerWidget {
                   : 'List tagihan bulanan wajib',
               color: Colors.lightBlue,
               route: '/bills',
-            ),
-            _ServiceData(
-              icon: Icons.health_and_safety_rounded,
-              title: 'Cek Kesehatan',
-              subtitle: 'Analisis kondisi keuanganmu',
-              color: Colors.green,
-              route: '/financial-health',
             ),
 
             // INVESTASI & PROTEKSI
@@ -159,13 +166,7 @@ class AllServicesPage extends ConsumerWidget {
               color: Colors.teal,
               route: '/zakat',
             ),
-            _ServiceData(
-              icon: Icons.wb_sunny_rounded,
-              title: 'Sedekah Subuh',
-              subtitle: 'Keberkahan di setiap pagi',
-              color: Colors.orangeAccent,
-              route: '/morning-charity',
-            ),
+
             _ServiceData(
               icon: Icons.emoji_events_rounded,
               title: 'Misi & Challenge',

@@ -107,11 +107,25 @@ class TransactionDetailSheet extends ConsumerWidget {
 
           // Receipt Details
           _buildReceiptRow(
-              context,
-              ref,
-              'Waktu',
-              DateFormat('EEEE, dd MMMM yyyy • HH:mm', 'id_ID')
-                  .format(transaction.date)),
+            context,
+            ref,
+            'ID Transaksi',
+            '#${transaction.id.toUpperCase().substring(0, 10)}',
+          ),
+          const SizedBox(height: 16),
+          _buildReceiptRow(
+            context,
+            ref,
+            'Waktu',
+            DateFormat('EEEE, dd MMMM yyyy', 'id_ID').format(transaction.date),
+          ),
+          const SizedBox(height: 16),
+          _buildReceiptRow(
+            context,
+            ref,
+            'Jam',
+            DateFormat('HH:mm:ss', 'id_ID').format(transaction.date),
+          ),
           const SizedBox(height: 16),
           _buildReceiptRow(context, ref, 'Kategori', transaction.category),
           const SizedBox(height: 16),
@@ -175,7 +189,7 @@ class TransactionDetailSheet extends ConsumerWidget {
   }
 
   Widget _buildReceiptRow(
-      BuildContext context, WidgetRef ref, String label, String value) {
+      BuildContext context, WidgetRef ref, String label, String value, {String? subValue}) {
     final theme = Theme.of(context);
     final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
         (ref.watch(themeProvider) == ThemeMode.system &&
@@ -185,7 +199,7 @@ class TransactionDetailSheet extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
-          width: 90,
+          width: 95,
           child: Text(label,
               style: TextStyle(
                   fontSize: 12,
@@ -195,12 +209,26 @@ class TransactionDetailSheet extends ConsumerWidget {
                       : Colors.black54)),
         ),
         Expanded(
-          child: Text(value,
-              textAlign: TextAlign.right,
-              style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: isDarkMode ? Colors.white : Colors.black87)),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(value,
+                  textAlign: TextAlign.right,
+                  style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: isDarkMode ? Colors.white : Colors.black87)),
+              if (subValue != null) ...[
+                const SizedBox(height: 4),
+                Text(subValue,
+                    textAlign: TextAlign.right,
+                    style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                        color: isDarkMode ? Colors.white38 : Colors.black45)),
+              ],
+            ],
+          ),
         ),
       ],
     );

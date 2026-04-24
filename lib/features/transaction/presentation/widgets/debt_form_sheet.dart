@@ -12,10 +12,11 @@ import 'package:tabunganku/providers/debt_provider.dart';
 
 class DebtFormSheet extends ConsumerStatefulWidget {
   final DebtModel? debt;
+  final DebtType? initialType;
 
-  const DebtFormSheet({super.key, this.debt});
+  const DebtFormSheet({super.key, this.debt, this.initialType});
 
-  static Future<void> show(BuildContext context, {DebtModel? debt}) async {
+  static Future<void> show(BuildContext context, {DebtModel? debt, DebtType? initialType}) async {
     await showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -24,7 +25,7 @@ class DebtFormSheet extends ConsumerStatefulWidget {
         padding: EdgeInsets.only(
           bottom: MediaQuery.of(context).viewInsets.bottom,
         ),
-        child: DebtFormSheet(debt: debt),
+        child: DebtFormSheet(debt: debt, initialType: initialType),
       ),
     );
   }
@@ -60,7 +61,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
     _contactController = TextEditingController(text: widget.debt?.contactName ?? '');
     _descriptionController =
         TextEditingController(text: widget.debt?.description ?? '');
-    _type = widget.debt?.type ?? DebtType.hutang;
+    _type = widget.debt?.type ?? widget.initialType ?? DebtType.hutang;
     _dueDate = widget.debt?.dueDate;
   }
 
@@ -141,7 +142,11 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
             ),
             const SizedBox(height: 20),
             Text(
-              widget.debt == null ? 'Catatan Baru' : 'Edit Catatan',
+              widget.debt != null
+                  ? 'Edit Catatan'
+                  : (_type == DebtType.hutang
+                      ? 'Catat Hutang Baru'
+                      : 'Catat Piutang Baru'),
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
@@ -151,33 +156,35 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
             ),
             const SizedBox(height: 16),
             
-            // Type Selector
-            Row(
-              children: [
-                Expanded(
-                  child: _TypeButton(
-                    label: 'Hutang',
-                    isSelected: _type == DebtType.hutang,
-                    onTap: () => setState(() => _type = DebtType.hutang),
-                    icon: Icons.call_made_rounded,
-                    color: const Color(0xFFE53935),
-                    isDarkMode: isDarkMode,
+            // Type Selector (Hidden if initialType is fixed for new entry)
+            if (widget.initialType == null || widget.debt != null) ...[
+              Row(
+                children: [
+                  Expanded(
+                    child: _TypeButton(
+                      label: 'Hutang',
+                      isSelected: _type == DebtType.hutang,
+                      onTap: () => setState(() => _type = DebtType.hutang),
+                      icon: Icons.call_made_rounded,
+                      color: const Color(0xFFE53935),
+                      isDarkMode: isDarkMode,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _TypeButton(
-                    label: 'Piutang',
-                    isSelected: _type == DebtType.piutang,
-                    onTap: () => setState(() => _type = DebtType.piutang),
-                    icon: Icons.call_received_rounded,
-                    color: AppColors.primary,
-                    isDarkMode: isDarkMode,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _TypeButton(
+                      label: 'Piutang',
+                      isSelected: _type == DebtType.piutang,
+                      onTap: () => setState(() => _type = DebtType.piutang),
+                      icon: Icons.call_received_rounded,
+                      color: AppColors.primary,
+                      isDarkMode: isDarkMode,
+                    ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
+                ],
+              ),
+              const SizedBox(height: 16),
+            ],
 
             _buildLabel('Nama Kontak', isDarkMode, isRequired: true),
             _buildTextField(

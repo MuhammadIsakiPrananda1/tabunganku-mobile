@@ -138,23 +138,6 @@ class _TransactionPageState extends ConsumerState<TransactionPage> {
     );
   }
 
-  // ─────────────────────────────────────────────
-        ),
-        Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 80),
-            itemCount: transactions.length,
-            itemBuilder: (context, index) {
-              final t = transactions[index];
-              return _buildShoppingTile(context, ref, t, isDarkMode);
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  // ─────────────────────────────────────────────
   // SHARED WIDGETS
   // ─────────────────────────────────────────────
   // Filter Chip Helper
@@ -269,29 +252,6 @@ class _TransactionPageState extends ConsumerState<TransactionPage> {
             fontSize: 13,
             fontWeight: FontWeight.bold,
             color: color,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildGroupHeader(String label, Color color, bool isDarkMode) {
-    return Row(
-      children: [
-        Container(
-          width: 4,
-          height: 14,
-          decoration: BoxDecoration(
-              color: color, borderRadius: BorderRadius.circular(2)),
-        ),
-        const SizedBox(width: 10),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1.2,
-            color: isDarkMode ? Colors.white38 : Colors.black38,
           ),
         ),
       ],

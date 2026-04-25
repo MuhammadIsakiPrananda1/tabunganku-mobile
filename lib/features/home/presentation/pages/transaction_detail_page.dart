@@ -6,6 +6,7 @@ import 'package:tabunganku/core/theme/theme_provider.dart';
 import 'package:tabunganku/models/transaction_model.dart';
 import 'package:tabunganku/providers/transaction_provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class TransactionDetailPage extends ConsumerWidget {
   final TransactionModel transaction;
@@ -47,7 +48,7 @@ class TransactionDetailPage extends ConsumerWidget {
         ),
         title: Text(
           'Detail Transaksi',
-          style: TextStyle(
+          style: GoogleFonts.comicNeue(
             fontWeight: FontWeight.bold,
             fontSize: 18,
             color: isDarkMode ? Colors.white : AppColors.primaryDark,
@@ -70,7 +71,7 @@ class TransactionDetailPage extends ConsumerWidget {
                 children: [
                   Text(
                     isExpense ? 'PENGELUARAN' : 'PEMASUKAN',
-                    style: TextStyle(
+                    style: GoogleFonts.comicNeue(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 2,
@@ -80,7 +81,7 @@ class TransactionDetailPage extends ConsumerWidget {
                   const SizedBox(height: 16),
                   Text(
                     _formatRupiah(transaction.amount),
-                    style: TextStyle(
+                    style: GoogleFonts.comicNeue(
                       fontSize: 36,
                       fontWeight: FontWeight.bold,
                       color: isDarkMode ? Colors.white : AppColors.primaryDark,
@@ -110,7 +111,7 @@ class TransactionDetailPage extends ConsumerWidget {
                   child: ElevatedButton.icon(
                     onPressed: () => context.push('/transaction-entry', extra: transaction),
                     icon: const Icon(Icons.edit_rounded, size: 18),
-                    label: const Text('Edit Transaksi', style: TextStyle(fontWeight: FontWeight.bold)),
+                    label: Text('Edit Transaksi', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold)),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: isDarkMode ? Colors.white.withValues(alpha: 0.05) : AppColors.background,
                       foregroundColor: isDarkMode ? Colors.white : AppColors.primary,
@@ -128,7 +129,7 @@ class TransactionDetailPage extends ConsumerWidget {
                       if (context.mounted) Navigator.pop(context);
                     },
                     icon: const Icon(Icons.delete_outline_rounded, size: 18),
-                    label: const Text('Hapus', style: TextStyle(fontWeight: FontWeight.bold)),
+                    label: Text('Hapus', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold)),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red.withValues(alpha: 0.1),
                       foregroundColor: Colors.red,
@@ -167,13 +168,13 @@ class TransactionDetailPage extends ConsumerWidget {
       children: [
         SizedBox(
           width: 100,
-          child: Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white24 : Colors.grey)),
+          child: Text(label, style: GoogleFonts.comicNeue(fontSize: 12, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white24 : Colors.grey)),
         ),
         Expanded(
           child: Text(
             value,
             textAlign: TextAlign.right,
-            style: TextStyle(
+            style: GoogleFonts.comicNeue(
               fontSize: 14,
               fontWeight: FontWeight.w600,
               color: isDarkMode ? Colors.white70 : AppColors.primaryDark,

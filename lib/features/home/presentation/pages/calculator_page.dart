@@ -101,7 +101,7 @@ class _CalculatorPageState extends ConsumerState<CalculatorPage> {
         ),
         title: Text(
           'Kalkulator',
-          style: TextStyle(
+          style: GoogleFonts.comicNeue(
             fontWeight: FontWeight.bold,
             fontSize: 18,
             color: isDarkMode ? Colors.white : AppColors.primaryDark,
@@ -130,7 +130,7 @@ class _CalculatorPageState extends ConsumerState<CalculatorPage> {
                     fit: BoxFit.scaleDown,
                     child: Text(
                       _output,
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.comicNeue(
                         fontSize: 64,
                         fontWeight: FontWeight.bold,
                         color: isDarkMode ? Colors.white : AppColors.primaryDark,
@@ -218,7 +218,7 @@ class _CalculatorPageState extends ConsumerState<CalculatorPage> {
           alignment: Alignment.center,
           child: Text(
             text,
-            style: TextStyle(
+            style: GoogleFonts.comicNeue(
               fontSize: 20,
               fontWeight: FontWeight.bold,
               color: textColor,

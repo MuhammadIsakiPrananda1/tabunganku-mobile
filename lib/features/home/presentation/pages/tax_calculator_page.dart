@@ -265,7 +265,7 @@ class _TaxCalculatorPageState extends ConsumerState<TaxCalculatorPage> {
             fit: BoxFit.scaleDown,
             child: Text(
               _formatRupiah(_taxResult), 
-              style: GoogleFonts.plusJakartaSans(fontSize: 32, fontWeight: FontWeight.bold, color: _taxResult > 0 ? AppColors.primary : contentColor.withValues(alpha: 0.1))
+              style: GoogleFonts.comicNeue(fontSize: 32, fontWeight: FontWeight.bold, color: _taxResult > 0 ? AppColors.primary : contentColor.withValues(alpha: 0.1))
             ),
           ),
           const SizedBox(height: 16),

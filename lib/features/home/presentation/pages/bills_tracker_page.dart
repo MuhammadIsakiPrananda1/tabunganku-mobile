@@ -43,7 +43,7 @@ class _BillsTrackerPageState extends ConsumerState<BillsTrackerPage> {
           onPressed: () => Navigator.pop(context),
           icon: Icon(Icons.arrow_back_ios_new_rounded, color: contentColor, size: 20),
         ),
-        title: Text('Kelola Tagihan', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: contentColor)),
+        title: Text('Kelola Tagihan', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 16, color: contentColor)),
         centerTitle: true,
       ),
       body: StreamBuilder<List<BillModel>>(
@@ -64,7 +64,7 @@ class _BillsTrackerPageState extends ConsumerState<BillsTrackerPage> {
                 const SizedBox(height: 32),
 
                 Text('TAGIHAN BULANAN', 
-                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5, color: contentColor.withValues(alpha: 0.4))),
+                  style: GoogleFonts.comicNeue(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5, color: contentColor.withValues(alpha: 0.4))),
                 const SizedBox(height: 16),
                 if (bills.isEmpty)
                   _buildEmptyState(isDarkMode)
@@ -139,7 +139,7 @@ class _BillsTrackerPageState extends ConsumerState<BillsTrackerPage> {
               const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
-                child: ElevatedButton(
+                child: ElevatedButton.icon(
                   onPressed: () async {
                     final amount = double.tryParse(_amountController.text.replaceAll('.', '')) ?? 0;
                     if (_nameController.text.isNotEmpty && amount > 0) {
@@ -161,14 +161,15 @@ class _BillsTrackerPageState extends ConsumerState<BillsTrackerPage> {
                       }
                     }
                   },
+                  icon: const Icon(Icons.check_rounded, size: 18),
+                  label: Text('Simpan Tagihan', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 14)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
                     elevation: 0,
                   ),
-                  child: const Text('Simpan Tagihan Baru', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
                 ),
               ),
             ],
@@ -239,28 +240,28 @@ class _BillsTrackerPageState extends ConsumerState<BillsTrackerPage> {
       controller: controller,
       keyboardType: isPremium ? TextInputType.number : TextInputType.text,
       inputFormatters: isPremium ? [_RibuanFormatter()] : null,
-      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: contentColor),
+      style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 15, color: contentColor),
       decoration: InputDecoration(
         hintText: hint ?? '0',
-        hintStyle: TextStyle(
-            fontSize: 16,
+        hintStyle: GoogleFonts.comicNeue(
+            fontSize: 15,
             color: isDarkMode ? Colors.white10 : Colors.black38),
         prefixIcon: Container(
           padding: const EdgeInsets.only(left: 16, right: 8),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, color: color, size: 20),
+              Icon(icon, color: color, size: 18),
               if (unit.isNotEmpty) ...[
                 const SizedBox(width: 8),
-                Text(unit, style: TextStyle(fontWeight: FontWeight.bold, color: color, fontSize: 16)),
+                Text(unit, style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, color: color, fontSize: 13)),
               ],
             ],
           ),
         ),
         filled: true,
         fillColor: isDarkMode ? Colors.white.withValues(alpha: 0.03) : AppColors.background,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       ),
     );
@@ -276,11 +277,11 @@ class _BillsTrackerPageState extends ConsumerState<BillsTrackerPage> {
           color: AppColors.primary.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
         ),
-        child: const Row(
+        child: Row(
           children: [
-            Icon(Icons.add_rounded, size: 16, color: AppColors.primary),
-            SizedBox(width: 4),
-            Text('Tambah', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primary)),
+            const Icon(Icons.add_rounded, size: 16, color: AppColors.primary),
+            const SizedBox(width: 4),
+            Text('Tambah', style: GoogleFonts.comicNeue(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primary)),
           ],
         ),
       ),
@@ -302,15 +303,15 @@ class _BillsTrackerPageState extends ConsumerState<BillsTrackerPage> {
       ),
       child: Column(
         children: [
-          Text('TOTAL TAGIHAN PENDING', style: TextStyle(color: contentColor.withValues(alpha: 0.4), fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+          Text('TOTAL TAGIHAN PENDING', style: GoogleFonts.comicNeue(color: contentColor.withValues(alpha: 0.4), fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
           const SizedBox(height: 12),
           FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(_formatRupiah(pending), 
-              style: GoogleFonts.plusJakartaSans(color: pending > 0 ? AppColors.primary : contentColor.withValues(alpha: 0.1), fontSize: 36, fontWeight: FontWeight.bold)),
+              style: GoogleFonts.comicNeue(color: pending > 0 ? AppColors.primary : contentColor.withValues(alpha: 0.1), fontSize: 36, fontWeight: FontWeight.bold)),
           ),
-          const SizedBox(height: 12),
-          Text('Dari $count tagihan terdaftar', style: TextStyle(color: contentColor.withValues(alpha: 0.3), fontSize: 12, fontWeight: FontWeight.w500)),
+          const SizedBox(height: 8),
+          Text('Dari $count tagihan terdaftar', style: GoogleFonts.comicNeue(color: contentColor.withValues(alpha: 0.3), fontSize: 11, fontWeight: FontWeight.bold)),
         ],
       ),
     );
@@ -419,7 +420,7 @@ class _BillsTrackerPageState extends ConsumerState<BillsTrackerPage> {
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: isDarkMode ? Colors.white.withValues(alpha: 0.02) : Colors.white,
         borderRadius: BorderRadius.circular(20),
@@ -445,29 +446,61 @@ class _BillsTrackerPageState extends ConsumerState<BillsTrackerPage> {
               children: [
                 Text(bill.name, 
                   maxLines: 1, overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: bill.isPaid ? contentColor.withValues(alpha: 0.3) : contentColor, decoration: bill.isPaid ? TextDecoration.lineThrough : null)),
-                Text('Jatuh tempo: Tanggal ${bill.dueDay}', style: TextStyle(color: contentColor.withValues(alpha: 0.4), fontSize: 10, fontWeight: FontWeight.w500)),
+                  style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 14, color: bill.isPaid ? contentColor.withValues(alpha: 0.3) : contentColor, decoration: bill.isPaid ? TextDecoration.lineThrough : null)),
+                Row(
+                  children: [
+                    Text('Tiap Tgl ${bill.dueDay}', style: GoogleFonts.comicNeue(color: isDarkMode ? Colors.white24 : Colors.black38, fontSize: 9, fontWeight: FontWeight.bold)),
+                    if (bill.lastPaidDate != null) ...[
+                      const SizedBox(width: 8),
+                      Text('•', style: TextStyle(color: isDarkMode ? Colors.white10 : Colors.grey.shade300, fontSize: 10)),
+                      const SizedBox(width: 8),
+                      Text('Lunas: ${DateFormat('d MMM').format(bill.lastPaidDate!)}', style: GoogleFonts.comicNeue(color: Colors.green, fontSize: 9, fontWeight: FontWeight.bold)),
+                    ],
+                  ],
+                ),
               ],
             ),
           ),
           const SizedBox(width: 8),
-          Text(_formatRupiah(bill.amount), 
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: bill.isPaid ? contentColor.withValues(alpha: 0.2) : AppColors.primary)),
-          const SizedBox(width: 8),
-          IconButton(
-            icon: Icon(Icons.edit_note_rounded, size: 22, color: contentColor.withValues(alpha: 0.3)),
-            onPressed: () => _showEditBillSheet(bill, isDarkMode),
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
-            visualDensity: VisualDensity.compact,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(_formatRupiah(bill.amount), 
+                style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 13, color: bill.isPaid ? contentColor.withValues(alpha: 0.3) : contentColor)),
+            ],
           ),
           const SizedBox(width: 4),
-          IconButton(
-            icon: Icon(Icons.delete_outline_rounded, size: 22, color: contentColor.withValues(alpha: 0.2)),
-            onPressed: () => _deleteBill(bill.id),
+          PopupMenuButton<String>(
+            icon: Icon(Icons.more_vert_rounded, size: 18, color: contentColor.withValues(alpha: 0.3)),
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
-            visualDensity: VisualDensity.compact,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            onSelected: (value) {
+              if (value == 'edit') _showEditBillSheet(bill, isDarkMode);
+              if (value == 'delete') _deleteBill(bill.id);
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 'edit',
+                child: Row(
+                  children: [
+                    const Icon(Icons.edit_note_rounded, size: 18, color: Colors.blue),
+                    const SizedBox(width: 8),
+                    Text('Edit', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 13)),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 'delete',
+                child: Row(
+                  children: [
+                    const Icon(Icons.delete_outline_rounded, size: 18, color: Colors.red),
+                    const SizedBox(width: 8),
+                    Text('Hapus', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.red)),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -571,34 +604,34 @@ class _BillsTrackerPageState extends ConsumerState<BillsTrackerPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 8),
-          child: Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: contentColor.withValues(alpha: 0.5))),
+          padding: const EdgeInsets.only(left: 4, bottom: 6),
+          child: Text(label, style: GoogleFonts.comicNeue(fontSize: 9, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white24 : Colors.black38)),
         ),
         TextFormField(
           controller: controller,
           keyboardType: isPremium ? TextInputType.number : TextInputType.text,
           inputFormatters: isPremium ? [_RibuanFormatter()] : null,
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: contentColor),
+          style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 15, color: contentColor),
           decoration: InputDecoration(
             hintText: isPremium ? '0' : 'e.g. Listrik, Wifi',
-            hintStyle: TextStyle(fontSize: 16, color: isDarkMode ? Colors.white10 : Colors.teal.shade50),
+            hintStyle: GoogleFonts.comicNeue(fontSize: 15, color: isDarkMode ? Colors.white10 : Colors.teal.shade50),
             prefixIcon: Container(
-              padding: const EdgeInsets.only(left: 20, right: 8),
+              padding: const EdgeInsets.only(left: 16, right: 8),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(icon, color: AppColors.primary, size: 20),
+                  Icon(icon, color: AppColors.primary, size: 18),
                   if (isPremium) ...[
-                    const SizedBox(width: 8),
-                    const Text('Rp', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 16)),
+                    const SizedBox(width: 6),
+                    Text('Rp', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 14)),
                   ],
                 ],
               ),
             ),
             filled: true,
             fillColor: isDarkMode ? Colors.white.withValues(alpha: 0.05) : AppColors.background,
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
         ),
       ],

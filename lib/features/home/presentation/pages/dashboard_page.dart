@@ -897,11 +897,19 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       groupedCategories.putIfAbsent(cat.group, () => []).add(cat);
     }
 
-    var selectedCategory =
-        type == TransactionType.expense ? 'Makanan & Minuman' : 'Gaji Pokok';
+    var selectedCategory = type == TransactionType.expense
+        ? 'Makanan & Minuman Harian'
+        : 'Gaji Pokok';
+    
+    // Ensure the default exists, otherwise pick the first one from the current list
+    if (categoryObjects.isNotEmpty && !categoryObjects.any((cat) => cat.label == selectedCategory)) {
+      selectedCategory = categoryObjects.first.label;
+    }
+
     var selectedGroup = categoryObjects
-        .firstWhere((cat) => cat.label == selectedCategory)
-        .group;
+            .any((cat) => cat.label == selectedCategory)
+        ? categoryObjects.firstWhere((cat) => cat.label == selectedCategory).group
+        : (categoryObjects.isNotEmpty ? categoryObjects.first.group : '');
     var noteText = '';
     StateSetter? sheetSetter;
 
@@ -1029,7 +1037,19 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                         const SizedBox(height: 12),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 28),
-                          child: TextFormField(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('NOMINAL TRANSAKSI *',
+                                  style: GoogleFonts.comicNeue(
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.bold,
+                                      color: isDarkMode
+                                          ? Colors.white24
+                                          : Colors.black38,
+                                      letterSpacing: 1.2)),
+                              const SizedBox(height: 6),
+                              TextFormField(
                             controller: amountController,
                             autofocus: false,
                             keyboardType: TextInputType.number,
@@ -1106,7 +1126,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                               return null;
                             },
                           ),
-                        ),
+                        ],
+                      ),
+                    ),
                         if (type == TransactionType.income) ...[
                           const SizedBox(height: 16),
                           Padding(
@@ -1136,9 +1158,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                               letterSpacing: 0.5)),
                                     ),
                                     const SizedBox(width: 8),
-                                    Text('BUNGA TABUNGAN (CEPAT)',
+                                    Text('BUNGA TABUNGAN (CEPAT) *',
                                         style: GoogleFonts.comicNeue(
-                                            fontSize: 10,
+                                            fontSize: 9,
                                             fontWeight: FontWeight.bold,
                                             color: isDarkMode
                                                 ? Colors.white24
@@ -1146,7 +1168,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                             letterSpacing: 1.2)),
                                   ],
                                 ),
-                                const SizedBox(height: 12),
+                                const SizedBox(height: 6),
                                 DropdownButtonFormField<String>(
                                   initialValue: selectedInterestBank,
                                   isExpanded: true,
@@ -1155,7 +1177,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                       ? AppColors.surfaceDark
                                       : Colors.white,
                                   decoration: InputDecoration(
-                                    labelText: 'Pilih Bank / Jenis Bunga',
+                                    hintText: 'Pilih Bank / Jenis Bunga',
                                     filled: true,
                                     fillColor: isDarkMode
                                         ? Colors.white.withValues(alpha: 0.05)
@@ -1344,12 +1366,11 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                       if (val == null) {
                                         nameController.clear();
                                         selectedCategory = 'Gaji Pokok';
-                                        selectedGroup = 'Pekerjaan';
+                                        selectedGroup = 'Pekerjaan Utama';
                                       } else if (val == 'Bank Lainnya') {
                                         nameController.clear();
-                                        selectedCategory =
-                                            'Bunga Deposito / Tabungan';
-                                        selectedGroup = 'Investasi & Pasif';
+                                        selectedCategory = 'Bunga Tabungan Reguler';
+                                        selectedGroup = 'Keuangan & Bank';
                                       } else {
                                         final now = DateTime.now();
                                         final monthName = [
@@ -1373,14 +1394,23 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                         nameController.text =
                                             'Bunga $bankClean $monthName ${now.year}';
                                         selectedCategory =
-                                            'Bunga Deposito / Tabungan';
-                                        selectedGroup = 'Investasi & Pasif';
+                                            'Bunga Tabungan Reguler';
+                                        selectedGroup = 'Keuangan & Bank';
                                       }
                                     });
                                   },
                                 ),
                                 if (selectedInterestBank == 'Bank Lainnya') ...[
                                   const SizedBox(height: 16),
+                                  Text('NAMA BANK *',
+                                      style: GoogleFonts.comicNeue(
+                                          fontSize: 9,
+                                          fontWeight: FontWeight.bold,
+                                          color: isDarkMode
+                                              ? Colors.white24
+                                              : Colors.black38,
+                                          letterSpacing: 1.2)),
+                                  const SizedBox(height: 6),
                                   TextFormField(
                                     style: GoogleFonts.comicNeue(
                                         fontWeight: FontWeight.bold,
@@ -1388,7 +1418,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                             ? Colors.white
                                             : Colors.black87),
                                     decoration: InputDecoration(
-                                      labelText: 'Nama Bank',
                                       hintText: 'Masukkan Nama Bank',
                                       filled: true,
                                       fillColor: isDarkMode
@@ -1439,14 +1468,14 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                             ? ''
                                             : 'Bunga ${val.trim()} $monthName ${now.year}';
                                         selectedCategory =
-                                            'Bunga Deposito / Tabungan';
-                                        selectedGroup = 'Investasi & Pasif';
+                                            'Bunga Tabungan Reguler';
+                                        selectedGroup = 'Keuangan & Bank';
                                       });
                                     },
                                   ),
                                 ],
                                 if (selectedInterestBank != null) ...[
-                                  const SizedBox(height: 12),
+                                  const SizedBox(height: 6),
                                   Container(
                                     padding: const EdgeInsets.all(14),
                                     decoration: BoxDecoration(
@@ -1550,13 +1579,13 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                               children: [
                                 Text('BIAYA ADMIN TOP-UP (CEPAT) *',
                                     style: GoogleFonts.comicNeue(
-                                        fontSize: 10,
+                                        fontSize: 9,
                                         fontWeight: FontWeight.bold,
                                         color: isDarkMode
                                             ? Colors.white24
-                                            : formSubTextColor,
+                                            : Colors.black38,
                                         letterSpacing: 1.2)),
-                                const SizedBox(height: 8),
+                                const SizedBox(height: 6),
                                 DropdownButtonFormField<String>(
                                   initialValue: selectedTopUpSource,
                                   isExpanded: true,
@@ -1613,12 +1642,12 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                         nameController.clear();
                                         selectedCategory =
                                             type == TransactionType.expense
-                                                ? 'Makanan & Minuman'
+                                                ? 'Makanan & Minuman Harian'
                                                 : 'Gaji Pokok';
                                         selectedGroup =
                                             type == TransactionType.expense
-                                                ? 'Kebutuhan Harian'
-                                                : 'Pekerjaan';
+                                                ? 'Kebutuhan Pokok'
+                                                : 'Pekerjaan Utama';
                                       } else if (val != 'Bank') {
                                         nameController.text =
                                             'Biaya Admin $val';
@@ -1636,6 +1665,15 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                 ),
                                 if (selectedTopUpSource == 'Bank') ...[
                                   const SizedBox(height: 16),
+                                  Text('NAMA BANK *',
+                                      style: GoogleFonts.comicNeue(
+                                          fontSize: 9,
+                                          fontWeight: FontWeight.bold,
+                                          color: isDarkMode
+                                              ? Colors.white24
+                                              : Colors.black38,
+                                          letterSpacing: 1.2)),
+                                  const SizedBox(height: 6),
                                   TextFormField(
                                     style: GoogleFonts.comicNeue(
                                         fontWeight: FontWeight.bold,
@@ -1643,7 +1681,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                             ? Colors.white
                                             : Colors.black87),
                                     decoration: InputDecoration(
-                                      labelText: 'Nama Bank',
                                       hintText: 'Masukkan Nama Bank',
                                       filled: true,
                                       fillColor: isDarkMode
@@ -1689,13 +1726,13 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                               const SizedBox(height: 20),
                               Text('KETERANGAN TRANSAKSI *',
                                   style: GoogleFonts.comicNeue(
-                                      fontSize: 10,
+                                      fontSize: 9,
                                       fontWeight: FontWeight.bold,
                                       color: isDarkMode
                                           ? Colors.white24
                                           : Colors.black38,
                                       letterSpacing: 1.2)),
-                              const SizedBox(height: 8),
+                              const SizedBox(height: 6),
                               TextFormField(
                                 controller: nameController,
                                 style: GoogleFonts.comicNeue(
@@ -1725,21 +1762,111 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                 onChanged: (val) {
                                   if (type == TransactionType.expense) {
                                     final lowerVal = val.toLowerCase();
-                                    if (lowerVal.contains('biaya admin')) {
+                                    if (lowerVal.contains('makan') ||
+                                        lowerVal.contains('minum') ||
+                                        lowerVal.contains('warung') ||
+                                        lowerVal.contains('nasi')) {
                                       setSheetState(() {
+                                        selectedCategory =
+                                            'Makanan & Minuman Harian';
+                                        selectedGroup = 'Kebutuhan Pokok';
+                                      });
+                                    } else if (lowerVal.contains('sembako') ||
+                                        lowerVal.contains('beras') ||
+                                        lowerVal.contains('minyak')) {
+                                      setSheetState(() {
+                                        selectedCategory =
+                                            'Belanja Sembako / Pasar';
+                                        selectedGroup = 'Kebutuhan Pokok';
+                                      });
+                                    } else if (lowerVal.contains('listrik') ||
+                                        lowerVal.contains('pln') ||
+                                        lowerVal.contains('token')) {
+                                      setSheetState(() {
+                                        selectedCategory = 'Token Listrik / PLN';
+                                        selectedGroup = 'Kebutuhan Pokok';
+                                      });
+                                    } else if (lowerVal.contains('bensin') ||
+                                        lowerVal.contains('pertalite') ||
+                                        lowerVal.contains('pertamax') ||
+                                        lowerVal.contains('spbu')) {
+                                      setSheetState(() {
+                                        selectedCategory = 'Bahan Bakar (BBM)';
+                                        selectedGroup = 'Transportasi';
+                                      });
+                                    } else if (lowerVal.contains('ojek') ||
+                                        lowerVal.contains('gojek') ||
+                                        lowerVal.contains('grab') ||
+                                        lowerVal.contains('maxim')) {
+                                      setSheetState(() {
+                                        selectedCategory =
+                                            'Ojek Online (Gojek/Grab)';
+                                        selectedGroup = 'Transportasi';
+                                      });
+                                    } else if (lowerVal.contains('pulsa') ||
+                                        lowerVal.contains('kuota') ||
+                                        lowerVal.contains('data')) {
+                                      setSheetState(() {
+                                        selectedCategory =
+                                            'Pulsa & Paket Data Seluler';
+                                        selectedGroup = 'Teknologi';
+                                      });
+                                    } else if (lowerVal.contains('wifi') ||
+                                        lowerVal.contains('indihome') ||
+                                        lowerVal.contains('biznet')) {
+                                      setSheetState(() {
+                                        selectedCategory = 'WiFi / Internet Rumah';
+                                        selectedGroup = 'Teknologi';
+                                      });
+                                    } else if (lowerVal.contains('netflix') ||
+                                        lowerVal.contains('disney') ||
+                                        lowerVal.contains('spotify') ||
+                                        lowerVal.contains('youtube')) {
+                                      setSheetState(() {
+                                        selectedCategory =
+                                            'Langganan Netflix / Disney+';
+                                        selectedGroup = 'Teknologi';
+                                      });
+                                    } else if (lowerVal.contains('obat') ||
+                                        lowerVal.contains('sakit') ||
+                                        lowerVal.contains('vitamin') ||
+                                        lowerVal.contains('apotek')) {
+                                      setSheetState(() {
+                                        selectedCategory = 'Obat & Vitamin';
+                                        selectedGroup = 'Kesehatan';
+                                      });
+                                    } else if (lowerVal.contains('kopi') ||
+                                        lowerVal.contains('coffee') ||
+                                        lowerVal.contains('cafe') ||
+                                        lowerVal.contains('nongkrong')) {
+                                      setSheetState(() {
+                                        selectedCategory =
+                                            'Nongkrong / Coffee Shop';
+                                        selectedGroup = 'Gaya Hidup';
+                                      });
+                                    } else if (lowerVal.contains('zakat') ||
+                                        lowerVal.contains('sedekah') ||
+                                        lowerVal.contains('infak')) {
+                                      setSheetState(() {
+                                        selectedCategory =
+                                            'Zakat / Infak / Sedekah';
+                                        selectedGroup = 'Sosial & Ibadah';
+                                      });
+                                    } else if (lowerVal.contains('admin') ||
+                                        lowerVal.contains('biaya') ||
+                                        lowerVal.contains('fee') ||
+                                        lowerVal.contains('top up')) {
+                                      setSheetState(() {
+                                        selectedCategory = 'Biaya Admin Bank';
                                         selectedGroup = 'Keuangan';
-                                        if (lowerVal.contains('dana') ||
-                                            lowerVal.contains('gopay') ||
-                                            lowerVal.contains('ovo') ||
-                                            lowerVal.contains('shopee') ||
-                                            lowerVal.contains('ewallet') ||
-                                            lowerVal.contains('aplikasi') ||
-                                            lowerVal.contains('top up')) {
-                                          selectedCategory =
-                                              'Biaya Admin Aplikasi / Top Up';
-                                        } else {
-                                          selectedCategory = 'Biaya Admin Bank';
-                                        }
+                                      });
+                                    } else if (lowerVal.contains('hutang') ||
+                                        lowerVal.contains('cicilan') ||
+                                        lowerVal.contains('pinjol') ||
+                                        lowerVal.contains('bayar')) {
+                                      setSheetState(() {
+                                        selectedCategory = 'Bayar Hutang / Pinjol';
+                                        selectedGroup = 'Keuangan';
                                       });
                                     }
                                   }
@@ -1756,24 +1883,25 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                 },
                               ),
                               const SizedBox(height: 20),
-                              Text('PILIH KATEGORI *',
+                              Text('GRUP KATEGORI *',
                                   style: GoogleFonts.comicNeue(
-                                      fontSize: 10,
+                                      fontSize: 9,
                                       fontWeight: FontWeight.bold,
                                       color: isDarkMode
                                           ? Colors.white24
-                                          : formSubTextColor,
+                                          : Colors.black38,
                                       letterSpacing: 1.2)),
-                              const SizedBox(height: 8),
+                              const SizedBox(height: 6),
                               // Group Dropdown
                               DropdownButtonFormField<String>(
-                                initialValue: selectedGroup,
+                                initialValue: groupedCategories.containsKey(selectedGroup) ? selectedGroup : (groupedCategories.isNotEmpty ? groupedCategories.keys.first : null),
+                                key: ValueKey('group_${type}_$selectedGroup'),
                                 isExpanded: true,
                                 dropdownColor: isDarkMode
                                     ? AppColors.surfaceDark
                                     : Colors.white,
                                 decoration: InputDecoration(
-                                  labelText: 'Grup Kategori',
+                                  hintText: 'Pilih Grup',
                                   filled: true,
                                   fillColor: isDarkMode
                                       ? Colors.white.withValues(alpha: 0.05)
@@ -1784,7 +1912,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                   prefixIcon: Icon(Icons.grid_view_rounded,
                                       color: AppColors.primary),
                                   labelStyle: GoogleFonts.comicNeue(
-                                      color: formLabelColor),
+                                      color: isDarkMode
+                                          ? Colors.white38
+                                          : Colors.black45),
                                 ),
                                 items: groupedCategories.keys
                                     .map((group) => DropdownMenuItem(
@@ -1810,15 +1940,25 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                 },
                               ),
                               const SizedBox(height: 16),
+                              Text('PILIH KATEGORI *',
+                                  style: GoogleFonts.comicNeue(
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.bold,
+                                      color: isDarkMode
+                                          ? Colors.white24
+                                          : Colors.black38,
+                                      letterSpacing: 1.2)),
+                              const SizedBox(height: 6),
                               // Category Dropdown
                               DropdownButtonFormField<String>(
-                                initialValue: selectedCategory,
+                                initialValue: (groupedCategories[selectedGroup]?.any((c) => c.label == selectedCategory) ?? false) ? selectedCategory : (groupedCategories[selectedGroup]?.isNotEmpty ?? false ? groupedCategories[selectedGroup]!.first.label : null),
+                                key: ValueKey('category_${type}_$selectedCategory'),
                                 isExpanded: true,
                                 dropdownColor: isDarkMode
                                     ? AppColors.surfaceDark
                                     : Colors.white,
                                 decoration: InputDecoration(
-                                  labelText: 'Kategori',
+                                  hintText: 'Pilih Kategori',
                                   filled: true,
                                   fillColor: isDarkMode
                                       ? Colors.white.withValues(alpha: 0.05)
@@ -1837,9 +1977,11 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                     color: AppColors.primary,
                                   ),
                                   labelStyle: GoogleFonts.comicNeue(
-                                      color: formLabelColor),
+                                      color: isDarkMode
+                                          ? Colors.white38
+                                          : Colors.black45),
                                 ),
-                                items: groupedCategories[selectedGroup]!
+                                items: (groupedCategories[selectedGroup] ?? [])
                                     .map((cat) => DropdownMenuItem(
                                           value: cat.label,
                                           child: Text(cat.label,
@@ -1859,8 +2001,20 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                   }
                                 },
                               ),
-                              if (selectedCategory == 'Lainnya') ...[
-                                const SizedBox(height: 20),
+                                if (selectedCategory == 'Lainnya') ...[
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    'NAMA KATEGORI KUSTOM *',
+                                    style: GoogleFonts.comicNeue(
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 1.2,
+                                      color: isDarkMode
+                                          ? Colors.white24
+                                          : Colors.black38,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
                                 TextFormField(
                                   controller: customCategoryController,
                                   autofocus: true,
@@ -1869,8 +2023,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                           ? Colors.white
                                           : Colors.black87),
                                   decoration: InputDecoration(
-                                    labelText: 'Kategori Kustom',
-                                    hintText: 'Masukkan Nama Kategori',
+                                    hintText: 'Misal: Hibah dari Atasan',
                                     filled: true,
                                     fillColor: isDarkMode
                                         ? Colors.white.withValues(alpha: 0.05)
@@ -1885,8 +2038,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                             BorderSide(color: formBorderColor)),
                                     prefixIcon: Icon(Icons.star_rounded,
                                         color: AppColors.primary),
-                                    labelStyle: GoogleFonts.comicNeue(
-                                        color: formLabelColor),
                                     hintStyle: GoogleFonts.comicNeue(
                                         color: formSubTextColor),
                                   ),
@@ -3995,8 +4146,6 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
   int _typeFilter = 0;
   // 0 = Semua, 1 = Hutang, 2 = Piutang
   int _debtTypeFilter = 0;
-  // null = semua kategori
-  String? _categoryFilter;
 
   @override
   void initState() {
@@ -4051,12 +4200,8 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
     );
   }
 
-  // ── Search Bar + Type + Category Filters ─────────────────────────────
+  // ── Search Bar + Type Filters ──────────────────────────────────────
   Widget _buildSearchBar(bool isDark, List<TransactionModel> regularList) {
-    // Build unique category list from regular transactions
-    final categories = regularList.map((t) => t.category).toSet().toList()
-      ..sort();
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -4127,11 +4272,6 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
               _typeChip(isDark, 1, 'Pemasukan', Icons.arrow_downward_rounded),
               const SizedBox(width: 8),
               _typeChip(isDark, 2, 'Pengeluaran', Icons.arrow_upward_rounded),
-              if (categories.isNotEmpty) ...[const SizedBox(width: 16)],
-              ...categories.map((cat) => Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: _categoryChip(isDark, cat),
-                  )),
             ],
           ),
         ),
@@ -4175,41 +4315,6 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
                         ? (isDark ? Colors.white : activeColor)
                         : (isDark ? Colors.white38 : Colors.grey))),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _categoryChip(bool isDark, String category) {
-    final selected = _categoryFilter == category;
-    return GestureDetector(
-      onTap: () => setState(() {
-        _categoryFilter = selected ? null : category;
-      }),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: selected
-              ? AppColors.primary.withValues(alpha: isDark ? 0.25 : 0.1)
-              : (isDark
-                  ? Colors.white.withValues(alpha: 0.04)
-                  : Colors.grey.shade50),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-              color: selected
-                  ? AppColors.primary
-                  : (isDark ? Colors.white10 : Colors.grey.shade200),
-              width: 1),
-        ),
-        child: Text(
-          '# $category',
-          style: GoogleFonts.comicNeue(
-              fontSize: 11,
-              fontWeight: selected ? FontWeight.bold : FontWeight.w600,
-              color: selected
-                  ? (isDark ? Colors.white : Colors.black87)
-                  : (isDark ? Colors.white38 : Colors.black45)),
         ),
       ),
     );
@@ -4378,16 +4483,12 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
   // List: hanya transaksi reguler, difilter search + tipe + kategori
   Widget _buildRegularTab(List<TransactionModel> allSorted,
       List<TransactionModel> regularList, bool isDark) {
-    // Apply search + type + category filter
+    // Apply search + type filter
     final filtered = regularList.where((t) {
       if (_typeFilter == 1 && t.type != TransactionType.income) {
         return false;
       }
       if (_typeFilter == 2 && t.type != TransactionType.expense) {
-        return false;
-      }
-      // Category filter
-      if (_categoryFilter != null && t.category != _categoryFilter) {
         return false;
       }
       // Search query
@@ -4403,7 +4504,7 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
     }).toList();
 
     final isFiltering =
-        _searchQuery.isNotEmpty || _typeFilter != 0 || _categoryFilter != null;
+        _searchQuery.isNotEmpty || _typeFilter != 0;
 
     if (regularList.isEmpty) {
       return _emptyState(isDark,

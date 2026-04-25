@@ -30,6 +30,7 @@ class _TransactionEntryPageState extends ConsumerState<TransactionEntryPage> {
   late TextEditingController _amountController;
   late String _selectedCategory;
   late String _selectedGroup;
+  late TextEditingController _customCategoryController;
   
   String? _selectedTopUpSource;
   String? _selectedInterestBank;
@@ -62,6 +63,7 @@ class _TransactionEntryPageState extends ConsumerState<TransactionEntryPage> {
           .group;
     }
 
+    _customCategoryController = TextEditingController();
     _nameController.addListener(_autoDetectCategory);
   }
 
@@ -75,33 +77,51 @@ class _TransactionEntryPageState extends ConsumerState<TransactionEntryPage> {
     final text = _nameController.text.toLowerCase();
     
     if (widget.type == TransactionType.expense && widget.existingTransaction == null) {
-      final adminKeywords = ['admin', 'dana', 'top up', 'fee', 'transfer', 'biaya'];
-
-      if (adminKeywords.any((k) => text.contains(k))) {
-        const adminCat = 'Biaya Admin Bank';
-        if (_selectedCategory != adminCat) {
-          setState(() {
-            _selectedCategory = adminCat;
-            _selectedGroup = 'Keuangan';
-          });
-        }
+      if (text.contains('makan') || text.contains('minum') || text.contains('warung') || text.contains('nasi')) {
+        _updateIncomeCategory('Makanan & Minuman Harian', 'Kebutuhan Pokok');
+      } else if (text.contains('sembako') || text.contains('beras') || text.contains('minyak')) {
+        _updateIncomeCategory('Belanja Sembako / Pasar', 'Kebutuhan Pokok');
+      } else if (text.contains('listrik') || text.contains('pln') || text.contains('token')) {
+        _updateIncomeCategory('Token Listrik / PLN', 'Kebutuhan Pokok');
+      } else if (text.contains('bensin') || text.contains('pertalite') || text.contains('pertamax') || text.contains('spbu')) {
+        _updateIncomeCategory('Bahan Bakar (BBM)', 'Transportasi');
+      } else if (text.contains('ojek') || text.contains('gojek') || text.contains('grab') || text.contains('maxim')) {
+        _updateIncomeCategory('Ojek Online (Gojek/Grab)', 'Transportasi');
+      } else if (text.contains('pulsa') || text.contains('kuota') || text.contains('data')) {
+        _updateIncomeCategory('Pulsa & Paket Data Seluler', 'Teknologi');
+      } else if (text.contains('wifi') || text.contains('indihome') || text.contains('biznet')) {
+        _updateIncomeCategory('WiFi / Internet Rumah', 'Teknologi');
+      } else if (text.contains('netflix') || text.contains('disney') || text.contains('spotify') || text.contains('youtube')) {
+        _updateIncomeCategory('Langganan Netflix / Disney+', 'Teknologi');
+      } else if (text.contains('obat') || text.contains('sakit') || text.contains('vitamin') || text.contains('apotek')) {
+        _updateIncomeCategory('Obat & Vitamin', 'Kesehatan');
+      } else if (text.contains('kopi') || text.contains('coffee') || text.contains('cafe') || text.contains('nongkrong')) {
+        _updateIncomeCategory('Nongkrong / Coffee Shop', 'Gaya Hidup');
+      } else if (text.contains('zakat') || text.contains('sedekah') || text.contains('infak')) {
+        _updateIncomeCategory('Zakat / Infak / Sedekah', 'Sosial & Ibadah');
+      } else if (text.contains('admin') || text.contains('biaya') || text.contains('fee') || text.contains('top up')) {
+        _updateIncomeCategory('Biaya Admin Bank', 'Keuangan');
+      } else if (text.contains('hutang') || text.contains('cicilan') || text.contains('pinjol') || text.contains('bayar')) {
+        _updateIncomeCategory('Bayar Hutang / Pinjol', 'Keuangan');
       }
     } else if (widget.type == TransactionType.income && widget.existingTransaction == null) {
       // Auto-detect for Income
       if (text.contains('gaji') || text.contains('salary')) {
-        _updateIncomeCategory('Gaji Pokok', 'Pekerjaan');
+        _updateIncomeCategory('Gaji Pokok', 'Pekerjaan Utama');
+      } else if (text.contains('thr')) {
+        _updateIncomeCategory('THR (Tunjangan Hari Raya)', 'Pekerjaan Utama');
+      } else if (text.contains('bonus')) {
+        _updateIncomeCategory('Bonus Tahunan & Performa', 'Pekerjaan Utama');
       } else if (text.contains('hutang') || text.contains('bayar') || text.contains('pinjam')) {
-        _updateIncomeCategory('Pengembalian Hutang (Teman Bayar)', 'Sosial & Hadiah');
+        _updateIncomeCategory('Teman Mengembalikan Hutang', 'Pinjaman & Hutang');
       } else if (text.contains('crypto') || text.contains('saham') || text.contains('forex') || text.contains('trading')) {
-        _updateIncomeCategory('Profit Trading (Crypto/Saham/Forex)', 'Investasi & Pasif');
+        _updateIncomeCategory('Profit Trading (Saham/Crypto)', 'Investasi');
       } else if (text.contains('cashback')) {
-        _updateIncomeCategory('Cashback e-Wallet / Belanja', 'Lainnya');
+        _updateIncomeCategory('Cashback e-Wallet / Belanja', 'Keuangan & Bank');
       } else if (text.contains('refund')) {
-        _updateIncomeCategory('Refund (Pengembalian Dana)', 'Lainnya');
+        _updateIncomeCategory('Refund / Pengembalian Dana', 'Keuangan & Bank');
       } else if (text.contains('jual') || text.contains('omzet') || text.contains('dagang')) {
-        _updateIncomeCategory('Hasil Jualan / Omzet Produk', 'Bisnis & Digital');
-      } else if (text.contains('bonus') || text.contains('thr')) {
-        _updateIncomeCategory('THR (Tunjangan Hari Raya)', 'Pekerjaan');
+        _updateIncomeCategory('Omzet Penjualan Produk', 'Bisnis & Usaha');
       }
     }
   }
@@ -119,6 +139,7 @@ class _TransactionEntryPageState extends ConsumerState<TransactionEntryPage> {
   void dispose() {
     _nameController.dispose();
     _amountController.dispose();
+    _customCategoryController.dispose();
     super.dispose();
   }
 
@@ -139,7 +160,9 @@ class _TransactionEntryPageState extends ConsumerState<TransactionEntryPage> {
         amount: amount,
         type: widget.type,
         date: _selectedDate,
-        category: _selectedCategory,
+        category: _selectedCategory == AppCategories.otherLabel && _customCategoryController.text.trim().isNotEmpty
+            ? _customCategoryController.text.trim()
+            : _selectedCategory,
       );
 
       if (widget.existingTransaction != null) {
@@ -206,7 +229,7 @@ class _TransactionEntryPageState extends ConsumerState<TransactionEntryPage> {
           widget.existingTransaction != null 
             ? 'Edit Transaksi' 
             : (widget.type == TransactionType.income ? 'Tambah Pemasukan' : 'Tambah Pengeluaran'),
-          style: TextStyle(
+          style: GoogleFonts.comicNeue(
             fontWeight: FontWeight.bold,
             fontSize: 18,
             color: isDarkMode ? Colors.white : AppColors.primaryDark,
@@ -232,30 +255,30 @@ class _TransactionEntryPageState extends ConsumerState<TransactionEntryPage> {
                   children: [
                     Text(
                       'NOMINAL',
-                      style: TextStyle(
-                        fontSize: 10,
+                      style: GoogleFonts.comicNeue(
+                        fontSize: 9,
                         fontWeight: FontWeight.bold,
-                        letterSpacing: 2,
+                        letterSpacing: 1.2,
                         color: isDarkMode ? Colors.white24 : Colors.grey.shade400,
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 4),
                     TextFormField(
                       controller: _amountController,
                       keyboardType: TextInputType.number,
                       inputFormatters: [_RibuanFormatter()],
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.comicNeue(
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
                         color: accentColor,
                       ),
                       decoration: InputDecoration(
                         hintText: '0',
-                        hintStyle: TextStyle(color: accentColor.withValues(alpha: 0.2)),
+                        hintStyle: GoogleFonts.comicNeue(color: accentColor.withValues(alpha: 0.2)),
                         prefixIcon: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text('Rp', style: TextStyle(
+                            Text('Rp', style: GoogleFonts.comicNeue(
                               fontSize: 18, 
                               fontWeight: FontWeight.w900, 
                               color: accentColor
@@ -273,23 +296,23 @@ class _TransactionEntryPageState extends ConsumerState<TransactionEntryPage> {
                   ],
                 ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 12),
 
               // Title Input
               _buildLabel('KETERANGAN / NAMA TRANSAKSI', isDarkMode),
-              const SizedBox(height: 12),
+              const SizedBox(height: 6),
               TextFormField(
                 controller: _nameController,
                 textCapitalization: TextCapitalization.sentences,
-                style: TextStyle(fontWeight: FontWeight.w600, color: isDarkMode ? Colors.white : Colors.black87),
+                style: GoogleFonts.comicNeue(fontWeight: FontWeight.w600, color: isDarkMode ? Colors.white : Colors.black87),
                 decoration: _inputDecoration('Misal: Gaji Bulan April', Icons.edit_note_rounded, isDarkMode),
                 validator: (val) => val == null || val.trim().isEmpty ? 'Keterangan tidak boleh kosong' : null,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
 
               // Date Picker
               _buildLabel('TANGGAL TRANSAKSI', isDarkMode),
-              const SizedBox(height: 12),
+              const SizedBox(height: 6),
               InkWell(
                 onTap: () async {
                   final picked = await showDatePicker(
@@ -309,10 +332,32 @@ class _TransactionEntryPageState extends ConsumerState<TransactionEntryPage> {
               const SizedBox(height: 24),
 
               // Category Picker
-              _buildLabel('KATEGORI', isDarkMode),
-              const SizedBox(height: 12),
+              _buildLabel('PILIH KATEGORI', isDarkMode),
+              const SizedBox(height: 6),
               _buildCategoryDropdown(groupedCategories, isDarkMode),
-              const SizedBox(height: 32),
+              const SizedBox(height: 16),
+
+              // Custom Category Input
+              if (_selectedCategory == AppCategories.otherLabel) ...[
+                const SizedBox(height: 4),
+                _buildLabel('NAMA KATEGORI KUSTOM', isDarkMode),
+                const SizedBox(height: 6),
+                TextFormField(
+                  controller: _customCategoryController,
+                  autofocus: true,
+                  style: GoogleFonts.comicNeue(fontWeight: FontWeight.w600, color: isDarkMode ? Colors.white : Colors.black87),
+                  decoration: _inputDecoration('Misal: Hibah dari Atasan', Icons.star_rounded, isDarkMode),
+                  validator: (val) {
+                    if (_selectedCategory == AppCategories.otherLabel && (val == null || val.trim().isEmpty)) {
+                      return 'Kategori kustom harus diisi!';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 24),
+              ],
+
+              const SizedBox(height: 12),
 
               // Dynamic Extra Context (Bank selections etc.)
               if (_selectedCategory == 'Biaya Admin Bank') _buildTopUpSourceSelection(isDarkMode),
@@ -334,7 +379,7 @@ class _TransactionEntryPageState extends ConsumerState<TransactionEntryPage> {
                   ),
                   child: Text(
                     widget.existingTransaction != null ? 'Simpan Perubahan' : 'Catat Transaksi Sekarang',
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: GoogleFonts.comicNeue(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
@@ -349,11 +394,11 @@ class _TransactionEntryPageState extends ConsumerState<TransactionEntryPage> {
   Widget _buildLabel(String text, bool isDarkMode) {
     return Text(
       text,
-      style: TextStyle(
-        fontSize: 10,
+      style: GoogleFonts.comicNeue(
+        fontSize: 9,
         fontWeight: FontWeight.bold,
-        letterSpacing: 1.5,
-        color: isDarkMode ? Colors.white24 : Colors.grey.shade400,
+        letterSpacing: 1.2,
+        color: isDarkMode ? Colors.white24 : Colors.black38,
       ),
     );
   }
@@ -380,7 +425,7 @@ class _TransactionEntryPageState extends ConsumerState<TransactionEntryPage> {
         children: [
           Icon(icon, color: AppColors.primary, size: 20),
           const SizedBox(width: 12),
-          Text(text, style: TextStyle(fontWeight: FontWeight.w600, color: isDarkMode ? Colors.white : Colors.black87)),
+          Text(text, style: GoogleFonts.comicNeue(fontWeight: FontWeight.w600, color: isDarkMode ? Colors.white : Colors.black87)),
         ],
       ),
     );
@@ -417,7 +462,7 @@ class _TransactionEntryPageState extends ConsumerState<TransactionEntryPage> {
               DropdownMenuItem<String>(
                 enabled: false,
                 child: Text(group.key.toUpperCase(), 
-                  style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.primary)),
+                  style: GoogleFonts.comicNeue(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.primary)),
               ),
               ...group.value.map((cat) => DropdownMenuItem<String>(
                 value: cat.label,
@@ -430,7 +475,7 @@ class _TransactionEntryPageState extends ConsumerState<TransactionEntryPage> {
                       Expanded(
                         child: Text(cat.label, 
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 14)),
+                          style: GoogleFonts.comicNeue(fontSize: 14)),
                       ),
                     ],
                   ),

@@ -943,7 +943,7 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
             child: Text(
               _formatRupiah(val),
               textAlign: TextAlign.right,
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.comicNeue(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
                 color: color,

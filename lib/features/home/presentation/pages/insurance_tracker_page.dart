@@ -40,7 +40,7 @@ class _InsuranceTrackerPageState extends ConsumerState<InsuranceTrackerPage> {
           onPressed: () => Navigator.pop(context),
           icon: Icon(Icons.arrow_back_ios_new_rounded, color: contentColor, size: 20),
         ),
-        title: Text('Asuransi & Proteksi', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: contentColor)),
+        title: Text('Asuransi & Proteksi', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 16, color: contentColor)),
         centerTitle: true,
       ),
       body: StreamBuilder<List<InsuranceModel>>(
@@ -61,7 +61,7 @@ class _InsuranceTrackerPageState extends ConsumerState<InsuranceTrackerPage> {
                 const SizedBox(height: 32),
 
                 Text('POLIS TERDAFTAR', 
-                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5, color: contentColor.withValues(alpha: 0.4))),
+                  style: GoogleFonts.comicNeue(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5, color: contentColor.withValues(alpha: 0.4))),
                 const SizedBox(height: 16),
                 if (items.isEmpty)
                   _buildEmptyState(isDarkMode)
@@ -146,7 +146,7 @@ class _InsuranceTrackerPageState extends ConsumerState<InsuranceTrackerPage> {
               const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
-                child: ElevatedButton(
+                child: ElevatedButton.icon(
                   onPressed: () async {
                     final premi = double.tryParse(_premiController.text.replaceAll('.', '')) ?? 0;
                     if (_nameController.text.isNotEmpty && premi > 0) {
@@ -169,14 +169,15 @@ class _InsuranceTrackerPageState extends ConsumerState<InsuranceTrackerPage> {
                       }
                     }
                   },
+                  icon: const Icon(Icons.check_rounded, size: 18),
+                  label: Text('Simpan Polis', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 14)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
                     elevation: 0,
                   ),
-                  child: const Text('Simpan Polis Baru', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
                 ),
               ),
             ],
@@ -214,28 +215,28 @@ class _InsuranceTrackerPageState extends ConsumerState<InsuranceTrackerPage> {
       controller: controller,
       keyboardType: isPremium ? TextInputType.number : TextInputType.text,
       inputFormatters: isPremium ? [_RibuanFormatter()] : null,
-      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: contentColor),
+      style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 15, color: contentColor),
       decoration: InputDecoration(
         hintText: hint ?? '0',
-        hintStyle: TextStyle(
-            fontSize: 16,
+        hintStyle: GoogleFonts.comicNeue(
+            fontSize: 15,
             color: isDarkMode ? Colors.white10 : Colors.black38),
         prefixIcon: Container(
           padding: const EdgeInsets.only(left: 16, right: 8),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, color: color, size: 20),
+              Icon(icon, color: color, size: 18),
               if (unit.isNotEmpty) ...[
                 const SizedBox(width: 8),
-                Text(unit, style: TextStyle(fontWeight: FontWeight.bold, color: color, fontSize: 16)),
+                Text(unit, style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, color: color, fontSize: 13)),
               ],
             ],
           ),
         ),
         filled: true,
         fillColor: isDarkMode ? Colors.white.withValues(alpha: 0.03) : AppColors.background,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       ),
     );
@@ -251,11 +252,11 @@ class _InsuranceTrackerPageState extends ConsumerState<InsuranceTrackerPage> {
           color: Colors.blueGrey.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
         ),
-        child: const Row(
+        child: Row(
           children: [
-            Icon(Icons.add_rounded, size: 16, color: Colors.blueGrey),
-            SizedBox(width: 4),
-            Text('Polis', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.blueGrey)),
+            const Icon(Icons.add_rounded, size: 16, color: Colors.blueGrey),
+            const SizedBox(width: 4),
+            Text('Polis', style: GoogleFonts.comicNeue(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.blueGrey)),
           ],
         ),
       ),
@@ -277,15 +278,15 @@ class _InsuranceTrackerPageState extends ConsumerState<InsuranceTrackerPage> {
       ),
       child: Column(
         children: [
-          Text('ESTIMASI PREMI BULANAN', style: TextStyle(color: contentColor.withValues(alpha: 0.4), fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+          Text('ESTIMASI PREMI BULANAN', style: GoogleFonts.comicNeue(color: contentColor.withValues(alpha: 0.4), fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
           const SizedBox(height: 12),
           FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(_formatRupiah(premi), 
-              style: GoogleFonts.plusJakartaSans(color: premi > 0 ? Colors.blueGrey : contentColor.withValues(alpha: 0.1), fontSize: 36, fontWeight: FontWeight.bold)),
+              style: GoogleFonts.comicNeue(color: premi > 0 ? Colors.blueGrey : contentColor.withValues(alpha: 0.1), fontSize: 36, fontWeight: FontWeight.bold)),
           ),
-          const SizedBox(height: 12),
-          Text('$count Polis Aktif Terlindungi', style: TextStyle(color: contentColor.withValues(alpha: 0.3), fontSize: 12, fontWeight: FontWeight.w500)),
+          const SizedBox(height: 8),
+          Text('$count Polis Aktif Terlindungi', style: GoogleFonts.comicNeue(color: contentColor.withValues(alpha: 0.3), fontSize: 11, fontWeight: FontWeight.bold)),
         ],
       ),
     );
@@ -401,21 +402,21 @@ class _InsuranceTrackerPageState extends ConsumerState<InsuranceTrackerPage> {
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: isDarkMode ? Colors.white.withValues(alpha: 0.02) : Colors.white,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(color: isDarkMode ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
       ),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: Colors.blueGrey.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(Icons.verified_user_rounded, color: Colors.blueGrey, size: 24),
+            child: const Icon(Icons.verified_user_rounded, color: Colors.blueGrey, size: 20),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -424,18 +425,18 @@ class _InsuranceTrackerPageState extends ConsumerState<InsuranceTrackerPage> {
               children: [
                 Text(item.policyName, 
                   maxLines: 1, overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: contentColor)),
-                Text(item.provider, style: TextStyle(color: contentColor.withValues(alpha: 0.4), fontSize: 11, fontWeight: FontWeight.w500)),
-                const SizedBox(height: 6),
+                  style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor)),
+                Text(item.provider, style: GoogleFonts.comicNeue(color: isDarkMode ? Colors.white24 : Colors.black38, fontSize: 9, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 4),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
                     color: (isNearExpiry ? Colors.orange : Colors.green).withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(6),
+                    borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
                     remainingDays > 0 ? 'Sisa $remainingDays Hari' : 'Kedaluwarsa',
-                    style: TextStyle(color: isNearExpiry ? Colors.orange : Colors.green, fontSize: 10, fontWeight: FontWeight.bold),
+                    style: GoogleFonts.comicNeue(color: isNearExpiry ? Colors.orange : Colors.green, fontSize: 8, fontWeight: FontWeight.bold),
                   ),
                 ),
               ],
@@ -445,28 +446,40 @@ class _InsuranceTrackerPageState extends ConsumerState<InsuranceTrackerPage> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(_formatRupiah(item.premiumAmount), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: contentColor)),
+              Text(_formatRupiah(item.premiumAmount), style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor)),
               const SizedBox(height: 8),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    icon: Icon(Icons.edit_note_rounded, size: 20, color: contentColor.withValues(alpha: 0.3)),
-                    onPressed: () => _showEditInsuranceSheet(item, isDarkMode),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                    visualDensity: VisualDensity.compact,
-                  ),
-                  const SizedBox(width: 8),
-                  IconButton(
-                    icon: Icon(Icons.delete_outline_rounded, size: 18, color: contentColor.withValues(alpha: 0.2)),
-                    onPressed: () => _deleteInsurance(item.id),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                    visualDensity: VisualDensity.compact,
-                  ),
-                ],
+          PopupMenuButton<String>(
+            icon: Icon(Icons.more_vert_rounded, size: 18, color: contentColor.withValues(alpha: 0.3)),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            onSelected: (value) {
+              if (value == 'edit') _showEditInsuranceSheet(item, isDarkMode);
+              if (value == 'delete') _deleteInsurance(item.id);
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 'edit',
+                child: Row(
+                  children: [
+                    const Icon(Icons.edit_note_rounded, size: 18, color: Colors.blue),
+                    const SizedBox(width: 8),
+                    Text('Edit', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 13)),
+                  ],
+                ),
               ),
+              PopupMenuItem(
+                value: 'delete',
+                child: Row(
+                  children: [
+                    const Icon(Icons.delete_outline_rounded, size: 18, color: Colors.red),
+                    const SizedBox(width: 8),
+                    Text('Hapus', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.red)),
+                  ],
+                ),
+              ),
+            ],
+          ),
             ],
           ),
         ],

@@ -366,7 +366,7 @@ class _ZakatPageState extends ConsumerState<ZakatPage> with TickerProviderStateM
             fit: BoxFit.scaleDown,
             child: Text(
               NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(amount),
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.comicNeue(
                 fontSize: compact ? 22 : 32,
                 fontWeight: FontWeight.bold,
                 color: hasVal ? AppColors.primary : contentColor.withValues(alpha: 0.1),

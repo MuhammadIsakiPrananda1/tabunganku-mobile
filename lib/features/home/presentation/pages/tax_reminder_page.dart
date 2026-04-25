@@ -160,7 +160,7 @@ class _TaxReminderPageState extends ConsumerState<TaxReminderPage> {
               color: iconColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(14),
             ),
-            child: Icon(IconData(item.iconCodePoint, fontFamily: 'MaterialIcons'),
+            child: Icon(_getIcon(item.iconCodePoint),
                 color: iconColor, size: 20),
           ),
           const SizedBox(width: 12),
@@ -281,6 +281,14 @@ class _TaxReminderPageState extends ConsumerState<TaxReminderPage> {
 
   void _deleteReminder(String id) {
     ref.read(taxReminderServiceProvider).deleteReminder(id);
+  }
+
+  IconData _getIcon(int codePoint) {
+    // Gunakan konstanta IconData untuk menghindari error tree shaking saat build release
+    if (codePoint == Icons.notification_important_rounded.codePoint) {
+      return Icons.notification_important_rounded;
+    }
+    return Icons.receipt_long_rounded;
   }
 
   Future<void> _showAddDialog(bool isDarkMode) async {

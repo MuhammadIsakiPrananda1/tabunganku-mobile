@@ -24,6 +24,7 @@ import 'package:tabunganku/features/transaction/presentation/pages/recurring_lis
 import 'package:tabunganku/features/transaction/presentation/pages/debt_list_page.dart';
 import 'package:tabunganku/features/shopping/presentation/pages/shopping_list_page.dart';
 import 'package:tabunganku/features/home/presentation/pages/tax_reminder_page.dart';
+import 'package:tabunganku/features/home/presentation/pages/piggy_bank_page.dart';
 
 final appRouterProvider = Provider((ref) {
   return GoRouter(
@@ -214,6 +215,11 @@ final appRouterProvider = Provider((ref) {
         path: '/tax-reminder',
         name: 'tax-reminder',
         builder: (context, state) => const TaxReminderPage(),
+      ),
+      GoRoute(
+        path: '/piggy-bank',
+        name: 'piggy-bank',
+        builder: (context, state) => const PiggyBankPage(),
       ),
 
       // Catch-all redirect to splash

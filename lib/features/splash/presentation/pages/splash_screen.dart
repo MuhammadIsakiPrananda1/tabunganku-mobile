@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:tabunganku/core/theme/app_colors.dart';
 import 'package:tabunganku/features/settings/presentation/providers/security_provider.dart';
 import 'package:tabunganku/core/constants/app_version.dart';
@@ -241,13 +242,23 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                           AppColors.primaryLight.withValues(alpha: 0.2),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 32),
+                  Text(
+                    'NEVERLAND STUDIO',
+                    style: GoogleFonts.poppins(
+                      color: AppColors.primary,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 2.5,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
                   const Text(
                     AppVersion.fullVersion,
                     style: TextStyle(
                       color: AppColors.textTertiary,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
                       letterSpacing: 2.0,
                     ),
                   ),

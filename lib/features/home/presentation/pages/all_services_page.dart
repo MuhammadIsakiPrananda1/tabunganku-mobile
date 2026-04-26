@@ -71,8 +71,8 @@ class AllServicesPage extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 40),
         children: [
+          _buildCategoryHeader(isDarkMode, 'MANAJEMEN KEUANGAN'),
           _buildCompactCategoryCard(context, isDarkMode, [
-            // FINANSIAL & TRANSAKSI
             _ServiceData(
               icon: Icons.document_scanner_rounded,
               title: 'Smart Receipt',
@@ -87,8 +87,26 @@ class AllServicesPage extends ConsumerWidget {
               color: Colors.blue,
               route: '/recurring',
             ),
-            
-            // TABUNGAN & RENCANA
+            _ServiceData(
+              icon: Icons.receipt_long_rounded,
+              title: 'Manajemen Tagihan',
+              subtitle: unpaidBillsTotal > 0 
+                  ? '${_formatRupiah(unpaidBillsTotal)} tertunggak' 
+                  : 'List tagihan bulanan wajib',
+              color: Colors.lightBlue,
+              route: '/bills',
+            ),
+          ]),
+
+          _buildCategoryHeader(isDarkMode, 'TABUNGAN & INVESTASI'),
+          _buildCompactCategoryCard(context, isDarkMode, [
+            _ServiceData(
+              icon: Icons.savings_rounded,
+              title: 'Tabungan Receh',
+              subtitle: 'Kumpulkan uang kecilmu',
+              color: Colors.pinkAccent,
+              route: '/piggy-bank',
+            ),
             _ServiceData(
               icon: Icons.assignment_turned_in_rounded,
               title: 'Dana Rencana',
@@ -105,8 +123,28 @@ class AllServicesPage extends ConsumerWidget {
               color: Colors.amber,
               route: '/gold',
             ),
+            _ServiceData(
+              icon: Icons.trending_up_rounded,
+              title: 'Portofolio Investasi',
+              subtitle: totalInvestmentValuation > 0 
+                  ? 'Valuasi: ${_formatRupiah(totalInvestmentValuation)}' 
+                  : 'Pantau aset investasimu',
+              color: Colors.indigo,
+              route: '/investment',
+            ),
+            _ServiceData(
+              icon: Icons.shield_rounded,
+              title: 'Proteksi Asuransi',
+              subtitle: totalMonthlyInsurance > 0 
+                  ? '${_formatRupiah(totalMonthlyInsurance)}/bln' 
+                  : 'Keamanan jangka panjang',
+              color: Colors.blueGrey,
+              route: '/insurance',
+            ),
+          ]),
 
-            // TOOLS & ANALISIS
+          _buildCategoryHeader(isDarkMode, 'ALAT & ANALISIS'),
+          _buildCompactCategoryCard(context, isDarkMode, [
             _ServiceData(
               icon: Icons.calculate_rounded,
               title: 'Simulasi Tabungan',
@@ -128,37 +166,10 @@ class AllServicesPage extends ConsumerWidget {
               color: Colors.orange,
               route: '/tax-reminder',
             ),
-            _ServiceData(
-              icon: Icons.receipt_long_rounded,
-              title: 'Manajemen Tagihan',
-              subtitle: unpaidBillsTotal > 0 
-                  ? '${_formatRupiah(unpaidBillsTotal)} tertunggak' 
-                  : 'List tagihan bulanan wajib',
-              color: Colors.lightBlue,
-              route: '/bills',
-            ),
+          ]),
 
-            // INVESTASI & PROTEKSI
-            _ServiceData(
-              icon: Icons.trending_up_rounded,
-              title: 'Portofolio Investasi',
-              subtitle: totalInvestmentValuation > 0 
-                  ? 'Valuasi: ${_formatRupiah(totalInvestmentValuation)}' 
-                  : 'Pantau aset investasimu',
-              color: Colors.indigo,
-              route: '/investment',
-            ),
-            _ServiceData(
-              icon: Icons.shield_rounded,
-              title: 'Proteksi Asuransi',
-              subtitle: totalMonthlyInsurance > 0 
-                  ? '${_formatRupiah(totalMonthlyInsurance)}/bln' 
-                  : 'Keamanan jangka panjang',
-              color: Colors.blueGrey,
-              route: '/insurance',
-            ),
-
-            // SOSIAL & HADIAH
+          _buildCategoryHeader(isDarkMode, 'SOSIAL & HADIAH'),
+          _buildCompactCategoryCard(context, isDarkMode, [
             _ServiceData(
               icon: Icons.volunteer_activism_rounded,
               title: 'Zakat & Infaq',
@@ -166,7 +177,6 @@ class AllServicesPage extends ConsumerWidget {
               color: Colors.teal,
               route: '/zakat',
             ),
-
             _ServiceData(
               icon: Icons.emoji_events_rounded,
               title: 'Misi & Challenge',

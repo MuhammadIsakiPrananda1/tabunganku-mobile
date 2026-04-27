@@ -65,22 +65,22 @@ class _CompoundInterestPageState extends ConsumerState<CompoundInterestPage> {
         (ref.watch(themeProvider) == ThemeMode.system && theme.brightness == Brightness.dark);
 
     return Scaffold(
-      backgroundColor: isDarkMode ? const Color(0xFF0F172A) : const Color(0xFFF0F9FF),
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.black,
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
           onPressed: () => Navigator.pop(context),
-          icon: Icon(Icons.arrow_back_ios_new_rounded,
-              color: isDarkMode ? Colors.white : AppColors.primaryDark, size: 18),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded,
+              color: AppColors.primary, size: 18),
         ),
         title: Text(
           'Simulasi Bunga Majemuk',
           style: GoogleFonts.comicNeue(
             fontWeight: FontWeight.bold,
             fontSize: 16,
-            color: isDarkMode ? Colors.white : AppColors.primaryDark,
+            color: AppColors.primary,
           ),
         ),
       ),
@@ -91,64 +91,53 @@ class _CompoundInterestPageState extends ConsumerState<CompoundInterestPage> {
           children: [
             // Result Card
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+              padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: isDarkMode
-                      ? [const Color(0xFF1E293B), const Color(0xFF0F172A)]
-                      : [const Color(0xFF0EA5E9), const Color(0xFF3B82F6)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+                color: const Color(0xFF0A0A0A),
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(
+                  color: AppColors.primary.withValues(alpha: 0.3),
+                  width: 1.5,
                 ),
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.blue.withValues(alpha: isDarkMode ? 0.4 : 0.2),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
-                  )
-                ],
               ),
               child: Column(
                 children: [
                   Text(
-                    'Estimasi Saldo Akhir',
+                    'ESTIMASI SALDO AKHIR',
                     style: GoogleFonts.comicNeue(
-                      color: Colors.white70,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
+                      color: AppColors.primary.withValues(alpha: 0.5),
+                      fontSize: 10,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.5,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 12),
                   FittedBox(
                     fit: BoxFit.scaleDown,
                     child: Text(
                       _formatRupiah(_finalBalance),
                       style: GoogleFonts.comicNeue(
-                        color: Colors.white,
-                        fontSize: 28,
+                        color: AppColors.primary,
+                        fontSize: 36,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
                   const SizedBox(height: 24),
+                  Divider(height: 1, thickness: 1, color: AppColors.primary.withValues(alpha: 0.1)),
+                  const SizedBox(height: 20),
                   Row(
                     children: [
                       Expanded(
                         child: _resultMiniItem(
-                          'Total Modal',
+                          'TOTAL MODAL',
                           _formatRupiah(_totalContributions),
-                          Icons.account_balance_wallet_rounded,
-                          isDarkMode,
                         ),
                       ),
-                      Container(width: 1, height: 40, color: Colors.white24),
                       Expanded(
                         child: _resultMiniItem(
-                          'Total Bunga',
+                          'TOTAL BUNGA',
                           _formatRupiah(_totalInterest),
-                          Icons.trending_up_rounded,
-                          isDarkMode,
                         ),
                       ),
                     ],
@@ -157,30 +146,34 @@ class _CompoundInterestPageState extends ConsumerState<CompoundInterestPage> {
               ),
             ),
 
-            const SizedBox(height: 32),
+            const SizedBox(height: 24),
 
             // Inputs
-            _buildInputCard(isDarkMode),
+            _buildInputCard(),
           ],
         ),
       ),
     );
   }
 
-  Widget _resultMiniItem(String label, String value, IconData icon, bool isDarkMode) {
+  Widget _resultMiniItem(String label, String value) {
     return Column(
       children: [
-        Icon(icon, color: Colors.white70, size: 16),
-        const SizedBox(height: 4),
         Text(
           label,
-          style: GoogleFonts.comicNeue(color: Colors.white60, fontSize: 10),
+          style: GoogleFonts.comicNeue(
+            color: AppColors.primary.withValues(alpha: 0.4),
+            fontSize: 9,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1,
+          ),
         ),
+        const SizedBox(height: 4),
         Text(
           value,
           style: GoogleFonts.comicNeue(
-            color: isDarkMode ? Colors.cyanAccent : Colors.blue.shade600,
-            fontSize: 13,
+            color: AppColors.primaryLight,
+            fontSize: 14,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -188,19 +181,16 @@ class _CompoundInterestPageState extends ConsumerState<CompoundInterestPage> {
     );
   }
 
-  Widget _buildInputCard(bool isDarkMode) {
+  Widget _buildInputCard() {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.blue.withValues(alpha: 0.05),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          )
-        ],
+        color: const Color(0xFF0A0A0A),
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(
+          color: AppColors.primary.withValues(alpha: 0.1),
+          width: 1,
+        ),
       ),
       child: Column(
         children: [
@@ -236,14 +226,14 @@ class _CompoundInterestPageState extends ConsumerState<CompoundInterestPage> {
           const SizedBox(height: 32),
           SizedBox(
             width: double.infinity,
-            height: 56,
+            height: 60,
             child: ElevatedButton(
               onPressed: _calculate,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue.shade600,
-                foregroundColor: Colors.white,
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.black,
                 elevation: 0,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
               ),
               child: Text(
                 'Hitung Sekarang',
@@ -263,25 +253,22 @@ class _CompoundInterestPageState extends ConsumerState<CompoundInterestPage> {
     required IconData icon,
     bool isCurrency = false,
   }) {
-    final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
-        (ref.watch(themeProvider) == ThemeMode.system && Theme.of(context).brightness == Brightness.dark);
-
     return TextField(
       controller: controller,
       keyboardType: TextInputType.number,
       style: GoogleFonts.comicNeue(
         fontWeight: FontWeight.bold,
-        color: isDarkMode ? Colors.white : AppColors.primaryDark,
+        color: AppColors.primaryLight,
       ),
       decoration: InputDecoration(
         labelText: label,
         labelStyle: GoogleFonts.comicNeue(
           fontSize: 14,
           fontWeight: FontWeight.bold,
-          color: isDarkMode ? Colors.white38 : Colors.grey.shade500,
+          color: AppColors.primary.withValues(alpha: 0.3),
         ),
         floatingLabelStyle: GoogleFonts.comicNeue(
-          color: isDarkMode ? Colors.cyanAccent : Colors.blue.shade600,
+          color: AppColors.primary,
           fontWeight: FontWeight.bold,
         ),
         prefixIcon: Container(
@@ -289,14 +276,14 @@ class _CompoundInterestPageState extends ConsumerState<CompoundInterestPage> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: 20, color: Colors.blue.shade600),
+              Icon(icon, size: 20, color: AppColors.primary),
               if (isCurrency) ...[
                 const SizedBox(width: 8),
                 Text(
                   'Rp',
                   style: GoogleFonts.comicNeue(
                     fontWeight: FontWeight.bold,
-                    color: isDarkMode ? Colors.cyanAccent : Colors.blue.shade700,
+                    color: AppColors.primary,
                   ),
                 ),
               ],
@@ -306,15 +293,23 @@ class _CompoundInterestPageState extends ConsumerState<CompoundInterestPage> {
         hintText: hint,
         hintStyle: GoogleFonts.comicNeue(
           fontSize: 14,
-          color: isDarkMode ? Colors.white10 : Colors.grey.shade300,
+          color: AppColors.primary.withValues(alpha: 0.1),
         ),
         filled: true,
-        fillColor: isDarkMode ? const Color(0xFF1E293B) : const Color(0xFFF0F9FF),
+        fillColor: const Color(0xFF121212),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide.none,
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: AppColors.primary.withValues(alpha: 0.05)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: AppColors.primary, width: 1),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
       ),
       onChanged: (value) {
         if (isCurrency && value.isNotEmpty) {

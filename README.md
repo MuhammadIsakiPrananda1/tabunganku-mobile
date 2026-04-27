@@ -1,117 +1,163 @@
-# 💰 TabunganKu - Aplikasi Tabungan Keluarga Cerdas
+# 💰 TabunganKu - Ekosistem Manajemen Keuangan Cerdas & Terintegrasi
 
 <p align="center">
-  <img src="assets/promo_banner.png" alt="TabunganKu Banner" width="100%">
+  <img src="assets/promo_banner.png" alt="TabunganKu Banner" width="100%" style="border-radius: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.15);">
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Flutter-3.0.0+-02569B?style=for-the-badge&logo=flutter&logoColor=white" alt="Flutter Version">
-  <img src="https://img.shields.io/badge/State-Riverpod-764ABC?style=for-the-badge&logo=riverpod&logoColor=white" alt="State Management">
-  <img src="https://img.shields.io/badge/Backend-Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black" alt="Backend">
-  <img src="https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge" alt="License">
+  <a href="https://flutter.dev"><img src="https://img.shields.io/badge/Flutter-3.0.0+-02569B?style=for-the-badge&logo=flutter&logoColor=white" alt="Versi Flutter"></a>
+  <a href="https://riverpod.dev"><img src="https://img.shields.io/badge/State-Riverpod-764ABC?style=for-the-badge&logo=riverpod&logoColor=white" alt="Manajemen State"></a>
+  <a href="https://firebase.google.com"><img src="https://img.shields.io/badge/Backend-Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black" alt="Backend"></a>
+  <img src="https://img.shields.io/badge/Lisensi-MIT-green.svg?style=for-the-badge" alt="Lisensi">
+  <img src="https://img.shields.io/badge/Platform-Android%20%7C%20iOS-blue?style=for-the-badge" alt="Platform Dukungan">
+  <img src="https://img.shields.io/badge/Maintained%3F-yes-brightgreen.svg?style=for-the-badge" alt="Maintained">
 </p>
 
-**TabunganKu** adalah ekosistem manajemen keuangan modern yang dirancang untuk menghadirkan transparansi dan kebiasaan menabung yang sehat bagi keluarga Indonesia. Dengan pendekatan **Premium UI/UX (Stellar Sky Design)** dan integrasi cloud yang cerdas, kami mengubah cara Anda mengelola masa depan finansial Anda.
+---
+
+## 📖 Deskripsi Proyek
+
+**TabunganKu** adalah solusi finansial mutakhir yang menggabungkan kemudahan pencatatan harian dengan kekuatan teknologi cloud. Lahir dari kebutuhan akan transparansi keuangan dalam keluarga, aplikasi ini berevolusi menjadi asisten finansial pintar yang mampu membantu siapa saja—dari pelajar hingga kepala keluarga—untuk mencapai target keuangan mereka dengan cara yang menyenangkan dan terukur.
+
+Kami percaya bahwa menabung seharusnya tidak terasa seperti beban. Melalui integrasi **Gamifikasi**, **AI OCR**, dan **Visualisasi Data**, TabunganKu mengubah angka-angka yang membosankan menjadi petualangan menuju impian Anda.
 
 ---
 
-## ✨ Fitur Unggulan
+## ✨ Fitur Utama (Deep Dive)
 
-TabunganKu bukan sekadar catatan pengeluaran. Ini adalah asisten keuangan pribadi lengkap yang mencakup:
+### 📊 Dashboard & Analitik Eksklusif
+*   **Stellar Insights**: Bukan sekadar angka, tapi pemahaman. Dashboard kami memberikan ringkasan saldo dengan animasi halus dan perubahan warna dinamis berdasarkan kondisi keuangan Anda.
+*   **Analisis Pengeluaran Multi-Kategori**: Visualisasikan ke mana uang Anda pergi dengan grafik **FL Chart** yang mendukung interaksi *touch-to-view*.
+*   **Laporan Periodik Otomatis**: Dapatkan ringkasan mingguan dan bulanan untuk membantu evaluasi pengeluaran tanpa perlu menghitung ulang.
 
-### 🏠 Inti Keuangan
-- **📊 Dashboard Interaktif**: Pantau sisa saldo, pendapatan, dan pengeluaran harian dengan grafik elegan bertenaga **FL Chart**.
-- **👨‍👩‍👧‍👦 Grup Keluarga**: Sinkronkan catatan tabungan dengan seluruh anggota keluarga secara real-time melalui **Firebase Firestore**.
-- **📈 Progres Target**: Visualisasikan seberapa dekat Anda dengan impian (iPhone, Rumah, Liburan) dengan indikator progres yang dinamis.
+### 👨‍👩‍👧‍👦 Kolaborasi Keluarga (The Harmony Feature)
+*   **Family Sync 2.0**: Buat grup keluarga dan undang anggota melalui link atau kode unik. Setiap kontribusi tabungan akan memicu notifikasi real-time ke semua anggota.
+*   **Target Bersama**: Bekerja sama untuk mencapai tujuan besar seperti DP Rumah, Pendidikan Anak, atau Liburan Keluarga.
+*   **Role Management**: Pengaturan admin grup untuk mengelola anggota dan memvalidasi transaksi jika diperlukan.
 
-### 🎮 Gamifikasi & Kebiasaan
-- **🎯 Saving Challenges**: 14+ template tantangan menabung (Harian, Mingguan, Bulanan) untuk membangun disiplin.
-- **🏆 Badge Collection**: Kumpulkan lencana eksklusif berdasarkan streak menabung, total tabungan, dan penyelesaian tantangan.
-- **🔥 Streak Tracker**: Pertahankan konsistensi menabung Anda dengan penghitung hari berturut-turut.
+### 🎮 Sistem Gamifikasi (Build the Habit)
+*   **14+ Saving Challenges**: Mulai dari *Tantangan Kalender*, *Tantangan 52 Minggu*, hingga *Tantangan Tanpa Belanja*.
+*   **Experience Points (XP) & Leveling**: Setiap kali Anda menabung atau menyelesaikan tantangan, Anda akan mendapatkan XP untuk menaikkan level akun Anda.
+*   **Hall of Fame**: Lihat pencapaian terbaik Anda dan koleksi lencana (*badges*) yang telah didapatkan sebagai bukti kedisiplinan finansial.
 
-### 🛠️ Alat Cerdas
-- **📷 Scan Bukti (OCR)**: Catat transaksi otomatis hanya dengan memotret struk menggunakan bantuan **Google ML Kit**.
-- **🧮 Smart Calculator**: Akselerasi perhitungan keuangan langsung di dalam aplikasi.
-- **🏠 Simulasi & Alokasi**: Gunakan simulator 50/30/20 untuk merencanakan keuangan masa depan Anda.
-- **📄 Laporan PDF**: Ekspor riwayat transaksi lengkap ke format PDF berkualitas tinggi untuk arsip fisik.
+### 🧠 Teknologi Pintar & Keamanan
+*   **AI OCR Receipt Scanner**: Memanfaatkan **Google ML Kit** dengan akurasi tinggi untuk membaca struk belanja dan mengonversinya menjadi data transaksi digital dalam hitungan detik.
+*   **Offline First Capabilities**: Aplikasi tetap dapat digunakan meski tanpa koneksi internet; data akan disinkronkan secara otomatis saat koneksi kembali tersedia (**Connectivity Plus**).
+*   **Biometric Guard**: Keamanan lapis baja dengan integrasi **Fingerprint** dan **Face Unlock** untuk menjaga privasi data Anda.
 
 ---
 
-## 🛠️ Stack Teknologi Modern
+## 🛠️ Arsitektur & Stack Teknologi Modern
 
-Aplikasi ini dibangun menggunakan praktik terbaik di industri Flutter:
+Aplikasi ini dibangun dengan standar industri tinggi menggunakan pola **Clean Architecture** sederhana yang memastikan skalabilitas dan kemudahan pemeliharaan.
 
-| Layer | Teknologi | Deskripsi |
+| Kategori | Teknologi | Kegunaan Utama |
 | :--- | :--- | :--- |
-| **Core Framework** | **Flutter 3.0+ (Dart)** | Performa native untuk Android & iOS. |
-| **State Management** | **Riverpod** | Manajemen state yang aman dan testable. |
-| **Backend / Ops** | **Firebase** | Firestore, Cloud Storage, & Auth. |
-| **AI / Machine Learning** | **Google ML Kit** | Pengenalan teks otomatis untuk scan struk. |
-| **Routing** | **GoRouter** | Navigasi deklaratif yang modern. |
-| **UI Components** | **Custom Stellar Sky** | Desain kustom dengan Poppins & Comic Neue fonts. |
-| **Graphics** | **FL Chart** | Visualisasi data keuangan yang interaktif. |
+| **Framework** | **Flutter SDK** | Membangun UI yang indah dan responsif untuk banyak platform. |
+| **State Management** | **Riverpod (Generator)** | Menangani logika aplikasi dengan *dependency injection* yang aman. |
+| **Database** | **Firestore NoSQL** | Sinkronisasi data real-time dengan latensi rendah. |
+| **Authentication** | **Firebase Auth** | Sistem login yang aman (Email, Google, dll). |
+| **Local Storage** | **Secure Storage** | Menyimpan kunci enkripsi dan data sensitif secara lokal. |
+| **AI/ML** | **Google ML Kit** | Pemrosesan citra untuk fitur scan struk otomatis. |
+| **Reporting** | **PDF & Intl** | Menghasilkan dokumen laporan dan formatting mata uang Rupiah. |
 
 ---
 
-## 🚀 Memulai (Developer Setup)
+## 📁 Struktur Direktori & Pola Kode
 
-> [!IMPORTANT]
-> Proyek ini memerlukan konfigurasi Firebase untuk sinkronisasi cloud agar berfungsi sepenuhnya.
-
-### Prasyarat
-- **Flutter SDK** (v3.0.0 atau lebih tinggi)
-- **Dart SDK** (v3.0.0 atau lebih tinggi)
-- Akun **Firebase Console**
-
-### Langkah Instalasi
-
-1.  **Clone & Fetch**
-    ```bash
-    git clone https://github.com/MuhammadIsakiPrananda1/tabunganku-mobile.git
-    cd tabunganku-mobile
-    flutter pub get
-    ```
-
-2.  **Konfigurasi Firebase**
-    - Buat proyek di [Firebase Console](https://console.firebase.google.com).
-    - Tambahkan aplikasi Android/iOS.
-    - Unduh dan letakkan file konfigurasi:
-        - Android: `android/app/google-services.json`
-        - iOS: `ios/Runner/GoogleService-Info.plist`
-
-3.  **Generate Models (Jika perlu)**
-    ```bash
-    flutter pub run build_runner build --delete-conflicting-outputs
-    ```
-
-4.  **Jalankan Aplikasi**
-    ```bash
-    flutter run
-    ```
+```text
+lib/
+├── app/              # Konfigurasi aplikasi global (Themes, Routes)
+├── features/         # Modul fitur (Dashboard, Savings, Profile, Family)
+│   ├── data/         # Repositori dan Data Sources (Firebase/Local)
+│   ├── domain/       # Entities dan Business Logic
+│   └── presentation/ # Widgets, Screens, dan State Providers (Riverpod)
+├── core/             # Utilitas, Ekstensi, dan Konstanta
+└── main.dart         # Titik masuk aplikasi
+```
 
 ---
 
-## 🏗️ Build & Deployment
+## 🚀 Panduan Instalasi (Step-by-Step)
 
-### Produksi Android
-Gunakan perintah berikut untuk membuat file APK yang dioptimalkan:
+### 1. Persiapan Lingkungan
+Pastikan perangkat Anda memenuhi spesifikasi berikut:
+*   **Flutter SDK**: v3.x atau lebih tinggi.
+*   **Java**: JDK 11 (direkomendasikan).
+*   **Android Studio / VS Code**: Terinstal plugin Flutter & Dart.
+
+### 2. Kloning & Dependensi
+Buka terminal Anda dan jalankan perintah berikut:
 ```bash
-flutter build apk --split-per-abi --release
+# Clone proyek ke lokal
+git clone https://github.com/MuhammadIsakiPrananda1/tabunganku-mobile.git
+
+# Masuk ke direktori proyek
+cd tabunganku-mobile
+
+# Instal semua paket yang diperlukan
+flutter pub get
 ```
 
-### Produksi iOS
+### 3. Konfigurasi Backend (Firebase)
+Tanpa langkah ini, fitur sinkronisasi cloud tidak akan berfungsi:
+1.  Buka [Firebase Console](https://console.firebase.google.com/).
+2.  Buat proyek baru dan tambahkan aplikasi Android/iOS.
+3.  Unduh `google-services.json` (Android) ke `android/app/`.
+4.  Unduh `GoogleService-Info.plist` (iOS) ke `ios/Runner/`.
+5.  Pastikan **Firestore Index** sudah dibuat sesuai dengan kueri yang ada di kode.
+
+### 4. Build Generation
+Aplikasi ini menggunakan *code generation* untuk performa state management yang lebih baik:
 ```bash
-flutter build ipa --release
+flutter pub run build_runner build --delete-conflicting-outputs
 ```
+
+---
+
+## 🏗️ Deployment & Distribusi
+
+### Persiapan Rilis Android
+1.  Pastikan `version` di `pubspec.yaml` sudah diperbarui.
+2.  Jalankan perintah build:
+```bash
+# Build APK untuk pengujian manual
+flutter build apk --release
+
+# Build App Bundle untuk rilis Play Store
+flutter build appbundle --release
+```
+
+### Persiapan Rilis iOS
+1.  Buka `Runner.xcworkspace` di Xcode.
+2.  Pilih *Signing & Capabilities* dan masukkan tim pengembang Anda.
+3.  Jalankan: `flutter build ipa --release`
+
+---
+
+## 🌟 Roadmap Pengembangan
+- [ ] Integrasi Notifikasi Push untuk pengingat menabung harian.
+- [ ] Fitur Ekspor Laporan ke format Excel (.xlsx).
+- [ ] Dark Mode yang lebih optimal.
+- [ ] Integrasi dengan API Bank lokal (Tahap Riset).
 
 ---
 
 ## 📄 Lisensi & Kredit
 
-Proyek ini dikembangkan oleh **Muhammad Isaki Prananda** dan didisribusikan di bawah **MIT License**.
+Proyek ini berada di bawah lisensi **MIT**. Anda bebas menggunakan dan memodifikasi kode ini dengan tetap memberikan atribusi kepada penulis aslinya.
 
-- **Pengembang Utama**: [Muhammad Isaki Prananda](https://github.com/MuhammadIsakiPrananda1)
-- **Dibuat dengan**: ❤️ Flutter, Riverpod, & Google Firebase.
+*   **Author**: [Muhammad Isaki Prananda](https://github.com/MuhammadIsakiPrananda1)
+*   **Organization**: Neverland Studio
+*   **Contact**: isaki.dev@example.com (Opsional)
 
 ---
-© 2026 Neverland Studio. Hak Cipta Dilindungi Undang-Undang.
+<p align="center">
+  <img src="https://forthebadge.com/images/badges/made-with-brave.svg" height="30">
+  <img src="https://forthebadge.com/images/badges/built-with-love.svg" height="30">
+</p>
+
+<p align="center">
+  <b>TabunganKu - Solusi Finansial di Genggaman Anda</b><br>
+  © 2026 Muhammad Isaki Prananda. Seluruh Hak Cipta Dilindungi.
+</p>

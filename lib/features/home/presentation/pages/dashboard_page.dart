@@ -1364,11 +1364,11 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                       selectedInterestBank = val;
                                       interestOtherBankName = '';
                                       if (val == null) {
-                                        nameController.clear();
+                                        // nameController.clear(); // Removed to keep user input "diam"
                                         selectedCategory = 'Gaji Pokok';
                                         selectedGroup = 'Pekerjaan Utama';
                                       } else if (val == 'Bank Lainnya') {
-                                        nameController.clear();
+                                        // nameController.clear(); // Removed to keep user input "diam"
                                         selectedCategory = 'Bunga Tabungan Reguler';
                                         selectedGroup = 'Keuangan & Bank';
                                       } else {
@@ -1391,13 +1391,20 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                         String bankClean = val
                                             .replaceAll(' (Premium)', '')
                                             .replaceAll(' (Standar)', '');
-                                        nameController.text =
-                                            'Bunga $bankClean $monthName ${now.year}';
+                                        
+                                        // Only auto-fill if current description is empty
+                                        if (nameController.text.isEmpty || nameController.text.startsWith('Bunga ')) {
+                                          nameController.text =
+                                              'Bunga $bankClean $monthName ${now.year}';
+                                        }
+                                        
                                         selectedCategory =
                                             'Bunga Tabungan Reguler';
                                         selectedGroup = 'Keuangan & Bank';
                                       }
                                     });
+                                    // Ensure focus stays "diam" (unfocused) after selection
+                                    FocusScope.of(context).unfocus();
                                   },
                                 ),
                                 if (selectedInterestBank == 'Bank Lainnya') ...[
@@ -1464,9 +1471,14 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                           'November',
                                           'Desember'
                                         ][now.month];
-                                        nameController.text = val.trim().isEmpty
-                                            ? ''
-                                            : 'Bunga ${val.trim()} $monthName ${now.year}';
+                                        
+                                        // Only auto-fill if empty or already contains "Bunga " prefix
+                                        if (nameController.text.isEmpty || nameController.text.startsWith('Bunga ')) {
+                                          nameController.text = val.trim().isEmpty
+                                              ? ''
+                                              : 'Bunga ${val.trim()} $monthName ${now.year}';
+                                        }
+                                        
                                         selectedCategory =
                                             'Bunga Tabungan Reguler';
                                         selectedGroup = 'Keuangan & Bank';
@@ -1639,7 +1651,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                     setSheetState(() {
                                       selectedTopUpSource = val;
                                       if (val == null) {
-                                        nameController.clear();
                                         selectedCategory =
                                             type == TransactionType.expense
                                                 ? 'Makanan & Minuman Harian'
@@ -1649,18 +1660,23 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                                 ? 'Kebutuhan Pokok'
                                                 : 'Pekerjaan Utama';
                                       } else if (val != 'Bank') {
-                                        nameController.text =
-                                            'Biaya Admin $val';
+                                        if (nameController.text.isEmpty || nameController.text.startsWith('Biaya Admin')) {
+                                          nameController.text =
+                                              'Biaya Admin $val';
+                                        }
                                         selectedCategory = 'Biaya Admin Bank';
                                         selectedGroup = 'Keuangan';
                                       } else {
-                                        nameController.text =
-                                            'Biaya Admin Bank ${topUpBankName.trim()}'
-                                                .trim();
+                                        if (nameController.text.isEmpty || nameController.text.startsWith('Biaya Admin')) {
+                                          nameController.text =
+                                              'Biaya Admin Bank ${topUpBankName.trim()}'
+                                                  .trim();
+                                        }
                                         selectedCategory = 'Biaya Admin Bank';
                                         selectedGroup = 'Keuangan';
                                       }
                                     });
+                                    FocusScope.of(context).unfocus();
                                   },
                                 ),
                                 if (selectedTopUpSource == 'Bank') ...[
@@ -1707,9 +1723,11 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                     onChanged: (val) {
                                       topUpBankName = val;
                                       setSheetState(() {
-                                        nameController.text =
-                                            'Biaya Admin Bank ${val.trim()}'
-                                                .trim();
+                                        if (nameController.text.isEmpty || nameController.text.startsWith('Biaya Admin Bank')) {
+                                          nameController.text =
+                                              'Biaya Admin Bank ${val.trim()}'
+                                                  .trim();
+                                        }
                                       });
                                     },
                                   ),
@@ -1894,8 +1912,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                               const SizedBox(height: 6),
                               // Group Dropdown
                               DropdownButtonFormField<String>(
-                                initialValue: groupedCategories.containsKey(selectedGroup) ? selectedGroup : (groupedCategories.isNotEmpty ? groupedCategories.keys.first : null),
-                                key: ValueKey('group_${type}_$selectedGroup'),
+                                value: groupedCategories.containsKey(selectedGroup) ? selectedGroup : (groupedCategories.isNotEmpty ? groupedCategories.keys.first : null),
+                                key: ValueKey('group_${type}'),
                                 isExpanded: true,
                                 dropdownColor: isDarkMode
                                     ? AppColors.surfaceDark
@@ -1936,6 +1954,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                       selectedCategory =
                                           groupedCategories[val]!.first.label;
                                     });
+                                    FocusScope.of(context).unfocus();
                                   }
                                 },
                               ),
@@ -1951,8 +1970,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                               const SizedBox(height: 6),
                               // Category Dropdown
                               DropdownButtonFormField<String>(
-                                initialValue: (groupedCategories[selectedGroup]?.any((c) => c.label == selectedCategory) ?? false) ? selectedCategory : (groupedCategories[selectedGroup]?.isNotEmpty ?? false ? groupedCategories[selectedGroup]!.first.label : null),
-                                key: ValueKey('category_${type}_$selectedCategory'),
+                                value: (groupedCategories[selectedGroup]?.any((c) => c.label == selectedCategory) ?? false) ? selectedCategory : (groupedCategories[selectedGroup]?.isNotEmpty ?? false ? groupedCategories[selectedGroup]!.first.label : null),
+                                key: ValueKey('category_${type}'),
                                 isExpanded: true,
                                 dropdownColor: isDarkMode
                                     ? AppColors.surfaceDark
@@ -1998,6 +2017,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                     setSheetState(() {
                                       selectedCategory = val;
                                     });
+                                    FocusScope.of(context).unfocus();
                                   }
                                 },
                               ),
@@ -2017,7 +2037,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                   const SizedBox(height: 6),
                                 TextFormField(
                                   controller: customCategoryController,
-                                  autofocus: true,
                                   style: GoogleFonts.comicNeue(
                                       color: isDarkMode
                                           ? Colors.white

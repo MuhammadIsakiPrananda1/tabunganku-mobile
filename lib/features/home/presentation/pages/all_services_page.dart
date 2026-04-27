@@ -168,6 +168,24 @@ class AllServicesPage extends ConsumerWidget {
             ),
           ]),
 
+          _buildCategoryHeader(isDarkMode, 'UTILITAS FINANSIAL'),
+          _buildCompactCategoryCard(context, isDarkMode, [
+            _ServiceData(
+              icon: Icons.trending_up_rounded,
+              title: 'Bunga Majemuk',
+              subtitle: 'Simulasi pertumbuhan aset',
+              color: AppColors.primary,
+              route: '/compound-interest',
+            ),
+            _ServiceData(
+              icon: Icons.currency_exchange_rounded,
+              title: 'Konverter Valas',
+              subtitle: 'Cek nilai tukar mata uang',
+              color: Colors.blue,
+              route: '/currency-converter',
+            ),
+          ]),
+
           _buildCategoryHeader(isDarkMode, 'SOSIAL & HADIAH'),
           _buildCompactCategoryCard(context, isDarkMode, [
             _ServiceData(

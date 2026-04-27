@@ -25,6 +25,8 @@ import 'package:tabunganku/features/transaction/presentation/pages/debt_list_pag
 import 'package:tabunganku/features/shopping/presentation/pages/shopping_list_page.dart';
 import 'package:tabunganku/features/home/presentation/pages/tax_reminder_page.dart';
 import 'package:tabunganku/features/home/presentation/pages/piggy_bank_page.dart';
+import 'package:tabunganku/features/home/presentation/pages/compound_interest_page.dart';
+import 'package:tabunganku/features/home/presentation/pages/currency_converter_page.dart';
 
 final appRouterProvider = Provider((ref) {
   return GoRouter(
@@ -220,6 +222,16 @@ final appRouterProvider = Provider((ref) {
         path: '/piggy-bank',
         name: 'piggy-bank',
         builder: (context, state) => const PiggyBankPage(),
+      ),
+      GoRoute(
+        path: '/compound-interest',
+        name: 'compound-interest',
+        builder: (context, state) => const CompoundInterestPage(),
+      ),
+      GoRoute(
+        path: '/currency-converter',
+        name: 'currency-converter',
+        builder: (context, state) => const CurrencyConverterPage(),
       ),
 
       // Catch-all redirect to splash

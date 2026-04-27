@@ -295,6 +295,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
                           _selectedCategory = groupedCategories[val]!.first.label;
                           _isCustomCategory = _selectedCategory == AppCategories.otherLabel;
                         });
+                        FocusScope.of(context).unfocus();
                       }
                     },
                   ),
@@ -328,6 +329,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
                           _selectedCategory = val;
                           _isCustomCategory = val == AppCategories.otherLabel;
                         });
+                        FocusScope.of(context).unfocus();
                       }
                     },
                   ),
@@ -342,7 +344,6 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: TextField(
                   controller: _customCategoryController,
-                  autofocus: true,
                   textCapitalization: TextCapitalization.words,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,

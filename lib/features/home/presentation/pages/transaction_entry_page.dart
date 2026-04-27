@@ -57,7 +57,7 @@ class _TransactionEntryPageState extends ConsumerState<TransactionEntryPage> {
           .group;
       _selectedDate = widget.existingTransaction!.date;
     } else {
-      _selectedCategory = widget.type == TransactionType.income ? 'Gaji Pokok' : 'Makanan & Minuman';
+      _selectedCategory = widget.type == TransactionType.income ? 'Gaji Pokok' : 'Makanan & Minuman Harian';
       _selectedGroup = categoryObjects
           .firstWhere((cat) => cat.label == _selectedCategory)
           .group;
@@ -344,7 +344,6 @@ class _TransactionEntryPageState extends ConsumerState<TransactionEntryPage> {
                 const SizedBox(height: 6),
                 TextFormField(
                   controller: _customCategoryController,
-                  autofocus: true,
                   style: GoogleFonts.comicNeue(fontWeight: FontWeight.w600, color: isDarkMode ? Colors.white : Colors.black87),
                   decoration: _inputDecoration('Misal: Hibah dari Atasan', Icons.star_rounded, isDarkMode),
                   validator: (val) {
@@ -361,7 +360,7 @@ class _TransactionEntryPageState extends ConsumerState<TransactionEntryPage> {
 
               // Dynamic Extra Context (Bank selections etc.)
               if (_selectedCategory == 'Biaya Admin Bank') _buildTopUpSourceSelection(isDarkMode),
-              if (_selectedCategory == 'Bunga Tabungan') _buildInterestBankSelection(isDarkMode),
+              if (_selectedCategory == 'Bunga Tabungan Reguler') _buildInterestBankSelection(isDarkMode),
 
               const SizedBox(height: 48),
 
@@ -455,6 +454,7 @@ class _TransactionEntryPageState extends ConsumerState<TransactionEntryPage> {
                   }
                 }
               });
+              FocusScope.of(context).unfocus();
             }
           },
           items: grouped.entries.expand((group) {
@@ -509,7 +509,17 @@ class _TransactionEntryPageState extends ConsumerState<TransactionEntryPage> {
             return ChoiceChip(
               label: Text(s['label'] as String),
               selected: isSel,
-              onSelected: (val) => setState(() => _selectedTopUpSource = val ? s['label'] as String : null),
+              onSelected: (val) {
+                setState(() {
+                  _selectedTopUpSource = val ? s['label'] as String : null;
+                  if (val) {
+                    final source = s['label'] as String;
+                    if (_nameController.text.isEmpty || _nameController.text.startsWith('Biaya Admin')) {
+                      _nameController.text = source == 'Bank' ? 'Biaya Admin Bank' : 'Biaya Admin $source';
+                    }
+                  }
+                });
+              },
               selectedColor: AppColors.primary.withValues(alpha: 0.2),
               labelStyle: TextStyle(
                 color: isSel ? AppColors.primary : (isDarkMode ? Colors.white38 : Colors.grey),
@@ -536,7 +546,18 @@ class _TransactionEntryPageState extends ConsumerState<TransactionEntryPage> {
             return ChoiceChip(
               label: Text(b),
               selected: isSel,
-              onSelected: (val) => setState(() => _selectedInterestBank = val ? b : null),
+              onSelected: (val) {
+                setState(() {
+                  _selectedInterestBank = val ? b : null;
+                  if (val) {
+                    if (_nameController.text.isEmpty || _nameController.text.startsWith('Bunga ')) {
+                      final now = DateTime.now();
+                      final monthName = ['','Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'][now.month];
+                      _nameController.text = 'Bunga $b $monthName ${now.year}';
+                    }
+                  }
+                });
+              },
               selectedColor: AppColors.primary.withValues(alpha: 0.2),
             );
           }).toList(),

@@ -147,17 +147,19 @@ flutter build appbundle --release
 
 Proyek ini berada di bawah lisensi **MIT**. Anda bebas menggunakan dan memodifikasi kode ini dengan tetap memberikan atribusi kepada penulis aslinya.
 
-*   **Author**: [Muhammad Isaki Prananda](https://github.com/MuhammadIsakiPrananda1)
-*   **Organization**: Neverland Studio
-*   **Contact**: isaki.dev@example.com (Opsional)
+*   **Pembuat Utama**: [Muhammad Isaki Prananda](https://github.com/MuhammadIsakiPrananda1)
+*   **Studio**: **Neverland Studio**
+*   **Email Kontak**: [Arlianto032@gmail.com](mailto:Arlianto032@gmail.com)
 
 ---
 <p align="center">
   <img src="https://forthebadge.com/images/badges/made-with-brave.svg" height="30">
   <img src="https://forthebadge.com/images/badges/built-with-love.svg" height="30">
+  <img src="https://forthebadge.com/images/badges/built-with-fluent-interface.svg" height="30">
+  <img src="https://forthebadge.com/images/badges/uses-badges.svg" height="30">
 </p>
 
 <p align="center">
   <b>TabunganKu - Solusi Finansial di Genggaman Anda</b><br>
-  © 2026 Muhammad Isaki Prananda. Seluruh Hak Cipta Dilindungi.
+  © 2026 <b>Muhammad Isaki Prananda</b>. Dipersembahkan oleh <b>Neverland Studio</b>.
 </p>

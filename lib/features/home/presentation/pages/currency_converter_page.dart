@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:tabunganku/core/theme/app_colors.dart';
 import 'package:tabunganku/core/theme/theme_provider.dart';
+import 'package:tabunganku/services/currency_service.dart';
 
 class CurrencyConverterPage extends ConsumerStatefulWidget {
   const CurrencyConverterPage({super.key});
@@ -13,8 +14,10 @@ class CurrencyConverterPage extends ConsumerStatefulWidget {
 }
 
 class _CurrencyConverterPageState extends ConsumerState<CurrencyConverterPage> {
-  String _amountStr = '0';
-  bool _isNumpadVisible = false;
+  String _amountStr = '1';
+  bool _isNumpadVisible = true;
+  bool _isLoading = true;
+  DateTime? _lastUpdated;
   
   final List<Map<String, dynamic>> _currencies = [
     {'code': 'IDR', 'name': 'Indonesian Rupiah', 'flag': '🇮🇩', 'rate': 1.0, 'symbol': 'Rp'},
@@ -47,6 +50,22 @@ class _CurrencyConverterPageState extends ConsumerState<CurrencyConverterPage> {
     super.initState();
     _fromCurrency = _currencies[1]; // USD
     _toCurrency = _currencies[0];   // IDR
+    _fetchRates();
+  }
+
+  Future<void> _fetchRates() async {
+    setState(() => _isLoading = true);
+    final rates = await ref.read(currencyServiceProvider).fetchLatestRates();
+    
+    setState(() {
+      for (var curr in _currencies) {
+        if (rates.containsKey(curr['code'])) {
+          curr['rate'] = rates[curr['code']];
+        }
+      }
+      _lastUpdated = DateTime.now();
+      _isLoading = false;
+    });
   }
 
   void _onNumberPress(String val) {
@@ -78,24 +97,17 @@ class _CurrencyConverterPageState extends ConsumerState<CurrencyConverterPage> {
   }
 
   double get _convertedAmount {
-    final amount = double.tryParse(_amountStr) ?? 0;
+    final amount = double.tryParse(_amountStr.replaceAll('.', '').replaceAll(',', '.')) ?? 0;
     return amount * _fromCurrency['rate'] / _toCurrency['rate'];
   }
 
-  String _formatValue(dynamic val) {
-    double value;
-    if (val is String) {
-      value = double.tryParse(val.replaceAll('.', '').replaceAll(',', '.')) ?? 0;
-    } else {
-      value = (val as num).toDouble();
-    }
-    
+  String _formatValue(double value) {
     final format = NumberFormat.currency(
       locale: 'id_ID',
       symbol: '',
       decimalDigits: value < 1 && value > 0 ? (value < 0.0001 ? 6 : 4) : 0,
     );
-    return format.format(value);
+    return format.format(value).trim();
   }
 
   @override
@@ -103,9 +115,10 @@ class _CurrencyConverterPageState extends ConsumerState<CurrencyConverterPage> {
     final theme = Theme.of(context);
     final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
         (ref.watch(themeProvider) == ThemeMode.system && theme.brightness == Brightness.dark);
+    final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
 
     return Scaffold(
-      backgroundColor: isDarkMode ? const Color(0xFF0F172A) : const Color(0xFFF0F9FF),
+      backgroundColor: isDarkMode ? AppColors.backgroundDark : const Color(0xFFF8FAF9),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -113,62 +126,80 @@ class _CurrencyConverterPageState extends ConsumerState<CurrencyConverterPage> {
         leading: IconButton(
           onPressed: () => Navigator.pop(context),
           icon: Icon(Icons.arrow_back_ios_new_rounded,
-              color: isDarkMode ? Colors.white : AppColors.primaryDark, size: 18),
+              color: contentColor, size: 20),
         ),
         title: Text(
-          'Valas',
+          'Konverter Valas',
           style: GoogleFonts.comicNeue(
             fontWeight: FontWeight.bold,
-            fontSize: 20,
-            color: isDarkMode ? Colors.white : AppColors.primaryDark,
+            fontSize: 16,
+            color: contentColor,
           ),
         ),
+        actions: [
+          IconButton(
+            onPressed: _fetchRates,
+            icon: Icon(Icons.refresh_rounded, color: AppColors.primary, size: 20),
+          ),
+        ],
       ),
       body: Column(
         children: [
+          if (_isLoading)
+            const LinearProgressIndicator(
+              backgroundColor: Colors.transparent,
+              valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+              minHeight: 2,
+            ),
           Expanded(
-            child: SafeArea(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildReferenceLabel('Jumlah', isDarkMode),
-                    const SizedBox(height: 6),
-                    _buildReferenceInput(context, _fromCurrency, _formatValue(_amountStr), true, isDarkMode),
-                    
-                    const SizedBox(height: 12),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildReferenceLabel('DARI', isDarkMode),
+                  const SizedBox(height: 6),
+                  _buildCurrencyCard(_fromCurrency, _amountStr, true, isDarkMode),
+                  
+                  const SizedBox(height: 8),
+                  Center(
+                    child: IconButton.filledTonal(
+                      onPressed: _swapCurrencies, 
+                      icon: const Icon(Icons.swap_vert_rounded, color: AppColors.primary, size: 18),
+                      style: IconButton.styleFrom(
+                        backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                        padding: const EdgeInsets.all(6),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+
+                  _buildReferenceLabel('KE', isDarkMode),
+                  const SizedBox(height: 6),
+                  _buildCurrencyCard(_toCurrency, _formatValue(_convertedAmount), false, isDarkMode),
+
+                  if (_lastUpdated != null) ...[
+                    const SizedBox(height: 16),
                     Center(
-                      child: InkWell(
-                        onTap: _swapCurrencies,
-                        borderRadius: BorderRadius.circular(50),
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF8DE969),
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(color: Colors.green.withValues(alpha: 0.15), blurRadius: 12, offset: const Offset(0, 4))
-                            ],
-                          ),
-                          child: const Icon(Icons.swap_vert_rounded, color: Colors.white, size: 20),
+                      child: Text(
+                        'Pembaruan terakhir: ${DateFormat('HH:mm').format(_lastUpdated!)}',
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: contentColor.withValues(alpha: 0.3),
+                          fontStyle: FontStyle.italic,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 12),
-
-                    _buildReferenceLabel('Hasil Konversi', isDarkMode),
-                    const SizedBox(height: 6),
-                    _buildReferenceInput(context, _toCurrency, _formatValue(_convertedAmount), false, isDarkMode),
                   ],
-                ),
+                ],
               ),
             ),
           ),
 
-          // Permanently Visible Numpad
-          Container(
-            height: (280 + MediaQuery.of(context).padding.bottom),
+          // Custom Numpad
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            height: _isNumpadVisible ? (320 + MediaQuery.of(context).padding.bottom) : 0,
             child: SingleChildScrollView(
               physics: const NeverScrollableScrollPhysics(),
               child: _buildNumpad(isDarkMode),
@@ -179,97 +210,108 @@ class _CurrencyConverterPageState extends ConsumerState<CurrencyConverterPage> {
     );
   }
 
-  Widget _buildBlinkingCursor(bool isDarkMode) {
-    return _BlinkingCursor(isDarkMode: isDarkMode);
-  }
-
   Widget _buildReferenceLabel(String label, bool isDarkMode) {
+    final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
     return Text(
       label,
       style: GoogleFonts.comicNeue(
-        fontSize: 14,
+        fontSize: 10,
         fontWeight: FontWeight.bold,
-        color: isDarkMode ? Colors.white70 : Colors.black87,
+        letterSpacing: 1.5,
+        color: contentColor.withValues(alpha: 0.4),
       ),
     );
   }
 
-  Widget _buildReferenceInput(BuildContext context, Map<String, dynamic> currency, String val, bool isFrom, bool isDarkMode) {
+  Widget _buildCurrencyCard(Map<String, dynamic> currency, String val, bool isFrom, bool isDarkMode) {
+    final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
     final isActive = isFrom && _isNumpadVisible;
+
     return InkWell(
       onTap: isFrom 
         ? () => setState(() => _isNumpadVisible = !_isNumpadVisible)
         : () => _showCurrencyPicker(context, isFrom),
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(20),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.white,
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isActive 
-              ? (isDarkMode ? Colors.cyanAccent : Colors.blue) 
-              : (isDarkMode ? Colors.white10 : Colors.grey.shade300),
+              ? AppColors.primary 
+              : (isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05)),
             width: 1.2,
           ),
         ),
         child: Row(
           children: [
-            // Amount on the left with Blinking Cursor (Beam)
             Expanded(
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    '${currency['symbol']} ',
-                    style: GoogleFonts.comicNeue(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: isDarkMode ? Colors.white : Colors.black87,
-                    ),
-                  ),
-                  if (isFrom && val == '0') _buildBlinkingCursor(isDarkMode),
-                  Flexible(
-                    child: FittedBox(
-                      alignment: Alignment.centerLeft,
-                      fit: BoxFit.scaleDown,
-                      child: Text(
-                        val,
-                        style: GoogleFonts.comicNeue(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: val == '0' || val == '0,00'
-                            ? (isDarkMode ? Colors.white24 : Colors.grey.shade300)
-                            : (isDarkMode ? Colors.white : Colors.black87),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          currency['symbol'],
+                          style: GoogleFonts.comicNeue(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primary,
+                          ),
                         ),
-                      ),
+                        const SizedBox(width: 6),
+                        Text(
+                          val,
+                          style: GoogleFonts.comicNeue(
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold,
+                            color: contentColor,
+                          ),
+                        ),
+                        if (isActive) _buildBlinkingCursor(isDarkMode),
+                      ],
                     ),
                   ),
-                  if (isFrom && val != '0') _buildBlinkingCursor(isDarkMode),
+                  Text(
+                    currency['name'],
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: contentColor.withValues(alpha: 0.3),
+                    ),
+                  ),
                 ],
               ),
             ),
             const SizedBox(width: 12),
-            // Currency Picker on the right
             InkWell(
               onTap: () => _showCurrencyPicker(context, isFrom),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(currency['flag'], style: const TextStyle(fontSize: 20)),
-                  const SizedBox(width: 6),
-                  Text(
-                    currency['code'],
-                    style: GoogleFonts.comicNeue(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: isDarkMode ? Colors.white : Colors.black87,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(currency['flag'], style: const TextStyle(fontSize: 16)),
+                    const SizedBox(width: 6),
+                    Text(
+                      currency['code'],
+                      style: GoogleFonts.comicNeue(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primary,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 2),
-                  Icon(Icons.keyboard_arrow_down_rounded, color: isDarkMode ? Colors.white38 : Colors.grey, size: 18),
-                ],
+                    Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.primary, size: 16),
+                  ],
+                ),
               ),
             ),
           ],
@@ -278,82 +320,31 @@ class _CurrencyConverterPageState extends ConsumerState<CurrencyConverterPage> {
     );
   }
 
-
-
-  Widget _buildSwapDivider(bool isDarkMode) {
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Divider(color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100, height: 1),
-        ),
-        GestureDetector(
-          onTap: _swapCurrencies,
-          child: Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: isDarkMode ? const Color(0xFF1A1A1A) : Colors.white,
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100,
-                width: 1.5,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.1),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                )
-              ],
-            ),
-            child: Icon(Icons.swap_vert_rounded, 
-              color: isDarkMode ? Colors.cyanAccent : Colors.blue.shade600, size: 20),
-          ),
-        ),
-      ],
-    );
+  Widget _buildBlinkingCursor(bool isDarkMode) {
+    return _BlinkingCursor(isDarkMode: isDarkMode);
   }
 
   Widget _buildNumpad(bool isDarkMode) {
-    return GestureDetector(
-      onVerticalDragUpdate: (details) {
-        if (details.delta.dy > 10) {
-          setState(() => _isNumpadVisible = false);
-        }
-      },
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
-        decoration: BoxDecoration(
-          color: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: isDarkMode ? 0.2 : 0.03),
-              blurRadius: 20,
-              offset: const Offset(0, -5),
-            )
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Minimalist Handle
-            Container(
-              width: 32,
-              height: 3,
-              margin: const EdgeInsets.only(bottom: 12),
-              decoration: BoxDecoration(
-                color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            _buildNumpadRow(['1', '2', '3'], isDarkMode),
-            _buildNumpadRow(['4', '5', '6'], isDarkMode),
-            _buildNumpadRow(['7', '8', '9'], isDarkMode),
-            _buildNumpadRow(['.', '0', 'back'], isDarkMode),
-          ],
-        ),
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
+      decoration: BoxDecoration(
+        color: isDarkMode ? const Color(0xFF121212) : Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDarkMode ? 0.3 : 0.05),
+            blurRadius: 20,
+            offset: const Offset(0, -5),
+          )
+        ],
+      ),
+      child: Column(
+        children: [
+          _buildNumpadRow(['1', '2', '3'], isDarkMode),
+          _buildNumpadRow(['4', '5', '6'], isDarkMode),
+          _buildNumpadRow(['7', '8', '9'], isDarkMode),
+          _buildNumpadRow(['.', '0', 'back'], isDarkMode),
+        ],
       ),
     );
   }
@@ -366,32 +357,37 @@ class _CurrencyConverterPageState extends ConsumerState<CurrencyConverterPage> {
 
   Widget _numpadBtn(String val, bool isDarkMode, {bool isIcon = false}) {
     return Expanded(
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            if (val == 'back') {
-              _onBackspace();
-            } else {
-              _onNumberPress(val);
-            }
-          },
-          borderRadius: BorderRadius.circular(16),
-          splashColor: Colors.blue.withValues(alpha: 0.1),
-          highlightColor: Colors.blue.withValues(alpha: 0.05),
-          child: Container(
-            height: 60,
-            alignment: Alignment.center,
-            child: isIcon 
-              ? Icon(Icons.backspace_outlined, color: isDarkMode ? Colors.white54 : Colors.grey.shade400, size: 20)
-              : Text(
-                  val,
-                  style: GoogleFonts.comicNeue(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w600,
-                    color: isDarkMode ? Colors.white : Colors.black87,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () {
+              if (val == 'back') {
+                _onBackspace();
+              } else {
+                _onNumberPress(val);
+              }
+            },
+            borderRadius: BorderRadius.circular(16),
+            child: Container(
+              height: 54,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                color: isDarkMode ? Colors.white.withValues(alpha: 0.03) : Colors.black.withValues(alpha: 0.01),
+              ),
+              child: isIcon 
+                ? Icon(Icons.backspace_outlined, color: AppColors.primary, size: 20)
+                : Text(
+                    val,
+                    style: GoogleFonts.comicNeue(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: isDarkMode ? Colors.white : AppColors.primaryDark,
+                    ),
                   ),
-                ),
+            ),
           ),
         ),
       ),
@@ -410,121 +406,39 @@ class _CurrencyConverterPageState extends ConsumerState<CurrencyConverterPage> {
         decoration: BoxDecoration(
           color: isDarkMode ? const Color(0xFF0F172A) : Colors.white,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-          boxShadow: [
-            BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 20)
-          ],
         ),
         child: Column(
           children: [
             const SizedBox(height: 12),
-            // Premium Handle
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
+            Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(2))),
             const SizedBox(height: 20),
-            Text(
-              'Pilih Mata Uang',
-              style: GoogleFonts.comicNeue(
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-                color: isDarkMode ? Colors.white : Colors.black87,
-              ),
-            ),
+            Text('Pilih Mata Uang', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 18, color: isDarkMode ? Colors.white : Colors.black87)),
             const SizedBox(height: 20),
             Expanded(
-              child: GridView.builder(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: 2.2,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                ),
+              child: ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
                 itemCount: _currencies.length,
                 itemBuilder: (context, index) {
                   final curr = _currencies[index];
                   final isSelected = (isFrom ? _fromCurrency : _toCurrency) == curr;
-                    
-                    return InkWell(
-                      onTap: () {
-                        setState(() {
-                          if (isFrom) {
-                            _fromCurrency = curr;
-                          } else {
-                            _toCurrency = curr;
-                          }
-                        });
-                        Navigator.pop(context);
-                      },
-                      borderRadius: BorderRadius.circular(16),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: isSelected 
-                            ? (isDarkMode ? Colors.cyanAccent.withValues(alpha: 0.1) : Colors.blue.shade50)
-                            : (isDarkMode ? Colors.white.withValues(alpha: 0.03) : Colors.grey.shade50),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: isSelected 
-                              ? (isDarkMode ? Colors.cyanAccent : Colors.blue)
-                              : Colors.transparent,
-                            width: 1.5,
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(6),
-                              decoration: BoxDecoration(
-                                color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.white,
-                                shape: BoxShape.circle,
-                              ),
-                              child: Text(curr['flag'], style: const TextStyle(fontSize: 18)),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    curr['code'],
-                                    style: GoogleFonts.comicNeue(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 15,
-                                      color: isDarkMode ? Colors.white : Colors.black87,
-                                    ),
-                                  ),
-                                  Text(
-                                    curr['name'],
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: GoogleFonts.comicNeue(
-                                      fontSize: 10,
-                                      color: isDarkMode ? Colors.white38 : Colors.grey.shade500,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            if (isSelected)
-                              Icon(Icons.check_circle_rounded, color: isDarkMode ? Colors.cyanAccent : Colors.blue, size: 16),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
+                  return ListTile(
+                    leading: Text(curr['flag'], style: const TextStyle(fontSize: 24)),
+                    title: Text(curr['code'], style: TextStyle(fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : Colors.black87)),
+                    subtitle: Text(curr['name'], style: TextStyle(fontSize: 12, color: isDarkMode ? Colors.white54 : Colors.black54)),
+                    trailing: isSelected ? const Icon(Icons.check_circle_rounded, color: AppColors.primary) : null,
+                    onTap: () {
+                      setState(() {
+                        if (isFrom) _fromCurrency = curr; else _toCurrency = curr;
+                      });
+                      Navigator.pop(context);
+                    },
+                  );
+                },
               ),
-            ],
-          ),
+            ),
+          ],
         ),
+      ),
     );
   }
 }
@@ -558,9 +472,9 @@ class _BlinkingCursorState extends State<_BlinkingCursor> with SingleTickerProvi
       opacity: _controller,
       child: Container(
         width: 2,
-        height: 24,
+        height: 22,
         margin: const EdgeInsets.only(left: 4),
-        color: widget.isDarkMode ? Colors.cyanAccent : Colors.blue,
+        color: AppColors.primary,
       ),
     );
   }

@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -23,18 +24,20 @@ class _CompoundInterestPageState extends ConsumerState<CompoundInterestPage> {
   double _totalContributions = 0;
   double _totalInterest = 0;
 
-  @override
-  void initState() {
-    super.initState();
-  }
-
   void _calculate() {
     final double p = double.tryParse(_initialAmountController.text.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
     final double pmt = double.tryParse(_monthlyContributionController.text.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
     final double r = (double.tryParse(_interestRateController.text) ?? 0) / 100 / 12;
     final int t = (int.tryParse(_yearsController.text) ?? 0) * 12;
 
-    if (t <= 0) return;
+    if (t <= 0) {
+      setState(() {
+        _finalBalance = p;
+        _totalContributions = p;
+        _totalInterest = 0;
+      });
+      return;
+    }
 
     double balance = p;
     double totalContributed = p;
@@ -46,7 +49,7 @@ class _CompoundInterestPageState extends ConsumerState<CompoundInterestPage> {
     setState(() {
       _finalBalance = balance;
       _totalContributions = totalContributed;
-      _totalInterest = balance - totalContributed;
+      _totalInterest = max(0, balance - totalContributed);
     });
   }
 
@@ -63,182 +66,103 @@ class _CompoundInterestPageState extends ConsumerState<CompoundInterestPage> {
     final theme = Theme.of(context);
     final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
         (ref.watch(themeProvider) == ThemeMode.system && theme.brightness == Brightness.dark);
+    final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: isDarkMode ? AppColors.backgroundDark : const Color(0xFFF8FAF9),
       appBar: AppBar(
-        backgroundColor: Colors.black,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
           onPressed: () => Navigator.pop(context),
-          icon: const Icon(Icons.arrow_back_ios_new_rounded,
-              color: AppColors.primary, size: 18),
+          icon: Icon(Icons.arrow_back_ios_new_rounded,
+              color: contentColor, size: 20),
         ),
         title: Text(
           'Simulasi Bunga Majemuk',
           style: GoogleFonts.comicNeue(
             fontWeight: FontWeight.bold,
             fontSize: 16,
-            color: AppColors.primary,
+            color: contentColor,
           ),
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Result Card
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: const Color(0xFF0A0A0A),
-                borderRadius: BorderRadius.circular(28),
-                border: Border.all(
-                  color: AppColors.primary.withValues(alpha: 0.3),
-                  width: 1.5,
-                ),
-              ),
-              child: Column(
-                children: [
-                  Text(
-                    'ESTIMASI SALDO AKHIR',
-                    style: GoogleFonts.comicNeue(
-                      color: AppColors.primary.withValues(alpha: 0.5),
-                      fontSize: 10,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 1.5,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(
-                      _formatRupiah(_finalBalance),
-                      style: GoogleFonts.comicNeue(
-                        color: AppColors.primary,
-                        fontSize: 36,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Divider(height: 1, thickness: 1, color: AppColors.primary.withValues(alpha: 0.1)),
-                  const SizedBox(height: 20),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _resultMiniItem(
-                          'TOTAL MODAL',
-                          _formatRupiah(_totalContributions),
-                        ),
-                      ),
-                      Expanded(
-                        child: _resultMiniItem(
-                          'TOTAL BUNGA',
-                          _formatRupiah(_totalInterest),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
+            _buildInfoCard(),
             const SizedBox(height: 24),
 
-            // Inputs
-            _buildInputCard(),
+            _buildAlignedInput(
+              'MODAL AWAL', 
+              _initialAmountController, 
+              (_) => _calculate(), 
+              Icons.account_balance_rounded, 
+              isDarkMode,
+              isCurrency: true
+            ),
+            const SizedBox(height: 20),
+            
+            _buildAlignedInput(
+              'TABUNGAN BULANAN', 
+              _monthlyContributionController, 
+              (_) => _calculate(), 
+              Icons.add_circle_outline_rounded, 
+              isDarkMode,
+              isCurrency: true
+            ),
+            const SizedBox(height: 20),
+
+            Row(
+              children: [
+                Expanded(
+                  child: _buildAlignedInput(
+                    'BUNGA (%)', 
+                    _interestRateController, 
+                    (_) => _calculate(), 
+                    Icons.percent_rounded, 
+                    isDarkMode
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _buildAlignedInput(
+                    'DURASI (THN)', 
+                    _yearsController, 
+                    (_) => _calculate(), 
+                    Icons.calendar_today_rounded, 
+                    isDarkMode
+                  ),
+                ),
+              ],
+            ),
+            
+            const SizedBox(height: 32),
+            _buildResultCard(isDarkMode),
           ],
         ),
       ),
     );
   }
 
-  Widget _resultMiniItem(String label, String value) {
-    return Column(
-      children: [
-        Text(
-          label,
-          style: GoogleFonts.comicNeue(
-            color: AppColors.primary.withValues(alpha: 0.4),
-            fontSize: 9,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: GoogleFonts.comicNeue(
-            color: AppColors.primaryLight,
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildInputCard() {
+  Widget _buildInfoCard() {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFF0A0A0A),
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(
-          color: AppColors.primary.withValues(alpha: 0.1),
-          width: 1,
-        ),
+        color: AppColors.primary.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
       ),
-      child: Column(
+      child: const Row(
         children: [
-          _buildTextField(
-            controller: _initialAmountController,
-            label: 'Modal Awal',
-            hint: '0',
-            icon: Icons.account_balance_rounded,
-            isCurrency: true,
-          ),
-          const SizedBox(height: 20),
-          _buildTextField(
-            controller: _monthlyContributionController,
-            label: 'Tabungan Bulanan',
-            hint: '0',
-            icon: Icons.add_circle_outline_rounded,
-            isCurrency: true,
-          ),
-          const SizedBox(height: 20),
-          _buildTextField(
-            controller: _interestRateController,
-            label: 'Bunga (%)',
-            hint: '0',
-            icon: Icons.percent_rounded,
-          ),
-          const SizedBox(height: 20),
-          _buildTextField(
-            controller: _yearsController,
-            label: 'Durasi (Tahun)',
-            hint: '0',
-            icon: Icons.calendar_today_rounded,
-          ),
-          const SizedBox(height: 32),
-          SizedBox(
-            width: double.infinity,
-            height: 60,
-            child: ElevatedButton(
-              onPressed: _calculate,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.black,
-                elevation: 0,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-              ),
-              child: Text(
-                'Hitung Sekarang',
-                style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
+          Icon(Icons.info_outline_rounded, color: AppColors.primary, size: 18),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'Simulasi ini membantu Anda memproyeksikan pertumbuhan investasi Anda seiring waktu.',
+              style: TextStyle(fontSize: 10, color: AppColors.primary, fontWeight: FontWeight.w500),
             ),
           ),
         ],
@@ -246,88 +170,115 @@ class _CompoundInterestPageState extends ConsumerState<CompoundInterestPage> {
     );
   }
 
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    required String hint,
-    required IconData icon,
-    bool isCurrency = false,
-  }) {
-    return TextField(
-      controller: controller,
-      keyboardType: TextInputType.number,
-      style: GoogleFonts.comicNeue(
-        fontWeight: FontWeight.bold,
-        color: AppColors.primaryLight,
-      ),
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: GoogleFonts.comicNeue(
-          fontSize: 14,
-          fontWeight: FontWeight.bold,
-          color: AppColors.primary.withValues(alpha: 0.3),
+  Widget _buildAlignedInput(
+    String label, 
+    TextEditingController controller, 
+    Function(String) onChanged, 
+    IconData icon, 
+    bool isDarkMode,
+    {bool isCurrency = false}
+  ) {
+    final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 8),
+          child: Text(label, style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: contentColor.withValues(alpha: 0.5), letterSpacing: 1)),
         ),
-        floatingLabelStyle: GoogleFonts.comicNeue(
-          color: AppColors.primary,
-          fontWeight: FontWeight.bold,
-        ),
-        prefixIcon: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, size: 20, color: AppColors.primary),
-              if (isCurrency) ...[
-                const SizedBox(width: 8),
-                Text(
-                  'Rp',
-                  style: GoogleFonts.comicNeue(
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
-                  ),
-                ),
-              ],
-            ],
+        TextFormField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          inputFormatters: isCurrency ? [_RibuanFormatter()] : [],
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: contentColor),
+          onChanged: onChanged,
+          decoration: InputDecoration(
+            hintText: '0',
+            hintStyle: TextStyle(
+                fontSize: 16,
+                color: isDarkMode ? Colors.white10 : Colors.black38),
+            prefixIcon: Container(
+              padding: const EdgeInsets.only(left: 20, right: 8),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(icon, color: AppColors.primary, size: 20),
+                  if (isCurrency) ...[
+                    const SizedBox(width: 8),
+                    const Text('Rp', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 16)),
+                  ],
+                ],
+              ),
+            ),
+            filled: true,
+            fillColor: isDarkMode ? Colors.white.withValues(alpha: 0.05) : AppColors.background,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           ),
         ),
-        hintText: hint,
-        hintStyle: GoogleFonts.comicNeue(
-          fontSize: 14,
-          color: AppColors.primary.withValues(alpha: 0.1),
-        ),
-        filled: true,
-        fillColor: const Color(0xFF121212),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide.none,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: AppColors.primary.withValues(alpha: 0.05)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppColors.primary, width: 1),
-        ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+      ],
+    );
+  }
+
+  Widget _buildResultCard(bool isDarkMode) {
+    final hexBg = isDarkMode ? AppColors.surfaceDark : Colors.white;
+    final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
+    
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: hexBg,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: isDarkMode ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: isDarkMode ? 0.3 : 0.05), blurRadius: 15, offset: const Offset(0, 8))],
       ),
-      onChanged: (value) {
-        if (isCurrency && value.isNotEmpty) {
-          final clean = value.replaceAll(RegExp(r'[^0-9]'), '');
-          if (clean.isNotEmpty) {
-            final formatted = NumberFormat.currency(
-              locale: 'id_ID',
-              symbol: '',
-              decimalDigits: 0,
-            ).format(double.parse(clean)).trim();
-            
-            controller.value = TextEditingValue(
-              text: formatted,
-              selection: TextSelection.collapsed(offset: formatted.length),
-            );
-          }
-        }
-      },
+      child: Column(
+        children: [
+          Text('ESTIMASI SALDO AKHIR', style: TextStyle(color: contentColor.withValues(alpha: 0.4), fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 2)),
+          const SizedBox(height: 12),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              _formatRupiah(_finalBalance), 
+              style: GoogleFonts.comicNeue(fontSize: 32, fontWeight: FontWeight.bold, color: _finalBalance > 0 ? AppColors.primary : contentColor.withValues(alpha: 0.1))
+            ),
+          ),
+          const SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildMiniBreakdown('MODAL', _formatRupiah(_totalContributions), isDarkMode),
+              _buildMiniBreakdown('BUNGA', _formatRupiah(_totalInterest), isDarkMode),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMiniBreakdown(String label, String value, bool isDarkMode) {
+    final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
+    return Column(
+      children: [
+        Text(label, style: TextStyle(color: contentColor.withValues(alpha: 0.4), fontSize: 9, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 4),
+        Text(value, style: TextStyle(color: contentColor, fontSize: 13, fontWeight: FontWeight.bold)),
+      ],
+    );
+  }
+}
+
+class _RibuanFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
+    if (newValue.text.isEmpty) return newValue;
+    String digits = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
+    if (digits.isEmpty) return const TextEditingValue(text: '');
+    final formatted = digits.replaceAllMapped(RegExp(r'(\d)(?=(\d{3})+(?!\d))'), (match) => '${match[1]}.');
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
     );
   }
 }

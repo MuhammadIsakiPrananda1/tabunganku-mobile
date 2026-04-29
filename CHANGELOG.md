@@ -1,188 +1,144 @@
 # 📝 Catatan Perubahan TabunganKu
 
-Seluruh evolusi, fitur, dan perbaikan aplikasi **TabunganKu** terdokumentasi secara lengkap dan detail di sini. Kami terus berinovasi untuk membantu Anda mengelola masa depan finansial yang lebih cerah.
+Seluruh evolusi, fitur, dan perbaikan aplikasi **TabunganKu** terdokumentasi secara lengkap di sini. Kami terus berinovasi untuk membantu Anda mengelola masa depan finansial yang lebih cerah dengan antarmuka yang modern dan pengalaman pengguna yang mulus.
 
 ---
 
-## 💎 [1.4.9] — 24 April 2026: The Security, Transparency & Services Modernization
+## 💎 [1.4.9] — 30 April 2026: Security, Transparency & UI Refresh
 
-Rilis ini menghadirkan perombakan total pada sistem keamanan, transparansi keluarga, serta modernisasi besar-besaran pada layanan tambahan (Other Services) seperti Sedekah Subuh dan Tabungan Emas.
+Rilis ini menghadirkan perombakan pada sistem keamanan, transparansi keluarga, serta penyegaran visual besar-besaran untuk menyelaraskan seluruh fitur keuangan dengan bahasa desain "Premium Zakat" yang bersih dan elegan.
 
-### 🚀 Tambah Fitur (New Features)
-- **Financial Health Check (Cek Kesehatan Finansial)** — Fitur analisis kesehatan finansial instan yang terintegrasi di menu "Lainnya" untuk membantu pengguna memahami kondisi keuangan mereka secara mendalam 📊.
-- **Real-time Gold Price Simulation** — Simulasi nilai investasi emas secara real-time untuk memberikan gambaran akurat pada fitur Tabungan Emas berdasarkan harga pasar terkini.
-- **Shared Family Transparency (Real-Sync)** — Implementasi sinkronisasi Firestore real-time. Kini setiap anggota keluarga bisa melihat seluruh riwayat transaksi grup secara instan 👨‍👩‍👧‍👦.
-- **Joint Account Management** — Akses penuh bagi seluruh anggota grup untuk mengedit atau menghapus catatan dalam buku kas keluarga demi tanggung jawab bersama.
-- **Security Modernization** — Alur startup baru yang lebih aman (`Splash -> Lock Screen -> Dashboard`) dan implementasi *Security Overlay* untuk melindungi data saat aplikasi di background 🛡️.
-- **Haptic Interaction Feedback** — Penambahan getaran halus (Haptic Feedback) pada interaksi navigasi penting untuk pengalaman yang lebih premium.
+### 🎨 Pembaruan Antarmuka (UI/UX Refresh)
+- **Unified Finance Aesthetics** — Redesain total halaman **Challenge Menabung** dan **Simulasi Tabungan** menggunakan gaya "Zakat" (AppBar transparan, kartu statistik premium, dan tipografi Comic Neue yang bersih) 🎨.
+- **Smart Savings Centralization** — Pemindahan kartu **Tunas Tabungan (Savings Pet)** dari tab Home ke tab Keuangan untuk sentralisasi fitur gamifikasi finansial 🐾.
+- **Enhanced Empty States** — Bagian "Distribusi Pengeluaran" dan "Rencana Nabung Harian" kini selalu terlihat dengan *placeholder* UI yang elegan saat data kosong.
+- **Filled Input System** — Standarisasi seluruh *form input* dengan gaya *filled background* dan *outline border* yang lebih taktil.
+- **Modernized "Sedekah Subuh" UI** — Refactoring form input menjadi lebih kompak dan profesional 🔴.
 
-### 🔄 Perombakan & Peningkatan (Revamped & Improvements)
-- **Modernized "Sedekah Subuh" UI** — Refactoring total input form Sedekah Subuh menjadi lebih kompak, profesional, dan menggunakan aksen merah (expense-themed) yang konsisten 🔴.
-- **Ultra-Legible UI Upgrade** — Peningkatan keterbacaan signifikan dengan avatar anggota yang lebih besar (72px) dan badge pembuat transaksi yang lebih tegas agar mudah dibedakan.
-- **Smart Currency Formatting** — Implementasi pemisah ribuan (thousand separators) otomatis pada seluruh form input keuangan (Emas, Sedekah, Transaksi) untuk akurasi input maksimal.
-- **Accurate Member Contribution** — Sistem pelacakan saldo individu yang kini lebih akurat dan tersinkronisasi sempurna di semua perangkat anggota keluarga.
-- **Hybrid Stream Logic** — Optimalisasi stream data yang menggabungkan penyimpanan lokal dan cloud secara otomatis tanpa jeda render.
-- **RenderFlex Error Fix** — Perbaikan permanen pada error layout "Pixel Overflow" di daftar anggota keluarga dan berbagai form input lainnya.
+### 🚀 Fitur Baru & Keamanan (New Features & Security)
+- **Financial Health Check** — Analisis kesehatan finansial instan yang terintegrasi di menu "Lainnya" 📊.
+- **Real-time Gold Price Simulation** — Simulasi nilai investasi emas berdasarkan harga pasar terkini untuk fitur Tabungan Emas.
+- **Shared Family Transparency (Real-Sync)** — Sinkronisasi Firestore real-time yang memungkinkan seluruh anggota keluarga melihat riwayat transaksi grup secara instan 👨‍👩‍👧‍👦.
+- **Security Modernization** — Implementasi *Security Overlay* untuk melindungi data saat aplikasi berada di background 🛡️.
 
-### 🗑️ Hapus Fitur (Removed Features)
-- **Individual Ownership Lock** — Menghapus pembatasan kelola transaksi demi transparansi penuh antar anggota keluarga.
-- **Floating "Kode Disalin" SnackBar** — Digantikan dengan respon getaran (haptic) yang lebih elegan dan bersih dari gangguan visual.
-
----
-
-## 🚀 [1.4.7] — 15 April 2026: Layanan Tanpa Batas & Visual Sempurna
-
-Pembaruan v1.4.7 adalah rilis pemeliharaan dan polesan visual yang memastikan aplikasi berjalan tanpa hambatan teknis. Fokus utama adalah pada perbaikan stabilitas rendering dan sinkronisasi versi sistem.
-
-### 🛠️ Perbaikan Layout Kritis (Critical UI Fixes)
-- **Zero-Crash Dashboard** — Memperbaiki pengecualian *"RenderBox was not laid out"* pada dashboard alokasi, memastikan transisi data yang mulus tanpa crash mendadak 🛡️.
-- **Donut Chart Optimization** — Menghilangkan tumpang tindih label pada grafik donat. Kini persentase diletakkan lebih jauh ke luar (outside labels) untuk keterbacaan yang jauh lebih baik 📊.
-- **Badge Grid Fix** — Memperbaiki masalah *overflow* sistem pada koleksi lencana (Badge Collection). Kini tampilan lencana tertata rapi dan responsif di semua ukuran layar smartphone.
-
-### ⚡ Stabilitas & Performa
-- **Constraint Polishing** — Optimalisasi batasan lebar (constraints) pada berbagai widget utama untuk mencegah kesalahan render (Pixel Overflow) di masa mendatang ⚡.
-- **System Integrity** — Penyelarasan versi build di seluruh file konfigurasi internal untuk konsistensi sistem antara backend dan internal constants.
-- **Production Infrastructure** — Integrasi build produksi yang lebih stabil melalui sistem CI/CD GitHub Actions.
+### 🛠️ Perbaikan & Stabilitas (Stability)
+- **Calculator Overflow Fix** — Resolusi permanen pada error *RenderFlex overflow* di lembar kalkulator melalui implementasi `SingleChildScrollView` 📏.
+- **Typo & Syntax Polish** — Pembersihan kode dari kesalahan sintaksis (*extra braces*) dan standarisasi font di seluruh modul simulasi.
+- **RenderFlex Error Fix** — Perbaikan pada error layout di daftar anggota keluarga dan form input lainnya.
+- **High-Quality Documentation** — Penulisan ulang README dengan detail fitur akurat dan sistem lencana "Hall of Fame" yang interaktif 📚.
 
 ---
 
-## 💎 [1.4.6] — 14–15 April 2026: Stability, Performance & Smart Income
+## 🚀 [1.4.7] — 15 April 2026: Visual Sempurna & Stabilitas
 
-Penyempurnaan performa, stabilitas sistem, dan penambahan fitur keuangan cerdas untuk pengalaman yang lebih mulus dan lengkap.
+Fokus pada perbaikan stabilitas rendering dan sinkronisasi versi sistem.
 
-### 🏦 Fitur Baru: Bunga Tabungan Multi-Bank (CEPAT)
-- **Multi-Bank Interest Quick-Fill** — Fitur pengisian cepat bunga tabungan dari berbagai bank langsung dari form **Tambah Pemasukan** 💚.
-  - Mendukung **10 pilihan bank** sekaligus dalam satu dropdown terintegrasi:
-    - 🟢 **SeaBank (Premium)** — 7,4% p.a. untuk saldo ≥ Rp 1 juta (dikreditkan harian)
-    - 🔵 **SeaBank (Standar)** — 2,5% p.a. tanpa saldo minimum (bebas tarik)
-    - ⚡ **Bank Neo Commerce** — Bunga cair harian
-    - 🟠 **Bank Jago** — Bunga cair bulanan
-    - 💧 **Blu by BCA Digital** — Bunga cair bulanan
-    - 🔷 **Bank BRI, BCA, Mandiri, BNI** — Bunga tabungan bulanan konvensional
-    - ⚫ **Bank Lainnya** — Untuk bank digital/konvensional lainnya
-  - Nama transaksi terisi otomatis cerdas: *"Bunga [Nama Bank] [Bulan] [Tahun]"*.
-  - Kategori otomatis terpilih: **Bunga Tabungan**.
-  - Info card dinamis menampilkan penjelasan rate sesuai bank yang dipilih.
-- **Kategori Pemasukan Baru: Bunga Tabungan** — Kategori khusus untuk mencatat pendapatan bunga dari rekening tabungan 🏦.
-
-### 🛠️ Detail Perubahan Lainnya
-- **UI Architecture Fix** — Memperbaiki masalah clipping pada kartu saldo utama agar dekorasi tidak bocor keluar sudut 💎.
-- **UI Restoration & Perfection** — Mengembalikan ikon lonceng notifikasi dan merestorasi desain **Target Tabungan** ke versi PageView slider yang interaktif 🔔.
-- **Premium Style Matching** — Menyelaraskan seksi **Alokasi Keuangan** agar persis dengan desain premium (Comic Neue Italic & Teal Accent shades) sesuai referensi visual 🎨.
-- **Enhanced Data Visualization** — Optimalisasi **Pie Chart** dengan tampilan persentase di luar segmen untuk keterbacaan maksimal, informasi total di tengah grafik, dan ketebalan proporsional (standard thickness) 📊.
-- **Strict Permission Security** — Implementasi sistem perizinan ketat dengan dialog edukasi premium (*BackdropBlur*) sebelum akses kamera/galeri untuk privasi maksimal 🛡️.
-- **High-Priority Notifications** — Upgrade sistem notifikasi ke mode **Heads-up (Banner)** dengan dukungan suara dan getaran sesuai preferensi sistem untuk peringatan yang lebih sigap 🔊.
-- **Permission & Privacy Optimization** — Menghapus permintaan izin "Alarm & Reminder" (Exact Alarm) yang redundan untuk privasi yang lebih baik 🛡️.
-- **System Stability Enhancement** — Perbaikan bug minor dan optimalisasi penggunaan memori untuk performa yang lebih gegas 🚀.
+- **Zero-Crash Dashboard** — Memperbaiki pengecualian *"RenderBox was not laid out"* pada dashboard alokasi 🛡️.
+- **Donut Chart Optimization** — Menghilangkan tumpang tindih label pada grafik donat untuk keterbacaan yang lebih baik 📊.
+- **Badge Grid Fix** — Perbaikan masalah *overflow* pada koleksi lencana agar tetap responsif di semua ukuran layar.
 
 ---
 
-## 💎 [1.4.5] — 11 April 2026: The Intelligence & Finalization
-Visi kami untuk asisten finansial yang cerdas dan premium kini telah lengkap.
+## 💎 [1.4.6] — 15 April 2026: Smart Income & Multi-Bank Interest
 
-### 🚀 Highlight Utama
-- **Intelligence Hub: Premium Scan AI** — Pengalaman scan struk futuristik dengan animasi Laser AI dan *Smart Auto-fill* merchant & nominal otomatis 📸.
-- **Spiritual Finance: Zakat & Infaq** — Kalkulator Zakat (Profesi, Maal, Fitrah) yang terhubung langsung dengan arus kas Anda ✨.
-- **Future Forecast: Estimasi Akhir Bulan** — Prediksi sisa saldo Anda di akhir bulan berdasarkan tren pengeluaran harian.
-- **Smart Allocation Planner** — Kalkulator alokasi pintar (50/30/20) otomatis setiap kali Anda mencatat pemasukan.
+Penyempurnaan performa dan penambahan fitur keuangan cerdas.
 
-### 📊 Detail & UX
-- **Subscription Monitor** — Pantau biaya rutin (Netflix, Spotify, tagihan) secara otomatis agar tidak ada "biaya siluman".
-- **Premium Data Export** — Generate laporan bulanan instan ke format PDF atau Text untuk dibagikan.
-- **Advanced Search & Filter** — Temukan transaksi history secepat kilat dengan filter kategori yang responsif 🔍.
-- **Quick Admin Buttons** — Pilihan biaya admin top-up (Bank, E-Wallet) dengan satu klik.
-
-### 🛠️ Under the Hood
-- **Theme Persistence fix** — Pilihan tema kini tidak akan pernah reset.
-- **Router Refinement** — Perbaikan error dependensi Riverpod dan stabilitas routing dashboard.
+- **Multi-Bank Interest Quick-Fill** — Fitur pengisian bunga tabungan otomatis dari 10+ bank (SeaBank, Neo, Jago, Blu, dll) 🏦.
+- **UI Restoration** — Mengembalikan desain **Target Tabungan** ke versi PageView slider yang interaktif 🔔.
+- **Strict Permission Security** — Sistem perizinan dengan dialog edukasi premium (*BackdropBlur*) sebelum akses kamera/galeri 🛡️.
 
 ---
 
-## 🎨 [1.4.4] — 9 April 2026: The Aesthetic Polish Era
-Penyempurnaan visual dan kenyamanan mata menjadi prioritas utama rilis ini.
+## 💎 [1.4.5] — 11 April 2026: The Intelligence Hub
 
-- **Cinematic Dark Mode** — Kontras warna yang dikalibrasi ulang untuk kenyamanan mata maksimal di malam hari 🌌.
-- **Typography Masterclass** — Penyesuaian *letter-spacing* dan hierarki teks untuk keterbacaan instan.
-- **Challenge Page Overhaul** — Layout tantangan menabung yang lebih rapi, proporsional, dan memotivasi 🏆.
+Visi asisten finansial yang cerdas kini telah lengkap.
 
----
-
-## 🎯 [1.4.3] — 7 April 2026: The OCR Precision Era
-Kecerdasan buatan kini jauh lebih peka terhadap detail keuangan terkecil.
-
-- **Enhanced AI Merchant Detection** — Deteksi struk provider besar (BCA, DANA, OVO) dengan akurasi 95%+ 🧠.
-- **Micro-Nominal Support** — Kini mendukung scan nominal hingga **Rp 1**, memastikan tidak ada perak yang tertinggal.
-- **Smart Admin Filter** — Otomatis mengabaikan biaya admin atau pajak transaksi yang tidak perlu dicatat 🧼.
+- **Premium Scan AI** — Scan struk dengan animasi Laser AI dan *Smart Auto-fill* 📸.
+- **Zakat & Infaq Calculator** — Perhitungan Zakat (Profesi, Maal, Fitrah) yang terhubung langsung dengan arus kas.
+- **Future Forecast** — Prediksi sisa saldo di akhir bulan berdasarkan tren pengeluaran harian.
 
 ---
 
-## 🛡️ [1.4.2] — 6 April 2026: The Budgeting & Structure
-Membawa kontrol finansial Anda ke level proaktif.
+## 🎨 [1.4.4] — 9 April 2026: Aesthetic Polish
 
-- **Proactive Budget Tracker** — Berkelanjutan dengan peringatan otomatis saat mendekati batas anggaran bulanan 🛡️.
+Penyempurnaan visual dan kenyamanan mata.
+
+- **Cinematic Dark Mode** — Kalibrasi ulang kontras warna untuk kenyamanan mata maksimal 🌌.
+- **Challenge Page Overhaul** — Layout tantangan menabung yang lebih rapi dan memotivasi 🏆.
+
+---
+
+## 🎯 [1.4.3] — 7 April 2026: OCR Precision
+
+Kecerdasan buatan yang lebih peka terhadap detail keuangan.
+
+- **Enhanced AI Merchant Detection** — Deteksi struk provider besar (BCA, DANA, OVO) dengan akurasi tinggi 🧠.
+- **Micro-Nominal Support** — Dukungan scan hingga nominal terkecil (**Rp 1**).
+
+---
+
+## 🛡️ [1.4.2] — 6 April 2026: Budgeting Structure
+
+Membawa kontrol finansial ke level proaktif.
+
+- **Proactive Budget Tracker** — Peringatan otomatis saat mendekati batas anggaran bulanan 🛡️.
 - **Fidelity Transaction Details** — Tampilan detail transaksi dengan kartu premium yang sangat terstruktur 💎.
-- **Responsive Form Architecture** — Seluruh form input kini bebas bug *overflow* di semua ukuran layar 📱.
 
 ---
 
 ## 🔘 [1.4.1] — 4 April 2026: Modernization & Linked Sync
-Antarmuka yang lebih gegas dan sistem manajemen data yang lebih cerdas.
+
+Antarmuka yang lebih gegas dan manajemen data yang cerdas.
 
 - **Pill-Button Navigation** — Sistem navigasi baru di Riwayat untuk pengalaman yang lebih taktil 🔘.
-- **Smart Linked Deletion** — Menghapus hutang/belanja otomatis menghapus transaksi terkait di riwayat utama 🔗.
-- **Profile Identity 2.0** — Unggah foto profil asli dari Galeri/Kamera dengan sinkronisasi grup keluarga 📸.
+- **Smart Linked Deletion** — Penghapusan transaksi terkait secara otomatis saat menghapus hutang/belanja 🔗.
 
 ---
 
 ## 🏗️ [1.4.0] — 3 April 2026: Productivity & Resilience
-Fokus pada kelegaan ruang kerja dan ketepatan waktu pengingat.
 
-- **Full-Page Shopping Center** — Migrasi catatan belanja dari BottomSheet ke halaman penuh yang lega 🏗️.
-- **Smart Reminder Engine** — Pengingat cerdas yang mendeteksi timezone dan melakukan *auto-reschedule* otomatis 🕒.
-- **Major Code Cleanup** — Penghapusan 800+ baris kode redundan untuk performa yang lebih ringan.
+Fokus pada kelegaan ruang kerja dan ketepatan waktu.
+
+- **Full-Page Shopping Center** — Migrasi catatan belanja ke halaman penuh yang lebih lega 🏗️.
+- **Smart Reminder Engine** — Pengingat cerdas dengan deteksi timezone otomatis 🕒.
 
 ---
 
-## 🎨 [1.3.0] — 1 April 2026: The Visual & Stability Polish
+## 🎨 [1.3.0] — 1 April 2026: Visual & Stability
+
 Penyegaran visual pertama untuk dashboard interaktif.
 
 - **Glassmorphism Dashboard** — Desain kartu saldo transparan yang modern ✨.
-- **README 2.0 Infrastructure** — Dokumentasi proyek yang kini tampil lebih profesional 📖.
 - **Gradle Version Sync** — Optimalisasi build system untuk stabilitas Android modern.
 
 ---
 
-## ⚙️ [1.3.9] — 1 April 2026: The Infrastructure Overhaul
-Fondasi masa depan untuk distribusi aplikasi yang lebih cepat.
+## ⚙️ [1.3.9] — 1 April 2026: Infrastructure Overhaul
 
-- **GitHub Actions Integration** — Implementasi sistem build & rilis otomatis berbasis CI/CD 🚀.
-- **Split APK (ABI)** — Pembagian varian APK (arm64, v7a, x86) untuk ukuran download 40% lebih hemat 📦.
+Fondasi untuk distribusi aplikasi yang lebih cepat.
+
+- **GitHub Actions Integration** — Build & rilis otomatis berbasis CI/CD 🚀.
+- **Split APK (ABI)** — Varian APK (arm64, v7a, x86) untuk ukuran download 40% lebih hemat 📦.
 
 ---
 
 ## 🧊 [1.2.0] — 31 Maret 2026: Intelligence & Community
-Tonggak sejarah dengan diperkenalkannya AI dan kolaborasi grup.
 
-- **OCR Smart Scan (Beta)** — Lahirnya fitur scan struk otomatis untuk pertama kalinya 📸.
-- **Family Group Sync** — Kolaborasi finansial keluarga secara real-time via Cloud Database 👨‍👩‍👧‍👦.
-- **Profile & Avatar System** — Sistem identitas pengguna dengan pustaka avatar lucu 👤.
-
----
-
-## 🌟 [1.1.0] — Maret 2026: The Cloud Foundation
-Evolusi dari catatan lokal menuju sinkronisasi awan.
-
-- **Firebase Firestore Integration** — Implementasi sinkronisasi data antar perangkat ☁️.
-- **Dashboard Interaktiv** — Pengenalan grafik pendapatan vs pengeluaran untuk pertama kali.
-- **Saving Target Goals** — Fitur pembuatan target menabung dan pelacak progres visual.
+- **OCR Smart Scan (Beta)** — Pengenalan fitur scan struk otomatis pertama kali 📸.
+- **Family Group Sync** — Kolaborasi finansial keluarga via Cloud Database 👨‍👩‍👧‍👦.
 
 ---
 
 ## 🐣 [1.0.0] — Februari 2026: The Birth of TabunganKu
+
 Kelahiran aplikasi pencatat keuangan yang aman dan sederhana.
 
-- **Core Ledger Engine** — Sistem dasar pencatatan transaksi pemasukan dan pengeluaran 🐣.
-- **Biometric Security** — Keamanan akses aplikasi dengan Sidik Jari dan Pengenalan Wajah.
-- **Local Persistence** — Penyimpanan data lokal yang cepat dan andal menggunakan SQLite.
+- **Core Ledger Engine** — Sistem dasar pencatatan transaksi harian 🐣.
+- **Biometric Security** — Keamanan akses dengan Sidik Jari dan FaceID.
 
 ---
+
+<p align="center">
+  <b>TabunganKu - Solusi Finansial di Genggaman Anda</b><br>
+  © 2026 <b>Muhammad Isaki Prananda</b>. Dipersembahkan oleh <b>Neverland Studio</b>.
+</p>

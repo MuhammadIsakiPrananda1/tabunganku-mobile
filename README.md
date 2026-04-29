@@ -133,9 +133,3 @@ Proyek ini dilisensikan di bawah **MIT License**.
   Dibuat dengan ❤️ oleh <b>Muhammad Isaki Prananda</b><br>
   <a href="mailto:Arlianto032@gmail.com">Kontak Kami</a>
 </p>
-
-<p align="center">
-  <img src="https://forthebadge.com/images/badges/built-with-love.svg" height="25">
-  <img src="https://forthebadge.com/images/badges/made-with-brave.svg" height="25">
-  <img src="https://forthebadge.com/images/badges/uses-badges.svg" height="25">
-</p>

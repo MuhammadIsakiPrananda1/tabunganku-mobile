@@ -130,6 +130,6 @@ Proyek ini dilisensikan di bawah **MIT License**.
 
 <p align="center">
   <b>Neverland Studio</b><br>
-  Dibuat dengan ❤️ oleh <b>Muhammad Isaki Prananda</b><br>
+  Dibuat Oleh <b>Muhammad Isaki Prananda</b><br>
   <a href="mailto:Arlianto032@gmail.com">Kontak Kami</a>
 </p>

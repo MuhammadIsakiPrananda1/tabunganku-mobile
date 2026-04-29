@@ -27,6 +27,8 @@ import 'package:tabunganku/features/home/presentation/pages/tax_reminder_page.da
 import 'package:tabunganku/features/home/presentation/pages/piggy_bank_page.dart';
 import 'package:tabunganku/features/home/presentation/pages/compound_interest_page.dart';
 import 'package:tabunganku/features/home/presentation/pages/currency_converter_page.dart';
+import 'package:tabunganku/features/home/presentation/pages/mosque_donation_page.dart';
+import 'package:tabunganku/features/home/presentation/pages/hajj_umrah_planner_page.dart';
 
 final appRouterProvider = Provider((ref) {
   return GoRouter(
@@ -232,6 +234,16 @@ final appRouterProvider = Provider((ref) {
         path: '/currency-converter',
         name: 'currency-converter',
         builder: (context, state) => const CurrencyConverterPage(),
+      ),
+      GoRoute(
+        path: '/mosque-donation',
+        name: 'mosque-donation',
+        builder: (context, state) => const MosqueDonationPage(),
+      ),
+      GoRoute(
+        path: '/hajj-umrah',
+        name: 'hajj-umrah',
+        builder: (context, state) => const HajjUmrahPlannerPage(),
       ),
 
       // Catch-all redirect to splash

@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:tabunganku/core/theme/app_colors.dart';
 import 'package:tabunganku/features/settings/presentation/providers/security_provider.dart';
 import 'package:tabunganku/core/constants/app_version.dart';
+import 'package:tabunganku/services/currency_service.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -73,6 +74,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   Future<void> _startAppLogic() async {
     // Wait for minimum splash time for animations
     final minimumWait = Future.delayed(const Duration(milliseconds: 3500));
+    
+    // Start pre-fetching currency rates early
+    ref.read(currencyRatesProvider);
     
     // Wait until security settings are loaded
     bool isLoaded = false;

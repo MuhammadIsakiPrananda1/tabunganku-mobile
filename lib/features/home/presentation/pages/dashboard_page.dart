@@ -1367,7 +1367,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                       selectedInterestBank = val;
                                       interestOtherBankName = '';
                                       if (val == null) {
-                                        // nameController.clear(); // Removed to keep user input "diam"
+                                        if (nameController.text.startsWith('Bunga ')) {
+                                          nameController.clear();
+                                        }
                                         selectedCategory = 'Gaji Pokok';
                                         selectedGroup = 'Pekerjaan Utama';
                                       } else if (val == 'Bank Lainnya') {
@@ -1654,6 +1656,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                     setSheetState(() {
                                       selectedTopUpSource = val;
                                       if (val == null) {
+                                        if (nameController.text.startsWith('Biaya Admin')) {
+                                          nameController.clear();
+                                        }
                                         selectedCategory =
                                             type == TransactionType.expense
                                                 ? 'Makanan & Minuman Harian'
@@ -2946,6 +2951,11 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           _buildExpenseAllocationSection(
               categoryTotals, totalExpense, isDarkMode),
 
+          const SizedBox(height: 28),
+
+          // 5. SAVINGS PET (MOVED FROM HOME)
+          _buildSavingsPetCard(balance, isDarkMode),
+
           const SizedBox(height: 40),
           const SizedBox(height: 24), // Final padding
         ],
@@ -2955,20 +2965,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
 
   Widget _buildSmartSavingPlannerSection(
       double currentBalance, List<SavingTargetModel> targets, bool isDarkMode) {
-    if (targets.isEmpty) return const SizedBox.shrink();
-
     // Find the next incomplete target
     final incomplete =
         targets.where((t) => currentBalance < t.targetAmount).toList();
-    if (incomplete.isEmpty) return const SizedBox.shrink();
-
-    // Sort by due date or proximity
-    incomplete.sort((a, b) => a.dueDate.compareTo(b.dueDate));
-    final target = incomplete.first;
-
-    final remaining = target.targetAmount - currentBalance;
-    final daysLeft = target.dueDate.difference(DateTime.now()).inDays;
-    final dailyTarget = daysLeft > 0 ? (remaining / daysLeft) : remaining;
 
     return Container(
       width: double.infinity,
@@ -2982,94 +2981,152 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
               : Colors.teal.shade50,
         ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.teal.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
+      child: (targets.isEmpty || incomplete.isEmpty)
+          ? Column(
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.teal.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.bolt_rounded,
+                          color: Colors.teal, size: 16),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      'RENCANA NABUNG HARIAN',
+                      style: GoogleFonts.comicNeue(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 1.2,
+                        color:
+                            isDarkMode ? Colors.white24 : Colors.grey.shade400,
+                      ),
+                    ),
+                  ],
                 ),
-                child: const Icon(Icons.bolt_rounded,
-                    color: Colors.teal, size: 16),
-              ),
-              const SizedBox(width: 10),
-              Text(
-                'RENCANA NABUNG HARIAN',
-                style: GoogleFonts.comicNeue(
-                  fontSize: 9,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1.2,
-                  color: isDarkMode ? Colors.white24 : Colors.grey.shade400,
+                const SizedBox(height: 16),
+                Icon(Icons.track_changes_rounded,
+                    size: 32,
+                    color: isDarkMode ? Colors.white10 : Colors.grey.shade200),
+                const SizedBox(height: 12),
+                Text(
+                  targets.isEmpty
+                      ? 'Belum ada target tabungan'
+                      : 'Semua target sudah tercapai!',
+                  style: GoogleFonts.comicNeue(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: isDarkMode ? Colors.white24 : Colors.black26,
+                  ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'Target: ${target.name}',
-            style: GoogleFonts.comicNeue(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: isDarkMode ? Colors.white70 : Colors.black87,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            children: [
-              Text(
-                _formatRupiah(dailyTarget),
-                style: GoogleFonts.comicNeue(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.teal,
-                ),
-              ),
-              const SizedBox(width: 4),
-              Text(
-                '/ hr',
-                style: GoogleFonts.comicNeue(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: isDarkMode ? Colors.white24 : Colors.grey.shade400,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: (currentBalance / target.targetAmount).clamp(0, 1),
-              backgroundColor: isDarkMode
-                  ? Colors.white.withValues(alpha: 0.05)
-                  : Colors.grey.shade100,
-              valueColor: const AlwaysStoppedAnimation<Color>(Colors.teal),
-              minHeight: 4,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Sisa ${_formatRupiah(remaining)} • $daysLeft hr lagi',
-            style: GoogleFonts.comicNeue(
-              fontSize: 10,
-              color: isDarkMode ? Colors.white38 : Colors.grey.shade500,
-            ),
-          ),
-        ],
-      ),
+              ],
+            )
+          : Builder(builder: (context) {
+              // Sort by due date or proximity
+              incomplete.sort((a, b) => a.dueDate.compareTo(b.dueDate));
+              final target = incomplete.first;
+
+              final remaining = target.targetAmount - currentBalance;
+              final daysLeft = target.dueDate.difference(DateTime.now()).inDays;
+              final dailyTarget =
+                  daysLeft > 0 ? (remaining / daysLeft) : remaining;
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.teal.withValues(alpha: 0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.bolt_rounded,
+                            color: Colors.teal, size: 16),
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        'RENCANA NABUNG HARIAN',
+                        style: GoogleFonts.comicNeue(
+                          fontSize: 9,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 1.2,
+                          color: isDarkMode
+                              ? Colors.white24
+                              : Colors.grey.shade400,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Target: ${target.name}',
+                    style: GoogleFonts.comicNeue(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: isDarkMode ? Colors.white70 : Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      Text(
+                        _formatRupiah(dailyTarget),
+                        style: GoogleFonts.comicNeue(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.teal,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '/ hr',
+                        style: GoogleFonts.comicNeue(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: isDarkMode
+                              ? Colors.white24
+                              : Colors.grey.shade400,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: (currentBalance / target.targetAmount).clamp(0, 1),
+                      backgroundColor: isDarkMode
+                          ? Colors.white.withValues(alpha: 0.05)
+                          : Colors.grey.shade100,
+                      valueColor:
+                          const AlwaysStoppedAnimation<Color>(Colors.teal),
+                      minHeight: 4,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Sisa ${_formatRupiah(remaining)} • $daysLeft hr lagi',
+                    style: GoogleFonts.comicNeue(
+                      fontSize: 10,
+                      color: isDarkMode ? Colors.white38 : Colors.grey.shade500,
+                    ),
+                  ),
+                ],
+              );
+            }),
     );
   }
 
   Widget _buildExpenseAllocationSection(Map<String, double> categoryTotals,
       double totalExpense, bool isDarkMode) {
-    if (categoryTotals.isEmpty) return const SizedBox.shrink();
-
     final sortedCategories = categoryTotals.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
 
@@ -3087,6 +3144,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         ),
         const SizedBox(height: 16),
         Container(
+          width: double.infinity,
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
             color: isDarkMode ? AppColors.surfaceDark : Colors.white,
@@ -3097,70 +3155,175 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   : Colors.teal.shade50,
             ),
           ),
-          child: Column(
-            children: sortedCategories.take(4).map((entry) {
-              final percentage =
-                  totalExpense > 0 ? (entry.value / totalExpense) : 0.0;
-              final color = AppCategories.getColorForCategory(entry.key);
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: Column(
+          child: categoryTotals.isEmpty
+              ? Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              width: 8,
-                              height: 8,
-                              decoration: BoxDecoration(
-                                  color: color, shape: BoxShape.circle),
-                            ),
-                            const SizedBox(width: 12),
-                            Text(
-                              entry.key,
-                              style: GoogleFonts.comicNeue(
-                                fontSize: 13,
-                                fontWeight: FontWeight.bold,
-                                color: isDarkMode
-                                    ? Colors.white70
-                                    : Colors.black87,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Text(
-                          '${(percentage * 100).toStringAsFixed(1)}%',
-                          style: GoogleFonts.comicNeue(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: isDarkMode
-                                ? Colors.white38
-                                : Colors.grey.shade600,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: LinearProgressIndicator(
-                        value: percentage,
-                        backgroundColor: isDarkMode
-                            ? Colors.white.withValues(alpha: 0.05)
-                            : Colors.grey.shade100,
-                        valueColor: AlwaysStoppedAnimation<Color>(color),
-                        minHeight: 6,
+                    Icon(Icons.pie_chart_outline_rounded,
+                        size: 40,
+                        color:
+                            isDarkMode ? Colors.white10 : Colors.grey.shade200),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Belum ada data pengeluaran bulan ini',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.comicNeue(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: isDarkMode ? Colors.white24 : Colors.black26,
                       ),
                     ),
                   ],
+                )
+              : Column(
+                  children: sortedCategories.take(4).map((entry) {
+                    final percentage =
+                        totalExpense > 0 ? (entry.value / totalExpense) : 0.0;
+                    final color = AppCategories.getColorForCategory(entry.key);
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    width: 8,
+                                    height: 8,
+                                    decoration: BoxDecoration(
+                                        color: color, shape: BoxShape.circle),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    entry.key,
+                                    style: GoogleFonts.comicNeue(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.bold,
+                                      color: isDarkMode
+                                          ? Colors.white70
+                                          : Colors.black87,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Text(
+                                '${(percentage * 100).toStringAsFixed(1)}%',
+                                style: GoogleFonts.comicNeue(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: isDarkMode
+                                      ? Colors.white38
+                                      : Colors.grey.shade600,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: LinearProgressIndicator(
+                              value: percentage,
+                              backgroundColor: isDarkMode
+                                  ? Colors.white.withValues(alpha: 0.05)
+                                  : Colors.grey.shade100,
+                              valueColor: AlwaysStoppedAnimation<Color>(color),
+                              minHeight: 6,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
                 ),
-              );
-            }).toList(),
-          ),
         ),
       ],
+    );
+  }
+
+  Widget _buildSavingsPetCard(double totalBalance, bool isDarkMode) {
+    // Logic: Pet grows based on balance
+    // 0-100k: Sprout, 100k-1M: Small Tree, 1M+: Golden Tree
+    String petName = "Tunas Tabungan";
+    IconData petIcon = Icons.eco_rounded;
+    Color petColor = Colors.green;
+    String status = "Baru mulai tumbuh!";
+    double growth = (totalBalance / 1000000).clamp(0.0, 1.0);
+
+    if (totalBalance >= 1000000) {
+      petName = "Pohon Emas";
+      petIcon = Icons.park_rounded;
+      petColor = Colors.amber;
+      status = "Luar biasa! Pohonmu sudah berbuah.";
+    } else if (totalBalance >= 100000) {
+      petName = "Pohon Muda";
+      petIcon = Icons.forest_rounded;
+      petColor = Colors.lightGreen;
+      status = "Sedang rajin tumbuh!";
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: isDarkMode ? AppColors.surfaceDark : Colors.white,
+        borderRadius: BorderRadius.circular(32),
+        border: Border.all(
+          color: petColor.withValues(alpha: 0.1),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: petColor.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(petIcon, size: 40, color: petColor),
+          ),
+          const SizedBox(width: 20),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(petName,
+                        style: GoogleFonts.comicNeue(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: isDarkMode ? Colors.white : Colors.black87)),
+                    Text('${(growth * 100).toInt()}%',
+                        style: GoogleFonts.comicNeue(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: petColor)),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: LinearProgressIndicator(
+                    value: growth,
+                    minHeight: 6,
+                    backgroundColor: petColor.withValues(alpha: 0.1),
+                    color: petColor,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(status,
+                    style: GoogleFonts.comicNeue(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                        color: isDarkMode ? Colors.white38 : Colors.black54)),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -3969,7 +4132,7 @@ class _CalculatorSheetContentState
             theme.brightness == Brightness.dark);
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+      padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
       decoration: BoxDecoration(
         color: isDarkMode ? AppColors.surfaceDark : Colors.white,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(40)),
@@ -3987,87 +4150,89 @@ class _CalculatorSheetContentState
                     offset: const Offset(0, -10))
               ],
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 40,
-            height: 4,
-            margin: const EdgeInsets.only(bottom: 24),
-            decoration: BoxDecoration(
-                color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
-                borderRadius: BorderRadius.circular(2)),
-          ),
-          // Display
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: isDarkMode
-                  ? Colors.white.withValues(alpha: 0.03)
-                  : AppColors.background,
-              borderRadius: BorderRadius.circular(24),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 20),
+              decoration: BoxDecoration(
+                  color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
+                  borderRadius: BorderRadius.circular(2)),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(_expression,
-                    style: GoogleFonts.comicNeue(
-                        fontSize: 14,
-                        color: isDarkMode
-                            ? Colors.white24
-                            : Colors.teal.shade800.withValues(alpha: 0.4),
-                        fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  reverse: true,
-                  child: Text(
-                    _formatDisplay(_output),
-                    style: GoogleFonts.comicNeue(
-                        fontSize: 48,
-                        fontWeight: FontWeight.bold,
-                        color: isDarkMode ? Colors.white : Colors.teal.shade900,
-                        letterSpacing: -1),
+            // Display
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: isDarkMode
+                    ? Colors.white.withValues(alpha: 0.03)
+                    : AppColors.background,
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(_expression,
+                      style: GoogleFonts.comicNeue(
+                          fontSize: 14,
+                          color: isDarkMode
+                              ? Colors.white24
+                              : Colors.teal.shade800.withValues(alpha: 0.4),
+                          fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 4),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    reverse: true,
+                    child: Text(
+                      _formatDisplay(_output),
+                      style: GoogleFonts.comicNeue(
+                          fontSize: 40,
+                          fontWeight: FontWeight.bold,
+                          color: isDarkMode ? Colors.white : Colors.teal.shade900,
+                          letterSpacing: -1),
+                    ),
                   ),
-                ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Buttons Grid
+            GridView.count(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisCount: 4,
+              mainAxisSpacing: 10,
+              crossAxisSpacing: 10,
+              children: [
+                _calcButton("AC", isAction: true, isDarkMode: isDarkMode),
+                _calcButton("+/-", isAction: true, isDarkMode: isDarkMode),
+                _calcButton("%", isAction: true, isDarkMode: isDarkMode),
+                _calcButton("÷", isOperator: true, isDarkMode: isDarkMode),
+                _calcButton("7", isDarkMode: isDarkMode),
+                _calcButton("8", isDarkMode: isDarkMode),
+                _calcButton("9", isDarkMode: isDarkMode),
+                _calcButton("×", isOperator: true, isDarkMode: isDarkMode),
+                _calcButton("4", isDarkMode: isDarkMode),
+                _calcButton("5", isDarkMode: isDarkMode),
+                _calcButton("6", isDarkMode: isDarkMode),
+                _calcButton("-", isOperator: true, isDarkMode: isDarkMode),
+                _calcButton("1", isDarkMode: isDarkMode),
+                _calcButton("2", isDarkMode: isDarkMode),
+                _calcButton("3", isDarkMode: isDarkMode),
+                _calcButton("+", isOperator: true, isDarkMode: isDarkMode),
+                _calcButton("C", isDarkMode: isDarkMode),
+                _calcButton("0", isDarkMode: isDarkMode),
+                _calcButton(",", isDarkMode: isDarkMode),
+                _calcButton("=",
+                    isOperator: true, isPrimary: true, isDarkMode: isDarkMode),
               ],
             ),
-          ),
-          const SizedBox(height: 24),
-          // Buttons Grid
-          GridView.count(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            crossAxisCount: 4,
-            mainAxisSpacing: 12,
-            crossAxisSpacing: 12,
-            children: [
-              _calcButton("AC", isAction: true, isDarkMode: isDarkMode),
-              _calcButton("+/-", isAction: true, isDarkMode: isDarkMode),
-              _calcButton("%", isAction: true, isDarkMode: isDarkMode),
-              _calcButton("÷", isOperator: true, isDarkMode: isDarkMode),
-              _calcButton("7", isDarkMode: isDarkMode),
-              _calcButton("8", isDarkMode: isDarkMode),
-              _calcButton("9", isDarkMode: isDarkMode),
-              _calcButton("×", isOperator: true, isDarkMode: isDarkMode),
-              _calcButton("4", isDarkMode: isDarkMode),
-              _calcButton("5", isDarkMode: isDarkMode),
-              _calcButton("6", isDarkMode: isDarkMode),
-              _calcButton("-", isOperator: true, isDarkMode: isDarkMode),
-              _calcButton("1", isDarkMode: isDarkMode),
-              _calcButton("2", isDarkMode: isDarkMode),
-              _calcButton("3", isDarkMode: isDarkMode),
-              _calcButton("+", isOperator: true, isDarkMode: isDarkMode),
-              _calcButton("C", isDarkMode: isDarkMode),
-              _calcButton("0", isDarkMode: isDarkMode),
-              _calcButton(",", isDarkMode: isDarkMode),
-              _calcButton("=",
-                  isOperator: true, isPrimary: true, isDarkMode: isDarkMode),
-            ],
-          ),
-          const SizedBox(height: 16),
-        ],
+            const SizedBox(height: 8),
+          ],
+        ),
       ),
     );
   }

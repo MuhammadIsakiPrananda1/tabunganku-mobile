@@ -50,27 +50,36 @@ class _CurrencyConverterPageState extends ConsumerState<CurrencyConverterPage> {
     super.initState();
     _fromCurrency = _currencies[1]; // USD
     _toCurrency = _currencies[0];   // IDR
-    _fetchRates();
+    
+    // Check if rates are already available to avoid showing loading spinner
+    final initialRates = ref.read(currencyRatesProvider).value;
+    if (initialRates != null) {
+      _updateRatesFromMap(initialRates);
+      _isLoading = false;
+    } else {
+      _isLoading = true;
+      // If not available, we can trigger a fetch if it hasn't started
+      _fetchRates();
+    }
+  }
+
+  void _updateRatesFromMap(Map<String, double> rates) {
+    for (var curr in _currencies) {
+      if (rates.containsKey(curr['code'])) {
+        curr['rate'] = rates[curr['code']];
+      }
+    }
+    _lastUpdated = DateTime.now();
   }
 
   Future<void> _fetchRates() async {
     setState(() => _isLoading = true);
-    final rates = await ref.read(currencyServiceProvider).fetchLatestRates();
-    
-    setState(() {
-      for (var curr in _currencies) {
-        if (rates.containsKey(curr['code'])) {
-          curr['rate'] = rates[curr['code']];
-        }
-      }
-      _lastUpdated = DateTime.now();
-      _isLoading = false;
-    });
+    await ref.read(currencyRatesProvider.notifier).refresh();
   }
 
   void _onNumberPress(String val) {
     setState(() {
-      if (_amountStr == '0') {
+      if (_amountStr == '0' && val != '.') {
         _amountStr = val;
       } else {
         _amountStr += val;
@@ -112,6 +121,15 @@ class _CurrencyConverterPageState extends ConsumerState<CurrencyConverterPage> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(currencyRatesProvider, (prev, next) {
+      next.whenData((rates) {
+        setState(() {
+          _updateRatesFromMap(rates);
+          _isLoading = false;
+        });
+      });
+    });
+
     final theme = Theme.of(context);
     final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
         (ref.watch(themeProvider) == ThemeMode.system && theme.brightness == Brightness.dark);
@@ -265,15 +283,22 @@ class _CurrencyConverterPageState extends ConsumerState<CurrencyConverterPage> {
                           ),
                         ),
                         const SizedBox(width: 6),
+                        if (isActive && val == '0') ...[
+                          _buildBlinkingCursor(isDarkMode),
+                          const SizedBox(width: 2),
+                        ],
                         Text(
                           val,
                           style: GoogleFonts.comicNeue(
                             fontSize: 26,
                             fontWeight: FontWeight.bold,
-                            color: contentColor,
+                            color: val == '0' ? contentColor.withValues(alpha: 0.3) : contentColor,
                           ),
                         ),
-                        if (isActive) _buildBlinkingCursor(isDarkMode),
+                        if (isActive && val != '0') ...[
+                          const SizedBox(width: 2),
+                          _buildBlinkingCursor(isDarkMode),
+                        ],
                       ],
                     ),
                   ),
@@ -473,7 +498,6 @@ class _BlinkingCursorState extends State<_BlinkingCursor> with SingleTickerProvi
       child: Container(
         width: 2,
         height: 22,
-        margin: const EdgeInsets.only(left: 4),
         color: AppColors.primary,
       ),
     );

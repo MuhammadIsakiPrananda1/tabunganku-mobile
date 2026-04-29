@@ -1,8 +1,26 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final currencyServiceProvider = Provider((ref) => CurrencyService());
+
+final currencyRatesProvider = AsyncNotifierProvider<CurrencyRatesNotifier, Map<String, double>>(() {
+  return CurrencyRatesNotifier();
+});
+
+class CurrencyRatesNotifier extends AsyncNotifier<Map<String, double>> {
+  @override
+  FutureOr<Map<String, double>> build() {
+    return ref.read(currencyServiceProvider).fetchLatestRates();
+  }
+
+  Future<void> refresh() async {
+    state = const AsyncLoading();
+    final rates = await ref.read(currencyServiceProvider).fetchLatestRates();
+    state = AsyncData(rates);
+  }
+}
 
 class CurrencyService {
   final String _baseUrl = 'https://api.frankfurter.app/latest';

@@ -255,12 +255,12 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
           const SizedBox(height: 32), // Seimbang (tidak terlalu rapat)
           _buildSavingTargetSection(totalBalance, targets, isDarkMode),
 
-          const SizedBox(height: 40),
+          const SizedBox(height: 12),
           _buildAllocationSection(
               totalIncome, totalExpense, transactions, isDarkMode),
 
+          const SizedBox(height: 32),
 
-          const SizedBox(height: 40),
           _buildRecentActivitySection(transactions, isDarkMode),
 
           const SizedBox(height: 60),
@@ -430,8 +430,6 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
     return total > 0 ? _formatRupiah(total) : '';
   }
 
-
-
   Widget _buildToolAction(
     IconData icon,
     String label,
@@ -574,7 +572,6 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
       type: QuickActionType.bills,
       baseColor: Colors.lightBlue,
     ),
-
     _QuickActionItem(
       icon: Icons.trending_up_rounded,
       label: 'Investasi',
@@ -601,7 +598,7 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
     final buyingTargets = targets
         .where((t) => t.category == 'Pembelian' || t.category == 'Umum')
         .toList();
-    if (buyingTargets.isEmpty) return const SizedBox.shrink();
+    final bool isEmpty = buyingTargets.isEmpty;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -625,18 +622,48 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
           ],
         ),
         const SizedBox(height: 20),
-        SizedBox(
-          height: 180,
-          child: PageView.builder(
-            itemCount: buyingTargets.length,
-            onPageChanged: (idx) => setState(() => _currentTargetIndex = idx),
-            itemBuilder: (context, index) {
-              final target = buyingTargets[index];
-              return _targetCardMinimalist(
-                  target, totalBalance, isDarkMode, index);
-            },
+        if (isEmpty)
+          Container(
+            height: 160,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: isDarkMode
+                  ? Colors.white.withValues(alpha: 0.02)
+                  : Colors.white,
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(
+                  color: isDarkMode
+                      ? Colors.white10
+                      : Colors.black.withValues(alpha: 0.05)),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.shopping_bag_outlined,
+                    size: 32,
+                    color: isDarkMode ? Colors.white10 : Colors.grey.shade200),
+                const SizedBox(height: 12),
+                Text('Belum ada target barang impian',
+                    style: GoogleFonts.comicNeue(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: isDarkMode ? Colors.white24 : Colors.black26)),
+              ],
+            ),
+          )
+        else
+          SizedBox(
+            height: 180,
+            child: PageView.builder(
+              itemCount: buyingTargets.length,
+              onPageChanged: (idx) => setState(() => _currentTargetIndex = idx),
+              itemBuilder: (context, index) {
+                final target = buyingTargets[index];
+                return _targetCardMinimalist(
+                    target, totalBalance, isDarkMode, index);
+              },
+            ),
           ),
-        ),
         const SizedBox(height: 12),
         // Custom Page Indicator
         Row(
@@ -788,11 +815,14 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
 
   Widget _buildAllocationSection(double totalIncome, double totalExpense,
       List<TransactionModel> transactions, bool isDarkMode) {
-    if (totalIncome == 0 && totalExpense == 0) return const SizedBox.shrink();
+    final bool isEmpty = totalIncome == 0 && totalExpense == 0;
 
-    final totalVal = totalIncome + totalExpense;
-    final incomePercent = (totalIncome / totalVal * 100).toStringAsFixed(0);
-    final expensePercent = (totalExpense / totalVal * 100).toStringAsFixed(0);
+    final actualTotal = totalIncome + totalExpense;
+    final totalVal = isEmpty ? 1.0 : actualTotal;
+    final incomePercent =
+        isEmpty ? '0' : (totalIncome / totalVal * 100).toStringAsFixed(0);
+    final expensePercent =
+        isEmpty ? '0' : (totalExpense / totalVal * 100).toStringAsFixed(0);
 
     return Container(
       padding: const EdgeInsets.all(20), // More compact padding
@@ -806,7 +836,7 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('ALOKASI KEUANGAN',
+              Text('ALOKASI PENGELUARAN',
                   style: GoogleFonts.comicNeue(
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
@@ -832,47 +862,78 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                       PieChartData(
                         sectionsSpace: 4,
                         centerSpaceRadius: 60,
-                        sections: [
-                          if (totalIncome > 0)
-                            PieChartSectionData(
-                              color: Colors.green,
-                              value: totalIncome,
-                              radius: 14,
-                              title: '$incomePercent%',
-                              showTitle: true,
-                              titlePositionPercentageOffset: 2.2,
-                              titleStyle: GoogleFonts.comicNeue(
-                                fontSize: 13,
-                                fontWeight: FontWeight.bold,
-                                color: isDarkMode
-                                    ? Colors.green.shade300
-                                    : Colors.green.shade700,
-                              ),
-                            ),
-                          if (totalExpense > 0)
-                            PieChartSectionData(
-                              color: Colors.red,
-                              value: totalExpense,
-                              radius: 14,
-                              title: '$expensePercent%',
-                              showTitle: true,
-                              titlePositionPercentageOffset: 2.2,
-                              titleStyle: GoogleFonts.comicNeue(
-                                fontSize: 13,
-                                fontWeight: FontWeight.bold,
-                                color: isDarkMode
-                                    ? Colors.red.shade300
-                                    : Colors.red.shade700,
-                              ),
-                            ),
-                        ],
+                        sections: isEmpty
+                            ? [
+                                PieChartSectionData(
+                                  color: isDarkMode
+                                      ? Colors.white10
+                                      : Colors.grey.shade100,
+                                  value: 1,
+                                  radius: 12,
+                                  showTitle: false,
+                                ),
+                              ]
+                            : [
+                                if (totalIncome > 0)
+                                  PieChartSectionData(
+                                    color: Colors.green,
+                                    value: totalIncome,
+                                    radius: 14,
+                                    title: '$incomePercent%',
+                                    showTitle: true,
+                                    titlePositionPercentageOffset: 2.2,
+                                    titleStyle: GoogleFonts.comicNeue(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.bold,
+                                      color: isDarkMode
+                                          ? Colors.green.shade300
+                                          : Colors.green.shade700,
+                                    ),
+                                  ),
+                                if (totalExpense > 0)
+                                  PieChartSectionData(
+                                    color: Colors.red,
+                                    value: totalExpense,
+                                    radius: 14,
+                                    title: '$expensePercent%',
+                                    showTitle: true,
+                                    titlePositionPercentageOffset: 2.2,
+                                    titleStyle: GoogleFonts.comicNeue(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.bold,
+                                      color: isDarkMode
+                                          ? Colors.red.shade300
+                                          : Colors.red.shade700,
+                                    ),
+                                  ),
+                              ],
                       ),
                     ),
-                    // Center is empty or subtle icon
-                    Icon(Icons.auto_awesome_mosaic_rounded,
-                        size: 20,
-                        color:
-                            isDarkMode ? Colors.white10 : Colors.grey.shade100),
+                    if (isEmpty)
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.analytics_outlined,
+                              size: 24,
+                              color: isDarkMode
+                                  ? Colors.white10
+                                  : Colors.grey.shade300),
+                          const SizedBox(height: 4),
+                          Text('Belum Ada Data',
+                              style: GoogleFonts.comicNeue(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  color: isDarkMode
+                                      ? Colors.white10
+                                      : Colors.grey.shade300)),
+                        ],
+                      )
+                    else
+                      Icon(Icons.auto_awesome_mosaic_rounded,
+                          size: 20,
+                          color: isDarkMode
+                              ? Colors.white10
+                              : Colors.grey.shade100),
                   ],
                 ),
               ),
@@ -893,7 +954,7 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                         'Pemasukan', totalIncome, Colors.green, isDarkMode),
                     _buildTableRow(
                         'Pengeluaran', totalExpense, Colors.red, isDarkMode),
-                    _buildTableRow('Total Alokasi', totalVal,
+                    _buildTableRow('Total Alokasi', actualTotal,
                         isDarkMode ? Colors.white : Colors.black87, isDarkMode,
                         isTotal: true),
                   ],
@@ -959,7 +1020,65 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
       List<TransactionModel> transactions, bool isDarkMode) {
     final expenses =
         transactions.where((t) => t.type == TransactionType.expense).toList();
-    if (expenses.isEmpty) return const SizedBox.shrink();
+
+    if (expenses.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 16),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                          color: isDarkMode
+                              ? Colors.white10
+                              : Colors.grey.shade200,
+                          shape: BoxShape.circle),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      'Belum Ada Pengeluaran',
+                      style: GoogleFonts.comicNeue(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        fontStyle: FontStyle.italic,
+                        color: isDarkMode ? Colors.white24 : Colors.black26,
+                      ),
+                    ),
+                  ],
+                ),
+                Text(
+                  '0.0%',
+                  style: GoogleFonts.comicNeue(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    fontStyle: FontStyle.italic,
+                    color: isDarkMode ? Colors.white10 : Colors.black12,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                value: 0,
+                backgroundColor: isDarkMode
+                    ? Colors.white.withValues(alpha: 0.05)
+                    : Colors.grey.shade100,
+                color: Colors.grey.shade300,
+                minHeight: 4.5,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
 
     // Group by category
     final categoryMap = <String, double>{};
@@ -970,7 +1089,6 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
     final totalExp = categoryMap.values.fold(0.0, (sum, val) => sum + val);
     final sortedCategories = categoryMap.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
-
 
     return Column(
       children: sortedCategories.take(4).map((entry) {
@@ -1034,8 +1152,6 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
 
   Widget _buildRecentActivitySection(
       List<TransactionModel> transactions, bool isDarkMode) {
-    if (transactions.isEmpty) return const SizedBox.shrink();
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1045,7 +1161,36 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                 fontSize: 16,
                 letterSpacing: -0.5)),
         const SizedBox(height: 16),
-        ...transactions.take(3).map((t) => _minimalTile(t, isDarkMode)),
+        if (transactions.isEmpty)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 24),
+            decoration: BoxDecoration(
+              color: isDarkMode
+                  ? Colors.white.withValues(alpha: 0.02)
+                  : Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                  color: isDarkMode
+                      ? Colors.white10
+                      : Colors.black.withValues(alpha: 0.05)),
+            ),
+            child: Column(
+              children: [
+                Icon(Icons.history_rounded,
+                    size: 24,
+                    color: isDarkMode ? Colors.white10 : Colors.grey.shade300),
+                const SizedBox(height: 8),
+                Text('Belum ada aktivitas baru-baru ini',
+                    style: GoogleFonts.comicNeue(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: isDarkMode ? Colors.white24 : Colors.black26)),
+              ],
+            ),
+          )
+        else
+          ...transactions.take(3).map((t) => _minimalTile(t, isDarkMode)),
       ],
     );
   }
@@ -1105,7 +1250,6 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
       ),
     );
   }
-
 
   Widget _buildWatermark(bool isDarkMode) {
     return Center(

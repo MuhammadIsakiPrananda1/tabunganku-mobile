@@ -40,178 +40,139 @@ class _ChallengePageState extends ConsumerState<ChallengePage>
     final streak = ref.watch(currentStreakProvider);
     final points = ref.watch(totalPointsProvider);
 
+    final contentColor = isDark ? Colors.white : AppColors.primaryDark;
+
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      body: SafeArea(
-        child: NestedScrollView(
-          headerSliverBuilder: (context, innerBoxIsScrolled) {
-            return [
-              SliverAppBar(
-                expandedHeight: 200,
-                floating: false,
-                pinned: true,
-                backgroundColor:
-                    isDark ? AppColors.surfaceDark : AppColors.primary,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                title: Text(
-                  'Challenge Menabung',
-                  style: GoogleFonts.comicNeue(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-                centerTitle: true,
-                flexibleSpace: FlexibleSpaceBar(
-                  background: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      // Modern background gradient
-                      Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: isDark
-                                ? [
-                                    AppColors.surfaceDark,
-                                    const Color(0xFF121212)
-                                  ]
-                                : [AppColors.primary, AppColors.primaryDark],
-                          ),
-                        ),
-                      ),
-                      // Decorative circles
-                      Positioned(
-                        top: -50,
-                        right: -50,
-                        child: Container(
-                          width: 200,
-                          height: 200,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white.withValues(alpha: 0.05),
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        bottom: -100,
-                        left: -50,
-                        child: Container(
-                          width: 250,
-                          height: 250,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white.withValues(alpha: 0.03),
-                          ),
-                        ),
-                      ),
-                      // Cards
-                      Positioned(
-                        bottom: 24,
-                        left: 16,
-                        right: 16,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 20),
-                          decoration: BoxDecoration(
-                            color: theme.cardColor,
-                            borderRadius: BorderRadius.circular(24),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.15),
-                                blurRadius: 20,
-                                offset: const Offset(0, 10),
-                              ),
-                            ],
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              _buildModernStatItem(
-                                icon: Icons.local_fire_department_rounded,
-                                iconColor: Colors.orange,
-                                value: streak.when(
-                                  data: (s) => s.toString(),
-                                  loading: () => '-',
-                                  error: (_, __) => '0',
-                                ),
-                                label: 'Streak',
-                                isDark: isDark,
-                              ),
-                              Container(
-                                  height: 30,
-                                  width: 1,
-                                  color: isDark
-                                      ? Colors.white10
-                                      : Colors.grey.shade200),
-                              _buildModernStatItem(
-                                icon: Icons.stars_rounded,
-                                iconColor: Colors.amber,
-                                value: points.when(
-                                  data: (p) => p.toString(),
-                                  loading: () => '-',
-                                  error: (_, __) => '0',
-                                ),
-                                label: 'Poin',
-                                isDark: isDark,
-                              ),
-                              Container(
-                                  height: 30,
-                                  width: 1,
-                                  color: isDark
-                                      ? Colors.white10
-                                      : Colors.grey.shade200),
-                              _buildModernStatItem(
-                                icon: Icons.check_circle_rounded,
-                                iconColor: AppColors.primary,
-                                value: stats['completed'].toString(),
-                                label: 'Selesai',
-                                isDark: isDark,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              SliverPersistentHeader(
-                pinned: true,
-                delegate: _SliverTabBarDelegate(
-                  TabBar(
-                    controller: _tabController,
-                    indicatorColor: AppColors.primary,
-                    indicatorWeight: 3,
-                    labelColor: isDark ? Colors.white : AppColors.primary,
-                    unselectedLabelColor: Colors.grey.shade500,
-                    labelStyle: GoogleFonts.comicNeue(
-                        fontWeight: FontWeight.bold, fontSize: 13),
-                    unselectedLabelStyle: GoogleFonts.comicNeue(
-                        fontWeight: FontWeight.bold, fontSize: 13),
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    tabs: const [
-                      Tab(text: 'Aktif'),
-                      Tab(text: 'Jelajahi'),
-                      Tab(text: 'Badge'),
-                    ],
-                  ),
-                ),
-              ),
-            ];
-          },
-          body: TabBarView(
-            controller: _tabController,
-            children: const [
-              _ActiveChallengesTab(),
-              _TemplatesTab(),
-              _BadgesTab(),
-            ],
+      backgroundColor: isDark ? AppColors.backgroundDark : const Color(0xFFF8FAF9),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        leading: IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: contentColor, size: 20),
+        ),
+        title: Text(
+          'Challenge Menabung',
+          style: GoogleFonts.comicNeue(
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+            color: contentColor,
           ),
         ),
       ),
+      body: NestedScrollView(
+        headerSliverBuilder: (context, innerBoxIsScrolled) {
+          return [
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+                child: Column(
+                  children: [
+                    _buildStatsCard(streak, points, stats, isDark),
+                  ],
+                ),
+              ),
+            ),
+            SliverPersistentHeader(
+              pinned: true,
+              delegate: _SliverTabBarDelegate(
+                TabBar(
+                  controller: _tabController,
+                  indicatorColor: AppColors.primary,
+                  indicatorWeight: 3,
+                  labelColor: isDark ? Colors.white : AppColors.primary,
+                  unselectedLabelColor: Colors.grey.shade500,
+                  labelStyle: GoogleFonts.comicNeue(
+                      fontWeight: FontWeight.bold, fontSize: 13),
+                  unselectedLabelStyle: GoogleFonts.comicNeue(
+                      fontWeight: FontWeight.bold, fontSize: 13),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  tabs: const [
+                    Tab(text: 'Aktif'),
+                    Tab(text: 'Jelajahi'),
+                    Tab(text: 'Badge'),
+                  ],
+                ),
+              ),
+            ),
+          ];
+        },
+        body: TabBarView(
+          controller: _tabController,
+          children: const [
+            _ActiveChallengesTab(),
+            _TemplatesTab(),
+            _BadgesTab(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatsCard(
+      AsyncValue<int> streak, AsyncValue<int> points, Map<String, dynamic> stats, bool isDark) {
+    final hexBg = isDark ? AppColors.surfaceDark : Colors.white;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: hexBg,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+            color: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
+        boxShadow: [
+          BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
+              blurRadius: 15,
+              offset: const Offset(0, 8))
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          _buildModernStatItem(
+            icon: Icons.local_fire_department_rounded,
+            iconColor: Colors.orange,
+            value: streak.when(
+              data: (s) => s.toString(),
+              loading: () => '-',
+              error: (_, __) => '0',
+            ),
+            label: 'Streak',
+            isDark: isDark,
+          ),
+          _buildDivider(isDark),
+          _buildModernStatItem(
+            icon: Icons.stars_rounded,
+            iconColor: Colors.amber,
+            value: points.when(
+              data: (p) => p.toString(),
+              loading: () => '-',
+              error: (_, __) => '0',
+            ),
+            label: 'Poin',
+            isDark: isDark,
+          ),
+          _buildDivider(isDark),
+          _buildModernStatItem(
+            icon: Icons.check_circle_rounded,
+            iconColor: AppColors.primary,
+            value: stats['completed'].toString(),
+            label: 'Selesai',
+            isDark: isDark,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDivider(bool isDark) {
+    return Container(
+      height: 30,
+      width: 1,
+      color: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.05),
     );
   }
 
@@ -227,21 +188,22 @@ class _ChallengePageState extends ConsumerState<ChallengePage>
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Icon(icon, color: iconColor, size: 24),
-        const SizedBox(height: 6),
+        const SizedBox(height: 8),
         Text(
           value,
           style: GoogleFonts.comicNeue(
-            color: isDark ? Colors.white : Colors.black87,
-            fontSize: 18,
+            color: isDark ? Colors.white : AppColors.primaryDark,
+            fontSize: 20,
             fontWeight: FontWeight.w900,
           ),
         ),
         Text(
-          label,
+          label.toUpperCase(),
           style: GoogleFonts.comicNeue(
-            color: Colors.grey.shade500,
-            fontSize: 10,
-            fontWeight: FontWeight.w800,
+            color: (isDark ? Colors.white : AppColors.primaryDark).withValues(alpha: 0.4),
+            fontSize: 9,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.2,
           ),
         ),
       ],

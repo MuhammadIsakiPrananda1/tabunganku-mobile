@@ -617,6 +617,10 @@ class _TransactionEntryPageState extends ConsumerState<TransactionEntryPage> {
                           ? 'Biaya Admin Bank'
                           : 'Biaya Admin $source';
                     }
+                  } else {
+                    if (_nameController.text.startsWith('Biaya Admin')) {
+                      _nameController.clear();
+                    }
                   }
                 });
               },
@@ -680,6 +684,10 @@ class _TransactionEntryPageState extends ConsumerState<TransactionEntryPage> {
                         'Desember'
                       ][now.month];
                       _nameController.text = 'Bunga $b $monthName ${now.year}';
+                    }
+                  } else {
+                    if (_nameController.text.startsWith('Bunga ')) {
+                      _nameController.clear();
                     }
                   }
                 });

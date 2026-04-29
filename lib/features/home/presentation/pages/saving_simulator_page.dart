@@ -65,284 +65,350 @@ class _SavingSimulatorPageState extends ConsumerState<SavingSimulatorPage> {
       monthly = remaining / (totalDays / 30);
     }
 
+    final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
+
     return Scaffold(
       backgroundColor: isDarkMode ? AppColors.backgroundDark : const Color(0xFFF8FAF9),
-      extendBodyBehindAppBar: false,
       appBar: AppBar(
-        backgroundColor: isDarkMode ? AppColors.backgroundDark : const Color(0xFFF8FAF9),
+        backgroundColor: Colors.transparent,
         elevation: 0,
-        scrolledUnderElevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text('Simulasi Tabungan', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 16)),
         centerTitle: true,
-      ),
-      body: Stack(
-        children: [
-          // Background Decor
-          Positioned(
-            top: -100,
-            right: -50,
-            child: CircleAvatar(
-              radius: 120,
-              backgroundColor: AppColors.primary.withValues(alpha: 0.05),
-            ),
+        leading: IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: contentColor, size: 20),
+        ),
+        title: Text(
+          'Simulasi Tabungan',
+          style: GoogleFonts.comicNeue(
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+            color: contentColor,
           ),
-          
-          SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(24, 20, 24, 40),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+        ),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildHeadingSection(isDarkMode),
+            const SizedBox(height: 32),
+
+            // FORM SECTION
+            _buildInputField(
+              label: 'TARGET DANA IMPIAN',
+              controller: _amountController,
+              icon: Icons.account_balance_wallet_rounded,
+              isDarkMode: isDarkMode,
+              isCurrency: true,
+              onChanged: (_) => _calculate(),
+            ),
+
+            const SizedBox(height: 24),
+
+            Row(
               children: [
-                Text('Hitung Tabungan', style: GoogleFonts.comicNeue(fontSize: 32, fontWeight: FontWeight.bold, letterSpacing: -1.5)),
-                const SizedBox(height: 8),
-                Text('Rencanakan masa depan finansialmu dengan tepat.', style: GoogleFonts.comicNeue(fontSize: 14, color: Colors.grey.shade500)),
-                
-                const SizedBox(height: 32),
-
-                // FORM SECTION
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('TARGET DANA IMPIAN *', style: GoogleFonts.comicNeue(fontSize: 10, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white24 : Colors.black38, letterSpacing: 1.2)),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: _amountController,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [_RibuanSeparatorInputFormatter()],
-                      style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 18, color: isDarkMode ? Colors.white : Colors.black87),
-                      decoration: InputDecoration(
-                        hintText: '0',
-                        hintStyle: GoogleFonts.comicNeue(color: isDarkMode ? Colors.white12 : Colors.black26),
-                        prefixIcon: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const SizedBox(width: 16),
-                            const Icon(Icons.account_balance_wallet_rounded, color: AppColors.primary, size: 20),
-                            const SizedBox(width: 8),
-                            Text('Rp', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 16)),
-                            const SizedBox(width: 8),
-                          ],
-                        ),
-                        filled: false,
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(color: isDarkMode ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.05)),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(color: AppColors.primary, width: 1.5),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(vertical: 20),
-                      ),
-                      onChanged: (_) => _calculate(),
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    Row(
-                      children: [
-                        Expanded(
-                          flex: 2,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('DURASI *', style: GoogleFonts.comicNeue(fontSize: 10, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white24 : Colors.black38, letterSpacing: 1.2)),
-                              const SizedBox(height: 12),
-                              TextField(
-                                controller: _durationController,
-                                keyboardType: TextInputType.number,
-                                style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 18, color: isDarkMode ? Colors.white : Colors.black87),
-                                decoration: InputDecoration(
-                                  hintText: '0',
-                                  prefixIcon: const Icon(Icons.timer_outlined, color: AppColors.primary, size: 20),
-                                  filled: false,
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                    borderSide: BorderSide(color: isDarkMode ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.05)),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                    borderSide: BorderSide(color: AppColors.primary, width: 1.5),
-                                  ),
-                                  contentPadding: const EdgeInsets.symmetric(vertical: 20),
-                                ),
-                                onChanged: (_) => _calculate(),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          flex: 3,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('SATUAN *', style: GoogleFonts.comicNeue(fontSize: 10, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white24 : Colors.black38, letterSpacing: 1.2)),
-                              const SizedBox(height: 12),
-                              Material(
-                                color: Colors.transparent,
-                                borderRadius: BorderRadius.circular(16),
-                                clipBehavior: Clip.antiAlias,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(16),
-                                    border: Border.all(color: isDarkMode ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.05)),
-                                  ),
-                                  child: DropdownButtonHideUnderline(
-                                    child: DropdownButton<String>(
-                                      value: _unit,
-                                      isExpanded: true,
-                                      icon: const Padding(
-                                        padding: EdgeInsets.only(right: 12),
-                                        child: Icon(Icons.expand_more_rounded, color: AppColors.primary),
-                                      ),
-                                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8.5),
-                                      borderRadius: BorderRadius.circular(16),
-                                      style: GoogleFonts.comicNeue(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                          color: isDarkMode
-                                              ? Colors.white
-                                              : Colors.black87),
-                                      items: ['Hari', 'Minggu', 'Bulan', 'Tahun']
-                                          .map((e) => DropdownMenuItem(
-                                              value: e,
-                                              child: Text(e,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                  style: GoogleFonts.comicNeue(
-                                                      fontWeight:
-                                                          FontWeight.bold))))
-                                          .toList(),
-                                      onChanged: (v) {
-                                        setState(() => _unit = v!);
-                                        _calculate();
-                                      },
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                Expanded(
+                  flex: 2,
+                  child: _buildInputField(
+                    label: 'DURASI',
+                    controller: _durationController,
+                    icon: Icons.timer_outlined,
+                    isDarkMode: isDarkMode,
+                    onChanged: (_) => _calculate(),
+                  ),
                 ),
-
-                const SizedBox(height: 48),
-
-                // RESULTS DASHBOARD
-                if (_targetAmount > 0) ...[
-                  // PROGRESS CARD
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: isDarkMode ? Colors.white.withValues(alpha: 0.03) : Colors.white,
-                      borderRadius: BorderRadius.circular(32),
-                      border: Border.all(color: isDarkMode ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
-                      boxShadow: [
-                         BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 20, offset: const Offset(0, 10)),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text('PROGRES TABUNGAN', style: GoogleFonts.comicNeue(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5, color: Colors.grey)),
-                            Text('${(progress * 100).toStringAsFixed(0)}%', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, color: AppColors.primary)),
-                          ],
-                        ),
-                        const SizedBox(height: 20),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: LinearProgressIndicator(
-                            value: progress,
-                            minHeight: 12,
-                            backgroundColor: isDarkMode ? Colors.white10 : Colors.black12,
-                            valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        Row(
-                          children: [
-                            _InfoPiece(
-                              label: 'Saldo Saat Ini',
-                              value: NumberFormat.currency(locale: 'id_ID', symbol: 'Rp', decimalDigits: 0).format(currentBalance),
-                              color: isDarkMode ? Colors.white60 : Colors.black54,
-                            ),
-                            Container(width: 1, height: 30, color: Colors.grey.withValues(alpha: 0.2), margin: const EdgeInsets.symmetric(horizontal: 20)),
-                            _InfoPiece(
-                              label: 'Kekurangan',
-                              value: NumberFormat.currency(locale: 'id_ID', symbol: 'Rp', decimalDigits: 0).format(remaining),
-                              color: remaining > 0 ? Colors.red.shade400 : Colors.green.shade400,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 40),
-
-                  // SETORAN RUTIN
-                  Text('RENCANA SETORAN', style: GoogleFonts.comicNeue(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 2, color: Colors.grey)),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      _StatCard(label: 'HARIAN', amount: daily, color: const Color(0xFF3498DB), isDarkMode: isDarkMode),
-                      const SizedBox(width: 12),
-                      _StatCard(label: 'MINGGUAN', amount: weekly, color: const Color(0xFFF39C12), isDarkMode: isDarkMode),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  _StatCard(label: 'SETORAN BULANAN', amount: monthly, color: const Color(0xFF27AE60), isDarkMode: isDarkMode, isWide: true),
-                  
-                  const SizedBox(height: 24),
-                  
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.05),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.calendar_today_rounded, color: AppColors.primary, size: 18),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            'Target akan tercapai pada ${ DateFormat('d MMMM yyyy', 'id_ID').format(DateTime.now().add(Duration(days: totalDays))) }',
-                            style: GoogleFonts.comicNeue(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primary),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ] else
-                   Center(
-                     child: Padding(
-                       padding: const EdgeInsets.symmetric(vertical: 80),
-                       child: Column(
-                         children: [
-                           Icon(Icons.pie_chart_outline_rounded, size: 64, color: isDarkMode ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
-                           const SizedBox(height: 24),
-                           Text('Masukkan target dan durasi\nuntuk melihat perhitungan.', textAlign: TextAlign.center, style: GoogleFonts.comicNeue(color: Colors.grey, fontWeight: FontWeight.w500)),
-                         ],
-                       ),
-                     ),
-                   ),
+                const SizedBox(width: 16),
+                Expanded(
+                  flex: 3,
+                  child: _buildUnitDropdown(isDarkMode),
+                ),
               ],
             ),
+
+            const SizedBox(height: 40),
+
+            // RESULTS DASHBOARD
+            if (_targetAmount > 0) ...[
+              _buildProgressCard(progress, currentBalance, remaining, isDarkMode),
+              const SizedBox(height: 32),
+              _buildSavingsPlanSection(daily, weekly, monthly, totalDays, isDarkMode),
+            ] else
+              _buildEmptyState(isDarkMode),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeadingSection(bool isDarkMode) {
+    final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Hitung Tabungan',
+          style: GoogleFonts.comicNeue(
+            fontSize: 32,
+            fontWeight: FontWeight.bold,
+            color: contentColor,
+            letterSpacing: -1,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Rencanakan masa depan finansialmu dengan tepat.',
+          style: GoogleFonts.comicNeue(
+            fontSize: 14,
+            color: contentColor.withValues(alpha: 0.5),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInputField({
+    required String label,
+    required TextEditingController controller,
+    required IconData icon,
+    required bool isDarkMode,
+    bool isCurrency = false,
+    Function(String)? onChanged,
+  }) {
+    final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 8),
+          child: Text(
+            label,
+            style: GoogleFonts.comicNeue(
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              color: contentColor.withValues(alpha: 0.5),
+              letterSpacing: 1,
+            ),
+          ),
+        ),
+        TextFormField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          inputFormatters: [isCurrency ? _RibuanSeparatorInputFormatter() : FilteringTextInputFormatter.digitsOnly],
+          style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 16, color: contentColor),
+          onChanged: onChanged,
+          decoration: InputDecoration(
+            hintText: '0',
+            hintStyle: GoogleFonts.comicNeue(fontSize: 16, color: isDarkMode ? Colors.white10 : Colors.black38),
+            prefixIcon: Container(
+              padding: const EdgeInsets.only(left: 20, right: 8),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(icon, color: AppColors.primary, size: 20),
+                  const SizedBox(width: 8),
+                  if (isCurrency)
+                    Text('Rp', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 16)),
+                ],
+              ),
+            ),
+            filled: true,
+            fillColor: isDarkMode ? Colors.white.withValues(alpha: 0.05) : AppColors.background,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildUnitDropdown(bool isDarkMode) {
+    final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 8),
+          child: Text(
+            'SATUAN',
+            style: GoogleFonts.comicNeue(
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              color: contentColor.withValues(alpha: 0.5),
+              letterSpacing: 1,
+            ),
+          ),
+        ),
+        Container(
+          height: 52,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : AppColors.background,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isDarkMode ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.05),
+            ),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: _unit,
+              isExpanded: true,
+              icon: const Icon(Icons.expand_more_rounded, color: AppColors.primary),
+              borderRadius: BorderRadius.circular(16),
+              style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 16, color: contentColor),
+              items: ['Hari', 'Minggu', 'Bulan', 'Tahun']
+                  .map((e) => DropdownMenuItem(
+                      value: e,
+                      child: Text(e, style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold))))
+                  .toList(),
+              onChanged: (v) {
+                setState(() => _unit = v!);
+                _calculate();
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildProgressCard(double progress, double currentBalance, double remaining, bool isDarkMode) {
+    final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
+    final hexBg = isDarkMode ? AppColors.surfaceDark : Colors.white;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: hexBg,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: isDarkMode ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
+        boxShadow: [
+          BoxShadow(
+              color: Colors.black.withValues(alpha: isDarkMode ? 0.3 : 0.05),
+              blurRadius: 15,
+              offset: const Offset(0, 8))
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('PROGRES TABUNGAN',
+                  style: GoogleFonts.comicNeue(
+                      color: contentColor.withValues(alpha: 0.4),
+                      fontSize: 9,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 2)),
+              Text('${(progress * 100).toStringAsFixed(0)}%',
+                  style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 14)),
+            ],
+          ),
+          const SizedBox(height: 20),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: LinearProgressIndicator(
+              value: progress,
+              minHeight: 10,
+              backgroundColor: isDarkMode ? Colors.white10 : Colors.black.withValues(alpha: 0.05),
+              valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              _InfoPiece(
+                label: 'SALDO SAAT INI',
+                value: NumberFormat.currency(locale: 'id_ID', symbol: 'Rp', decimalDigits: 0).format(currentBalance),
+                color: contentColor,
+              ),
+              Container(
+                  width: 1,
+                  height: 30,
+                  color: contentColor.withValues(alpha: 0.1),
+                  margin: const EdgeInsets.symmetric(horizontal: 20)),
+              _InfoPiece(
+                label: 'KEKURANGAN',
+                value: NumberFormat.currency(locale: 'id_ID', symbol: 'Rp', decimalDigits: 0).format(remaining),
+                color: remaining > 0 ? Colors.red.shade400 : Colors.green.shade400,
+              ),
+            ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSavingsPlanSection(double daily, double weekly, double monthly, int totalDays, bool isDarkMode) {
+    final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('RENCANA SETORAN',
+            style: GoogleFonts.comicNeue(
+                color: contentColor.withValues(alpha: 0.4),
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 2)),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            _StatCard(label: 'HARIAN', amount: daily, color: const Color(0xFF3498DB), isDarkMode: isDarkMode),
+            const SizedBox(width: 12),
+            _StatCard(label: 'MINGGUAN', amount: weekly, color: const Color(0xFFF39C12), isDarkMode: isDarkMode),
+          ],
+        ),
+        const SizedBox(height: 12),
+        _StatCard(label: 'SETORAN BULANAN', amount: monthly, color: const Color(0xFF27AE60), isDarkMode: isDarkMode, isWide: true),
+        const SizedBox(height: 24),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColors.primary.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.event_available_rounded, color: AppColors.primary, size: 20),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Target akan tercapai pada ${DateFormat('d MMMM yyyy', 'id_ID').format(DateTime.now().add(Duration(days: totalDays)))}',
+                  style: GoogleFonts.comicNeue(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primary),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEmptyState(bool isDarkMode) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 60),
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.05),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.insights_rounded,
+                  size: 48, color: isDarkMode ? Colors.white10 : AppColors.primary.withValues(alpha: 0.2)),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Masukkan target dan durasi\nuntuk melihat perhitungan.',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.comicNeue(color: Colors.grey, fontWeight: FontWeight.w500, fontSize: 14),
+            ),
+          ],
+        ),
       ),
     );
   }

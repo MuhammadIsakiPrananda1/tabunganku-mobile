@@ -196,6 +196,20 @@ class AllServicesPage extends ConsumerWidget {
               route: '/zakat',
             ),
             _ServiceData(
+              icon: Icons.mosque_rounded,
+              title: 'Sedekah Masjid',
+              subtitle: 'Catat sedekah untuk rumah ibadah',
+              color: Colors.lightGreen,
+              route: '/mosque-donation',
+            ),
+            _ServiceData(
+              icon: Icons.mosque_rounded,
+              title: 'Haji & Umrah',
+              subtitle: 'Rencanakan ibadah suci',
+              color: Colors.amber.shade800,
+              route: '/hajj-umrah',
+            ),
+            _ServiceData(
               icon: Icons.emoji_events_rounded,
               title: 'Misi & Challenge',
               subtitle: 'Mainkan misi, raih reward',

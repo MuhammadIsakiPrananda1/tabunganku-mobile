@@ -10,156 +10,132 @@
   <a href="https://firebase.google.com"><img src="https://img.shields.io/badge/Backend-Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black" alt="Backend"></a>
   <img src="https://img.shields.io/badge/Lisensi-MIT-green.svg?style=for-the-badge" alt="Lisensi">
   <img src="https://img.shields.io/badge/Platform-Android%20%7C%20iOS-blue?style=for-the-badge" alt="Platform Dukungan">
-  <img src="https://img.shields.io/badge/Maintained%3F-yes-brightgreen.svg?style=for-the-badge" alt="Maintained">
 </p>
 
 ---
 
 ## 📖 Deskripsi Proyek
 
-**TabunganKu** adalah solusi finansial mutakhir yang menggabungkan kemudahan pencatatan harian dengan kekuatan teknologi cloud. Lahir dari kebutuhan akan transparansi keuangan dalam keluarga, aplikasi ini berevolusi menjadi asisten finansial pintar yang mampu membantu siapa saja—dari pelajar hingga kepala keluarga—untuk mencapai target keuangan mereka dengan cara yang menyenangkan dan terukur.
+**TabunganKu** adalah aplikasi manajemen keuangan modern yang dirancang untuk mengubah kebiasaan finansial Anda menjadi lebih terstruktur, transparan, dan menyenangkan. Dikembangkan dengan Flutter dan didukung oleh ekosistem Firebase, aplikasi ini menawarkan pengalaman manajemen uang yang mulus, baik untuk penggunaan pribadi maupun kolaborasi dalam keluarga.
 
-Kami percaya bahwa menabung seharusnya tidak terasa seperti beban. Melalui integrasi **Gamifikasi**, **AI OCR**, dan **Visualisasi Data**, TabunganKu mengubah angka-angka yang membosankan menjadi petualangan menuju impian Anda.
-
----
-
-## ✨ Fitur Utama (Deep Dive)
-
-### 📊 Dashboard & Analitik Eksklusif
-*   **Stellar Insights**: Bukan sekadar angka, tapi pemahaman. Dashboard kami memberikan ringkasan saldo dengan animasi halus dan perubahan warna dinamis berdasarkan kondisi keuangan Anda.
-*   **Analisis Pengeluaran Multi-Kategori**: Visualisasikan ke mana uang Anda pergi dengan grafik **FL Chart** yang mendukung interaksi *touch-to-view*.
-*   **Laporan Periodik Otomatis**: Dapatkan ringkasan mingguan dan bulanan untuk membantu evaluasi pengeluaran tanpa perlu menghitung ulang.
-
-### 👨‍👩‍👧‍👦 Kolaborasi Keluarga (The Harmony Feature)
-*   **Family Sync 2.0**: Buat grup keluarga dan undang anggota melalui link atau kode unik. Setiap kontribusi tabungan akan memicu notifikasi real-time ke semua anggota.
-*   **Target Bersama**: Bekerja sama untuk mencapai tujuan besar seperti DP Rumah, Pendidikan Anak, atau Liburan Keluarga.
-*   **Role Management**: Pengaturan admin grup untuk mengelola anggota dan memvalidasi transaksi jika diperlukan.
-
-### 🎮 Sistem Gamifikasi (Build the Habit)
-*   **14+ Saving Challenges**: Mulai dari *Tantangan Kalender*, *Tantangan 52 Minggu*, hingga *Tantangan Tanpa Belanja*.
-*   **Experience Points (XP) & Leveling**: Setiap kali Anda menabung atau menyelesaikan tantangan, Anda akan mendapatkan XP untuk menaikkan level akun Anda.
-*   **Hall of Fame**: Lihat pencapaian terbaik Anda dan koleksi lencana (*badges*) yang telah didapatkan sebagai bukti kedisiplinan finansial.
-
-### 🧠 Teknologi Pintar & Keamanan
-*   **AI OCR Receipt Scanner**: Memanfaatkan **Google ML Kit** dengan akurasi tinggi untuk membaca struk belanja dan mengonversinya menjadi data transaksi digital dalam hitungan detik.
-*   **Offline First Capabilities**: Aplikasi tetap dapat digunakan meski tanpa koneksi internet; data akan disinkronkan secara otomatis saat koneksi kembali tersedia (**Connectivity Plus**).
-*   **Biometric Guard**: Keamanan lapis baja dengan integrasi **Fingerprint** dan **Face Unlock** untuk menjaga privasi data Anda.
+Aplikasi ini bukan sekadar alat pencatat; TabunganKu adalah asisten finansial yang dilengkapi dengan teknologi AI OCR untuk pemindaian struk, simulasi tabungan yang akurat, hingga sistem gamifikasi yang memotivasi Anda untuk mencapai tujuan finansial lebih cepat.
 
 ---
 
-## 🛠️ Arsitektur & Stack Teknologi Modern
+## ✨ Fitur Unggulan (Real App Capabilities)
 
-Aplikasi ini dibangun dengan standar industri tinggi menggunakan pola **Clean Architecture** sederhana yang memastikan skalabilitas dan kemudahan pemeliharaan.
+TabunganKu hadir dengan ekosistem fitur yang lengkap untuk mencakup seluruh aspek kehidupan finansial Anda:
 
-| Kategori | Teknologi | Kegunaan Utama |
-| :--- | :--- | :--- |
-| **Framework** | **Flutter SDK** | Membangun UI yang indah dan responsif untuk banyak platform. |
-| **State Management** | **Riverpod (Generator)** | Menangani logika aplikasi dengan *dependency injection* yang aman. |
-| **Database** | **Firestore NoSQL** | Sinkronisasi data real-time dengan latensi rendah. |
-| **Authentication** | **Firebase Auth** | Sistem login yang aman (Email, Google, dll). |
-| **Local Storage** | **Secure Storage** | Menyimpan kunci enkripsi dan data sensitif secara lokal. |
-| **AI/ML** | **Google ML Kit** | Pemrosesan citra untuk fitur scan struk otomatis. |
-| **Reporting** | **PDF & Intl** | Menghasilkan dokumen laporan dan formatting mata uang Rupiah. |
+### 📊 Manajemen Keuangan & Pencatatan Cerdas
+*   **Smart Receipt (AI OCR)**: Pindai struk belanja secara otomatis menggunakan **Google ML Kit**. Aplikasi akan mengekstrak data nominal, tanggal, dan item secara instan untuk pencatatan tanpa ketik manual.
+*   **Kelola Langganan (Subscription Manager)**: Pantau semua layanan langganan rutin (Netflix, Spotify, Gym) agar tidak ada pengeluaran yang terlewat atau mubazir.
+*   **Manajemen Tagihan**: List tagihan bulanan wajib dengan status pembayaran yang jelas, membantu Anda menghindari denda keterlambatan.
+*   **Analitik FL Chart**: Visualisasi pengeluaran dan pemasukan melalui grafik interaktif yang mendukung mode gelap (*dark mode*) dan terang.
+
+### 💰 Tabungan & Investasi Modern
+*   **Tabungan Receh (Piggy Bank)**: Fitur untuk mengumpulkan uang kecil secara digital, memupuk kebiasaan menabung dari jumlah yang paling sederhana.
+*   **Dana Rencana (Saving Goals)**: Tetapkan target dana untuk masa depan (pendidikan, kendaraan, dll) dengan pelacakan progres yang mendetail.
+*   **Simpanan Emas**: Pantau dan catat kepemilikan aset emas Anda sebagai instrumen pelindung nilai kekayaan.
+*   **Portofolio Investasi**: Satu tempat untuk memantau semua instrumen investasi Anda (Saham, Reksa Dana, Obligasi) dengan valuasi real-time.
+*   **Proteksi Asuransi**: Catat dan pantau premi asuransi rutin Anda untuk memastikan perlindungan finansial jangka panjang tetap aktif.
+
+### 👨‍👩‍👧‍👦 Kolaborasi & Sinkronisasi Keluarga
+*   **Family Sync 2.0**: Hubungkan akun dengan anggota keluarga. Setiap transaksi yang dicatat akan tersinkronisasi secara real-time ke semua perangkat dalam grup keluarga.
+*   **Transparansi Kontribusi**: Lihat kontribusi tabungan setiap anggota secara terbuka untuk membangun kepercayaan dan kebersamaan dalam mencapai target keluarga.
+
+### 🛠️ Alat & Utilitas Finansial
+*   **Simulasi Tabungan**: Hitung proyeksi pertumbuhan tabungan Anda berdasarkan target dana dan durasi waktu yang diinginkan.
+*   **Kalkulator Bunga Majemuk**: Pahami kekuatan *compounding interest* dengan simulasi pertumbuhan aset jangka panjang.
+*   **Konverter Valas Real-time**: Cek nilai tukar mata uang asing secara akurat menggunakan integrasi API pihak ketiga yang terpercaya.
+*   **Kalkulator & Pengingat Pajak**: Estimasi perhitungan pajak (PBB & PKB) serta pengingat jatuh tempo agar Anda tetap menjadi warga negara yang taat pajak.
+
+### 🕋 Sosial & Ibadah (Religious Finance)
+*   **Zakat & Infaq Calculator**: Kalkulator khusus untuk menghitung Zakat Profesi, Zakat Maal, dan Zakat Fitrah sesuai syariat dengan alur pencatatan langsung ke riwayat transaksi.
+*   **Sedekah Masjid**: Fitur untuk mencatat dan merencanakan donasi untuk rumah ibadah.
+*   **Rencana Haji & Umrah**: Simulasi dan perencanaan khusus untuk membantu Anda mewujudkan ibadah ke tanah suci.
+
+### 🎮 Gamifikasi & Motivasi (Build the Habit)
+*   **14+ Saving Challenges**: Tantangan seru seperti *Tantangan 52 Minggu*, *Daily Saving*, hingga *Zero Expense Day* untuk membuat menabung terasa seperti permainan.
+*   **Sistem XP & Leveling**: Dapatkan pengalaman (XP) dari setiap aktivitas menabung dan naikkan level profil Anda.
+*   **Hall of Fame (Badges)**: Dapatkan lencana penghargaan atas kedisiplinan finansial Anda dan koleksi semuanya di profil.
 
 ---
 
-## 📁 Struktur Direktori & Pola Kode
+## 🏆 Sistem Badge (Hall of Fame)
+*Dapatkan penghargaan atas setiap kedisiplinan finansial Anda. Koleksi semua badge dan jadilah Legenda Menabung!*
 
-```text
-lib/
-├── app/              # Konfigurasi aplikasi global (Themes, Routes)
-├── features/         # Modul fitur (Dashboard, Savings, Profile, Family)
-│   ├── data/         # Repositori dan Data Sources (Firebase/Local)
-│   ├── domain/       # Entities dan Business Logic
-│   └── presentation/ # Widgets, Screens, dan State Providers (Riverpod)
-├── core/             # Utilitas, Ekstensi, dan Konstanta
-└── main.dart         # Titik masuk aplikasi
+<div align="center">
+
+| Badge | Nama Lencana | Misi Pencapaian | Kategori |
+| :---: | :--- | :--- | :---: |
+| 🎖️ | **Konsisten 3 Hari** | Selesaikan challenge 3 hari berturut-turut | 🔥 Streak |
+| 📅 | **Pekan Sempurna** | Selesaikan challenge 7 hari berturut-turut | 🔥 Streak |
+| 🏛️ | **Disiplin Sejati** | Selesaikan challenge 30 hari berturut-turut | 🔥 Streak |
+| 👑 | **Legenda Menabung** | Selesaikan challenge 100 hari berturut-turut | 🔥 Streak |
+| ⭐ | **Pemula Hebat** | Berhasil mengumpulkan 50 poin challenge | 🎯 Point |
+| 💰 | **Penabung Handal** | Berhasil mengumpulkan 100 poin challenge | 🎯 Point |
+| 💎 | **Master Hemat** | Berhasil mengumpulkan 250 poin challenge | 🎯 Point |
+| 🔱 | **Raja Tabungan** | Berhasil mengumpulkan 500 poin challenge | 🎯 Point |
+| 🧿 | **Dewa Penabung** | Pencapaian tertinggi 1.000 poin challenge | 🎯 Point |
+| 🚀 | **Langkah Pertama** | Berhasil menyelesaikan challenge pertama Anda | 🎮 Mission |
+| 🍱 | **Chef Hemat** | Menyelesaikan tantangan Meal Prep Week | 🎮 Mission |
+| 🛒 | **Pantang Belanja** | Menyelesaikan tantangan No Online Shopping | 🎮 Mission |
+
+</div>
+
+---
+
+## 🛠️ Stack Teknologi
+
+| Kategori | Teknologi |
+| :--- | :--- |
+| **Framework** | Flutter 3.x (Dart) |
+| **State Management** | Riverpod (Generator) |
+| **Backend** | Firebase (Auth, Firestore, Storage) |
+| **AI / ML** | Google ML Kit (Text Recognition) |
+| **Database Lokal** | Shared Preferences & Secure Storage |
+| **Keamanan** | Biometric Local Auth (Fingerprint/FaceID) |
+| **Reporting** | PDF Generation & Intl Formatting |
+
+---
+
+## 🚀 Panduan Instalasi
+
+### 1. Kloning Repositori
+```bash
+git clone https://github.com/MuhammadIsakiPrananda1/tabunganku-mobile.git
+cd tabunganku-mobile
 ```
 
----
-
-## 🚀 Panduan Instalasi (Step-by-Step)
-
-### 1. Persiapan Lingkungan
-Pastikan perangkat Anda memenuhi spesifikasi berikut:
-*   **Flutter SDK**: v3.x atau lebih tinggi.
-*   **Java**: JDK 11 (direkomendasikan).
-*   **Android Studio / VS Code**: Terinstal plugin Flutter & Dart.
-
-### 2. Kloning & Dependensi
-Buka terminal Anda dan jalankan perintah berikut:
+### 2. Instal Dependensi
 ```bash
-# Clone proyek ke lokal
-git clone https://github.com/MuhammadIsakiPrananda1/tabunganku-mobile.git
-
-# Masuk ke direktori proyek
-cd tabunganku-mobile
-
-# Instal semua paket yang diperlukan
 flutter pub get
 ```
 
-### 3. Konfigurasi Backend (Firebase)
-Tanpa langkah ini, fitur sinkronisasi cloud tidak akan berfungsi:
-1.  Buka [Firebase Console](https://console.firebase.google.com/).
-2.  Buat proyek baru dan tambahkan aplikasi Android/iOS.
-3.  Unduh `google-services.json` (Android) ke `android/app/`.
-4.  Unduh `GoogleService-Info.plist` (iOS) ke `ios/Runner/`.
-5.  Pastikan **Firestore Index** sudah dibuat sesuai dengan kueri yang ada di kode.
-
-### 4. Build Generation
-Aplikasi ini menggunakan *code generation* untuk performa state management yang lebih baik:
+### 3. Generate Kode
 ```bash
 flutter pub run build_runner build --delete-conflicting-outputs
 ```
 
----
-
-## 🏗️ Deployment & Distribusi
-
-### Persiapan Rilis Android
-1.  Pastikan `version` di `pubspec.yaml` sudah diperbarui.
-2.  Jalankan perintah build:
+### 4. Jalankan Aplikasi
 ```bash
-# Build APK untuk pengujian manual
-flutter build apk --release
-
-# Build App Bundle untuk rilis Play Store
-flutter build appbundle --release
+flutter run
 ```
 
-### Persiapan Rilis iOS
-1.  Buka `Runner.xcworkspace` di Xcode.
-2.  Pilih *Signing & Capabilities* dan masukkan tim pengembang Anda.
-3.  Jalankan: `flutter build ipa --release`
-
 ---
 
-## 🌟 Roadmap Pengembangan
-- [ ] Integrasi Notifikasi Push untuk pengingat menabung harian.
-- [ ] Fitur Ekspor Laporan ke format Excel (.xlsx).
-- [ ] Dark Mode yang lebih optimal.
-- [ ] Integrasi dengan API Bank lokal (Tahap Riset).
+## 📄 Lisensi
 
----
+Proyek ini dilisensikan di bawah **MIT License**.
 
-## 📄 Lisensi & Kredit
-
-Proyek ini berada di bawah lisensi **MIT**. Anda bebas menggunakan dan memodifikasi kode ini dengan tetap memberikan atribusi kepada penulis aslinya.
-
-*   **Pembuat Utama**: [Muhammad Isaki Prananda](https://github.com/MuhammadIsakiPrananda1)
-*   **Studio**: **Neverland Studio**
-*   **Email Kontak**: [Arlianto032@gmail.com](mailto:Arlianto032@gmail.com)
-
----
 <p align="center">
-  <img src="https://forthebadge.com/images/badges/made-with-brave.svg" height="30">
-  <img src="https://forthebadge.com/images/badges/built-with-love.svg" height="30">
-  <img src="https://forthebadge.com/images/badges/built-with-fluent-interface.svg" height="30">
-  <img src="https://forthebadge.com/images/badges/uses-badges.svg" height="30">
+  <b>Neverland Studio</b><br>
+  Dibuat dengan ❤️ oleh <b>Muhammad Isaki Prananda</b><br>
+  <a href="mailto:Arlianto032@gmail.com">Kontak Kami</a>
 </p>
 
 <p align="center">
-  <b>TabunganKu - Solusi Finansial di Genggaman Anda</b><br>
-  © 2026 <b>Muhammad Isaki Prananda</b>. Dipersembahkan oleh <b>Neverland Studio</b>.
+  <img src="https://forthebadge.com/images/badges/built-with-love.svg" height="25">
+  <img src="https://forthebadge.com/images/badges/made-with-brave.svg" height="25">
+  <img src="https://forthebadge.com/images/badges/uses-badges.svg" height="25">
 </p>

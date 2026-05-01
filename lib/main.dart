@@ -145,32 +145,36 @@ class _TabunganKuAppState extends ConsumerState<TabunganKuApp>
         themeMode: themeMode,
         routerConfig: appRouter,
         builder: (context, child) {
-          return Consumer(
-            builder: (context, ref, _) {
-              final security = ref.watch(securityProvider);
-              final router = ref.watch(appRouterProvider);
-              
-              // Get current location safely to exclude lock from splash/setup
-              String location = '/';
-              try {
-                location = router.routerDelegate.currentConfiguration.fullPath;
-              } catch (_) {}
+          return GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+            child: Consumer(
+              builder: (context, ref, _) {
+                final security = ref.watch(securityProvider);
+                final router = ref.watch(appRouterProvider);
+                
+                // Get current location safely to exclude lock from splash/setup
+                String location = '/';
+                try {
+                  location = router.routerDelegate.currentConfiguration.fullPath;
+                } catch (_) {}
 
-              final isLockableRoute = location != '/' &&
-                                    location != '/splash' && 
-                                    location != '/pin-setup' && 
-                                    location != '/lock';
+                final isLockableRoute = location != '/' &&
+                                      location != '/splash' && 
+                                      location != '/pin-setup' && 
+                                      location != '/lock';
 
-              if (security.hasPin && !security.isAuthorized && isLockableRoute) {
-                return Stack(
-                  children: [
-                    if (child != null) child,
-                    const LockScreen(),
-                  ],
-                );
-              }
-              return child ?? const SizedBox();
-            },
+                if (security.hasPin && !security.isAuthorized && isLockableRoute) {
+                  return Stack(
+                    children: [
+                      if (child != null) child,
+                      const LockScreen(),
+                    ],
+                  );
+                }
+                return child ?? const SizedBox();
+              },
+            ),
           );
         },
       ),

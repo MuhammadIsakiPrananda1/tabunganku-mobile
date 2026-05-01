@@ -86,6 +86,19 @@ class SecureStorageService {
     return await _storage.read(key: _tokenExpiryKey);
   }
 
+  // General Secure Storage Methods
+  Future<void> writeSecureData(String key, String value) async {
+    await _storage.write(key: key, value: value);
+  }
+
+  Future<String?> readSecureData(String key) async {
+    return await _storage.read(key: key);
+  }
+
+  Future<void> deleteSecureData(String key) async {
+    await _storage.delete(key: key);
+  }
+
   // Clear all secure data
   Future<void> clearAll() async {
     await Future.wait([

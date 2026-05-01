@@ -75,7 +75,7 @@ class _HajjUmrahPlannerPageState extends ConsumerState<HajjUmrahPlannerPage> {
                 _buildInfoCard(),
                 const SizedBox(height: 24),
 
-                Text('PILIH PROGRAM', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5, color: contentColor.withValues(alpha: 0.4))),
+                Text('PILIH PROGRAM', style: GoogleFonts.comicNeue(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5, color: contentColor.withValues(alpha: 0.4))),
                 const SizedBox(height: 12),
                 Row(
                   children: [
@@ -89,7 +89,7 @@ class _HajjUmrahPlannerPageState extends ConsumerState<HajjUmrahPlannerPage> {
                 _buildInputForm(isDarkMode),
                 
                 const SizedBox(height: 40),
-                Text('RENCANA AKTIF', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5, color: contentColor.withValues(alpha: 0.4))),
+                Text('RENCANA AKTIF', style: GoogleFonts.comicNeue(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5, color: contentColor.withValues(alpha: 0.4))),
                 const SizedBox(height: 16),
                 if (filteredTargets.isEmpty)
                   _buildEmptyState(isDarkMode)
@@ -139,7 +139,7 @@ class _HajjUmrahPlannerPageState extends ConsumerState<HajjUmrahPlannerPage> {
               const SizedBox(width: 8),
               Text(
                 label,
-                style: TextStyle(
+                style: GoogleFonts.comicNeue(
                   fontWeight: FontWeight.bold,
                   fontSize: 13,
                   color: isSelected ? Colors.white : contentColor
@@ -168,7 +168,7 @@ class _HajjUmrahPlannerPageState extends ConsumerState<HajjUmrahPlannerPage> {
               _activeType == 'Haji' 
                 ? 'Persiapkan bekal perjalanan haji Anda sedini mungkin untuk ibadah yang lebih tenang.' 
                 : 'Wujudkan impian ibadah Umrah Anda dengan perencanaan keuangan yang matang.',
-              style: const TextStyle(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.w500, height: 1.4),
+              style: GoogleFonts.comicNeue(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.w500, height: 1.4),
             ),
           ),
         ],
@@ -184,7 +184,7 @@ class _HajjUmrahPlannerPageState extends ConsumerState<HajjUmrahPlannerPage> {
           _nameController, 
           Icons.edit_note_rounded, 
           isDarkMode,
-          hint: _activeType == 'Haji' ? 'Contoh: Haji Sekeluarga' : 'Contoh: Umrah Ramadhan',
+          hint: 'Masukkan nama rencana',
         ),
         const SizedBox(height: 20),
         _buildAlignedInput(
@@ -193,7 +193,7 @@ class _HajjUmrahPlannerPageState extends ConsumerState<HajjUmrahPlannerPage> {
           Icons.account_balance_wallet_rounded, 
           isDarkMode,
           isAmount: true,
-          hint: _activeType == 'Haji' ? '25.000.000' : '30.000.000',
+          hint: '0',
         ),
         const SizedBox(height: 20),
         _buildDatePicker(isDarkMode),
@@ -209,7 +209,7 @@ class _HajjUmrahPlannerPageState extends ConsumerState<HajjUmrahPlannerPage> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               elevation: 0,
             ),
-            child: const Text('Simpan Rencana', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+            child: Text('Simpan Rencana', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 15)),
           ),
         ),
       ],
@@ -223,16 +223,16 @@ class _HajjUmrahPlannerPageState extends ConsumerState<HajjUmrahPlannerPage> {
       children: [
         Padding(
           padding: const EdgeInsets.only(left: 4, bottom: 8),
-          child: Text(label, style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: contentColor.withValues(alpha: 0.5), letterSpacing: 1)),
+          child: Text(label, style: GoogleFonts.comicNeue(fontSize: 10, fontWeight: FontWeight.bold, color: contentColor.withValues(alpha: 0.5), letterSpacing: 1)),
         ),
         TextFormField(
           controller: controller,
           keyboardType: isAmount ? TextInputType.number : TextInputType.text,
           inputFormatters: isAmount ? [_RibuanFormatter()] : null,
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: contentColor),
+          style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 16, color: contentColor),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: TextStyle(
+            hintStyle: GoogleFonts.comicNeue(
                 fontSize: 15,
                 fontWeight: FontWeight.normal,
                 color: isDarkMode ? Colors.white10 : Colors.black12),
@@ -266,7 +266,7 @@ class _HajjUmrahPlannerPageState extends ConsumerState<HajjUmrahPlannerPage> {
       children: [
         Padding(
           padding: const EdgeInsets.only(left: 4, bottom: 8),
-          child: Text('ESTIMASI KEBERANGKATAN', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: contentColor.withValues(alpha: 0.5), letterSpacing: 1)),
+          child: Text('ESTIMASI KEBERANGKATAN', style: GoogleFonts.comicNeue(fontSize: 10, fontWeight: FontWeight.bold, color: contentColor.withValues(alpha: 0.5), letterSpacing: 1)),
         ),
         InkWell(
           onTap: () async {
@@ -290,7 +290,7 @@ class _HajjUmrahPlannerPageState extends ConsumerState<HajjUmrahPlannerPage> {
                 const SizedBox(width: 12),
                 Text(
                   DateFormat('MMMM yyyy', 'id_ID').format(_selectedDate), 
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: contentColor)
+                  style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 15, color: contentColor)
                 ),
                 const Spacer(),
                 Icon(Icons.chevron_right_rounded, color: isDarkMode ? Colors.white10 : Colors.grey.shade300),
@@ -351,8 +351,16 @@ class _HajjUmrahPlannerPageState extends ConsumerState<HajjUmrahPlannerPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(target.name, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: contentColor)),
-              Text('${(progress * 100).toInt()}%', style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 15)),
+              Expanded(
+                child: Text(
+                  target.name, 
+                  style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 15, color: contentColor),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text('${(progress * 100).toInt()}%', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 15)),
             ],
           ),
           const SizedBox(height: 12),
@@ -397,7 +405,7 @@ class _HajjUmrahPlannerPageState extends ConsumerState<HajjUmrahPlannerPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('MILESTONE PERJALANAN', 
-          style: TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white24 : Colors.black26, letterSpacing: 1)),
+          style: GoogleFonts.comicNeue(fontSize: 8, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white24 : Colors.black26, letterSpacing: 1)),
         const SizedBox(height: 10),
         ...milestones.map((m) {
           final isReached = balance >= (m['amount'] as double);
@@ -411,15 +419,19 @@ class _HajjUmrahPlannerPageState extends ConsumerState<HajjUmrahPlannerPage> {
                   color: isReached ? AppColors.primary : (isDarkMode ? Colors.white10 : Colors.grey.shade300),
                 ),
                 const SizedBox(width: 8),
-                Text(m['label'] as String, 
-                  style: TextStyle(
-                    fontSize: 10, 
-                    fontWeight: isReached ? FontWeight.bold : FontWeight.normal,
-                    color: isReached ? (isDarkMode ? Colors.white : Colors.black87) : Colors.grey,
-                  )),
-                const Spacer(),
+                Expanded(
+                  child: Text(m['label'] as String, 
+                    style: GoogleFonts.comicNeue(
+                      fontSize: 10, 
+                      fontWeight: isReached ? FontWeight.bold : FontWeight.normal,
+                      color: isReached ? (isDarkMode ? Colors.white : Colors.black87) : Colors.grey,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const SizedBox(width: 8),
                 Text(_formatRupiah(m['amount'] as double), 
-                  style: TextStyle(fontSize: 9, color: isReached ? AppColors.primary : Colors.grey)),
+                  style: GoogleFonts.comicNeue(fontSize: 9, color: isReached ? AppColors.primary : Colors.grey)),
               ],
             ),
           );
@@ -432,8 +444,8 @@ class _HajjUmrahPlannerPageState extends ConsumerState<HajjUmrahPlannerPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(fontSize: 8, color: isDarkMode ? Colors.white24 : Colors.black26, fontWeight: FontWeight.bold)),
-        Text(value, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+        Text(label, style: GoogleFonts.comicNeue(fontSize: 8, color: isDarkMode ? Colors.white24 : Colors.black26, fontWeight: FontWeight.bold)),
+        Text(value, style: GoogleFonts.comicNeue(fontSize: 11, fontWeight: FontWeight.bold)),
       ],
     );
   }
@@ -447,7 +459,7 @@ class _HajjUmrahPlannerPageState extends ConsumerState<HajjUmrahPlannerPage> {
             Icon(Icons.auto_awesome_rounded, size: 40, color: isDarkMode ? Colors.white10 : Colors.grey.shade100),
             const SizedBox(height: 16),
             Text('Belum ada rencana aktif.', 
-              style: TextStyle(color: isDarkMode ? Colors.white24 : Colors.grey.shade400, fontSize: 12)),
+              style: GoogleFonts.comicNeue(color: isDarkMode ? Colors.white24 : Colors.grey.shade400, fontSize: 12)),
           ],
         ),
       ),

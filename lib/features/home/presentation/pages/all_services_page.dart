@@ -141,6 +141,13 @@ class AllServicesPage extends ConsumerWidget {
               color: Colors.blueGrey,
               route: '/insurance',
             ),
+            _ServiceData(
+              icon: Icons.flight_takeoff_rounded,
+              title: 'Target Luar Negeri',
+              subtitle: 'Nabung dengan kurs real-time',
+              color: Colors.deepPurple,
+              route: '/overseas-travel',
+            ),
           ]),
 
           _buildCategoryHeader(isDarkMode, 'ALAT & ANALISIS'),

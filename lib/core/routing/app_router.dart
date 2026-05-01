@@ -29,6 +29,7 @@ import 'package:tabunganku/features/home/presentation/pages/compound_interest_pa
 import 'package:tabunganku/features/home/presentation/pages/currency_converter_page.dart';
 import 'package:tabunganku/features/home/presentation/pages/mosque_donation_page.dart';
 import 'package:tabunganku/features/home/presentation/pages/hajj_umrah_planner_page.dart';
+import 'package:tabunganku/features/budget/presentation/pages/overseas_travel_page.dart';
 
 final appRouterProvider = Provider((ref) {
   return GoRouter(
@@ -244,6 +245,11 @@ final appRouterProvider = Provider((ref) {
         path: '/hajj-umrah',
         name: 'hajj-umrah',
         builder: (context, state) => const HajjUmrahPlannerPage(),
+      ),
+      GoRoute(
+        path: '/overseas-travel',
+        name: 'overseas-travel',
+        builder: (context, state) => const OverseasTravelPage(),
       ),
 
       // Catch-all redirect to splash

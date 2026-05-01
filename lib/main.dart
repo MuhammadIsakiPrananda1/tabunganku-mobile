@@ -22,8 +22,7 @@ final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 Future<void> _initNotifications() async {
   const AndroidInitializationSettings androidSettings =
       AndroidInitializationSettings('@mipmap/ic_launcher');
-  const DarwinInitializationSettings iosSettings =
-      DarwinInitializationSettings(
+  const DarwinInitializationSettings iosSettings = DarwinInitializationSettings(
     requestAlertPermission: true,
     requestBadgePermission: true,
     requestSoundPermission: true,
@@ -36,10 +35,10 @@ Future<void> _initNotifications() async {
   await flutterLocalNotificationsPlugin.initialize(initSettings);
 
   // Request permission untuk Android 13+ (Notifikasi & Exact Alarm)
-  final androidPlugin = flutterLocalNotificationsPlugin
-      .resolvePlatformSpecificImplementation<
+  final androidPlugin =
+      flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin>();
-  
+
   if (androidPlugin != null) {
     await androidPlugin.requestNotificationsPermission();
   }
@@ -54,11 +53,14 @@ void main() async {
     tz_data.initializeTimeZones();
     final dynamic location = await FlutterTimezone.getLocalTimezone();
     // flutter_timezone v5.x returns TimezoneInfo object with 'identifier' property
-    final String locationName = location is String ? location : (location as dynamic).identifier.toString();
+    final String locationName = location is String
+        ? location
+        : (location as dynamic).identifier.toString();
     tz.setLocalLocation(tz.getLocation(locationName));
     debugPrint('Timezone set to: $locationName');
   } catch (e) {
-    debugPrint('Gagal mendeteksi timezone otomatis: $e. Menggunakan Asia/Jakarta sebagai default.');
+    debugPrint(
+        'Gagal mendeteksi timezone otomatis: $e. Menggunakan Asia/Jakarta sebagai default.');
     try {
       tz.setLocalLocation(tz.getLocation('Asia/Jakarta'));
     } catch (_) {
@@ -68,9 +70,7 @@ void main() async {
 
   // Inisialisasi notifikasi di level app
   await _initNotifications();
-  
 
-  
   // Inisialisasi locale data untuk DateFormat('...', 'id_ID')
   await initializeDateFormatting('id_ID', null);
 
@@ -115,21 +115,7 @@ class _TabunganKuAppState extends ConsumerState<TabunganKuApp>
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    // final security = ref.read(securityProvider);
-    // final router = ref.read(appRouterProvider);
-
-    // if (state == AppLifecycleState.paused) {
-    //   // Deauthorize ONLY if we are not currently showing a biometric dialog
-    //   // AND NOT currently in an external operation (like Picking Image)
-    //   if (security.hasPin && 
-    //       !security.isAuthenticating && 
-    //       !security.isExternalOperationInProgress) {
-    //     ref.read(securityProvider.notifier).deauthorize();
-    //   }
-    // }
-    // Logic for resumed moved to MaterialApp.builder to preserve state
-  }
+  void didChangeAppLifecycleState(AppLifecycleState state) {}
 
   @override
   Widget build(BuildContext context) {
@@ -152,19 +138,25 @@ class _TabunganKuAppState extends ConsumerState<TabunganKuApp>
               builder: (context, ref, _) {
                 final security = ref.watch(securityProvider);
                 final router = ref.watch(appRouterProvider);
-                
+
                 // Get current location safely to exclude lock from splash/setup
                 String location = '/';
                 try {
-                  location = router.routerDelegate.currentConfiguration.fullPath;
+                  location =
+                      router.routerDelegate.currentConfiguration.fullPath;
                 } catch (_) {}
 
                 final isLockableRoute = location != '/' &&
-                                      location != '/splash' && 
-                                      location != '/pin-setup' && 
-                                      location != '/lock';
+                    location != '/splash' &&
+                    location != '/pin-setup' &&
+                    location != '/lock';
 
-                if (security.hasPin && !security.isAuthorized && isLockableRoute) {
+                final isSecurityEnabled =
+                    security.hasPin || security.isBiometricEnabled;
+
+                if (isSecurityEnabled &&
+                    !security.isAuthorized &&
+                    isLockableRoute) {
                   return Stack(
                     children: [
                       if (child != null) child,

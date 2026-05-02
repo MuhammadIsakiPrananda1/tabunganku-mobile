@@ -333,8 +333,10 @@ class _HajjUmrahPlannerPageState extends ConsumerState<HajjUmrahPlannerPage> {
 
   Widget _buildTargetItem(SavingTargetModel target, bool isDarkMode) {
     final transactions = ref.watch(transactionsByGroupProvider(null));
-    final balance = transactions.fold<double>(0, (s, t) => s + (t.type == TransactionType.income ? t.amount : -t.amount));
-    final progress = (target.targetAmount > 0) ? (balance / target.targetAmount).clamp(0.0, 1.0) : 0.0;
+    final targetBalance = transactions
+        .where((t) => !t.date.isBefore(target.createdAt))
+        .fold<double>(0, (s, t) => s + (t.type == TransactionType.income ? t.amount : 0));
+    final progress = (target.targetAmount > 0) ? (targetBalance / target.targetAmount).clamp(0.0, 1.0) : 0.0;
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
 
     return Container(
@@ -374,7 +376,7 @@ class _HajjUmrahPlannerPageState extends ConsumerState<HajjUmrahPlannerPage> {
             ),
           ),
           const SizedBox(height: 20),
-          _buildMilestones(target, balance, isDarkMode),
+          _buildMilestones(target, targetBalance, isDarkMode),
           const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

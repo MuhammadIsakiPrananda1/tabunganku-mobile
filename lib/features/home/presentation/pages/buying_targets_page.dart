@@ -286,8 +286,10 @@ class _BuyingTargetsPageState extends ConsumerState<BuyingTargetsPage> {
 
   Widget _buildTargetItem(SavingTargetModel target, bool isDarkMode) {
     final transactions = ref.watch(transactionsByGroupProvider(null));
-    final balance = transactions.fold<double>(0, (s, t) => s + (t.type == TransactionType.income ? t.amount : -t.amount));
-    final progress = (target.targetAmount > 0) ? (balance / target.targetAmount).clamp(0.0, 1.0) : 0.0;
+    final targetBalance = transactions
+        .where((t) => !t.date.isBefore(target.createdAt))
+        .fold<double>(0, (s, t) => s + (t.type == TransactionType.income ? t.amount : 0));
+    final progress = (target.targetAmount > 0) ? (targetBalance / target.targetAmount).clamp(0.0, 1.0) : 0.0;
     const baseColor = AppColors.primary;
 
     return Container(

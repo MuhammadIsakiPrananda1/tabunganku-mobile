@@ -253,7 +253,7 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
           ),
 
           const SizedBox(height: 32), // Seimbang (tidak terlalu rapat)
-          _buildSavingTargetSection(totalBalance, targets, isDarkMode),
+          _buildSavingTargetSection(transactions, targets, isDarkMode),
 
           const SizedBox(height: 12),
           _buildAllocationSection(
@@ -593,7 +593,7 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
   ];
 
   Widget _buildSavingTargetSection(
-      double totalBalance, List<SavingTargetModel> targets, bool isDarkMode) {
+      List<TransactionModel> transactions, List<SavingTargetModel> targets, bool isDarkMode) {
     // Filter out specialized plans from the general target section
     final buyingTargets = targets
         .where((t) => t.category == 'Pembelian' || t.category == 'Umum')
@@ -660,7 +660,7 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
               itemBuilder: (context, index) {
                 final target = buyingTargets[index];
                 return _targetCardMinimalist(
-                    target, totalBalance, isDarkMode, index);
+                    target, transactions, isDarkMode, index);
               },
             ),
           ),
@@ -687,14 +687,19 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
     );
   }
 
-  Widget _targetCardMinimalist(SavingTargetModel target, double totalBalance,
-      bool isDarkMode, int index) {
+  Widget _targetCardMinimalist(SavingTargetModel target,
+      List<TransactionModel> transactions, bool isDarkMode, int index) {
+    // Only count transactions AFTER target creation
+    final targetBalance = transactions
+        .where((t) => !t.date.isBefore(target.createdAt))
+        .fold<double>(0, (s, t) => s + (t.type == TransactionType.income ? t.amount : 0));
+
     final progress = (target.targetAmount > 0)
-        ? (totalBalance / target.targetAmount).clamp(0.0, 1.0)
+        ? (targetBalance / target.targetAmount).clamp(0.0, 1.0)
         : 0.0;
 
     return GestureDetector(
-      onTap: () => widget.onTargetTap(target, totalBalance),
+      onTap: () => widget.onTargetTap(target, targetBalance),
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 4),
         decoration: BoxDecoration(
@@ -794,7 +799,7 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                     const SizedBox(height: 8),
                     Text(
                       widget.showBalance
-                          ? '${_formatRupiah(totalBalance)} / ${_formatRupiah(target.targetAmount)}'
+                          ? '${_formatRupiah(targetBalance)} / ${_formatRupiah(target.targetAmount)}'
                           : '••••••',
                       style: GoogleFonts.comicNeue(
                           fontSize: 12,

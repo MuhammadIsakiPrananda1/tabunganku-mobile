@@ -47,7 +47,7 @@ class _SavingSimulatorPageState extends ConsumerState<SavingSimulatorPage> {
     
     // Calculate current personal balance (non-manual)
     final currentBalance = transactions
-        .fold<double>(0, (s, t) => s + (t.type == TransactionType.income ? t.amount : -t.amount));
+        .fold<double>(0, (s, t) => s + (t.type == TransactionType.income ? t.amount : 0));
 
     final remaining = (_targetAmount - currentBalance).clamp(0.0, double.infinity);
     final progress = _targetAmount > 0 ? (currentBalance / _targetAmount).clamp(0.0, 1.0) : 0.0;

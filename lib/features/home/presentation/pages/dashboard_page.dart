@@ -408,7 +408,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             0,
             (sum, t) =>
                 sum +
-                (t.type == TransactionType.income ? t.amount : -t.amount));
+                (t.type == TransactionType.income ? t.amount : 0));
         await _showSavingTargetDialog(bal);
         break;
       case QuickActionType.buyingTarget:
@@ -504,12 +504,17 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     }
   }
 
-  void _showTargetDetailSheet(SavingTargetModel target, double totalBalance) {
+  void _showTargetDetailSheet(SavingTargetModel target, double _) {
+    final transactions = ref.read(transactionsByGroupProvider(null));
+    final targetBalance = transactions
+        .where((t) => !t.date.isBefore(target.createdAt))
+        .fold<double>(0, (s, t) => s + (t.type == TransactionType.income ? t.amount : 0));
+
     final progress = (target.targetAmount > 0)
-        ? (totalBalance / target.targetAmount).clamp(0.0, 1.0)
+        ? (targetBalance / target.targetAmount).clamp(0.0, 1.0)
         : 0.0;
     final remainingDays = target.dueDate.difference(DateTime.now()).inDays;
-    final remainingAmount = target.targetAmount - totalBalance;
+    final remainingAmount = target.targetAmount - targetBalance;
     final isCompleted = progress >= 1.0;
 
     final theme = Theme.of(context);
@@ -664,7 +669,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
               Divider(
                   height: 32,
                   color: isDarkMode ? Colors.white10 : Colors.grey.shade200),
-              _buildDetailRow('Telah Terkumpul', _formatRupiah(totalBalance),
+              _buildDetailRow('Telah Terkumpul', _formatRupiah(targetBalance),
                   Icons.account_balance_wallet_rounded, Colors.green),
               Divider(
                   height: 32,

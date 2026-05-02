@@ -406,32 +406,43 @@ class _OverseasTravelPageState extends ConsumerState<OverseasTravelPage> {
 
   void _showAddSavingDialog(OverseasTravelGoalModel goal) {
     final controller = TextEditingController();
+    final theme = Theme.of(context);
+    final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
+        (ref.watch(themeProvider) == ThemeMode.system && theme.brightness == Brightness.dark);
+    final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: Text('Tambah Tabungan', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold)),
+        title: Text('Tambah Tabungan', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, color: contentColor)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Masukkan nominal dalam Rupiah untuk tujuan ${goal.destinationName}', style: GoogleFonts.comicNeue(fontSize: 12)),
+            Text('Masukkan nominal dalam Rupiah untuk tujuan ${goal.destinationName}', style: GoogleFonts.comicNeue(fontSize: 12, color: contentColor.withValues(alpha: 0.7))),
             const SizedBox(height: 16),
             TextFormField(
               controller: controller,
               keyboardType: TextInputType.number,
               inputFormatters: [_RibuanFormatter()],
               autofocus: true,
+              style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, color: contentColor),
               decoration: InputDecoration(
                 prefixText: 'Rp ',
+                prefixStyle: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, color: AppColors.primary),
                 filled: true,
-                fillColor: Colors.grey.shade50,
+                fillColor: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade50,
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
               ),
             ),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Batal')),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Batal', style: GoogleFonts.comicNeue(color: isDarkMode ? Colors.white38 : Colors.grey)),
+          ),
           ElevatedButton(
             onPressed: () {
               final text = controller.text.replaceAll('.', '');
@@ -444,8 +455,13 @@ class _OverseasTravelPageState extends ConsumerState<OverseasTravelPage> {
                 Navigator.pop(context);
               }
             },
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
-            child: const Text('Simpan'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              elevation: 0,
+            ),
+            child: Text('Simpan', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -453,20 +469,32 @@ class _OverseasTravelPageState extends ConsumerState<OverseasTravelPage> {
   }
 
   void _showDeleteConfirmation(OverseasTravelGoalModel goal) {
+    final theme = Theme.of(context);
+    final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
+        (ref.watch(themeProvider) == ThemeMode.system && theme.brightness == Brightness.dark);
+    final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: const Text('Hapus Target?'),
-        content: Text('Apakah kamu yakin ingin menghapus target liburan ke ${goal.destinationName}?'),
+        title: Text('Hapus Target?', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, color: contentColor)),
+        content: Text(
+          'Apakah kamu yakin ingin menghapus target liburan ke ${goal.destinationName}?',
+          style: GoogleFonts.comicNeue(color: contentColor.withValues(alpha: 0.7)),
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Batal')),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Batal', style: GoogleFonts.comicNeue(color: isDarkMode ? Colors.white38 : Colors.grey)),
+          ),
           TextButton(
             onPressed: () {
               ref.read(overseasTravelServiceProvider).deleteGoal(goal.id);
               Navigator.pop(context);
             },
-            child: const Text('Hapus', style: TextStyle(color: Colors.redAccent)),
+            child: const Text('Hapus', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
           ),
         ],
       ),

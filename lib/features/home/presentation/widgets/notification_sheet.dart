@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:tabunganku/core/theme/app_colors.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:tabunganku/core/theme/theme_provider.dart';
 import 'package:tabunganku/models/notification_model.dart';
 import 'package:tabunganku/providers/notification_provider.dart';
@@ -43,7 +44,7 @@ class NotificationSheet extends ConsumerWidget {
             children: [
               Text(
                 'Notifikasi',
-                style: TextStyle(
+                style: GoogleFonts.comicNeue(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                   color: isDarkMode ? Colors.white : AppColors.primaryDark,
@@ -52,7 +53,7 @@ class NotificationSheet extends ConsumerWidget {
               TextButton(
                 onPressed: () => ref.read(notificationNotifierProvider.notifier).markAllAsRead(),
                 style: TextButton.styleFrom(foregroundColor: AppColors.primary),
-                child: const Text('Tandai Dibaca'),
+                child: Text('Tandai Dibaca', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold)),
               ),
             ],
           ),
@@ -91,7 +92,7 @@ class NotificationSheet extends ConsumerWidget {
                     side: const BorderSide(color: Colors.redAccent, width: 0.5),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: const Text('Hapus Semua Riwayat'),
+                  child: Text('Hapus Semua Riwayat', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold)),
                 ),
               ),
             ),
@@ -116,7 +117,7 @@ class NotificationSheet extends ConsumerWidget {
           const SizedBox(height: 16),
           Text(
             'Belum Ada Notifikasi',
-            style: TextStyle(
+            style: GoogleFonts.comicNeue(
               fontWeight: FontWeight.bold,
               color: isDarkMode ? Colors.white38 : Colors.grey.shade400,
             ),
@@ -148,6 +149,30 @@ class NotificationSheet extends ConsumerWidget {
       case NotificationType.system:
         icon = Icons.info_outline_rounded;
         color = AppColors.primary;
+        break;
+      case NotificationType.bills:
+        icon = Icons.receipt_long_rounded;
+        color = Colors.redAccent;
+        break;
+      case NotificationType.investment:
+        icon = Icons.trending_up_rounded;
+        color = Colors.indigo;
+        break;
+      case NotificationType.tax:
+        icon = Icons.account_balance_rounded;
+        color = Colors.deepPurpleAccent;
+        break;
+      case NotificationType.recurring:
+        icon = Icons.loop_rounded;
+        color = Colors.teal;
+        break;
+      case NotificationType.healthCheck:
+        icon = Icons.health_and_safety_rounded;
+        color = Colors.green;
+        break;
+      case NotificationType.gold:
+        icon = Icons.monetization_on_rounded;
+        color = Colors.amber.shade700;
         break;
     }
 
@@ -192,7 +217,7 @@ class NotificationSheet extends ConsumerWidget {
                       Expanded(
                         child: Text(
                           n.title,
-                          style: TextStyle(
+                          style: GoogleFonts.comicNeue(
                             fontWeight: n.isRead ? FontWeight.normal : FontWeight.bold,
                             fontSize: 14,
                             color: isDarkMode ? Colors.white : Colors.black87,
@@ -201,9 +226,10 @@ class NotificationSheet extends ConsumerWidget {
                       ),
                       Text(
                         DateFormat('HH:mm').format(n.timestamp),
-                        style: TextStyle(
+                        style: GoogleFonts.comicNeue(
                           fontSize: 10,
                           color: isDarkMode ? Colors.white38 : Colors.black54,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ],
@@ -211,7 +237,7 @@ class NotificationSheet extends ConsumerWidget {
                   const SizedBox(height: 4),
                   Text(
                     n.message,
-                    style: TextStyle(
+                    style: GoogleFonts.comicNeue(
                       fontSize: 12,
                       color: isDarkMode ? Colors.white54 : Colors.black54,
                     ),
@@ -219,9 +245,10 @@ class NotificationSheet extends ConsumerWidget {
                   const SizedBox(height: 4),
                   Text(
                     DateFormat('dd MMM yyyy').format(n.timestamp),
-                    style: TextStyle(
+                    style: GoogleFonts.comicNeue(
                       fontSize: 9,
                       color: isDarkMode ? Colors.white24 : Colors.black45,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ],

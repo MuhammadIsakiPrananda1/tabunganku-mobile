@@ -498,9 +498,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       case QuickActionType.savingPlans:
         context.push('/saving-plans');
         break;
-      case QuickActionType.financialHealth:
-        context.push('/financial-health');
-        break;
     }
   }
 

@@ -584,12 +584,6 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
       type: QuickActionType.insurance,
       baseColor: Colors.blueGrey,
     ),
-    _QuickActionItem(
-      icon: Icons.health_and_safety_rounded,
-      label: 'Cek Sehat',
-      type: QuickActionType.financialHealth,
-      baseColor: Colors.green,
-    ),
   ];
 
   Widget _buildSavingTargetSection(

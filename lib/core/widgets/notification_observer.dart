@@ -81,12 +81,16 @@ class _NotificationObserverState extends ConsumerState<NotificationObserver> {
         final currentBalance = totalIncome - totalExpense;
 
         for (final target in targets) {
-          if (currentBalance >= target.targetAmount && !_isNotified('target_reached_${target.id}')) {
+          final targetBalance = personalTransactions
+              .where((t) => !t.date.isBefore(target.createdAt))
+              .fold<double>(0, (s, t) => s + (t.type == TransactionType.income ? t.amount : 0));
+
+          if (targetBalance >= target.targetAmount && target.targetAmount > 0 && !_isNotified('target_reached_${target.id}')) {
             ref.read(notificationNotifierProvider.notifier).addNotification(
               NotificationModel(
                 id: 'target_reached_${target.id}_${DateTime.now().millisecondsSinceEpoch}',
                 title: 'Target Tercapai! 🎯',
-                message: 'Selamat! Saldo Anda telah mencapai target "${target.name}" sebesar ${currencyFormatter.format(target.targetAmount)}.',
+                message: 'Selamat! Saldo target "${target.name}" telah mencapai ${currencyFormatter.format(target.targetAmount)}.',
                 timestamp: DateTime.now(),
                 type: NotificationType.savings,
                 actionData: target.id,

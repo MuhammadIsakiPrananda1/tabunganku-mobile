@@ -25,6 +25,5 @@ enum QuickActionType {
   insurance,
   savingPlans,
   buyingTarget,
-  financialHealth,
 }
 

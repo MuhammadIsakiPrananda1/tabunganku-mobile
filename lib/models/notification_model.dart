@@ -5,6 +5,12 @@ enum NotificationType {
   system,  // Notifikasi sistem (update, info)
   family,  // Notifikasi dari grup keluarga
   savings, // Notifikasi pengingat target tabungan
+  bills,
+  investment,
+  tax,
+  recurring,
+  healthCheck,
+  gold,
 }
 
 class NotificationModel {

@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:tabunganku/core/theme/theme_provider.dart';
 import 'package:tabunganku/models/notification_model.dart';
 import 'package:tabunganku/providers/notification_provider.dart';
+import 'package:tabunganku/features/home/presentation/pages/notifications_page.dart';
 
 class NotificationSheet extends ConsumerWidget {
   const NotificationSheet({super.key});
@@ -44,8 +45,8 @@ class NotificationSheet extends ConsumerWidget {
             children: [
               Text(
                 'Notifikasi',
-                style: GoogleFonts.comicNeue(
-                  fontSize: 22,
+                style: GoogleFonts.quicksand(
+                  fontSize: 19,
                   fontWeight: FontWeight.bold,
                   color: isDarkMode ? Colors.white : AppColors.primaryDark,
                 ),
@@ -53,7 +54,7 @@ class NotificationSheet extends ConsumerWidget {
               TextButton(
                 onPressed: () => ref.read(notificationNotifierProvider.notifier).markAllAsRead(),
                 style: TextButton.styleFrom(foregroundColor: AppColors.primary),
-                child: Text('Tandai Dibaca', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold)),
+                child: Text('Tandai Dibaca', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold)),
               ),
             ],
           ),
@@ -67,13 +68,47 @@ class NotificationSheet extends ConsumerWidget {
                 if (notifications.isEmpty) {
                   return _buildEmptyState(isDarkMode);
                 }
-                return ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: notifications.length,
-                  itemBuilder: (context, index) {
-                    final n = notifications[index];
-                    return _buildNotificationTile(context, ref, n, isDarkMode);
-                  },
+                final displayList = notifications.take(5).toList();
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: displayList.length,
+                      itemBuilder: (context, index) {
+                        final n = displayList[index];
+                        return _buildNotificationTile(context, ref, n, isDarkMode);
+                      },
+                    ),
+                    if (notifications.length > 5)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const NotificationsPage()),
+                            );
+                          },
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Lihat Semua (${notifications.length})',
+                                style: GoogleFonts.quicksand(
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              const Icon(Icons.arrow_forward_ios_rounded, size: 12, color: AppColors.primary),
+                            ],
+                          ),
+                        ),
+                      ),
+                  ],
                 );
               },
               loading: () => const Center(child: CircularProgressIndicator()),
@@ -92,7 +127,7 @@ class NotificationSheet extends ConsumerWidget {
                     side: const BorderSide(color: Colors.redAccent, width: 0.5),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: Text('Hapus Semua Riwayat', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold)),
+                  child: Text('Hapus Semua Riwayat', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold)),
                 ),
               ),
             ),
@@ -117,7 +152,7 @@ class NotificationSheet extends ConsumerWidget {
           const SizedBox(height: 16),
           Text(
             'Belum Ada Notifikasi',
-            style: GoogleFonts.comicNeue(
+            style: GoogleFonts.quicksand(
               fontWeight: FontWeight.bold,
               color: isDarkMode ? Colors.white38 : Colors.grey.shade400,
             ),
@@ -142,10 +177,7 @@ class NotificationSheet extends ConsumerWidget {
         icon = Icons.track_changes_rounded;
         color = AppColors.primary;
         break;
-      case NotificationType.family:
-        icon = Icons.family_restroom_rounded;
-        color = Colors.blue;
-        break;
+
       case NotificationType.system:
         icon = Icons.info_outline_rounded;
         color = AppColors.primary;
@@ -217,16 +249,16 @@ class NotificationSheet extends ConsumerWidget {
                       Expanded(
                         child: Text(
                           n.title,
-                          style: GoogleFonts.comicNeue(
-                            fontWeight: n.isRead ? FontWeight.normal : FontWeight.bold,
-                            fontSize: 14,
+                          style: GoogleFonts.quicksand(
+                            fontWeight: n.isRead ? FontWeight.bold : FontWeight.bold,
+                            fontSize: 11,
                             color: isDarkMode ? Colors.white : Colors.black87,
                           ),
                         ),
                       ),
                       Text(
                         DateFormat('HH:mm').format(n.timestamp),
-                        style: GoogleFonts.comicNeue(
+                        style: GoogleFonts.quicksand(
                           fontSize: 10,
                           color: isDarkMode ? Colors.white38 : Colors.black54,
                           fontWeight: FontWeight.bold,
@@ -237,15 +269,15 @@ class NotificationSheet extends ConsumerWidget {
                   const SizedBox(height: 4),
                   Text(
                     n.message,
-                    style: GoogleFonts.comicNeue(
-                      fontSize: 12,
+                    style: GoogleFonts.quicksand(
+                      fontSize: 11,
                       color: isDarkMode ? Colors.white54 : Colors.black54,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     DateFormat('dd MMM yyyy').format(n.timestamp),
-                    style: GoogleFonts.comicNeue(
+                    style: GoogleFonts.quicksand(
                       fontSize: 9,
                       color: isDarkMode ? Colors.white24 : Colors.black45,
                       fontWeight: FontWeight.bold,

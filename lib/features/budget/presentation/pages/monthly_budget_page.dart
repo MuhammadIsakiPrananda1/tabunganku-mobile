@@ -145,7 +145,7 @@ class _MonthlyBudgetPageState extends ConsumerState<MonthlyBudgetPage> {
                       'Budget Bulanan',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: 11,
                         fontWeight: FontWeight.bold,
                         color: isDarkMode ? Colors.white : AppColors.primaryDark,
                         letterSpacing: 0.5,
@@ -208,7 +208,7 @@ class _MonthlyBudgetPageState extends ConsumerState<MonthlyBudgetPage> {
           Text(
             dateDisplay,
             style: TextStyle(
-              fontSize: 15, 
+              fontSize: 13, 
               fontWeight: FontWeight.bold, 
               color: contentColor,
             ),
@@ -267,7 +267,7 @@ class _MonthlyBudgetPageState extends ConsumerState<MonthlyBudgetPage> {
             child: Text(
               formatter.format(spent),
               style: TextStyle(
-                fontSize: 32,
+                fontSize: 21,
                 fontWeight: FontWeight.w900,
                 color: isDarkMode ? Colors.white : Colors.black87,
                 letterSpacing: -1,
@@ -316,17 +316,17 @@ class _MonthlyBudgetPageState extends ConsumerState<MonthlyBudgetPage> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Terpakai', style: TextStyle(fontSize: 11, color: isDarkMode ? Colors.white38 : Colors.black54)),
+                  Text('Terpakai', style: TextStyle(fontSize: 13, color: isDarkMode ? Colors.white38 : Colors.black54)),
                   Text('${(progress * 100).toStringAsFixed(1)}%', 
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: statusColor)),
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: statusColor)),
                 ],
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text('Sisa Limit', style: TextStyle(fontSize: 11, color: isDarkMode ? Colors.white38 : Colors.black54)),
+                  Text('Sisa Limit', style: TextStyle(fontSize: 13, color: isDarkMode ? Colors.white38 : Colors.black54)),
                   Text(formatter.format((limit - spent).clamp(0, double.infinity)), 
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : Colors.black87)),
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : Colors.black87)),
                 ],
               ),
             ],
@@ -354,7 +354,7 @@ class _MonthlyBudgetPageState extends ConsumerState<MonthlyBudgetPage> {
             Text(
               'Atur Limit Baru',
               style: TextStyle(
-                fontSize: 16, 
+                fontSize: 11, 
                 fontWeight: FontWeight.bold, 
                 color: isDarkMode ? Colors.white : Colors.black87,
               ),
@@ -368,7 +368,7 @@ class _MonthlyBudgetPageState extends ConsumerState<MonthlyBudgetPage> {
           controller: _budgetController,
           keyboardType: TextInputType.number,
           style: TextStyle(
-            fontSize: 16,
+            fontSize: 14,
             fontWeight: FontWeight.bold,
             color: isDarkMode ? Colors.white : Colors.black87,
           ),
@@ -387,7 +387,7 @@ class _MonthlyBudgetPageState extends ConsumerState<MonthlyBudgetPage> {
           decoration: InputDecoration(
             hintText: '0',
             hintStyle: TextStyle(
-              fontSize: 16,
+              fontSize: 14,
               fontWeight: FontWeight.bold,
               color: isDarkMode ? Colors.white24 : Colors.black26,
             ),
@@ -403,7 +403,7 @@ class _MonthlyBudgetPageState extends ConsumerState<MonthlyBudgetPage> {
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: AppColors.primary,
-                      fontSize: 15,
+                      fontSize: 11,
                     ),
                   ),
                 ],
@@ -441,7 +441,7 @@ class _MonthlyBudgetPageState extends ConsumerState<MonthlyBudgetPage> {
                 const SizedBox(width: 8),
                 Text(
                   'Simpan Target', 
-                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, letterSpacing: 0.5),
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 0.5),
                 ),
               ],
             ),

@@ -34,7 +34,7 @@ class ShoppingListPage extends ConsumerWidget {
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text('Catatan Belanja',
-            style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold)),
+            style: GoogleFonts.quicksand(fontWeight: FontWeight.bold)),
         backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
         scrolledUnderElevation: 0,
@@ -98,7 +98,7 @@ class ShoppingListPage extends ConsumerWidget {
           Text(
             'Belum ada rencana belanja',
             style: TextStyle(
-                fontSize: 18,
+                fontSize: 11,
                 fontWeight: FontWeight.bold,
                 color: isDarkMode ? Colors.white60 : Colors.black38),
           ),
@@ -107,7 +107,7 @@ class ShoppingListPage extends ConsumerWidget {
             'Catat semua kebutuhan & keinginanmu\nagar pengeluaran lebih terencana!',
             textAlign: TextAlign.center,
             style: TextStyle(
-                fontSize: 14, color: isDarkMode ? Colors.white38 : Colors.black26),
+                fontSize: 11, color: isDarkMode ? Colors.white38 : Colors.black26),
           ),
         ],
       ),
@@ -128,8 +128,8 @@ class ShoppingListPage extends ConsumerWidget {
         const SizedBox(width: 12),
         Text(
           title,
-          style: GoogleFonts.comicNeue(
-            fontSize: 14,
+          style: GoogleFonts.quicksand(
+            fontSize: 13,
             fontWeight: FontWeight.bold,
             color: isDarkMode ? Colors.white54 : Colors.black38,
           ),
@@ -210,7 +210,7 @@ class ShoppingListPage extends ConsumerWidget {
                       Text(
                         item.name,
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 11,
                           fontWeight: FontWeight.bold,
                           color: item.isBought 
                               ? (isDarkMode ? Colors.white24 : Colors.black26)
@@ -259,7 +259,7 @@ class ShoppingListPage extends ConsumerWidget {
                     Text(
                       _formatRupiah(item.estimatedPrice),
                       style: TextStyle(
-                        fontSize: 15,
+                        fontSize: 11,
                         fontWeight: FontWeight.bold,
                         color: item.isBought
                             ? (isDarkMode ? Colors.white24 : Colors.grey.shade400)
@@ -436,15 +436,15 @@ class ShoppingListPage extends ConsumerWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('ESTIMASI TOTAL', style: GoogleFonts.comicNeue(fontSize: 12, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white38 : Colors.black26)),
-              Text(_formatRupiah(totalEstimated), style: GoogleFonts.comicNeue(fontSize: 18, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : AppColors.primaryDark)),
+              Text('ESTIMASI TOTAL', style: GoogleFonts.quicksand(fontSize: 13, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white38 : Colors.black26)),
+              Text(_formatRupiah(totalEstimated), style: GoogleFonts.quicksand(fontSize: 13, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : AppColors.primaryDark)),
             ],
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text('DIBELI', style: GoogleFonts.comicNeue(fontSize: 10, fontWeight: FontWeight.bold, color: isDarkMode ? AppColors.primary.withValues(alpha: 0.5) : AppColors.primaryDark.withValues(alpha: 0.4))),
-              Text(_formatRupiah(totalBought), style: GoogleFonts.comicNeue(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.primary)),
+              Text('DIBELI', style: GoogleFonts.quicksand(fontSize: 10, fontWeight: FontWeight.bold, color: isDarkMode ? AppColors.primary.withValues(alpha: 0.5) : AppColors.primaryDark.withValues(alpha: 0.4))),
+              Text(_formatRupiah(totalBought), style: GoogleFonts.quicksand(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.primary)),
             ],
           ),
         ],

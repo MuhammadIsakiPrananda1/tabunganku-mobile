@@ -39,7 +39,7 @@ class _InvestmentTrackerPageState extends ConsumerState<InvestmentTrackerPage> {
           onPressed: () => Navigator.pop(context),
           icon: Icon(Icons.arrow_back_ios_new_rounded, color: contentColor, size: 20),
         ),
-        title: Text('Portofolio Investasi', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 16, color: contentColor)),
+        title: Text('Portofolio Investasi', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11, color: contentColor)),
         centerTitle: true,
       ),
       body: StreamBuilder<List<InvestmentModel>>(
@@ -62,7 +62,7 @@ class _InvestmentTrackerPageState extends ConsumerState<InvestmentTrackerPage> {
                 const SizedBox(height: 32),
 
                 Text('ASET INVESTASI', 
-                  style: GoogleFonts.comicNeue(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5, color: contentColor.withValues(alpha: 0.4))),
+                  style: GoogleFonts.quicksand(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5, color: contentColor.withValues(alpha: 0.4))),
                 const SizedBox(height: 12),
                 if (items.isEmpty)
                   _buildEmptyState(isDarkMode)
@@ -138,7 +138,7 @@ class _InvestmentTrackerPageState extends ConsumerState<InvestmentTrackerPage> {
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('Portofolio Berhasil Disimpan', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold)),
+                        content: Text('Portofolio Berhasil Disimpan', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold)),
                         backgroundColor: AppColors.primary,
                       ),
                     );
@@ -146,7 +146,7 @@ class _InvestmentTrackerPageState extends ConsumerState<InvestmentTrackerPage> {
                 }
               },
               icon: const Icon(Icons.check_rounded, size: 18),
-              label: Text('Simpan Portofolio', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 14)),
+              label: Text('Simpan Portofolio', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
@@ -177,11 +177,11 @@ class _InvestmentTrackerPageState extends ConsumerState<InvestmentTrackerPage> {
       controller: controller,
       keyboardType: isPremium ? TextInputType.number : TextInputType.text,
       inputFormatters: isPremium ? [_RibuanFormatter()] : null,
-      style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 16, color: contentColor),
+      style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11, color: contentColor),
       decoration: InputDecoration(
         hintText: hint ?? '0',
-        hintStyle: GoogleFonts.comicNeue(
-            fontSize: 16,
+        hintStyle: GoogleFonts.quicksand(
+            fontSize: 11,
             color: isDarkMode ? Colors.white10 : Colors.black38),
         prefixIcon: Container(
           padding: const EdgeInsets.only(left: 16, right: 8),
@@ -191,7 +191,7 @@ class _InvestmentTrackerPageState extends ConsumerState<InvestmentTrackerPage> {
               Icon(icon, color: color, size: 18),
               if (unit.isNotEmpty) ...[
                 const SizedBox(width: 8),
-                Text(unit, style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, color: color, fontSize: 13)),
+                Text(unit, style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: color, fontSize: 11)),
               ],
             ],
           ),
@@ -218,7 +218,7 @@ class _InvestmentTrackerPageState extends ConsumerState<InvestmentTrackerPage> {
           children: [
             const Icon(Icons.add_rounded, size: 16, color: AppColors.primary),
             const SizedBox(width: 4),
-            Text('Aset', style: GoogleFonts.comicNeue(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primary)),
+            Text('Aset', style: GoogleFonts.quicksand(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.primary)),
           ],
         ),
       ),
@@ -241,12 +241,12 @@ class _InvestmentTrackerPageState extends ConsumerState<InvestmentTrackerPage> {
       ),
       child: Column(
         children: [
-          Text('ESTIMASI NILAI ASET', style: GoogleFonts.comicNeue(color: contentColor.withValues(alpha: 0.4), fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
+          Text('ESTIMASI NILAI ASET', style: GoogleFonts.quicksand(color: contentColor.withValues(alpha: 0.4), fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
           const SizedBox(height: 6),
           FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(_formatRupiah(current), 
-              style: GoogleFonts.comicNeue(color: current > 0 ? AppColors.primary : contentColor.withValues(alpha: 0.1), fontSize: 32, fontWeight: FontWeight.bold)),
+              style: GoogleFonts.quicksand(color: current > 0 ? AppColors.primary : contentColor.withValues(alpha: 0.1), fontSize: 21, fontWeight: FontWeight.bold)),
           ),
           const SizedBox(height: 32),
           Row(
@@ -266,11 +266,11 @@ class _InvestmentTrackerPageState extends ConsumerState<InvestmentTrackerPage> {
     return Expanded(
       child: Column(
         children: [
-          Text(label, style: GoogleFonts.comicNeue(fontSize: 9, color: contentColor.withValues(alpha: 0.4), fontWeight: FontWeight.bold)),
+          Text(label, style: GoogleFonts.quicksand(fontSize: 9, color: contentColor.withValues(alpha: 0.4), fontWeight: FontWeight.bold)),
           const SizedBox(height: 4),
           FittedBox(
             fit: BoxFit.scaleDown,
-            child: Text(_formatRupiah(val), style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 15, color: color ?? contentColor)),
+            child: Text(_formatRupiah(val), style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11, color: color ?? contentColor)),
           ),
         ],
       ),
@@ -297,7 +297,7 @@ class _InvestmentTrackerPageState extends ConsumerState<InvestmentTrackerPage> {
               Expanded(
                 child: Text(item.assetName, 
                   maxLines: 1, overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 14, color: contentColor)),
+                  style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11, color: contentColor)),
               ),
               PopupMenuButton<String>(
                 icon: Icon(Icons.more_vert_rounded, size: 18, color: contentColor.withValues(alpha: 0.3)),
@@ -317,7 +317,7 @@ class _InvestmentTrackerPageState extends ConsumerState<InvestmentTrackerPage> {
                       children: [
                         const Icon(Icons.edit_note_rounded, size: 18, color: Colors.blue),
                         const SizedBox(width: 8),
-                        Text('Update Valuasi', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 13)),
+                        Text('Update Valuasi', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11)),
                       ],
                     ),
                   ),
@@ -327,7 +327,7 @@ class _InvestmentTrackerPageState extends ConsumerState<InvestmentTrackerPage> {
                       children: [
                         const Icon(Icons.delete_outline_rounded, size: 18, color: Colors.red),
                         const SizedBox(width: 8),
-                        Text('Hapus', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.red)),
+                        Text('Hapus', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11, color: Colors.red)),
                       ],
                     ),
                   ),
@@ -344,7 +344,7 @@ class _InvestmentTrackerPageState extends ConsumerState<InvestmentTrackerPage> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text('PROFIT/LOSS', style: GoogleFonts.comicNeue(fontSize: 9, color: isDarkMode ? Colors.white24 : Colors.black38, fontWeight: FontWeight.bold)),
+                  Text('PROFIT/LOSS', style: GoogleFonts.quicksand(fontSize: 9, color: isDarkMode ? Colors.white24 : Colors.black38, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 4),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -358,7 +358,7 @@ class _InvestmentTrackerPageState extends ConsumerState<InvestmentTrackerPage> {
                         Icon(isProfit ? Icons.trending_up_rounded : Icons.trending_down_rounded, color: isProfit ? Colors.green : Colors.red, size: 10),
                         const SizedBox(width: 4),
                         Text('${isProfit ? '+' : ''}${item.profitLossPercentage.toStringAsFixed(1)}%', 
-                          style: GoogleFonts.comicNeue(color: isProfit ? Colors.green : Colors.red, fontWeight: FontWeight.bold, fontSize: 11)),
+                          style: GoogleFonts.quicksand(color: isProfit ? Colors.green : Colors.red, fontWeight: FontWeight.bold, fontSize: 11)),
                       ],
                     ),
                   ),
@@ -376,9 +376,9 @@ class _InvestmentTrackerPageState extends ConsumerState<InvestmentTrackerPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label.toUpperCase(), style: GoogleFonts.comicNeue(fontSize: 9, color: isDarkMode ? Colors.white24 : Colors.black38, fontWeight: FontWeight.bold)),
+        Text(label.toUpperCase(), style: GoogleFonts.quicksand(fontSize: 9, color: isDarkMode ? Colors.white24 : Colors.black38, fontWeight: FontWeight.bold)),
         const SizedBox(height: 4),
-        Text(value, style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor)),
+        Text(value, style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11, color: contentColor)),
       ],
     );
   }
@@ -391,7 +391,7 @@ class _InvestmentTrackerPageState extends ConsumerState<InvestmentTrackerPage> {
           children: [
             Icon(Icons.query_stats_rounded, size: 64, color: isDarkMode ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
             const SizedBox(height: 24),
-            const Text('Belum ada portofolio investasi.', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w500)),
+            const Text('Belum ada portofolio investasi.', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
           ],
         ),
       ),
@@ -432,7 +432,7 @@ class _InvestmentTrackerPageState extends ConsumerState<InvestmentTrackerPage> {
             const SizedBox(height: 12),
             Center(
               child: Text('TAMBAH ASET INVESTASI', 
-                style: GoogleFonts.comicNeue(fontSize: 15, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : Colors.teal.shade900)),
+                style: GoogleFonts.quicksand(fontSize: 11, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : Colors.teal.shade900)),
             ),
             const SizedBox(height: 16),
             _buildCompactInput('Nama Aset / Instrumen', nameController, Icons.category_rounded, isDarkMode, isPremium: false),
@@ -458,7 +458,7 @@ class _InvestmentTrackerPageState extends ConsumerState<InvestmentTrackerPage> {
                   }
                 },
                 icon: const Icon(Icons.check_rounded, size: 18),
-                label: Text('Simpan Portofolio', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 14)),
+                label: Text('Simpan Portofolio', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
@@ -504,10 +504,10 @@ class _InvestmentTrackerPageState extends ConsumerState<InvestmentTrackerPage> {
             const SizedBox(height: 12),
             Center(
               child: Text('UPDATE VALUASI', 
-                style: GoogleFonts.comicNeue(fontSize: 15, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : Colors.teal.shade900)),
+                style: GoogleFonts.quicksand(fontSize: 11, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : Colors.teal.shade900)),
             ),
             const SizedBox(height: 4),
-            Center(child: Text(item.assetName, style: GoogleFonts.comicNeue(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.bold))),
+            Center(child: Text(item.assetName, style: GoogleFonts.quicksand(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.bold))),
             const SizedBox(height: 16),
             _buildCompactInput('Nilai Valuasi Terbaru', valuationController, Icons.update_rounded, isDarkMode, isPremium: true),
             const SizedBox(height: 20),
@@ -525,7 +525,7 @@ class _InvestmentTrackerPageState extends ConsumerState<InvestmentTrackerPage> {
                       side: const BorderSide(color: AppColors.error),
                       foregroundColor: AppColors.error,
                     ),
-                    child: Text('Hapus', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 13)),
+                    child: Text('Hapus', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11)),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -541,7 +541,7 @@ class _InvestmentTrackerPageState extends ConsumerState<InvestmentTrackerPage> {
                       if (context.mounted) Navigator.pop(context);
                     },
                     icon: const Icon(Icons.update_rounded, size: 18),
-                    label: Text('Update Nilai', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 13)),
+                    label: Text('Update Nilai', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11)),
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       backgroundColor: AppColors.primary,
@@ -566,16 +566,16 @@ class _InvestmentTrackerPageState extends ConsumerState<InvestmentTrackerPage> {
       children: [
         Padding(
           padding: const EdgeInsets.only(left: 4, bottom: 6),
-          child: Text(label, style: GoogleFonts.comicNeue(fontSize: 9, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white24 : Colors.black38)),
+          child: Text(label, style: GoogleFonts.quicksand(fontSize: 9, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white24 : Colors.black38)),
         ),
         TextFormField(
           controller: controller,
           keyboardType: isPremium ? TextInputType.number : TextInputType.text,
           inputFormatters: isPremium ? [_RibuanFormatter()] : null,
-          style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 15, color: contentColor),
+          style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11, color: contentColor),
           decoration: InputDecoration(
             hintText: isPremium ? '0' : 'Masukkan nama aset...',
-            hintStyle: GoogleFonts.comicNeue(fontSize: 15, color: isDarkMode ? Colors.white10 : Colors.teal.shade50),
+            hintStyle: GoogleFonts.quicksand(fontSize: 11, color: isDarkMode ? Colors.white10 : Colors.teal.shade50),
             prefixIcon: Container(
               padding: const EdgeInsets.only(left: 16, right: 8),
               child: Row(
@@ -584,7 +584,7 @@ class _InvestmentTrackerPageState extends ConsumerState<InvestmentTrackerPage> {
                   Icon(icon, color: AppColors.primary, size: 18),
                   if (isPremium) ...[
                     const SizedBox(width: 6),
-                    Text('Rp', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 14)),
+                    Text('Rp', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 11)),
                   ],
                 ],
               ),

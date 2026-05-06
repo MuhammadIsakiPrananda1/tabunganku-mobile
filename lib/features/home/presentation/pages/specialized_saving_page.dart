@@ -62,7 +62,7 @@ class _SpecializedSavingPageState extends ConsumerState<SpecializedSavingPage> {
           onPressed: () => Navigator.pop(context),
           icon: Icon(Icons.arrow_back_ios_new_rounded, color: contentColor, size: 20),
         ),
-        title: Text(widget.title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: contentColor)),
+        title: Text(widget.title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: contentColor)),
         centerTitle: true,
       ),
       body: targetsAsync.when(
@@ -143,7 +143,7 @@ class _SpecializedSavingPageState extends ConsumerState<SpecializedSavingPage> {
                       children: [
                         const Icon(Icons.calendar_today_rounded, size: 18, color: AppColors.primary),
                         const SizedBox(width: 8),
-                        Text(DateFormat('d/M/yy').format(_selectedDate), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                        Text(DateFormat('d/M/yy').format(_selectedDate), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
                       ],
                     ),
                   ),
@@ -215,11 +215,11 @@ class _SpecializedSavingPageState extends ConsumerState<SpecializedSavingPage> {
       controller: controller,
       keyboardType: isPremium ? TextInputType.number : TextInputType.text,
       inputFormatters: isPremium ? [_RibuanFormatter()] : null,
-      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: contentColor),
+      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: contentColor),
       decoration: InputDecoration(
         hintText: hint ?? '0',
         hintStyle: TextStyle(
-            fontSize: 16,
+            fontSize: 11,
             color: isDarkMode ? Colors.white10 : Colors.black38),
         prefixIcon: Container(
           padding: const EdgeInsets.only(left: 16, right: 8),
@@ -229,7 +229,7 @@ class _SpecializedSavingPageState extends ConsumerState<SpecializedSavingPage> {
               Icon(icon, color: color, size: 20),
               if (unit.isNotEmpty) ...[
                 const SizedBox(width: 8),
-                Text(unit, style: TextStyle(fontWeight: FontWeight.bold, color: color, fontSize: 16)),
+                Text(unit, style: TextStyle(fontWeight: FontWeight.bold, color: color, fontSize: 11)),
               ],
             ],
           ),
@@ -256,7 +256,7 @@ class _SpecializedSavingPageState extends ConsumerState<SpecializedSavingPage> {
           children: [
             Icon(Icons.add_rounded, size: 16, color: widget.baseColor),
             const SizedBox(width: 4),
-            Text('Tambah', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: widget.baseColor)),
+            Text('Tambah', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: widget.baseColor)),
           ],
         ),
       ),
@@ -287,11 +287,11 @@ class _SpecializedSavingPageState extends ConsumerState<SpecializedSavingPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(widget.title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: widget.baseColor)),
+                Text(widget.title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: widget.baseColor)),
                 const SizedBox(height: 4),
                 Text(
                   'Rencanakan dana masa depanmu dengan target yang produktif.',
-                  style: TextStyle(fontSize: 11, color: widget.baseColor.withValues(alpha: 0.8), fontWeight: FontWeight.w500),
+                  style: TextStyle(fontSize: 11, color: widget.baseColor.withValues(alpha: 0.8), fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -326,10 +326,10 @@ class _SpecializedSavingPageState extends ConsumerState<SpecializedSavingPage> {
               Expanded(
                 child: Text(target.name, 
                   maxLines: 1, overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: contentColor)),
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: contentColor)),
               ),
               const SizedBox(width: 8),
-              Text('${(progress * 100).toInt()}%', style: TextStyle(fontWeight: FontWeight.bold, color: widget.baseColor, fontSize: 16)),
+              Text('${(progress * 100).toInt()}%', style: TextStyle(fontWeight: FontWeight.bold, color: widget.baseColor, fontSize: 11)),
             ],
           ),
           const SizedBox(height: 16),
@@ -362,7 +362,7 @@ class _SpecializedSavingPageState extends ConsumerState<SpecializedSavingPage> {
       children: [
         Text(label, style: TextStyle(fontSize: 10, color: contentColor.withValues(alpha: 0.4), fontWeight: FontWeight.bold)),
         const SizedBox(height: 4),
-        Text(value, style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: contentColor)),
+        Text(value, style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: contentColor)),
       ],
     );
   }
@@ -375,7 +375,7 @@ class _SpecializedSavingPageState extends ConsumerState<SpecializedSavingPage> {
           children: [
             Icon(widget.icon, size: 64, color: isDarkMode ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
             const SizedBox(height: 24),
-            const Text('Belum ada rencana yang dibuat.', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w500)),
+            const Text('Belum ada rencana yang dibuat.', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
           ],
         ),
       ),
@@ -417,7 +417,7 @@ class _SpecializedSavingPageState extends ConsumerState<SpecializedSavingPage> {
               const SizedBox(height: 20),
               Center(
                 child: Text('BUAT RENCANA', 
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : Colors.teal.shade900)),
+                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : Colors.teal.shade900)),
               ),
               const SizedBox(height: 24),
               _buildCompactInput('Nama Rencana', nameController, Icons.edit_note_rounded, isDarkMode, isPremium: false),
@@ -449,7 +449,7 @@ class _SpecializedSavingPageState extends ConsumerState<SpecializedSavingPage> {
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   ),
-                  child: const Text('Buat Rencana', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  child: const Text('Buat Rencana', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
                 ),
               ),
             ],
@@ -472,10 +472,10 @@ class _SpecializedSavingPageState extends ConsumerState<SpecializedSavingPage> {
           controller: controller,
           keyboardType: isPremium ? TextInputType.number : TextInputType.text,
           inputFormatters: isPremium ? [_RibuanFormatter()] : null,
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: contentColor),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: contentColor),
           decoration: InputDecoration(
             hintText: isPremium ? '0' : 'Masukkan nama...',
-            hintStyle: TextStyle(fontSize: 16, color: isDarkMode ? Colors.white10 : Colors.teal.shade50),
+            hintStyle: TextStyle(fontSize: 11, color: isDarkMode ? Colors.white10 : Colors.teal.shade50),
             prefixIcon: Container(
               padding: const EdgeInsets.only(left: 20, right: 8),
               child: Row(
@@ -484,7 +484,7 @@ class _SpecializedSavingPageState extends ConsumerState<SpecializedSavingPage> {
                   Icon(icon, color: AppColors.primary, size: 20),
                   if (isPremium) ...[
                     const SizedBox(width: 8),
-                    const Text('Rp', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 16)),
+                    const Text('Rp', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 11)),
                   ],
                 ],
               ),
@@ -526,7 +526,7 @@ class _SpecializedSavingPageState extends ConsumerState<SpecializedSavingPage> {
               children: [
                 Text('TARGET SELESAI', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: contentColor.withValues(alpha: 0.4))),
                 const SizedBox(height: 2),
-                Text(DateFormat('d MMMM yyyy').format(selected), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: contentColor)),
+                Text(DateFormat('d MMMM yyyy').format(selected), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: contentColor)),
               ],
             ),
             const Spacer(),

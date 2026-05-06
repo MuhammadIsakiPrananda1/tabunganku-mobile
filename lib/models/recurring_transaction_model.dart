@@ -4,6 +4,9 @@ enum RecurringFrequency {
   daily,
   weekly,
   monthly,
+  quarterly,
+  semiAnnually,
+  yearly,
 }
 
 class RecurringTransactionModel {

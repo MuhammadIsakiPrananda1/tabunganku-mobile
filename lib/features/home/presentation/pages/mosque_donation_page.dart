@@ -95,9 +95,9 @@ class _MosqueDonationPageState extends ConsumerState<MosqueDonationPage> {
         ),
         title: Text(
           'Sedekah Masjid',
-          style: GoogleFonts.comicNeue(
+          style: GoogleFonts.quicksand(
             fontWeight: FontWeight.bold,
-            fontSize: 16,
+            fontSize: 11,
             color: contentColor,
           ),
         ),
@@ -146,7 +146,7 @@ class _MosqueDonationPageState extends ConsumerState<MosqueDonationPage> {
                 ),
                 child: const Text(
                   'Simpan Catatan Sedekah',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
                 ),
               ),
             ),
@@ -177,10 +177,10 @@ class _MosqueDonationPageState extends ConsumerState<MosqueDonationPage> {
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
     return TextFormField(
       controller: controller,
-      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: contentColor),
+      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: contentColor),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: TextStyle(fontSize: 14, color: isDarkMode ? Colors.white24 : Colors.grey.shade400),
+        hintStyle: TextStyle(fontSize: 11, color: isDarkMode ? Colors.white24 : Colors.grey.shade400),
         prefixIcon: Icon(icon, color: AppColors.primary, size: 20),
         filled: true,
         fillColor: isDarkMode ? Colors.white.withValues(alpha: 0.03) : Colors.white,
@@ -205,10 +205,10 @@ class _MosqueDonationPageState extends ConsumerState<MosqueDonationPage> {
       controller: controller,
       keyboardType: TextInputType.number,
       inputFormatters: [_RibuanFormatter()],
-      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: contentColor),
+      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: contentColor),
       decoration: InputDecoration(
         hintText: '0',
-        hintStyle: TextStyle(fontSize: 18, color: isDarkMode ? Colors.white24 : Colors.grey.shade400),
+        hintStyle: TextStyle(fontSize: 11, color: isDarkMode ? Colors.white24 : Colors.grey.shade400),
         prefixIcon: Container(
           padding: const EdgeInsets.only(left: 16, right: 8),
           child: Row(
@@ -216,7 +216,7 @@ class _MosqueDonationPageState extends ConsumerState<MosqueDonationPage> {
             children: [
               const Icon(Icons.account_balance_wallet_rounded, color: AppColors.primary, size: 20),
               const SizedBox(width: 8),
-              const Text('Rp', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 18)),
+              const Text('Rp', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 11)),
             ],
           ),
         ),
@@ -256,7 +256,7 @@ class _MosqueDonationPageState extends ConsumerState<MosqueDonationPage> {
             child: Text(
               type,
               style: TextStyle(
-                fontSize: 12,
+                fontSize: 11,
                 fontWeight: FontWeight.bold,
                 color: isSelected ? Colors.white : (isDarkMode ? Colors.white70 : AppColors.primaryDark),
               ),
@@ -282,9 +282,9 @@ class _MosqueDonationPageState extends ConsumerState<MosqueDonationPage> {
             child: Text(
               'Sedekah adalah bukti keimanan. Catat setiap kebaikanmu untuk memantau keberkahan hartamu.',
               style: TextStyle(
-                fontSize: 12,
+                fontSize: 11,
                 color: AppColors.primary,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.bold,
                 height: 1.5,
               ),
             ),

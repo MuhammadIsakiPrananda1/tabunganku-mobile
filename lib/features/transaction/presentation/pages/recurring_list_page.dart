@@ -42,12 +42,34 @@ class _RecurringListPageState extends ConsumerState<RecurringListPage> {
     return NumberFormat.currency(locale: 'id_ID', symbol: 'Rp', decimalDigits: 0).format(amount);
   }
 
+  String _getFreqLabel(RecurringFrequency f) {
+    switch (f) {
+      case RecurringFrequency.daily: return 'Harian';
+      case RecurringFrequency.weekly: return 'Mingguan';
+      case RecurringFrequency.monthly: return 'Bulanan';
+      case RecurringFrequency.quarterly: return 'Triwulan';
+      case RecurringFrequency.semiAnnually: return 'Semester';
+      case RecurringFrequency.yearly: return 'Tahunan';
+    }
+  }
+
+  String _getFreqDesc(RecurringFrequency f) {
+    switch (f) {
+      case RecurringFrequency.daily: return 'Terulang otomatis setiap hari';
+      case RecurringFrequency.weekly: return 'Terulang otomatis setiap minggu';
+      case RecurringFrequency.monthly: return 'Terulang otomatis setiap bulan';
+      case RecurringFrequency.quarterly: return 'Terulang otomatis setiap 3 bulan';
+      case RecurringFrequency.semiAnnually: return 'Terulang otomatis setiap 6 bulan';
+      case RecurringFrequency.yearly: return 'Terulang otomatis setiap tahun';
+    }
+  }
+
   void _showAddSheet() {
     final amountController = TextEditingController();
     final titleController = TextEditingController();
     TransactionType selectedType = TransactionType.expense;
     RecurringFrequency selectedFreq = RecurringFrequency.monthly;
-    String selectedCategory = 'Tagihan Listrik / Air';
+    String selectedCategory = AppCategories.expenseCategories.first.label;
 
     showModalBottomSheet(
       context: context,
@@ -72,7 +94,7 @@ class _RecurringListPageState extends ConsumerState<RecurringListPage> {
                 children: [
                   Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: isDark ? Colors.white10 : Colors.grey.shade200, borderRadius: BorderRadius.circular(2)))),
                   const SizedBox(height: 24),
-                  const Text('Tambah Transaksi Rutin', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  const Text('Tambah Transaksi Rutin', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 24),
                   TextField(
                     controller: titleController,
@@ -110,26 +132,125 @@ class _RecurringListPageState extends ConsumerState<RecurringListPage> {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  Text('Frekuensi',
+                  Text('Jenis Transaksi',
                       style: TextStyle(
-                          fontSize: 12,
+                          fontSize: 13,
                           fontWeight: FontWeight.bold,
                           color: isDark ? Colors.white70 : Colors.black54)),
                   const SizedBox(height: 8),
                   Row(
+                    children: [
+                      Expanded(
+                        child: ChoiceChip(
+                          label: const Center(child: Text('PENGELUARAN')),
+                          selected: selectedType == TransactionType.expense,
+                          onSelected: (_) => setSheetState(() {
+                            selectedType = TransactionType.expense;
+                            selectedCategory = AppCategories.expenseCategories.first.label;
+                          }),
+                          selectedColor: Colors.redAccent,
+                          labelStyle: TextStyle(
+                              color: selectedType == TransactionType.expense ? Colors.white : Colors.redAccent,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 11),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: ChoiceChip(
+                          label: const Center(child: Text('PEMASUKAN')),
+                          selected: selectedType == TransactionType.income,
+                          onSelected: (_) => setSheetState(() {
+                            selectedType = TransactionType.income;
+                            selectedCategory = AppCategories.incomeCategories.first.label;
+                          }),
+                          selectedColor: Colors.green,
+                          labelStyle: TextStyle(
+                              color: selectedType == TransactionType.income ? Colors.white : Colors.green,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 11),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  Text('Kategori',
+                      style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white70 : Colors.black54)),
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade50,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: selectedCategory,
+                        isExpanded: true,
+                        dropdownColor: isDark ? AppColors.surfaceDark : Colors.white,
+                        items: (selectedType == TransactionType.expense 
+                                ? AppCategories.expenseCategories 
+                                : AppCategories.incomeCategories)
+                            .map((c) => DropdownMenuItem(
+                                  value: c.label,
+                                  child: Text(c.label, style: const TextStyle(fontSize: 13)),
+                                ))
+                            .toList(),
+                        onChanged: (val) => setSheetState(() => selectedCategory = val!),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Text('Frekuensi Penagihan',
+                      style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white70 : Colors.black54)),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
                     children: RecurringFrequency.values.map((f) {
                       final isSelected = selectedFreq == f;
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: ChoiceChip(
-                          label: Text(f.name.toUpperCase()),
-                          selected: isSelected,
-                          onSelected: (_) => setSheetState(() => selectedFreq = f),
-                          selectedColor: AppColors.primary,
-                          labelStyle: TextStyle(color: isSelected ? Colors.white : Colors.teal, fontWeight: FontWeight.bold, fontSize: 10),
-                        ),
+                      return ChoiceChip(
+                        label: Text(_getFreqLabel(f)),
+                        selected: isSelected,
+                        onSelected: (_) => setSheetState(() => selectedFreq = f),
+                        selectedColor: AppColors.primary,
+                        labelStyle: TextStyle(
+                            color: isSelected ? Colors.white : AppColors.primary,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12),
                       );
                     }).toList(),
+                  ),
+                  const SizedBox(height: 12),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.05),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppColors.primary.withValues(alpha: 0.1)),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.info_outline_rounded, size: 16, color: AppColors.primary),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            _getFreqDesc(selectedFreq),
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: isDark ? Colors.white60 : Colors.black54,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 32),
                   ElevatedButton(
@@ -156,7 +277,7 @@ class _RecurringListPageState extends ConsumerState<RecurringListPage> {
                       minimumSize: const Size(double.infinity, 56),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     ),
-                    child: const Text('Simpan Transaksi Rutin', style: TextStyle(fontWeight: FontWeight.bold)),
+                    child: const Text('Simpan Transaksi Rutin', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                   ),
                 ],
               ),
@@ -208,7 +329,7 @@ class _RecurringListPageState extends ConsumerState<RecurringListPage> {
           const SizedBox(height: 20),
           Text('Belum ada transaksi rutin', style: TextStyle(color: isDark ? Colors.white38 : Colors.black38, fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
-          const Text('Tambahkan Netflix, Spotify, atau kost-kosan kamu!', style: TextStyle(color: Colors.grey, fontSize: 12)),
+          const Text('Tambahkan Netflix, Spotify, atau kost-kosan kamu!', style: TextStyle(color: Colors.grey, fontSize: 11)),
         ],
       ),
     );
@@ -235,9 +356,9 @@ class _RecurringListPageState extends ConsumerState<RecurringListPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(item.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                Text(item.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
                 Text(
-                    '${item.frequency.name.toUpperCase()} • ${_formatRupiah(item.amount)}',
+                    '${_getFreqLabel(item.frequency)} • ${_formatRupiah(item.amount)}',
                     style: TextStyle(
                         color: isDark ? Colors.white38 : Colors.black54,
                         fontSize: 11)),

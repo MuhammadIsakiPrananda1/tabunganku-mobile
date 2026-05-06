@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
+import 'package:intl/intl.dart';
 import 'package:tabunganku/core/theme/app_colors.dart';
 import 'package:tabunganku/core/theme/theme_provider.dart';
 import 'package:tabunganku/models/shopping_item_model.dart';
@@ -66,12 +67,6 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
         text: widget.item?.unit ?? '');
     
     // Calculate initial price per unit if editing
-    double initialPricePerUnit = 0;
-    if (widget.item != null) {
-      initialPricePerUnit = widget.item!.estimatedPrice / widget.item!.quantity;
-    }
-    
-    // Calculate initial price per unit if editing
     String initialPriceStr = '';
     if (widget.item != null) {
       final pricePerUnit = (widget.item!.estimatedPrice / widget.item!.quantity).toInt();
@@ -117,6 +112,14 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
     super.dispose();
   }
 
+  String _formatRupiah(double amount) {
+    return NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    ).format(amount);
+  }
+
   void _calculateTotalPrice() {
     final qtyStr = _quantityController.text.replaceAll(',', '.');
     final priceStr = _pricePerUnitController.text.replaceAll(RegExp(r'[^0-9]'), '');
@@ -131,7 +134,7 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
         final formattedTotal = _RibuanSeparatorInputFormatter().formatEditUpdate(
           const TextEditingValue(text: ''),
           TextEditingValue(
-              text: total.toInt().toString(), selection: TextSelection.collapsed(offset: 0)),
+              text: total.toInt().toString(), selection: const TextSelection.collapsed(offset: 0)),
         ).text;
         
         _priceController.text = formattedTotal;
@@ -202,7 +205,7 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
             Text('Pilih Sumber Foto',
                 style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 18,
+                    fontSize: 11,
                     color: isDarkMode ? Colors.white : Colors.black87)),
             const SizedBox(height: 24),
             Row(
@@ -266,7 +269,7 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
             Text(label,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 14,
+                  fontSize: 11,
                   color: isDarkMode ? Colors.white70 : Colors.teal.shade900,
                 )),
           ],
@@ -354,8 +357,8 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
               children: [
                 Text(
                   widget.item == null ? 'Bikin Rencana' : 'Ubah Rencana',
-                  style: GoogleFonts.comicNeue(
-                    fontSize: 22,
+                  style: GoogleFonts.quicksand(
+                    fontSize: 19,
                     fontWeight: FontWeight.bold,
                     color: isDarkMode ? Colors.white : Colors.black87,
                   ),
@@ -372,7 +375,7 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
                       style: const TextStyle(
                         color: AppColors.primary,
                         fontWeight: FontWeight.bold,
-                        fontSize: 14,
+                        fontSize: 11,
                       ),
                     ),
                   ),
@@ -433,12 +436,12 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
                             : Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(Icons.add_a_photo_rounded,
+                                  const Icon(Icons.add_a_photo_rounded,
                                       color: AppColors.primary, size: 24),
                                   const SizedBox(width: 12),
                                   Text('Tambah Foto Barang',
                                       style: TextStyle(
-                                          fontSize: 12,
+                                          fontSize: 11,
                                           fontWeight: FontWeight.bold,
                                           color: isDarkMode ? Colors.white24 : Colors.grey.shade400)),
                                 ],
@@ -533,8 +536,13 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text('Total Estimasi', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.grey)),
-                            Text('Rp ${_priceController.text}', style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 18, color: AppColors.primary)),
+                            Text('ESTIMASI TOTAL', style: GoogleFonts.quicksand(fontSize: 13, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white38 : Colors.black26)),
+                            Builder(
+                              builder: (context) {
+                                final totalEstimated = double.tryParse(_priceController.text.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0.0;
+                                return Text(_formatRupiah(totalEstimated), style: GoogleFonts.quicksand(fontSize: 13, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : AppColors.primaryDark));
+                              },
+                            ),
                           ],
                         ),
                       ),
@@ -552,7 +560,7 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
                         ),
                         child: Text(
                             widget.item == null ? 'Simpan Rencana' : 'Simpan Perubahan',
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -582,8 +590,8 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
           children: [
             TextSpan(
               text: text,
-              style: GoogleFonts.comicNeue(
-                fontSize: 14,
+              style: GoogleFonts.quicksand(
+                fontSize: 11,
                 fontWeight: FontWeight.bold,
                 color: isDarkMode ? Colors.white70 : Colors.black87,
               ),
@@ -593,7 +601,7 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
                 text: ' *',
                 style: TextStyle(
                   color: Colors.red,
-                  fontSize: 14,
+                  fontSize: 13,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -625,8 +633,8 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
           fontWeight: FontWeight.bold),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: TextStyle(
-            color: isDarkMode ? Colors.white12 : Colors.black26, fontSize: 14),
+         hintStyle: TextStyle(
+             color: isDarkMode ? Colors.white12 : Colors.black26, fontSize: 14),
         prefixIcon: Row(
           mainAxisSize: MainAxisSize.min,
           children: [

@@ -33,16 +33,16 @@ class NotificationsPage extends ConsumerWidget {
         ),
         title: Text(
           'Notifikasi',
-          style: GoogleFonts.comicNeue(
+          style: GoogleFonts.quicksand(
             fontWeight: FontWeight.bold,
-            fontSize: 18,
+            fontSize: 11,
             color: isDarkMode ? Colors.white : AppColors.primaryDark,
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => ref.read(notificationNotifierProvider.notifier).markAllAsRead(),
-            child: Text('Tandai Dibaca', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold)),
+            child: Text('Tandai Dibaca', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -76,7 +76,7 @@ class NotificationsPage extends ConsumerWidget {
                         side: BorderSide(color: Colors.red.withValues(alpha: 0.2), width: 1),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       ),
-                      child: Text('Hapus Semua Riwayat', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold)),
+                      child: Text('Hapus Semua Riwayat', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold)),
                     ),
                   ),
                 ),
@@ -102,8 +102,8 @@ class NotificationsPage extends ConsumerWidget {
           const SizedBox(height: 24),
           Text(
             'Belum Ada Notifikasi',
-            style: GoogleFonts.comicNeue(
-              fontSize: 16,
+            style: GoogleFonts.quicksand(
+              fontSize: 11,
               fontWeight: FontWeight.bold,
               color: isDarkMode ? Colors.white38 : Colors.grey.shade400,
             ),
@@ -111,8 +111,8 @@ class NotificationsPage extends ConsumerWidget {
           const SizedBox(height: 8),
           Text(
             'Semua kabar terbaru akan muncul di sini',
-            style: GoogleFonts.comicNeue(
-              fontSize: 12,
+            style: GoogleFonts.quicksand(
+              fontSize: 11,
               color: isDarkMode ? Colors.white12 : Colors.grey.shade300,
             ),
           ),
@@ -135,10 +135,7 @@ class NotificationsPage extends ConsumerWidget {
         icon = Icons.track_changes_rounded;
         color = AppColors.primary;
         break;
-      case NotificationType.family:
-        icon = Icons.family_restroom_rounded;
-        color = Colors.blue;
-        break;
+
       case NotificationType.system:
         icon = Icons.info_outline_rounded;
         color = Colors.teal;
@@ -211,16 +208,16 @@ class NotificationsPage extends ConsumerWidget {
                       Expanded(
                         child: Text(
                           n.title,
-                          style: GoogleFonts.comicNeue(
-                            fontWeight: n.isRead ? FontWeight.normal : FontWeight.bold,
-                            fontSize: 14,
+                          style: GoogleFonts.quicksand(
+                            fontWeight: n.isRead ? FontWeight.bold : FontWeight.bold,
+                            fontSize: 11,
                             color: isDarkMode ? Colors.white : Colors.black87,
                           ),
                         ),
                       ),
                       Text(
                         DateFormat('HH:mm').format(n.timestamp),
-                        style: GoogleFonts.comicNeue(
+                        style: GoogleFonts.quicksand(
                           fontSize: 10,
                           color: isDarkMode ? Colors.white24 : Colors.grey,
                           fontWeight: FontWeight.bold,
@@ -231,15 +228,15 @@ class NotificationsPage extends ConsumerWidget {
                   const SizedBox(height: 4),
                   Text(
                     n.message,
-                    style: GoogleFonts.comicNeue(
-                      fontSize: 12,
+                    style: GoogleFonts.quicksand(
+                      fontSize: 11,
                       color: isDarkMode ? Colors.white54 : Colors.black54,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     DateFormat('dd MMM yyyy').format(n.timestamp),
-                    style: GoogleFonts.comicNeue(
+                    style: GoogleFonts.quicksand(
                       fontSize: 9,
                       color: isDarkMode ? Colors.white12 : Colors.grey.shade400,
                       fontWeight: FontWeight.bold,

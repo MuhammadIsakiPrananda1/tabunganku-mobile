@@ -63,9 +63,9 @@ class _OverseasTravelPageState extends ConsumerState<OverseasTravelPage> {
         ),
         title: Text(
           'Target Luar Negeri',
-          style: GoogleFonts.comicNeue(
+          style: GoogleFonts.quicksand(
             fontWeight: FontWeight.bold,
-            fontSize: 16,
+            fontSize: 11,
             color: contentColor,
           ),
         ),
@@ -78,7 +78,7 @@ class _OverseasTravelPageState extends ConsumerState<OverseasTravelPage> {
             _buildInfoCard(),
             const SizedBox(height: 32),
             
-            Text('TARGET AKTIF', style: GoogleFonts.comicNeue(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5, color: contentColor.withValues(alpha: 0.4))),
+            Text('TARGET AKTIF', style: GoogleFonts.quicksand(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5, color: contentColor.withValues(alpha: 0.4))),
             const SizedBox(height: 12),
             
             goalsAsync.when(
@@ -102,7 +102,7 @@ class _OverseasTravelPageState extends ConsumerState<OverseasTravelPage> {
             ),
             
             const SizedBox(height: 40),
-            Text('BUAT TARGET BARU', style: GoogleFonts.comicNeue(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5, color: contentColor.withValues(alpha: 0.4))),
+            Text('BUAT TARGET BARU', style: GoogleFonts.quicksand(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5, color: contentColor.withValues(alpha: 0.4))),
             const SizedBox(height: 16),
             
             _buildNewGoalForm(isDarkMode),
@@ -127,7 +127,7 @@ class _OverseasTravelPageState extends ConsumerState<OverseasTravelPage> {
           Expanded(
             child: Text(
               'Rencanakan liburanmu dengan memantau kurs mata uang asing secara real-time. Tabungan ini tidak tercatat di riwayat utama.',
-              style: GoogleFonts.comicNeue(fontSize: 10, color: AppColors.primary, fontWeight: FontWeight.w500),
+              style: GoogleFonts.quicksand(fontSize: 10, color: AppColors.primary, fontWeight: FontWeight.bold),
             ),
           ),
         ],
@@ -150,7 +150,7 @@ class _OverseasTravelPageState extends ConsumerState<OverseasTravelPage> {
           const SizedBox(height: 16),
           Text(
             'Belum ada target liburan',
-            style: GoogleFonts.comicNeue(fontSize: 14, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white38 : Colors.grey),
+            style: GoogleFonts.quicksand(fontSize: 11, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white38 : Colors.grey),
           ),
         ],
       ),
@@ -185,12 +185,12 @@ class _OverseasTravelPageState extends ConsumerState<OverseasTravelPage> {
               Expanded(
                 child: Row(
                   children: [
-                    Text(_getFlag(goal.countryCode), style: const TextStyle(fontSize: 20)),
+                    Text(_getFlag(goal.countryCode), style: const TextStyle(fontSize: 11)),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         goal.destinationName.toUpperCase(), 
-                        style: GoogleFonts.comicNeue(color: contentColor.withValues(alpha: 0.4), fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 2),
+                        style: GoogleFonts.quicksand(color: contentColor.withValues(alpha: 0.4), fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 2),
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
                       ),
@@ -211,25 +211,25 @@ class _OverseasTravelPageState extends ConsumerState<OverseasTravelPage> {
             fit: BoxFit.scaleDown,
             child: Text(
               idrFormat.format(goal.collectedIdrAmount),
-              style: GoogleFonts.comicNeue(fontSize: 32, fontWeight: FontWeight.bold, color: AppColors.primary)
+              style: GoogleFonts.quicksand(fontSize: 21, fontWeight: FontWeight.bold, color: AppColors.primary)
             ),
           ),
           const SizedBox(height: 4),
           Text(
             'Target: ${foreignFormat.format(goal.targetForeignAmount)} (~${idrFormat.format(targetIdr)})',
-            style: GoogleFonts.comicNeue(fontSize: 10, color: contentColor.withValues(alpha: 0.5), fontWeight: FontWeight.w500),
+            style: GoogleFonts.quicksand(fontSize: 10, color: contentColor.withValues(alpha: 0.5), fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 20),
           
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Progress: $percent%', style: GoogleFonts.comicNeue(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.primary)),
+              Text('Progress: $percent%', style: GoogleFonts.quicksand(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.primary)),
               const SizedBox(width: 8),
               Flexible(
                 child: Text(
                   'Kurs: 1 ${goal.currencyCode} = ${idrFormat.format(rate)}', 
-                  style: GoogleFonts.comicNeue(fontSize: 9, color: contentColor.withValues(alpha: 0.3)),
+                  style: GoogleFonts.quicksand(fontSize: 9, color: contentColor.withValues(alpha: 0.3)),
                   textAlign: TextAlign.right,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -259,7 +259,7 @@ class _OverseasTravelPageState extends ConsumerState<OverseasTravelPage> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 elevation: 0,
               ),
-              child: Text('Tambah Tabungan', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 14)),
+              child: Text('Tambah Tabungan', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 16)),
             ),
           ),
         ],
@@ -283,7 +283,7 @@ class _OverseasTravelPageState extends ConsumerState<OverseasTravelPage> {
                 children: [
                   Padding(
                     padding: const EdgeInsets.only(left: 4, bottom: 8),
-                    child: Text('VALAS', style: GoogleFonts.comicNeue(fontSize: 10, fontWeight: FontWeight.bold, color: contentColor.withValues(alpha: 0.5), letterSpacing: 1)),
+                    child: Text('VALAS', style: GoogleFonts.quicksand(fontSize: 10, fontWeight: FontWeight.bold, color: contentColor.withValues(alpha: 0.5), letterSpacing: 1)),
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -296,7 +296,7 @@ class _OverseasTravelPageState extends ConsumerState<OverseasTravelPage> {
                         value: _selectedCurrency,
                         isExpanded: true,
                         dropdownColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
-                        style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, color: contentColor),
+                        style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: contentColor),
                         items: _currencies.map((c) {
                           return DropdownMenuItem(
                             value: c['code'],
@@ -334,7 +334,7 @@ class _OverseasTravelPageState extends ConsumerState<OverseasTravelPage> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               elevation: 0,
             ),
-            child: Text('Simpan Target Baru', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 16)),
+            child: Text('Simpan Target Baru', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 16)),
           ),
         ),
       ],
@@ -348,17 +348,17 @@ class _OverseasTravelPageState extends ConsumerState<OverseasTravelPage> {
       children: [
         Padding(
           padding: const EdgeInsets.only(left: 4, bottom: 8),
-          child: Text(label, style: GoogleFonts.comicNeue(fontSize: 10, fontWeight: FontWeight.bold, color: contentColor.withValues(alpha: 0.5), letterSpacing: 1)),
+          child: Text(label, style: GoogleFonts.quicksand(fontSize: 10, fontWeight: FontWeight.bold, color: contentColor.withValues(alpha: 0.5), letterSpacing: 1)),
         ),
         TextFormField(
           controller: controller,
           keyboardType: isText ? TextInputType.text : TextInputType.number,
           inputFormatters: isText ? [] : [_RibuanFormatter()],
-          style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 16, color: contentColor),
+          style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 14, color: contentColor),
           onChanged: onChanged,
           decoration: InputDecoration(
             hintText: isText ? 'Masukkan nama tujuan' : '0',
-            hintStyle: GoogleFonts.comicNeue(fontSize: 14, color: isDarkMode ? Colors.white10 : Colors.black38),
+            hintStyle: GoogleFonts.quicksand(fontSize: 14, color: isDarkMode ? Colors.white10 : Colors.black38),
             prefixIcon: Container(
               padding: const EdgeInsets.only(left: 16, right: 8),
               child: Icon(icon, color: AppColors.primary, size: 20),
@@ -416,21 +416,21 @@ class _OverseasTravelPageState extends ConsumerState<OverseasTravelPage> {
       builder: (context) => AlertDialog(
         backgroundColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: Text('Tambah Tabungan', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, color: contentColor)),
+        title: Text('Tambah Tabungan', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: contentColor)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Masukkan nominal dalam Rupiah untuk tujuan ${goal.destinationName}', style: GoogleFonts.comicNeue(fontSize: 12, color: contentColor.withValues(alpha: 0.7))),
+            Text('Masukkan nominal dalam Rupiah untuk tujuan ${goal.destinationName}', style: GoogleFonts.quicksand(fontSize: 13, color: contentColor.withValues(alpha: 0.7))),
             const SizedBox(height: 16),
             TextFormField(
               controller: controller,
               keyboardType: TextInputType.number,
               inputFormatters: [_RibuanFormatter()],
               autofocus: true,
-              style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, color: contentColor),
+              style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: contentColor),
               decoration: InputDecoration(
                 prefixText: 'Rp ',
-                prefixStyle: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, color: AppColors.primary),
+                prefixStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: AppColors.primary),
                 filled: true,
                 fillColor: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade50,
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
@@ -441,7 +441,7 @@ class _OverseasTravelPageState extends ConsumerState<OverseasTravelPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Batal', style: GoogleFonts.comicNeue(color: isDarkMode ? Colors.white38 : Colors.grey)),
+            child: Text('Batal', style: GoogleFonts.quicksand(color: isDarkMode ? Colors.white38 : Colors.grey)),
           ),
           ElevatedButton(
             onPressed: () {
@@ -461,7 +461,7 @@ class _OverseasTravelPageState extends ConsumerState<OverseasTravelPage> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               elevation: 0,
             ),
-            child: Text('Simpan', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold)),
+            child: Text('Simpan', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -479,15 +479,15 @@ class _OverseasTravelPageState extends ConsumerState<OverseasTravelPage> {
       builder: (context) => AlertDialog(
         backgroundColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: Text('Hapus Target?', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, color: contentColor)),
+        title: Text('Hapus Target?', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: contentColor)),
         content: Text(
           'Apakah kamu yakin ingin menghapus target liburan ke ${goal.destinationName}?',
-          style: GoogleFonts.comicNeue(color: contentColor.withValues(alpha: 0.7)),
+          style: GoogleFonts.quicksand(color: contentColor.withValues(alpha: 0.7)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Batal', style: GoogleFonts.comicNeue(color: isDarkMode ? Colors.white38 : Colors.grey)),
+            child: Text('Batal', style: GoogleFonts.quicksand(color: isDarkMode ? Colors.white38 : Colors.grey)),
           ),
           TextButton(
             onPressed: () {

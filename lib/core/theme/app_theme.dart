@@ -7,7 +7,7 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
-      fontFamily: GoogleFonts.comicNeue().fontFamily,
+      fontFamily: GoogleFonts.quicksand().fontFamily,
       colorScheme: const ColorScheme.light(
         primary: AppColors.primary,
         onPrimary: Colors.white,
@@ -20,69 +20,69 @@ class AppTheme {
       cardColor: AppColors.surface,
       dividerColor: AppColors.divider,
       textTheme: TextTheme(
-        displayLarge: GoogleFonts.comicNeue(
-          fontSize: 34,
-          fontWeight: FontWeight.bold,
-          letterSpacing: 0.5,
-          color: AppColors.textPrimary,
-        ),
-        displayMedium: GoogleFonts.comicNeue(
+        displayLarge: GoogleFonts.quicksand(
           fontSize: 30,
           fontWeight: FontWeight.bold,
-          letterSpacing: 0.5,
+          letterSpacing: -0.5,
           color: AppColors.textPrimary,
         ),
-        displaySmall: GoogleFonts.comicNeue(
+        displayMedium: GoogleFonts.quicksand(
           fontSize: 26,
           fontWeight: FontWeight.bold,
-          letterSpacing: 0.5,
+          letterSpacing: -0.5,
           color: AppColors.textPrimary,
         ),
-        headlineMedium: GoogleFonts.comicNeue(
+        displaySmall: GoogleFonts.quicksand(
           fontSize: 22,
           fontWeight: FontWeight.bold,
-          letterSpacing: 0.5,
+          letterSpacing: -0.5,
           color: AppColors.textPrimary,
         ),
-        headlineSmall: GoogleFonts.comicNeue(
+        headlineMedium: GoogleFonts.quicksand(
           fontSize: 20,
           fontWeight: FontWeight.bold,
-          letterSpacing: 0.5,
+          letterSpacing: 0.2,
           color: AppColors.textPrimary,
         ),
-        titleLarge: GoogleFonts.comicNeue(
+        headlineSmall: GoogleFonts.quicksand(
           fontSize: 18,
           fontWeight: FontWeight.bold,
-          letterSpacing: 0.5,
+          letterSpacing: 0.2,
           color: AppColors.textPrimary,
         ),
-        titleMedium: GoogleFonts.comicNeue(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-          color: AppColors.textPrimary,
-        ),
-        titleSmall: GoogleFonts.comicNeue(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          color: AppColors.textSecondary,
-        ),
-        bodyLarge: GoogleFonts.comicNeue(
+        titleLarge: GoogleFonts.quicksand(
           fontSize: 16,
-          fontWeight: FontWeight.normal,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 0.1,
           color: AppColors.textPrimary,
         ),
-        bodyMedium: GoogleFonts.comicNeue(
-          fontSize: 14,
-          fontWeight: FontWeight.normal,
+        titleMedium: GoogleFonts.quicksand(
+          fontSize: 13,
+          fontWeight: FontWeight.bold,
+          color: AppColors.textPrimary,
+        ),
+        titleSmall: GoogleFonts.quicksand(
+          fontSize: 11,
+          fontWeight: FontWeight.bold,
           color: AppColors.textSecondary,
         ),
-        bodySmall: GoogleFonts.comicNeue(
+        bodyLarge: GoogleFonts.quicksand(
+          fontSize: 14,
+          fontWeight: FontWeight.bold,
+          color: AppColors.textPrimary,
+        ),
+        bodyMedium: GoogleFonts.quicksand(
           fontSize: 12,
-          fontWeight: FontWeight.normal,
+          fontWeight: FontWeight.bold,
           color: AppColors.textSecondary,
         ),
-        labelLarge: GoogleFonts.comicNeue(
-          fontSize: 14,
+        bodySmall: GoogleFonts.quicksand(
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+          color: AppColors.textSecondary,
+        ),
+        labelLarge: GoogleFonts.quicksand(
+          fontSize: 12,
           fontWeight: FontWeight.bold,
           color: AppColors.textPrimary,
         ),
@@ -92,10 +92,10 @@ class AppTheme {
         elevation: 0,
         centerTitle: false,
         iconTheme: const IconThemeData(color: AppColors.textPrimary),
-        titleTextStyle: GoogleFonts.comicNeue(
-          fontSize: 22,
+        titleTextStyle: GoogleFonts.quicksand(
+          fontSize: 19,
           fontWeight: FontWeight.bold,
-          letterSpacing: 0.5,
+          letterSpacing: 0.2,
           color: AppColors.textPrimary,
         ),
       ),
@@ -108,8 +108,8 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
-          textStyle: GoogleFonts.comicNeue(
-            fontSize: 16,
+          textStyle: GoogleFonts.quicksand(
+            fontSize: 14,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -122,8 +122,8 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
-          textStyle: GoogleFonts.comicNeue(
-            fontSize: 16,
+          textStyle: GoogleFonts.quicksand(
+            fontSize: 14,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -152,19 +152,19 @@ class AppTheme {
           borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(color: AppColors.error, width: 2),
         ),
-        hintStyle: GoogleFonts.comicNeue(
+        hintStyle: GoogleFonts.quicksand(
           fontSize: 14,
-          fontWeight: FontWeight.normal,
+          fontWeight: FontWeight.bold,
           color: AppColors.textSecondary,
         ),
-        labelStyle: GoogleFonts.comicNeue(
+        labelStyle: GoogleFonts.quicksand(
           fontSize: 14,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.bold,
           color: AppColors.textPrimary,
         ),
-        errorStyle: GoogleFonts.comicNeue(
+        errorStyle: GoogleFonts.quicksand(
           fontSize: 12,
-          fontWeight: FontWeight.normal,
+          fontWeight: FontWeight.bold,
           color: AppColors.error,
         ),
       ),
@@ -182,7 +182,7 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
-      fontFamily: GoogleFonts.comicNeue().fontFamily,
+      fontFamily: GoogleFonts.quicksand().fontFamily,
       colorScheme: const ColorScheme.dark(
         primary: AppColors.primary,
         onPrimary: Colors.white,
@@ -195,69 +195,69 @@ class AppTheme {
       cardColor: AppColors.surfaceDark,
       dividerColor: AppColors.dividerDark,
       textTheme: TextTheme(
-        displayLarge: GoogleFonts.comicNeue(
-          fontSize: 34,
-          fontWeight: FontWeight.bold,
-          letterSpacing: 0.5,
-          color: AppColors.textPrimaryDark,
-        ),
-        displayMedium: GoogleFonts.comicNeue(
+        displayLarge: GoogleFonts.quicksand(
           fontSize: 30,
           fontWeight: FontWeight.bold,
-          letterSpacing: 0.5,
+          letterSpacing: -0.5,
           color: AppColors.textPrimaryDark,
         ),
-        displaySmall: GoogleFonts.comicNeue(
+        displayMedium: GoogleFonts.quicksand(
           fontSize: 26,
           fontWeight: FontWeight.bold,
-          letterSpacing: 0.5,
+          letterSpacing: -0.5,
           color: AppColors.textPrimaryDark,
         ),
-        headlineMedium: GoogleFonts.comicNeue(
+        displaySmall: GoogleFonts.quicksand(
           fontSize: 22,
           fontWeight: FontWeight.bold,
-          letterSpacing: 0.5,
+          letterSpacing: -0.5,
           color: AppColors.textPrimaryDark,
         ),
-        headlineSmall: GoogleFonts.comicNeue(
+        headlineMedium: GoogleFonts.quicksand(
           fontSize: 20,
           fontWeight: FontWeight.bold,
-          letterSpacing: 0.5,
+          letterSpacing: 0.2,
           color: AppColors.textPrimaryDark,
         ),
-        titleLarge: GoogleFonts.comicNeue(
+        headlineSmall: GoogleFonts.quicksand(
           fontSize: 18,
           fontWeight: FontWeight.bold,
-          letterSpacing: 0.5,
+          letterSpacing: 0.2,
           color: AppColors.textPrimaryDark,
         ),
-        titleMedium: GoogleFonts.comicNeue(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-          color: AppColors.textPrimaryDark,
-        ),
-        titleSmall: GoogleFonts.comicNeue(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          color: AppColors.textSecondaryDark,
-        ),
-        bodyLarge: GoogleFonts.comicNeue(
+        titleLarge: GoogleFonts.quicksand(
           fontSize: 16,
-          fontWeight: FontWeight.normal,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 0.1,
           color: AppColors.textPrimaryDark,
         ),
-        bodyMedium: GoogleFonts.comicNeue(
-          fontSize: 14,
-          fontWeight: FontWeight.normal,
+        titleMedium: GoogleFonts.quicksand(
+          fontSize: 13,
+          fontWeight: FontWeight.bold,
+          color: AppColors.textPrimaryDark,
+        ),
+        titleSmall: GoogleFonts.quicksand(
+          fontSize: 11,
+          fontWeight: FontWeight.bold,
           color: AppColors.textSecondaryDark,
         ),
-        bodySmall: GoogleFonts.comicNeue(
+        bodyLarge: GoogleFonts.quicksand(
+          fontSize: 14,
+          fontWeight: FontWeight.bold,
+          color: AppColors.textPrimaryDark,
+        ),
+        bodyMedium: GoogleFonts.quicksand(
           fontSize: 12,
-          fontWeight: FontWeight.normal,
+          fontWeight: FontWeight.bold,
           color: AppColors.textSecondaryDark,
         ),
-        labelLarge: GoogleFonts.comicNeue(
-          fontSize: 14,
+        bodySmall: GoogleFonts.quicksand(
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+          color: AppColors.textSecondaryDark,
+        ),
+        labelLarge: GoogleFonts.quicksand(
+          fontSize: 12,
           fontWeight: FontWeight.bold,
           color: AppColors.textPrimaryDark,
         ),
@@ -267,10 +267,10 @@ class AppTheme {
         elevation: 0,
         centerTitle: false,
         iconTheme: const IconThemeData(color: AppColors.textPrimaryDark),
-        titleTextStyle: GoogleFonts.comicNeue(
-          fontSize: 22,
+        titleTextStyle: GoogleFonts.quicksand(
+          fontSize: 19,
           fontWeight: FontWeight.bold,
-          letterSpacing: 0.5,
+          letterSpacing: 0.2,
           color: AppColors.textPrimaryDark,
         ),
       ),
@@ -283,8 +283,8 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
-          textStyle: GoogleFonts.comicNeue(
-            fontSize: 16,
+          textStyle: GoogleFonts.quicksand(
+            fontSize: 14,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -297,8 +297,8 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
-          textStyle: GoogleFonts.comicNeue(
-            fontSize: 16,
+          textStyle: GoogleFonts.quicksand(
+            fontSize: 14,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -327,19 +327,19 @@ class AppTheme {
           borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(color: AppColors.error, width: 2),
         ),
-        hintStyle: GoogleFonts.comicNeue(
+        hintStyle: GoogleFonts.quicksand(
           fontSize: 14,
-          fontWeight: FontWeight.normal,
+          fontWeight: FontWeight.bold,
           color: AppColors.textSecondaryDark,
         ),
-        labelStyle: GoogleFonts.comicNeue(
+        labelStyle: GoogleFonts.quicksand(
           fontSize: 14,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.bold,
           color: AppColors.textPrimaryDark,
         ),
-        errorStyle: GoogleFonts.comicNeue(
+        errorStyle: GoogleFonts.quicksand(
           fontSize: 12,
-          fontWeight: FontWeight.normal,
+          fontWeight: FontWeight.bold,
           color: AppColors.error,
         ),
       ),

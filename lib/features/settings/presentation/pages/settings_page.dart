@@ -9,10 +9,11 @@ import 'package:tabunganku/core/services/permission_service.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:image_cropper/image_cropper.dart';
 
 import 'package:tabunganku/core/theme/app_colors.dart';
 import 'package:tabunganku/core/theme/theme_provider.dart';
-import 'package:tabunganku/providers/family_group_provider.dart';
+import 'package:tabunganku/providers/user_provider.dart';
 import 'package:tabunganku/providers/transaction_provider.dart';
 import 'package:tabunganku/models/transaction_model.dart';
 import 'package:tabunganku/features/settings/presentation/providers/security_provider.dart';
@@ -85,11 +86,15 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     if (pickedFile == null) return;
     if (!mounted) return;
 
+    // ── Crop Image ──────────────────────────────────────────────
+    final croppedFile = await _cropImage(pickedFile.path);
+    if (croppedFile == null) return;
+
     setState(() => _isUploadingPhoto = true);
 
     final result = await ref
         .read(userProfileProvider.notifier)
-        .uploadAndSetPhoto(File(pickedFile.path));
+        .uploadAndSetPhoto(File(croppedFile.path));
 
     if (!mounted) return;
     setState(() {
@@ -97,6 +102,43 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       _uploadError =
           result != null ? null : 'Gagal mengupload foto. Coba lagi.';
     });
+  }
+
+  Future<CroppedFile?> _cropImage(String path) async {
+    final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
+        (ref.watch(themeProvider) == ThemeMode.system &&
+            Theme.of(context).brightness == Brightness.dark);
+    final bgColor =
+        isDarkMode ? AppColors.backgroundDark : const Color(0xFFF8FAF9);
+    final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
+
+    return await ImageCropper().cropImage(
+      sourcePath: path,
+      uiSettings: [
+        AndroidUiSettings(
+          toolbarTitle: 'Potong Foto Profil',
+          toolbarColor: bgColor,
+          toolbarWidgetColor: contentColor,
+          initAspectRatio: CropAspectRatioPreset.square,
+          lockAspectRatio: true,
+          activeControlsWidgetColor: AppColors.primary,
+          statusBarColor: bgColor,
+          backgroundColor: bgColor,
+        ),
+        IOSUiSettings(
+          title: 'Potong Foto Profil',
+          doneButtonTitle: 'Selesai',
+          cancelButtonTitle: 'Batal',
+          aspectRatioLockEnabled: true,
+        ),
+        WebUiSettings(
+          context: context,
+        ),
+      ],
+      aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
+      maxWidth: 600,
+      maxHeight: 600,
+    );
   }
 
   Future<ImageSource?> _showImageSourceDialog() async {
@@ -118,7 +160,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           children: [
             const Text(
               'Ubah Foto Profil',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 24),
             Row(
@@ -145,7 +187,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                           child: const Icon(Icons.delete_outline_rounded,
                               color: Colors.red, size: 30),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 6),
                         const Text('Hapus',
                             style: TextStyle(
                                 color: Colors.red,
@@ -217,7 +259,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     final securityState = ref.watch(securityProvider);
     final achievements = ref.watch(achievementsProvider);
     final unlockedCount = achievements.where((a) => a.isUnlocked).length;
-    final budgets = ref.watch(currentMonthBudgetsProvider);
+
 
     // ── Hitung Statistik Dasar ──────────────────────────────────────
     final transactions = (transactionsAsync.value ?? [])
@@ -234,26 +276,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
     final currentBalance = totalIncome - totalExpense;
 
-    // ── Hitung Health Score & Budget ────────────────────────────────
-    double healthScore = 100;
-    final Map<String, double> budgetConsumption = {};
-    for (final budget in budgets) {
-      final spent = transactions
-          .where((t) =>
-              t.category == budget.category &&
-              t.type == TransactionType.expense &&
-              t.date.month == budget.month &&
-              t.date.year == budget.year)
-          .fold<double>(0, (sum, t) => sum + t.amount);
-      budgetConsumption[budget.category] = spent;
-      if (spent > budget.limitAmount) {
-        healthScore -= 15;
-      } else if (spent > budget.limitAmount * 0.8) {
-        healthScore -= 5;
-      }
-    }
-    if (totalExpense > totalIncome && totalIncome > 0) healthScore -= 10;
-    healthScore = healthScore.clamp(0, 100);
+
 
     final String rankName = _getRankName(totalIncome);
     final IconData rankIcon = _getRankIcon(totalIncome);
@@ -313,10 +336,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             // ── Statistik Baris ───────────────────────────────────
             _buildStatsRow(streak, currentBalance, unlockedCount,
                 currencyFormatter, isDarkMode),
-            const SizedBox(height: 16),
-
-            // ── Kesehatan Keuangan ─────────────────────────────────
-            _buildHealthScoreCard(healthScore, isDarkMode),
             const SizedBox(height: 16),
 
             // ── Lencana Pencapaian ─────────────────────────────────
@@ -401,15 +420,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 subtitle: 'Matikan semua fitur keamanan',
               ),
             const SizedBox(height: 32),
-
             _buildSectionHeader('Sosial & Komunitas'),
-            _buildSettingTile(
-              Icons.people_alt_outlined,
-              'Undang Keluarga',
-              () => context.push('/family-group'),
-              subtitle: 'Ajak keluarga menabung bersama',
-              color: Colors.blue,
-            ),
             _buildSettingTile(
               Icons.camera_alt_outlined,
               'Instagram',
@@ -452,7 +463,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             const SizedBox(height: 16),
 
             const Text('Versi ${AppVersion.version}',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+                style: TextStyle(color: AppColors.textSecondary, fontSize: 11)),
           ],
         ),
       ),
@@ -584,6 +595,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Row(
                   children: [
@@ -596,29 +608,35 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 18,
+                          fontSize: 14,
+                          height: 1.1,
                           color: isDarkMode ? Colors.white : Colors.black87,
                         ),
                       ),
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.edit_outlined, size: 18),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                      onPressed: () => _showEditNameDialog(profile.name),
-                      color: AppColors.primary,
+                    SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: IconButton(
+                        icon: const Icon(Icons.edit_outlined, size: 16),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                        onPressed: () => _showEditNameDialog(profile.name),
+                        color: AppColors.primary,
+                      ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
                 Text(
                   'Ketuk foto untuk menggantinya',
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 11,
+                    height: 1.1,
                     color: isDarkMode ? Colors.white38 : Colors.black38,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 // Rank Badge
                 Container(
                   padding:
@@ -638,7 +656,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                         rank,
                         style: TextStyle(
                           fontSize: 11,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.bold,
                           color: rankColor,
                         ),
                       ),
@@ -696,9 +714,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             Text(
               label,
               style: TextStyle(
-                fontSize: 10,
+                fontSize: 9.5,
                 color: isDarkMode ? Colors.white38 : Colors.black38,
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.bold,
                 letterSpacing: 0.3,
               ),
             ),
@@ -712,7 +730,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                      fontSize: 13,
+                      height: 0.8,
                       color: isDarkMode ? Colors.white : Colors.black87,
                     ),
                   ),
@@ -782,7 +801,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   style: TextStyle(
                     fontSize: 9,
                     height: 1.1,
-                    fontWeight: unlocked ? FontWeight.w600 : FontWeight.w500,
+                    fontWeight: unlocked ? FontWeight.bold : FontWeight.bold,
                     color: unlocked
                         ? (isDarkMode ? Colors.white : Colors.black87)
                         : (isDarkMode ? Colors.white24 : Colors.grey.shade400),
@@ -876,7 +895,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         title,
         style: TextStyle(
           fontWeight: FontWeight.bold,
-          fontSize: 16,
+          fontSize: 11,
           color: Theme.of(context).textTheme.titleLarge?.color,
         ),
       ),
@@ -888,96 +907,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         'Ayo raih target finansialmu lebih mudah dengan TabunganKu! Download aplikasi resmi di sini: https://tabunganku.neverlandstudio.my.id/ 🎉');
   }
 
-  // ── Health Score & Budget ──────────────────────────────────────
-
-  Widget _buildHealthScoreCard(double score, bool isDarkMode) {
-    String status = 'Sehat';
-    Color scoreColor = Colors.green;
-    if (score < 40) {
-      status = 'Kritis';
-      scoreColor = Colors.red;
-    } else if (score < 70) {
-      status = 'Waspada';
-      scoreColor = Colors.orange;
-    }
-
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDarkMode ? 0.3 : 0.05),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              SizedBox(
-                width: 72,
-                height: 72,
-                child: CircularProgressIndicator(
-                  value: score / 100,
-                  strokeWidth: 7,
-                  backgroundColor:
-                      isDarkMode ? Colors.white10 : Colors.grey.shade100,
-                  valueColor: AlwaysStoppedAnimation<Color>(scoreColor),
-                  strokeCap: StrokeCap.round,
-                ),
-              ),
-              Text(
-                '${score.toInt()}',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: isDarkMode ? Colors.white : Colors.black87,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(width: 20),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Kesehatan Keuangan',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    color: isDarkMode ? Colors.white30 : Colors.black38,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  status,
-                  style: TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.bold,
-                    color: scoreColor,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Berdasarkan budget & pengeluaran bulan ini.',
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: isDarkMode ? Colors.white24 : Colors.black26,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  
 
   Widget _buildSettingTile(IconData icon, String title, VoidCallback onTap,
       {Widget? trailing, String? subtitle, Color? color}) {
@@ -996,12 +926,14 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             leading: Icon(icon, color: color ?? AppColors.primary),
             title: Text(title,
                 style: TextStyle(
+                    fontSize: 10.5,
                     color:
                         color ?? Theme.of(context).textTheme.bodyLarge?.color,
-                    fontWeight: FontWeight.w500)),
+                    fontWeight: FontWeight.bold)),
             subtitle: subtitle != null
                 ? Text(subtitle,
                     style: TextStyle(
+                        fontSize: 9.5,
                         color: Theme.of(context).textTheme.bodySmall?.color))
                 : null,
             trailing: trailing ??
@@ -1023,7 +955,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red)),
         content: const Text(
           'Apakah kamu yakin ingin menghapus PIN keamanan? Ini akan mematikan kunci aplikasi dan biometrik.',
-          style: TextStyle(fontSize: 14),
+          style: TextStyle(fontSize: 11),
         ),
         actions: [
           TextButton(
@@ -1089,14 +1021,14 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             ),
             const SizedBox(height: 24),
             const Text('TabunganKu',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold)),
             const Text('Versi ${AppVersion.version}',
-                style: TextStyle(color: Colors.grey, fontSize: 13)),
+                style: TextStyle(color: Colors.grey, fontSize: 11)),
             const SizedBox(height: 24),
             const Text(
               'Aplikasi pengelola keuangan pribadi yang cerdas dan estetik untuk membantu kamu mencapai tujuan finansial.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, height: 1.5),
+              style: TextStyle(fontSize: 11, height: 1.5),
             ),
             const SizedBox(height: 32),
             SizedBox(

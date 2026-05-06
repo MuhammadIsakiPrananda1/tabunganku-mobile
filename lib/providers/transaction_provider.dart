@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tabunganku/models/transaction_model.dart';
 import 'package:tabunganku/services/transaction_service.dart';
 import 'package:tabunganku/providers/challenge_provider.dart';
-import 'package:tabunganku/providers/family_group_provider.dart';
 
 // Provider untuk TransactionService
 final transactionServiceProvider = Provider<TransactionService>((ref) {
@@ -40,17 +39,15 @@ final transactionsProvider = FutureProvider.autoDispose<List<TransactionModel>>(
 final transactionsStreamProvider =
     StreamProvider.autoDispose<List<TransactionModel>>((ref) {
   final service = ref.watch(transactionServiceProvider);
-  // Watch the current groupId to reload the stream whenever the group context changes
-  final groupId = ref.watch(userGroupIdProvider);
-  return service.watchTransactions(groupId);
+  return service.watchTransactions();
 });
 
-// Provider untuk mendapatkan transaksi berdasarkan groupId (null untuk pribadi) secara reaktif
+// Provider untuk mendapatkan transaksi (null untuk filter jika diperlukan nanti)
 final transactionsByGroupProvider =
     Provider.autoDispose.family<List<TransactionModel>, String?>((ref, groupId) {
   final transactionsAsync = ref.watch(transactionsStreamProvider);
   return transactionsAsync.maybeWhen(
-    data: (data) => data.where((t) => t.groupId == groupId).toList(),
+    data: (data) => data.toList(),
     orElse: () => <TransactionModel>[],
   );
 });

@@ -53,8 +53,8 @@ class TransactionTile extends ConsumerWidget {
                 Text(
                   transaction.title,
                   style: TextStyle(
-                    fontWeight: FontWeight.w600, 
-                    fontSize: 14,
+                    fontWeight: FontWeight.bold, 
+                    fontSize: 16,
                     color: isDarkMode ? Colors.white : Colors.black,
                   ),
                 ),
@@ -83,7 +83,7 @@ class TransactionTile extends ConsumerWidget {
                 DateFormat('dd MMM').format(transaction.date),
                 style: TextStyle(
                   color: isDarkMode ? Colors.white54 : AppColors.textSecondary, 
-                  fontSize: 10,
+                  fontSize: 12,
                 ),
               ),
             ],

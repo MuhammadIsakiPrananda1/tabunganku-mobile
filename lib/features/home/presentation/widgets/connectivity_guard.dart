@@ -105,8 +105,8 @@ class _ConnectivityGuardState extends ConsumerState<ConnectivityGuard>
                     const SizedBox(height: 24),
                     Text(
                       'SINKRONISASI TERPUTUS',
-                      style: GoogleFonts.comicNeue(
-                        fontSize: 12,
+                      style: GoogleFonts.quicksand(
+                        fontSize: 11,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 2.0,
                         color: Colors.teal,
@@ -116,13 +116,13 @@ class _ConnectivityGuardState extends ConsumerState<ConnectivityGuard>
                     Text(
                       'Fitur Keluarga memerlukan koneksi cloud untuk menjaga data tetap aman dan sinkron.',
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.comicNeue(
-                        fontSize: 14,
+                      style: GoogleFonts.quicksand(
+                        fontSize: 11,
                         color: Theme.of(context).brightness == Brightness.dark 
                             ? Colors.white70 
                             : Colors.black54,
                         height: 1.6,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(height: 32),
@@ -147,7 +147,7 @@ class _ConnectivityGuardState extends ConsumerState<ConnectivityGuard>
                           const SizedBox(width: 12),
                           Text(
                             'Mencari Sinyal...',
-                            style: GoogleFonts.comicNeue(
+                            style: GoogleFonts.quicksand(
                               fontSize: 11,
                               fontWeight: FontWeight.bold,
                               color: Colors.teal,

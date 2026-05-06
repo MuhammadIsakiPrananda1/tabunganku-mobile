@@ -81,9 +81,9 @@ class _CompoundInterestPageState extends ConsumerState<CompoundInterestPage> {
         ),
         title: Text(
           'Simulasi Bunga Majemuk',
-          style: GoogleFonts.comicNeue(
+          style: GoogleFonts.quicksand(
             fontWeight: FontWeight.bold,
-            fontSize: 16,
+            fontSize: 11,
             color: contentColor,
           ),
         ),
@@ -162,7 +162,7 @@ class _CompoundInterestPageState extends ConsumerState<CompoundInterestPage> {
           Expanded(
             child: Text(
               'Simulasi ini membantu Anda memproyeksikan pertumbuhan investasi Anda seiring waktu.',
-              style: TextStyle(fontSize: 10, color: AppColors.primary, fontWeight: FontWeight.w500),
+              style: TextStyle(fontSize: 10, color: AppColors.primary, fontWeight: FontWeight.bold),
             ),
           ),
         ],
@@ -190,12 +190,12 @@ class _CompoundInterestPageState extends ConsumerState<CompoundInterestPage> {
           controller: controller,
           keyboardType: TextInputType.number,
           inputFormatters: isCurrency ? [_RibuanFormatter()] : [],
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: contentColor),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: contentColor),
           onChanged: onChanged,
           decoration: InputDecoration(
             hintText: '0',
             hintStyle: TextStyle(
-                fontSize: 16,
+                fontSize: 11,
                 color: isDarkMode ? Colors.white10 : Colors.black38),
             prefixIcon: Container(
               padding: const EdgeInsets.only(left: 20, right: 8),
@@ -205,7 +205,7 @@ class _CompoundInterestPageState extends ConsumerState<CompoundInterestPage> {
                   Icon(icon, color: AppColors.primary, size: 20),
                   if (isCurrency) ...[
                     const SizedBox(width: 8),
-                    const Text('Rp', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 16)),
+                    const Text('Rp', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 11)),
                   ],
                 ],
               ),
@@ -241,7 +241,7 @@ class _CompoundInterestPageState extends ConsumerState<CompoundInterestPage> {
             fit: BoxFit.scaleDown,
             child: Text(
               _formatRupiah(_finalBalance), 
-              style: GoogleFonts.comicNeue(fontSize: 32, fontWeight: FontWeight.bold, color: _finalBalance > 0 ? AppColors.primary : contentColor.withValues(alpha: 0.1))
+              style: GoogleFonts.quicksand(fontSize: 21, fontWeight: FontWeight.bold, color: _finalBalance > 0 ? AppColors.primary : contentColor.withValues(alpha: 0.1))
             ),
           ),
           const SizedBox(height: 20),
@@ -263,7 +263,7 @@ class _CompoundInterestPageState extends ConsumerState<CompoundInterestPage> {
       children: [
         Text(label, style: TextStyle(color: contentColor.withValues(alpha: 0.4), fontSize: 9, fontWeight: FontWeight.bold)),
         const SizedBox(height: 4),
-        Text(value, style: TextStyle(color: contentColor, fontSize: 13, fontWeight: FontWeight.bold)),
+        Text(value, style: TextStyle(color: contentColor, fontSize: 11, fontWeight: FontWeight.bold)),
       ],
     );
   }

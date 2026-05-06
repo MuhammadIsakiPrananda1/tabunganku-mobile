@@ -88,7 +88,7 @@ class _TaxCalculatorPageState extends ConsumerState<TaxCalculatorPage> {
           onPressed: () => Navigator.pop(context),
           icon: Icon(Icons.arrow_back_ios_new_rounded, color: contentColor, size: 20),
         ),
-        title: Text('Kalkulator Pajak', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: contentColor)),
+        title: Text('Kalkulator Pajak', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: contentColor)),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -105,7 +105,7 @@ class _TaxCalculatorPageState extends ConsumerState<TaxCalculatorPage> {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               crossAxisCount: 2,
-              childAspectRatio: 3.2,
+              childAspectRatio: 2.8,
               mainAxisSpacing: 8,
               crossAxisSpacing: 8,
               children: [
@@ -194,12 +194,12 @@ class _TaxCalculatorPageState extends ConsumerState<TaxCalculatorPage> {
           controller: controller,
           keyboardType: TextInputType.number,
           inputFormatters: [_RibuanFormatter()],
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: contentColor),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: contentColor),
           onChanged: onChanged,
           decoration: InputDecoration(
             hintText: '0',
             hintStyle: TextStyle(
-                fontSize: 16,
+                fontSize: 11,
                 color: isDarkMode ? Colors.white10 : Colors.black38),
             prefixIcon: Container(
               padding: const EdgeInsets.only(left: 20, right: 8),
@@ -208,7 +208,7 @@ class _TaxCalculatorPageState extends ConsumerState<TaxCalculatorPage> {
                 children: [
                   Icon(icon, color: AppColors.primary, size: 20),
                   const SizedBox(width: 8),
-                  const Text('Rp', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 16)),
+                  const Text('Rp', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 11)),
                 ],
               ),
             ),
@@ -236,7 +236,7 @@ class _TaxCalculatorPageState extends ConsumerState<TaxCalculatorPage> {
           Expanded(
             child: Text(
               'Cek nilai akurat pada STNK atau SPPT terbaru Anda.',
-              style: TextStyle(fontSize: 10, color: AppColors.primary, fontWeight: FontWeight.w500),
+              style: TextStyle(fontSize: 10, color: AppColors.primary, fontWeight: FontWeight.bold),
             ),
           ),
         ],
@@ -265,7 +265,7 @@ class _TaxCalculatorPageState extends ConsumerState<TaxCalculatorPage> {
             fit: BoxFit.scaleDown,
             child: Text(
               _formatRupiah(_taxResult), 
-              style: GoogleFonts.comicNeue(fontSize: 32, fontWeight: FontWeight.bold, color: _taxResult > 0 ? AppColors.primary : contentColor.withValues(alpha: 0.1))
+              style: GoogleFonts.quicksand(fontSize: 21, fontWeight: FontWeight.bold, color: _taxResult > 0 ? AppColors.primary : contentColor.withValues(alpha: 0.1))
             ),
           ),
           const SizedBox(height: 16),
@@ -281,7 +281,7 @@ class _TaxCalculatorPageState extends ConsumerState<TaxCalculatorPage> {
                 elevation: 0,
                 disabledBackgroundColor: isDarkMode ? Colors.white.withValues(alpha: 0.03) : Colors.grey.shade100,
               ),
-              child: const Text('Simpan Pengingat', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+              child: const Text('Simpan Pengingat', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
             ),
           ),
         ],

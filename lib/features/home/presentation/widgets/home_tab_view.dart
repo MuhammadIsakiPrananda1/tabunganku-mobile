@@ -57,13 +57,25 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
     final transactions = List<TransactionModel>.from(personalTransactions)
       ..sort((a, b) => b.date.compareTo(a.date));
 
-    final totalIncome = transactions
+    final now = DateTime.now();
+    final monthlyTransactions = transactions
+        .where((t) => t.date.year == now.year && t.date.month == now.month)
+        .toList();
+
+    final totalIncome = monthlyTransactions
         .where((t) => t.type == TransactionType.income)
         .fold<double>(0, (sum, t) => sum + t.amount);
-    final totalExpense = transactions
+    final totalExpense = monthlyTransactions
         .where((t) => t.type == TransactionType.expense)
         .fold<double>(0, (sum, t) => sum + t.amount);
-    final totalBalance = totalIncome - totalExpense;
+
+    final allTimeIncome = transactions
+        .where((t) => t.type == TransactionType.income)
+        .fold<double>(0, (sum, t) => sum + t.amount);
+    final allTimeExpense = transactions
+        .where((t) => t.type == TransactionType.expense)
+        .fold<double>(0, (sum, t) => sum + t.amount);
+    final totalBalance = allTimeIncome - allTimeExpense;
 
     final targetsAsync = ref.watch(savingTargetsStreamProvider);
     final targets = targetsAsync.valueOrNull ?? [];
@@ -142,10 +154,10 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                       Text(
                         'TOTAL SALDO TERKUMPUL',
                         textAlign: TextAlign.center,
-                        style: GoogleFonts.comicNeue(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 2.5,
+                        style: GoogleFonts.quicksand(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.2,
                           color: isDarkMode
                               ? Colors.white30
                               : Colors.teal.shade800.withValues(alpha: 0.4),
@@ -164,11 +176,11 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                                 widget.showBalance
                                     ? _formatRupiah(totalBalance)
                                     : '••••••',
-                                style: GoogleFonts.comicNeue(
+                                style: GoogleFonts.quicksand(
                                   color: isDarkMode
                                       ? Colors.white
                                       : Colors.teal.shade900,
-                                  fontSize: 42,
+                                  fontSize: 32,
                                   fontWeight: FontWeight.bold,
                                   letterSpacing: 1.5,
                                 ),
@@ -195,7 +207,7 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                       const SizedBox(height: 12),
                       // Estimasi Akhir Bulan
                       _buildEstimationCard(
-                          totalIncome, totalExpense, isDarkMode),
+                          totalBalance, totalIncome, totalExpense, isDarkMode),
                       const SizedBox(height: 24),
 
                       // Stats Row Divider
@@ -257,7 +269,7 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
 
           const SizedBox(height: 12),
           _buildAllocationSection(
-              totalIncome, totalExpense, transactions, isDarkMode),
+              totalIncome, totalExpense, monthlyTransactions, isDarkMode),
 
           const SizedBox(height: 32),
 
@@ -270,16 +282,20 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
     );
   }
 
-  Widget _buildEstimationCard(
-      double totalIncome, double totalExpense, bool isDarkMode) {
+  Widget _buildEstimationCard(double totalBalance, double totalIncome,
+      double totalExpense, bool isDarkMode) {
     final now = DateTime.now();
     final totalDays = DateTime(now.year, now.month + 1, 0).day;
     final day = now.day;
     final currentDay = day > 0 ? day : 1;
     final estIncome = (totalIncome / currentDay) * totalDays;
     final estExpense = (totalExpense / currentDay) * totalDays;
-    final estBalance = estIncome - estExpense;
-    final isDanger = estBalance < 0;
+
+    // Proyeksi saldo akhir bulan: Saldo saat ini + sisa pendapatan yang diharapkan - sisa pengeluaran yang diharapkan
+    final remainingNet = (estIncome - totalIncome) - (estExpense - totalExpense);
+    final projectedFinalBalance = totalBalance + remainingNet;
+
+    final isDanger = projectedFinalBalance < totalBalance; // Saldo diperkirakan menurun
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
@@ -299,29 +315,27 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
           children: [
             Icon(
                 isDanger
-                    ? Icons.warning_amber_rounded
-                    : Icons.auto_graph_rounded,
+                    ? Icons.trending_down_rounded
+                    : Icons.trending_up_rounded,
                 size: 14,
                 color: isDanger ? Colors.red : Colors.teal),
             const SizedBox(width: 8),
             Text(
-              'Estimasi Bulan Ini: ',
-              style: GoogleFonts.comicNeue(
-                fontSize: 11,
-                fontWeight: FontWeight.w500,
-                color: isDarkMode
-                    ? Colors.white38
-                    : Colors.teal.shade900.withValues(alpha: 0.5),
+              'Proyeksi Saldo Akhir Bulan: ',
+              style: GoogleFonts.quicksand(
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                color: isDarkMode ? Colors.white30 : Colors.teal.shade700,
               ),
             ),
             Text(
-              widget.showBalance ? _formatRupiah(estBalance) : '••••••',
-              style: GoogleFonts.comicNeue(
-                fontSize: 11,
+              _formatRupiah(projectedFinalBalance),
+              style: GoogleFonts.quicksand(
+                fontSize: 10,
                 fontWeight: FontWeight.bold,
                 color: isDanger
                     ? Colors.red
-                    : (isDarkMode ? Colors.white70 : Colors.teal.shade900),
+                    : (isDarkMode ? Colors.tealAccent : Colors.teal.shade900),
               ),
             ),
           ],
@@ -338,7 +352,7 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
       children: [
         Text(label.toUpperCase(),
             textAlign: center ? TextAlign.center : TextAlign.start,
-            style: GoogleFonts.comicNeue(
+            style: GoogleFonts.quicksand(
                 fontSize: 10,
                 fontWeight: FontWeight.bold,
                 color: isDarkMode ? Colors.white54 : Colors.grey.shade500,
@@ -349,8 +363,8 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
           child: Text(
             widget.showBalance ? _formatRupiah(amount) : '••••',
             textAlign: center ? TextAlign.center : TextAlign.start,
-            style: GoogleFonts.comicNeue(
-                fontSize: 15,
+            style: GoogleFonts.quicksand(
+                fontSize: 13,
                 fontWeight: FontWeight.bold,
                 color: color.withValues(alpha: isDarkMode ? 0.9 : 0.8)),
           ),
@@ -379,7 +393,7 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
           ? '${_formatRupiah(totalMonthlyInsurance)}/bln'
           : '',
       QuickActionType.savingPlans: _getPlansTotal(targets),
-      QuickActionType.buyingTarget: _getBuyingTotal(targets),
+      QuickActionType.buyingTarget: '', // Removed total nominal
     };
 
     final primaryActions = _allActions.take(7).toList();
@@ -389,9 +403,9 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
       physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: 8),
       crossAxisCount: 4,
-      mainAxisSpacing: 24,
+      mainAxisSpacing: 8,
       crossAxisSpacing: 12,
-      childAspectRatio: 0.82,
+      childAspectRatio: 0.85,
       children: [
         for (var action in primaryActions)
           _buildToolAction(
@@ -446,7 +460,7 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: color.withValues(alpha: isDarkMode ? 0.15 : 0.08),
               borderRadius: BorderRadius.circular(18),
@@ -457,19 +471,31 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
               size: 28,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
           Text(
             label,
             textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.comicNeue(
-              fontSize: 11,
+            style: GoogleFonts.quicksand(
+              fontSize: 10.2,
               fontWeight: FontWeight.bold,
-              height: 1.1,
+              height: 1.0,
               color: isDarkMode ? Colors.white70 : Colors.black87,
             ),
           ),
+          if (subLabel != null && subLabel.isNotEmpty)
+            Text(
+              subLabel,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.quicksand(
+                fontSize: 8,
+                fontWeight: FontWeight.bold,
+                color: isDarkMode ? Colors.white30 : Colors.black38,
+              ),
+            ),
         ],
       ),
     );
@@ -501,10 +527,10 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
       baseColor: Colors.orange,
     ),
     _QuickActionItem(
-      icon: Icons.family_restroom_rounded,
-      label: 'Keluarga',
-      type: QuickActionType.family,
-      baseColor: Colors.indigo,
+      icon: Icons.groups_rounded,
+      label: 'Arisan',
+      type: QuickActionType.arisan,
+      baseColor: Colors.pink,
     ),
     _QuickActionItem(
       icon: Icons.shopping_cart_outlined,
@@ -586,8 +612,8 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
     ),
   ];
 
-  Widget _buildSavingTargetSection(
-      List<TransactionModel> transactions, List<SavingTargetModel> targets, bool isDarkMode) {
+  Widget _buildSavingTargetSection(List<TransactionModel> transactions,
+      List<SavingTargetModel> targets, bool isDarkMode) {
     // Filter out specialized plans from the general target section
     final buyingTargets = targets
         .where((t) => t.category == 'Pembelian' || t.category == 'Umum')
@@ -601,16 +627,16 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text('Target Pembelian Saya',
-                style: GoogleFonts.comicNeue(
-                    fontSize: 14,
+                style: GoogleFonts.quicksand(
+                    fontSize: 13,
                     fontWeight: FontWeight.bold,
                     color: isDarkMode
                         ? Colors.white30
                         : AppColors.primaryDark.withValues(alpha: 0.4))),
             if (buyingTargets.length > 1)
               Text('${buyingTargets.length} Barang Impian',
-                  style: GoogleFonts.comicNeue(
-                      fontSize: 11,
+                  style: GoogleFonts.quicksand(
+                      fontSize: 12,
                       fontWeight: FontWeight.bold,
                       color: AppColors.primary)),
           ],
@@ -638,10 +664,11 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                     color: isDarkMode ? Colors.white10 : Colors.grey.shade200),
                 const SizedBox(height: 12),
                 Text('Belum ada target barang impian',
-                    style: GoogleFonts.comicNeue(
+                    style: GoogleFonts.quicksand(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
-                        color: isDarkMode ? Colors.white24 : Colors.black26)),
+                        color:
+                            isDarkMode ? Colors.white : AppColors.primaryDark)),
               ],
             ),
           )
@@ -686,7 +713,8 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
     // Only count transactions AFTER target creation
     final targetBalance = transactions
         .where((t) => !t.date.isBefore(target.createdAt))
-        .fold<double>(0, (s, t) => s + (t.type == TransactionType.income ? t.amount : 0));
+        .fold<double>(
+            0, (s, t) => s + (t.type == TransactionType.income ? t.amount : 0));
 
     final progress = (target.targetAmount > 0)
         ? (targetBalance / target.targetAmount).clamp(0.0, 1.0)
@@ -732,7 +760,7 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text('Target #${index + 1}',
-                            style: GoogleFonts.comicNeue(
+                            style: GoogleFonts.quicksand(
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold,
                                 color:
@@ -748,7 +776,7 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                             child: Text(target.name,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: GoogleFonts.comicNeue(
+                                style: GoogleFonts.quicksand(
                                     fontSize: 11,
                                     fontWeight: FontWeight.bold,
                                     color: AppColors.primary)),
@@ -762,16 +790,16 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                       textBaseline: TextBaseline.alphabetic,
                       children: [
                         Text('${(progress * 100).toInt()}%',
-                            style: GoogleFonts.comicNeue(
-                                fontSize: 36,
+                            style: GoogleFonts.quicksand(
+                                fontSize: 24,
                                 fontWeight: FontWeight.bold,
                                 color: isDarkMode
                                     ? Colors.white
                                     : Colors.black87)),
                         const SizedBox(width: 8),
                         Text('/ 100%',
-                            style: GoogleFonts.comicNeue(
-                                fontSize: 14,
+                            style: GoogleFonts.quicksand(
+                                fontSize: 11,
                                 fontWeight: FontWeight.bold,
                                 color: isDarkMode
                                     ? Colors.white12
@@ -795,8 +823,8 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                       widget.showBalance
                           ? '${_formatRupiah(targetBalance)} / ${_formatRupiah(target.targetAmount)}'
                           : '••••••',
-                      style: GoogleFonts.comicNeue(
-                          fontSize: 12,
+                      style: GoogleFonts.quicksand(
+                          fontSize: 10,
                           fontWeight: FontWeight.bold,
                           color: isDarkMode
                               ? Colors.white38
@@ -836,7 +864,7 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('ALOKASI PENGELUARAN',
-                  style: GoogleFonts.comicNeue(
+                  style: GoogleFonts.quicksand(
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 1.5,
@@ -881,8 +909,8 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                                     title: '$incomePercent%',
                                     showTitle: true,
                                     titlePositionPercentageOffset: 2.2,
-                                    titleStyle: GoogleFonts.comicNeue(
-                                      fontSize: 13,
+                                    titleStyle: GoogleFonts.quicksand(
+                                      fontSize: 10,
                                       fontWeight: FontWeight.bold,
                                       color: isDarkMode
                                           ? Colors.green.shade300
@@ -897,8 +925,8 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                                     title: '$expensePercent%',
                                     showTitle: true,
                                     titlePositionPercentageOffset: 2.2,
-                                    titleStyle: GoogleFonts.comicNeue(
-                                      fontSize: 13,
+                                    titleStyle: GoogleFonts.quicksand(
+                                      fontSize: 10,
                                       fontWeight: FontWeight.bold,
                                       color: isDarkMode
                                           ? Colors.red.shade300
@@ -919,8 +947,8 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                                   : Colors.grey.shade300),
                           const SizedBox(height: 4),
                           Text('Belum Ada Data',
-                              style: GoogleFonts.comicNeue(
-                                  fontSize: 10,
+                              style: GoogleFonts.quicksand(
+                                  fontSize: 9.5,
                                   fontWeight: FontWeight.bold,
                                   color: isDarkMode
                                       ? Colors.white10
@@ -985,9 +1013,9 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
               const SizedBox(width: 12),
               Text(
                 label,
-                style: GoogleFonts.comicNeue(
-                  fontSize: 13,
-                  fontWeight: isTotal ? FontWeight.bold : FontWeight.w500,
+                style: GoogleFonts.quicksand(
+                  fontSize: 10,
+                  fontWeight: isTotal ? FontWeight.bold : FontWeight.bold,
                   color: isDarkMode ? Colors.white70 : Colors.black54,
                 ),
               ),
@@ -1003,8 +1031,8 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
             child: Text(
               _formatRupiah(val),
               textAlign: TextAlign.right,
-              style: GoogleFonts.comicNeue(
-                fontSize: 14,
+              style: GoogleFonts.quicksand(
+                fontSize: 10,
                 fontWeight: FontWeight.bold,
                 color: color,
               ),
@@ -1042,9 +1070,9 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                     const SizedBox(width: 10),
                     Text(
                       'Belum Ada Pengeluaran',
-                      style: GoogleFonts.comicNeue(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
+                      style: GoogleFonts.quicksand(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
                         fontStyle: FontStyle.italic,
                         color: isDarkMode ? Colors.white24 : Colors.black26,
                       ),
@@ -1053,8 +1081,8 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                 ),
                 Text(
                   '0.0%',
-                  style: GoogleFonts.comicNeue(
-                    fontSize: 13,
+                  style: GoogleFonts.quicksand(
+                    fontSize: 10,
                     fontWeight: FontWeight.bold,
                     fontStyle: FontStyle.italic,
                     color: isDarkMode ? Colors.white10 : Colors.black12,
@@ -1111,9 +1139,9 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                       const SizedBox(width: 10),
                       Text(
                         entry.key,
-                        style: GoogleFonts.comicNeue(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
+                        style: GoogleFonts.quicksand(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
                           fontStyle: FontStyle.italic,
                           color: isDarkMode ? Colors.white70 : Colors.black87,
                         ),
@@ -1122,8 +1150,8 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                   ),
                   Text(
                     '${(percentage * 100).toStringAsFixed(1)}%',
-                    style: GoogleFonts.comicNeue(
-                      fontSize: 13,
+                    style: GoogleFonts.quicksand(
+                      fontSize: 10,
                       fontWeight: FontWeight.bold,
                       fontStyle: FontStyle.italic,
                       color: isDarkMode ? Colors.white54 : Colors.black54,
@@ -1155,9 +1183,9 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('Aktivitas Terakhir',
-            style: GoogleFonts.comicNeue(
+            style: GoogleFonts.quicksand(
                 fontWeight: FontWeight.bold,
-                fontSize: 16,
+                fontSize: 10,
                 letterSpacing: -0.5)),
         const SizedBox(height: 16),
         if (transactions.isEmpty)
@@ -1181,8 +1209,8 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                     color: isDarkMode ? Colors.white10 : Colors.grey.shade300),
                 const SizedBox(height: 8),
                 Text('Belum ada aktivitas baru-baru ini',
-                    style: GoogleFonts.comicNeue(
-                        fontSize: 11,
+                    style: GoogleFonts.quicksand(
+                        fontSize: 10,
                         fontWeight: FontWeight.bold,
                         color: isDarkMode ? Colors.white24 : Colors.black26)),
               ],
@@ -1228,10 +1256,10 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                       Text(t.title,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.comicNeue(
-                              fontWeight: FontWeight.bold, fontSize: 14)),
+                          style: GoogleFonts.quicksand(
+                              fontWeight: FontWeight.bold, fontSize: 11)),
                       Text(DateFormat('dd MMM').format(t.date),
-                          style: GoogleFonts.comicNeue(
+                          style: GoogleFonts.quicksand(
                               fontSize: 10,
                               color: isDarkMode
                                   ? Colors.white38
@@ -1240,8 +1268,8 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                   ),
                 ),
                 Text('${isExpense ? '- ' : '+ '}${_formatRupiah(t.amount)}',
-                    style: GoogleFonts.comicNeue(
-                        fontWeight: FontWeight.bold, fontSize: 14)),
+                    style: GoogleFonts.quicksand(
+                        fontWeight: FontWeight.bold, fontSize: 11)),
               ],
             ),
           ),
@@ -1257,16 +1285,16 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
         child: Column(
           children: [
             Text('NEVERLAND STUDIO',
-                style: GoogleFonts.comicNeue(
+                style: GoogleFonts.quicksand(
                     color: AppColors.primary,
-                    fontSize: 12,
+                    fontSize: 10,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 3)),
             const SizedBox(height: 6),
             Text(
               AppVersion.fullVersion,
-              style: GoogleFonts.comicNeue(
-                fontSize: 14,
+              style: GoogleFonts.quicksand(
+                fontSize: 10,
                 fontWeight: FontWeight.bold,
                 color: isDarkMode ? Colors.white70 : Colors.black54,
               ),

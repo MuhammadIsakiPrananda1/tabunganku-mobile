@@ -326,8 +326,8 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
           children: [
             TextSpan(
               text: text,
-              style: GoogleFonts.comicNeue(
-                fontSize: 12,
+              style: GoogleFonts.quicksand(
+                fontSize: 13,
                 fontWeight: FontWeight.bold,
                 color: isDarkMode ? Colors.white30 : Colors.black38,
                 letterSpacing: 0.5,
@@ -338,7 +338,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                 text: ' *',
                 style: TextStyle(
                   color: Colors.red,
-                  fontSize: 14,
+                  fontSize: 13,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -370,7 +370,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: TextStyle(
-            color: isDarkMode ? Colors.white12 : Colors.black26, fontSize: 13),
+            color: isDarkMode ? Colors.white12 : Colors.black26, fontSize: 14),
         suffixIcon: suffixIcon,
         prefixIcon: Row(
           mainAxisSize: MainAxisSize.min,
@@ -384,7 +384,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                 style: TextStyle(
                   color: iconColor ?? (isDarkMode ? Colors.white70 : Colors.black87),
                   fontWeight: FontWeight.bold,
-                  fontSize: 15,
+                  fontSize: 14,
                 ),
               ),
             ],
@@ -458,7 +458,7 @@ class _TypeButton extends StatelessWidget {
               style: TextStyle(
                 color: textColor,
                 fontWeight: FontWeight.bold,
-                fontSize: 14,
+                fontSize: 11,
               ),
             ),
           ],

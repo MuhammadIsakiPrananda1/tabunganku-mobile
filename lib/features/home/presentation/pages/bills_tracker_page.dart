@@ -43,7 +43,7 @@ class _BillsTrackerPageState extends ConsumerState<BillsTrackerPage> {
           onPressed: () => Navigator.pop(context),
           icon: Icon(Icons.arrow_back_ios_new_rounded, color: contentColor, size: 20),
         ),
-        title: Text('Kelola Tagihan', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 16, color: contentColor)),
+        title: Text('Kelola Tagihan', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11, color: contentColor)),
         centerTitle: true,
       ),
       body: StreamBuilder<List<BillModel>>(
@@ -64,7 +64,7 @@ class _BillsTrackerPageState extends ConsumerState<BillsTrackerPage> {
                 const SizedBox(height: 32),
 
                 Text('TAGIHAN BULANAN', 
-                  style: GoogleFonts.comicNeue(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5, color: contentColor.withValues(alpha: 0.4))),
+                  style: GoogleFonts.quicksand(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5, color: contentColor.withValues(alpha: 0.4))),
                 const SizedBox(height: 16),
                 if (bills.isEmpty)
                   _buildEmptyState(isDarkMode)
@@ -127,7 +127,7 @@ class _BillsTrackerPageState extends ConsumerState<BillsTrackerPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text('Jatuh Tempo Tiap Bulan', style: TextStyle(fontSize: 10, color: (isDarkMode ? Colors.white38 : Colors.grey.shade500), fontWeight: FontWeight.bold)),
-                          Text('Tanggal $_dueDay', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                          Text('Tanggal $_dueDay', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
                         ],
                       ),
                       const Spacer(),
@@ -162,7 +162,7 @@ class _BillsTrackerPageState extends ConsumerState<BillsTrackerPage> {
                     }
                   },
                   icon: const Icon(Icons.check_rounded, size: 18),
-                  label: Text('Simpan Tagihan', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 14)),
+                  label: Text('Simpan Tagihan', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
@@ -189,7 +189,7 @@ class _BillsTrackerPageState extends ConsumerState<BillsTrackerPage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('PILIH TANGGAL JATUH TEMPO', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+            const Text('PILIH TANGGAL JATUH TEMPO', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
             const SizedBox(height: 20),
             SizedBox(
               height: 200,
@@ -240,11 +240,11 @@ class _BillsTrackerPageState extends ConsumerState<BillsTrackerPage> {
       controller: controller,
       keyboardType: isPremium ? TextInputType.number : TextInputType.text,
       inputFormatters: isPremium ? [_RibuanFormatter()] : null,
-      style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 15, color: contentColor),
+      style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11, color: contentColor),
       decoration: InputDecoration(
         hintText: hint ?? '0',
-        hintStyle: GoogleFonts.comicNeue(
-            fontSize: 15,
+        hintStyle: GoogleFonts.quicksand(
+            fontSize: 11,
             color: isDarkMode ? Colors.white10 : Colors.black38),
         prefixIcon: Container(
           padding: const EdgeInsets.only(left: 16, right: 8),
@@ -254,7 +254,7 @@ class _BillsTrackerPageState extends ConsumerState<BillsTrackerPage> {
               Icon(icon, color: color, size: 18),
               if (unit.isNotEmpty) ...[
                 const SizedBox(width: 8),
-                Text(unit, style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, color: color, fontSize: 13)),
+                Text(unit, style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: color, fontSize: 11)),
               ],
             ],
           ),
@@ -281,7 +281,7 @@ class _BillsTrackerPageState extends ConsumerState<BillsTrackerPage> {
           children: [
             const Icon(Icons.add_rounded, size: 16, color: AppColors.primary),
             const SizedBox(width: 4),
-            Text('Tambah', style: GoogleFonts.comicNeue(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primary)),
+            Text('Tambah', style: GoogleFonts.quicksand(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.primary)),
           ],
         ),
       ),
@@ -303,15 +303,15 @@ class _BillsTrackerPageState extends ConsumerState<BillsTrackerPage> {
       ),
       child: Column(
         children: [
-          Text('TOTAL TAGIHAN PENDING', style: GoogleFonts.comicNeue(color: contentColor.withValues(alpha: 0.4), fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+          Text('TOTAL TAGIHAN PENDING', style: GoogleFonts.quicksand(color: contentColor.withValues(alpha: 0.4), fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
           const SizedBox(height: 12),
           FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(_formatRupiah(pending), 
-              style: GoogleFonts.comicNeue(color: pending > 0 ? AppColors.primary : contentColor.withValues(alpha: 0.1), fontSize: 36, fontWeight: FontWeight.bold)),
+              style: GoogleFonts.quicksand(color: pending > 0 ? AppColors.primary : contentColor.withValues(alpha: 0.1), fontSize: 36, fontWeight: FontWeight.bold)),
           ),
           const SizedBox(height: 8),
-          Text('Dari $count tagihan terdaftar', style: GoogleFonts.comicNeue(color: contentColor.withValues(alpha: 0.3), fontSize: 11, fontWeight: FontWeight.bold)),
+          Text('Dari $count tagihan terdaftar', style: GoogleFonts.quicksand(color: contentColor.withValues(alpha: 0.3), fontSize: 11, fontWeight: FontWeight.bold)),
         ],
       ),
     );
@@ -376,7 +376,7 @@ class _BillsTrackerPageState extends ConsumerState<BillsTrackerPage> {
               const SizedBox(height: 20),
               Center(
                 child: Text('UBAH TAGIHAN', 
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : Colors.teal.shade900)),
+                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : Colors.teal.shade900)),
               ),
               const SizedBox(height: 24),
               _buildCompactInput('Nama Tagihan', nameController, Icons.label_important_rounded, isDarkMode, isPremium: false),
@@ -406,7 +406,7 @@ class _BillsTrackerPageState extends ConsumerState<BillsTrackerPage> {
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   ),
-                  child: const Text('Simpan Perubahan', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  child: const Text('Simpan Perubahan', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
                 ),
               ),
             ],
@@ -446,15 +446,15 @@ class _BillsTrackerPageState extends ConsumerState<BillsTrackerPage> {
               children: [
                 Text(bill.name, 
                   maxLines: 1, overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 14, color: bill.isPaid ? contentColor.withValues(alpha: 0.3) : contentColor, decoration: bill.isPaid ? TextDecoration.lineThrough : null)),
+                  style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11, color: bill.isPaid ? contentColor.withValues(alpha: 0.3) : contentColor, decoration: bill.isPaid ? TextDecoration.lineThrough : null)),
                 Row(
                   children: [
-                    Text('Tiap Tgl ${bill.dueDay}', style: GoogleFonts.comicNeue(color: isDarkMode ? Colors.white24 : Colors.black38, fontSize: 9, fontWeight: FontWeight.bold)),
+                    Text('Tiap Tgl ${bill.dueDay}', style: GoogleFonts.quicksand(color: isDarkMode ? Colors.white24 : Colors.black38, fontSize: 9, fontWeight: FontWeight.bold)),
                     if (bill.lastPaidDate != null) ...[
                       const SizedBox(width: 8),
                       Text('•', style: TextStyle(color: isDarkMode ? Colors.white10 : Colors.grey.shade300, fontSize: 10)),
                       const SizedBox(width: 8),
-                      Text('Lunas: ${DateFormat('d MMM').format(bill.lastPaidDate!)}', style: GoogleFonts.comicNeue(color: Colors.green, fontSize: 9, fontWeight: FontWeight.bold)),
+                      Text('Lunas: ${DateFormat('d MMM').format(bill.lastPaidDate!)}', style: GoogleFonts.quicksand(color: Colors.green, fontSize: 9, fontWeight: FontWeight.bold)),
                     ],
                   ],
                 ),
@@ -466,7 +466,7 @@ class _BillsTrackerPageState extends ConsumerState<BillsTrackerPage> {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(_formatRupiah(bill.amount), 
-                style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 13, color: bill.isPaid ? contentColor.withValues(alpha: 0.3) : contentColor)),
+                style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11, color: bill.isPaid ? contentColor.withValues(alpha: 0.3) : contentColor)),
             ],
           ),
           const SizedBox(width: 4),
@@ -486,7 +486,7 @@ class _BillsTrackerPageState extends ConsumerState<BillsTrackerPage> {
                   children: [
                     const Icon(Icons.edit_note_rounded, size: 18, color: Colors.blue),
                     const SizedBox(width: 8),
-                    Text('Edit', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 13)),
+                    Text('Edit', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11)),
                   ],
                 ),
               ),
@@ -496,7 +496,7 @@ class _BillsTrackerPageState extends ConsumerState<BillsTrackerPage> {
                   children: [
                     const Icon(Icons.delete_outline_rounded, size: 18, color: Colors.red),
                     const SizedBox(width: 8),
-                    Text('Hapus', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.red)),
+                    Text('Hapus', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11, color: Colors.red)),
                   ],
                 ),
               ),
@@ -516,7 +516,7 @@ class _BillsTrackerPageState extends ConsumerState<BillsTrackerPage> {
           children: [
             Icon(Icons.receipt_long_rounded, size: 64, color: isDarkMode ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
             const SizedBox(height: 24),
-            const Text('Belum ada tagihan.', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w500)),
+            const Text('Belum ada tagihan.', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
           ],
         ),
       ),
@@ -557,7 +557,7 @@ class _BillsTrackerPageState extends ConsumerState<BillsTrackerPage> {
               const SizedBox(height: 20),
               Center(
                 child: Text('TAMBAH TAGIHAN', 
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : Colors.teal.shade900)),
+                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : Colors.teal.shade900)),
               ),
               const SizedBox(height: 24),
               _buildCompactInput('Nama Tagihan', nameController, Icons.label_important_rounded, isDarkMode, isPremium: false),
@@ -588,7 +588,7 @@ class _BillsTrackerPageState extends ConsumerState<BillsTrackerPage> {
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   ),
-                  child: const Text('Simpan Tagihan', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  child: const Text('Simpan Tagihan', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
                 ),
               ),
             ],
@@ -605,16 +605,16 @@ class _BillsTrackerPageState extends ConsumerState<BillsTrackerPage> {
       children: [
         Padding(
           padding: const EdgeInsets.only(left: 4, bottom: 6),
-          child: Text(label, style: GoogleFonts.comicNeue(fontSize: 9, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white24 : Colors.black38)),
+          child: Text(label, style: GoogleFonts.quicksand(fontSize: 9, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white24 : Colors.black38)),
         ),
         TextFormField(
           controller: controller,
           keyboardType: isPremium ? TextInputType.number : TextInputType.text,
           inputFormatters: isPremium ? [_RibuanFormatter()] : null,
-          style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 15, color: contentColor),
+          style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11, color: contentColor),
           decoration: InputDecoration(
             hintText: isPremium ? '0' : 'e.g. Listrik, Wifi',
-            hintStyle: GoogleFonts.comicNeue(fontSize: 15, color: isDarkMode ? Colors.white10 : Colors.teal.shade50),
+            hintStyle: GoogleFonts.quicksand(fontSize: 11, color: isDarkMode ? Colors.white10 : Colors.teal.shade50),
             prefixIcon: Container(
               padding: const EdgeInsets.only(left: 16, right: 8),
               child: Row(
@@ -623,7 +623,7 @@ class _BillsTrackerPageState extends ConsumerState<BillsTrackerPage> {
                   Icon(icon, color: AppColors.primary, size: 18),
                   if (isPremium) ...[
                     const SizedBox(width: 6),
-                    Text('Rp', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 14)),
+                    Text('Rp', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 11)),
                   ],
                 ],
               ),
@@ -659,14 +659,14 @@ class _BillsTrackerPageState extends ConsumerState<BillsTrackerPage> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const SizedBox(height: 16),
-                    const Text('Pilih Tanggal', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    const Text('Pilih Tanggal', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
                     const SizedBox(height: 16),
                     SizedBox(
                       height: 250,
                       child: ListView.builder(
                         itemCount: 31,
                         itemBuilder: (context, i) => ListTile(
-                          title: Text('Tanggal ${i + 1}', textAlign: TextAlign.center, style: TextStyle(fontWeight: selected == (i + 1) ? FontWeight.bold : FontWeight.normal)),
+                          title: Text('Tanggal ${i + 1}', textAlign: TextAlign.center, style: TextStyle(fontWeight: selected == (i + 1) ? FontWeight.bold : FontWeight.bold)),
                           onTap: () {
                             onPicked(i + 1);
                             Navigator.pop(context);
@@ -691,7 +691,7 @@ class _BillsTrackerPageState extends ConsumerState<BillsTrackerPage> {
                 children: [
                   const Icon(Icons.event_note_rounded, color: AppColors.primary, size: 20),
                   const SizedBox(width: 12),
-                  Text('Setiap Tanggal $selected', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: contentColor)),
+                  Text('Setiap Tanggal $selected', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: contentColor)),
                   const Spacer(),
                   Icon(Icons.expand_more_rounded, color: contentColor.withValues(alpha: 0.3)),
                 ],

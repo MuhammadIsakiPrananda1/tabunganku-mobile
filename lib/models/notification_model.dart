@@ -3,7 +3,6 @@ import 'dart:convert';
 enum NotificationType {
   badge,   // Notifikasi ketika mendapatkan badge/pencapaian
   system,  // Notifikasi sistem (update, info)
-  family,  // Notifikasi dari grup keluarga
   savings, // Notifikasi pengingat target tabungan
   bills,
   investment,

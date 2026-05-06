@@ -54,9 +54,9 @@ class _ChallengePageState extends ConsumerState<ChallengePage>
         ),
         title: Text(
           'Challenge Menabung',
-          style: GoogleFonts.comicNeue(
+          style: GoogleFonts.quicksand(
             fontWeight: FontWeight.bold,
-            fontSize: 16,
+            fontSize: 11,
             color: contentColor,
           ),
         ),
@@ -83,10 +83,10 @@ class _ChallengePageState extends ConsumerState<ChallengePage>
                   indicatorWeight: 3,
                   labelColor: isDark ? Colors.white : AppColors.primary,
                   unselectedLabelColor: Colors.grey.shade500,
-                  labelStyle: GoogleFonts.comicNeue(
-                      fontWeight: FontWeight.bold, fontSize: 13),
-                  unselectedLabelStyle: GoogleFonts.comicNeue(
-                      fontWeight: FontWeight.bold, fontSize: 13),
+                  labelStyle: GoogleFonts.quicksand(
+                      fontWeight: FontWeight.bold, fontSize: 11),
+                  unselectedLabelStyle: GoogleFonts.quicksand(
+                      fontWeight: FontWeight.bold, fontSize: 11),
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   tabs: const [
                     Tab(text: 'Aktif'),
@@ -191,15 +191,15 @@ class _ChallengePageState extends ConsumerState<ChallengePage>
         const SizedBox(height: 8),
         Text(
           value,
-          style: GoogleFonts.comicNeue(
+          style: GoogleFonts.quicksand(
             color: isDark ? Colors.white : AppColors.primaryDark,
-            fontSize: 20,
+            fontSize: 11,
             fontWeight: FontWeight.w900,
           ),
         ),
         Text(
           label.toUpperCase(),
-          style: GoogleFonts.comicNeue(
+          style: GoogleFonts.quicksand(
             color: (isDark ? Colors.white : AppColors.primaryDark).withValues(alpha: 0.4),
             fontSize: 9,
             fontWeight: FontWeight.bold,
@@ -277,7 +277,7 @@ class _ActiveChallengesTab extends ConsumerWidget {
                   Text(
                     'Belum Ada Challenge',
                     style: TextStyle(
-                      fontSize: 22,
+                      fontSize: 19,
                       fontWeight: FontWeight.bold,
                       color: theme.textTheme.bodyLarge?.color,
                     ),
@@ -287,7 +287,7 @@ class _ActiveChallengesTab extends ConsumerWidget {
                     'Pilih challenge pertamamu dan bangun kebiasaan menabung yang seru!',
                     style: TextStyle(
                       color: Colors.grey.shade500,
-                      fontSize: 15,
+                      fontSize: 11,
                       height: 1.5,
                     ),
                     textAlign: TextAlign.center,
@@ -379,8 +379,8 @@ class _ActiveChallengesTab extends ConsumerWidget {
                   children: [
                     Text(
                       challenge.title.toUpperCase(),
-                      style: GoogleFonts.comicNeue(
-                        fontSize: 14,
+                      style: GoogleFonts.quicksand(
+                        fontSize: 11,
                         fontWeight: FontWeight.w900,
                         letterSpacing: 0.5,
                         color: isDark ? Colors.white : AppColors.primaryDark,
@@ -396,7 +396,7 @@ class _ActiveChallengesTab extends ConsumerWidget {
                         const SizedBox(width: 4),
                         Text(
                           '${challenge.daysRemaining} hari lagi',
-                          style: GoogleFonts.comicNeue(
+                          style: GoogleFonts.quicksand(
                             fontSize: 11,
                             color:
                                 isDark ? Colors.white38 : Colors.grey.shade600,
@@ -416,7 +416,7 @@ class _ActiveChallengesTab extends ConsumerWidget {
                         const SizedBox(width: 4),
                         Text(
                           '${challenge.id.hashCode % 50 + 10} Poin',
-                          style: GoogleFonts.comicNeue(
+                          style: GoogleFonts.quicksand(
                             fontSize: 11,
                             color: Colors.amber.shade700,
                             fontWeight: FontWeight.bold,
@@ -433,8 +433,8 @@ class _ActiveChallengesTab extends ConsumerWidget {
                 children: [
                   Text(
                     '${(progressPercent * 100).toInt()}%',
-                    style: GoogleFonts.comicNeue(
-                      fontSize: 20,
+                    style: GoogleFonts.quicksand(
+                      fontSize: 11,
                       fontWeight: FontWeight.w900,
                       color: _getProgressColor(progressPercent),
                     ),
@@ -480,20 +480,20 @@ class _ActiveChallengesTab extends ConsumerWidget {
                 color: Colors.orange, size: 28),
             const SizedBox(width: 12),
             Text('Hapus Challenge?',
-                style: GoogleFonts.comicNeue(
-                    fontSize: 18, fontWeight: FontWeight.w900)),
+                style: GoogleFonts.quicksand(
+                    fontSize: 11, fontWeight: FontWeight.w900)),
           ],
         ),
         content: Text(
           'Challenge "${challenge.title}" akan dihapus. Semua progres di dalamnya akan hilang.',
-          style: GoogleFonts.comicNeue(
-              fontSize: 14, height: 1.5, fontWeight: FontWeight.bold),
+          style: GoogleFonts.quicksand(
+              fontSize: 11, height: 1.5, fontWeight: FontWeight.bold),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text('Batal',
-                style: GoogleFonts.comicNeue(
+                style: GoogleFonts.quicksand(
                     color: Colors.grey, fontWeight: FontWeight.w900)),
           ),
           ElevatedButton(
@@ -508,7 +508,7 @@ class _ActiveChallengesTab extends ConsumerWidget {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('Challenge berhasil dihapus',
-                          style: GoogleFonts.comicNeue(
+                          style: GoogleFonts.quicksand(
                               fontWeight: FontWeight.bold)),
                       backgroundColor: Colors.redAccent,
                       behavior: SnackBarBehavior.floating,
@@ -531,7 +531,7 @@ class _ActiveChallengesTab extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(12)),
             ),
             child: Text('Hapus',
-                style: GoogleFonts.comicNeue(fontWeight: FontWeight.w900)),
+                style: GoogleFonts.quicksand(fontWeight: FontWeight.w900)),
           ),
         ],
       ),
@@ -585,7 +585,7 @@ class _TemplatesTab extends ConsumerWidget {
         Text(
           'Pilih Challenge',
           style: TextStyle(
-            fontSize: 20,
+            fontSize: 11,
             fontWeight: FontWeight.bold,
             color: theme.textTheme.bodyLarge?.color,
             letterSpacing: 0.3,
@@ -596,7 +596,7 @@ class _TemplatesTab extends ConsumerWidget {
           'Mulai perjalanan menabungmu dengan challenge yang cocok!',
           style: TextStyle(
             color: Colors.grey[600],
-            fontSize: 13,
+            fontSize: 11,
             height: 1.5,
             letterSpacing: 0.2,
           ),
@@ -626,7 +626,7 @@ class _TemplatesTab extends ConsumerWidget {
           child: Text(
             title,
             style: TextStyle(
-              fontSize: 16,
+              fontSize: 11,
               fontWeight: FontWeight.bold,
               color: theme.textTheme.bodyLarge?.color,
               letterSpacing: 0.3,
@@ -695,8 +695,8 @@ class _TemplateCard extends ConsumerWidget {
                     children: [
                       Text(
                         template.title,
-                        style: GoogleFonts.comicNeue(
-                          fontSize: 15,
+                        style: GoogleFonts.quicksand(
+                          fontSize: 11,
                           fontWeight: FontWeight.w900,
                           color: isDark ? Colors.white : AppColors.primaryDark,
                         ),
@@ -747,7 +747,7 @@ class _TemplateCard extends ConsumerWidget {
           ],
           Text(
             text,
-            style: GoogleFonts.comicNeue(
+            style: GoogleFonts.quicksand(
               color: color,
               fontSize: 10,
               fontWeight: FontWeight.w900,
@@ -810,8 +810,8 @@ class _TemplateCard extends ConsumerWidget {
                         Expanded(
                           child: Text(
                             template.title,
-                            style: GoogleFonts.comicNeue(
-                              fontSize: 20,
+                            style: GoogleFonts.quicksand(
+                              fontSize: 11,
                               fontWeight: FontWeight.w900,
                               color: theme.textTheme.bodyLarge?.color,
                             ),
@@ -822,9 +822,9 @@ class _TemplateCard extends ConsumerWidget {
                     const SizedBox(height: 16),
                     Text(
                       template.description,
-                      style: GoogleFonts.comicNeue(
+                      style: GoogleFonts.quicksand(
                         color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
-                        fontSize: 14,
+                        fontSize: 11,
                         fontWeight: FontWeight.bold,
                         height: 1.5,
                       ),
@@ -846,9 +846,9 @@ class _TemplateCard extends ConsumerWidget {
                     // 📅 SET DURASI SECTION
                     Text(
                       'Target Waktu Pengerjaan:',
-                      style: GoogleFonts.comicNeue(
+                      style: GoogleFonts.quicksand(
                         fontWeight: FontWeight.w900,
-                        fontSize: 16,
+                        fontSize: 11,
                         color: theme.textTheme.bodyLarge?.color,
                       ),
                     ),
@@ -892,15 +892,15 @@ class _TemplateCard extends ConsumerWidget {
                                   keyboardType: TextInputType.number,
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(
-                                      fontSize: 24,
+                                      fontSize: 21,
                                       fontWeight: FontWeight.bold,
                                       color: AppColors.primary),
                                   decoration: const InputDecoration(
                                     border: InputBorder.none,
                                     suffixText: ' Hari',
                                     suffixStyle: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.normal,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
                                         color: Colors.grey),
                                   ),
                                   onChanged: (_) => setSheetState(() {}),
@@ -931,8 +931,8 @@ class _TemplateCard extends ConsumerWidget {
                               const SizedBox(width: 8),
                               Text(
                                 'Akan berakhir pada: ${DateFormat('d MMM yyyy').format(endDate)}',
-                                style: GoogleFonts.comicNeue(
-                                    fontSize: 12,
+                                style: GoogleFonts.quicksand(
+                                    fontSize: 11,
                                     color: Colors.grey,
                                     fontWeight: FontWeight.bold),
                               ),
@@ -948,7 +948,7 @@ class _TemplateCard extends ConsumerWidget {
                         'Tips Sukses:',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                          fontSize: 11,
                           color: theme.textTheme.bodyLarge?.color,
                         ),
                       ),
@@ -968,7 +968,7 @@ class _TemplateCard extends ConsumerWidget {
                                         color: isDarkMode
                                             ? Colors.grey[400]
                                             : Colors.grey[700],
-                                        fontSize: 13),
+                                        fontSize: 11),
                                   ),
                                 ),
                               ],
@@ -1030,8 +1030,8 @@ class _TemplateCard extends ConsumerWidget {
                           elevation: 0,
                         ),
                         child: Text('Mulai Challenge Sekarang',
-                            style: GoogleFonts.comicNeue(
-                                fontSize: 16, fontWeight: FontWeight.w900)),
+                            style: GoogleFonts.quicksand(
+                                fontSize: 11, fontWeight: FontWeight.w900)),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -1054,9 +1054,9 @@ class _TemplateCard extends ConsumerWidget {
       ),
       child: Text(
         text,
-        style: GoogleFonts.comicNeue(
+        style: GoogleFonts.quicksand(
           color: color,
-          fontSize: 12,
+          fontSize: 11,
           fontWeight: FontWeight.w900,
         ),
       ),
@@ -1104,18 +1104,18 @@ class _BadgesTab extends ConsumerWidget {
                 children: [
                   Text(
                     badgeStats['earned'].toString(),
-                    style: GoogleFonts.comicNeue(
+                    style: GoogleFonts.quicksand(
                       color: Colors.white,
-                      fontSize: 32,
+                      fontSize: 21,
                       fontWeight: FontWeight.w900,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     'Badge Diraih',
-                    style: GoogleFonts.comicNeue(
+                    style: GoogleFonts.quicksand(
                       color: Colors.white70,
-                      fontSize: 12,
+                      fontSize: 11,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -1130,18 +1130,18 @@ class _BadgesTab extends ConsumerWidget {
                 children: [
                   Text(
                     '${badgeStats['percentage']}%',
-                    style: GoogleFonts.comicNeue(
+                    style: GoogleFonts.quicksand(
                       color: Colors.white,
-                      fontSize: 32,
+                      fontSize: 21,
                       fontWeight: FontWeight.w900,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     'Koleksi',
-                    style: GoogleFonts.comicNeue(
+                    style: GoogleFonts.quicksand(
                       color: Colors.white70,
-                      fontSize: 12,
+                      fontSize: 11,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -1160,7 +1160,7 @@ class _BadgesTab extends ConsumerWidget {
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 3,
-                  childAspectRatio: 0.78, // Taller cards to accommodate text
+                  childAspectRatio: 0.70, // Taller cards to accommodate text
                   crossAxisSpacing: 14,
                   mainAxisSpacing: 14,
                 ),
@@ -1182,7 +1182,7 @@ class _BadgesTab extends ConsumerWidget {
                         size: 64, color: Colors.grey[400]),
                     Text(
                       'Terjadi kesalahan',
-                      style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                      style: TextStyle(color: Colors.grey[600], fontSize: 11),
                     ),
                   ],
                 ),
@@ -1250,7 +1250,7 @@ class _BadgeItem extends StatelessWidget {
               Text(
                 badge.name,
                 textAlign: TextAlign.center,
-                style: GoogleFonts.comicNeue(
+                style: GoogleFonts.quicksand(
                   fontSize: 11,
                   fontWeight: FontWeight.w900,
                   color: badge.isEarned
@@ -1281,8 +1281,8 @@ class _BadgeItem extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: Text(badge.name,
-                  style: GoogleFonts.comicNeue(
-                      fontSize: 18, fontWeight: FontWeight.w900)),
+                  style: GoogleFonts.quicksand(
+                      fontSize: 11, fontWeight: FontWeight.w900)),
             ),
           ],
         ),
@@ -1291,8 +1291,8 @@ class _BadgeItem extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(badge.description,
-                style: GoogleFonts.comicNeue(
-                    fontSize: 14, height: 1.5, fontWeight: FontWeight.bold)),
+                style: GoogleFonts.quicksand(
+                    fontSize: 11, height: 1.5, fontWeight: FontWeight.bold)),
             const SizedBox(height: 14),
             if (badge.requiredPoints > 0)
               _buildRequirement('🎯 Butuh ${badge.requiredPoints} poin'),
@@ -1315,10 +1315,10 @@ class _BadgeItem extends StatelessWidget {
                     const SizedBox(width: 8),
                     Text(
                       'Sudah Diraih!',
-                      style: GoogleFonts.comicNeue(
+                      style: GoogleFonts.quicksand(
                         color: Colors.green,
                         fontWeight: FontWeight.w900,
-                        fontSize: 14,
+                        fontSize: 11,
                       ),
                     ),
                   ],
@@ -1331,7 +1331,7 @@ class _BadgeItem extends StatelessWidget {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text('Tutup',
-                style: GoogleFonts.comicNeue(
+                style: GoogleFonts.quicksand(
                     fontWeight: FontWeight.w900, color: AppColors.primary)),
           ),
         ],
@@ -1348,8 +1348,8 @@ class _BadgeItem extends StatelessWidget {
               size: 14, color: Colors.grey),
           const SizedBox(width: 8),
           Text(text,
-              style: GoogleFonts.comicNeue(
-                  fontSize: 13,
+              style: GoogleFonts.quicksand(
+                  fontSize: 11,
                   fontWeight: FontWeight.bold,
                   color: Colors.grey)),
         ],

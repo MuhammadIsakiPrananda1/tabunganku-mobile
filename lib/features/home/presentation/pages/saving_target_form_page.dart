@@ -105,9 +105,9 @@ class _SavingTargetFormPageState extends ConsumerState<SavingTargetFormPage> {
         ),
         title: Text(
           widget.target != null ? 'Ubah Target' : 'Target Baru',
-          style: GoogleFonts.comicNeue(
+          style: GoogleFonts.quicksand(
             fontWeight: FontWeight.bold,
-            fontSize: 20,
+            fontSize: 11,
             color: isDarkMode ? Colors.white : AppColors.primaryDark,
           ),
         ),
@@ -124,7 +124,7 @@ class _SavingTargetFormPageState extends ConsumerState<SavingTargetFormPage> {
               TextFormField(
                 controller: _nameController,
                 textCapitalization: TextCapitalization.sentences,
-                style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : Colors.black87),
+                style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : Colors.black87),
                 decoration: _inputDecoration('Misal: iPhone 15 Pro', Icons.stars_rounded, isDarkMode),
                 validator: (val) => val == null || val.trim().isEmpty ? 'Nama tidak boleh kosong' : null,
               ),
@@ -136,10 +136,10 @@ class _SavingTargetFormPageState extends ConsumerState<SavingTargetFormPage> {
                 controller: _amountController,
                 keyboardType: TextInputType.number,
                 inputFormatters: [_RibuanFormatter()],
-                style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 24),
+                style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 21),
                 decoration: _inputDecoration('0', Icons.payments_rounded, isDarkMode).copyWith(
                   prefixText: 'Rp ',
-                  prefixStyle: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 20),
+                  prefixStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 11),
                 ),
                 validator: (val) {
                   if (val == null || val.trim().isEmpty) return 'Masukkan nominal';
@@ -162,7 +162,7 @@ class _SavingTargetFormPageState extends ConsumerState<SavingTargetFormPage> {
                     value: _selectedCategory,
                     isExpanded: true,
                     dropdownColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
-                    style: GoogleFonts.comicNeue(fontWeight: FontWeight.w600, color: isDarkMode ? Colors.white : Colors.black87, fontSize: 14),
+                    style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : Colors.black87, fontSize: 11),
                     onChanged: (val) => setState(() => _selectedCategory = val!),
                     items: _categories.map((c) => DropdownMenuItem(value: c, child: Text(c, overflow: TextOverflow.ellipsis))).toList(),
                   ),
@@ -194,7 +194,7 @@ class _SavingTargetFormPageState extends ConsumerState<SavingTargetFormPage> {
                       const SizedBox(width: 12),
                       Text(
                         DateFormat('EEEE, dd MMMM yyyy', 'id_ID').format(_selectedDate),
-                        style: GoogleFonts.comicNeue(fontWeight: FontWeight.w600, color: isDarkMode ? Colors.white : Colors.black87),
+                        style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : Colors.black87),
                       ),
                     ],
                   ),
@@ -215,7 +215,7 @@ class _SavingTargetFormPageState extends ConsumerState<SavingTargetFormPage> {
                   ),
                   child: Text(
                     widget.target != null ? 'Simpan Perubahan' : 'Mulai Menabung',
-                    style: GoogleFonts.comicNeue(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: GoogleFonts.quicksand(fontSize: 11, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
@@ -229,8 +229,8 @@ class _SavingTargetFormPageState extends ConsumerState<SavingTargetFormPage> {
   Widget _buildInputLabel(String text, bool isDarkMode) {
     return Text(
       text,
-      style: GoogleFonts.comicNeue(
-        fontSize: 14,
+      style: GoogleFonts.quicksand(
+        fontSize: 11,
         fontWeight: FontWeight.bold,
         color: isDarkMode ? Colors.white70 : Colors.black87,
       ),

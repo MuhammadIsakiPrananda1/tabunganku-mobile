@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tabunganku/core/theme/app_colors.dart';
 import 'package:tabunganku/features/settings/presentation/providers/security_provider.dart';
-import 'package:tabunganku/providers/family_group_provider.dart';
+import 'package:tabunganku/providers/user_provider.dart';
 import 'dart:io';
 
 class LockScreen extends ConsumerStatefulWidget {
@@ -267,7 +267,7 @@ class _LockScreenState extends ConsumerState<LockScreen> with TickerProviderStat
           child: Text(
             value,
             style: TextStyle(
-              fontSize: 24,
+              fontSize: 21,
               fontWeight: FontWeight.bold,
               color: colorScheme.onSurface,
             ),

@@ -138,7 +138,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
             style: TextStyle(fontWeight: FontWeight.bold)),
         content: Text(
           'Hapus budget kategori "${widget.budget!.category}"?\nLangkah ini tidak bisa dibatalkan.',
-          style: const TextStyle(fontSize: 14),
+          style: const TextStyle(fontSize: 11),
         ),
         actions: [
           TextButton(
@@ -228,7 +228,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
                         Text(
                           isEditing ? 'Perbarui Budget' : 'Budget Baru',
                           style: TextStyle(
-                            fontSize: 22, 
+                            fontSize: 19, 
                             fontWeight: FontWeight.bold,
                             color: isDarkMode ? Colors.white : Colors.black87,
                             letterSpacing: -0.5,
@@ -237,7 +237,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
                         Text(
                           'Atur batas pengeluaran bulanan Anda',
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: 11,
                             color: isDarkMode ? Colors.white38 : Colors.grey.shade600,
                           ),
                         ),
@@ -273,7 +273,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
                     value: _selectedGroup,
                     isExpanded: true,
                     dropdownColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
-                    style: TextStyle(color: isDarkMode ? Colors.white : Colors.black87, fontWeight: FontWeight.w600),
+                    style: TextStyle(color: isDarkMode ? Colors.white : Colors.black87, fontWeight: FontWeight.bold),
                     decoration: InputDecoration(
                       labelText: 'Grup Kategori',
                       filled: true,
@@ -286,7 +286,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
                       value: group,
                       child: Text(group, 
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
                     )).toList(),
                     onChanged: (val) {
                       if (val != null) {
@@ -305,7 +305,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
                     value: _selectedCategory,
                     isExpanded: true,
                     dropdownColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
-                    style: TextStyle(color: isDarkMode ? Colors.white : Colors.black87, fontWeight: FontWeight.w600),
+                    style: TextStyle(color: isDarkMode ? Colors.white : Colors.black87, fontWeight: FontWeight.bold),
                     decoration: InputDecoration(
                       labelText: 'Kategori Budget',
                       filled: true,
@@ -321,7 +321,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
                       value: cat.label,
                       child: Text(cat.label, 
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 13)),
+                        style: const TextStyle(fontSize: 11)),
                     )).toList(),
                     onChanged: (val) {
                       if (val != null) {
@@ -347,7 +347,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
                   textCapitalization: TextCapitalization.words,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 15,
+                    fontSize: 11,
                     color: isDarkMode ? Colors.white : Colors.black87,
                   ),
                   decoration: InputDecoration(
@@ -377,7 +377,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
                   Text(
                     'Limit Anggaran',
                     style: TextStyle(
-                      fontSize: 14, 
+                      fontSize: 11, 
                       fontWeight: FontWeight.bold,
                       color: isDarkMode ? Colors.white70 : Colors.black87,
                     ),
@@ -398,7 +398,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
                         const Text(
                           'Rp',
                           style: TextStyle(
-                            fontSize: 24,
+                            fontSize: 21,
                             fontWeight: FontWeight.w900,
                             color: AppColors.primary,
                           ),
@@ -413,7 +413,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
                               RibuanFormatter(),
                             ],
                             style: TextStyle(
-                              fontSize: 28,
+                              fontSize: 21,
                               fontWeight: FontWeight.w900,
                               color: isDarkMode ? Colors.white : Colors.black87,
                               letterSpacing: -0.5,
@@ -458,7 +458,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
                       const SizedBox(width: 12),
                       Text(
                         isEditing ? 'Perbarui Anggaran' : 'Simpan Anggaran',
-                        style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 18),
+                        style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11),
                       ),
                     ],
                   ),

@@ -91,11 +91,27 @@ class RecurringService {
             nextDate = lastProcessed.add(const Duration(days: 7));
             break;
           case RecurringFrequency.monthly:
-            // Sederhana: tambah 1 bulan
             nextDate = DateTime(lastProcessed.year, lastProcessed.month + 1, lastProcessed.day);
-            // Handle day overflow (e.g., Jan 31 -> Feb 28)
-            if (nextDate.month == (lastProcessed.month + 2) % 12) {
-               nextDate = DateTime(lastProcessed.year, lastProcessed.month + 1, 0);
+            if (nextDate.day != lastProcessed.day) {
+              nextDate = DateTime(lastProcessed.year, lastProcessed.month + 2, 0);
+            }
+            break;
+          case RecurringFrequency.quarterly:
+            nextDate = DateTime(lastProcessed.year, lastProcessed.month + 3, lastProcessed.day);
+            if (nextDate.day != lastProcessed.day) {
+              nextDate = DateTime(lastProcessed.year, lastProcessed.month + 4, 0);
+            }
+            break;
+          case RecurringFrequency.semiAnnually:
+            nextDate = DateTime(lastProcessed.year, lastProcessed.month + 6, lastProcessed.day);
+            if (nextDate.day != lastProcessed.day) {
+              nextDate = DateTime(lastProcessed.year, lastProcessed.month + 7, 0);
+            }
+            break;
+          case RecurringFrequency.yearly:
+            nextDate = DateTime(lastProcessed.year + 1, lastProcessed.month, lastProcessed.day);
+            if (nextDate.day != lastProcessed.day) {
+              nextDate = DateTime(lastProcessed.year + 1, lastProcessed.month + 1, 0);
             }
             break;
         }

@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tabunganku/features/splash/presentation/pages/splash_screen.dart';
 import 'package:tabunganku/features/home/presentation/pages/dashboard_page.dart';
 import 'package:tabunganku/features/auth/presentation/pages/lock_screen.dart';
-import 'package:tabunganku/features/friends/presentation/pages/family_group_page.dart';
+import 'package:tabunganku/features/arisan/presentation/pages/arisan_page.dart';
 import 'package:tabunganku/features/settings/presentation/pages/pin_setup_page.dart';
 import 'package:tabunganku/features/home/presentation/pages/saving_simulator_page.dart';
 import 'package:tabunganku/features/transaction/presentation/pages/scan_receipt_page.dart';
@@ -59,11 +59,11 @@ final appRouterProvider = Provider((ref) {
         },
       ),
 
-      // Family Group
+      // Arisan Page
       GoRoute(
-        path: '/family-group',
-        name: 'family-group',
-        builder: (context, state) => const FamilyGroupPage(),
+        path: '/arisan',
+        name: 'arisan',
+        builder: (context, state) => const ArisanPage(),
       ),
 
       // PIN Setup

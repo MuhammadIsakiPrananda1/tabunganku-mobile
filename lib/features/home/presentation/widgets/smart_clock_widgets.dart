@@ -43,7 +43,7 @@ class _SmartDigitalClockState extends State<SmartDigitalClock> {
   Widget build(BuildContext context) {
     return Text(
       DateFormat('HH:mm:ss').format(_currentTime),
-      style: GoogleFonts.comicNeue(
+      style: GoogleFonts.quicksand(
         fontSize: widget.fontSize,
         fontWeight: FontWeight.bold,
         color: AppColors.primary,
@@ -89,7 +89,7 @@ class _SmartDateDisplayState extends State<SmartDateDisplay> {
     return Text(
       DateFormat('EEEE, d MMMM yyyy', 'id_ID').format(_currentDate),
       style: TextStyle(
-        fontSize: 12,
+        fontSize: 11,
         color: AppColors.primary.withValues(alpha: 0.8),
         fontWeight: FontWeight.bold,
       ),

@@ -3,7 +3,6 @@ enum QuickActionType {
   expense,
   budget,
   debt,
-  family,
   shoppingList,
   scanReceipt,
   challenge,
@@ -25,5 +24,6 @@ enum QuickActionType {
   insurance,
   savingPlans,
   buyingTarget,
+  arisan,
 }
 

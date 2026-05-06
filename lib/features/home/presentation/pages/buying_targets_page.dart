@@ -49,7 +49,7 @@ class _BuyingTargetsPageState extends ConsumerState<BuyingTargetsPage> {
           onPressed: () => Navigator.pop(context),
           icon: Icon(Icons.arrow_back_ios_new_rounded, color: contentColor, size: 20),
         ),
-        title: Text('Target Saya', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 18, color: contentColor)),
+        title: Text('Target Saya', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11, color: contentColor)),
       ),
       body: targetsAsync.when(
         data: (targets) {
@@ -65,7 +65,7 @@ class _BuyingTargetsPageState extends ConsumerState<BuyingTargetsPage> {
                 _buildInputForm(isDarkMode),
                 const SizedBox(height: 32),
                 Text('Daftar Target Pembelian', 
-                  style: GoogleFonts.comicNeue(fontSize: 14, fontWeight: FontWeight.bold, color: contentColor.withValues(alpha: 0.5))),
+                  style: GoogleFonts.quicksand(fontSize: 11, fontWeight: FontWeight.bold, color: contentColor.withValues(alpha: 0.5))),
                 const SizedBox(height: 16),
                 if (buyingTargets.isEmpty)
                   _buildEmptyState(isDarkMode)
@@ -106,10 +106,10 @@ class _BuyingTargetsPageState extends ConsumerState<BuyingTargetsPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('Target Belanja', 
-                  style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 18, color: isDarkMode ? Colors.white : AppColors.primaryDark)),
+                  style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11, color: isDarkMode ? Colors.white : AppColors.primaryDark)),
                 Text(
                   'Mulai cicil tabungan untuk barang impianmu.',
-                  style: GoogleFonts.comicNeue(fontSize: 11, color: isDarkMode ? Colors.white38 : Colors.black38, fontWeight: FontWeight.w500),
+                  style: GoogleFonts.quicksand(fontSize: 11, color: isDarkMode ? Colors.white38 : Colors.black38, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -167,8 +167,8 @@ class _BuyingTargetsPageState extends ConsumerState<BuyingTargetsPage> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Target Tanggal', style: GoogleFonts.comicNeue(fontSize: 10, color: (isDarkMode ? Colors.white38 : Colors.grey.shade500), fontWeight: FontWeight.bold)),
-                      Text(DateFormat('d MMMM yyyy', 'id_ID').format(_selectedDate), style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 13)),
+                      Text('Target Tanggal', style: GoogleFonts.quicksand(fontSize: 10, color: (isDarkMode ? Colors.white38 : Colors.grey.shade500), fontWeight: FontWeight.bold)),
+                      Text(DateFormat('d MMMM yyyy', 'id_ID').format(_selectedDate), style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11)),
                     ],
                   ),
                   const Spacer(),
@@ -205,7 +205,7 @@ class _BuyingTargetsPageState extends ConsumerState<BuyingTargetsPage> {
                 }
               },
               icon: const Icon(Icons.add_rounded, size: 20),
-              label: Text('Tambah Target', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 15)),
+              label: Text('Tambah Target', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
@@ -222,8 +222,8 @@ class _BuyingTargetsPageState extends ConsumerState<BuyingTargetsPage> {
   Widget _buildInputLabel(String label, bool isDarkMode) {
     return Text(
       label,
-      style: GoogleFonts.comicNeue(
-        fontSize: 14,
+      style: GoogleFonts.quicksand(
+        fontSize: 11,
         fontWeight: FontWeight.bold,
         color: isDarkMode ? Colors.white70 : Colors.black87,
       ),
@@ -257,11 +257,11 @@ class _BuyingTargetsPageState extends ConsumerState<BuyingTargetsPage> {
       controller: controller,
       keyboardType: isPremium ? TextInputType.number : TextInputType.text,
       inputFormatters: isPremium ? [_RibuanFormatter()] : null,
-      style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 16, color: contentColor),
+      style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11, color: contentColor),
       decoration: InputDecoration(
         hintText: hint ?? '0',
         hintStyle: TextStyle(
-            fontSize: 16,
+            fontSize: 11,
             color: isDarkMode ? Colors.white10 : Colors.black38),
         prefixIcon: Container(
           padding: const EdgeInsets.only(left: 16, right: 8),
@@ -271,7 +271,7 @@ class _BuyingTargetsPageState extends ConsumerState<BuyingTargetsPage> {
               Icon(icon, color: color, size: 20),
               if (unit.isNotEmpty) ...[
                 const SizedBox(width: 8),
-                Text(unit, style: TextStyle(fontWeight: FontWeight.bold, color: color, fontSize: 16)),
+                Text(unit, style: TextStyle(fontWeight: FontWeight.bold, color: color, fontSize: 11)),
               ],
             ],
           ),
@@ -351,8 +351,8 @@ class _BuyingTargetsPageState extends ConsumerState<BuyingTargetsPage> {
                     children: [
                       Text(
                         target.name.toUpperCase(),
-                        style: GoogleFonts.comicNeue(
-                          fontSize: 15,
+                        style: GoogleFonts.quicksand(
+                          fontSize: 11,
                           fontWeight: FontWeight.w900,
                           letterSpacing: 0.5,
                           color: isDarkMode ? Colors.white : AppColors.primaryDark,
@@ -367,8 +367,8 @@ class _BuyingTargetsPageState extends ConsumerState<BuyingTargetsPage> {
                           const SizedBox(width: 4),
                           Text(
                             _formatRupiah(target.targetAmount),
-                            style: GoogleFonts.comicNeue(
-                              fontSize: 12,
+                            style: GoogleFonts.quicksand(
+                              fontSize: 11,
                               color: isDarkMode ? Colors.white38 : Colors.grey.shade600,
                               fontWeight: FontWeight.bold,
                             ),
@@ -382,8 +382,8 @@ class _BuyingTargetsPageState extends ConsumerState<BuyingTargetsPage> {
                           const SizedBox(width: 4),
                           Text(
                             DateFormat('d MMM').format(target.dueDate),
-                            style: GoogleFonts.comicNeue(
-                              fontSize: 12,
+                            style: GoogleFonts.quicksand(
+                              fontSize: 11,
                               color: isDarkMode ? Colors.white38 : Colors.grey.shade600,
                               fontWeight: FontWeight.bold,
                             ),
@@ -399,8 +399,8 @@ class _BuyingTargetsPageState extends ConsumerState<BuyingTargetsPage> {
                   children: [
                     Text(
                       '${(progress * 100).toInt()}%',
-                      style: GoogleFonts.comicNeue(
-                        fontSize: 20,
+                      style: GoogleFonts.quicksand(
+                        fontSize: 11,
                         fontWeight: FontWeight.w900,
                         color: baseColor,
                       ),
@@ -428,9 +428,9 @@ class _BuyingTargetsPageState extends ConsumerState<BuyingTargetsPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: GoogleFonts.comicNeue(fontSize: 12, color: Colors.grey.shade500, fontWeight: FontWeight.bold)),
+        Text(label, style: GoogleFonts.quicksand(fontSize: 11, color: Colors.grey.shade500, fontWeight: FontWeight.bold)),
         const SizedBox(height: 4),
-        Text(value, style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 12, color: isDarkMode ? Colors.white70 : AppColors.primaryDark)),
+        Text(value, style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11, color: isDarkMode ? Colors.white70 : AppColors.primaryDark)),
       ],
     );
   }
@@ -447,7 +447,7 @@ class _BuyingTargetsPageState extends ConsumerState<BuyingTargetsPage> {
         builder: (context, setDialogState) => AlertDialog(
           backgroundColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-          title: Text('Ubah Target', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold)),
+          title: Text('Ubah Target', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -489,7 +489,7 @@ class _BuyingTargetsPageState extends ConsumerState<BuyingTargetsPage> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             ),
-            child: Text('Simpan', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold)),
+            child: Text('Simpan', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold)),
           ),
           ],
         ),
@@ -522,7 +522,7 @@ class _BuyingTargetsPageState extends ConsumerState<BuyingTargetsPage> {
           children: [
             Icon(Icons.shopping_bag_outlined, size: 64, color: isDarkMode ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
             const SizedBox(height: 16),
-            Text('Belum ada target pembelian.', style: GoogleFonts.comicNeue(color: Colors.grey, fontWeight: FontWeight.w600)),
+            Text('Belum ada target pembelian.', style: GoogleFonts.quicksand(color: Colors.grey, fontWeight: FontWeight.bold)),
           ],
         ),
       ),

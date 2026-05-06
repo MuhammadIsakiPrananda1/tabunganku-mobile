@@ -212,8 +212,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                             'Pencatat Keuangan Cerdas',
                             style: TextStyle(
                               color: AppColors.primary,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
                               letterSpacing: 1.0,
                             ),
                           ),
@@ -251,7 +251,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                     'NEVERLAND STUDIO',
                     style: GoogleFonts.poppins(
                       color: AppColors.primary,
-                      fontSize: 13,
+                      fontSize: 11,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 2.5,
                     ),
@@ -261,8 +261,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                     AppVersion.fullVersion,
                     style: TextStyle(
                       color: AppColors.textTertiary,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
                       letterSpacing: 2.0,
                     ),
                   ),

@@ -52,7 +52,7 @@ class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
           onPressed: () => Navigator.pop(context),
           icon: Icon(Icons.arrow_back_ios_new_rounded, color: contentColor, size: 20),
         ),
-        title: Text('Tabungan Emas', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 16, color: contentColor)),
+        title: Text('Tabungan Emas', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11, color: contentColor)),
         centerTitle: true,
       ),
       body: StreamBuilder<List<GoldTransactionModel>>(
@@ -74,14 +74,14 @@ class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
                 const SizedBox(height: 24),
                 Padding(
                   padding: const EdgeInsets.only(left: 4),
-                  child: Text('HARGA EMAS HARI INI', style: GoogleFonts.comicNeue(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1, color: contentColor.withValues(alpha: 0.3))),
+                  child: Text('HARGA EMAS HARI INI', style: GoogleFonts.quicksand(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1, color: contentColor.withValues(alpha: 0.3))),
                 ),
                 const SizedBox(height: 12),
                 _buildRealtimePriceCard(isDarkMode),
                 const SizedBox(height: 32),
                 _buildInlineInputForm(isDarkMode),
                 const SizedBox(height: 32),
-                Text('HISTORY TRANSAKSI', style: GoogleFonts.comicNeue(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5, color: contentColor.withValues(alpha: 0.4))),
+                Text('HISTORY TRANSAKSI', style: GoogleFonts.quicksand(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5, color: contentColor.withValues(alpha: 0.4))),
                 const SizedBox(height: 16),
                 if (txs.isEmpty)
                    _buildEmptyState(isDarkMode)
@@ -141,8 +141,8 @@ class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
                           const SizedBox(width: 8),
                           Text(
                             'Estimasi Emas: ${estGrams.toStringAsFixed(4)} gram',
-                            style: GoogleFonts.comicNeue(
-                              fontSize: 12,
+                            style: GoogleFonts.quicksand(
+                              fontSize: 11,
                               fontWeight: FontWeight.bold,
                               color: isDarkMode ? Colors.white70 : accentColor,
                             ),
@@ -172,7 +172,7 @@ class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
                       if (mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('Transaksi Berhasil Disimpan', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold)),
+                            content: Text('Transaksi Berhasil Disimpan', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold)),
                             backgroundColor: Colors.amber,
                           ),
                         );
@@ -180,7 +180,7 @@ class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
                     }
                   },
                   icon: const Icon(Icons.check_rounded, size: 18),
-                  label: Text('Simpan Transaksi', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 14)),
+                  label: Text('Simpan Transaksi', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 16)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
@@ -218,7 +218,7 @@ class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
             children: [
               Icon(icon, color: isSelected ? accentColor : Colors.grey, size: 16),
               const SizedBox(width: 6),
-              Text(label, style: GoogleFonts.comicNeue(fontSize: 12, fontWeight: FontWeight.bold, color: isSelected ? accentColor : Colors.grey)),
+              Text(label, style: GoogleFonts.quicksand(fontSize: 11, fontWeight: FontWeight.bold, color: isSelected ? accentColor : Colors.grey)),
             ],
           ),
         ),
@@ -240,11 +240,11 @@ class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
       controller: controller,
       keyboardType: TextInputType.number,
       inputFormatters: [_RibuanFormatter()],
-      style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 16, color: contentColor),
+      style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 14, color: contentColor),
       decoration: InputDecoration(
         hintText: '0',
-        hintStyle: GoogleFonts.comicNeue(
-            fontSize: 16,
+        hintStyle: GoogleFonts.quicksand(
+            fontSize: 14,
             color: isDarkMode ? Colors.white10 : Colors.black38),
         prefixIcon: Container(
           padding: const EdgeInsets.only(left: 16, right: 8),
@@ -253,7 +253,7 @@ class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
             children: [
               Icon(icon, color: color, size: 18),
               const SizedBox(width: 8),
-              Text(unit, style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, color: color, fontSize: 13)),
+              Text(unit, style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: color, fontSize: 13)),
             ],
           ),
         ),
@@ -284,16 +284,16 @@ class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
       ),
       child: Column(
         children: [
-          Text('TOTAL SALDO EMAS', style: GoogleFonts.comicNeue(color: Colors.white.withValues(alpha: 0.6), fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
+          Text('TOTAL SALDO EMAS', style: GoogleFonts.quicksand(color: Colors.white.withValues(alpha: 0.6), fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
           const SizedBox(height: 4),
           FittedBox(
             fit: BoxFit.scaleDown,
             child: Text('${grams.toStringAsFixed(3)} g', 
-              style: GoogleFonts.comicNeue(color: Colors.white, fontSize: 38, fontWeight: FontWeight.bold, letterSpacing: -1)),
+              style: GoogleFonts.quicksand(color: Colors.white, fontSize: 38, fontWeight: FontWeight.bold, letterSpacing: -1)),
           ),
           const SizedBox(height: 2),
           Text(_formatRupiah(value), 
-            style: GoogleFonts.comicNeue(color: Colors.white.withValues(alpha: 0.8), fontSize: 12, fontWeight: FontWeight.bold)),
+            style: GoogleFonts.quicksand(color: Colors.white.withValues(alpha: 0.8), fontSize: 11, fontWeight: FontWeight.bold)),
           const SizedBox(height: 16),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
@@ -308,7 +308,7 @@ class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
                 const SizedBox(width: 6),
                 Text(
                   '${isProfit ? 'Profit' : 'Loss'}: ${_formatRupiah(pl.abs())}',
-                  style: GoogleFonts.comicNeue(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 10),
+                  style: GoogleFonts.quicksand(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 10),
                 ),
               ],
             ),
@@ -345,12 +345,12 @@ class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text('HARGA EMAS TERKINI', 
-                    style: GoogleFonts.comicNeue(fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1.5, color: contentColor.withValues(alpha: 0.4))),
+                    style: GoogleFonts.quicksand(fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1.5, color: contentColor.withValues(alpha: 0.4))),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(color: Colors.green.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
                     child: Text('${priceChange > 0 ? '+' : ''}${priceChange.toStringAsFixed(2)}%', 
-                      style: GoogleFonts.comicNeue(color: Colors.green, fontSize: 10, fontWeight: FontWeight.bold)),
+                      style: GoogleFonts.quicksand(color: Colors.green, fontSize: 10, fontWeight: FontWeight.bold)),
                   ),
                 ],
               ),
@@ -375,9 +375,9 @@ class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
     return Column(
       children: [
-        Text(label, style: GoogleFonts.comicNeue(fontSize: 8, fontWeight: FontWeight.bold, color: contentColor.withValues(alpha: 0.3), letterSpacing: 1)),
+        Text(label, style: GoogleFonts.quicksand(fontSize: 8, fontWeight: FontWeight.bold, color: contentColor.withValues(alpha: 0.3), letterSpacing: 1)),
         const SizedBox(height: 4),
-        Text(_formatRupiah(price), style: GoogleFonts.comicNeue(fontSize: 12, fontWeight: FontWeight.bold, color: color)),
+        Text(_formatRupiah(price), style: GoogleFonts.quicksand(fontSize: 11, fontWeight: FontWeight.bold, color: color)),
       ],
     );
   }
@@ -399,16 +399,16 @@ class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: Text('Hapus Transaksi?', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold)),
-        content: Text('Data transaksi emas ini akan dihapus secara permanen.', style: GoogleFonts.comicNeue()),
+        title: Text('Hapus Transaksi?', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold)),
+        content: Text('Data transaksi emas ini akan dihapus secara permanen.', style: GoogleFonts.quicksand()),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('Batal', style: GoogleFonts.comicNeue(color: Colors.grey.shade600, fontWeight: FontWeight.bold)),
+            child: Text('Batal', style: GoogleFonts.quicksand(color: Colors.grey.shade600, fontWeight: FontWeight.bold)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text('Hapus', style: GoogleFonts.comicNeue(color: Colors.red, fontWeight: FontWeight.bold)),
+            child: Text('Hapus', style: GoogleFonts.quicksand(color: Colors.red, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -457,7 +457,7 @@ class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
               const SizedBox(height: 12),
               Center(
                 child: Text('UBAH TRANSAKSI EMAS', 
-                  style: GoogleFonts.comicNeue(fontSize: 15, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : Colors.teal.shade900)),
+                  style: GoogleFonts.quicksand(fontSize: 11, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : Colors.teal.shade900)),
               ),
               const SizedBox(height: 16),
               Row(
@@ -481,7 +481,7 @@ class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
                     child: Center(
                       child: Text(
                         'Estimasi: ${estGrams.toStringAsFixed(4)} gram',
-                        style: GoogleFonts.comicNeue(
+                        style: GoogleFonts.quicksand(
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
                           color: isDarkMode ? Colors.white38 : Colors.teal.shade900.withValues(alpha: 0.5),
@@ -514,7 +514,7 @@ class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     elevation: 0,
                   ),
-                  child: Text('Simpan Perubahan', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 14)),
+                  child: Text('Simpan Perubahan', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11)),
                 ),
               ),
             ],
@@ -552,16 +552,16 @@ class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(isBuy ? 'Beli Emas' : 'Jual Emas', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor)),
+                Text(isBuy ? 'Beli Emas' : 'Jual Emas', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11, color: contentColor)),
                 const SizedBox(height: 2),
                 Text('${isBuy ? '+' : '-'}${tx.grams.toStringAsFixed(3)} g', 
-                  style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 11, color: isBuy ? Colors.green : Colors.red)),
+                  style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11, color: isBuy ? Colors.green : Colors.red)),
                 const SizedBox(height: 2),
                 Text(_formatRupiah(tx.grams * tx.pricePerGram), 
-                  style: GoogleFonts.comicNeue(color: contentColor, fontSize: 12, fontWeight: FontWeight.bold)),
+                  style: GoogleFonts.quicksand(color: contentColor, fontSize: 11, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 4),
                 Text(DateFormat('EEEE, d MMM yyyy').format(tx.date), 
-                  style: GoogleFonts.comicNeue(color: isDarkMode ? Colors.white24 : Colors.black38, fontSize: 9, fontWeight: FontWeight.bold)),
+                  style: GoogleFonts.quicksand(color: isDarkMode ? Colors.white24 : Colors.black38, fontSize: 9, fontWeight: FontWeight.bold)),
               ],
             ),
           ),
@@ -582,7 +582,7 @@ class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
                   children: [
                     const Icon(Icons.edit_note_rounded, size: 18, color: Colors.blue),
                     const SizedBox(width: 8),
-                    Text('Edit', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 13)),
+                    Text('Edit', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11)),
                   ],
                 ),
               ),
@@ -592,7 +592,7 @@ class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
                   children: [
                     const Icon(Icons.delete_outline_rounded, size: 18, color: Colors.red),
                     const SizedBox(width: 8),
-                    Text('Hapus', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.red)),
+                    Text('Hapus', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11, color: Colors.red)),
                   ],
                 ),
               ),
@@ -608,9 +608,9 @@ class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label.toUpperCase(), style: GoogleFonts.comicNeue(fontSize: 8, color: isDarkMode ? Colors.white24 : Colors.black38, fontWeight: FontWeight.bold)),
+        Text(label.toUpperCase(), style: GoogleFonts.quicksand(fontSize: 8, color: isDarkMode ? Colors.white24 : Colors.black38, fontWeight: FontWeight.bold)),
         const SizedBox(height: 2),
-        Text(value, style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 11, color: color ?? contentColor)),
+        Text(value, style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11, color: color ?? contentColor)),
       ],
     );
   }
@@ -624,7 +624,7 @@ class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
           children: [
             Icon(Icons.history_toggle_off_rounded, size: 64, color: isDarkMode ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
             const SizedBox(height: 24),
-            const Text('Belum ada riwayat transaksi.', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w500)),
+            const Text('Belum ada riwayat transaksi.', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
           ],
         ),
       ),
@@ -649,7 +649,7 @@ class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
           children: [
             Icon(icon, color: isSelected ? Colors.white : Colors.grey, size: 18),
             const SizedBox(width: 8),
-            Text(label, style: GoogleFonts.comicNeue(fontSize: 13, fontWeight: FontWeight.bold, color: isSelected ? Colors.white : Colors.grey)),
+            Text(label, style: GoogleFonts.quicksand(fontSize: 11, fontWeight: FontWeight.bold, color: isSelected ? Colors.white : Colors.grey)),
           ],
         ),
       ),
@@ -664,16 +664,16 @@ class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
       children: [
         Padding(
           padding: const EdgeInsets.only(left: 4, bottom: 6),
-          child: Text(label, style: GoogleFonts.comicNeue(fontSize: 9, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white24 : Colors.black38)),
+          child: Text(label, style: GoogleFonts.quicksand(fontSize: 9, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white24 : Colors.black38)),
         ),
         TextFormField(
           controller: controller,
           keyboardType: TextInputType.number,
           inputFormatters: [_RibuanFormatter()],
-          style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 15, color: contentColor),
+          style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11, color: contentColor),
           decoration: InputDecoration(
             hintText: '0',
-            hintStyle: GoogleFonts.comicNeue(fontSize: 15, color: isDarkMode ? Colors.white10 : Colors.teal.shade50),
+            hintStyle: GoogleFonts.quicksand(fontSize: 11, color: isDarkMode ? Colors.white10 : Colors.teal.shade50),
             prefixIcon: Container(
               padding: const EdgeInsets.only(left: 16, right: 8),
               child: Row(
@@ -681,7 +681,7 @@ class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
                 children: [
                   Icon(icon, color: accentColor, size: 18),
                   const SizedBox(width: 8),
-                  Text(unit, style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, color: accentColor, fontSize: 13)),
+                  Text(unit, style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: accentColor, fontSize: 11)),
                 ],
               ),
             ),

@@ -69,7 +69,7 @@ class PermissionDialog extends StatelessWidget {
                 Text(
                   'Izin $title',
                   style: TextStyle(
-                    fontSize: 22,
+                    fontSize: 19,
                     fontWeight: FontWeight.bold,
                     color: isDarkMode ? Colors.white : Colors.black87,
                   ),
@@ -118,7 +118,7 @@ class PermissionDialog extends StatelessWidget {
                       ),
                       child: const Text(
                         'Nanti Saja',
-                        style: TextStyle(fontWeight: FontWeight.w600),
+                        style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ),
                   ],

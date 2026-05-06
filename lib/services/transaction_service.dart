@@ -2,13 +2,11 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tabunganku/core/security/secure_storage_service.dart';
 import 'package:tabunganku/models/transaction_model.dart';
 import 'package:tabunganku/services/challenge_service.dart';
 
 /// Service untuk mengelola data transaksi
-/// Menggabungkan data Lokal (Pribadi) dan Cloud (Grup Keluarga)
 abstract class TransactionService {
   /// Hapus semua transaksi user saat ini
   Future<void> clearAllTransactions();
@@ -19,14 +17,12 @@ abstract class TransactionService {
   Future<void> deleteTransaction(String id);
   
   /// Menonton transaksi secara real-time.
-  /// Jika groupId diberikan, juga akan menggabungkan data dari Firestore.
-  Stream<List<TransactionModel>> watchTransactions([String? groupId]);
+  Stream<List<TransactionModel>> watchTransactions();
 }
 
-/// Hybrid implementation: Local for Personal, Firestore for Group
+/// Hybrid implementation: Local for Personal
 class MockTransactionService implements TransactionService {
   final ChallengeService? challengeService;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   MockTransactionService({this.challengeService});
 
@@ -121,25 +117,10 @@ class MockTransactionService implements TransactionService {
   Future<TransactionModel> addTransaction(TransactionModel transaction) async {
     final userId = await _getCurrentUserId();
     
-    // 1. Save Locally (Optional for group, but keeps a local backup)
     await _ensureUserLoaded(userId);
     _userTransactions[userId]!.add(transaction);
     await _saveUserTransactions(userId);
     await _emitTransactions(userId);
-
-    // 2. Sync to Firestore if it's a group transaction
-    if (transaction.groupId != null && transaction.groupId!.isNotEmpty) {
-      try {
-        await _firestore
-            .collection('family_groups')
-            .doc(transaction.groupId)
-            .collection('transactions')
-            .doc(transaction.id)
-            .set(transaction.toJson());
-      } catch (e) {
-        print("ERROR: Gagal sinkronisasi transaksi ke Cloud: $e");
-      }
-    }
 
     // Trigger challenge update
     if (challengeService != null) {
@@ -160,18 +141,6 @@ class MockTransactionService implements TransactionService {
       await _saveUserTransactions(userId);
       await _emitTransactions(userId);
     }
-
-    // Firestore Sync
-    if (transaction.groupId != null && transaction.groupId!.isNotEmpty) {
-      try {
-        await _firestore
-            .collection('family_groups')
-            .doc(transaction.groupId)
-            .collection('transactions')
-            .doc(transaction.id)
-            .update(transaction.toJson());
-      } catch (_) {}
-    }
   }
 
   @override
@@ -179,99 +148,37 @@ class MockTransactionService implements TransactionService {
     final userId = await _getCurrentUserId();
     await _ensureUserLoaded(userId);
     
-    // Find transaction to check for groupId before deletion
-    final txToDelete = _userTransactions[userId]!.firstWhere((t) => t.id == id, orElse: () => throw Exception("Not found"));
-    final groupId = txToDelete.groupId;
-
     _userTransactions[userId]!.removeWhere((t) => t.id == id);
     await _saveUserTransactions(userId);
     await _emitTransactions(userId);
-
-    // Firestore Sync
-    if (groupId != null && groupId.isNotEmpty) {
-      try {
-        await _firestore
-            .collection('family_groups')
-            .doc(groupId)
-            .collection('transactions')
-            .doc(id)
-            .delete();
-      } catch (_) {}
-    }
   }
 
   @override
-  Stream<List<TransactionModel>> watchTransactions([String? groupId]) {
-    // Controller to manage the merged stream
+  Stream<List<TransactionModel>> watchTransactions() {
+    // Controller to manage the stream
     final controller = StreamController<List<TransactionModel>>.broadcast();
 
-    // 1. Subscription to local data changes via _streamController
     StreamSubscription<List<TransactionModel>>? localSub;
-    
-    // 2. Subscription to Firestore if groupId is present
-    StreamSubscription<QuerySnapshot>? firestoreSub;
-
-    // Buffer to hold latest data from both sources
-    List<TransactionModel> latestLocal = [];
-    List<TransactionModel> latestCloud = [];
-
-    void emitMerged() {
-      // Use a Map to deduplicate by ID, preferring Cloud data if it matches
-      final Map<String, TransactionModel> mergedMap = {};
-      
-      // Load local first
-      for (var tx in latestLocal) {
-        mergedMap[tx.id] = tx;
-      }
-      
-      // Overwrite/Add Cloud transactions
-      // This ensures that even if local data is stale or missing (for new members),
-      // the cloud data is present.
-      for (var tx in latestCloud) {
-        mergedMap[tx.id] = tx;
-      }
-
-      final mergedList = mergedMap.values.toList();
-      if (!controller.isClosed) {
-        controller.add(_ordered(mergedList));
-      }
-    }
 
     // Initialize local data
     Future<void> init() async {
       final userId = await _getCurrentUserId();
       await _ensureUserLoaded(userId);
-      latestLocal = _userTransactions[userId] ?? [];
+      final initialData = _userTransactions[userId] ?? [];
+      controller.add(_ordered(initialData));
       
       // Listen to future local changes
       localSub = _streamController.stream.listen((newList) {
-        latestLocal = newList;
-        emitMerged();
+        if (!controller.isClosed) {
+          controller.add(_ordered(newList));
+        }
       });
-
-      // Start Firestore listener if groupId is provided
-      if (groupId != null && groupId.isNotEmpty) {
-        firestoreSub = _firestore
-            .collection('family_groups')
-            .doc(groupId)
-            .collection('transactions')
-            .snapshots()
-            .listen((snapshot) {
-          latestCloud = snapshot.docs
-              .map((doc) => TransactionModel.fromJson(doc.data()))
-              .toList();
-          emitMerged();
-        }, onError: (e) => print("Firestore Stream Error: $e"));
-      }
-
-      emitMerged();
     }
 
     init();
 
     controller.onCancel = () {
       localSub?.cancel();
-      firestoreSub?.cancel();
       controller.close();
     };
 

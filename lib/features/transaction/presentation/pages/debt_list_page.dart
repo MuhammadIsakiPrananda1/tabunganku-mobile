@@ -19,10 +19,13 @@ class DebtListPage extends ConsumerStatefulWidget {
 
 class _DebtListPageState extends ConsumerState<DebtListPage> {
   String _filter = 'Hutang'; // Hutang, Piutang
+  String _searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
 
   @override
-  void initState() {
-    super.initState();
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   String _formatRupiah(double amount) {
@@ -58,9 +61,50 @@ class _DebtListPageState extends ConsumerState<DebtListPage> {
       ),
       body: Column(
         children: [
+          // Search Bar
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+            child: TextField(
+              controller: _searchController,
+              onChanged: (val) => setState(() => _searchQuery = val),
+              style: TextStyle(
+                fontSize: 13,
+                color: isDarkMode ? Colors.white : Colors.black87,
+              ),
+              decoration: InputDecoration(
+                hintText: 'Cari catatan pinjaman...',
+                hintStyle: TextStyle(
+                  color: isDarkMode ? Colors.white24 : Colors.black26,
+                  fontSize: 13,
+                ),
+                prefixIcon: Icon(
+                  Icons.search_rounded,
+                  color: isDarkMode ? Colors.white24 : Colors.black26,
+                  size: 20,
+                ),
+                suffixIcon: _searchQuery.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.close_rounded, size: 18),
+                        onPressed: () {
+                          _searchController.clear();
+                          setState(() => _searchQuery = '');
+                        },
+                      )
+                    : null,
+                filled: true,
+                fillColor: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
+                ),
+                contentPadding: const EdgeInsets.symmetric(vertical: 12),
+              ),
+            ),
+          ),
+
           // Filter Chips
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
             child: Row(
               children: [
                 _buildFilterChip('Hutang', 'Hutang', _filter, Icons.call_made_rounded, (val) => setState(() => _filter = val), isDarkMode),
@@ -74,6 +118,13 @@ class _DebtListPageState extends ConsumerState<DebtListPage> {
             child: debtsAsync.when(
               data: (debts) {
                 final filteredDebts = debts.where((d) {
+                  // Search filter
+                  if (_searchQuery.isNotEmpty) {
+                    final nameMatch = d.contactName.toLowerCase().contains(_searchQuery.toLowerCase());
+                    final titleMatch = d.title.toLowerCase().contains(_searchQuery.toLowerCase());
+                    if (!nameMatch && !titleMatch) return false;
+                  }
+
                   if (_filter == 'Hutang') return d.type == DebtType.hutang;
                   return d.type == DebtType.piutang;
                 }).toList();
@@ -149,9 +200,9 @@ class _DebtListPageState extends ConsumerState<DebtListPage> {
           children: [
             Icon(icon, size: 14, color: isSelected ? activeColor : (isDarkMode ? Colors.white38 : Colors.grey)),
             const SizedBox(width: 8),
-            Text(label, style: GoogleFonts.comicNeue(
-                fontSize: 13,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+            Text(label, style: GoogleFonts.quicksand(
+                fontSize: 11,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.bold,
                 color: isSelected ? (isDarkMode ? Colors.white : activeColor) : (isDarkMode ? Colors.white38 : Colors.grey),
               ),
             ),
@@ -181,7 +232,7 @@ class _DebtListPageState extends ConsumerState<DebtListPage> {
           Text(
             'Belum ada catatan',
             style: TextStyle(
-                fontSize: 18,
+                fontSize: 11,
                 fontWeight: FontWeight.bold,
                 color: isDarkMode ? Colors.white60 : Colors.black38),
           ),
@@ -190,7 +241,7 @@ class _DebtListPageState extends ConsumerState<DebtListPage> {
             'Catat semua hutang & piutangmu\nagar keuangan lebih teratur!',
             textAlign: TextAlign.center,
             style: TextStyle(
-                fontSize: 14, color: isDarkMode ? Colors.white38 : Colors.black26),
+                fontSize: 11, color: isDarkMode ? Colors.white38 : Colors.black26),
           ),
         ],
       ),
@@ -274,7 +325,7 @@ class _DebtListPageState extends ConsumerState<DebtListPage> {
                       Text(
                         debt.contactName,
                         style: TextStyle(
-                          fontSize: 15,
+                          fontSize: 11,
                           fontWeight: FontWeight.bold,
                           color: isDarkMode ? Colors.white : Colors.black87,
                           decoration: debt.isPaid ? TextDecoration.lineThrough : null,
@@ -317,7 +368,7 @@ class _DebtListPageState extends ConsumerState<DebtListPage> {
                     Text(
                       _formatRupiah(debt.amount),
                       style: TextStyle(
-                        fontSize: 15,
+                        fontSize: 11,
                         fontWeight: FontWeight.bold,
                         color: debt.isPaid
                             ? (isDarkMode ? Colors.white24 : Colors.grey.shade400)
@@ -449,7 +500,7 @@ class _DebtListPageState extends ConsumerState<DebtListPage> {
         : 'Pembayaran Piutang dari ${debt.contactName}';
 
     final transaction = TransactionModel(
-      id: 'paid_debt_${debt.id}', // Gunakan ID yang deterministik agar bisa dihapus sinkron
+      id: debt.id, // Gunakan ID dari debt agar deterministik & angka saja sesuai permintaan user
       title: title,
       description: debt.title.isNotEmpty ? debt.title : (isHutang ? 'Hutang' : 'Piutang'),
       amount: debt.amount,
@@ -473,7 +524,7 @@ class _DebtListPageState extends ConsumerState<DebtListPage> {
   void _deleteDebt(BuildContext context, WidgetRef ref, DebtModel debt) async {
     // Hapus transaksi terkait di Riwayat jika ada (jika sudah lunas)
     try {
-      await ref.read(transactionServiceProvider).deleteTransaction('paid_debt_${debt.id}');
+      await ref.read(transactionServiceProvider).deleteTransaction(debt.id);
     } catch (_) {}
 
     await ref.read(debtServiceProvider).deleteDebt(debt.id);

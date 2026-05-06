@@ -45,8 +45,8 @@ class ActiveChallengeWidget extends ConsumerWidget {
           const SizedBox(height: 12),
           Text(
             'MULAI CHALLENGE!',
-            style: GoogleFonts.comicNeue(
-              fontSize: 16,
+            style: GoogleFonts.quicksand(
+              fontSize: 11,
               fontWeight: FontWeight.w900,
               color: AppColors.primary,
             ),
@@ -55,9 +55,9 @@ class ActiveChallengeWidget extends ConsumerWidget {
           Text(
             'Bangun kebiasaan menabung yang seru',
             textAlign: TextAlign.center,
-            style: GoogleFonts.comicNeue(
+            style: GoogleFonts.quicksand(
               color: Colors.grey,
-              fontSize: 12,
+              fontSize: 11,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -77,7 +77,7 @@ class ActiveChallengeWidget extends ConsumerWidget {
                 elevation: 0,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
-              child: Text('LIHAT DAFTAR', style: GoogleFonts.comicNeue(fontWeight: FontWeight.w900)),
+              child: Text('LIHAT DAFTAR', style: GoogleFonts.quicksand(fontWeight: FontWeight.w900)),
             ),
           ),
         ],
@@ -151,7 +151,7 @@ class ActiveChallengeWidget extends ConsumerWidget {
                     children: [
                       Text(
                         'CHALLENGE AKTIF',
-                        style: GoogleFonts.comicNeue(
+                        style: GoogleFonts.quicksand(
                           fontSize: 10,
                           fontWeight: FontWeight.w900,
                           color: AppColors.primary,
@@ -161,8 +161,8 @@ class ActiveChallengeWidget extends ConsumerWidget {
                       const SizedBox(height: 2),
                       Text(
                         challenge.title,
-                        style: GoogleFonts.comicNeue(
-                          fontSize: 16,
+                        style: GoogleFonts.quicksand(
+                          fontSize: 11,
                           fontWeight: FontWeight.w900,
                           color: isDark ? Colors.white : AppColors.primaryDark,
                         ),
@@ -178,7 +178,7 @@ class ActiveChallengeWidget extends ConsumerWidget {
                           const SizedBox(width: 4),
                           Text(
                             '${challenge.daysRemaining} hari lagi',
-                            style: GoogleFonts.comicNeue(
+                            style: GoogleFonts.quicksand(
                               fontSize: 11,
                               color: isDark ? Colors.white38 : Colors.grey.shade600,
                               fontWeight: FontWeight.bold,
@@ -192,8 +192,8 @@ class ActiveChallengeWidget extends ConsumerWidget {
                 // Trailing: Percentage
                 Text(
                   '${(progressPercent * 100).toInt()}%',
-                  style: GoogleFonts.comicNeue(
-                    fontSize: 22,
+                  style: GoogleFonts.quicksand(
+                    fontSize: 19,
                     fontWeight: FontWeight.w900,
                     color: _getProgressColor(progressPercent),
                   ),

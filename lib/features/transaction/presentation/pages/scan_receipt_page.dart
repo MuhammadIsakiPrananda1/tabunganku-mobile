@@ -290,11 +290,11 @@ class _ScanReceiptPageState extends ConsumerState<ScanReceiptPage> {
                           FilteringTextInputFormatter.digitsOnly,
                           _RibuanSeparatorInputFormatter(),
                         ],
-                        style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                        style: const TextStyle(fontSize: 21, fontWeight: FontWeight.bold),
                         decoration: InputDecoration(
                           labelText: 'Nominal yang Terdeteksi',
                           prefixText: 'Rp ',
-                          prefixStyle: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.teal),
+                          prefixStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.teal),
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
                           filled: true,
                           fillColor: actsAsSurface(isDarkMode),
@@ -321,7 +321,7 @@ class _ScanReceiptPageState extends ConsumerState<ScanReceiptPage> {
                       elevation: 8,
                       shadowColor: AppColors.primary.withValues(alpha: 0.4),
                     ),
-                    child: const Text('Simpan Transaksi', style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+                    child: const Text('Simpan Transaksi', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -371,7 +371,7 @@ class _ScanReceiptPageState extends ConsumerState<ScanReceiptPage> {
             style: TextStyle(
               color: isSelected ? color : (isDarkMode ? Colors.white38 : Colors.black38),
               fontWeight: FontWeight.bold,
-              fontSize: 13,
+              fontSize: 11,
             ),
           ),
         ),
@@ -394,14 +394,14 @@ class _ScanReceiptPageState extends ConsumerState<ScanReceiptPage> {
         const SizedBox(height: 24),
         Text('Scan Bukti Transaksi', 
           style: TextStyle(
-            fontSize: 18, 
+            fontSize: 11, 
             fontWeight: FontWeight.bold, 
             color: isDarkMode ? Colors.white70 : Colors.black87
           )),
         const SizedBox(height: 8),
         Text('Ambil foto struk atau screenshot transfer', 
           style: TextStyle(
-            fontSize: 13, 
+            fontSize: 11, 
             color: isDarkMode ? Colors.white38 : Colors.black38
           )),
       ],
@@ -430,7 +430,7 @@ class _ScanReceiptPageState extends ConsumerState<ScanReceiptPage> {
                   color: Colors.white, 
                   fontWeight: FontWeight.bold,
                   letterSpacing: 2.0,
-                  fontSize: 12,
+                  fontSize: 11,
                   shadows: [Shadow(color: Colors.black.withValues(alpha: 0.5), blurRadius: 10)]
                 )),
             ],
@@ -534,7 +534,7 @@ class _ScanReceiptPageState extends ConsumerState<ScanReceiptPage> {
               'Pastikan nominal dan judul sudah sesuai dengan bukti transfer kamu.',
               style: TextStyle(
                 fontSize: 11, 
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.bold,
                 color: isDarkMode ? Colors.orange.shade200 : Colors.orange.shade800
               ),
             ),
@@ -564,7 +564,7 @@ class _ScanReceiptPageState extends ConsumerState<ScanReceiptPage> {
                     borderRadius: BorderRadius.circular(2))),
             const SizedBox(height: 24),
             const Text('Upload Bukti Transfer',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
             const SizedBox(height: 24),
             ListTile(
               leading:

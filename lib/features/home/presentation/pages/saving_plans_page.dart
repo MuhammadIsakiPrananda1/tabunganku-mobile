@@ -115,7 +115,7 @@ class _SavingPlansPageState extends ConsumerState<SavingPlansPage> {
           onPressed: () => Navigator.pop(context),
           icon: Icon(Icons.arrow_back_ios_new_rounded, color: contentColor, size: 20),
         ),
-        title: Text('Dana Rencana', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: contentColor)),
+        title: Text('Dana Rencana', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: contentColor)),
       ),
       body: targetsAsync.when(
         data: (targets) => Column(
@@ -190,8 +190,8 @@ class _SavingPlansPageState extends ConsumerState<SavingPlansPage> {
               Text(
                 label.split(' ').last,
                 style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                  fontSize: 11,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.bold,
                   color: isSelected ? Colors.white : contentColor.withValues(alpha: 0.5),
                 ),
               ),
@@ -372,11 +372,11 @@ class _SavingPlansPageState extends ConsumerState<SavingPlansPage> {
       controller: controller,
       keyboardType: isPremium ? TextInputType.number : TextInputType.text,
       inputFormatters: isPremium ? [_RibuanFormatter()] : null,
-      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: contentColor),
+      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: contentColor),
       decoration: InputDecoration(
         hintText: hint ?? '0',
         hintStyle: TextStyle(
-            fontSize: 16,
+            fontSize: 11,
             color: isDarkMode ? Colors.white10 : Colors.black38),
         prefixIcon: Container(
           padding: const EdgeInsets.only(left: 16, right: 8),
@@ -386,7 +386,7 @@ class _SavingPlansPageState extends ConsumerState<SavingPlansPage> {
               Icon(icon, color: color, size: 20),
               if (unit.isNotEmpty) ...[
                 const SizedBox(width: 8),
-                Text(unit, style: TextStyle(fontWeight: FontWeight.bold, color: color, fontSize: 16)),
+                Text(unit, style: TextStyle(fontWeight: FontWeight.bold, color: color, fontSize: 11)),
               ],
             ],
           ),
@@ -492,11 +492,11 @@ class _SavingPlanTabContentState extends ConsumerState<_SavingPlanTabContent> wi
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(tab['title'], style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: baseColor)),
+                Text(tab['title'], style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: baseColor)),
                 const SizedBox(height: 4),
                 Text(
                   tab['desc'],
-                  style: TextStyle(fontSize: 11, color: baseColor.withValues(alpha: 0.8), fontWeight: FontWeight.w500),
+                  style: TextStyle(fontSize: 11, color: baseColor.withValues(alpha: 0.8), fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -559,7 +559,7 @@ class _SavingPlanTabContentState extends ConsumerState<_SavingPlanTabContent> wi
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text('Target Terkumpul', style: TextStyle(fontSize: 10, color: (isDarkMode ? Colors.white38 : Colors.grey.shade500), fontWeight: FontWeight.bold)),
-                          Text(DateFormat('d MMMM yyyy', 'id_ID').format(widget.onSelectedDates[index]), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                          Text(DateFormat('d MMMM yyyy', 'id_ID').format(widget.onSelectedDates[index]), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
                         ],
                       ),
                       const Spacer(),
@@ -601,7 +601,7 @@ class _SavingPlanTabContentState extends ConsumerState<_SavingPlanTabContent> wi
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     elevation: 0,
                   ),
-                  child: const Text('Buat Rencana Sekarang', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                  child: const Text('Buat Rencana Sekarang', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
                 ),
               ),
             ],
@@ -636,10 +636,10 @@ class _SavingPlanTabContentState extends ConsumerState<_SavingPlanTabContent> wi
               Expanded(
                 child: Text(target.name, 
                   maxLines: 1, overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: contentColor)),
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: contentColor)),
               ),
               const SizedBox(width: 8),
-              Text('${(progress * 100).toInt()}%', style: TextStyle(fontWeight: FontWeight.bold, color: baseColor, fontSize: 16)),
+              Text('${(progress * 100).toInt()}%', style: TextStyle(fontWeight: FontWeight.bold, color: baseColor, fontSize: 11)),
             ],
           ),
           const SizedBox(height: 16),
@@ -667,7 +667,7 @@ class _SavingPlanTabContentState extends ConsumerState<_SavingPlanTabContent> wi
                 child: OutlinedButton.icon(
                   onPressed: () => widget.onEdit(target, baseColor),
                   icon: const Icon(Icons.edit_rounded, size: 16),
-                  label: const Text('Ubah', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                  label: const Text('Ubah', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: baseColor,
                     side: BorderSide(color: baseColor.withValues(alpha: 0.3)),
@@ -681,7 +681,7 @@ class _SavingPlanTabContentState extends ConsumerState<_SavingPlanTabContent> wi
                 child: OutlinedButton.icon(
                   onPressed: () => widget.onDelete(target.id),
                   icon: const Icon(Icons.delete_outline_rounded, size: 16),
-                  label: const Text('Hapus', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                  label: const Text('Hapus', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.redAccent,
                     side: BorderSide(color: Colors.redAccent.withValues(alpha: 0.3)),
@@ -704,7 +704,7 @@ class _SavingPlanTabContentState extends ConsumerState<_SavingPlanTabContent> wi
       children: [
         Text(label, style: TextStyle(fontSize: 10, color: contentColor.withValues(alpha: 0.4), fontWeight: FontWeight.bold)),
         const SizedBox(height: 4),
-        Text(value, style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: contentColor)),
+        Text(value, style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: contentColor)),
       ],
     );
   }
@@ -717,7 +717,7 @@ class _SavingPlanTabContentState extends ConsumerState<_SavingPlanTabContent> wi
           children: [
             Icon(icon, size: 64, color: isDarkMode ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
             const SizedBox(height: 24),
-            const Text('Belum ada rencana yang dibuat.', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w500)),
+            const Text('Belum ada rencana yang dibuat.', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
           ],
         ),
       ),
@@ -739,11 +739,11 @@ class _SavingPlanTabContentState extends ConsumerState<_SavingPlanTabContent> wi
       controller: controller,
       keyboardType: isPremium ? TextInputType.number : TextInputType.text,
       inputFormatters: isPremium ? [_RibuanFormatter()] : null,
-      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: contentColor),
+      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: contentColor),
       decoration: InputDecoration(
         hintText: hint ?? '0',
         hintStyle: TextStyle(
-            fontSize: 16,
+            fontSize: 11,
             color: isDarkMode ? Colors.white10 : Colors.black38),
         prefixIcon: Container(
           padding: const EdgeInsets.only(left: 16, right: 8),
@@ -753,7 +753,7 @@ class _SavingPlanTabContentState extends ConsumerState<_SavingPlanTabContent> wi
               Icon(icon, color: color, size: 20),
               if (unit.isNotEmpty) ...[
                 const SizedBox(width: 8),
-                Text(unit, style: TextStyle(fontWeight: FontWeight.bold, color: color, fontSize: 16)),
+                Text(unit, style: TextStyle(fontWeight: FontWeight.bold, color: color, fontSize: 11)),
               ],
             ],
           ),

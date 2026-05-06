@@ -10,9 +10,8 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:tabunganku/main.dart' show flutterLocalNotificationsPlugin;
 import 'package:tabunganku/services/recurring_service.dart';
 import 'package:tabunganku/providers/transaction_provider.dart';
-import 'package:tabunganku/providers/family_group_provider.dart';
+import 'package:tabunganku/providers/user_provider.dart';
 import 'package:tabunganku/features/transaction/presentation/widgets/transaction_detail_sheet.dart';
-import 'package:tabunganku/features/friends/presentation/pages/family_group_page.dart';
 import 'package:tabunganku/providers/saving_target_provider.dart';
 import 'package:tabunganku/core/theme/app_colors.dart';
 import 'package:tabunganku/core/theme/theme_provider.dart';
@@ -133,43 +132,50 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         elevation: 0,
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
-        toolbarHeight: 80,
-        title: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.centerLeft,
-                    child: Text(_navItems[_currentIndex].label,
-                        style: GoogleFonts.comicNeue(
-                            fontWeight: FontWeight.bold, fontSize: 24)),
-                  ),
-                  if (_currentIndex != 3) ...[
-                    const SizedBox(height: 4),
+        toolbarHeight: 90,
+        title: Padding(
+          padding: const EdgeInsets.only(top: 12),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                     FittedBox(
                       fit: BoxFit.scaleDown,
                       alignment: Alignment.centerLeft,
-                      child: SmartDateDisplay(isDarkMode: isDarkMode),
+                      child: Text(_navItems[_currentIndex].label,
+                          style: GoogleFonts.quicksand(
+                              fontWeight: FontWeight.bold, fontSize: 24)),
                     ),
+                    if (_currentIndex != 3) ...[
+                      const SizedBox(height: 2),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: SmartDateDisplay(isDarkMode: isDarkMode),
+                      ),
+                      const SizedBox(height: 1),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: SmartDigitalClock(
+                          isDarkMode: isDarkMode,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
-            ),
-            const SizedBox(width: 16),
-            if (_currentIndex != 3)
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                child: SmartDigitalClock(isDarkMode: isDarkMode),
-              ),
-          ],
+              const SizedBox(width: 16),
+            ],
+          ),
         ),
         actions: [
           if (_currentIndex == 0)
             Padding(
-              padding: const EdgeInsets.only(right: 8),
+              padding: const EdgeInsets.only(right: 8, top: 12),
               child: Consumer(
                 builder: (context, ref, child) {
                   final unreadCountAsync =
@@ -289,11 +295,11 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                     const SizedBox(height: 4),
                     Text(
                       'Kalkulator',
-                      style: GoogleFonts.comicNeue(
+                      style: GoogleFonts.quicksand(
                         color: AppColors.primary,
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
-                        letterSpacing: 0.5,
+                        letterSpacing: 0.2,
                       ),
                     ),
                   ],
@@ -407,8 +413,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         final bal = txs.fold<double>(
             0,
             (sum, t) =>
-                sum +
-                (t.type == TransactionType.income ? t.amount : 0));
+                sum + (t.type == TransactionType.income ? t.amount : 0));
         await _showSavingTargetDialog(bal);
         break;
       case QuickActionType.buyingTarget:
@@ -426,13 +431,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       case QuickActionType.simulator:
         _showSavingSimulatorSheet();
         break;
-      case QuickActionType.family:
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const FamilyGroupPage(),
-          ),
-        );
+      case QuickActionType.arisan:
+        context.push('/arisan');
         break;
       case QuickActionType.debt:
         Navigator.push(
@@ -505,7 +505,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     final transactions = ref.read(transactionsByGroupProvider(null));
     final targetBalance = transactions
         .where((t) => !t.date.isBefore(target.createdAt))
-        .fold<double>(0, (s, t) => s + (t.type == TransactionType.income ? t.amount : 0));
+        .fold<double>(
+            0, (s, t) => s + (t.type == TransactionType.income ? t.amount : 0));
 
     final progress = (target.targetAmount > 0)
         ? (targetBalance / target.targetAmount).clamp(0.0, 1.0)
@@ -570,8 +571,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                           target.name,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.comicNeue(
-                              fontSize: 26,
+                          style: GoogleFonts.quicksand(
+                              fontSize: 24,
                               fontWeight: FontWeight.bold,
                               color: isDarkMode
                                   ? Colors.white
@@ -593,11 +594,11 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                           ),
                           child: Text(
                             isCompleted
-                                ? 'TARGET TERCAPAI 🎊'
-                                : 'SEDANG BERJALAN 🚀',
-                            style: GoogleFonts.comicNeue(
+                                ? 'TARGET TERCAPAI'
+                                : 'SEDANG BERJALAN',
+                            style: GoogleFonts.quicksand(
                                 color: Colors.white,
-                                fontSize: 11,
+                                fontSize: 12,
                                 fontWeight: FontWeight.bold),
                           ),
                         ),
@@ -633,7 +634,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                       children: [
                         Text(
                           '${(progress * 100).toInt()}%',
-                          style: GoogleFonts.comicNeue(
+                          style: GoogleFonts.quicksand(
                               fontSize: 36,
                               fontWeight: FontWeight.bold,
                               color: isDarkMode
@@ -642,8 +643,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                         ),
                         Text(
                           'Tercapai',
-                          style: GoogleFonts.comicNeue(
-                              fontSize: 14,
+                          style: GoogleFonts.quicksand(
+                              fontSize: 13,
                               fontWeight: FontWeight.bold,
                               color: isDarkMode
                                   ? Colors.white54
@@ -693,8 +694,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
               Center(
                 child: Text(
                   'Dibuat pada ${DateFormat('d MMM yyyy').format(target.createdAt)}',
-                  style: GoogleFonts.comicNeue(
-                      fontSize: 12,
+                  style: GoogleFonts.quicksand(
+                      fontSize: 13,
                       color: isDarkMode ? Colors.white12 : Colors.black26,
                       fontWeight: FontWeight.bold),
                 ),
@@ -712,7 +713,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                       },
                       icon: const Icon(Icons.edit_rounded, size: 18),
                       label: Text('Ubah Target',
-                          style: GoogleFonts.comicNeue(
+                          style: GoogleFonts.quicksand(
                               fontWeight: FontWeight.bold)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: isDarkMode
@@ -736,7 +737,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                       },
                       icon: const Icon(Icons.delete_outline_rounded, size: 18),
                       label: Text('Hapus',
-                          style: GoogleFonts.comicNeue(
+                          style: GoogleFonts.quicksand(
                               fontWeight: FontWeight.bold)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: isDarkMode
@@ -774,15 +775,15 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         const SizedBox(width: 16),
         Expanded(
             child: Text(label,
-                style: GoogleFonts.comicNeue(
+                style: GoogleFonts.quicksand(
                     fontWeight: FontWeight.bold,
                     fontSize: 13,
                     color: isDarkMode ? Colors.white38 : Colors.black54))),
         const SizedBox(width: 8),
         Text(value,
-            style: GoogleFonts.comicNeue(
+            style: GoogleFonts.quicksand(
                 fontWeight: FontWeight.bold,
-                fontSize: 13,
+                fontSize: 14,
                 color: isDarkMode ? Colors.white : AppColors.primaryDark)),
       ],
     );
@@ -796,8 +797,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       builder: (context) => const _CalculatorSheetContent(),
     );
   }
-
-
 
   Widget _buildSmartAllocationPlanner(double amount, bool isDarkMode) {
     if (amount <= 0) return const SizedBox.shrink();
@@ -827,13 +826,13 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(label,
-                    style: GoogleFonts.comicNeue(
+                    style: GoogleFonts.quicksand(
                         fontSize: 9,
                         fontWeight: FontWeight.bold,
                         color: isDarkMode ? Colors.white38 : Colors.black38)),
                 Text(_formatRupiah(val),
-                    style: GoogleFonts.comicNeue(
-                        fontSize: 12,
+                    style: GoogleFonts.quicksand(
+                        fontSize: 11,
                         fontWeight: FontWeight.bold,
                         color: isDarkMode ? Colors.white70 : Colors.black87)),
               ],
@@ -853,7 +852,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 size: 14, color: Colors.amber.shade600),
             const SizedBox(width: 8),
             Text('ALOKASI CERDAS (50/30/20)',
-                style: GoogleFonts.comicNeue(
+                style: GoogleFonts.quicksand(
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
                     color: isDarkMode
@@ -902,16 +901,19 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     var selectedCategory = type == TransactionType.expense
         ? 'Makanan & Minuman Harian'
         : 'Gaji Pokok';
-    
+
     // Ensure the default exists, otherwise pick the first one from the current list
-    if (categoryObjects.isNotEmpty && !categoryObjects.any((cat) => cat.label == selectedCategory)) {
+    if (categoryObjects.isNotEmpty &&
+        !categoryObjects.any((cat) => cat.label == selectedCategory)) {
       selectedCategory = categoryObjects.first.label;
     }
 
-    var selectedGroup = categoryObjects
-            .any((cat) => cat.label == selectedCategory)
-        ? categoryObjects.firstWhere((cat) => cat.label == selectedCategory).group
-        : (categoryObjects.isNotEmpty ? categoryObjects.first.group : '');
+    var selectedGroup =
+        categoryObjects.any((cat) => cat.label == selectedCategory)
+            ? categoryObjects
+                .firstWhere((cat) => cat.label == selectedCategory)
+                .group
+            : (categoryObjects.isNotEmpty ? categoryObjects.first.group : '');
     var noteText = '';
     StateSetter? sheetSetter;
 
@@ -985,8 +987,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             final formBorderColor =
                 isDarkMode ? Colors.white10 : Colors.black26;
 
-
-
             return Container(
               clipBehavior: Clip.antiAlias,
               decoration: BoxDecoration(
@@ -1029,9 +1029,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                   ? 'Tambah Pengeluaran'
                                   : 'Tambah Pemasukan',
                               textAlign: TextAlign.center,
-                              style: GoogleFonts.comicNeue(
+                              style: GoogleFonts.quicksand(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 22,
+                                fontSize: 19,
                                 color:
                                     isDarkMode ? Colors.white : Colors.black87,
                                 letterSpacing: -0.5,
@@ -1046,8 +1046,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text('NOMINAL TRANSAKSI *',
-                                  style: GoogleFonts.comicNeue(
-                                      fontSize: 9,
+                                  style: GoogleFonts.quicksand(
+                                      fontSize: 11,
                                       fontWeight: FontWeight.bold,
                                       color: isDarkMode
                                           ? Colors.white24
@@ -1055,85 +1055,88 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                       letterSpacing: 1.2)),
                               const SizedBox(height: 6),
                               TextFormField(
-                            controller: amountController,
-                            autofocus: false,
-                            keyboardType: TextInputType.number,
-                            textAlign: TextAlign.left,
-                            style: GoogleFonts.comicNeue(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: isDarkMode ? Colors.white : Colors.black87,
-                            ),
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly,
-                              RibuanFormatter(),
-                            ],
-                            onChanged: (val) => setSheetState(() {}),
-                            onEditingComplete: () =>
-                                FocusScope.of(context).unfocus(),
-                            onTapOutside: (event) =>
-                                FocusScope.of(context).unfocus(),
-                            decoration: InputDecoration(
-                              hintText: '0',
-                              hintStyle: GoogleFonts.comicNeue(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: isDarkMode
-                                    ? Colors.white10
-                                    : formSubTextColor,
-                              ),
-                              prefixIcon: Container(
-                                padding:
-                                    const EdgeInsets.only(left: 20, right: 8),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      Icons.payments_rounded,
-                                      color: type == TransactionType.income
-                                          ? AppColors.primary
-                                          : const Color(0xFFE53935),
-                                      size: 20,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      'Rp',
-                                      style: GoogleFonts.comicNeue(
-                                        fontWeight: FontWeight.bold,
-                                        color: type == TransactionType.income
-                                            ? AppColors.primary
-                                            : const Color(0xFFE53935),
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                  ],
+                                controller: amountController,
+                                autofocus: false,
+                                keyboardType: TextInputType.number,
+                                textAlign: TextAlign.left,
+                                style: GoogleFonts.quicksand(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: isDarkMode
+                                      ? Colors.white
+                                      : Colors.black87,
                                 ),
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                  RibuanFormatter(),
+                                ],
+                                onChanged: (val) => setSheetState(() {}),
+                                onEditingComplete: () =>
+                                    FocusScope.of(context).unfocus(),
+                                onTapOutside: (event) =>
+                                    FocusScope.of(context).unfocus(),
+                                decoration: InputDecoration(
+                                  hintText: '0',
+                                  hintStyle: GoogleFonts.quicksand(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: isDarkMode
+                                        ? Colors.white10
+                                        : formSubTextColor,
+                                  ),
+                                  prefixIcon: Container(
+                                    padding: const EdgeInsets.only(
+                                        left: 20, right: 8),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.payments_rounded,
+                                          color: type == TransactionType.income
+                                              ? AppColors.primary
+                                              : const Color(0xFFE53935),
+                                          size: 20,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          'Rp',
+                                          style: GoogleFonts.quicksand(
+                                            fontWeight: FontWeight.bold,
+                                            color:
+                                                type == TransactionType.income
+                                                    ? AppColors.primary
+                                                    : const Color(0xFFE53935),
+                                            fontSize: 11,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  filled: true,
+                                  fillColor: isDarkMode
+                                      ? Colors.white.withValues(alpha: 0.05)
+                                      : AppColors.background,
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 20, vertical: 16),
+                                ),
+                                validator: (val) {
+                                  if (val == null || val.trim().isEmpty) {
+                                    return 'Nominal tidak boleh kosong!';
+                                  }
+                                  final amount = _toAmount(val);
+                                  if (amount == null || amount <= 0) {
+                                    return 'Nominal transaksi tidak valid.';
+                                  }
+                                  return null;
+                                },
                               ),
-                              filled: true,
-                              fillColor: isDarkMode
-                                  ? Colors.white.withValues(alpha: 0.05)
-                                  : AppColors.background,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide.none,
-                              ),
-                              contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 20, vertical: 16),
-                            ),
-                            validator: (val) {
-                              if (val == null || val.trim().isEmpty) {
-                                return 'Nominal tidak boleh kosong!';
-                              }
-                              final amount = _toAmount(val);
-                              if (amount == null || amount <= 0) {
-                                return 'Nominal transaksi tidak valid.';
-                              }
-                              return null;
-                            },
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
+                        ),
                         if (type == TransactionType.income) ...[
                           const SizedBox(height: 16),
                           Padding(
@@ -1156,7 +1159,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                         borderRadius: BorderRadius.circular(6),
                                       ),
                                       child: Text('INSTAN',
-                                          style: GoogleFonts.comicNeue(
+                                          style: GoogleFonts.quicksand(
                                               color: Colors.white,
                                               fontSize: 9,
                                               fontWeight: FontWeight.bold,
@@ -1164,7 +1167,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                     ),
                                     const SizedBox(width: 8),
                                     Text('BUNGA TABUNGAN (CEPAT) *',
-                                        style: GoogleFonts.comicNeue(
+                                        style: GoogleFonts.quicksand(
                                             fontSize: 9,
                                             fontWeight: FontWeight.bold,
                                             color: isDarkMode
@@ -1203,7 +1206,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                     prefixIcon: Icon(
                                         Icons.account_balance_rounded,
                                         color: AppColors.primary),
-                                    labelStyle: GoogleFonts.comicNeue(
+                                    labelStyle: GoogleFonts.quicksand(
                                         color: formLabelColor),
                                   ),
                                   selectedItemBuilder: (context) {
@@ -1222,9 +1225,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                         'Bank Lainnya',
                                       ].map((label) {
                                         return Text(label,
-                                            style: GoogleFonts.comicNeue(
+                                            style: GoogleFonts.quicksand(
                                                 fontWeight: FontWeight.bold,
-                                                fontSize: 14,
+                                                fontSize: 11,
                                                 color: isDarkMode
                                                     ? Colors.white70
                                                     : Colors.black87));
@@ -1235,7 +1238,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                     DropdownMenuItem<String>(
                                       value: null,
                                       child: Text('None',
-                                          style: GoogleFonts.comicNeue(
+                                          style: GoogleFonts.quicksand(
                                               color: isDarkMode
                                                   ? Colors.white54
                                                   : Colors.black54)),
@@ -1337,10 +1340,10 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                                     overflow:
                                                         TextOverflow.ellipsis,
                                                     style:
-                                                        GoogleFonts.comicNeue(
+                                                        GoogleFonts.quicksand(
                                                             fontWeight:
                                                                 FontWeight.bold,
-                                                            fontSize: 14,
+                                                            fontSize: 11,
                                                             color: isDarkMode
                                                                 ? Colors.white70
                                                                 : Colors
@@ -1351,7 +1354,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                                     maxLines: 1,
                                                     overflow:
                                                         TextOverflow.ellipsis,
-                                                    style: GoogleFonts.comicNeue(
+                                                    style: GoogleFonts.quicksand(
                                                         fontSize: 11,
                                                         color:
                                                             formSubTextColor),
@@ -1369,14 +1372,16 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                       selectedInterestBank = val;
                                       interestOtherBankName = '';
                                       if (val == null) {
-                                        if (nameController.text.startsWith('Bunga ')) {
+                                        if (nameController.text
+                                            .startsWith('Bunga ')) {
                                           nameController.clear();
                                         }
                                         selectedCategory = 'Gaji Pokok';
                                         selectedGroup = 'Pekerjaan Utama';
                                       } else if (val == 'Bank Lainnya') {
                                         // nameController.clear(); // Removed to keep user input "diam"
-                                        selectedCategory = 'Bunga Tabungan Reguler';
+                                        selectedCategory =
+                                            'Bunga Tabungan Reguler';
                                         selectedGroup = 'Keuangan & Bank';
                                       } else {
                                         final now = DateTime.now();
@@ -1398,13 +1403,15 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                         String bankClean = val
                                             .replaceAll(' (Premium)', '')
                                             .replaceAll(' (Standar)', '');
-                                        
+
                                         // Only auto-fill if current description is empty
-                                        if (nameController.text.isEmpty || nameController.text.startsWith('Bunga ')) {
+                                        if (nameController.text.isEmpty ||
+                                            nameController.text
+                                                .startsWith('Bunga ')) {
                                           nameController.text =
                                               'Bunga $bankClean $monthName ${now.year}';
                                         }
-                                        
+
                                         selectedCategory =
                                             'Bunga Tabungan Reguler';
                                         selectedGroup = 'Keuangan & Bank';
@@ -1417,7 +1424,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                 if (selectedInterestBank == 'Bank Lainnya') ...[
                                   const SizedBox(height: 16),
                                   Text('NAMA BANK *',
-                                      style: GoogleFonts.comicNeue(
+                                      style: GoogleFonts.quicksand(
                                           fontSize: 9,
                                           fontWeight: FontWeight.bold,
                                           color: isDarkMode
@@ -1426,7 +1433,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                           letterSpacing: 1.2)),
                                   const SizedBox(height: 6),
                                   TextFormField(
-                                    style: GoogleFonts.comicNeue(
+                                    style: GoogleFonts.quicksand(
                                         fontWeight: FontWeight.bold,
                                         color: isDarkMode
                                             ? Colors.white
@@ -1456,7 +1463,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                       prefixIcon: Icon(
                                           Icons.account_balance_rounded,
                                           color: AppColors.primary),
-                                      labelStyle: GoogleFonts.comicNeue(
+                                      labelStyle: GoogleFonts.quicksand(
                                           color: formLabelColor),
                                     ),
                                     onChanged: (val) {
@@ -1478,14 +1485,18 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                           'November',
                                           'Desember'
                                         ][now.month];
-                                        
+
                                         // Only auto-fill if empty or already contains "Bunga " prefix
-                                        if (nameController.text.isEmpty || nameController.text.startsWith('Bunga ')) {
-                                          nameController.text = val.trim().isEmpty
+                                        if (nameController.text.isEmpty ||
+                                            nameController.text
+                                                .startsWith('Bunga ')) {
+                                          nameController.text = val
+                                                  .trim()
+                                                  .isEmpty
                                               ? ''
                                               : 'Bunga ${val.trim()} $monthName ${now.year}';
                                         }
-                                        
+
                                         selectedCategory =
                                             'Bunga Tabungan Reguler';
                                         selectedGroup = 'Keuangan & Bank';
@@ -1550,9 +1561,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                                             .isNotEmpty
                                                     ? 'Bunga ${interestOtherBankName.trim()}'
                                                     : 'Bunga $selectedInterestBank',
-                                                style: GoogleFonts.comicNeue(
+                                                style: GoogleFonts.quicksand(
                                                     fontWeight: FontWeight.bold,
-                                                    fontSize: 12,
+                                                    fontSize: 11,
                                                     color: isDarkMode
                                                         ? Colors.white
                                                         : Colors.black87),
@@ -1572,7 +1583,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                                                     'Bank Lainnya'
                                                                 ? 'Masukkan nama bank Anda di kolom atas. Nama transaksi akan terisi otomatis.'
                                                                 : 'Bunga tabungan dari $selectedInterestBank. Tambahkan catatan nominal pajak jika diperlukan.',
-                                                style: GoogleFonts.comicNeue(
+                                                style: GoogleFonts.quicksand(
                                                     fontSize: 11,
                                                     color: isDarkMode
                                                         ? Colors.white54
@@ -1597,7 +1608,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text('BIAYA ADMIN TOP-UP (CEPAT) *',
-                                    style: GoogleFonts.comicNeue(
+                                    style: GoogleFonts.quicksand(
                                         fontSize: 9,
                                         fontWeight: FontWeight.bold,
                                         color: isDarkMode
@@ -1631,7 +1642,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                             : Icons
                                                 .account_balance_wallet_rounded,
                                         color: AppColors.primary),
-                                    labelStyle: GoogleFonts.comicNeue(
+                                    labelStyle: GoogleFonts.quicksand(
                                         color: isDarkMode
                                             ? Colors.white38
                                             : Colors.black45),
@@ -1647,7 +1658,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                         value: label,
                                         child: Text(label,
                                             overflow: TextOverflow.ellipsis,
-                                            style: GoogleFonts.comicNeue(
+                                            style: GoogleFonts.quicksand(
                                                 color: isDarkMode
                                                     ? Colors.white70
                                                     : Colors.black87)),
@@ -1658,7 +1669,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                     setSheetState(() {
                                       selectedTopUpSource = val;
                                       if (val == null) {
-                                        if (nameController.text.startsWith('Biaya Admin')) {
+                                        if (nameController.text
+                                            .startsWith('Biaya Admin')) {
                                           nameController.clear();
                                         }
                                         selectedCategory =
@@ -1670,14 +1682,18 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                                 ? 'Kebutuhan Pokok'
                                                 : 'Pekerjaan Utama';
                                       } else if (val != 'Bank') {
-                                        if (nameController.text.isEmpty || nameController.text.startsWith('Biaya Admin')) {
+                                        if (nameController.text.isEmpty ||
+                                            nameController.text
+                                                .startsWith('Biaya Admin')) {
                                           nameController.text =
                                               'Biaya Admin $val';
                                         }
                                         selectedCategory = 'Biaya Admin Bank';
                                         selectedGroup = 'Keuangan';
                                       } else {
-                                        if (nameController.text.isEmpty || nameController.text.startsWith('Biaya Admin')) {
+                                        if (nameController.text.isEmpty ||
+                                            nameController.text
+                                                .startsWith('Biaya Admin')) {
                                           nameController.text =
                                               'Biaya Admin Bank ${topUpBankName.trim()}'
                                                   .trim();
@@ -1692,7 +1708,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                 if (selectedTopUpSource == 'Bank') ...[
                                   const SizedBox(height: 16),
                                   Text('NAMA BANK *',
-                                      style: GoogleFonts.comicNeue(
+                                      style: GoogleFonts.quicksand(
                                           fontSize: 9,
                                           fontWeight: FontWeight.bold,
                                           color: isDarkMode
@@ -1701,7 +1717,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                           letterSpacing: 1.2)),
                                   const SizedBox(height: 6),
                                   TextFormField(
-                                    style: GoogleFonts.comicNeue(
+                                    style: GoogleFonts.quicksand(
                                         fontWeight: FontWeight.bold,
                                         color: isDarkMode
                                             ? Colors.white
@@ -1725,7 +1741,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                       prefixIcon: Icon(
                                           Icons.account_balance_rounded,
                                           color: AppColors.primary),
-                                      labelStyle: GoogleFonts.comicNeue(
+                                      labelStyle: GoogleFonts.quicksand(
                                           color: isDarkMode
                                               ? Colors.white38
                                               : Colors.black45),
@@ -1733,7 +1749,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                     onChanged: (val) {
                                       topUpBankName = val;
                                       setSheetState(() {
-                                        if (nameController.text.isEmpty || nameController.text.startsWith('Biaya Admin Bank')) {
+                                        if (nameController.text.isEmpty ||
+                                            nameController.text.startsWith(
+                                                'Biaya Admin Bank')) {
                                           nameController.text =
                                               'Biaya Admin Bank ${val.trim()}'
                                                   .trim();
@@ -1753,8 +1771,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                             children: [
                               const SizedBox(height: 20),
                               Text('KETERANGAN TRANSAKSI *',
-                                  style: GoogleFonts.comicNeue(
-                                      fontSize: 9,
+                                  style: GoogleFonts.quicksand(
+                                      fontSize: 11,
                                       fontWeight: FontWeight.bold,
                                       color: isDarkMode
                                           ? Colors.white24
@@ -1763,7 +1781,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                               const SizedBox(height: 6),
                               TextFormField(
                                 controller: nameController,
-                                style: GoogleFonts.comicNeue(
+                                style: GoogleFonts.quicksand(
                                     fontWeight: FontWeight.bold,
                                     color: isDarkMode
                                         ? Colors.white
@@ -1784,7 +1802,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                           BorderSide(color: formBorderColor)),
                                   prefixIcon: Icon(Icons.edit_note_rounded,
                                       color: AppColors.primary),
-                                  hintStyle: GoogleFonts.comicNeue(
+                                  hintStyle: GoogleFonts.quicksand(
                                       color: formSubTextColor),
                                 ),
                                 onChanged: (val) {
@@ -1811,7 +1829,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                         lowerVal.contains('pln') ||
                                         lowerVal.contains('token')) {
                                       setSheetState(() {
-                                        selectedCategory = 'Token Listrik / PLN';
+                                        selectedCategory =
+                                            'Token Listrik / PLN';
                                         selectedGroup = 'Kebutuhan Pokok';
                                       });
                                     } else if (lowerVal.contains('bensin') ||
@@ -1843,7 +1862,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                         lowerVal.contains('indihome') ||
                                         lowerVal.contains('biznet')) {
                                       setSheetState(() {
-                                        selectedCategory = 'WiFi / Internet Rumah';
+                                        selectedCategory =
+                                            'WiFi / Internet Rumah';
                                         selectedGroup = 'Teknologi';
                                       });
                                     } else if (lowerVal.contains('netflix') ||
@@ -1893,7 +1913,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                         lowerVal.contains('pinjol') ||
                                         lowerVal.contains('bayar')) {
                                       setSheetState(() {
-                                        selectedCategory = 'Bayar Hutang / Pinjol';
+                                        selectedCategory =
+                                            'Bayar Hutang / Pinjol';
                                         selectedGroup = 'Keuangan';
                                       });
                                     }
@@ -1912,8 +1933,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                               ),
                               const SizedBox(height: 20),
                               Text('GRUP KATEGORI *',
-                                  style: GoogleFonts.comicNeue(
-                                      fontSize: 9,
+                                  style: GoogleFonts.quicksand(
+                                      fontSize: 11,
                                       fontWeight: FontWeight.bold,
                                       color: isDarkMode
                                           ? Colors.white24
@@ -1922,7 +1943,12 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                               const SizedBox(height: 6),
                               // Group Dropdown
                               DropdownButtonFormField<String>(
-                                value: groupedCategories.containsKey(selectedGroup) ? selectedGroup : (groupedCategories.isNotEmpty ? groupedCategories.keys.first : null),
+                                value:
+                                    groupedCategories.containsKey(selectedGroup)
+                                        ? selectedGroup
+                                        : (groupedCategories.isNotEmpty
+                                            ? groupedCategories.keys.first
+                                            : null),
                                 key: ValueKey('group_${type}'),
                                 isExpanded: true,
                                 dropdownColor: isDarkMode
@@ -1939,7 +1965,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                       borderSide: BorderSide.none),
                                   prefixIcon: Icon(Icons.grid_view_rounded,
                                       color: AppColors.primary),
-                                  labelStyle: GoogleFonts.comicNeue(
+                                  labelStyle: GoogleFonts.quicksand(
                                       color: isDarkMode
                                           ? Colors.white38
                                           : Colors.black45),
@@ -1948,12 +1974,12 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                     .map((group) => DropdownMenuItem(
                                           value: group,
                                           child: Text(group,
-                                              style: GoogleFonts.comicNeue(
+                                              style: GoogleFonts.quicksand(
                                                   color: isDarkMode
                                                       ? Colors.white
                                                       : Colors.black87,
                                                   fontWeight: FontWeight.bold,
-                                                  fontSize: 13)),
+                                                  fontSize: 11)),
                                         ))
                                     .toList(),
                                 onChanged: (val) {
@@ -1970,8 +1996,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                               ),
                               const SizedBox(height: 16),
                               Text('PILIH KATEGORI *',
-                                  style: GoogleFonts.comicNeue(
-                                      fontSize: 9,
+                                  style: GoogleFonts.quicksand(
+                                      fontSize: 11,
                                       fontWeight: FontWeight.bold,
                                       color: isDarkMode
                                           ? Colors.white24
@@ -1980,7 +2006,18 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                               const SizedBox(height: 6),
                               // Category Dropdown
                               DropdownButtonFormField<String>(
-                                value: (groupedCategories[selectedGroup]?.any((c) => c.label == selectedCategory) ?? false) ? selectedCategory : (groupedCategories[selectedGroup]?.isNotEmpty ?? false ? groupedCategories[selectedGroup]!.first.label : null),
+                                value: (groupedCategories[selectedGroup]?.any(
+                                            (c) =>
+                                                c.label == selectedCategory) ??
+                                        false)
+                                    ? selectedCategory
+                                    : (groupedCategories[selectedGroup]
+                                                ?.isNotEmpty ??
+                                            false
+                                        ? groupedCategories[selectedGroup]!
+                                            .first
+                                            .label
+                                        : null),
                                 key: ValueKey('category_${type}'),
                                 isExpanded: true,
                                 dropdownColor: isDarkMode
@@ -2005,7 +2042,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                         : Icons.help_outline_rounded,
                                     color: AppColors.primary,
                                   ),
-                                  labelStyle: GoogleFonts.comicNeue(
+                                  labelStyle: GoogleFonts.quicksand(
                                       color: isDarkMode
                                           ? Colors.white38
                                           : Colors.black45),
@@ -2014,12 +2051,12 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                     .map((cat) => DropdownMenuItem(
                                           value: cat.label,
                                           child: Text(cat.label,
-                                              style: GoogleFonts.comicNeue(
+                                              style: GoogleFonts.quicksand(
                                                   color: isDarkMode
                                                       ? Colors.white
                                                       : Colors.black87,
-                                                  fontSize: 13,
-                                                  fontWeight: FontWeight.w600)),
+                                                  fontSize: 11,
+                                                  fontWeight: FontWeight.bold)),
                                         ))
                                     .toList(),
                                 onChanged: (val) {
@@ -2031,23 +2068,23 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                   }
                                 },
                               ),
-                                if (selectedCategory == 'Lainnya') ...[
-                                  const SizedBox(height: 16),
-                                  Text(
-                                    'NAMA KATEGORI KUSTOM *',
-                                    style: GoogleFonts.comicNeue(
-                                      fontSize: 9,
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: 1.2,
-                                      color: isDarkMode
-                                          ? Colors.white24
-                                          : Colors.black38,
-                                    ),
+                              if (selectedCategory == 'Lainnya') ...[
+                                const SizedBox(height: 16),
+                                Text(
+                                  'NAMA KATEGORI KUSTOM *',
+                                  style: GoogleFonts.quicksand(
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 1.2,
+                                    color: isDarkMode
+                                        ? Colors.white24
+                                        : Colors.black38,
                                   ),
-                                  const SizedBox(height: 6),
+                                ),
+                                const SizedBox(height: 6),
                                 TextFormField(
                                   controller: customCategoryController,
-                                  style: GoogleFonts.comicNeue(
+                                  style: GoogleFonts.quicksand(
                                       color: isDarkMode
                                           ? Colors.white
                                           : Colors.black87),
@@ -2067,7 +2104,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                             BorderSide(color: formBorderColor)),
                                     prefixIcon: Icon(Icons.star_rounded,
                                         color: AppColors.primary),
-                                    hintStyle: GoogleFonts.comicNeue(
+                                    hintStyle: GoogleFonts.quicksand(
                                         color: formSubTextColor),
                                   ),
                                   validator: (val) {
@@ -2143,9 +2180,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                       AppColors.primary.withValues(alpha: 0.3),
                                 ),
                                 child: Text('Simpan Transaksi',
-                                    style: GoogleFonts.comicNeue(
+                                    style: GoogleFonts.quicksand(
                                         fontWeight: FontWeight.bold,
-                                        fontSize: 15,
+                                        fontSize: 11,
                                         letterSpacing: 0.5)),
                               ),
                               const SizedBox(height: 24),
@@ -2197,9 +2234,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text('Daftar Target',
-                        style: GoogleFonts.comicNeue(
+                        style: GoogleFonts.quicksand(
                             fontWeight: FontWeight.bold,
-                            fontSize: 20,
+                            fontSize: 11,
                             color: isDarkMode ? Colors.white : Colors.black87)),
                     TextButton.icon(
                       onPressed: () => _showAddEditTargetDialog(),
@@ -2219,7 +2256,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                         if (targets.isEmpty) {
                           return Center(
                               child: Text('Belum ada target.',
-                                  style: GoogleFonts.comicNeue(
+                                  style: GoogleFonts.quicksand(
                                       color: isDarkMode
                                           ? Colors.white60
                                           : Colors.black38)));
@@ -2236,14 +2273,14 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                   child: const Icon(Icons.track_changes_rounded,
                                       color: AppColors.primary)),
                               title: Text(t.name,
-                                  style: GoogleFonts.comicNeue(
+                                  style: GoogleFonts.quicksand(
                                       fontWeight: FontWeight.bold,
                                       color: isDarkMode
                                           ? Colors.white
                                           : Colors.black87)),
                               subtitle: Text(
                                   'Target: ${_formatRupiah(t.targetAmount)}',
-                                  style: GoogleFonts.comicNeue(
+                                  style: GoogleFonts.quicksand(
                                       color: isDarkMode
                                           ? Colors.white24
                                           : Colors.black54)),
@@ -2307,9 +2344,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(32)),
               title: Text(isEdit ? 'Ubah Target' : 'Target Baru',
-                  style: GoogleFonts.comicNeue(
+                  style: GoogleFonts.quicksand(
                       fontWeight: FontWeight.bold,
-                      fontSize: 22,
+                      fontSize: 19,
                       color: isDarkMode ? Colors.white : Colors.black87)),
               content: SingleChildScrollView(
                 child: Column(
@@ -2322,9 +2359,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                       controller: amountController,
                       autofocus: true,
                       keyboardType: TextInputType.number,
-                      style: GoogleFonts.comicNeue(
+                      style: GoogleFonts.quicksand(
                           fontWeight: FontWeight.bold,
-                          fontSize: 20,
+                          fontSize: 14,
                           color: isDarkMode ? Colors.white : Colors.black87),
                       inputFormatters: [
                         FilteringTextInputFormatter.digitsOnly,
@@ -2332,7 +2369,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                       ],
                       decoration: InputDecoration(
                         hintText: '0',
-                        hintStyle: GoogleFonts.comicNeue(
+                        hintStyle: GoogleFonts.quicksand(
                             color:
                                 isDarkMode ? Colors.white12 : Colors.black26),
                         prefixIcon: Row(
@@ -2343,10 +2380,10 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                 color: AppColors.primary, size: 20),
                             const SizedBox(width: 8),
                             Text('Rp',
-                                style: GoogleFonts.comicNeue(
+                                style: GoogleFonts.quicksand(
                                     fontWeight: FontWeight.bold,
                                     color: AppColors.primary,
-                                    fontSize: 18)),
+                                    fontSize: 11)),
                             const SizedBox(width: 8),
                           ],
                         ),
@@ -2366,12 +2403,12 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                     const SizedBox(height: 12),
                     TextFormField(
                       controller: itemController,
-                      style: GoogleFonts.comicNeue(
+                      style: GoogleFonts.quicksand(
                           fontWeight: FontWeight.bold,
                           color: isDarkMode ? Colors.white : Colors.black87),
                       decoration: InputDecoration(
                         hintText: 'Contoh: Laptop, Motor, HP...',
-                        hintStyle: GoogleFonts.comicNeue(
+                        hintStyle: GoogleFonts.quicksand(
                             color:
                                 isDarkMode ? Colors.white12 : Colors.black26),
                         filled: true,
@@ -2442,7 +2479,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                               child: Text(
                                 DateFormat('EEEE, d MMMM yyyy', 'id_ID')
                                     .format(selectedDate),
-                                style: GoogleFonts.comicNeue(
+                                style: GoogleFonts.quicksand(
                                     fontWeight: FontWeight.bold,
                                     color: isDarkMode
                                         ? Colors.white70
@@ -2472,7 +2509,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                               : Colors.grey.shade50,
                         ),
                         child: Text('Batal',
-                            style: GoogleFonts.comicNeue(
+                            style: GoogleFonts.quicksand(
                                 color: isDarkMode
                                     ? Colors.white38
                                     : Colors.grey.shade600,
@@ -2539,7 +2576,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                           padding: const EdgeInsets.symmetric(vertical: 16),
                         ),
                         child: Text('Simpan',
-                            style: GoogleFonts.comicNeue(
+                            style: GoogleFonts.quicksand(
                                 fontWeight: FontWeight.bold)),
                       ),
                     ),
@@ -2556,8 +2593,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
   Widget _buildInputLabel(String label, bool isDarkMode) {
     return Text(
       label,
-      style: GoogleFonts.comicNeue(
-        fontSize: 14,
+      style: GoogleFonts.quicksand(
+        fontSize: 13,
         fontWeight: FontWeight.bold,
         color: isDarkMode ? Colors.white70 : Colors.black87,
       ),
@@ -2576,17 +2613,17 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       children: [
         Text(
           label,
-          style: GoogleFonts.comicNeue(
+          style: GoogleFonts.quicksand(
             fontSize: 9,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.bold,
             color: isDarkMode ? Colors.white24 : Colors.grey.shade500,
           ),
         ),
         const SizedBox(height: 4),
         Text(
           value,
-          style: GoogleFonts.comicNeue(
-            fontSize: 14,
+          style: GoogleFonts.quicksand(
+            fontSize: 11,
             fontWeight: FontWeight.bold,
             color: isDarkMode ? Colors.white : AppColors.primaryDark,
           ),
@@ -2606,7 +2643,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         const SizedBox(width: 8),
         Text(
           _showBalance ? _formatCompactRupiah(amount) : '••••',
-          style: GoogleFonts.comicNeue(
+          style: GoogleFonts.quicksand(
             fontSize: 11,
             fontWeight: FontWeight.bold,
             color: isDarkMode
@@ -2649,7 +2686,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
               children: [
                 Text(
                   label,
-                  style: GoogleFonts.comicNeue(
+                  style: GoogleFonts.quicksand(
                     fontSize: 9,
                     fontWeight: FontWeight.bold,
                     color: isDarkMode ? Colors.white24 : Colors.grey.shade400,
@@ -2659,8 +2696,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   value,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.comicNeue(
-                    fontSize: 12,
+                  style: GoogleFonts.quicksand(
+                    fontSize: 11,
                     fontWeight: FontWeight.bold,
                     color: isDarkMode ? Colors.white70 : Colors.black87,
                   ),
@@ -2802,7 +2839,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                     children: [
                       Text(
                         'KEKAYAAN BERSIH',
-                        style: GoogleFonts.comicNeue(
+                        style: GoogleFonts.quicksand(
                           fontSize: 10,
                           fontWeight: FontWeight.w800,
                           letterSpacing: 2,
@@ -2819,8 +2856,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                 investmentValuation -
                                 unpaidBillsAmount)
                             : '••••••',
-                        style: GoogleFonts.comicNeue(
-                          fontSize: 32,
+                        style: GoogleFonts.quicksand(
+                          fontSize: 21,
                           fontWeight: FontWeight.bold,
                           color:
                               isDarkMode ? Colors.white : AppColors.primaryDark,
@@ -2899,7 +2936,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           // 2. INSIGHTS GRID (Compact)
           Text(
             'INSIGHTS & HABITS',
-            style: GoogleFonts.comicNeue(
+            style: GoogleFonts.quicksand(
               fontSize: 10,
               fontWeight: FontWeight.w800,
               letterSpacing: 1.5,
@@ -2914,7 +2951,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 spacing: 12,
                 runSpacing: 12,
                 children: [
-
                   _buildCompactInsightCard(
                     'Terboros',
                     topCategory != null
@@ -3000,7 +3036,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                     const SizedBox(width: 10),
                     Text(
                       'RENCANA NABUNG HARIAN',
-                      style: GoogleFonts.comicNeue(
+                      style: GoogleFonts.quicksand(
                         fontSize: 9,
                         fontWeight: FontWeight.w800,
                         letterSpacing: 1.2,
@@ -3019,8 +3055,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   targets.isEmpty
                       ? 'Belum ada target tabungan'
                       : 'Semua target sudah tercapai!',
-                  style: GoogleFonts.comicNeue(
-                    fontSize: 12,
+                  style: GoogleFonts.quicksand(
+                    fontSize: 11,
                     fontWeight: FontWeight.bold,
                     color: isDarkMode ? Colors.white24 : Colors.black26,
                   ),
@@ -3054,7 +3090,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                       const SizedBox(width: 10),
                       Text(
                         'RENCANA NABUNG HARIAN',
-                        style: GoogleFonts.comicNeue(
+                        style: GoogleFonts.quicksand(
                           fontSize: 9,
                           fontWeight: FontWeight.w800,
                           letterSpacing: 1.2,
@@ -3068,8 +3104,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   const SizedBox(height: 12),
                   Text(
                     'Target: ${target.name}',
-                    style: GoogleFonts.comicNeue(
-                      fontSize: 12,
+                    style: GoogleFonts.quicksand(
+                      fontSize: 11,
                       fontWeight: FontWeight.bold,
                       color: isDarkMode ? Colors.white70 : Colors.black87,
                     ),
@@ -3081,8 +3117,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                     children: [
                       Text(
                         _formatRupiah(dailyTarget),
-                        style: GoogleFonts.comicNeue(
-                          fontSize: 22,
+                        style: GoogleFonts.quicksand(
+                          fontSize: 19,
                           fontWeight: FontWeight.bold,
                           color: Colors.teal,
                         ),
@@ -3090,8 +3126,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                       const SizedBox(width: 4),
                       Text(
                         '/ hr',
-                        style: GoogleFonts.comicNeue(
-                          fontSize: 12,
+                        style: GoogleFonts.quicksand(
+                          fontSize: 11,
                           fontWeight: FontWeight.bold,
                           color: isDarkMode
                               ? Colors.white24
@@ -3116,7 +3152,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   const SizedBox(height: 8),
                   Text(
                     'Sisa ${_formatRupiah(remaining)} • $daysLeft hr lagi',
-                    style: GoogleFonts.comicNeue(
+                    style: GoogleFonts.quicksand(
                       fontSize: 10,
                       color: isDarkMode ? Colors.white38 : Colors.grey.shade500,
                     ),
@@ -3137,7 +3173,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       children: [
         Text(
           'DISTRIBUSI PENGELUARAN',
-          style: GoogleFonts.comicNeue(
+          style: GoogleFonts.quicksand(
             fontSize: 10,
             fontWeight: FontWeight.w800,
             letterSpacing: 1.5,
@@ -3169,8 +3205,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                     Text(
                       'Belum ada data pengeluaran bulan ini',
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.comicNeue(
-                        fontSize: 12,
+                      style: GoogleFonts.quicksand(
+                        fontSize: 11,
                         fontWeight: FontWeight.bold,
                         color: isDarkMode ? Colors.white24 : Colors.black26,
                       ),
@@ -3200,8 +3236,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                   const SizedBox(width: 12),
                                   Text(
                                     entry.key,
-                                    style: GoogleFonts.comicNeue(
-                                      fontSize: 13,
+                                    style: GoogleFonts.quicksand(
+                                      fontSize: 11,
                                       fontWeight: FontWeight.bold,
                                       color: isDarkMode
                                           ? Colors.white70
@@ -3212,8 +3248,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                               ),
                               Text(
                                 '${(percentage * 100).toStringAsFixed(1)}%',
-                                style: GoogleFonts.comicNeue(
-                                  fontSize: 12,
+                                style: GoogleFonts.quicksand(
+                                  fontSize: 11,
                                   fontWeight: FontWeight.bold,
                                   color: isDarkMode
                                       ? Colors.white38
@@ -3294,13 +3330,13 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(petName,
-                        style: GoogleFonts.comicNeue(
-                            fontSize: 16,
+                        style: GoogleFonts.quicksand(
+                            fontSize: 11,
                             fontWeight: FontWeight.bold,
                             color: isDarkMode ? Colors.white : Colors.black87)),
                     Text('${(growth * 100).toInt()}%',
-                        style: GoogleFonts.comicNeue(
-                            fontSize: 12,
+                        style: GoogleFonts.quicksand(
+                            fontSize: 11,
                             fontWeight: FontWeight.bold,
                             color: petColor)),
                   ],
@@ -3317,9 +3353,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 ),
                 const SizedBox(height: 8),
                 Text(status,
-                    style: GoogleFonts.comicNeue(
+                    style: GoogleFonts.quicksand(
                         fontSize: 11,
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.bold,
                         color: isDarkMode ? Colors.white38 : Colors.black54)),
               ],
             ),
@@ -3423,18 +3459,18 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text('Ekspor Laporan',
-                              style: GoogleFonts.comicNeue(
-                                  fontSize: 18,
+                              style: GoogleFonts.quicksand(
+                                  fontSize: 11,
                                   fontWeight: FontWeight.bold,
                                   color:
                                       isDark ? Colors.white : Colors.black87)),
                           Text(
                               'Bulan $monthLabel (${regular.length} transaksi)',
-                              style: GoogleFonts.comicNeue(
-                                  fontSize: 12,
+                              style: GoogleFonts.quicksand(
+                                  fontSize: 11,
                                   color:
                                       isDark ? Colors.white38 : Colors.black45,
-                                  fontWeight: FontWeight.w500)),
+                                  fontWeight: FontWeight.bold)),
                         ],
                       ),
                     ),
@@ -3511,15 +3547,15 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     return Column(
       children: [
         Text(label,
-            style: GoogleFonts.comicNeue(
+            style: GoogleFonts.quicksand(
                 fontSize: 8,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 0.8,
                 color: isDark ? Colors.white38 : Colors.black38)),
         const SizedBox(height: 4),
         Text(value,
-            style: GoogleFonts.comicNeue(
-                fontSize: 12, fontWeight: FontWeight.bold, color: color)),
+            style: GoogleFonts.quicksand(
+                fontSize: 11, fontWeight: FontWeight.bold, color: color)),
       ],
     );
   }
@@ -3557,16 +3593,16 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(title,
-                        style: GoogleFonts.comicNeue(
-                            fontSize: 14,
+                        style: GoogleFonts.quicksand(
+                            fontSize: 11,
                             fontWeight: FontWeight.bold,
                             color: isDark ? Colors.white : Colors.black87)),
                     const SizedBox(height: 2),
                     Text(subtitle,
-                        style: GoogleFonts.comicNeue(
+                        style: GoogleFonts.quicksand(
                             fontSize: 11,
                             color: isDark ? Colors.white38 : Colors.black45,
-                            fontWeight: FontWeight.w500)),
+                            fontWeight: FontWeight.bold)),
                   ],
                 ),
               ),
@@ -3594,10 +3630,10 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text('$label: ',
-              style: GoogleFonts.comicNeue(
+              style: GoogleFonts.quicksand(
                   fontSize: 11, fontWeight: FontWeight.bold, color: color)),
           Text(_formatRupiah(amount),
-              style: GoogleFonts.comicNeue(
+              style: GoogleFonts.quicksand(
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
                   color: isDarkMode ? color : color.withValues(alpha: 0.8))),
@@ -3660,28 +3696,28 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                       Text(t.title,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.comicNeue(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
+                          style: GoogleFonts.quicksand(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 11,
                               color: isDarkMode
                                   ? Colors.white
                                   : Colors.teal.shade900)),
                       const SizedBox(height: 2),
                       Text(
                           '${DateFormat('EEEE, dd MMM', 'id_ID').format(t.date)} • ${DateFormat('HH:mm', 'id_ID').format(t.date)}',
-                          style: GoogleFonts.comicNeue(
+                          style: GoogleFonts.quicksand(
                               color:
                                   isDarkMode ? Colors.white54 : Colors.black26,
                               fontSize: 11,
-                              fontWeight: FontWeight.w600)),
+                              fontWeight: FontWeight.bold)),
                     ],
                   ),
                 ),
                 Text(
                   '${isExpense ? '- ' : '+ '}${_formatRupiah(t.amount)}',
-                  style: GoogleFonts.comicNeue(
+                  style: GoogleFonts.quicksand(
                     fontWeight: FontWeight.bold,
-                    fontSize: 14,
+                    fontSize: 11,
                     color: isExpense
                         ? (isDarkMode ? Colors.redAccent : Colors.red.shade700)
                         : (isDarkMode
@@ -3725,23 +3761,23 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         backgroundColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: Text('Hapus Transaksi?',
-            style: GoogleFonts.comicNeue(
+            style: GoogleFonts.quicksand(
                 fontWeight: FontWeight.bold,
                 color: isDarkMode ? Colors.white : Colors.black87)),
         content: Text(
             'Yakin ingin menghapus ${t.title}? Langkah ini tidak bisa dibatalkan.',
-            style: GoogleFonts.comicNeue(
+            style: GoogleFonts.quicksand(
                 color: isDarkMode ? Colors.white70 : Colors.black54)),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx, false),
               child: Text('Batal',
-                  style: GoogleFonts.comicNeue(
+                  style: GoogleFonts.quicksand(
                       color: isDarkMode ? Colors.white30 : Colors.grey))),
           TextButton(
               onPressed: () => Navigator.pop(ctx, true),
               child: Text('Hapus',
-                  style: GoogleFonts.comicNeue(
+                  style: GoogleFonts.quicksand(
                       color: Colors.red, fontWeight: FontWeight.bold))),
         ],
       ),
@@ -3772,20 +3808,17 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 duration: const Duration(milliseconds: 300),
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? AppColors.primary.withValues(alpha: 0.1)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(12),
+                decoration: const BoxDecoration(
+                  color: Colors.transparent,
                 ),
                 child: Icon(item.icon, color: color, size: 22),
               ),
               const SizedBox(height: 4),
               Text(
                 item.label,
-                style: GoogleFonts.comicNeue(
+                style: GoogleFonts.quicksand(
                   fontSize: 10,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.bold,
                   color: color,
                   letterSpacing: 0.2,
                 ),
@@ -3865,15 +3898,15 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                   : Colors.grey.shade200,
                               borderRadius: BorderRadius.circular(2))),
                       Text('Edit Nominal',
-                          style: GoogleFonts.comicNeue(
-                              fontSize: 18,
+                          style: GoogleFonts.quicksand(
+                              fontSize: 11,
                               fontWeight: FontWeight.bold,
                               color:
                                   isDarkMode ? Colors.white : Colors.black87)),
                       const SizedBox(height: 12),
                       Text(t.title,
-                          style: GoogleFonts.comicNeue(
-                              fontSize: 13,
+                          style: GoogleFonts.quicksand(
+                              fontSize: 11,
                               fontWeight: FontWeight.bold,
                               color: isDarkMode
                                   ? Colors.white38
@@ -3890,13 +3923,13 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                           FilteringTextInputFormatter.digitsOnly,
                           RibuanFormatter()
                         ],
-                        style: GoogleFonts.comicNeue(
-                            fontSize: 28,
+                        style: GoogleFonts.quicksand(
+                            fontSize: 21,
                             fontWeight: FontWeight.bold,
                             color: isDarkMode ? Colors.white : Colors.black87),
                         decoration: InputDecoration(
                           labelText: 'Input Nominal Baru *',
-                          labelStyle: GoogleFonts.comicNeue(
+                          labelStyle: GoogleFonts.quicksand(
                               color:
                                   isDarkMode ? Colors.white38 : Colors.black45),
                           prefixIcon: Row(
@@ -3907,10 +3940,10 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                   color: Colors.teal, size: 20),
                               const SizedBox(width: 8),
                               Text('Rp',
-                                  style: GoogleFonts.comicNeue(
+                                  style: GoogleFonts.quicksand(
                                       fontWeight: FontWeight.bold,
                                       color: Colors.teal,
-                                      fontSize: 16)),
+                                      fontSize: 11)),
                               const SizedBox(width: 8),
                             ],
                           ),
@@ -3969,8 +4002,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                 borderRadius: BorderRadius.circular(20)),
                           ),
                           child: Text('Simpan Perubahan',
-                              style: GoogleFonts.comicNeue(
-                                  fontWeight: FontWeight.bold, fontSize: 16)),
+                              style: GoogleFonts.quicksand(
+                                  fontWeight: FontWeight.bold, fontSize: 11)),
                         ),
                       ),
                     ],
@@ -4178,8 +4211,8 @@ class _CalculatorSheetContentState
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(_expression,
-                      style: GoogleFonts.comicNeue(
-                          fontSize: 14,
+                      style: GoogleFonts.quicksand(
+                          fontSize: 11,
                           color: isDarkMode
                               ? Colors.white24
                               : Colors.teal.shade800.withValues(alpha: 0.4),
@@ -4190,10 +4223,11 @@ class _CalculatorSheetContentState
                     reverse: true,
                     child: Text(
                       _formatDisplay(_output),
-                      style: GoogleFonts.comicNeue(
+                      style: GoogleFonts.quicksand(
                           fontSize: 40,
                           fontWeight: FontWeight.bold,
-                          color: isDarkMode ? Colors.white : Colors.teal.shade900,
+                          color:
+                              isDarkMode ? Colors.white : Colors.teal.shade900,
                           letterSpacing: -1),
                     ),
                   ),
@@ -4282,8 +4316,8 @@ class _CalculatorSheetContentState
           alignment: Alignment.center,
           child: Text(
             text,
-            style: GoogleFonts.comicNeue(
-              fontSize: 20,
+            style: GoogleFonts.quicksand(
+              fontSize: 18,
               fontWeight: FontWeight.bold,
               color: textColor,
             ),
@@ -4374,8 +4408,8 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
         // ── Minimalist Filter Selektor ────────────────────────────────────
         _buildHistoryFilter(isDark, regularList, hutangList, belanjaList),
 
-        // ── Search Bar (hanya tampil di tab reguler) ─────────────────────
-        if (_filterIndex == 0) _buildSearchBar(isDark, regularList),
+        // ── Search Bar (tampil di semua tab) ───────────────────────────
+        _buildSearchBar(isDark, regularList),
 
         // ── Konten Filtered ───────────────────────────────────────────────
         Expanded(
@@ -4401,16 +4435,16 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
             final isDk = isDark;
             return TextField(
               controller: _searchCtrl,
-              style: GoogleFonts.comicNeue(
-                  fontSize: 14,
+              style: GoogleFonts.quicksand(
+                  fontSize: 11,
                   color: isDk ? Colors.white : Colors.black87,
-                  fontWeight: FontWeight.w500),
+                  fontWeight: FontWeight.bold),
               decoration: InputDecoration(
                 hintText: 'Cari transaksi...',
-                hintStyle: GoogleFonts.comicNeue(
+                hintStyle: GoogleFonts.quicksand(
                     fontSize: 14,
                     color: isDk ? Colors.white24 : Colors.black26,
-                    fontWeight: FontWeight.w500),
+                    fontWeight: FontWeight.bold),
                 prefixIcon: Icon(Icons.search_rounded,
                     color: isDk ? Colors.white38 : Colors.black38, size: 20),
                 suffixIcon: _searchQuery.isNotEmpty
@@ -4450,20 +4484,32 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
           }),
         ),
         const SizedBox(height: 10),
-        // Type Filter Chips
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Row(
-            children: [
-              _typeChip(isDark, 0, 'Semua', Icons.receipt_long_rounded),
-              const SizedBox(width: 8),
-              _typeChip(isDark, 1, 'Pemasukan', Icons.arrow_downward_rounded),
-              const SizedBox(width: 8),
-              _typeChip(isDark, 2, 'Pengeluaran', Icons.arrow_upward_rounded),
-            ],
+        // Type Filter Chips (hanya tampil di tab reguler & hutang)
+        if (_filterIndex == 0 || _filterIndex == 1)
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Row(
+              children: [
+                if (_filterIndex == 0) ...[
+                  _typeChip(isDark, 0, 'Semua', Icons.receipt_long_rounded),
+                  const SizedBox(width: 8),
+                  _typeChip(
+                      isDark, 1, 'Pemasukan', Icons.arrow_downward_rounded),
+                  const SizedBox(width: 8),
+                  _typeChip(
+                      isDark, 2, 'Pengeluaran', Icons.arrow_upward_rounded),
+                ] else if (_filterIndex == 1) ...[
+                  _debtTypeChip(isDark, 0, 'Semua', Icons.receipt_long_rounded),
+                  const SizedBox(width: 8),
+                  _debtTypeChip(isDark, 1, 'Hutang', Icons.call_made_rounded),
+                  const SizedBox(width: 8),
+                  _debtTypeChip(
+                      isDark, 2, 'Piutang', Icons.call_received_rounded),
+                ],
+              ],
+            ),
           ),
-        ),
         const SizedBox(height: 8),
       ],
     );
@@ -4471,8 +4517,8 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
 
   Widget _typeChip(bool isDark, int value, String label, IconData icon) {
     final selected = _typeFilter == value;
-    const activeColor = Color(0xFF00BFA5); 
-    
+    const activeColor = Color(0xFF00BFA5);
+
     return GestureDetector(
       onTap: () => setState(() => _typeFilter = value),
       child: AnimatedContainer(
@@ -4481,11 +4527,12 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
         decoration: BoxDecoration(
           color: selected
               ? activeColor.withValues(alpha: 0.15)
-              : (isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100),
+              : (isDark
+                  ? Colors.white.withValues(alpha: 0.05)
+                  : Colors.grey.shade100),
           borderRadius: BorderRadius.circular(30),
           border: Border.all(
-              color: selected ? activeColor : Colors.transparent,
-              width: 1.5),
+              color: selected ? activeColor : Colors.transparent, width: 1.5),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -4497,9 +4544,9 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
                     : (isDark ? Colors.white38 : Colors.grey)),
             const SizedBox(width: 8),
             Text(label,
-                style: GoogleFonts.comicNeue(
-                    fontSize: 13,
-                    fontWeight: selected ? FontWeight.bold : FontWeight.w600,
+                style: GoogleFonts.quicksand(
+                    fontSize: 11,
+                    fontWeight: selected ? FontWeight.bold : FontWeight.bold,
                     color: selected
                         ? (isDark ? Colors.white : activeColor)
                         : (isDark ? Colors.white38 : Colors.grey))),
@@ -4511,7 +4558,11 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
 
   Widget _buildHistoryFilter(bool isDark, List<TransactionModel> regularList,
       List<TransactionModel> hutangList, List<TransactionModel> belanjaList) {
-    final categories = ['Pemasukan & Pengeluaran', 'Hutang & Piutang', 'Belanja'];
+    final categories = [
+      'Pemasukan & Pengeluaran',
+      'Hutang & Piutang',
+      'Belanja'
+    ];
     final categoryIcons = [
       Icons.account_balance_rounded,
       Icons.account_balance_wallet_rounded,
@@ -4568,11 +4619,11 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
                                         : Colors.black38)),
                             const SizedBox(width: 12),
                             Text(categories[i],
-                                style: GoogleFonts.comicNeue(
-                                  fontSize: 13,
+                                style: GoogleFonts.quicksand(
+                                  fontSize: 11,
                                   fontWeight: _filterIndex == i
                                       ? FontWeight.bold
-                                      : FontWeight.w600,
+                                      : FontWeight.bold,
                                   color: _filterIndex == i
                                       ? AppColors.primary
                                       : (isDark
@@ -4610,8 +4661,8 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
                     const SizedBox(width: 10),
                     Text(
                       categories[_filterIndex],
-                      style: GoogleFonts.comicNeue(
-                        fontSize: 12,
+                      style: GoogleFonts.quicksand(
+                        fontSize: 11,
                         fontWeight: FontWeight.bold,
                         color: isDark ? Colors.white : AppColors.primaryDark,
                       ),
@@ -4639,7 +4690,7 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
                   : (_filterIndex == 1
                       ? '${hutangList.length} Item'
                       : '${belanjaList.length} Item'),
-              style: GoogleFonts.comicNeue(
+              style: GoogleFonts.quicksand(
                   fontSize: 10,
                   fontWeight: FontWeight.bold,
                   color: AppColors.primary),
@@ -4692,8 +4743,7 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
       return true;
     }).toList();
 
-    final isFiltering =
-        _searchQuery.isNotEmpty || _typeFilter != 0;
+    final isFiltering = _searchQuery.isNotEmpty || _typeFilter != 0;
 
     if (regularList.isEmpty) {
       return _emptyState(isDark,
@@ -4750,8 +4800,8 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(monthKey,
-                            style: GoogleFonts.comicNeue(
-                                fontSize: 12,
+                            style: GoogleFonts.quicksand(
+                                fontSize: 11,
                                 fontWeight: FontWeight.bold,
                                 color: isDark
                                     ? Colors.white60
@@ -4796,7 +4846,7 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
                                         size: 13, color: AppColors.primary),
                                     SizedBox(width: 4),
                                     Text('EKSPOR',
-                                        style: GoogleFonts.comicNeue(
+                                        style: GoogleFonts.quicksand(
                                             fontSize: 11,
                                             fontWeight: FontWeight.bold,
                                             color: AppColors.primary)),
@@ -4828,28 +4878,35 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
           subtitle: 'Muncul saat hutang/piutang ditandai lunas');
     }
 
-    final hutangOnly = list.where((t) => t.category == 'Hutang').toList();
-    final piutangOnly = list.where((t) => t.category == 'Piutang').toList();
+    // Apply search query
+    final filtered = list.where((t) {
+      if (_searchQuery.isNotEmpty) {
+        final q = _searchQuery.toLowerCase();
+        if (!t.title.toLowerCase().contains(q) &&
+            !t.category.toLowerCase().contains(q) &&
+            !t.description.toLowerCase().contains(q)) {
+          return false;
+        }
+      }
+      return true;
+    }).toList();
+
+    if (filtered.isEmpty && _searchQuery.isNotEmpty) {
+      return _emptyState(isDark,
+          icon: Icons.search_off_rounded,
+          label: 'Tidak ada hasil',
+          subtitle: 'Coba ubah kata kunci pencarian Anda');
+    }
+
+    final hutangOnly = filtered.where((t) => t.category == 'Hutang').toList();
+    final piutangOnly = filtered.where((t) => t.category == 'Piutang').toList();
     final totalH = hutangOnly.fold(0.0, (s, t) => s + t.amount);
     final totalP = piutangOnly.fold(0.0, (s, t) => s + t.amount);
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 80),
       children: [
-        // Filter Kapsul (Premium)
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.only(bottom: 20),
-          child: Row(
-            children: [
-              _debtTypeChip(isDark, 0, 'Semua', Icons.receipt_long_rounded),
-              const SizedBox(width: 8),
-              _debtTypeChip(isDark, 1, 'Hutang', Icons.call_made_rounded),
-              const SizedBox(width: 8),
-              _debtTypeChip(isDark, 2, 'Piutang', Icons.call_received_rounded),
-            ],
-          ),
-        ),
+        const SizedBox(height: 12),
 
         // Summary Minimalist (Style Masuk/Keluar)
         Container(
@@ -4885,10 +4942,12 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
           ),
         ),
 
-        if ((_debtTypeFilter == 0 || _debtTypeFilter == 1) && hutangOnly.isNotEmpty) ...[
+        if ((_debtTypeFilter == 0 || _debtTypeFilter == 1) &&
+            hutangOnly.isNotEmpty) ...[
           ...hutangOnly.map((t) => _debtCard(t, isDark)),
         ],
-        if ((_debtTypeFilter == 0 || _debtTypeFilter == 2) && piutangOnly.isNotEmpty) ...[
+        if ((_debtTypeFilter == 0 || _debtTypeFilter == 2) &&
+            piutangOnly.isNotEmpty) ...[
           ...piutangOnly.map((t) => _debtCard(t, isDark)),
         ],
       ],
@@ -4897,8 +4956,8 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
 
   Widget _debtTypeChip(bool isDark, int value, String label, IconData icon) {
     final selected = _debtTypeFilter == value;
-    const activeColor = Color(0xFF00BFA5); 
-    
+    const activeColor = Color(0xFF00BFA5);
+
     return GestureDetector(
       onTap: () => setState(() => _debtTypeFilter = value),
       child: AnimatedContainer(
@@ -4907,11 +4966,12 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
         decoration: BoxDecoration(
           color: selected
               ? activeColor.withValues(alpha: 0.15)
-              : (isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100),
+              : (isDark
+                  ? Colors.white.withValues(alpha: 0.05)
+                  : Colors.grey.shade100),
           borderRadius: BorderRadius.circular(30),
           border: Border.all(
-              color: selected ? activeColor : Colors.transparent,
-              width: 1.5),
+              color: selected ? activeColor : Colors.transparent, width: 1.5),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -4923,9 +4983,9 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
                     : (isDark ? Colors.white38 : Colors.grey)),
             const SizedBox(width: 8),
             Text(label,
-                style: GoogleFonts.comicNeue(
-                    fontSize: 13,
-                    fontWeight: selected ? FontWeight.bold : FontWeight.w600,
+                style: GoogleFonts.quicksand(
+                    fontSize: 11,
+                    fontWeight: selected ? FontWeight.bold : FontWeight.bold,
                     color: selected
                         ? (isDark ? Colors.white : activeColor)
                         : (isDark ? Colors.white38 : Colors.grey))),
@@ -4944,7 +5004,27 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
           subtitle: 'Muncul saat item belanja ditandai dibeli');
     }
 
-    final total = list.fold(0.0, (s, t) => s + t.amount);
+    // Apply search query
+    final filtered = list.where((t) {
+      if (_searchQuery.isNotEmpty) {
+        final q = _searchQuery.toLowerCase();
+        if (!t.title.toLowerCase().contains(q) &&
+            !t.category.toLowerCase().contains(q) &&
+            !t.description.toLowerCase().contains(q)) {
+          return false;
+        }
+      }
+      return true;
+    }).toList();
+
+    if (filtered.isEmpty && _searchQuery.isNotEmpty) {
+      return _emptyState(isDark,
+          icon: Icons.search_off_rounded,
+          label: 'Tidak ada hasil',
+          subtitle: 'Coba ubah kata kunci pencarian Anda');
+    }
+
+    final total = filtered.fold(0.0, (s, t) => s + t.amount);
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 80),
@@ -4977,13 +5057,13 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
               Expanded(
                   child: _sumItemMinimalist(isDark,
                       label: 'JUMLAH ITEM',
-                      amount: list.length.toDouble(),
+                      amount: filtered.length.toDouble(),
                       isCurrency: false,
                       color: isDark ? Colors.white38 : Colors.black38)),
             ],
           ),
         ),
-        ...list.map((t) => _shoppingCard(t, isDark)),
+        ...filtered.map((t) => _shoppingCard(t, isDark)),
       ],
     );
   }
@@ -5031,22 +5111,28 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(t.title,
-                          style: GoogleFonts.comicNeue(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
+                          style: GoogleFonts.quicksand(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
                               color: isDark ? Colors.white : Colors.black87)),
                       if (t.description.isNotEmpty)
                         Text(t.description,
-                            style: GoogleFonts.comicNeue(
+                            style: GoogleFonts.quicksand(
                                 fontSize: 11,
                                 color:
                                     isDark ? Colors.white38 : Colors.black38)),
+                      Text('#${t.id.replaceAll('paid_debt_', '')}',
+                          style: GoogleFonts.quicksand(
+                              fontSize: 9,
+                              color: isDark
+                                  ? Colors.white.withValues(alpha: 0.2)
+                                  : Colors.grey.shade400)),
                     ],
                   ),
                 ),
                 Text(_fmtCur(t.amount),
-                    style: GoogleFonts.comicNeue(
-                        fontSize: 14,
+                    style: GoogleFonts.quicksand(
+                        fontSize: 11,
                         fontWeight: FontWeight.bold,
                         color: color)),
               ],
@@ -5090,14 +5176,14 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(t.title,
-                      style: GoogleFonts.comicNeue(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
+                      style: GoogleFonts.quicksand(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
                           color: isDark ? Colors.white : Colors.black87)),
                 ),
                 Text(_fmtCur(t.amount),
-                    style: GoogleFonts.comicNeue(
-                        fontSize: 14,
+                    style: GoogleFonts.quicksand(
+                        fontSize: 11,
                         fontWeight: FontWeight.bold,
                         color: AppColors.primary)),
               ],
@@ -5115,15 +5201,15 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
       bool isCurrency = true}) {
     return Column(children: [
       Text(label,
-          style: GoogleFonts.comicNeue(
+          style: GoogleFonts.quicksand(
               fontSize: 8,
               fontWeight: FontWeight.bold,
               letterSpacing: 0.8,
               color: isDark ? Colors.white38 : Colors.black38)),
       const SizedBox(height: 5),
       Text(isCurrency ? _fmtCur(amount) : amount.toInt().toString(),
-          style: GoogleFonts.comicNeue(
-              fontSize: 14, fontWeight: FontWeight.bold, color: color)),
+          style: GoogleFonts.quicksand(
+              fontSize: 11, fontWeight: FontWeight.bold, color: color)),
     ]);
   }
 
@@ -5136,7 +5222,7 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
               color: color, borderRadius: BorderRadius.circular(2))),
       const SizedBox(width: 10),
       Text(label,
-          style: GoogleFonts.comicNeue(
+          style: GoogleFonts.quicksand(
               fontSize: 10,
               fontWeight: FontWeight.bold,
               letterSpacing: 1.2,
@@ -5160,9 +5246,9 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
           ),
           const SizedBox(height: 20),
           Text(label,
-              style: GoogleFonts.comicNeue(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
+              style: GoogleFonts.quicksand(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
                   color: isDark ? Colors.white38 : Colors.black38)),
           if (subtitle != null) ...[
             const SizedBox(height: 8),
@@ -5170,8 +5256,8 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
               padding: const EdgeInsets.symmetric(horizontal: 40),
               child: Text(subtitle,
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.comicNeue(
-                      fontSize: 12,
+                  style: GoogleFonts.quicksand(
+                      fontSize: 11,
                       color: isDark ? Colors.white24 : Colors.black26)),
             ),
           ],

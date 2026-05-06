@@ -17,27 +17,64 @@ class SavingSimulatorPage extends ConsumerStatefulWidget {
 
 class _SavingSimulatorPageState extends ConsumerState<SavingSimulatorPage> {
   final TextEditingController _amountController = TextEditingController();
-  final TextEditingController _durationController = TextEditingController();
-  String _unit = 'Bulan';
+  DateTime? _targetDate;
   double _targetAmount = 0;
-  int _durationCount = 12;
 
   @override
   void dispose() {
     _amountController.dispose();
-    _durationController.dispose();
     super.dispose();
+  }
+
+  String _formatRupiah(double amount) {
+    return NumberFormat.currency(locale: 'id_ID', symbol: 'Rp', decimalDigits: 0).format(amount);
   }
 
   void _calculate() {
     final text = _amountController.text.replaceAll('.', '');
     final amount = double.tryParse(text) ?? 0;
-    final dur = int.tryParse(_durationController.text) ?? 1;
     
     setState(() {
       _targetAmount = amount;
-      _durationCount = dur;
     });
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _targetDate ?? DateTime.now().add(const Duration(days: 30)),
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 365 * 20)), // Max 20 years
+      builder: (context, child) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: AppColors.primary,
+              primary: AppColors.primary,
+              onPrimary: Colors.white,
+              surface: isDark ? AppColors.surfaceDark : Colors.white,
+              onSurface: isDark ? Colors.white : Colors.black87,
+              brightness: isDark ? Brightness.dark : Brightness.light,
+            ),
+            dialogBackgroundColor: isDark ? AppColors.surfaceDark : Colors.white,
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.primary,
+                textStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null && picked != _targetDate) {
+      setState(() {
+        _targetDate = picked;
+      });
+      _calculate();
+    }
   }
 
   @override
@@ -53,16 +90,21 @@ class _SavingSimulatorPageState extends ConsumerState<SavingSimulatorPage> {
     final progress = _targetAmount > 0 ? (currentBalance / _targetAmount).clamp(0.0, 1.0) : 0.0;
     
     double daily = 0, weekly = 0, monthly = 0;
-    int totalDays = 1;
-    if (_durationCount > 0) {
-      if (_unit == 'Hari') totalDays = _durationCount;
-      if (_unit == 'Minggu') totalDays = _durationCount * 7;
-      if (_unit == 'Bulan') totalDays = _durationCount * 30;
-      if (_unit == 'Tahun') totalDays = _durationCount * 365;
-
-      daily = remaining / totalDays;
-      weekly = remaining / (totalDays / 7);
-      monthly = remaining / (totalDays / 30);
+    int totalDays = 0;
+    if (_targetDate != null) {
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      final target = DateTime(_targetDate!.year, _targetDate!.month, _targetDate!.day);
+      totalDays = target.difference(today).inDays;
+      
+      if (totalDays > 0) {
+        daily = remaining / totalDays;
+        weekly = totalDays >= 7 ? remaining / (totalDays / 7) : 0;
+        monthly = totalDays >= 30 ? remaining / (totalDays / 30) : 0;
+      } else {
+        // If target is today
+        daily = remaining;
+      }
     }
 
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
@@ -79,9 +121,9 @@ class _SavingSimulatorPageState extends ConsumerState<SavingSimulatorPage> {
         ),
         title: Text(
           'Simulasi Tabungan',
-          style: GoogleFonts.comicNeue(
+          style: GoogleFonts.quicksand(
             fontWeight: FontWeight.bold,
-            fontSize: 16,
+            fontSize: 11,
             color: contentColor,
           ),
         ),
@@ -106,30 +148,12 @@ class _SavingSimulatorPageState extends ConsumerState<SavingSimulatorPage> {
 
             const SizedBox(height: 24),
 
-            Row(
-              children: [
-                Expanded(
-                  flex: 2,
-                  child: _buildInputField(
-                    label: 'DURASI',
-                    controller: _durationController,
-                    icon: Icons.timer_outlined,
-                    isDarkMode: isDarkMode,
-                    onChanged: (_) => _calculate(),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  flex: 3,
-                  child: _buildUnitDropdown(isDarkMode),
-                ),
-              ],
-            ),
+            _buildDatePickerField(isDarkMode),
 
             const SizedBox(height: 40),
 
             // RESULTS DASHBOARD
-            if (_targetAmount > 0) ...[
+            if (_targetAmount > 0 && _targetDate != null) ...[
               _buildProgressCard(progress, currentBalance, remaining, isDarkMode),
               const SizedBox(height: 32),
               _buildSavingsPlanSection(daily, weekly, monthly, totalDays, isDarkMode),
@@ -148,8 +172,8 @@ class _SavingSimulatorPageState extends ConsumerState<SavingSimulatorPage> {
       children: [
         Text(
           'Hitung Tabungan',
-          style: GoogleFonts.comicNeue(
-            fontSize: 32,
+          style: GoogleFonts.quicksand(
+            fontSize: 21,
             fontWeight: FontWeight.bold,
             color: contentColor,
             letterSpacing: -1,
@@ -158,8 +182,8 @@ class _SavingSimulatorPageState extends ConsumerState<SavingSimulatorPage> {
         const SizedBox(height: 8),
         Text(
           'Rencanakan masa depan finansialmu dengan tepat.',
-          style: GoogleFonts.comicNeue(
-            fontSize: 14,
+          style: GoogleFonts.quicksand(
+            fontSize: 11,
             color: contentColor.withValues(alpha: 0.5),
           ),
         ),
@@ -183,7 +207,7 @@ class _SavingSimulatorPageState extends ConsumerState<SavingSimulatorPage> {
           padding: const EdgeInsets.only(left: 4, bottom: 8),
           child: Text(
             label,
-            style: GoogleFonts.comicNeue(
+            style: GoogleFonts.quicksand(
               fontSize: 10,
               fontWeight: FontWeight.bold,
               color: contentColor.withValues(alpha: 0.5),
@@ -195,11 +219,11 @@ class _SavingSimulatorPageState extends ConsumerState<SavingSimulatorPage> {
           controller: controller,
           keyboardType: TextInputType.number,
           inputFormatters: [isCurrency ? _RibuanSeparatorInputFormatter() : FilteringTextInputFormatter.digitsOnly],
-          style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 16, color: contentColor),
+          style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11, color: contentColor),
           onChanged: onChanged,
           decoration: InputDecoration(
             hintText: '0',
-            hintStyle: GoogleFonts.comicNeue(fontSize: 16, color: isDarkMode ? Colors.white10 : Colors.black38),
+            hintStyle: GoogleFonts.quicksand(fontSize: 11, color: isDarkMode ? Colors.white10 : Colors.black38),
             prefixIcon: Container(
               padding: const EdgeInsets.only(left: 20, right: 8),
               child: Row(
@@ -208,7 +232,7 @@ class _SavingSimulatorPageState extends ConsumerState<SavingSimulatorPage> {
                   Icon(icon, color: AppColors.primary, size: 20),
                   const SizedBox(width: 8),
                   if (isCurrency)
-                    Text('Rp', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 16)),
+                    Text('Rp', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 11)),
                 ],
               ),
             ),
@@ -222,7 +246,7 @@ class _SavingSimulatorPageState extends ConsumerState<SavingSimulatorPage> {
     );
   }
 
-  Widget _buildUnitDropdown(bool isDarkMode) {
+  Widget _buildDatePickerField(bool isDarkMode) {
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -230,8 +254,8 @@ class _SavingSimulatorPageState extends ConsumerState<SavingSimulatorPage> {
         Padding(
           padding: const EdgeInsets.only(left: 4, bottom: 8),
           child: Text(
-            'SATUAN',
-            style: GoogleFonts.comicNeue(
+            'TARGET TANGGAL TERCAPAI',
+            style: GoogleFonts.quicksand(
               fontSize: 10,
               fontWeight: FontWeight.bold,
               color: contentColor.withValues(alpha: 0.5),
@@ -239,32 +263,35 @@ class _SavingSimulatorPageState extends ConsumerState<SavingSimulatorPage> {
             ),
           ),
         ),
-        Container(
-          height: 52,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          decoration: BoxDecoration(
-            color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : AppColors.background,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isDarkMode ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.05),
-            ),
-          ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              value: _unit,
-              isExpanded: true,
-              icon: const Icon(Icons.expand_more_rounded, color: AppColors.primary),
+        GestureDetector(
+          onTap: () => _selectDate(context),
+          child: Container(
+            height: 52,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : AppColors.background,
               borderRadius: BorderRadius.circular(16),
-              style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 16, color: contentColor),
-              items: ['Hari', 'Minggu', 'Bulan', 'Tahun']
-                  .map((e) => DropdownMenuItem(
-                      value: e,
-                      child: Text(e, style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold))))
-                  .toList(),
-              onChanged: (v) {
-                setState(() => _unit = v!);
-                _calculate();
-              },
+              border: Border.all(
+                color: isDarkMode ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.05),
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.calendar_month_rounded, color: AppColors.primary, size: 20),
+                const SizedBox(width: 12),
+                Text(
+                  _targetDate == null 
+                      ? 'Pilih Tanggal' 
+                      : DateFormat('d MMMM yyyy', 'id_ID').format(_targetDate!),
+                  style: GoogleFonts.quicksand(
+                    fontWeight: FontWeight.bold, 
+                    fontSize: 11, 
+                    color: _targetDate == null ? (isDarkMode ? Colors.white24 : Colors.black38) : contentColor
+                  ),
+                ),
+                const Spacer(),
+                const Icon(Icons.expand_more_rounded, color: AppColors.primary),
+              ],
             ),
           ),
         ),
@@ -297,13 +324,13 @@ class _SavingSimulatorPageState extends ConsumerState<SavingSimulatorPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('PROGRES TABUNGAN',
-                  style: GoogleFonts.comicNeue(
+                  style: GoogleFonts.quicksand(
                       color: contentColor.withValues(alpha: 0.4),
                       fontSize: 9,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 2)),
               Text('${(progress * 100).toStringAsFixed(0)}%',
-                  style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 14)),
+                  style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 11)),
             ],
           ),
           const SizedBox(height: 20),
@@ -347,7 +374,7 @@ class _SavingSimulatorPageState extends ConsumerState<SavingSimulatorPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('RENCANA SETORAN',
-            style: GoogleFonts.comicNeue(
+            style: GoogleFonts.quicksand(
                 color: contentColor.withValues(alpha: 0.4),
                 fontSize: 10,
                 fontWeight: FontWeight.bold,
@@ -355,33 +382,18 @@ class _SavingSimulatorPageState extends ConsumerState<SavingSimulatorPage> {
         const SizedBox(height: 16),
         Row(
           children: [
-            _StatCard(label: 'HARIAN', amount: daily, color: const Color(0xFF3498DB), isDarkMode: isDarkMode),
-            const SizedBox(width: 12),
-            _StatCard(label: 'MINGGUAN', amount: weekly, color: const Color(0xFFF39C12), isDarkMode: isDarkMode),
+            _StatCard(label: 'SETIAP HARI', amount: daily, color: const Color(0xFF3498DB), isDarkMode: isDarkMode),
+            if (totalDays >= 7) ...[
+              const SizedBox(width: 12),
+              _StatCard(label: 'SETIAP MINGGU', amount: weekly, color: const Color(0xFFF39C12), isDarkMode: isDarkMode),
+            ],
           ],
         ),
-        const SizedBox(height: 12),
-        _StatCard(label: 'SETORAN BULANAN', amount: monthly, color: const Color(0xFF27AE60), isDarkMode: isDarkMode, isWide: true),
+        if (totalDays >= 30) ...[
+          const SizedBox(height: 12),
+          _StatCard(label: 'SETIAP BULAN', amount: monthly, color: const Color(0xFF27AE60), isDarkMode: isDarkMode, isWide: true),
+        ],
         const SizedBox(height: 24),
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: AppColors.primary.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Row(
-            children: [
-              const Icon(Icons.event_available_rounded, color: AppColors.primary, size: 20),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  'Target akan tercapai pada ${DateFormat('d MMMM yyyy', 'id_ID').format(DateTime.now().add(Duration(days: totalDays)))}',
-                  style: GoogleFonts.comicNeue(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primary),
-                ),
-              ),
-            ],
-          ),
-        ),
       ],
     );
   }
@@ -403,9 +415,9 @@ class _SavingSimulatorPageState extends ConsumerState<SavingSimulatorPage> {
             ),
             const SizedBox(height: 24),
             Text(
-              'Masukkan target dan durasi\nuntuk melihat perhitungan.',
+              'Masukkan target dana dan tanggal\nuntuk melihat perhitungan.',
               textAlign: TextAlign.center,
-              style: GoogleFonts.comicNeue(color: Colors.grey, fontWeight: FontWeight.w500, fontSize: 14),
+              style: GoogleFonts.quicksand(color: Colors.grey, fontWeight: FontWeight.bold, fontSize: 11),
             ),
           ],
         ),
@@ -427,12 +439,12 @@ class _InfoPiece extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: GoogleFonts.comicNeue(fontSize: 9, color: Colors.grey, fontWeight: FontWeight.bold)),
+          Text(label, style: GoogleFonts.quicksand(fontSize: 9, color: Colors.grey, fontWeight: FontWeight.bold)),
           const SizedBox(height: 4),
           FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
-            child: Text(value, style: GoogleFonts.comicNeue(fontSize: 16, fontWeight: FontWeight.bold, color: color)),
+            child: Text(value, style: GoogleFonts.quicksand(fontSize: 11, fontWeight: FontWeight.bold, color: color)),
           ),
         ],
       ),
@@ -461,13 +473,13 @@ class _StatCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: isWide ? CrossAxisAlignment.start : CrossAxisAlignment.center,
         children: [
-          Text(label, style: GoogleFonts.comicNeue(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.grey, letterSpacing: 1)),
+          Text(label, style: GoogleFonts.quicksand(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.grey, letterSpacing: 1)),
           const SizedBox(height: 12),
           FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(
               NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(amount),
-              style: GoogleFonts.comicNeue(fontSize: 20, fontWeight: FontWeight.bold, color: color),
+              style: GoogleFonts.quicksand(fontSize: 11, fontWeight: FontWeight.bold, color: color),
             ),
           ),
         ],

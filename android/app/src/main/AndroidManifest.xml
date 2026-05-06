@@ -45,6 +45,10 @@
                 <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
             </intent-filter>
         </receiver>
+        <activity
+            android:name="com.yalantis.ucrop.UCropActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
     </application>
     <queries>
         <intent>

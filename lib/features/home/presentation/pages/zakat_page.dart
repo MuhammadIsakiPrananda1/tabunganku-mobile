@@ -100,9 +100,9 @@ class _ZakatPageState extends ConsumerState<ZakatPage> with TickerProviderStateM
         ),
         title: Text(
           'Zakat & Infaq', 
-          style: GoogleFonts.comicNeue(
+          style: GoogleFonts.quicksand(
             fontWeight: FontWeight.bold,
-            fontSize: 16,
+            fontSize: 11,
             color: contentColor,
           ),
         ),
@@ -278,12 +278,12 @@ class _ZakatPageState extends ConsumerState<ZakatPage> with TickerProviderStateM
           controller: controller,
           keyboardType: TextInputType.number,
           inputFormatters: [_RibuanFormatter()],
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: contentColor),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: contentColor),
           onChanged: onChanged,
           decoration: InputDecoration(
             hintText: '0',
             hintStyle: TextStyle(
-                fontSize: 16,
+                fontSize: 11,
                 color: isDarkMode ? Colors.white10 : Colors.black38),
             prefixIcon: Container(
               padding: const EdgeInsets.only(left: 20, right: 8),
@@ -292,7 +292,7 @@ class _ZakatPageState extends ConsumerState<ZakatPage> with TickerProviderStateM
                 children: [
                   Icon(icon, color: AppColors.primary, size: 20),
                   const SizedBox(width: 8),
-                  const Text('Rp', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 16)),
+                  const Text('Rp', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 11)),
                 ],
               ),
             ),
@@ -322,7 +322,7 @@ class _ZakatPageState extends ConsumerState<ZakatPage> with TickerProviderStateM
               _activeType == 'Profesi' ? 'Zakat profesi wajib dikeluarkan jika mencapai nishab setara 522kg beras.' :
               _activeType == 'Maal' ? 'Zakat harta simpanan (Maal) wajib dikeluarkan jika mencapai nishab 85g emas.' :
               'Sucikan harta Anda dengan zakat fitrah dan infaq/sedekah.',
-              style: const TextStyle(fontSize: 10, color: AppColors.primary, fontWeight: FontWeight.w500),
+              style: const TextStyle(fontSize: 10, color: AppColors.primary, fontWeight: FontWeight.bold),
             ),
           ),
         ],
@@ -352,7 +352,7 @@ class _ZakatPageState extends ConsumerState<ZakatPage> with TickerProviderStateM
             fit: BoxFit.scaleDown,
             child: Text(
               NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(amount), 
-              style: GoogleFonts.comicNeue(fontSize: compact ? 24 : 32, fontWeight: FontWeight.bold, color: hasValue ? AppColors.primary : contentColor.withValues(alpha: 0.1))
+              style: GoogleFonts.quicksand(fontSize: compact ? 24 : 32, fontWeight: FontWeight.bold, color: hasValue ? AppColors.primary : contentColor.withValues(alpha: 0.1))
             ),
           ),
           if (warningText != null) ...[
@@ -372,7 +372,7 @@ class _ZakatPageState extends ConsumerState<ZakatPage> with TickerProviderStateM
                 elevation: 0,
                 disabledBackgroundColor: isDarkMode ? Colors.white.withValues(alpha: 0.03) : Colors.grey.shade100,
               ),
-              child: const Text('Catat', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+              child: const Text('Catat', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
             ),
           ),
         ],

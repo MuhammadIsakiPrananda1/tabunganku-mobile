@@ -148,9 +148,9 @@ class _CurrencyConverterPageState extends ConsumerState<CurrencyConverterPage> {
         ),
         title: Text(
           'Konverter Valas',
-          style: GoogleFonts.comicNeue(
+          style: GoogleFonts.quicksand(
             fontWeight: FontWeight.bold,
-            fontSize: 16,
+            fontSize: 11,
             color: contentColor,
           ),
         ),
@@ -232,7 +232,7 @@ class _CurrencyConverterPageState extends ConsumerState<CurrencyConverterPage> {
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
     return Text(
       label,
-      style: GoogleFonts.comicNeue(
+      style: GoogleFonts.quicksand(
         fontSize: 10,
         fontWeight: FontWeight.bold,
         letterSpacing: 1.5,
@@ -276,8 +276,8 @@ class _CurrencyConverterPageState extends ConsumerState<CurrencyConverterPage> {
                       children: [
                         Text(
                           currency['symbol'],
-                          style: GoogleFonts.comicNeue(
-                            fontSize: 16,
+                          style: GoogleFonts.quicksand(
+                            fontSize: 11,
                             fontWeight: FontWeight.bold,
                             color: AppColors.primary,
                           ),
@@ -289,7 +289,7 @@ class _CurrencyConverterPageState extends ConsumerState<CurrencyConverterPage> {
                         ],
                         Text(
                           val,
-                          style: GoogleFonts.comicNeue(
+                          style: GoogleFonts.quicksand(
                             fontSize: 26,
                             fontWeight: FontWeight.bold,
                             color: val == '0' ? contentColor.withValues(alpha: 0.3) : contentColor,
@@ -324,12 +324,12 @@ class _CurrencyConverterPageState extends ConsumerState<CurrencyConverterPage> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(currency['flag'], style: const TextStyle(fontSize: 16)),
+                    Text(currency['flag'], style: const TextStyle(fontSize: 11)),
                     const SizedBox(width: 6),
                     Text(
                       currency['code'],
-                      style: GoogleFonts.comicNeue(
-                        fontSize: 14,
+                      style: GoogleFonts.quicksand(
+                        fontSize: 11,
                         fontWeight: FontWeight.bold,
                         color: AppColors.primary,
                       ),
@@ -406,8 +406,8 @@ class _CurrencyConverterPageState extends ConsumerState<CurrencyConverterPage> {
                 ? Icon(Icons.backspace_outlined, color: AppColors.primary, size: 20)
                 : Text(
                     val,
-                    style: GoogleFonts.comicNeue(
-                      fontSize: 22,
+                    style: GoogleFonts.quicksand(
+                      fontSize: 19,
                       fontWeight: FontWeight.bold,
                       color: isDarkMode ? Colors.white : AppColors.primaryDark,
                     ),
@@ -437,7 +437,7 @@ class _CurrencyConverterPageState extends ConsumerState<CurrencyConverterPage> {
             const SizedBox(height: 12),
             Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(2))),
             const SizedBox(height: 20),
-            Text('Pilih Mata Uang', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold, fontSize: 18, color: isDarkMode ? Colors.white : Colors.black87)),
+            Text('Pilih Mata Uang', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11, color: isDarkMode ? Colors.white : Colors.black87)),
             const SizedBox(height: 20),
             Expanded(
               child: ListView.builder(
@@ -447,9 +447,9 @@ class _CurrencyConverterPageState extends ConsumerState<CurrencyConverterPage> {
                   final curr = _currencies[index];
                   final isSelected = (isFrom ? _fromCurrency : _toCurrency) == curr;
                   return ListTile(
-                    leading: Text(curr['flag'], style: const TextStyle(fontSize: 24)),
+                    leading: Text(curr['flag'], style: const TextStyle(fontSize: 21)),
                     title: Text(curr['code'], style: TextStyle(fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : Colors.black87)),
-                    subtitle: Text(curr['name'], style: TextStyle(fontSize: 12, color: isDarkMode ? Colors.white54 : Colors.black54)),
+                    subtitle: Text(curr['name'], style: TextStyle(fontSize: 11, color: isDarkMode ? Colors.white54 : Colors.black54)),
                     trailing: isSelected ? const Icon(Icons.check_circle_rounded, color: AppColors.primary) : null,
                     onTap: () {
                       setState(() {

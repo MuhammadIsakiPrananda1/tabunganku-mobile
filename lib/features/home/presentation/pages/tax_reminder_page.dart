@@ -32,9 +32,9 @@ class _TaxReminderPageState extends ConsumerState<TaxReminderPage> {
               size: 18),
         ),
         title: Text('Pengingat Pajak',
-            style: GoogleFonts.comicNeue(
+            style: GoogleFonts.quicksand(
               fontWeight: FontWeight.bold,
-              fontSize: 16,
+              fontSize: 11,
               color: isDarkMode ? Colors.white : AppColors.primaryDark,
             )),
       ),
@@ -45,15 +45,15 @@ class _TaxReminderPageState extends ConsumerState<TaxReminderPage> {
                 padding: const EdgeInsets.all(24),
                 children: [
                   Text('Jadwal Pembayaran Pajak',
-                      style: GoogleFonts.comicNeue(
-                        fontSize: 24,
+                      style: GoogleFonts.quicksand(
+                        fontSize: 21,
                         fontWeight: FontWeight.bold,
                         color: isDarkMode ? Colors.white : AppColors.primaryDark,
                       )),
                   const SizedBox(height: 8),
                   Text('Jangan biarkan denda menumpuk, catat tanggal jatuh temponya.',
-                      style: GoogleFonts.comicNeue(
-                        fontSize: 14,
+                      style: GoogleFonts.quicksand(
+                        fontSize: 11,
                         color: Colors.grey,
                       )),
                   const SizedBox(height: 32),
@@ -101,7 +101,7 @@ class _TaxReminderPageState extends ConsumerState<TaxReminderPage> {
         backgroundColor: AppColors.primary,
         icon: const Icon(Icons.add_rounded, color: Colors.white),
         label: Text('Tambah Pengingat',
-            style: GoogleFonts.comicNeue(
+            style: GoogleFonts.quicksand(
                 fontWeight: FontWeight.bold, color: Colors.white)),
       ),
     );
@@ -118,15 +118,15 @@ class _TaxReminderPageState extends ConsumerState<TaxReminderPage> {
                 size: 80, color: Colors.grey.withValues(alpha: 0.2)),
             const SizedBox(height: 24),
             Text('Belum Ada Pengingat',
-                style: GoogleFonts.comicNeue(
-                    fontSize: 20,
+                style: GoogleFonts.quicksand(
+                    fontSize: 11,
                     fontWeight: FontWeight.bold,
                     color: isDarkMode ? Colors.white30 : Colors.black26)),
             const SizedBox(height: 8),
             Text(
                 'Tambahkan jadwal pajak Anda seperti PKB atau PBB agar tidak terlambat membayar.',
                 textAlign: TextAlign.center,
-                style: GoogleFonts.comicNeue(fontSize: 14, color: Colors.grey)),
+                style: GoogleFonts.quicksand(fontSize: 11, color: Colors.grey)),
             const SizedBox(height: 32),
           ],
         ),
@@ -172,9 +172,9 @@ class _TaxReminderPageState extends ConsumerState<TaxReminderPage> {
                 Text(item.title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.comicNeue(
+                    style: GoogleFonts.quicksand(
                       fontWeight: FontWeight.bold,
-                      fontSize: 14,
+                      fontSize: 11,
                       color: isDarkMode ? Colors.white : Colors.black87,
                     )),
                 const SizedBox(height: 2),
@@ -187,7 +187,7 @@ class _TaxReminderPageState extends ConsumerState<TaxReminderPage> {
                           DateFormat('d MMM yyyy', 'id_ID').format(item.dueDate),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.comicNeue(
+                          style: GoogleFonts.quicksand(
                               fontSize: 11, color: Colors.grey)),
                     ),
                   ],
@@ -203,7 +203,7 @@ class _TaxReminderPageState extends ConsumerState<TaxReminderPage> {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(item.status,
-                style: GoogleFonts.comicNeue(
+                style: GoogleFonts.quicksand(
                   fontSize: 10,
                   fontWeight: FontWeight.bold,
                   color: statusColor,
@@ -243,8 +243,8 @@ class _TaxReminderPageState extends ConsumerState<TaxReminderPage> {
                         item.status == 'Sudah Bayar'
                             ? 'Tandai Belum Bayar'
                             : 'Tandai Sudah Bayar',
-                        style: GoogleFonts.comicNeue(
-                            fontSize: 12, fontWeight: FontWeight.bold)),
+                        style: GoogleFonts.quicksand(
+                            fontSize: 11, fontWeight: FontWeight.bold)),
                   ],
                 ),
               ),
@@ -258,8 +258,8 @@ class _TaxReminderPageState extends ConsumerState<TaxReminderPage> {
                         size: 16, color: Colors.red),
                     const SizedBox(width: 12),
                     Text('Hapus Pengingat',
-                      style: GoogleFonts.comicNeue(
-                          fontSize: 12,
+                      style: GoogleFonts.quicksand(
+                          fontSize: 11,
                           color: Colors.red,
                           fontWeight: FontWeight.bold)),
                   ],
@@ -301,13 +301,13 @@ class _TaxReminderPageState extends ConsumerState<TaxReminderPage> {
         builder: (context, setState) => AlertDialog(
           backgroundColor: isDarkMode ? const Color(0xFF1A1A1A) : Colors.white,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-          title: Text('Pengingat Baru', style: GoogleFonts.comicNeue(fontWeight: FontWeight.bold)),
+          title: Text('Pengingat Baru', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('NAMA PAJAK', 
-                style: GoogleFonts.comicNeue(
+                style: GoogleFonts.quicksand(
                   fontSize: 10, 
                   fontWeight: FontWeight.bold, 
                   color: Colors.grey,
@@ -316,10 +316,10 @@ class _TaxReminderPageState extends ConsumerState<TaxReminderPage> {
               const SizedBox(height: 6),
               TextField(
                 controller: titleController,
-                style: GoogleFonts.comicNeue(fontSize: 14),
+                style: GoogleFonts.quicksand(fontSize: 11),
                 decoration: InputDecoration(
                   hintText: 'Contoh: PKB Motor, PBB Rumah',
-                  hintStyle: GoogleFonts.comicNeue(fontSize: 13, color: Colors.grey.withValues(alpha: 0.5)),
+                  hintStyle: GoogleFonts.quicksand(fontSize: 11, color: Colors.grey.withValues(alpha: 0.5)),
                   filled: true,
                   isDense: true,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -329,7 +329,7 @@ class _TaxReminderPageState extends ConsumerState<TaxReminderPage> {
               ),
               const SizedBox(height: 16),
               Text('TANGGAL JATUH TEMPO', 
-                style: GoogleFonts.comicNeue(
+                style: GoogleFonts.quicksand(
                   fontSize: 9, 
                   fontWeight: FontWeight.bold, 
                   color: Colors.grey,
@@ -365,9 +365,9 @@ class _TaxReminderPageState extends ConsumerState<TaxReminderPage> {
                       Text(
                           DateFormat('d MMMM yyyy', 'id_ID')
                               .format(selectedDate),
-                          style: GoogleFonts.comicNeue(
+                          style: GoogleFonts.quicksand(
                               fontWeight: FontWeight.bold,
-                              fontSize: 14,
+                              fontSize: 11,
                               color: isDarkMode
                                   ? Colors.white
                                   : Colors.black87)),
@@ -380,7 +380,7 @@ class _TaxReminderPageState extends ConsumerState<TaxReminderPage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text('Batal', style: GoogleFonts.comicNeue(color: Colors.grey)),
+              child: Text('Batal', style: GoogleFonts.quicksand(color: Colors.grey)),
             ),
             ElevatedButton(
               onPressed: () {
@@ -400,7 +400,7 @@ class _TaxReminderPageState extends ConsumerState<TaxReminderPage> {
                 backgroundColor: AppColors.primary,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
-              child: Text('Simpan', style: GoogleFonts.comicNeue(color: Colors.white, fontWeight: FontWeight.bold)),
+              child: Text('Simpan', style: GoogleFonts.quicksand(color: Colors.white, fontWeight: FontWeight.bold)),
             ),
           ],
         ),

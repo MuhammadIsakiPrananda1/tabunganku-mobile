@@ -101,7 +101,7 @@ class ExportService {
 
     // ── Styles
     final headerStyle = pw.TextStyle(
-        font: fontBold, fontSize: 18, color: PdfColor.fromHex('#009688'));
+        font: fontBold, fontSize: 11, color: PdfColor.fromHex('#009688'));
 
     doc.addPage(
       pw.MultiPage(
@@ -153,7 +153,7 @@ class ExportService {
                         style: pw.TextStyle(
                           font: fontBold,
                           color: primaryColor,
-                          fontSize: 12,
+                          fontSize: 11,
                         ),
                       ),
                     ),

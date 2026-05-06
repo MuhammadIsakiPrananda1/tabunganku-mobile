@@ -61,9 +61,9 @@ class AllServicesPage extends ConsumerWidget {
         ),
         title: Text(
           'Semua Layanan',
-          style: GoogleFonts.comicNeue(
+          style: GoogleFonts.quicksand(
             fontWeight: FontWeight.bold,
-            fontSize: 16,
+            fontSize: 18,
             color: isDarkMode ? Colors.white : AppColors.primaryDark,
           ),
         ),
@@ -234,7 +234,7 @@ class AllServicesPage extends ConsumerWidget {
       padding: const EdgeInsets.only(left: 4, top: 24, bottom: 12),
       child: Text(
         title,
-        style: GoogleFonts.comicNeue(
+        style: GoogleFonts.quicksand(
           fontSize: 10,
           fontWeight: FontWeight.w800,
           letterSpacing: 1.2,
@@ -296,8 +296,8 @@ class AllServicesPage extends ConsumerWidget {
                 children: [
                   Text(
                     item.title,
-                    style: GoogleFonts.comicNeue(
-                      fontSize: 14,
+                    style: GoogleFonts.quicksand(
+                      fontSize: 12,
                       fontWeight: FontWeight.bold,
                       color: isDarkMode ? Colors.white : AppColors.primaryDark,
                     ),
@@ -307,9 +307,9 @@ class AllServicesPage extends ConsumerWidget {
                     item.subtitle,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.comicNeue(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
+                    style: GoogleFonts.quicksand(
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.bold,
                       color: isDarkMode ? Colors.white38 : Colors.grey.shade500,
                     ),
                   ),

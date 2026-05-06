@@ -4,6 +4,16 @@ Seluruh evolusi, fitur, dan perbaikan aplikasi **TabunganKu** terdokumentasi sec
 
 ---
 
+## 💎 [1.5.0] — 6 Mei 2026: General Improvements & Version Bump
+
+Rilis ini menandai transisi ke versi 1.5.0 dengan berbagai peningkatan stabilitas dan pembaruan sistem internal.
+
+### 🚀 Pembaruan (Updates)
+- **Version Migration** — Pembaruan sistem ke versi 1.5.0 (Build 150) 🚀.
+- **Visual Overhaul (Quicksand Bold)** — Transformasi identitas visual dengan migrasi seluruh font aplikasi ke **Quicksand Bold** untuk keterbacaan yang lebih modern dan tegas 🎨.
+- **System Stability** — Optimalisasi performa dan stabilitas aplikasi secara menyeluruh.
+
+
 ## 💎 [1.4.9] — 30 April 2026: Security, Transparency & UI Refresh
 
 Rilis ini menghadirkan perombakan pada sistem keamanan, transparansi keluarga, serta penyegaran visual besar-besaran untuk menyelaraskan seluruh fitur keuangan dengan bahasa desain "Premium Zakat" yang bersih dan elegan.

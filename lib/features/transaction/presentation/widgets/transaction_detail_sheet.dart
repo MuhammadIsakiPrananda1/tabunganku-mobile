@@ -74,7 +74,7 @@ class TransactionDetailSheet extends ConsumerWidget {
           // Receipt Header
           Text(isExpense ? 'PENGELUARAN' : 'PEMASUKAN',
               style: TextStyle(
-                  fontSize: 12,
+                  fontSize: 11,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 2,
                   color: isExpense
@@ -83,7 +83,7 @@ class TransactionDetailSheet extends ConsumerWidget {
           const SizedBox(height: 12),
           Text(formatRupiah(transaction.amount),
               style: TextStyle(
-                  fontSize: 32,
+                  fontSize: 21,
                   fontWeight: FontWeight.bold,
                   color: isDarkMode ? Colors.white : Colors.teal.shade900,
                   letterSpacing: -1)),
@@ -110,7 +110,7 @@ class TransactionDetailSheet extends ConsumerWidget {
             context,
             ref,
             'ID Transaksi',
-            '#${transaction.id.toUpperCase().substring(0, 10)}',
+            '#${transaction.id.replaceAll('paid_debt_', '').toUpperCase()}',
           ),
           const SizedBox(height: 16),
           _buildReceiptRow(
@@ -202,7 +202,7 @@ class TransactionDetailSheet extends ConsumerWidget {
           width: 95,
           child: Text(label,
               style: TextStyle(
-                  fontSize: 12,
+                  fontSize: 11,
                   fontWeight: FontWeight.bold,
                   color: isDarkMode
                       ? Colors.white38
@@ -215,8 +215,8 @@ class TransactionDetailSheet extends ConsumerWidget {
               Text(value,
                   textAlign: TextAlign.right,
                   style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
                       color: isDarkMode ? Colors.white : Colors.black87)),
               if (subValue != null) ...[
                 const SizedBox(height: 4),
@@ -224,7 +224,7 @@ class TransactionDetailSheet extends ConsumerWidget {
                     textAlign: TextAlign.right,
                     style: TextStyle(
                         fontSize: 11,
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.bold,
                         color: isDarkMode ? Colors.white38 : Colors.black45)),
               ],
             ],

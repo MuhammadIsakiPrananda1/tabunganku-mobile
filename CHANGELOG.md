@@ -4,14 +4,16 @@ Seluruh evolusi, fitur, dan perbaikan aplikasi **TabunganKu** terdokumentasi sec
 
 ---
 
-## 💎 [1.5.0] — 6 Mei 2026: General Improvements & Version Bump
+## 💎 [1.5.0] — 7 Mei 2026: Minimalist Premium & UI Refinement
 
-Rilis ini menandai transisi ke versi 1.5.0 dengan berbagai peningkatan stabilitas dan pembaruan sistem internal.
+Rilis ini menghadirkan perombakan estetika besar-besaran untuk mencapai tampilan yang lebih bersih, profesional, dan minimalis. Kami fokus pada penghapusan clutter visual dan optimalisasi logika proyeksi keuangan.
 
-### 🚀 Pembaruan (Updates)
-- **Version Migration** — Pembaruan sistem ke versi 1.5.0 (Build 150) 🚀.
-- **Visual Overhaul (Quicksand Bold)** — Transformasi identitas visual dengan migrasi seluruh font aplikasi ke **Quicksand Bold** untuk keterbacaan yang lebih modern dan tegas 🎨.
-- **System Stability** — Optimalisasi performa dan stabilitas aplikasi secara menyeluruh.
+- **Minimalist Detail Overhaul** — Pembersihan seluruh lembar detail (transaksi & target) dari emotikon berlebih untuk tampilan yang lebih premium 💎.
+- **Advanced Arisan Management** — Perombakan total UI Arisan: penghapusan ikon dadu, penyederhanaan daftar peserta dengan checkbox bersih, dan implementasi tombol "Tambah Peserta" bergaya dashed border 🎨.
+- **Smart Balance Projection** — Perbaikan logika "Estimasi Bulan Ini" yang kini menampilkan **Proyeksi Saldo Akhir Bulan** secara akurat berdasarkan tren pemasukan dan pengeluaran 📊.
+- **Dashboard Monthly Reset** — Statistik pemasukan dan pengeluaran di dashboard utama kini otomatis direset setiap awal bulan untuk pemantauan yang lebih relevan 🔄.
+- **Compact UI Typography** — Penyesuaian ukuran font pada Quick Actions (10.2) dan kartu target agar interface terasa lebih lega dan tidak padat 📏.
+- **Premium Success Feedback** — Standarisasi pesan sukses (snackbars) dengan bahasa yang lebih profesional tanpa clutter simbolis.
 
 
 ## 💎 [1.4.9] — 30 April 2026: Security, Transparency & UI Refresh

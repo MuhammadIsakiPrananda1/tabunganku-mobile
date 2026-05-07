@@ -525,7 +525,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        padding: const EdgeInsets.fromLTRB(28, 12, 28, 36),
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
         decoration: BoxDecoration(
           color: isDarkMode ? AppColors.surfaceDark : Colors.white,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
@@ -533,223 +533,225 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: isDarkMode
-                        ? Colors.white.withValues(alpha: 0.1)
-                        : Colors.grey.shade200,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
+              // Pull Bar
+              Container(
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 20),
 
-              // Header with Icon
+              // Compact Header
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(16),
+                    width: 48,
+                    height: 48,
                     decoration: BoxDecoration(
                       color: AppColors.primary
-                          .withValues(alpha: isDarkMode ? 0.2 : 0.1),
-                      borderRadius: BorderRadius.circular(20),
+                          .withValues(alpha: isDarkMode ? 0.15 : 0.08),
+                      borderRadius: BorderRadius.circular(14),
                     ),
                     child: const Icon(Icons.track_changes_rounded,
-                        color: AppColors.primary, size: 32),
+                        color: AppColors.primary, size: 24),
                   ),
-                  const SizedBox(width: 20),
+                  const SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           target.name,
-                          maxLines: 2,
+                          maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.quicksand(
-                              fontSize: 24,
+                              fontSize: 18,
                               fontWeight: FontWeight.bold,
-                              color: isDarkMode
-                                  ? Colors.white
-                                  : AppColors.primaryDark),
+                              color: isDarkMode ? Colors.white : Colors.black87),
                         ),
-                        const SizedBox(height: 4),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: isCompleted
-                                ? (isDarkMode
-                                    ? Colors.green.shade800
-                                    : Colors.green.shade500)
-                                : (isDarkMode
-                                    ? Colors.orange.shade800
-                                    : Colors.orange.shade500),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            isCompleted
-                                ? 'TARGET TERCAPAI'
-                                : 'SEDANG BERJALAN',
-                            style: GoogleFonts.quicksand(
-                                color: Colors.white,
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold),
-                          ),
+                        Text(
+                          'Target Tabungan',
+                          style: GoogleFonts.quicksand(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: isDarkMode ? Colors.white24 : Colors.grey),
                         ),
                       ],
+                    ),
+                  ),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: isCompleted
+                          ? Colors.green.withValues(alpha: 0.1)
+                          : AppColors.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      isCompleted ? 'SELESAI' : 'AKTIF',
+                      style: GoogleFonts.quicksand(
+                        color: isCompleted ? Colors.green : AppColors.primary,
+                        fontSize: 9,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ],
               ),
 
-              const SizedBox(height: 40),
+              const SizedBox(height: 24),
 
-              // Progress Section
-              Center(
-                child: Stack(
-                  alignment: Alignment.center,
+              // Integrated Progress Section
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: isDarkMode
+                      ? Colors.white.withValues(alpha: 0.01)
+                      : Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(
+                    color: isDarkMode ? Colors.white10 : Colors.grey.shade100,
+                  ),
+                ),
+                child: Row(
                   children: [
-                    SizedBox(
-                      width: 140,
-                      height: 140,
-                      child: CircularProgressIndicator(
-                        value: progress,
-                        strokeWidth: 12,
-                        backgroundColor: isDarkMode
-                            ? Colors.white.withValues(alpha: 0.05)
-                            : AppColors.primary.withValues(alpha: 0.05),
-                        valueColor: AlwaysStoppedAnimation<Color>(isCompleted
-                            ? Colors.green.shade400
-                            : AppColors.primary),
-                      ),
-                    ),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                    Stack(
+                      alignment: Alignment.center,
                       children: [
+                        SizedBox(
+                          width: 86,
+                          height: 86,
+                          child: CircularProgressIndicator(
+                            value: progress,
+                            strokeWidth: 9,
+                            backgroundColor: isDarkMode
+                                ? Colors.white.withValues(alpha: 0.05)
+                                : Colors.white,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                                isCompleted
+                                    ? Colors.green.shade400
+                                    : AppColors.primary),
+                          ),
+                        ),
                         Text(
                           '${(progress * 100).toInt()}%',
                           style: GoogleFonts.quicksand(
-                              fontSize: 36,
+                              fontSize: 20,
                               fontWeight: FontWeight.bold,
-                              color: isDarkMode
-                                  ? Colors.white
-                                  : AppColors.primaryDark),
-                        ),
-                        Text(
-                          'Tercapai',
-                          style: GoogleFonts.quicksand(
-                              fontSize: 13,
-                              fontWeight: FontWeight.bold,
-                              color: isDarkMode
-                                  ? Colors.white54
-                                  : AppColors.primary.withValues(alpha: 0.4)),
+                              color: isDarkMode ? Colors.white : Colors.black87),
                         ),
                       ],
+                    ),
+                    const SizedBox(width: 24),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _targetStatPill(
+                              'TERKUMPUL',
+                              _formatRupiah(targetBalance),
+                              isDarkMode,
+                              Colors.green),
+                          const SizedBox(height: 14),
+                          _targetStatPill(
+                              'GOAL',
+                              _formatRupiah(target.targetAmount),
+                              isDarkMode,
+                              AppColors.primary),
+                        ],
+                      ),
                     ),
                   ],
                 ),
               ),
 
-              const SizedBox(height: 40),
+              const SizedBox(height: 20),
 
-              // Detailed Stats Grid
-              _buildDetailRow(
-                  'Nominal Target',
-                  _formatRupiah(target.targetAmount),
-                  Icons.flag_rounded,
-                  Colors.teal),
-              Divider(
-                  height: 32,
-                  color: isDarkMode ? Colors.white10 : Colors.grey.shade200),
-              _buildDetailRow('Telah Terkumpul', _formatRupiah(targetBalance),
-                  Icons.account_balance_wallet_rounded, Colors.green),
-              Divider(
-                  height: 32,
-                  color: isDarkMode ? Colors.white10 : Colors.grey.shade200),
-              _buildDetailRow(
-                  'Sisa Kekurangan',
-                  remainingAmount <= 0
-                      ? 'Lunas'
-                      : _formatRupiah(remainingAmount),
-                  Icons.hourglass_bottom_rounded,
-                  Colors.red),
-              Divider(
-                  height: 32,
-                  color: isDarkMode ? Colors.white10 : Colors.grey.shade200),
-              _buildDetailRow(
-                  'Jatuh Tempo',
-                  '${DateFormat('d MMM yyyy').format(target.dueDate)} ($remainingDays Hari lagi)',
-                  Icons.calendar_today_rounded,
-                  Colors.orange),
-
-              const SizedBox(height: 40),
-
-              // Subtitle info
-              Center(
-                child: Text(
-                  'Dibuat pada ${DateFormat('d MMM yyyy').format(target.createdAt)}',
-                  style: GoogleFonts.quicksand(
-                      fontSize: 13,
-                      color: isDarkMode ? Colors.white12 : Colors.black26,
-                      fontWeight: FontWeight.bold),
+              // Detail Cards Grid
+              IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                      child: _targetInfoCard(
+                          'SISA KURANG',
+                          remainingAmount <= 0
+                              ? 'Lunas'
+                              : _formatRupiah(remainingAmount),
+                          Icons.hourglass_bottom_rounded,
+                          isDarkMode,
+                          color: Colors.red),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _targetInfoCard(
+                          'JATUH TEMPO',
+                          DateFormat('d MMM yyyy').format(target.dueDate),
+                          Icons.calendar_today_rounded,
+                          isDarkMode,
+                          subLabel: '$remainingDays Hari lagi'),
+                    ),
+                  ],
                 ),
               ),
 
               const SizedBox(height: 24),
 
-              // Action Buttons
+              // Minimal Footer
+              Text(
+                'Dibuat pada ${DateFormat('d MMM yyyy').format(target.createdAt)}',
+                style: GoogleFonts.quicksand(
+                    fontSize: 10,
+                    color: isDarkMode ? Colors.white10 : Colors.black12,
+                    fontWeight: FontWeight.bold),
+              ),
+
+              const SizedBox(height: 20),
+
+              // Action Buttons (Modern & Balanced)
               Row(
                 children: [
                   Expanded(
-                    child: ElevatedButton.icon(
+                    child: ElevatedButton(
                       onPressed: () {
                         _showAddEditTargetDialog(target: target);
                       },
-                      icon: const Icon(Icons.edit_rounded, size: 18),
-                      label: Text('Ubah Target',
-                          style: GoogleFonts.quicksand(
-                              fontWeight: FontWeight.bold)),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: isDarkMode
-                            ? AppColors.primary.withValues(alpha: 0.05)
-                            : AppColors.primary.withValues(alpha: 0.03),
-                        foregroundColor:
-                            isDarkMode ? Colors.white : AppColors.primary,
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
                         elevation: 0,
-                        minimumSize: const Size(0, 56),
+                        minimumSize: const Size(0, 52),
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16)),
                       ),
+                      child: Text('Ubah Target',
+                          style: GoogleFonts.quicksand(
+                              fontWeight: FontWeight.bold, fontSize: 13)),
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: ElevatedButton.icon(
+                  const SizedBox(width: 12),
+                  Container(
+                    height: 52,
+                    width: 52,
+                    decoration: BoxDecoration(
+                      color: isDarkMode
+                          ? Colors.red.shade900.withValues(alpha: 0.1)
+                          : Colors.red.shade50,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: IconButton(
                       onPressed: () async {
                         Navigator.pop(context);
                         await _deleteSavingTarget(target.id);
                       },
-                      icon: const Icon(Icons.delete_outline_rounded, size: 18),
-                      label: Text('Hapus',
-                          style: GoogleFonts.quicksand(
-                              fontWeight: FontWeight.bold)),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: isDarkMode
-                            ? Colors.red.shade900.withValues(alpha: 0.2)
-                            : Colors.red.shade50,
-                        foregroundColor:
-                            isDarkMode ? Colors.red.shade300 : Colors.red,
-                        elevation: 0,
-                        minimumSize: const Size(0, 56),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16)),
-                      ),
+                      icon: Icon(Icons.delete_outline_rounded,
+                          color: isDarkMode ? Colors.red.shade300 : Colors.red,
+                          size: 20),
                     ),
                   ),
                 ],
@@ -757,6 +759,87 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _targetStatPill(
+      String label, String value, bool isDarkMode, Color color) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.quicksand(
+            fontSize: 9,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 0.5,
+            color: isDarkMode ? Colors.white24 : Colors.grey.shade400,
+          ),
+        ),
+        Text(
+          value,
+          style: GoogleFonts.quicksand(
+            fontSize: 15,
+            fontWeight: FontWeight.bold,
+            color: isDarkMode ? Colors.white70 : Colors.black87,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _targetInfoCard(String label, String value, IconData icon,
+      bool isDarkMode, {Color? color, String? subLabel}) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: isDarkMode ? Colors.white.withValues(alpha: 0.01) : Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: isDarkMode ? Colors.white10 : Colors.grey.shade100,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon,
+                  size: 14,
+                  color: color ?? (isDarkMode ? Colors.white24 : Colors.grey)),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: GoogleFonts.quicksand(
+                  fontSize: 8,
+                  fontWeight: FontWeight.bold,
+                  color: isDarkMode ? Colors.white24 : Colors.grey,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.quicksand(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: isDarkMode ? Colors.white70 : Colors.black87,
+            ),
+          ),
+          if (subLabel != null)
+            Text(
+              subLabel,
+              style: GoogleFonts.quicksand(
+                fontSize: 9,
+                fontWeight: FontWeight.bold,
+                color: AppColors.primary.withValues(alpha: 0.5),
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -4608,29 +4691,40 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
                     for (int i = 0; i < categories.length; i++)
                       PopupMenuItem(
                         value: i,
-                        child: Row(
-                          children: [
-                            Icon(categoryIcons[i],
-                                size: 18,
-                                color: _filterIndex == i
-                                    ? AppColors.primary
-                                    : (isDark
-                                        ? Colors.white38
-                                        : Colors.black38)),
-                            const SizedBox(width: 12),
-                            Text(categories[i],
-                                style: GoogleFonts.quicksand(
-                                  fontSize: 11,
-                                  fontWeight: _filterIndex == i
-                                      ? FontWeight.bold
-                                      : FontWeight.bold,
-                                  color: _filterIndex == i
-                                      ? AppColors.primary
-                                      : (isDark
-                                          ? Colors.white
-                                          : Colors.black87),
-                                )),
-                          ],
+                        padding: EdgeInsets.zero,
+                        height: 52,
+                        child: GestureDetector(
+                          onTap: () => Navigator.pop(context, i),
+                          behavior: HitTestBehavior.opaque,
+                          child: Container(
+                            width: double.infinity,
+                            height: 52,
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: Row(
+                              children: [
+                                Icon(categoryIcons[i],
+                                    size: 18,
+                                    color: _filterIndex == i
+                                        ? AppColors.primary
+                                        : (isDark
+                                            ? Colors.white38
+                                            : Colors.black38)),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(categories[i],
+                                      style: GoogleFonts.quicksand(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                        color: _filterIndex == i
+                                            ? AppColors.primary
+                                            : (isDark
+                                                ? Colors.white
+                                                : Colors.black87),
+                                      )),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
                   ],

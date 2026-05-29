@@ -24,6 +24,6 @@ enum QuickActionType {
   insurance,
   savingPlans,
   buyingTarget,
-  arisan,
+  nabungBersama,
 }
 

@@ -15,7 +15,7 @@ class ZakatPage extends ConsumerStatefulWidget {
   ConsumerState<ZakatPage> createState() => _ZakatPageState();
 }
 
-class _ZakatPageState extends ConsumerState<ZakatPage> with TickerProviderStateMixin {
+class _ZakatPageState extends ConsumerState<ZakatPage> {
   String _activeType = 'Profesi'; // Profesi, Maal, Fitrah
   
   final TextEditingController _profesiController = TextEditingController();
@@ -30,6 +30,12 @@ class _ZakatPageState extends ConsumerState<ZakatPage> with TickerProviderStateM
 
   final double _hargaEmasPerGram = 1200000; 
   double get _nishabMaal => 85 * _hargaEmasPerGram;
+
+  final List<Map<String, dynamic>> _zakatTypes = [
+    {'code': 'Profesi', 'label': 'Zakat Profesi', 'icon': Icons.payments_rounded},
+    {'code': 'Maal', 'label': 'Zakat Harta / Maal', 'icon': Icons.account_balance_wallet_rounded},
+    {'code': 'Fitrah', 'label': 'Zakat Fitrah & Infaq', 'icon': Icons.favorite_rounded},
+  ];
 
   @override
   void dispose() {
@@ -56,7 +62,7 @@ class _ZakatPageState extends ConsumerState<ZakatPage> with TickerProviderStateM
     });
   }
 
-  void _recordTransaction(String title, double amount, String category) async {
+  void _recordTransaction(String title, double amount, String category, Color accentColor) async {
     if (amount <= 0) return;
     final transaction = TransactionModel(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -71,8 +77,11 @@ class _ZakatPageState extends ConsumerState<ZakatPage> with TickerProviderStateM
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('$title berhasil dicatat!'),
-          backgroundColor: AppColors.primary,
+          content: Text(
+            '$title berhasil dicatat!',
+            style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 13),
+          ),
+          backgroundColor: accentColor,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
@@ -81,15 +90,24 @@ class _ZakatPageState extends ConsumerState<ZakatPage> with TickerProviderStateM
     }
   }
 
+  IconData _getZakatIcon(String code) {
+    return _zakatTypes.firstWhere((t) => t['code'] == code)['icon'] as IconData;
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
         (ref.watch(themeProvider) == ThemeMode.system && theme.brightness == Brightness.dark);
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
+    
+    // Page Theme: Mint Green Accent & Pure Dark/Light backgrounds
+    final pageBgColor = isDarkMode ? AppColors.backgroundDark : const Color(0xFFF8FAF9);
+    final accentColor = isDarkMode ? const Color(0xFF2ECC71) : const Color(0xFF27AE60);
+    final inputBgColor = isDarkMode ? Colors.white.withOpacity(0.05) : AppColors.background;
 
     return Scaffold(
-      backgroundColor: isDarkMode ? AppColors.backgroundDark : const Color(0xFFF8FAF9),
+      backgroundColor: pageBgColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -102,7 +120,7 @@ class _ZakatPageState extends ConsumerState<ZakatPage> with TickerProviderStateM
           'Zakat & Infaq', 
           style: GoogleFonts.quicksand(
             fontWeight: FontWeight.bold,
-            fontSize: 11,
+            fontSize: 14,
             color: contentColor,
           ),
         ),
@@ -112,53 +130,95 @@ class _ZakatPageState extends ConsumerState<ZakatPage> with TickerProviderStateM
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildInfoCard(),
-            const SizedBox(height: 24),
+            _buildInfoCard(accentColor),
+            const SizedBox(height: 28),
 
-            Text('TIPE ZAKAT', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5, color: contentColor.withValues(alpha: 0.4))),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                _buildCompactTypeCard('Profesi', 'Profesi', Icons.payments_rounded, isDarkMode),
-                const SizedBox(width: 8),
-                _buildCompactTypeCard('Maal', 'Harta/Maal', Icons.account_balance_wallet_rounded, isDarkMode),
-                const SizedBox(width: 8),
-                _buildCompactTypeCard('Fitrah', 'Fitrah/Infaq', Icons.favorite_rounded, isDarkMode),
-              ],
+            Text(
+              'Tipe Zakat', 
+              style: GoogleFonts.quicksand(
+                fontSize: 11, 
+                fontWeight: FontWeight.bold, 
+                color: contentColor.withOpacity(0.4),
+              ),
+            ),
+            const SizedBox(height: 8),
+
+            // Premium Dropdown like Tax Calculator
+            Container(
+              height: 48,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                color: inputBgColor,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  Icon(_getZakatIcon(_activeType), color: accentColor, size: 18),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: _activeType,
+                        isExpanded: true,
+                        dropdownColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
+                        icon: Icon(Icons.arrow_drop_down_rounded, color: contentColor.withOpacity(0.4), size: 20),
+                        style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: contentColor, fontSize: 13),
+                        items: _zakatTypes.map((t) {
+                          return DropdownMenuItem<String>(
+                            value: t['code'] as String,
+                            child: Text(
+                              t['label'] as String,
+                              style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (val) {
+                          setState(() {
+                            _activeType = val!;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
 
-            const SizedBox(height: 32),
-            if (_activeType == 'Profesi') _buildProfesiContent(isDarkMode),
-            if (_activeType == 'Maal') _buildMaalContent(isDarkMode),
-            if (_activeType == 'Fitrah') _buildFitrahContent(isDarkMode),
+            const SizedBox(height: 24),
+            if (_activeType == 'Profesi') _buildProfesiContent(isDarkMode, accentColor),
+            if (_activeType == 'Maal') _buildMaalContent(isDarkMode, accentColor),
+            if (_activeType == 'Fitrah') _buildFitrahContent(isDarkMode, accentColor),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildProfesiContent(bool isDarkMode) {
+  Widget _buildProfesiContent(bool isDarkMode, Color accentColor) {
     return Column(
       children: [
         _buildAlignedInput(
-          'PENGHASILAN BULANAN', 
+          'Penghasilan Bulanan', 
           _profesiController, 
           (_) => _calculateProfesi(), 
           Icons.wallet_rounded, 
-          isDarkMode
+          isDarkMode,
+          accentColor,
+          'Penghasilan Bulanan'
         ),
         const SizedBox(height: 32),
         _buildResultCard(
-          'ESTIMASI ZAKAT PROFESI', 
+          'Estimasi Zakat Profesi', 
           _profesiAmount, 
-          () => _recordTransaction('Zakat Profesi', _profesiAmount, 'Zakat'), 
-          isDarkMode
+          () => _recordTransaction('Zakat Profesi', _profesiAmount, 'Zakat', accentColor), 
+          isDarkMode,
+          accentColor
         ),
       ],
     );
   }
 
-  Widget _buildMaalContent(bool isDarkMode) {
+  Widget _buildMaalContent(bool isDarkMode, Color accentColor) {
     final warningText = (_maalAmount == 0 && _maalController.text.isNotEmpty) 
       ? 'Saldo belum mencapai nishab (~Rp ${NumberFormat.decimalPattern('id_ID').format(_nishabMaal)})' 
       : null;
@@ -166,61 +226,70 @@ class _ZakatPageState extends ConsumerState<ZakatPage> with TickerProviderStateM
     return Column(
       children: [
         _buildAlignedInput(
-          'TOTAL HARTA SIMPANAN', 
+          'Total Harta Simpanan', 
           _maalController, 
           (_) => _calculateMaal(), 
           Icons.account_balance_rounded, 
-          isDarkMode
+          isDarkMode,
+          accentColor,
+          'Total Harta Simpanan'
         ),
         const SizedBox(height: 32),
         _buildResultCard(
-          'ESTIMASI ZAKAT MAAL', 
+          'Estimasi Zakat Maal', 
           _maalAmount, 
-          () => _recordTransaction('Zakat Maal', _maalAmount, 'Zakat'), 
+          () => _recordTransaction('Zakat Maal', _maalAmount, 'Zakat', accentColor), 
           isDarkMode,
+          accentColor,
           warningText: warningText
         ),
       ],
     );
   }
 
-  Widget _buildFitrahContent(bool isDarkMode) {
+  Widget _buildFitrahContent(bool isDarkMode, Color accentColor) {
     return Column(
       children: [
         _buildAlignedInput(
-          'ZAKAT FITRAH', 
+          'Zakat Fitrah', 
           _fitrahController, 
           (v) => setState(() => _fitrahAmount = double.tryParse(v.replaceAll('.', '')) ?? 0), 
           Icons.face_rounded, 
-          isDarkMode
+          isDarkMode,
+          accentColor,
+          'Zakat Fitrah'
         ),
         const SizedBox(height: 20),
         _buildAlignedInput(
-          'INFAQ / SEDEKAH', 
+          'Infaq / Sedekah', 
           _infaqController, 
           (v) => setState(() => _infaqAmount = double.tryParse(v.replaceAll('.', '')) ?? 0), 
           Icons.favorite_rounded, 
-          isDarkMode
+          isDarkMode,
+          accentColor,
+          'Infaq / Sedekah'
         ),
         const SizedBox(height: 32),
         Row(
           children: [
             Expanded(
               child: _buildResultCard(
-                'FITRAH', 
+                'Fitrah', 
                 _fitrahAmount, 
-                () => _recordTransaction('Zakat Fitrah', _fitrahAmount, 'Zakat'), 
+                () => _recordTransaction('Zakat Fitrah', _fitrahAmount, 'Zakat', accentColor), 
                 isDarkMode,
+                accentColor,
                 compact: true
               ),
             ),
             const SizedBox(width: 16),
             Expanded(
               child: _buildResultCard(
-                'INFAQ', 
+                'Infaq', 
                 _infaqAmount, 
-                () => _recordTransaction('Infaq', _infaqAmount, 'Gift'), 
+                () => _recordTransaction('Infaq', _infaqAmount, 'Gift', accentColor), 
                 isDarkMode,
+                accentColor,
                 compact: true
               ),
             ),
@@ -230,99 +299,84 @@ class _ZakatPageState extends ConsumerState<ZakatPage> with TickerProviderStateM
     );
   }
 
-  Widget _buildCompactTypeCard(String type, String label, IconData icon, bool isDarkMode) {
-    final isSelected = _activeType == type;
-    final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
-    
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => setState(() => _activeType = type),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          decoration: BoxDecoration(
-            color: isSelected ? AppColors.primary : (isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.white),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: isSelected ? AppColors.primary : (isDarkMode ? Colors.white10 : Colors.black.withValues(alpha: 0.05))),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, color: isSelected ? Colors.white : AppColors.primary, size: 14),
-              const SizedBox(width: 6),
-              Text(
-                label,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 10,
-                  color: isSelected ? Colors.white : contentColor
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAlignedInput(String label, TextEditingController controller, Function(String) onChanged, IconData icon, bool isDarkMode) {
+  Widget _buildAlignedInput(
+    String label, 
+    TextEditingController controller, 
+    Function(String) onChanged, 
+    IconData icon, 
+    bool isDarkMode,
+    Color accentColor,
+    String hintText
+  ) {
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.only(left: 4, bottom: 8),
-          child: Text(label, style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: contentColor.withValues(alpha: 0.5), letterSpacing: 1)),
+          child: Text(
+            label, 
+            style: GoogleFonts.quicksand(
+              fontSize: 11, 
+              fontWeight: FontWeight.bold, 
+              color: contentColor.withOpacity(0.4),
+            ),
+          ),
         ),
         TextFormField(
           controller: controller,
           keyboardType: TextInputType.number,
           inputFormatters: [_RibuanFormatter()],
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: contentColor),
+          style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
           onChanged: onChanged,
           decoration: InputDecoration(
-            hintText: '0',
-            hintStyle: TextStyle(
-                fontSize: 11,
-                color: isDarkMode ? Colors.white10 : Colors.black38),
+            hintText: hintText,
+            hintStyle: GoogleFonts.quicksand(
+              fontSize: 13,
+              color: isDarkMode ? Colors.white.withOpacity(0.2) : Colors.black.withOpacity(0.25),
+              fontWeight: FontWeight.bold,
+            ),
             prefixIcon: Container(
-              padding: const EdgeInsets.only(left: 20, right: 8),
+              padding: const EdgeInsets.only(left: 16, right: 8),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(icon, color: AppColors.primary, size: 20),
+                  Icon(icon, color: accentColor, size: 18),
                   const SizedBox(width: 8),
-                  const Text('Rp', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 11)),
+                  Text(
+                    'Rp', 
+                    style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: accentColor, fontSize: 13),
+                  ),
                 ],
               ),
             ),
             filled: true,
-            fillColor: isDarkMode ? Colors.white.withValues(alpha: 0.05) : AppColors.background,
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            fillColor: isDarkMode ? Colors.white.withOpacity(0.05) : AppColors.background,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildInfoCard() {
+  Widget _buildInfoCard(Color accentColor) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.1),
+        color: accentColor.withOpacity(0.08),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
-          const Icon(Icons.info_outline_rounded, color: AppColors.primary, size: 18),
-          const SizedBox(width: 8),
+          Icon(Icons.info_outline_rounded, color: accentColor, size: 18),
+          const SizedBox(width: 10),
           Expanded(
             child: Text(
               _activeType == 'Profesi' ? 'Zakat profesi wajib dikeluarkan jika mencapai nishab setara 522kg beras.' :
               _activeType == 'Maal' ? 'Zakat harta simpanan (Maal) wajib dikeluarkan jika mencapai nishab 85g emas.' :
               'Sucikan harta Anda dengan zakat fitrah dan infaq/sedekah.',
-              style: const TextStyle(fontSize: 10, color: AppColors.primary, fontWeight: FontWeight.bold),
+              style: GoogleFonts.quicksand(fontSize: 11, color: accentColor, fontWeight: FontWeight.bold),
             ),
           ),
         ],
@@ -330,7 +384,15 @@ class _ZakatPageState extends ConsumerState<ZakatPage> with TickerProviderStateM
     );
   }
 
-  Widget _buildResultCard(String title, double amount, VoidCallback onRecord, bool isDarkMode, {String? warningText, bool compact = false}) {
+  Widget _buildResultCard(
+    String title, 
+    double amount, 
+    VoidCallback onRecord, 
+    bool isDarkMode, 
+    Color accentColor,
+    {String? warningText, 
+    bool compact = false}
+  ) {
     final hexBg = isDarkMode ? AppColors.surfaceDark : Colors.white;
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
     final hasValue = amount > 0;
@@ -340,39 +402,58 @@ class _ZakatPageState extends ConsumerState<ZakatPage> with TickerProviderStateM
       padding: EdgeInsets.all(compact ? 16 : 24),
       decoration: BoxDecoration(
         color: hexBg,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: isDarkMode ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: isDarkMode ? 0.3 : 0.05), blurRadius: 15, offset: const Offset(0, 8))],
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDarkMode ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.03),
+        ),
       ),
       child: Column(
         children: [
-          Text(title, style: TextStyle(color: contentColor.withValues(alpha: 0.4), fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 2)),
-          const SizedBox(height: 12),
+          Text(
+            title, 
+            style: GoogleFonts.quicksand(
+              color: contentColor.withOpacity(0.4), 
+              fontSize: 11, 
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
           FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(
               NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(amount), 
-              style: GoogleFonts.quicksand(fontSize: compact ? 24 : 32, fontWeight: FontWeight.bold, color: hasValue ? AppColors.primary : contentColor.withValues(alpha: 0.1))
+              style: GoogleFonts.quicksand(
+                fontSize: compact ? 22 : 26, 
+                fontWeight: FontWeight.bold, 
+                color: hasValue ? accentColor : contentColor.withOpacity(0.1),
+              ),
             ),
           ),
           if (warningText != null) ...[
             const SizedBox(height: 8),
-            Text(warningText, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.error, fontSize: 10, fontWeight: FontWeight.bold)),
+            Text(
+              warningText, 
+              textAlign: TextAlign.center, 
+              style: GoogleFonts.quicksand(color: AppColors.error, fontSize: 10, fontWeight: FontWeight.bold),
+            ),
           ],
           const SizedBox(height: 20),
           SizedBox(
             width: double.infinity,
-            height: 48,
+            height: 44,
             child: ElevatedButton(
               onPressed: hasValue ? onRecord : null,
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
+                backgroundColor: accentColor,
                 foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 elevation: 0,
-                disabledBackgroundColor: isDarkMode ? Colors.white.withValues(alpha: 0.03) : Colors.grey.shade100,
+                disabledBackgroundColor: isDarkMode ? Colors.white.withOpacity(0.03) : Colors.grey.shade100,
               ),
-              child: const Text('Catat', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
+              child: Text(
+                'Catat', 
+                style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: hasValue ? Colors.white : Colors.grey),
+              ),
             ),
           ),
         ],

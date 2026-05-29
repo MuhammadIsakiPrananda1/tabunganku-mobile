@@ -10,6 +10,12 @@ import 'package:tabunganku/providers/debt_provider.dart';
 import 'package:tabunganku/providers/transaction_provider.dart';
 import 'package:tabunganku/features/transaction/presentation/widgets/debt_form_sheet.dart';
 
+// ── Type scale ──────────────────────────────────────────────────────────────
+// label   : 10  w800  letterSpacing 1.0   (badge, section header)
+// caption : 11  w500                      (subtitle, hint)
+// body    : 13  w600                      (main text, amount)
+// title   : 15  w700                      (page title)
+
 class DebtListPage extends ConsumerStatefulWidget {
   const DebtListPage({super.key});
 
@@ -18,341 +24,376 @@ class DebtListPage extends ConsumerStatefulWidget {
 }
 
 class _DebtListPageState extends ConsumerState<DebtListPage> {
-  String _filter = 'Hutang'; // Hutang, Piutang
+  String _filter = 'Hutang';
   String _searchQuery = '';
-  final TextEditingController _searchController = TextEditingController();
+  final _searchCtrl = TextEditingController();
+
+  static final _fmt = NumberFormat.currency(
+      locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
 
   @override
   void dispose() {
-    _searchController.dispose();
+    _searchCtrl.dispose();
     super.dispose();
-  }
-
-  String _formatRupiah(double amount) {
-    return NumberFormat.currency(
-      locale: 'id_ID',
-      symbol: 'Rp ',
-      decimalDigits: 0,
-    ).format(amount);
   }
 
   @override
   Widget build(BuildContext context) {
     final debtsAsync = ref.watch(debtsStreamProvider);
-    final theme = Theme.of(context);
-    final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
+    final isDark = ref.watch(themeProvider) == ThemeMode.dark ||
         (ref.watch(themeProvider) == ThemeMode.system &&
-            theme.brightness == Brightness.dark);
+            Theme.of(context).brightness == Brightness.dark);
+
+    final pageBg  = isDark ? AppColors.backgroundDark : const Color(0xFFF0F3F7);
+    final cardBg  = isDark ? AppColors.surfaceDark : Colors.white;
+    final divClr  = isDark ? Colors.white.withValues(alpha: 0.07) : Colors.black.withValues(alpha: 0.07);
+    final subClr  = isDark ? Colors.white38 : Colors.black38;
+    final txtClr  = isDark ? Colors.white : Colors.black87;
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: const Text('Catatan Pinjaman',
-            style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: theme.scaffoldBackgroundColor,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        leading: IconButton(
-          onPressed: () => Navigator.pop(context),
-          icon: Icon(Icons.arrow_back_ios_new_rounded, 
-            color: isDarkMode ? Colors.white : AppColors.primaryDark, 
-            size: 20),
-        ),
-      ),
-      body: Column(
-        children: [
-          // Search Bar
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-            child: TextField(
-              controller: _searchController,
-              onChanged: (val) => setState(() => _searchQuery = val),
-              style: TextStyle(
-                fontSize: 13,
-                color: isDarkMode ? Colors.white : Colors.black87,
-              ),
-              decoration: InputDecoration(
-                hintText: 'Cari catatan pinjaman...',
-                hintStyle: TextStyle(
-                  color: isDarkMode ? Colors.white24 : Colors.black26,
-                  fontSize: 13,
-                ),
-                prefixIcon: Icon(
-                  Icons.search_rounded,
-                  color: isDarkMode ? Colors.white24 : Colors.black26,
-                  size: 20,
-                ),
-                suffixIcon: _searchQuery.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.close_rounded, size: 18),
-                        onPressed: () {
-                          _searchController.clear();
-                          setState(() => _searchQuery = '');
-                        },
-                      )
-                    : null,
-                filled: true,
-                fillColor: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide.none,
-                ),
-                contentPadding: const EdgeInsets.symmetric(vertical: 12),
-              ),
-            ),
-          ),
+      backgroundColor: pageBg,
+      body: SafeArea(
+        child: Column(
+          children: [
 
-          // Filter Chips
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-            child: Row(
-              children: [
-                _buildFilterChip('Hutang', 'Hutang', _filter, Icons.call_made_rounded, (val) => setState(() => _filter = val), isDarkMode),
-                const SizedBox(width: 8),
-                _buildFilterChip('Piutang', 'Piutang', _filter, Icons.call_received_rounded, (val) => setState(() => _filter = val), isDarkMode),
-              ],
+            // ── AppBar ─────────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(4, 8, 16, 0),
+              child: Row(
+                children: [
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: Icon(Icons.arrow_back_ios_new_rounded,
+                        size: 17,
+                        color: isDark ? Colors.white70 : AppColors.primaryDark),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+                  ),
+                  Expanded(
+                    child: Text('Catatan Pinjaman',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.quicksand(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: txtClr)),
+                  ),
+                  const SizedBox(width: 40),
+                ],
+              ),
             ),
-          ),
-          
-          Expanded(
-            child: debtsAsync.when(
-              data: (debts) {
-                final filteredDebts = debts.where((d) {
-                  // Search filter
-                  if (_searchQuery.isNotEmpty) {
-                    final nameMatch = d.contactName.toLowerCase().contains(_searchQuery.toLowerCase());
-                    final titleMatch = d.title.toLowerCase().contains(_searchQuery.toLowerCase());
-                    if (!nameMatch && !titleMatch) return false;
+            const SizedBox(height: 10),
+
+            // ── Search bar ─────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: TextField(
+                controller: _searchCtrl,
+                onChanged: (v) => setState(() => _searchQuery = v),
+                style: GoogleFonts.quicksand(fontSize: 13, color: txtClr),
+                decoration: InputDecoration(
+                  hintText: 'Cari nama atau keterangan...',
+                  hintStyle: GoogleFonts.quicksand(
+                      fontSize: 13,
+                      color: isDark ? Colors.white24 : Colors.black26),
+                  prefixIcon: Icon(Icons.search_rounded,
+                      size: 19,
+                      color: isDark ? Colors.white24 : Colors.black26),
+                  suffixIcon: _searchQuery.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.close_rounded, size: 17),
+                          onPressed: () {
+                            _searchCtrl.clear();
+                            setState(() => _searchQuery = '');
+                          },
+                        )
+                      : null,
+                  filled: true,
+                  fillColor: cardBg,
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide(color: divClr)),
+                  enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide(color: divClr)),
+                  focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide:
+                          const BorderSide(color: AppColors.primary, width: 1.5)),
+                  contentPadding:
+                      const EdgeInsets.symmetric(vertical: 11, horizontal: 14),
+                  isDense: true,
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+
+            // ── Filter chips ────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  _filterChip(
+                    label: 'Hutang',
+                    icon: Icons.call_made_rounded,
+                    color: const Color(0xFFE53935),
+                    isSelected: _filter == 'Hutang',
+                    isDark: isDark,
+                    onTap: () => setState(() => _filter = 'Hutang'),
+                  ),
+                  const SizedBox(width: 8),
+                  _filterChip(
+                    label: 'Piutang',
+                    icon: Icons.call_received_rounded,
+                    color: AppColors.primary,
+                    isSelected: _filter == 'Piutang',
+                    isDark: isDark,
+                    onTap: () => setState(() => _filter = 'Piutang'),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
+
+            // ── List ────────────────────────────────────────────────────
+            Expanded(
+              child: debtsAsync.when(
+                data: (debts) {
+                  final filtered = debts.where((d) {
+                    if (_searchQuery.isNotEmpty) {
+                      final q = _searchQuery.toLowerCase();
+                      if (!d.contactName.toLowerCase().contains(q) &&
+                          !d.title.toLowerCase().contains(q)) return false;
+                    }
+                    return _filter == 'Hutang'
+                        ? d.type == DebtType.hutang
+                        : d.type == DebtType.piutang;
+                  }).toList();
+
+                  if (filtered.isEmpty) {
+                    return _emptyState(isDark, subClr);
                   }
 
-                  if (_filter == 'Hutang') return d.type == DebtType.hutang;
-                  return d.type == DebtType.piutang;
-                }).toList();
+                  final unpaid = filtered.where((d) => !d.isPaid).toList();
+                  final paid   = filtered.where((d) =>  d.isPaid).toList();
 
-                if (filteredDebts.isEmpty) {
-                  return _buildEmptyState(context, isDarkMode);
-                }
-
-                final unpaidDebts = filteredDebts.where((d) => !d.isPaid).toList();
-                final paidDebts = filteredDebts.where((d) => d.isPaid).toList();
-
-                return ListView(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 80),
-                  children: [
-                    if (unpaidDebts.isNotEmpty) ...[
-                      _buildSectionHeader('Belum Lunas', AppColors.primary, isDarkMode),
-                      const SizedBox(height: 8),
-                      ...unpaidDebts.map((d) => _buildDebtTile(context, ref, d, isDarkMode)),
+                  return ListView(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+                    children: [
+                      if (unpaid.isNotEmpty) ...[
+                        _sectionHeader('Belum Lunas', const Color(0xFFE53935), isDark),
+                        const SizedBox(height: 8),
+                        ...unpaid.map((d) => _debtCard(context, ref, d, isDark, txtClr, subClr, divClr)),
+                      ],
+                      if (paid.isNotEmpty) ...[
+                        if (unpaid.isNotEmpty) const SizedBox(height: 20),
+                        _sectionHeader('Sudah Lunas', AppColors.primary, isDark),
+                        const SizedBox(height: 8),
+                        ...paid.map((d) => _debtCard(context, ref, d, isDark, txtClr, subClr, divClr)),
+                      ],
                     ],
-                    if (paidDebts.isNotEmpty) ...[
-                      if (unpaidDebts.isNotEmpty) const SizedBox(height: 24),
-                      _buildSectionHeader('Sudah Lunas', AppColors.primary, isDarkMode),
-                      const SizedBox(height: 8),
-                      ...paidDebts.map((d) => _buildDebtTile(context, ref, d, isDarkMode)),
-                    ],
-                  ],
-                );
-              },
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, st) => Center(child: Text('Error: $e')),
+                  );
+                },
+                loading: () => const Center(
+                    child: CircularProgressIndicator(color: AppColors.primary)),
+                error: (e, _) => Center(
+                    child: Text('Error: $e',
+                        style: GoogleFonts.quicksand(fontSize: 13))),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
+
+      // ── FAB ──────────────────────────────────────────────────────────
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          DebtFormSheet.show(
-            context,
-            initialType: _filter == 'Piutang' ? DebtType.piutang : DebtType.hutang,
-          );
-        },
+        onPressed: () => DebtFormSheet.show(
+          context,
+          initialType:
+              _filter == 'Piutang' ? DebtType.piutang : DebtType.hutang,
+        ),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
-        icon: const Icon(Icons.add_rounded),
-        label: const Text('Tambah Catatan',
-            style: TextStyle(fontWeight: FontWeight.bold)),
+        elevation: 4,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        icon: const Icon(Icons.add_rounded, size: 20),
+        label: Text('Tambah',
+            style: GoogleFonts.quicksand(
+                fontSize: 13, fontWeight: FontWeight.w700)),
       ),
     );
   }
 
-  // Filter Chip Helper (Same as Riwayat)
-  Widget _buildFilterChip(String label, String value, String currentValue, IconData icon, Function(String) onSelected, bool isDarkMode) {
-    final isSelected = currentValue == value;
-    const activeColor = Color(0xFF00BFA5); 
-    
+  // ── Widgets ───────────────────────────────────────────────────────────────
+
+  Widget _filterChip({
+    required String label,
+    required IconData icon,
+    required Color color,
+    required bool isSelected,
+    required bool isDark,
+    required VoidCallback onTap,
+  }) {
     return GestureDetector(
-      onTap: () => onSelected(value),
+      onTap: onTap,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected 
-              ? activeColor.withValues(alpha: 0.15) 
-              : (isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100),
+          color: isSelected
+              ? color.withValues(alpha: 0.12)
+              : (isDark
+                  ? Colors.white.withValues(alpha: 0.05)
+                  : Colors.white),
           borderRadius: BorderRadius.circular(30),
           border: Border.all(
-            color: isSelected ? activeColor : Colors.transparent,
+            color: isSelected ? color : Colors.transparent,
             width: 1.5,
           ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 14, color: isSelected ? activeColor : (isDarkMode ? Colors.white38 : Colors.grey)),
-            const SizedBox(width: 8),
-            Text(label, style: GoogleFonts.quicksand(
-                fontSize: 11,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.bold,
-                color: isSelected ? (isDarkMode ? Colors.white : activeColor) : (isDarkMode ? Colors.white38 : Colors.grey),
-              ),
-            ),
+            Icon(icon,
+                size: 13,
+                color: isSelected
+                    ? color
+                    : (isDark ? Colors.white38 : Colors.black38)),
+            const SizedBox(width: 6),
+            Text(label,
+                style: GoogleFonts.quicksand(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: isSelected
+                      ? color
+                      : (isDark ? Colors.white38 : Colors.black38),
+                )),
           ],
         ),
       ),
     );
   }
 
-
-
-  Widget _buildEmptyState(BuildContext context, bool isDarkMode) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(32),
-            decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: isDarkMode ? 0.05 : 0.05),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(Icons.auto_stories_outlined,
-                size: 80, color: AppColors.primary.withValues(alpha: 0.4)),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            'Belum ada catatan',
-            style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.bold,
-                color: isDarkMode ? Colors.white60 : Colors.black38),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Catat semua hutang & piutangmu\nagar keuangan lebih teratur!',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-                fontSize: 11, color: isDarkMode ? Colors.white38 : Colors.black26),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSectionHeader(String title, Color color, bool isDarkMode) {
+  Widget _sectionHeader(String title, Color color, bool isDark) {
     return Row(
       children: [
         Container(
-          width: 4,
-          height: 16,
+          width: 3,
+          height: 14,
           decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(2),
-          ),
+              color: color, borderRadius: BorderRadius.circular(2)),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 10),
         Text(
           title.toUpperCase(),
-          style: TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.bold,
-            color: isDarkMode ? Colors.white54 : Colors.black38,
+          style: GoogleFonts.quicksand(
+            fontSize: 10,
+            fontWeight: FontWeight.w800,
             letterSpacing: 1.2,
+            color: isDark ? Colors.white38 : Colors.black38,
           ),
         ),
       ],
     );
   }
 
-  Widget _buildDebtTile(
-      BuildContext context, WidgetRef ref, DebtModel debt, bool isDarkMode) {
+  Widget _debtCard(
+    BuildContext context,
+    WidgetRef ref,
+    DebtModel debt,
+    bool isDark,
+    Color txtClr,
+    Color subClr,
+    Color divClr,
+  ) {
     final isHutang = debt.type == DebtType.hutang;
-    final color = isHutang ? const Color(0xFFE53935) : AppColors.primary;
-    final theme = Theme.of(context);
+    final accentColor = isHutang ? const Color(0xFFE53935) : AppColors.primary;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-            color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100),
+        color: isDark ? AppColors.surfaceDark : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: divClr),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDarkMode ? 0.2 : 0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
       child: Material(
         color: Colors.transparent,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(16),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
-          onTap: () => _showOptions(context, ref, debt, isDarkMode),
+          onTap: () => _showOptions(context, ref, debt, isDark),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             child: Row(
               children: [
+                // Icon
                 Container(
-                  width: 44,
-                  height: 44,
+                  width: 40,
+                  height: 40,
                   decoration: BoxDecoration(
-                    color: color.withValues(alpha: isDarkMode ? 0.15 : 0.08),
-                    borderRadius: BorderRadius.circular(14),
+                    color: accentColor.withValues(
+                        alpha: isDark ? 0.15 : 0.08),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
-                    isHutang ? Icons.call_made_rounded : Icons.call_received_rounded,
-                    color: color,
-                    size: 22,
+                    isHutang
+                        ? Icons.call_made_rounded
+                        : Icons.call_received_rounded,
+                    color: accentColor,
+                    size: 18,
                   ),
                 ),
                 const SizedBox(width: 12),
+
+                // Content
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         debt.contactName,
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          color: isDarkMode ? Colors.white : Colors.black87,
-                          decoration: debt.isPaid ? TextDecoration.lineThrough : null,
+                        style: GoogleFonts.quicksand(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: debt.isPaid
+                              ? subClr
+                              : txtClr,
+                          decoration:
+                              debt.isPaid ? TextDecoration.lineThrough : null,
                         ),
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        debt.title,
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: isDarkMode ? Colors.white38 : Colors.black45,
+                      if (debt.title.isNotEmpty) ...[
+                        const SizedBox(height: 1),
+                        Text(
+                          debt.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.quicksand(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                            color: subClr,
+                          ),
                         ),
-                      ),
+                      ],
                       if (debt.dueDate != null) ...[
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 3),
                         Row(
                           children: [
                             Icon(Icons.event_rounded,
-                                size: 11,
-                                color: isDarkMode ? Colors.white : Colors.black54),
+                                size: 11, color: subClr),
                             const SizedBox(width: 4),
                             Text(
-                              DateFormat('dd MMM yyyy').format(debt.dueDate!),
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                                color: isDarkMode ? Colors.white : Colors.black54,
+                              DateFormat('d MMM yyyy').format(debt.dueDate!),
+                              style: GoogleFonts.quicksand(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: subClr,
                               ),
                             ),
                           ],
@@ -361,37 +402,39 @@ class _DebtListPageState extends ConsumerState<DebtListPage> {
                     ],
                   ),
                 ),
-                const SizedBox(width: 12),
+
+                // Amount + badge
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      _formatRupiah(debt.amount),
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        color: debt.isPaid
-                            ? (isDarkMode ? Colors.white24 : Colors.grey.shade400)
-                            : color,
+                      _fmt.format(debt.amount),
+                      style: GoogleFonts.quicksand(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: debt.isPaid ? subClr : accentColor,
                       ),
                     ),
-                    if (debt.isPaid)
-                      Container(
-                        margin: const EdgeInsets.only(top: 4),
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: const Text(
-                          'LUNAS',
-                          style: TextStyle(
-                            fontSize: 9,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primary,
-                          ),
+                    const SizedBox(height: 4),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: debt.isPaid
+                            ? AppColors.primary.withValues(alpha: 0.1)
+                            : accentColor.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        debt.isPaid ? 'LUNAS' : (isHutang ? 'HUTANG' : 'PIUTANG'),
+                        style: GoogleFonts.quicksand(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.5,
+                          color: debt.isPaid ? AppColors.primary : accentColor,
                         ),
                       ),
+                    ),
                   ],
                 ),
               ],
@@ -402,56 +445,135 @@ class _DebtListPageState extends ConsumerState<DebtListPage> {
     );
   }
 
+  Widget _emptyState(bool isDark, Color subClr) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.07),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.auto_stories_outlined,
+                size: 52, color: AppColors.primary.withValues(alpha: 0.4)),
+          ),
+          const SizedBox(height: 20),
+          Text('Belum ada catatan',
+              style: GoogleFonts.quicksand(
+                  fontSize: 13, fontWeight: FontWeight.w700, color: subClr)),
+          const SizedBox(height: 6),
+          Text('Catat hutang & piutangmu\nagar keuangan lebih teratur.',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.quicksand(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                  color: subClr.withValues(alpha: 0.6))),
+        ],
+      ),
+    );
+  }
+
+  // ── Bottom Sheet Options ──────────────────────────────────────────────────
+
   void _showOptions(
-      BuildContext context, WidgetRef ref, DebtModel debt, bool isDarkMode) {
+      BuildContext context, WidgetRef ref, DebtModel debt, bool isDark) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        padding: const EdgeInsets.fromLTRB(28, 12, 28, 32),
+      builder: (ctx) => Container(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
         decoration: BoxDecoration(
-          color: isDarkMode ? AppColors.surfaceDark : Colors.white,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+          color: isDark ? AppColors.surfaceDark : Colors.white,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            // Pull bar
             Container(
-              width: 40,
+              width: 36,
               height: 4,
               decoration: BoxDecoration(
-                  color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
-                  borderRadius: BorderRadius.circular(2)),
+                color: isDark ? Colors.white12 : Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(2),
+              ),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 20),
+
+            // Debt info summary
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: (debt.type == DebtType.hutang
+                        ? const Color(0xFFE53935)
+                        : AppColors.primary)
+                    .withValues(alpha: 0.07),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    debt.type == DebtType.hutang
+                        ? Icons.call_made_rounded
+                        : Icons.call_received_rounded,
+                    size: 16,
+                    color: debt.type == DebtType.hutang
+                        ? const Color(0xFFE53935)
+                        : AppColors.primary,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(debt.contactName,
+                            style: GoogleFonts.quicksand(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: isDark ? Colors.white : Colors.black87)),
+                        Text(_fmt.format(debt.amount),
+                            style: GoogleFonts.quicksand(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: isDark ? Colors.white38 : Colors.black38)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 14),
+
             if (!debt.isPaid)
-              _buildOptionTile(
+              _optionTile(
                 icon: Icons.check_circle_outline_rounded,
                 label: 'Tandai Sudah Lunas',
                 color: AppColors.primary,
-                isDarkMode: isDarkMode,
+                isDark: isDark,
                 onTap: () {
-                  Navigator.pop(context);
+                  Navigator.pop(ctx);
                   _markAsPaid(context, ref, debt);
                 },
               ),
-            _buildOptionTile(
+            _optionTile(
               icon: Icons.edit_outlined,
               label: 'Edit Catatan',
               color: AppColors.primary,
-              isDarkMode: isDarkMode,
+              isDark: isDark,
               onTap: () {
-                Navigator.pop(context);
+                Navigator.pop(ctx);
                 DebtFormSheet.show(context, debt: debt);
               },
             ),
-            _buildOptionTile(
+            _optionTile(
               icon: Icons.delete_outline_rounded,
               label: 'Hapus Catatan',
               color: const Color(0xFFE53935),
-              isDarkMode: isDarkMode,
+              isDark: isDark,
               onTap: () {
-                Navigator.pop(context);
+                Navigator.pop(ctx);
                 _deleteDebt(context, ref, debt);
               },
             ),
@@ -461,77 +583,88 @@ class _DebtListPageState extends ConsumerState<DebtListPage> {
     );
   }
 
-  Widget _buildOptionTile({
+  Widget _optionTile({
     required IconData icon,
     required String label,
     required Color color,
-    required bool isDarkMode,
+    required bool isDark,
     required VoidCallback onTap,
   }) {
     return ListTile(
       onTap: onTap,
+      dense: true,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(10),
         ),
-        child: Icon(icon, color: color, size: 20),
+        child: Icon(icon, color: color, size: 18),
       ),
-      title: Text(
-        label,
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          color: isDarkMode ? Colors.white : Colors.black87,
-        ),
-      ),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      title: Text(label,
+          style: GoogleFonts.quicksand(
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+            color: isDark ? Colors.white : Colors.black87,
+          )),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     );
   }
 
-  void _markAsPaid(BuildContext context, WidgetRef ref, DebtModel debt) async {
-    final updatedDebt = debt.copyWith(isPaid: true);
-    await ref.read(debtServiceProvider).updateDebt(updatedDebt);
+  // ── Actions ───────────────────────────────────────────────────────────────
 
-    // Catat ke Riwayat Transaksi
+  Future<void> _markAsPaid(
+      BuildContext context, WidgetRef ref, DebtModel debt) async {
+    await ref.read(debtServiceProvider).updateDebt(debt.copyWith(isPaid: true));
+
     final isHutang = debt.type == DebtType.hutang;
-    final title = isHutang
-        ? 'Pembayaran Hutang ke ${debt.contactName}'
-        : 'Pembayaran Piutang dari ${debt.contactName}';
-
-    final transaction = TransactionModel(
-      id: debt.id, // Gunakan ID dari debt agar deterministik & angka saja sesuai permintaan user
-      title: title,
-      description: debt.title.isNotEmpty ? debt.title : (isHutang ? 'Hutang' : 'Piutang'),
+    final tx = TransactionModel(
+      id: debt.id,
+      title: isHutang
+          ? 'Pembayaran Hutang ke ${debt.contactName}'
+          : 'Pembayaran Piutang dari ${debt.contactName}',
+      description: debt.title.isNotEmpty
+          ? debt.title
+          : (isHutang ? 'Hutang' : 'Piutang'),
       amount: debt.amount,
       type: isHutang ? TransactionType.expense : TransactionType.income,
       date: DateTime.now(),
       category: isHutang ? 'Hutang' : 'Piutang',
     );
-    await ref.read(transactionServiceProvider).addTransaction(transaction);
+    await ref.read(transactionServiceProvider).addTransaction(tx);
 
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${isHutang ? 'Hutang' : 'Piutang'} lunas & tercatat di Riwayat'),
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.green,
-        ),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(
+            '${isHutang ? 'Hutang' : 'Piutang'} lunas & tercatat di Riwayat',
+            style: GoogleFonts.quicksand(
+                fontSize: 13, fontWeight: FontWeight.bold)),
+        backgroundColor: AppColors.primary,
+        behavior: SnackBarBehavior.floating,
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        margin: const EdgeInsets.all(12),
+      ));
     }
   }
 
-  void _deleteDebt(BuildContext context, WidgetRef ref, DebtModel debt) async {
-    // Hapus transaksi terkait di Riwayat jika ada (jika sudah lunas)
+  Future<void> _deleteDebt(
+      BuildContext context, WidgetRef ref, DebtModel debt) async {
     try {
       await ref.read(transactionServiceProvider).deleteTransaction(debt.id);
     } catch (_) {}
-
     await ref.read(debtServiceProvider).deleteDebt(debt.id);
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Catatan dihapus'), behavior: SnackBarBehavior.floating),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Catatan dihapus',
+            style: GoogleFonts.quicksand(
+                fontSize: 13, fontWeight: FontWeight.bold)),
+        behavior: SnackBarBehavior.floating,
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        margin: const EdgeInsets.all(12),
+      ));
     }
   }
 }

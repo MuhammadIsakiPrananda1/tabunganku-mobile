@@ -97,145 +97,187 @@ class _PiggyBankPageState extends ConsumerState<PiggyBankPage> {
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 28),
+        padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 20),
-              
+              const SizedBox(height: 24),
+
               // Compact Balance Card
               _buildCompactBalanceCard(balance, isDarkMode),
-              
+
               const SizedBox(height: 32),
-              
-              // Formal Input Label
-              Text('NOMINAL MASUKKAN RECEH *',
-                  style: GoogleFonts.quicksand(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: isDarkMode ? Colors.white24 : Colors.black38,
-                      letterSpacing: 1.2)),
-              const SizedBox(height: 8),
-              
-              // Formal Transaction Style Input
-              TextFormField(
-                controller: _amountController,
-                keyboardType: TextInputType.number,
-                style: GoogleFonts.quicksand(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: isDarkMode ? Colors.white : Colors.black87,
-                ),
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                  _RibuanFormatter(),
-                ],
-                decoration: InputDecoration(
-                  hintText: '0',
-                  hintStyle: GoogleFonts.quicksand(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: isDarkMode ? Colors.white10 : Colors.black26,
+
+              // Input Card Container
+              Card(
+                elevation: isDarkMode ? 1 : 2,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    color: isDarkMode ? const Color(0xFF1a1a1a) : Colors.white,
+                    border: Border.all(
+                      color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100,
+                    ),
                   ),
-                  prefixIcon: Container(
-                    padding: const EdgeInsets.only(left: 20, right: 8),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          Icons.payments_rounded,
-                          color: AppColors.primary,
-                          size: 20,
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Input Label
+                      Text(
+                        'NOMINAL MASUKKAN RECEH',
+                        style: GoogleFonts.quicksand(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          color: isDarkMode ? Colors.white24 : Colors.black38,
+                          letterSpacing: 1.2,
                         ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Rp',
-                          style: GoogleFonts.quicksand(
+                      ),
+                      const SizedBox(height: 12),
+
+                      // Input Field
+                      TextFormField(
+                        controller: _amountController,
+                        keyboardType: TextInputType.number,
+                        style: GoogleFonts.quicksand(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: isDarkMode ? Colors.white : Colors.black87,
+                        ),
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                          _RibuanFormatter(),
+                        ],
+                        decoration: InputDecoration(
+                          hintText: '0',
+                          hintStyle: GoogleFonts.quicksand(
+                            fontSize: 15,
                             fontWeight: FontWeight.bold,
-                            color: AppColors.primary,
-                            fontSize: 14,
+                            color: isDarkMode ? Colors.white10 : Colors.black26,
+                          ),
+                          prefixIcon: Container(
+                            padding: const EdgeInsets.only(left: 16, right: 8),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.payments_rounded,
+                                  color: AppColors.primary,
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Rp',
+                                  style: GoogleFonts.quicksand(
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.primary,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          filled: true,
+                          fillColor: isDarkMode
+                              ? Colors.white.withValues(alpha: 0.03)
+                              : AppColors.background,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: isDarkMode ? Colors.white.withValues(alpha: 0.1) : Colors.grey.shade200,
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: isDarkMode ? Colors.white.withValues(alpha: 0.1) : Colors.grey.shade200,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(
+                              color: AppColors.primary,
+                              width: 1.5,
+                            ),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 14,
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                  filled: true,
-                  fillColor: isDarkMode
-                      ? Colors.white.withValues(alpha: 0.05)
-                      : AppColors.background,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide.none,
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 20, vertical: 16),
-                ),
-                validator: (val) {
-                  if (val == null || val.trim().isEmpty) {
-                    return 'Nominal tidak boleh kosong!';
-                  }
-                  final cleaned = val.replaceAll('.', '');
-                  final amount = double.tryParse(cleaned);
-                  if (amount == null || amount <= 0) {
-                    return 'Nominal tidak valid.';
-                  }
-                  return null;
-                },
-              ),
-              
-              const SizedBox(height: 20),
-              
-              // Formal Primary Button
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: _submitAmount,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  child: Text(
-                    'Simpan ke Celengan',
-                    style: GoogleFonts.quicksand(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
-                    ),
-                  ),
-                ),
-              ),
-              
-              const SizedBox(height: 24),
-              
-              // Secondary Action (Break Jar)
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: balance > 0 ? () => _showBreakJarDialog(context, ref, balance) : null,
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.redAccent,
-                    side: BorderSide(color: Colors.redAccent.withValues(alpha: 0.3), width: 1.5),
-                    backgroundColor: Colors.redAccent.withValues(alpha: 0.02),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  ),
-                  icon: const Icon(Icons.gavel_rounded, size: 18),
-                  label: Text(
-                    'Pecahkan Celengan',
-                    style: GoogleFonts.quicksand(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
-                    ),
+                        validator: (val) {
+                          if (val == null || val.trim().isEmpty) {
+                            return 'Nominal tidak boleh kosong!';
+                          }
+                          final cleaned = val.replaceAll('.', '');
+                          final amount = double.tryParse(cleaned);
+                          if (amount == null || amount <= 0) {
+                            return 'Nominal tidak valid.';
+                          }
+                          return null;
+                        },
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // Submit Button
+                      SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: ElevatedButton(
+                          onPressed: _submitAmount,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: Text(
+                            'Simpan ke Celengan',
+                            style: GoogleFonts.quicksand(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      // Break Jar Button
+                      SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: ElevatedButton.icon(
+                          onPressed: balance > 0 ? () => _showBreakJarDialog(context, ref, balance) : null,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: balance > 0 ? Colors.redAccent : Colors.grey.shade300,
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          icon: const Icon(Icons.gavel_rounded, size: 18),
+                          label: Text(
+                            'Pecahkan Celengan',
+                            style: GoogleFonts.quicksand(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 40),
             ],
           ),

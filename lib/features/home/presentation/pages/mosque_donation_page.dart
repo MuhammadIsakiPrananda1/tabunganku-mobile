@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -18,6 +17,7 @@ class MosqueDonationPage extends ConsumerStatefulWidget {
 class _MosqueDonationPageState extends ConsumerState<MosqueDonationPage> {
   final TextEditingController _mosqueNameController = TextEditingController();
   final TextEditingController _amountController = TextEditingController();
+  final TextEditingController _customTypeController = TextEditingController();
   String _selectedType = 'Infaq Jumat';
 
   final List<String> _donationTypes = [
@@ -33,19 +33,41 @@ class _MosqueDonationPageState extends ConsumerState<MosqueDonationPage> {
   void dispose() {
     _mosqueNameController.dispose();
     _amountController.dispose();
+    _customTypeController.dispose();
     super.dispose();
   }
 
-  void _saveDonation() async {
+  void _saveDonation(Color accentColor) async {
     final amountText = _amountController.text.replaceAll('.', '');
     final amount = double.tryParse(amountText) ?? 0;
     final mosqueName = _mosqueNameController.text.trim();
+    final customType = _customTypeController.text.trim();
 
     if (amount <= 0 || mosqueName.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Mohon isi nama masjid dan nominal sedekah'),
+        SnackBar(
+          content: Text(
+            'Mohon isi nama masjid dan nominal sedekah',
+            style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.white),
+          ),
+          backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
+      return;
+    }
+
+    if (_selectedType == 'Lainnya' && customType.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Mohon isi jenis sedekah kustom Anda',
+            style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.white),
+          ),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
       );
       return;
@@ -54,7 +76,7 @@ class _MosqueDonationPageState extends ConsumerState<MosqueDonationPage> {
     final transaction = TransactionModel(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       title: 'Sedekah: $mosqueName',
-      description: 'Sedekah $_selectedType untuk $mosqueName',
+      description: 'Sedekah ${_selectedType == 'Lainnya' ? customType : _selectedType} untuk $mosqueName',
       amount: amount,
       type: TransactionType.expense,
       date: DateTime.now(),
@@ -66,13 +88,33 @@ class _MosqueDonationPageState extends ConsumerState<MosqueDonationPage> {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Sedekah berhasil dicatat! ✨'),
-          backgroundColor: AppColors.primary,
+          content: Text(
+            'Sedekah berhasil dicatat! ✨',
+            style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.white),
+          ),
+          backgroundColor: accentColor,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
       );
       Navigator.pop(context);
+    }
+  }
+
+  IconData _getDonationIcon(String type) {
+    switch (type) {
+      case 'Infaq Jumat':
+        return Icons.calendar_today_rounded;
+      case 'Pembangunan':
+        return Icons.home_work_rounded;
+      case 'Operasional Masjid':
+        return Icons.settings_rounded;
+      case 'Santunan Yatim':
+        return Icons.child_care_rounded;
+      case 'Zakat Mal':
+        return Icons.account_balance_wallet_rounded;
+      default:
+        return Icons.more_horiz_rounded;
     }
   }
 
@@ -82,9 +124,14 @@ class _MosqueDonationPageState extends ConsumerState<MosqueDonationPage> {
     final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
         (ref.watch(themeProvider) == ThemeMode.system && theme.brightness == Brightness.dark);
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
+    
+    // Page Theme: Mint Green Accent & Pure Dark/Light backgrounds
+    final pageBgColor = isDarkMode ? AppColors.backgroundDark : const Color(0xFFF8FAF9);
+    final accentColor = isDarkMode ? const Color(0xFF2ECC71) : const Color(0xFF27AE60);
+    final inputBgColor = isDarkMode ? Colors.white.withOpacity(0.05) : AppColors.background;
 
     return Scaffold(
-      backgroundColor: isDarkMode ? AppColors.backgroundDark : const Color(0xFFF8FAF9),
+      backgroundColor: pageBgColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -97,56 +144,121 @@ class _MosqueDonationPageState extends ConsumerState<MosqueDonationPage> {
           'Sedekah Masjid',
           style: GoogleFonts.quicksand(
             fontWeight: FontWeight.bold,
-            fontSize: 11,
+            fontSize: 14,
             color: contentColor,
           ),
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildInfoCard(isDarkMode),
-            const SizedBox(height: 32),
+            _buildInfoCard(accentColor),
+            const SizedBox(height: 28),
             
-            _buildInputLabel('NAMA MASJID', contentColor),
+            _buildAlignedInput(
+              'Nama Masjid',
+              _mosqueNameController,
+              (_) {},
+              Icons.mosque_rounded,
+              isDarkMode,
+              accentColor,
+              'Nama Masjid',
+            ),
+            const SizedBox(height: 20),
+            
+            _buildAlignedInput(
+              'Nominal Sedekah',
+              _amountController,
+              (_) {},
+              Icons.account_balance_wallet_rounded,
+              isDarkMode,
+              accentColor,
+              'Nominal Sedekah',
+              isCurrency: true,
+            ),
+            const SizedBox(height: 20),
+            
+            Text(
+              'Jenis Sedekah',
+              style: GoogleFonts.quicksand(
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+                color: contentColor.withOpacity(0.4),
+              ),
+            ),
             const SizedBox(height: 8),
-            _buildTextField(
-              controller: _mosqueNameController,
-              hint: 'Masukkan nama masjid...',
-              icon: Icons.mosque_rounded,
-              isDarkMode: isDarkMode,
+
+            // Premium Dropdown like Tax & Zakat
+            Container(
+              height: 48,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                color: inputBgColor,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  Icon(_getDonationIcon(_selectedType), color: accentColor, size: 18),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: _selectedType,
+                        isExpanded: true,
+                        dropdownColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
+                        icon: Icon(Icons.arrow_drop_down_rounded, color: contentColor.withOpacity(0.4), size: 20),
+                        style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: contentColor, fontSize: 13),
+                        items: _donationTypes.map((type) {
+                          return DropdownMenuItem<String>(
+                            value: type,
+                            child: Text(
+                              type,
+                              style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (val) {
+                          setState(() {
+                            _selectedType = val!;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
             
-            const SizedBox(height: 24),
-            _buildInputLabel('NOMINAL SEDEKAH', contentColor),
-            const SizedBox(height: 8),
-            _buildCurrencyField(
-              controller: _amountController,
-              isDarkMode: isDarkMode,
-            ),
+            if (_selectedType == 'Lainnya') ...[
+              const SizedBox(height: 20),
+              _buildAlignedInput(
+                'Jenis Sedekah Kustom',
+                _customTypeController,
+                (_) {},
+                Icons.edit_note_rounded,
+                isDarkMode,
+                accentColor,
+                'Jenis Sedekah Kustom',
+              ),
+            ],
             
-            const SizedBox(height: 24),
-            _buildInputLabel('JENIS SEDEKAH', contentColor),
-            const SizedBox(height: 12),
-            _buildTypeSelector(isDarkMode),
-            
-            const SizedBox(height: 48),
+            const SizedBox(height: 40),
             SizedBox(
               width: double.infinity,
-              height: 56,
+              height: 44,
               child: ElevatedButton(
-                onPressed: _saveDonation,
+                onPressed: () => _saveDonation(accentColor),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
+                  backgroundColor: accentColor,
                   foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   elevation: 0,
                 ),
-                child: const Text(
+                child: Text(
                   'Simpan Catatan Sedekah',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
+                  style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13),
                 ),
               ),
             ),
@@ -156,137 +268,85 @@ class _MosqueDonationPageState extends ConsumerState<MosqueDonationPage> {
     );
   }
 
-  Widget _buildInputLabel(String label, Color color) {
-    return Text(
-      label,
-      style: TextStyle(
-        fontSize: 10,
-        fontWeight: FontWeight.bold,
-        letterSpacing: 1.5,
-        color: color.withValues(alpha: 0.4),
-      ),
-    );
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String hint,
-    required IconData icon,
-    required bool isDarkMode,
-  }) {
+  Widget _buildAlignedInput(
+    String label, 
+    TextEditingController controller, 
+    Function(String) onChanged, 
+    IconData icon, 
+    bool isDarkMode,
+    Color accentColor,
+    String hintText,
+    {bool isCurrency = false}
+  ) {
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
-    return TextFormField(
-      controller: controller,
-      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: contentColor),
-      decoration: InputDecoration(
-        hintText: hint,
-        hintStyle: TextStyle(fontSize: 11, color: isDarkMode ? Colors.white24 : Colors.grey.shade400),
-        prefixIcon: Icon(icon, color: AppColors.primary, size: 20),
-        filled: true,
-        fillColor: isDarkMode ? Colors.white.withValues(alpha: 0.03) : Colors.white,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: isDarkMode ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: isDarkMode ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCurrencyField({
-    required TextEditingController controller,
-    required bool isDarkMode,
-  }) {
-    final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
-    return TextFormField(
-      controller: controller,
-      keyboardType: TextInputType.number,
-      inputFormatters: [_RibuanFormatter()],
-      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: contentColor),
-      decoration: InputDecoration(
-        hintText: '0',
-        hintStyle: TextStyle(fontSize: 11, color: isDarkMode ? Colors.white24 : Colors.grey.shade400),
-        prefixIcon: Container(
-          padding: const EdgeInsets.only(left: 16, right: 8),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.account_balance_wallet_rounded, color: AppColors.primary, size: 20),
-              const SizedBox(width: 8),
-              const Text('Rp', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 11)),
-            ],
-          ),
-        ),
-        filled: true,
-        fillColor: isDarkMode ? Colors.white.withValues(alpha: 0.03) : Colors.white,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: isDarkMode ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: isDarkMode ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTypeSelector(bool isDarkMode) {
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: _donationTypes.map((type) {
-        final isSelected = _selectedType == type;
-        return InkWell(
-          onTap: () => setState(() => _selectedType = type),
-          borderRadius: BorderRadius.circular(12),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            decoration: BoxDecoration(
-              color: isSelected ? AppColors.primary : (isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.white),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: isSelected ? AppColors.primary : (isDarkMode ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
-              ),
-            ),
-            child: Text(
-              type,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.bold,
-                color: isSelected ? Colors.white : (isDarkMode ? Colors.white70 : AppColors.primaryDark),
-              ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 8),
+          child: Text(
+            label, 
+            style: GoogleFonts.quicksand(
+              fontSize: 11, 
+              fontWeight: FontWeight.bold, 
+              color: contentColor.withOpacity(0.4),
             ),
           ),
-        );
-      }).toList(),
+        ),
+        TextFormField(
+          controller: controller,
+          keyboardType: isCurrency ? TextInputType.number : TextInputType.text,
+          inputFormatters: isCurrency ? [_RibuanFormatter()] : [],
+          style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
+          onChanged: onChanged,
+          decoration: InputDecoration(
+            hintText: hintText,
+            hintStyle: GoogleFonts.quicksand(
+              fontSize: 13,
+              color: isDarkMode ? Colors.white.withOpacity(0.2) : Colors.black.withOpacity(0.25),
+              fontWeight: FontWeight.bold,
+            ),
+            prefixIcon: Container(
+              padding: const EdgeInsets.only(left: 16, right: 8),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(icon, color: accentColor, size: 18),
+                  if (isCurrency) ...[
+                    const SizedBox(width: 8),
+                    Text(
+                      'Rp', 
+                      style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: accentColor, fontSize: 13),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            filled: true,
+            fillColor: isDarkMode ? Colors.white.withOpacity(0.05) : AppColors.background,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          ),
+        ),
+      ],
     );
   }
 
-  Widget _buildInfoCard(bool isDarkMode) {
+  Widget _buildInfoCard(Color accentColor) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(16),
+        color: accentColor.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
-          const Icon(Icons.volunteer_activism_rounded, color: AppColors.primary, size: 24),
-          const SizedBox(width: 16),
-          const Expanded(
+          Icon(Icons.volunteer_activism_rounded, color: accentColor, size: 20),
+          const SizedBox(width: 10),
+          Expanded(
             child: Text(
               'Sedekah adalah bukti keimanan. Catat setiap kebaikanmu untuk memantau keberkahan hartamu.',
-              style: TextStyle(
-                fontSize: 11,
-                color: AppColors.primary,
-                fontWeight: FontWeight.bold,
-                height: 1.5,
-              ),
+              style: GoogleFonts.quicksand(fontSize: 11, color: accentColor, fontWeight: FontWeight.bold, height: 1.4),
             ),
           ),
         ],

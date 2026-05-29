@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tabunganku/features/splash/presentation/pages/splash_screen.dart';
 import 'package:tabunganku/features/home/presentation/pages/dashboard_page.dart';
 import 'package:tabunganku/features/auth/presentation/pages/lock_screen.dart';
-import 'package:tabunganku/features/arisan/presentation/pages/arisan_page.dart';
+import 'package:tabunganku/features/nabung_bersama/presentation/pages/nabung_bersama_page.dart';
 import 'package:tabunganku/features/settings/presentation/pages/pin_setup_page.dart';
 import 'package:tabunganku/features/home/presentation/pages/saving_simulator_page.dart';
 import 'package:tabunganku/features/transaction/presentation/pages/scan_receipt_page.dart';
@@ -13,7 +13,7 @@ import 'package:tabunganku/features/budget/presentation/pages/monthly_budget_pag
 import 'package:tabunganku/features/home/presentation/pages/zakat_page.dart';
 import 'package:tabunganku/features/home/presentation/pages/gold_savings_page.dart';
 import 'package:tabunganku/features/home/presentation/pages/specialized_saving_page.dart';
-import 'package:tabunganku/features/home/presentation/pages/bills_tracker_page.dart';
+import 'package:tabunganku/features/home/presentation/pages/billing_management_page.dart';
 import 'package:tabunganku/features/home/presentation/pages/tax_calculator_page.dart';
 import 'package:tabunganku/features/home/presentation/pages/investment_tracker_page.dart';
 import 'package:tabunganku/features/home/presentation/pages/insurance_tracker_page.dart';
@@ -31,6 +31,13 @@ import 'package:tabunganku/features/home/presentation/pages/mosque_donation_page
 import 'package:tabunganku/features/home/presentation/pages/hajj_umrah_planner_page.dart';
 
 import 'package:tabunganku/features/budget/presentation/pages/overseas_travel_page.dart';
+import 'package:tabunganku/features/home/presentation/pages/ramadan_mode_page.dart';
+import 'package:tabunganku/features/home/presentation/pages/hutang_jariyah_page.dart';
+import 'package:tabunganku/features/home/presentation/pages/brankas_finansial_page.dart';
+import 'package:tabunganku/features/home/presentation/pages/kontak_darurat_finansial_page.dart';
+import 'package:tabunganku/features/home/presentation/pages/nikah_planner_page.dart';
+import 'package:tabunganku/features/home/presentation/pages/kuliah_planner_page.dart';
+import 'package:tabunganku/features/home/presentation/pages/wisata_planner_page.dart';
 
 final appRouterProvider = Provider((ref) {
   return GoRouter(
@@ -59,11 +66,11 @@ final appRouterProvider = Provider((ref) {
         },
       ),
 
-      // Arisan Page
+      // Nabung Bersama Page
       GoRoute(
-        path: '/arisan',
-        name: 'arisan',
-        builder: (context, state) => const ArisanPage(),
+        path: '/nabung-bersama',
+        name: 'nabung-bersama',
+        builder: (context, state) => const NabungBersamaPage(),
       ),
 
       // PIN Setup
@@ -167,11 +174,11 @@ final appRouterProvider = Provider((ref) {
         builder: (context, state) => const BuyingTargetsPage(),
       ),
 
-      // Bills Tracker Page
+      // Billing Management Page
       GoRoute(
         path: '/bills',
         name: 'bills',
-        builder: (context, state) => const BillsTrackerPage(),
+        builder: (context, state) => const BillingManagementPage(),
       ),
 
       // Tax Calculator Page
@@ -251,6 +258,41 @@ final appRouterProvider = Provider((ref) {
         path: '/overseas-travel',
         name: 'overseas-travel',
         builder: (context, state) => const OverseasTravelPage(),
+      ),
+      GoRoute(
+        path: '/ramadan-mode',
+        name: 'ramadan-mode',
+        builder: (context, state) => const RamadanModePage(),
+      ),
+      GoRoute(
+        path: '/hutang-jariyah',
+        name: 'hutang-jariyah',
+        builder: (context, state) => const HutangJariyahPage(),
+      ),
+      GoRoute(
+        path: '/brankas-finansial',
+        name: 'brankas-finansial',
+        builder: (context, state) => const BrankasFinansialPage(),
+      ),
+      GoRoute(
+        path: '/kontak-darurat',
+        name: 'kontak-darurat',
+        builder: (context, state) => const KontakDaruratFinansialPage(),
+      ),
+      GoRoute(
+        path: '/nikah-planner',
+        name: 'nikah-planner',
+        builder: (context, state) => const BiayaNikahPlannerPage(),
+      ),
+      GoRoute(
+        path: '/kuliah-planner',
+        name: 'kuliah-planner',
+        builder: (context, state) => const BiayaKuliahPlannerPage(),
+      ),
+      GoRoute(
+        path: '/wisata-planner',
+        name: 'wisata-planner',
+        builder: (context, state) => const TabunganWisataPage(),
       ),
 
       // Catch-all redirect to splash

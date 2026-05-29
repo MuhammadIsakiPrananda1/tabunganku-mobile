@@ -1,18 +1,20 @@
 import 'dart:convert';
 
-class ArisanModel {
+class NabungBersamaModel {
   final String id;
   final String name;
   final double contributionAmount;
+  final double targetAmount;
   final String period; // 'Weekly', 'Monthly'
   final DateTime startDate;
-  final List<ArisanMemberModel> members;
+  final List<NabungBersamaMemberModel> members;
   final bool isCompleted;
 
-  ArisanModel({
+  NabungBersamaModel({
     required this.id,
     required this.name,
     required this.contributionAmount,
+    required this.targetAmount,
     required this.period,
     required this.startDate,
     required this.members,
@@ -24,6 +26,7 @@ class ArisanModel {
       'id': id,
       'name': name,
       'contributionAmount': contributionAmount,
+      'targetAmount': targetAmount,
       'period': period,
       'startDate': startDate.toIso8601String(),
       'members': members.map((m) => m.toJson()).toList(),
@@ -31,30 +34,33 @@ class ArisanModel {
     };
   }
 
-  factory ArisanModel.fromJson(Map<String, dynamic> json) {
-    return ArisanModel(
+  factory NabungBersamaModel.fromJson(Map<String, dynamic> json) {
+    return NabungBersamaModel(
       id: json['id'] as String,
       name: json['name'] as String,
       contributionAmount: (json['contributionAmount'] as num).toDouble(),
+      targetAmount: (json['targetAmount'] as num? ?? 0.0).toDouble(),
       period: json['period'] as String,
       startDate: DateTime.parse(json['startDate'] as String),
-      members: (json['members'] as List).map((m) => ArisanMemberModel.fromJson(m)).toList(),
+      members: (json['members'] as List).map((m) => NabungBersamaMemberModel.fromJson(m)).toList(),
       isCompleted: json['isCompleted'] as bool? ?? false,
     );
   }
 
-  ArisanModel copyWith({
+  NabungBersamaModel copyWith({
     String? name,
     double? contributionAmount,
+    double? targetAmount,
     String? period,
     DateTime? startDate,
-    List<ArisanMemberModel>? members,
+    List<NabungBersamaMemberModel>? members,
     bool? isCompleted,
   }) {
-    return ArisanModel(
+    return NabungBersamaModel(
       id: id,
       name: name ?? this.name,
       contributionAmount: contributionAmount ?? this.contributionAmount,
+      targetAmount: targetAmount ?? this.targetAmount,
       period: period ?? this.period,
       startDate: startDate ?? this.startDate,
       members: members ?? this.members,
@@ -63,13 +69,13 @@ class ArisanModel {
   }
 }
 
-class ArisanMemberModel {
+class NabungBersamaMemberModel {
   final String id;
   final String name;
   final bool hasWon;
   final List<DateTime> paymentDates;
 
-  ArisanMemberModel({
+  NabungBersamaMemberModel({
     required this.id,
     required this.name,
     this.hasWon = false,
@@ -85,8 +91,8 @@ class ArisanMemberModel {
     };
   }
 
-  factory ArisanMemberModel.fromJson(Map<String, dynamic> json) {
-    return ArisanMemberModel(
+  factory NabungBersamaMemberModel.fromJson(Map<String, dynamic> json) {
+    return NabungBersamaMemberModel(
       id: json['id'] as String,
       name: json['name'] as String,
       hasWon: json['hasWon'] as bool? ?? false,
@@ -94,12 +100,12 @@ class ArisanMemberModel {
     );
   }
 
-  ArisanMemberModel copyWith({
+  NabungBersamaMemberModel copyWith({
     String? name,
     bool? hasWon,
     List<DateTime>? paymentDates,
   }) {
-    return ArisanMemberModel(
+    return NabungBersamaMemberModel(
       id: id,
       name: name ?? this.name,
       hasWon: hasWon ?? this.hasWon,
@@ -107,3 +113,4 @@ class ArisanMemberModel {
     );
   }
 }
+

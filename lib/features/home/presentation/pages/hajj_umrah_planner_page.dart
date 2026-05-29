@@ -24,6 +24,11 @@ class _HajjUmrahPlannerPageState extends ConsumerState<HajjUmrahPlannerPage> {
   final _nameController = TextEditingController();
   DateTime _selectedDate = DateTime.now().add(const Duration(days: 365 * 5));
 
+  final List<Map<String, dynamic>> _programTypes = [
+    {'code': 'Haji', 'label': 'Perjalanan Haji', 'icon': Icons.mosque_rounded},
+    {'code': 'Umrah', 'label': 'Ibadah Umrah', 'icon': Icons.star_rounded},
+  ];
+
   @override
   void dispose() {
     _amountController.dispose();
@@ -35,6 +40,10 @@ class _HajjUmrahPlannerPageState extends ConsumerState<HajjUmrahPlannerPage> {
     return NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(amount);
   }
 
+  IconData _getProgramIcon(String code) {
+    return _programTypes.firstWhere((p) => p['code'] == code)['icon'] as IconData;
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -42,10 +51,15 @@ class _HajjUmrahPlannerPageState extends ConsumerState<HajjUmrahPlannerPage> {
         (ref.watch(themeProvider) == ThemeMode.system && theme.brightness == Brightness.dark);
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
     
+    // Page Theme: Mint Green Accent & Pure Dark/Light backgrounds
+    final pageBgColor = isDarkMode ? AppColors.backgroundDark : const Color(0xFFF8FAF9);
+    final accentColor = isDarkMode ? const Color(0xFF2ECC71) : const Color(0xFF27AE60);
+    final inputBgColor = isDarkMode ? Colors.white.withOpacity(0.05) : AppColors.background;
+
     final targetsAsync = ref.watch(savingTargetsStreamProvider);
 
     return Scaffold(
-      backgroundColor: isDarkMode ? AppColors.backgroundDark : const Color(0xFFF8FAF9),
+      backgroundColor: pageBgColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -58,7 +72,7 @@ class _HajjUmrahPlannerPageState extends ConsumerState<HajjUmrahPlannerPage> {
           'Haji & Umrah', 
           style: GoogleFonts.quicksand(
             fontWeight: FontWeight.bold,
-            fontSize: 11,
+            fontSize: 14,
             color: contentColor,
           ),
         ),
@@ -72,103 +86,107 @@ class _HajjUmrahPlannerPageState extends ConsumerState<HajjUmrahPlannerPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildInfoCard(),
-                const SizedBox(height: 24),
+                _buildInfoCard(accentColor),
+                const SizedBox(height: 28),
 
-                Text('PILIH PROGRAM', style: GoogleFonts.quicksand(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5, color: contentColor.withValues(alpha: 0.4))),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    _buildCompactTypeCard('Haji', 'Haji', Icons.mosque_rounded, isDarkMode),
-                    const SizedBox(width: 12),
-                    _buildCompactTypeCard('Umrah', 'Umrah', Icons.star_rounded, isDarkMode),
-                  ],
+                Text(
+                  'Pilih Program', 
+                  style: GoogleFonts.quicksand(
+                    fontSize: 11, 
+                    fontWeight: FontWeight.bold, 
+                    color: contentColor.withOpacity(0.4),
+                  ),
+                ),
+                const SizedBox(height: 8),
+
+                // Premium Dropdown like Tax & Zakat & Mosque
+                Container(
+                  height: 48,
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: inputBgColor,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(_getProgramIcon(_activeType), color: accentColor, size: 18),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            value: _activeType,
+                            isExpanded: true,
+                            dropdownColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
+                            icon: Icon(Icons.arrow_drop_down_rounded, color: contentColor.withOpacity(0.4), size: 20),
+                            style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: contentColor, fontSize: 13),
+                            items: _programTypes.map((p) {
+                              return DropdownMenuItem<String>(
+                                value: p['code'] as String,
+                                child: Text(
+                                  p['label'] as String,
+                                  style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
+                                ),
+                              );
+                            }).toList(),
+                            onChanged: (val) {
+                              setState(() {
+                                _activeType = val!;
+                                _nameController.clear();
+                                _amountController.clear();
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
 
-                const SizedBox(height: 32),
-                _buildInputForm(isDarkMode),
+                const SizedBox(height: 24),
+                _buildInputForm(isDarkMode, accentColor),
                 
-                const SizedBox(height: 40),
-                Text('RENCANA AKTIF', style: GoogleFonts.quicksand(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5, color: contentColor.withValues(alpha: 0.4))),
-                const SizedBox(height: 16),
+                const SizedBox(height: 36),
+                Text(
+                  'Rencana Aktif', 
+                  style: GoogleFonts.quicksand(
+                    fontSize: 11, 
+                    fontWeight: FontWeight.bold, 
+                    color: contentColor.withOpacity(0.4),
+                  ),
+                ),
+                const SizedBox(height: 12),
                 if (filteredTargets.isEmpty)
                   _buildEmptyState(isDarkMode)
                 else
-                  ...filteredTargets.map((t) => _buildTargetItem(t, isDarkMode)),
+                  ...filteredTargets.map((t) => _buildTargetItem(t, isDarkMode, accentColor)),
                 const SizedBox(height: 40),
               ],
             ),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(accentColor))),
         error: (e, _) => Center(child: Text('Error: $e')),
       ),
     );
   }
 
-  Widget _buildCompactTypeCard(String type, String label, IconData icon, bool isDarkMode) {
-    final isSelected = _activeType == type;
-    final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
-    
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => setState(() {
-          _activeType = type;
-          _nameController.clear();
-          _amountController.clear();
-        }),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(
-            color: isSelected ? AppColors.primary : (isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.white),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: isSelected ? AppColors.primary : (isDarkMode ? Colors.white10 : Colors.black.withValues(alpha: 0.05))),
-            boxShadow: isSelected ? [
-              BoxShadow(
-                color: AppColors.primary.withValues(alpha: 0.3),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              )
-            ] : null,
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, color: isSelected ? Colors.white : AppColors.primary, size: 16),
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: GoogleFonts.quicksand(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 11,
-                  color: isSelected ? Colors.white : contentColor
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInfoCard() {
+  Widget _buildInfoCard(Color accentColor) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(16),
+        color: accentColor.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
-          const Icon(Icons.info_outline_rounded, color: AppColors.primary, size: 20),
-          const SizedBox(width: 12),
+          Icon(Icons.info_outline_rounded, color: accentColor, size: 18),
+          const SizedBox(width: 10),
           Expanded(
             child: Text(
               _activeType == 'Haji' 
                 ? 'Persiapkan bekal perjalanan haji Anda sedini mungkin untuk ibadah yang lebih tenang.' 
                 : 'Wujudkan impian ibadah Umrah Anda dengan perencanaan keuangan yang matang.',
-              style: GoogleFonts.quicksand(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.bold, height: 1.4),
+              style: GoogleFonts.quicksand(fontSize: 11, color: accentColor, fontWeight: FontWeight.bold, height: 1.4),
             ),
           ),
         ],
@@ -176,97 +194,125 @@ class _HajjUmrahPlannerPageState extends ConsumerState<HajjUmrahPlannerPage> {
     );
   }
 
-  Widget _buildInputForm(bool isDarkMode) {
+  Widget _buildInputForm(bool isDarkMode, Color accentColor) {
     return Column(
       children: [
         _buildAlignedInput(
-          'NAMA RENCANA', 
+          'Nama Rencana', 
           _nameController, 
           Icons.edit_note_rounded, 
           isDarkMode,
-          hint: 'Masukkan nama rencana',
+          accentColor,
+          hint: 'Nama Rencana',
         ),
         const SizedBox(height: 20),
         _buildAlignedInput(
-          'TARGET TABUNGAN', 
+          'Target Tabungan', 
           _amountController, 
           Icons.account_balance_wallet_rounded, 
           isDarkMode,
+          accentColor,
           isAmount: true,
-          hint: '0',
+          hint: 'Target Tabungan',
         ),
         const SizedBox(height: 20),
-        _buildDatePicker(isDarkMode),
+        _buildDatePicker(isDarkMode, accentColor),
         const SizedBox(height: 32),
         SizedBox(
           width: double.infinity,
-          height: 54,
+          height: 44,
           child: ElevatedButton(
-            onPressed: () => _saveTarget(),
+            onPressed: () => _saveTarget(accentColor),
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
+              backgroundColor: accentColor,
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               elevation: 0,
             ),
-            child: Text('Simpan Rencana', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 16)),
+            child: Text('Simpan Rencana', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13)),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildAlignedInput(String label, TextEditingController controller, IconData icon, bool isDarkMode, {bool isAmount = false, String? hint}) {
+  Widget _buildAlignedInput(
+    String label, 
+    TextEditingController controller, 
+    IconData icon, 
+    bool isDarkMode, 
+    Color accentColor,
+    {bool isAmount = false, 
+    required String hint}
+  ) {
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.only(left: 4, bottom: 8),
-          child: Text(label, style: GoogleFonts.quicksand(fontSize: 10, fontWeight: FontWeight.bold, color: contentColor.withValues(alpha: 0.5), letterSpacing: 1)),
+          child: Text(
+            label, 
+            style: GoogleFonts.quicksand(
+              fontSize: 11, 
+              fontWeight: FontWeight.bold, 
+              color: contentColor.withOpacity(0.4),
+            ),
+          ),
         ),
         TextFormField(
           controller: controller,
           keyboardType: isAmount ? TextInputType.number : TextInputType.text,
           inputFormatters: isAmount ? [_RibuanFormatter()] : null,
-          style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 14, color: contentColor),
+          style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: GoogleFonts.quicksand(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: isDarkMode ? Colors.white10 : Colors.black12),
+              fontSize: 13,
+              fontWeight: FontWeight.bold,
+              color: isDarkMode ? Colors.white.withOpacity(0.2) : Colors.black.withOpacity(0.25),
+            ),
             prefixIcon: Container(
-              padding: const EdgeInsets.only(left: 20, right: 8),
+              padding: const EdgeInsets.only(left: 16, right: 8),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(icon, color: AppColors.primary, size: 20),
+                  Icon(icon, color: accentColor, size: 18),
                   if (isAmount) ...[
                     const SizedBox(width: 8),
-                    const Text('Rp', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 13)),
+                    Text(
+                      'Rp', 
+                      style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: accentColor, fontSize: 13),
+                    ),
                   ],
                 ],
               ),
             ),
             filled: true,
-            fillColor: isDarkMode ? Colors.white.withValues(alpha: 0.05) : AppColors.background,
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            fillColor: isDarkMode ? Colors.white.withOpacity(0.05) : AppColors.background,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildDatePicker(bool isDarkMode) {
+  Widget _buildDatePicker(bool isDarkMode, Color accentColor) {
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.only(left: 4, bottom: 8),
-          child: Text('ESTIMASI KEBERANGKATAN', style: GoogleFonts.quicksand(fontSize: 10, fontWeight: FontWeight.bold, color: contentColor.withValues(alpha: 0.5), letterSpacing: 1)),
+          child: Text(
+            'Estimasi Keberangkatant', 
+            style: GoogleFonts.quicksand(
+              fontSize: 11, 
+              fontWeight: FontWeight.bold, 
+              color: contentColor.withOpacity(0.4),
+            ),
+          ),
         ),
         InkWell(
           onTap: () async {
@@ -279,21 +325,21 @@ class _HajjUmrahPlannerPageState extends ConsumerState<HajjUmrahPlannerPage> {
             if (picked != null) setState(() => _selectedDate = picked);
           },
           child: Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : AppColors.background,
-              borderRadius: BorderRadius.circular(16),
+              color: isDarkMode ? Colors.white.withOpacity(0.05) : AppColors.background,
+              borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
               children: [
-                const Icon(Icons.calendar_today_rounded, size: 18, color: AppColors.primary),
+                Icon(Icons.calendar_today_rounded, size: 18, color: accentColor),
                 const SizedBox(width: 12),
                 Text(
                   DateFormat('MMMM yyyy', 'id_ID').format(_selectedDate), 
-                  style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11, color: contentColor)
+                  style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor)
                 ),
                 const Spacer(),
-                Icon(Icons.chevron_right_rounded, color: isDarkMode ? Colors.white10 : Colors.grey.shade300),
+                Icon(Icons.chevron_right_rounded, color: isDarkMode ? Colors.white24 : Colors.grey.shade400, size: 20),
               ],
             ),
           ),
@@ -302,10 +348,20 @@ class _HajjUmrahPlannerPageState extends ConsumerState<HajjUmrahPlannerPage> {
     );
   }
 
-  Future<void> _saveTarget() async {
+  Future<void> _saveTarget(Color accentColor) async {
     final amount = double.tryParse(_amountController.text.replaceAll('.', '')) ?? 0;
     if (amount <= 0 || _nameController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Lengkapi nama dan nominal rencana.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Lengkapi nama dan nominal rencana.',
+            style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.white),
+          ),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
       return;
     }
 
@@ -321,8 +377,11 @@ class _HajjUmrahPlannerPageState extends ConsumerState<HajjUmrahPlannerPage> {
     await ref.read(savingTargetServiceProvider).addTarget(target);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Rencana $_activeType Berhasil Dibuat'),
-        backgroundColor: AppColors.primary,
+        content: Text(
+          'Rencana $_activeType Berhasil Dibuat',
+          style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.white),
+        ),
+        backgroundColor: accentColor,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ));
@@ -331,7 +390,7 @@ class _HajjUmrahPlannerPageState extends ConsumerState<HajjUmrahPlannerPage> {
     }
   }
 
-  Widget _buildTargetItem(SavingTargetModel target, bool isDarkMode) {
+  Widget _buildTargetItem(SavingTargetModel target, bool isDarkMode, Color accentColor) {
     final transactions = ref.watch(transactionsByGroupProvider(null));
     final targetBalance = transactions
         .where((t) => !t.date.isBefore(target.createdAt))
@@ -341,11 +400,13 @@ class _HajjUmrahPlannerPageState extends ConsumerState<HajjUmrahPlannerPage> {
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: isDarkMode ? AppColors.surfaceDark : Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: isDarkMode ? Colors.white10 : Colors.grey.shade100),
+        border: Border.all(
+          color: isDarkMode ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.03),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -356,13 +417,16 @@ class _HajjUmrahPlannerPageState extends ConsumerState<HajjUmrahPlannerPage> {
               Expanded(
                 child: Text(
                   target.name, 
-                  style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11, color: contentColor),
+                  style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 14, color: contentColor),
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
                 ),
               ),
               const SizedBox(width: 8),
-              Text('${(progress * 100).toInt()}%', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 11)),
+              Text(
+                '${(progress * 100).toInt()}%', 
+                style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: accentColor, fontSize: 12),
+              ),
             ],
           ),
           const SizedBox(height: 12),
@@ -371,12 +435,12 @@ class _HajjUmrahPlannerPageState extends ConsumerState<HajjUmrahPlannerPage> {
             child: LinearProgressIndicator(
               value: progress,
               minHeight: 6,
-              backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-              color: AppColors.primary,
+              backgroundColor: accentColor.withOpacity(0.1),
+              color: accentColor,
             ),
           ),
           const SizedBox(height: 20),
-          _buildMilestones(target, targetBalance, isDarkMode),
+          _buildMilestones(target, targetBalance, isDarkMode, accentColor),
           const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -390,7 +454,7 @@ class _HajjUmrahPlannerPageState extends ConsumerState<HajjUmrahPlannerPage> {
     );
   }
 
-  Widget _buildMilestones(SavingTargetModel target, double balance, bool isDarkMode) {
+  Widget _buildMilestones(SavingTargetModel target, double balance, bool isDarkMode, Color accentColor) {
     final milestones = target.category == 'Haji' 
       ? [
           {'label': 'Daftar (Porsi)', 'amount': 25000000.0},
@@ -406,8 +470,14 @@ class _HajjUmrahPlannerPageState extends ConsumerState<HajjUmrahPlannerPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('MILESTONE PERJALANAN', 
-          style: GoogleFonts.quicksand(fontSize: 8, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white24 : Colors.black26, letterSpacing: 1)),
+        Text(
+          'Milestone Perjalanan', 
+          style: GoogleFonts.quicksand(
+            fontSize: 9, 
+            fontWeight: FontWeight.bold, 
+            color: isDarkMode ? Colors.white30 : Colors.black38,
+          ),
+        ),
         const SizedBox(height: 10),
         ...milestones.map((m) {
           final isReached = balance >= (m['amount'] as double);
@@ -417,23 +487,26 @@ class _HajjUmrahPlannerPageState extends ConsumerState<HajjUmrahPlannerPage> {
               children: [
                 Icon(
                   isReached ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
-                  size: 12,
-                  color: isReached ? AppColors.primary : (isDarkMode ? Colors.white10 : Colors.grey.shade300),
+                  size: 14,
+                  color: isReached ? accentColor : (isDarkMode ? Colors.white10 : Colors.grey.shade300),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: Text(m['label'] as String, 
+                  child: Text(
+                    m['label'] as String, 
                     style: GoogleFonts.quicksand(
-                      fontSize: 10, 
-                      fontWeight: isReached ? FontWeight.bold : FontWeight.bold,
+                      fontSize: 12, 
+                      fontWeight: FontWeight.bold,
                       color: isReached ? (isDarkMode ? Colors.white : Colors.black87) : Colors.grey,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 const SizedBox(width: 8),
-                Text(_formatRupiah(m['amount'] as double), 
-                  style: GoogleFonts.quicksand(fontSize: 9, color: isReached ? AppColors.primary : Colors.grey)),
+                Text(
+                  _formatRupiah(m['amount'] as double), 
+                  style: GoogleFonts.quicksand(fontSize: 11, color: isReached ? accentColor : Colors.grey, fontWeight: FontWeight.bold),
+                ),
               ],
             ),
           );
@@ -446,8 +519,22 @@ class _HajjUmrahPlannerPageState extends ConsumerState<HajjUmrahPlannerPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: GoogleFonts.quicksand(fontSize: 8, color: isDarkMode ? Colors.white24 : Colors.black26, fontWeight: FontWeight.bold)),
-        Text(value, style: GoogleFonts.quicksand(fontSize: 11, fontWeight: FontWeight.bold)),
+        Text(
+          label, 
+          style: GoogleFonts.quicksand(
+            fontSize: 9, 
+            color: isDarkMode ? Colors.white30 : Colors.black38, 
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          value, 
+          style: GoogleFonts.quicksand(
+            fontSize: 13, 
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ],
     );
   }
@@ -458,10 +545,16 @@ class _HajjUmrahPlannerPageState extends ConsumerState<HajjUmrahPlannerPage> {
         padding: const EdgeInsets.symmetric(vertical: 40),
         child: Column(
           children: [
-            Icon(Icons.auto_awesome_rounded, size: 40, color: isDarkMode ? Colors.white10 : Colors.grey.shade100),
+            Icon(Icons.auto_awesome_rounded, size: 40, color: isDarkMode ? Colors.white10 : Colors.grey.shade200),
             const SizedBox(height: 16),
-            Text('Belum ada rencana aktif.', 
-              style: GoogleFonts.quicksand(color: isDarkMode ? Colors.white24 : Colors.grey.shade400, fontSize: 11)),
+            Text(
+              'Belum ada rencana aktif.', 
+              style: GoogleFonts.quicksand(
+                color: isDarkMode ? Colors.white24 : Colors.grey.shade400, 
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ],
         ),
       ),

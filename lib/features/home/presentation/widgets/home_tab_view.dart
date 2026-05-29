@@ -41,6 +41,7 @@ class HomeTabView extends ConsumerStatefulWidget {
 
 class _HomeTabViewState extends ConsumerState<HomeTabView> {
   int _currentTargetIndex = 0;
+  int _selectedAllocationTab = 2; // 0: Pemasukan, 1: Pengeluaran, 2: Semua
 
   String _formatRupiah(double amount) {
     return NumberFormat.currency(
@@ -530,8 +531,8 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
     ),
     _QuickActionItem(
       icon: Icons.groups_rounded,
-      label: 'Arisan',
-      type: QuickActionType.arisan,
+      label: 'Nabung Bersama',
+      type: QuickActionType.nabungBersama,
       baseColor: Colors.pink,
     ),
     _QuickActionItem(
@@ -854,14 +855,13 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                                         .clamp(0, double.infinity))
                                 : '••••••',
                             isDarkMode,
-                            valueColor: (target.targetAmount - targetBalance) <= 0
-                                ? Colors.green
-                                : null,
+                            valueColor:
+                                (target.targetAmount - targetBalance) <= 0
+                                    ? Colors.green
+                                    : null,
                             crossAxisAlignment: CrossAxisAlignment.center),
-                        _targetDetailItem(
-                            'GOAL',
-                            _formatRupiah(target.targetAmount),
-                            isDarkMode,
+                        _targetDetailItem('GOAL',
+                            _formatRupiah(target.targetAmount), isDarkMode,
                             crossAxisAlignment: CrossAxisAlignment.end),
                       ],
                     ),
@@ -902,22 +902,109 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
     );
   }
 
+  Widget _buildAllocationDropdown(bool isDarkMode) {
+    final labels = {
+      0: 'Pemasukan',
+      1: 'Pengeluaran',
+      2: 'Semua',
+    };
+    
+    final activeColors = {
+      0: isDarkMode ? const Color(0xFF2ECC71) : const Color(0xFF27AE60),
+      1: isDarkMode ? const Color(0xFFE74C3C) : const Color(0xFFC0392B),
+      2: isDarkMode ? const Color(0xFF3498DB) : const Color(0xFF2980B9),
+    };
+    
+    final currentColor = activeColors[_selectedAllocationTab] ?? AppColors.primary;
+
+    return PopupMenuButton<int>(
+      initialValue: _selectedAllocationTab,
+      onSelected: (int newValue) {
+        setState(() {
+          _selectedAllocationTab = newValue;
+        });
+      },
+      offset: const Offset(0, 34), // Displays the menu right below the button
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      color: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
+      clipBehavior: Clip.antiAlias,
+      elevation: 3,
+      itemBuilder: (BuildContext context) {
+        return labels.entries.map((entry) {
+          final color = activeColors[entry.key] ?? currentColor;
+          return PopupMenuItem<int>(
+            value: entry.key,
+            height: 38,
+            child: Text(
+              entry.value,
+              style: GoogleFonts.quicksand(
+                fontWeight: FontWeight.w900,
+                fontSize: 11,
+                color: color,
+              ),
+            ),
+          );
+        }).toList();
+      },
+      child: Container(
+        height: 32,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: currentColor.withOpacity(isDarkMode ? 0.12 : 0.08),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: currentColor.withOpacity(isDarkMode ? 0.3 : 0.2),
+            width: 1,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              labels[_selectedAllocationTab]!,
+              style: GoogleFonts.quicksand(
+                fontSize: 11,
+                fontWeight: FontWeight.w900,
+                color: currentColor,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Icon(
+              Icons.keyboard_arrow_down_rounded,
+              size: 16,
+              color: currentColor,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildAllocationSection(double totalIncome, double totalExpense,
       List<TransactionModel> transactions, bool isDarkMode) {
-    final bool isEmpty = totalIncome == 0 && totalExpense == 0;
-
-    final actualTotal = totalIncome + totalExpense;
-    final totalVal = isEmpty ? 1.0 : actualTotal;
-    final incomePercent =
-        isEmpty ? '0' : (totalIncome / totalVal * 100).toStringAsFixed(0);
-    final expensePercent =
-        isEmpty ? '0' : (totalExpense / totalVal * 100).toStringAsFixed(0);
+    final bool isEmptyAll = totalIncome == 0 && totalExpense == 0;
 
     return Container(
-      padding: const EdgeInsets.all(20), // More compact padding
+      padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
         color: isDarkMode ? AppColors.surfaceDark : Colors.white,
-        borderRadius: BorderRadius.circular(32),
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(
+          color: isDarkMode
+              ? Colors.white.withOpacity(0.04)
+              : Colors.black.withOpacity(0.03),
+        ),
+        boxShadow: isDarkMode
+            ? []
+            : [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.02),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -925,132 +1012,31 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('ALOKASI PENGELUARAN',
+              Text('ALOKASI DANA',
                   style: GoogleFonts.quicksand(
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.5,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1.8,
                       color: isDarkMode
                           ? Colors.white30
-                          : Colors.teal.shade800.withValues(alpha: 0.4))),
-              Icon(Icons.pie_chart_outline_rounded,
-                  size: 16,
-                  color: isDarkMode ? Colors.white24 : Colors.grey.shade300),
+                          : AppColors.primaryDark.withValues(alpha: 0.4))),
+              _buildAllocationDropdown(isDarkMode),
             ],
           ),
-          const SizedBox(height: 16), // Reduced from 32
+          const SizedBox(height: 16),
           Column(
             children: [
-              // Centered Pie Chart with Stack for Total
-              SizedBox(
-                height: 210, // Keeping chart size as requested
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    PieChart(
-                      PieChartData(
-                        sectionsSpace: 4,
-                        centerSpaceRadius: 60,
-                        sections: isEmpty
-                            ? [
-                                PieChartSectionData(
-                                  color: isDarkMode
-                                      ? Colors.white10
-                                      : Colors.grey.shade100,
-                                  value: 1,
-                                  radius: 12,
-                                  showTitle: false,
-                                ),
-                              ]
-                            : [
-                                if (totalIncome > 0)
-                                  PieChartSectionData(
-                                    color: Colors.green,
-                                    value: totalIncome,
-                                    radius: 14,
-                                    title: '$incomePercent%',
-                                    showTitle: true,
-                                    titlePositionPercentageOffset: 2.2,
-                                    titleStyle: GoogleFonts.quicksand(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                      color: isDarkMode
-                                          ? Colors.green.shade300
-                                          : Colors.green.shade700,
-                                    ),
-                                  ),
-                                if (totalExpense > 0)
-                                  PieChartSectionData(
-                                    color: Colors.red,
-                                    value: totalExpense,
-                                    radius: 14,
-                                    title: '$expensePercent%',
-                                    showTitle: true,
-                                    titlePositionPercentageOffset: 2.2,
-                                    titleStyle: GoogleFonts.quicksand(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                      color: isDarkMode
-                                          ? Colors.red.shade300
-                                          : Colors.red.shade700,
-                                    ),
-                                  ),
-                              ],
-                      ),
-                    ),
-                    if (isEmpty)
-                      Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.analytics_outlined,
-                              size: 24,
-                              color: isDarkMode
-                                  ? Colors.white10
-                                  : Colors.grey.shade300),
-                          const SizedBox(height: 4),
-                          Text('Belum Ada Data',
-                              style: GoogleFonts.quicksand(
-                                  fontSize: 9.5,
-                                  fontWeight: FontWeight.bold,
-                                  color: isDarkMode
-                                      ? Colors.white10
-                                      : Colors.grey.shade300)),
-                        ],
-                      )
-                    else
-                      Icon(Icons.auto_awesome_mosaic_rounded,
-                          size: 20,
-                          color: isDarkMode
-                              ? Colors.white10
-                              : Colors.grey.shade100),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 12), // Reduced from 24
-              // Structured Table Layout instead of centered indicators
-              Container(
-                margin: const EdgeInsets.only(top: 8),
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: Table(
-                  columnWidths: const {
-                    0: IntrinsicColumnWidth(),
-                    1: FlexColumnWidth(1),
-                    2: FlexColumnWidth(1.5),
-                  },
-                  defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                  children: [
-                    _buildTableRow(
-                        'Pemasukan', totalIncome, Colors.green, isDarkMode),
-                    _buildTableRow(
-                        'Pengeluaran', totalExpense, Colors.red, isDarkMode),
-                    _buildTableRow('Total Alokasi', actualTotal,
-                        isDarkMode ? Colors.white : Colors.black87, isDarkMode,
-                        isTotal: true),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24), // Reduced from 32
-              _buildCategoryBreakdown(transactions, isDarkMode),
+              if (_selectedAllocationTab == 0) ...[
+                // PEMASUKAN TAB
+                _buildIncomeChartAndData(transactions, isDarkMode),
+              ] else if (_selectedAllocationTab == 1) ...[
+                // PENGELUARAN TAB
+                _buildExpenseChartAndData(transactions, isDarkMode),
+              ] else ...[
+                // ALOKASI SEMUA TAB
+                _buildAllAllocationChartAndData(totalIncome, totalExpense,
+                    transactions, isDarkMode, isEmptyAll),
+              ],
             ],
           ),
         ],
@@ -1058,89 +1044,339 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
     );
   }
 
-  TableRow _buildTableRow(
-      String label, double val, Color color, bool isDarkMode,
-      {bool isTotal = false}) {
-    return TableRow(
+  Widget _buildIncomeChartAndData(
+      List<TransactionModel> transactions, bool isDarkMode) {
+    final incomes =
+        transactions.where((t) => t.type == TransactionType.income).toList();
+    final bool isEmpty = incomes.isEmpty;
+
+    final categoryMap = <String, double>{};
+    for (var t in incomes) {
+      categoryMap[t.category] = (categoryMap[t.category] ?? 0) + t.amount;
+    }
+    final totalInc = categoryMap.values.fold(0.0, (sum, val) => sum + val);
+    final sortedCategories = categoryMap.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+
+    return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          child: Row(
+        SizedBox(
+          height: 140,
+          child: Stack(
+            alignment: Alignment.center,
             children: [
-              Container(
-                width: 8,
-                height: 8,
-                decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+              PieChart(
+                PieChartData(
+                  sectionsSpace: 3,
+                  centerSpaceRadius: 46,
+                  sections: isEmpty
+                      ? [
+                          PieChartSectionData(
+                            color: isDarkMode
+                                ? Colors.white10
+                                : Colors.grey.shade100,
+                            value: 1,
+                            radius: 14,
+                            showTitle: false,
+                          ),
+                        ]
+                      : sortedCategories.asMap().entries.map((e) {
+                          final index = e.key;
+                          final entry = e.value;
+                          final percentage = totalInc > 0
+                              ? (entry.value / totalInc * 100)
+                              : 0.0;
+                          final baseColor = const Color(0xFF2ECC71);
+                          final color = baseColor.withOpacity((1.0 - (index * 0.15)).clamp(0.4, 1.0));
+                          final showTitle = percentage >= 5;
+                          return PieChartSectionData(
+                            color: color,
+                            value: entry.value,
+                            radius: 14,
+                            title: showTitle ? '${percentage.toStringAsFixed(0)}%' : '',
+                            showTitle: false,
+                            titlePositionPercentageOffset: 0.55,
+                            titleStyle: GoogleFonts.quicksand(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          );
+                        }).toList(),
+                ),
               ),
-              const SizedBox(width: 12),
-              Text(
-                label,
-                style: GoogleFonts.quicksand(
-                  fontSize: 10,
-                  fontWeight: isTotal ? FontWeight.bold : FontWeight.bold,
-                  color: isDarkMode ? Colors.white70 : Colors.black54,
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Text(
+                    isEmpty || sortedCategories.isEmpty
+                        ? '0%'
+                        : '${(sortedCategories.first.value / totalInc * 100).toStringAsFixed(0)}%',
+                    style: GoogleFonts.quicksand(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w900,
+                      color: isDarkMode ? Colors.white : AppColors.primaryDark,
+                    ),
+                  ),
                 ),
               ),
             ],
           ),
         ),
-        const SizedBox(), // Spacer column
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerRight,
-            child: Text(
-              _formatRupiah(val),
-              textAlign: TextAlign.right,
-              style: GoogleFonts.quicksand(
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-                color: color,
+        const SizedBox(height: 12),
+        _buildDynamicCategoryBreakdown(
+            incomes, totalInc, isDarkMode, 'Belum ada pemasukan bulan ini', const Color(0xFF2ECC71)),
+      ],
+    );
+  }
+
+  Widget _buildExpenseChartAndData(
+      List<TransactionModel> transactions, bool isDarkMode) {
+    final expenses =
+        transactions.where((t) => t.type == TransactionType.expense).toList();
+    final bool isEmpty = expenses.isEmpty;
+
+    final categoryMap = <String, double>{};
+    for (var t in expenses) {
+      categoryMap[t.category] = (categoryMap[t.category] ?? 0) + t.amount;
+    }
+    final totalExp = categoryMap.values.fold(0.0, (sum, val) => sum + val);
+    final sortedCategories = categoryMap.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+
+    return Column(
+      children: [
+        SizedBox(
+          height: 140,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              PieChart(
+                PieChartData(
+                  sectionsSpace: 3,
+                  centerSpaceRadius: 46,
+                  sections: isEmpty
+                      ? [
+                          PieChartSectionData(
+                            color: isDarkMode
+                                ? Colors.white10
+                                : Colors.grey.shade100,
+                            value: 1,
+                            radius: 14,
+                            showTitle: false,
+                          ),
+                        ]
+                      : sortedCategories.asMap().entries.map((e) {
+                          final index = e.key;
+                          final entry = e.value;
+                          final percentage = totalExp > 0
+                              ? (entry.value / totalExp * 100)
+                              : 0.0;
+                          final baseColor = const Color(0xFFE74C3C);
+                          final color = baseColor.withOpacity((1.0 - (index * 0.15)).clamp(0.4, 1.0));
+                          final showTitle = percentage >= 5;
+                          return PieChartSectionData(
+                            color: color,
+                            value: entry.value,
+                            radius: 14,
+                            title: showTitle ? '${percentage.toStringAsFixed(0)}%' : '',
+                            showTitle: false,
+                            titlePositionPercentageOffset: 0.55,
+                            titleStyle: GoogleFonts.quicksand(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          );
+                        }).toList(),
+                ),
               ),
-            ),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Text(
+                    isEmpty || sortedCategories.isEmpty
+                        ? '0%'
+                        : '${(sortedCategories.first.value / totalExp * 100).toStringAsFixed(0)}%',
+                    style: GoogleFonts.quicksand(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w900,
+                      color: isDarkMode ? Colors.white : AppColors.primaryDark,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        _buildDynamicCategoryBreakdown(
+            expenses, totalExp, isDarkMode, 'Belum ada pengeluaran bulan ini', const Color(0xFFE74C3C)),
+      ],
+    );
+  }
+
+  Widget _buildAllAllocationChartAndData(
+      double totalIncome,
+      double totalExpense,
+      List<TransactionModel> transactions,
+      bool isDarkMode,
+      bool isEmpty) {
+    final actualTotal = totalIncome + totalExpense;
+    final totalVal = isEmpty ? 1.0 : actualTotal;
+    final incomePercent =
+        isEmpty ? '0' : (totalIncome / totalVal * 100).toStringAsFixed(0);
+    final expensePercent =
+        isEmpty ? '0' : (totalExpense / totalVal * 100).toStringAsFixed(0);
+
+    return Column(
+      children: [
+        SizedBox(
+          height: 140,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              PieChart(
+                PieChartData(
+                  sectionsSpace: 3,
+                  centerSpaceRadius: 46,
+                  sections: isEmpty
+                      ? [
+                          PieChartSectionData(
+                            color: isDarkMode
+                                ? Colors.white10
+                                : Colors.grey.shade100,
+                            value: 1,
+                            radius: 14,
+                            showTitle: false,
+                          ),
+                        ]
+                      : [
+                          if (totalIncome > 0)
+                            PieChartSectionData(
+                              color: const Color(0xFF2ECC71), // flat green
+                              value: totalIncome,
+                              radius: 14,
+                              title: incomePercent != '0' ? '$incomePercent%' : '',
+                              showTitle: incomePercent != '0',
+                              titlePositionPercentageOffset: 2.2,
+                              titleStyle: GoogleFonts.quicksand(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w900,
+                                color: isDarkMode ? Colors.white70 : Colors.black87,
+                              ),
+                            ),
+                          if (totalExpense > 0)
+                            PieChartSectionData(
+                              color: const Color(0xFFE74C3C), // flat red
+                              value: totalExpense,
+                              radius: 14,
+                              title: expensePercent != '0' ? '$expensePercent%' : '',
+                              showTitle: expensePercent != '0',
+                              titlePositionPercentageOffset: 2.2,
+                              titleStyle: GoogleFonts.quicksand(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w900,
+                                color: isDarkMode ? Colors.white70 : Colors.black87,
+                              ),
+                            ),
+                        ],
+                ),
+              ),
+              if (isEmpty)
+                Container(
+                  width: 76,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.analytics_outlined,
+                            size: 18,
+                            color:
+                                isDarkMode ? Colors.white10 : Colors.grey.shade300),
+                        const SizedBox(height: 3),
+                        Text('Belum Ada Data',
+                            style: GoogleFonts.quicksand(
+                                fontSize: 9.5,
+                                fontWeight: FontWeight.bold,
+                                color: isDarkMode
+                                    ? Colors.white30
+                                    : Colors.grey.shade400)),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          margin: const EdgeInsets.only(top: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: Table(
+            columnWidths: const {
+              0: FlexColumnWidth(3.5),
+              1: FlexColumnWidth(0.5),
+              2: FlexColumnWidth(3.0),
+            },
+            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+            children: [
+              _buildTableRow(
+                  'Pemasukan ($incomePercent%)', totalIncome, const Color(0xFF2ECC71), isDarkMode),
+              _buildTableRow(
+                  'Pengeluaran ($expensePercent%)', totalExpense, const Color(0xFFE74C3C), isDarkMode),
+              _buildTableRow('Total Alokasi', actualTotal,
+                  isDarkMode ? Colors.white : Colors.black87, isDarkMode,
+                  isTotal: true),
+            ],
           ),
         ),
       ],
     );
   }
 
-  Widget _buildCategoryBreakdown(
-      List<TransactionModel> transactions, bool isDarkMode) {
-    final expenses =
-        transactions.where((t) => t.type == TransactionType.expense).toList();
-
-    if (expenses.isEmpty) {
+  Widget _buildDynamicCategoryBreakdown(List<TransactionModel> filteredTxs,
+      double totalAmount, bool isDarkMode, String emptyPlaceholder, Color baseColor) {
+    if (filteredTxs.isEmpty) {
       return Padding(
-        padding: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.only(bottom: 10),
         child: Column(
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                          color: isDarkMode
-                              ? Colors.white10
-                              : Colors.grey.shade200,
-                          shape: BoxShape.circle),
-                    ),
-                    const SizedBox(width: 10),
-                    Text(
-                      'Belum Ada Pengeluaran',
-                      style: GoogleFonts.quicksand(
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        fontStyle: FontStyle.italic,
-                        color: isDarkMode ? Colors.white24 : Colors.black26,
+                Expanded(
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                            color: isDarkMode
+                                ? Colors.white10
+                                : Colors.grey.shade200,
+                            shape: BoxShape.circle),
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          emptyPlaceholder,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.quicksand(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            fontStyle: FontStyle.italic,
+                            color: isDarkMode ? Colors.white24 : Colors.black26,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
+                const SizedBox(width: 8),
                 Text(
                   '0.0%',
                   style: GoogleFonts.quicksand(
@@ -1152,7 +1388,7 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                 ),
               ],
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 6),
             ClipRRect(
               borderRadius: BorderRadius.circular(4),
               child: LinearProgressIndicator(
@@ -1161,7 +1397,7 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                     ? Colors.white.withValues(alpha: 0.05)
                     : Colors.grey.shade100,
                 color: Colors.grey.shade300,
-                minHeight: 4.5,
+                minHeight: 4,
               ),
             ),
           ],
@@ -1169,67 +1405,71 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
       );
     }
 
-    // Group by category
     final categoryMap = <String, double>{};
-    for (var t in expenses) {
+    for (var t in filteredTxs) {
       categoryMap[t.category] = (categoryMap[t.category] ?? 0) + t.amount;
     }
-
-    final totalExp = categoryMap.values.fold(0.0, (sum, val) => sum + val);
     final sortedCategories = categoryMap.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
 
     return Column(
-      children: sortedCategories.take(4).map((entry) {
-        final percentage = entry.value / totalExp;
+      children: sortedCategories.asMap().entries.take(4).map((e) {
+        final index = e.key;
+        final entry = e.value;
+        final percentage = totalAmount > 0 ? entry.value / totalAmount : 0.0;
+        final color = baseColor.withOpacity((1.0 - (index * 0.15)).clamp(0.4, 1.0));
         return Padding(
-          padding: const EdgeInsets.only(bottom: 16),
+          padding: const EdgeInsets.only(bottom: 14),
           child: Column(
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 8,
-                        height: 8,
-                        decoration: BoxDecoration(
-                            color: AppCategories.getColorForCategory(entry.key),
-                            shape: BoxShape.circle),
-                      ),
-                      const SizedBox(width: 10),
-                      Text(
-                        entry.key,
-                        style: GoogleFonts.quicksand(
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          fontStyle: FontStyle.italic,
-                          color: isDarkMode ? Colors.white70 : Colors.black87,
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 8,
+                          height: 8,
+                          decoration:
+                              BoxDecoration(color: color, shape: BoxShape.circle),
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            entry.key,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.quicksand(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: isDarkMode ? Colors.white70 : Colors.black87,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
+                  const SizedBox(width: 8),
                   Text(
-                    '${(percentage * 100).toStringAsFixed(1)}%',
+                    '${(percentage * 100).toStringAsFixed(0)}%',
                     style: GoogleFonts.quicksand(
-                      fontSize: 10,
+                      fontSize: 12,
                       fontWeight: FontWeight.bold,
-                      fontStyle: FontStyle.italic,
-                      color: isDarkMode ? Colors.white54 : Colors.black54,
+                      color: isDarkMode ? Colors.white70 : Colors.black87,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 8),
               ClipRRect(
-                borderRadius: BorderRadius.circular(4),
+                borderRadius: BorderRadius.circular(6),
                 child: LinearProgressIndicator(
                   value: percentage,
-                  backgroundColor:
-                      isDarkMode ? Colors.white10 : Colors.grey.shade100,
-                  color: AppCategories.getColorForCategory(entry.key),
-                  minHeight: 4.5,
+                  backgroundColor: isDarkMode
+                      ? Colors.white.withOpacity(0.04)
+                      : Colors.grey.shade100,
+                  color: color,
+                  minHeight: 5,
                 ),
               ),
             ],
@@ -1239,47 +1479,167 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
     );
   }
 
+  TableRow _buildTableRow(
+      String label, double val, Color color, bool isDarkMode,
+      {bool isTotal = false}) {
+    return TableRow(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          child: Row(
+            children: [
+              Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  label,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.quicksand(
+                    fontSize: 12,
+                    fontWeight: isTotal ? FontWeight.w800 : FontWeight.bold,
+                    color: isDarkMode
+                        ? (isTotal ? Colors.white : Colors.white70)
+                        : (isTotal ? AppColors.primaryDark : Colors.black54),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerRight,
+            child: Text(
+              _formatRupiah(val),
+              textAlign: TextAlign.right,
+              style: GoogleFonts.quicksand(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+
   Widget _buildRecentActivitySection(
       List<TransactionModel> transactions, bool isDarkMode) {
+    final displayTxs = transactions.take(3).toList();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Aktivitas Terakhir',
-            style: GoogleFonts.quicksand(
-                fontWeight: FontWeight.bold,
-                fontSize: 10,
-                letterSpacing: -0.5)),
-        const SizedBox(height: 16),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('AKTIVITAS TERAKHIR',
+                style: GoogleFonts.quicksand(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.5,
+                    color: isDarkMode
+                        ? Colors.white30
+                        : Colors.teal.shade800.withValues(alpha: 0.4))),
+            Icon(Icons.history_rounded,
+                size: 16,
+                color: isDarkMode ? Colors.white24 : Colors.grey.shade300),
+          ],
+        ),
+        const SizedBox(height: 12),
         if (transactions.isEmpty)
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 24),
+            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
             decoration: BoxDecoration(
-              color: isDarkMode
-                  ? Colors.white.withValues(alpha: 0.02)
-                  : Colors.white,
+              color: isDarkMode ? AppColors.surfaceDark : Colors.white,
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                  color: isDarkMode
-                      ? Colors.white10
-                      : Colors.black.withValues(alpha: 0.05)),
+                color: isDarkMode
+                    ? Colors.white.withOpacity(0.04)
+                    : Colors.black.withOpacity(0.03),
+              ),
             ),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.history_rounded,
-                    size: 24,
-                    color: isDarkMode ? Colors.white10 : Colors.grey.shade300),
-                const SizedBox(height: 8),
-                Text('Belum ada aktivitas baru-baru ini',
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: (isDarkMode
+                            ? const Color(0xFF2ECC71)
+                            : const Color(0xFF27AE60))
+                        .withOpacity(0.08),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: (isDarkMode
+                              ? const Color(0xFF2ECC71)
+                              : const Color(0xFF27AE60))
+                          .withOpacity(0.12),
+                      width: 1,
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.receipt_long_rounded,
+                    size: 18,
+                    color: isDarkMode
+                        ? const Color(0xFF2ECC71)
+                        : const Color(0xFF27AE60),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text('Belum Ada Transaksi',
                     style: GoogleFonts.quicksand(
-                        fontSize: 10,
+                        fontSize: 10.5,
                         fontWeight: FontWeight.bold,
-                        color: isDarkMode ? Colors.white24 : Colors.black26)),
+                        color: isDarkMode ? Colors.white70 : Colors.black87)),
+                const SizedBox(height: 2),
+                Text('Catatan transaksi keuanganmu akan muncul di sini',
+                    style: GoogleFonts.quicksand(
+                        fontSize: 8.5,
+                        fontWeight: FontWeight.w600,
+                        color: isDarkMode ? Colors.white30 : Colors.black38)),
               ],
             ),
           )
         else
-          ...transactions.take(3).map((t) => _minimalTile(t, isDarkMode)),
+          Container(
+            decoration: BoxDecoration(
+              color: isDarkMode ? AppColors.surfaceDark : Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: isDarkMode
+                    ? Colors.white.withOpacity(0.04)
+                    : Colors.black.withOpacity(0.03),
+              ),
+            ),
+            child: Column(
+              children: [
+                for (int i = 0; i < displayTxs.length; i++) ...[
+                  _minimalTile(displayTxs[i], isDarkMode),
+                  if (i < displayTxs.length - 1)
+                    Divider(
+                      height: 1,
+                      thickness: 1,
+                      color: isDarkMode
+                          ? Colors.white.withOpacity(0.03)
+                          : Colors.black.withOpacity(0.02),
+                      indent: 64,
+                    ),
+                ],
+              ],
+            ),
+          ),
       ],
     );
   }
@@ -1288,53 +1648,60 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
     final bool isExpense = t.type == TransactionType.expense;
     final IconData icon =
         isExpense ? Icons.arrow_outward_rounded : Icons.call_received_rounded;
-    final Color color = isExpense ? Colors.red : Colors.green;
+    final Color color = isExpense ? Colors.red.shade400 : Colors.green.shade400;
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Material(
-        color: isDarkMode ? AppColors.surfaceDark : Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        child: InkWell(
-          onTap: () => widget.onTransactionTap(t),
-          borderRadius: BorderRadius.circular(20),
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                      color: color.withValues(alpha: 0.1),
-                      shape: BoxShape.circle),
-                  child: Icon(icon, color: color, size: 18),
+    return InkWell(
+      onTap: () => widget.onTransactionTap(t),
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        child: Row(
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.08),
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: color.withOpacity(0.12),
+                  width: 1,
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(t.title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.quicksand(
-                              fontWeight: FontWeight.bold, fontSize: 11)),
-                      Text(DateFormat('dd MMM').format(t.date),
-                          style: GoogleFonts.quicksand(
-                              fontSize: 10,
-                              color: isDarkMode
-                                  ? Colors.white38
-                                  : Colors.black54)),
-                    ],
-                  ),
-                ),
-                Text('${isExpense ? '- ' : '+ '}${_formatRupiah(t.amount)}',
-                    style: GoogleFonts.quicksand(
-                        fontWeight: FontWeight.bold, fontSize: 11)),
-              ],
+              ),
+              child: Icon(icon, color: color, size: 16),
             ),
-          ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(t.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.quicksand(
+                          fontWeight: FontWeight.bold, fontSize: 11)),
+                  const SizedBox(height: 2),
+                  Text(DateFormat('dd MMM yyyy').format(t.date),
+                      style: GoogleFonts.quicksand(
+                          fontSize: 9,
+                          fontWeight: FontWeight.w600,
+                          color: isDarkMode ? Colors.white30 : Colors.black38)),
+                ],
+              ),
+            ),
+            Text(
+              '${isExpense ? '- ' : '+ '}${_formatRupiah(t.amount)}',
+              style: GoogleFonts.quicksand(
+                fontWeight: FontWeight.bold,
+                fontSize: 11,
+                color: isExpense
+                    ? (isDarkMode ? Colors.red.shade300 : Colors.red.shade700)
+                    : (isDarkMode
+                        ? Colors.green.shade300
+                        : Colors.green.shade700),
+              ),
+            ),
+          ],
         ),
       ),
     );

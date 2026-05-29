@@ -41,9 +41,13 @@ class _ChallengePageState extends ConsumerState<ChallengePage>
     final points = ref.watch(totalPointsProvider);
 
     final contentColor = isDark ? Colors.white : AppColors.primaryDark;
+    
+    // Page Theme: Mint Green Accent & Pure Dark/Light backgrounds
+    final pageBgColor = isDark ? AppColors.backgroundDark : const Color(0xFFF8FAF9);
+    final accentColor = isDark ? const Color(0xFF2ECC71) : const Color(0xFF27AE60);
 
     return Scaffold(
-      backgroundColor: isDark ? AppColors.backgroundDark : const Color(0xFFF8FAF9),
+      backgroundColor: pageBgColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -56,7 +60,7 @@ class _ChallengePageState extends ConsumerState<ChallengePage>
           'Challenge Menabung',
           style: GoogleFonts.quicksand(
             fontWeight: FontWeight.bold,
-            fontSize: 11,
+            fontSize: 14,
             color: contentColor,
           ),
         ),
@@ -69,7 +73,7 @@ class _ChallengePageState extends ConsumerState<ChallengePage>
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
                 child: Column(
                   children: [
-                    _buildStatsCard(streak, points, stats, isDark),
+                    _buildStatsCard(streak, points, stats, isDark, accentColor),
                   ],
                 ),
               ),
@@ -79,14 +83,12 @@ class _ChallengePageState extends ConsumerState<ChallengePage>
               delegate: _SliverTabBarDelegate(
                 TabBar(
                   controller: _tabController,
-                  indicatorColor: AppColors.primary,
+                  indicatorColor: accentColor,
                   indicatorWeight: 3,
-                  labelColor: isDark ? Colors.white : AppColors.primary,
+                  labelColor: isDark ? Colors.white : AppColors.primaryDark,
                   unselectedLabelColor: Colors.grey.shade500,
-                  labelStyle: GoogleFonts.quicksand(
-                      fontWeight: FontWeight.bold, fontSize: 11),
-                  unselectedLabelStyle: GoogleFonts.quicksand(
-                      fontWeight: FontWeight.bold, fontSize: 11),
+                  labelStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13),
+                  unselectedLabelStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13),
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   tabs: const [
                     Tab(text: 'Aktif'),
@@ -100,10 +102,10 @@ class _ChallengePageState extends ConsumerState<ChallengePage>
         },
         body: TabBarView(
           controller: _tabController,
-          children: const [
-            _ActiveChallengesTab(),
-            _TemplatesTab(),
-            _BadgesTab(),
+          children: [
+            _ActiveChallengesTab(accentColor: accentColor),
+            _TemplatesTab(accentColor: accentColor),
+            _BadgesTab(accentColor: accentColor),
           ],
         ),
       ),
@@ -111,23 +113,18 @@ class _ChallengePageState extends ConsumerState<ChallengePage>
   }
 
   Widget _buildStatsCard(
-      AsyncValue<int> streak, AsyncValue<int> points, Map<String, dynamic> stats, bool isDark) {
+      AsyncValue<int> streak, AsyncValue<int> points, Map<String, dynamic> stats, bool isDark, Color accentColor) {
     final hexBg = isDark ? AppColors.surfaceDark : Colors.white;
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
       decoration: BoxDecoration(
         color: hexBg,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
-            color: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
-        boxShadow: [
-          BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
-              blurRadius: 15,
-              offset: const Offset(0, 8))
-        ],
+          color: isDark ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.03),
+        ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -158,7 +155,7 @@ class _ChallengePageState extends ConsumerState<ChallengePage>
           _buildDivider(isDark),
           _buildModernStatItem(
             icon: Icons.check_circle_rounded,
-            iconColor: AppColors.primary,
+            iconColor: accentColor,
             value: stats['completed'].toString(),
             label: 'Selesai',
             isDark: isDark,
@@ -172,7 +169,7 @@ class _ChallengePageState extends ConsumerState<ChallengePage>
     return Container(
       height: 30,
       width: 1,
-      color: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.05),
+      color: isDark ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.03),
     );
   }
 
@@ -193,17 +190,17 @@ class _ChallengePageState extends ConsumerState<ChallengePage>
           value,
           style: GoogleFonts.quicksand(
             color: isDark ? Colors.white : AppColors.primaryDark,
-            fontSize: 11,
-            fontWeight: FontWeight.w900,
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
           ),
         ),
+        const SizedBox(height: 2),
         Text(
-          label.toUpperCase(),
+          label,
           style: GoogleFonts.quicksand(
-            color: (isDark ? Colors.white : AppColors.primaryDark).withValues(alpha: 0.4),
-            fontSize: 9,
+            color: (isDark ? Colors.white : AppColors.primaryDark).withOpacity(0.4),
+            fontSize: 10,
             fontWeight: FontWeight.bold,
-            letterSpacing: 1.2,
           ),
         ),
       ],
@@ -217,7 +214,7 @@ class _SliverTabBarDelegate extends SliverPersistentHeaderDelegate {
   _SliverTabBarDelegate(this.tabBar);
 
   @override
-  double get minExtent => tabBar.preferredSize.height + 8; // Added spacing
+  double get minExtent => tabBar.preferredSize.height + 8;
 
   @override
   double get maxExtent => tabBar.preferredSize.height + 8;
@@ -238,7 +235,8 @@ class _SliverTabBarDelegate extends SliverPersistentHeaderDelegate {
 }
 
 class _ActiveChallengesTab extends ConsumerWidget {
-  const _ActiveChallengesTab();
+  final Color accentColor;
+  const _ActiveChallengesTab({required this.accentColor});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -256,39 +254,37 @@ class _ActiveChallengesTab extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
-                    width: 140,
-                    height: 140,
+                    width: 120,
+                    height: 120,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: isDark
-                          ? Colors.white.withValues(alpha: 0.05)
-                          : AppColors.primary.withValues(alpha: 0.08),
+                      color: accentColor.withOpacity(0.08),
                     ),
                     child: Center(
                       child: Icon(
                         Icons.emoji_events_outlined,
-                        size: 72,
-                        color:
-                            isDark ? Colors.grey.shade400 : AppColors.primary,
+                        size: 60,
+                        color: accentColor,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 24),
                   Text(
                     'Belum Ada Challenge',
-                    style: TextStyle(
-                      fontSize: 19,
+                    style: GoogleFonts.quicksand(
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
                       color: theme.textTheme.bodyLarge?.color,
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 8),
                   Text(
                     'Pilih challenge pertamamu dan bangun kebiasaan menabung yang seru!',
-                    style: TextStyle(
+                    style: GoogleFonts.quicksand(
                       color: Colors.grey.shade500,
-                      fontSize: 11,
-                      height: 1.5,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      height: 1.4,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -299,14 +295,14 @@ class _ActiveChallengesTab extends ConsumerWidget {
         }
 
         return ListView.builder(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
           itemCount: challenges.length,
           itemBuilder: (context, index) {
             return _buildChallengeCard(context, ref, challenges[index]);
           },
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(accentColor))),
       error: (error, _) => Center(child: Text('Terjadi kesalahan: $error')),
     );
   }
@@ -316,103 +312,88 @@ class _ActiveChallengesTab extends ConsumerWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final progressPercent = challenge.progressPercentage / 100;
-    const baseColor = AppColors.primary;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: isDark ? AppColors.surfaceDark : Colors.white,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
-            color: isDark
-                ? Colors.white.withValues(alpha: 0.05)
-                : Colors.grey.shade100),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.03),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+          color: isDark ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.03),
+        ),
       ),
       child: Material(
         color: Colors.transparent,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(20),
         clipBehavior: Clip.antiAlias,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 20, 16),
+          padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              // Leading: Circular Progress
               Stack(
                 alignment: Alignment.center,
                 children: [
                   SizedBox(
-                    width: 54,
-                    height: 54,
+                    width: 52,
+                    height: 52,
                     child: CircularProgressIndicator(
                       value: progressPercent,
-                      strokeWidth: 5,
-                      backgroundColor: baseColor.withValues(alpha: 0.1),
+                      strokeWidth: 4,
+                      backgroundColor: accentColor.withOpacity(0.1),
                       valueColor: AlwaysStoppedAnimation<Color>(
-                          _getProgressColor(progressPercent)),
+                        progressPercent < 0.3 ? Colors.red : (progressPercent < 0.7 ? Colors.orange : accentColor)
+                      ),
                       strokeCap: StrokeCap.round,
                     ),
                   ),
                   Container(
-                    width: 38,
-                    height: 38,
+                    width: 36,
+                    height: 36,
                     decoration: BoxDecoration(
-                      color: baseColor.withValues(alpha: 0.1),
+                      color: accentColor.withOpacity(0.08),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(_getTemplateIcon(challenge.title),
-                        color: baseColor, size: 20),
+                        color: accentColor, size: 18),
                   ),
                 ],
               ),
               const SizedBox(width: 16),
-              // Title and Info
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      challenge.title.toUpperCase(),
+                      challenge.title,
                       style: GoogleFonts.quicksand(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0.5,
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
                         color: isDark ? Colors.white : AppColors.primaryDark,
                       ),
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 4),
                     Row(
                       children: [
                         Icon(Icons.timer_outlined,
                             size: 12,
-                            color:
-                                isDark ? Colors.white24 : Colors.grey.shade400),
+                            color: isDark ? Colors.white24 : Colors.grey.shade400),
                         const SizedBox(width: 4),
                         Text(
                           '${challenge.daysRemaining} hari lagi',
                           style: GoogleFonts.quicksand(
                             fontSize: 11,
-                            color:
-                                isDark ? Colors.white38 : Colors.grey.shade600,
+                            color: isDark ? Colors.white38 : Colors.grey.shade600,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         const SizedBox(width: 8),
                         Text('•',
                             style: TextStyle(
-                                color: isDark
-                                    ? Colors.white12
-                                    : Colors.grey.shade300)),
+                                color: isDark ? Colors.white12 : Colors.grey.shade300)),
                         const SizedBox(width: 8),
                         Icon(Icons.stars_rounded,
                             size: 12,
-                            color: Colors.amber.withValues(alpha: 0.7)),
+                            color: Colors.amber.withOpacity(0.8)),
                         const SizedBox(width: 4),
                         Text(
                           '${challenge.id.hashCode % 50 + 10} Poin',
@@ -427,25 +408,23 @@ class _ActiveChallengesTab extends ConsumerWidget {
                   ],
                 ),
               ),
-              // Trailing: Percentage
+              const SizedBox(width: 8),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
                     '${(progressPercent * 100).toInt()}%',
                     style: GoogleFonts.quicksand(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w900,
-                      color: _getProgressColor(progressPercent),
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: progressPercent < 0.3 ? Colors.red : (progressPercent < 0.7 ? Colors.orange : accentColor),
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 6),
                   GestureDetector(
                     onTap: () => _showDeleteDialog(context, ref, challenge),
                     child: Icon(Icons.delete_outline_rounded,
-                        color: isDark
-                            ? Colors.white12
-                            : Colors.redAccent.withValues(alpha: 0.3),
+                        color: isDark ? Colors.white24 : Colors.red.withOpacity(0.4),
                         size: 18),
                   ),
                 ],
@@ -460,8 +439,7 @@ class _ActiveChallengesTab extends ConsumerWidget {
   IconData _getTemplateIcon(String title) {
     if (title.contains('Kopi')) return Icons.coffee_rounded;
     if (title.contains('Jajan')) return Icons.no_meals_rounded;
-    if (title.contains('Hemat') || title.contains('Tabung'))
-      return Icons.savings_rounded;
+    if (title.contains('Hemat') || title.contains('Tabung')) return Icons.savings_rounded;
     if (title.contains('Zero')) return Icons.lock_outline_rounded;
     if (title.contains('Weekend')) return Icons.weekend_rounded;
     return Icons.emoji_events_rounded;
@@ -472,29 +450,25 @@ class _ActiveChallengesTab extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         title: Row(
           children: [
-            const Icon(Icons.warning_amber_rounded,
-                color: Colors.orange, size: 28),
+            const Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 24),
             const SizedBox(width: 12),
             Text('Hapus Challenge?',
-                style: GoogleFonts.quicksand(
-                    fontSize: 11, fontWeight: FontWeight.w900)),
+                style: GoogleFonts.quicksand(fontSize: 14, fontWeight: FontWeight.bold)),
           ],
         ),
         content: Text(
           'Challenge "${challenge.title}" akan dihapus. Semua progres di dalamnya akan hilang.',
-          style: GoogleFonts.quicksand(
-              fontSize: 11, height: 1.5, fontWeight: FontWeight.bold),
+          style: GoogleFonts.quicksand(fontSize: 13, height: 1.4, fontWeight: FontWeight.bold),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text('Batal',
-                style: GoogleFonts.quicksand(
-                    color: Colors.grey, fontWeight: FontWeight.w900)),
+                style: GoogleFonts.quicksand(color: Colors.grey, fontWeight: FontWeight.bold)),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -508,8 +482,7 @@ class _ActiveChallengesTab extends ConsumerWidget {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('Challenge berhasil dihapus',
-                          style: GoogleFonts.quicksand(
-                              fontWeight: FontWeight.bold)),
+                          style: GoogleFonts.quicksand(fontWeight: FontWeight.bold)),
                       backgroundColor: Colors.redAccent,
                       behavior: SnackBarBehavior.floating,
                       shape: RoundedRectangleBorder(
@@ -527,52 +500,20 @@ class _ActiveChallengesTab extends ConsumerWidget {
               backgroundColor: Colors.redAccent,
               foregroundColor: Colors.white,
               elevation: 0,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
             child: Text('Hapus',
-                style: GoogleFonts.quicksand(fontWeight: FontWeight.w900)),
+                style: GoogleFonts.quicksand(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
     );
   }
-
-  Color _getProgressColor(double progress) {
-    if (progress < 0.3) return Colors.red;
-    if (progress < 0.7) return Colors.orange;
-    return Colors.green;
-  }
 }
-
-Color _getDifficultyColor(ChallengeDifficulty difficulty) {
-  switch (difficulty) {
-    case ChallengeDifficulty.easy:
-      return Colors.green;
-    case ChallengeDifficulty.medium:
-      return Colors.orange;
-    case ChallengeDifficulty.hard:
-      return Colors.red;
-  }
-}
-
-String _getDifficultyLabel(ChallengeDifficulty difficulty) {
-  switch (difficulty) {
-    case ChallengeDifficulty.easy:
-      return 'MUDAH';
-    case ChallengeDifficulty.medium:
-      return 'SEDANG';
-    case ChallengeDifficulty.hard:
-      return 'SULIT';
-  }
-}
-
-/// ═══════════════════════════════════
-/// 🔍 EXPLORE TEMPLATES TAB
-/// ═══════════════════════════════════
 
 class _TemplatesTab extends ConsumerWidget {
-  const _TemplatesTab();
+  final Color accentColor;
+  const _TemplatesTab({required this.accentColor});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -580,34 +521,33 @@ class _TemplatesTab extends ConsumerWidget {
     final templates = ref.watch(challengeTemplatesProvider);
 
     return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       children: [
         Text(
           'Pilih Challenge',
-          style: TextStyle(
-            fontSize: 11,
+          style: GoogleFonts.quicksand(
+            fontSize: 14,
             fontWeight: FontWeight.bold,
             color: theme.textTheme.bodyLarge?.color,
-            letterSpacing: 0.3,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         Text(
           'Mulai perjalanan menabungmu dengan challenge yang cocok!',
-          style: TextStyle(
+          style: GoogleFonts.quicksand(
             color: Colors.grey[600],
-            fontSize: 11,
-            height: 1.5,
-            letterSpacing: 0.2,
+            fontSize: 12,
+            height: 1.4,
+            fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 20),
         _buildSection(context, '🌟 Challenge Harian',
             templates.where((t) => t.type == ChallengeType.daily).toList()),
-        const SizedBox(height: 4),
+        const SizedBox(height: 8),
         _buildSection(context, '📅 Challenge Mingguan',
             templates.where((t) => t.type == ChallengeType.weekly).toList()),
-        const SizedBox(height: 4),
+        const SizedBox(height: 8),
         _buildSection(context, '🎯 Challenge Bulanan',
             templates.where((t) => t.type == ChallengeType.monthly).toList()),
       ],
@@ -619,21 +559,19 @@ class _TemplatesTab extends ConsumerWidget {
     final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      spacing: 12,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
+          padding: const EdgeInsets.symmetric(vertical: 12),
           child: Text(
             title,
-            style: TextStyle(
-              fontSize: 11,
+            style: GoogleFonts.quicksand(
+              fontSize: 13,
               fontWeight: FontWeight.bold,
               color: theme.textTheme.bodyLarge?.color,
-              letterSpacing: 0.3,
             ),
           ),
         ),
-        ...templates.map((template) => _TemplateCard(template: template)),
+        ...templates.map((template) => _TemplateCard(template: template, accentColor: accentColor)),
       ],
     );
   }
@@ -641,8 +579,9 @@ class _TemplatesTab extends ConsumerWidget {
 
 class _TemplateCard extends ConsumerWidget {
   final ChallengeTemplateModel template;
+  final Color accentColor;
 
-  const _TemplateCard({required this.template});
+  const _TemplateCard({required this.template, required this.accentColor});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -653,42 +592,32 @@ class _TemplateCard extends ConsumerWidget {
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: isDark ? AppColors.surfaceDark : Colors.white,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
-            color: isDark
-                ? Colors.white.withValues(alpha: 0.05)
-                : Colors.grey.shade100),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.03),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+          color: isDark ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.03),
+        ),
       ),
       child: Material(
         color: Colors.transparent,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(20),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: () => _showTemplateDetail(context, ref, theme),
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 20, 16),
+            padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                // Leading Icon
                 Container(
-                  width: 54,
-                  height: 54,
+                  width: 48,
+                  height: 48,
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.1),
+                    color: accentColor.withOpacity(0.08),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(template.icon ?? Icons.emoji_events_rounded,
-                      color: AppColors.primary, size: 24),
+                      color: accentColor, size: 20),
                 ),
                 const SizedBox(width: 16),
-                // Title and Info
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -696,8 +625,8 @@ class _TemplateCard extends ConsumerWidget {
                       Text(
                         template.title,
                         style: GoogleFonts.quicksand(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w900,
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
                           color: isDark ? Colors.white : AppColors.primaryDark,
                         ),
                       ),
@@ -712,17 +641,17 @@ class _TemplateCard extends ConsumerWidget {
                           const SizedBox(width: 8),
                           _buildMiniBadge(
                               '${template.defaultDurationDays} Hari',
-                              AppColors.primary,
+                              accentColor,
                               icon: Icons.timer_outlined),
                         ],
                       ),
                     ],
                   ),
                 ),
-                // Trailing Arrow
+                const SizedBox(width: 8),
                 Icon(Icons.arrow_forward_ios_rounded,
                     color: isDark ? Colors.white12 : Colors.grey.shade300,
-                    size: 16),
+                    size: 14),
               ],
             ),
           ),
@@ -735,7 +664,7 @@ class _TemplateCard extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
+        color: color.withOpacity(0.08),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -749,8 +678,8 @@ class _TemplateCard extends ConsumerWidget {
             text,
             style: GoogleFonts.quicksand(
               color: color,
-              fontSize: 10,
-              fontWeight: FontWeight.w900,
+              fontSize: 9,
+              fontWeight: FontWeight.bold,
             ),
           ),
         ],
@@ -758,9 +687,19 @@ class _TemplateCard extends ConsumerWidget {
     );
   }
 
+  Color _getDifficultyColor(ChallengeDifficulty difficulty) {
+    switch (difficulty) {
+      case ChallengeDifficulty.easy:
+        return Colors.green;
+      case ChallengeDifficulty.medium:
+        return Colors.orange;
+      case ChallengeDifficulty.hard:
+        return Colors.red;
+    }
+  }
+
   void _showTemplateDetail(
       BuildContext parentContext, WidgetRef ref, ThemeData theme) {
-    // Tambahan controller untuk durasi - Dipindah ke luar builder agar tidak ter-reset saat keyboard turun
     final durationController =
         TextEditingController(text: template.defaultDurationDays.toString());
 
@@ -779,12 +718,11 @@ class _TemplateCard extends ConsumerWidget {
             return Container(
               decoration: BoxDecoration(
                 color: theme.scaffoldBackgroundColor,
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(24)),
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
               ),
               padding: EdgeInsets.only(
-                left: 24,
-                right: 24,
+                left: 20,
+                right: 20,
                 top: 24,
                 bottom: MediaQuery.of(context).viewInsets.bottom + 24,
               ),
@@ -793,26 +731,24 @@ class _TemplateCard extends ConsumerWidget {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Header with Title and Icon
                     Row(
                       children: [
                         if (template.icon != null)
                           Container(
-                            padding: const EdgeInsets.all(12),
+                            padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                              color: AppColors.primary.withValues(alpha: 0.1),
+                              color: accentColor.withOpacity(0.08),
                               shape: BoxShape.circle,
                             ),
-                            child: Icon(template.icon,
-                                color: AppColors.primary, size: 32),
+                            child: Icon(template.icon, color: accentColor, size: 24),
                           ),
                         if (template.icon != null) const SizedBox(width: 16),
                         Expanded(
                           child: Text(
                             template.title,
                             style: GoogleFonts.quicksand(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w900,
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
                               color: theme.textTheme.bodyLarge?.color,
                             ),
                           ),
@@ -824,31 +760,29 @@ class _TemplateCard extends ConsumerWidget {
                       template.description,
                       style: GoogleFonts.quicksand(
                         color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
-                        fontSize: 11,
+                        fontSize: 13,
                         fontWeight: FontWeight.bold,
-                        height: 1.5,
+                        height: 1.4,
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 20),
 
-                    // Tags/Badges
                     Row(
                       children: [
                         _buildBadge(template.difficultyLabel,
                             _getDifficultyColor(template.difficulty)),
                         const SizedBox(width: 8),
                         _buildBadge(
-                            '${template.points} poin', Colors.amber[700]!),
+                            '${template.points} Poin', Colors.amber[700]!),
                       ],
                     ),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 28),
 
-                    // 📅 SET DURASI SECTION
                     Text(
                       'Target Waktu Pengerjaan:',
                       style: GoogleFonts.quicksand(
-                        fontWeight: FontWeight.w900,
-                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
                         color: theme.textTheme.bodyLarge?.color,
                       ),
                     ),
@@ -856,14 +790,10 @@ class _TemplateCard extends ConsumerWidget {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: isDarkMode
-                            ? Colors.white.withValues(alpha: 0.05)
-                            : Colors.grey.shade50,
+                        color: isDarkMode ? Colors.white.withOpacity(0.03) : AppColors.background,
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                            color: isDarkMode
-                                ? Colors.white10
-                                : Colors.grey.shade200),
+                            color: isDarkMode ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.03)),
                       ),
                       child: Column(
                         children: [
@@ -882,24 +812,22 @@ class _TemplateCard extends ConsumerWidget {
                                     });
                                   }
                                 },
-                                icon: const Icon(
-                                    Icons.remove_circle_outline_rounded,
-                                    color: AppColors.primary),
+                                icon: Icon(Icons.remove_circle_outline_rounded, color: accentColor),
                               ),
                               Expanded(
                                 child: TextField(
                                   controller: durationController,
                                   keyboardType: TextInputType.number,
                                   textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                      fontSize: 21,
+                                  style: GoogleFonts.quicksand(
+                                      fontSize: 20,
                                       fontWeight: FontWeight.bold,
-                                      color: AppColors.primary),
+                                      color: accentColor),
                                   decoration: const InputDecoration(
                                     border: InputBorder.none,
                                     suffixText: ' Hari',
                                     suffixStyle: TextStyle(
-                                        fontSize: 11,
+                                        fontSize: 13,
                                         fontWeight: FontWeight.bold,
                                         color: Colors.grey),
                                   ),
@@ -916,21 +844,18 @@ class _TemplateCard extends ConsumerWidget {
                                         (val + 1).toString();
                                   });
                                 },
-                                icon: const Icon(
-                                    Icons.add_circle_outline_rounded,
-                                    color: AppColors.primary),
+                                icon: Icon(Icons.add_circle_outline_rounded, color: accentColor),
                               ),
                             ],
                           ),
-                          const Divider(),
+                          const Divider(height: 12),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Icon(Icons.calendar_today_rounded,
-                                  size: 14, color: Colors.grey),
+                              const Icon(Icons.calendar_today_rounded, size: 12, color: Colors.grey),
                               const SizedBox(width: 8),
                               Text(
-                                'Akan berakhir pada: ${DateFormat('d MMM yyyy').format(endDate)}',
+                                'Akan berakhir pada: ${DateFormat('d MMM yyyy', 'id_ID').format(endDate)}',
                                 style: GoogleFonts.quicksand(
                                     fontSize: 11,
                                     color: Colors.grey,
@@ -941,14 +866,14 @@ class _TemplateCard extends ConsumerWidget {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 24),
 
                     if (template.tips.isNotEmpty) ...[
                       Text(
                         'Tips Sukses:',
-                        style: TextStyle(
+                        style: GoogleFonts.quicksand(
                           fontWeight: FontWeight.bold,
-                          fontSize: 11,
+                          fontSize: 13,
                           color: theme.textTheme.bodyLarge?.color,
                         ),
                       ),
@@ -958,27 +883,26 @@ class _TemplateCard extends ConsumerWidget {
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Icon(Icons.check_circle_rounded,
-                                    color: Colors.green, size: 18),
+                                const Icon(Icons.check_circle_rounded, color: Colors.green, size: 16),
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Text(
                                     tip,
-                                    style: TextStyle(
-                                        color: isDarkMode
-                                            ? Colors.grey[400]
-                                            : Colors.grey[700],
-                                        fontSize: 11),
+                                    style: GoogleFonts.quicksand(
+                                        color: isDarkMode ? Colors.grey[400] : Colors.grey[700],
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold),
                                   ),
                                 ),
                               ],
                             ),
                           )),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 20),
                     ],
 
                     SizedBox(
                       width: double.infinity,
+                      height: 44,
                       child: ElevatedButton(
                         onPressed: () async {
                           final duration =
@@ -987,9 +911,9 @@ class _TemplateCard extends ConsumerWidget {
 
                           if (duration < 1) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content:
-                                    Text('Durasi challenge minimal 1 hari!'),
+                              SnackBar(
+                                content: Text('Durasi challenge minimal 1 hari!',
+                                    style: GoogleFonts.quicksand(fontWeight: FontWeight.bold)),
                                 backgroundColor: Colors.red,
                                 behavior: SnackBarBehavior.floating,
                               ),
@@ -1006,8 +930,10 @@ class _TemplateCard extends ConsumerWidget {
                             ScaffoldMessenger.of(parentContext).showSnackBar(
                               SnackBar(
                                 content: Text(
-                                    'Challenge "${template.title}" dimulai selama $duration hari!'),
-                                backgroundColor: AppColors.primary,
+                                  'Challenge "${template.title}" dimulai selama $duration hari!',
+                                  style: GoogleFonts.quicksand(fontWeight: FontWeight.bold),
+                                ),
+                                backgroundColor: accentColor,
                                 behavior: SnackBarBehavior.floating,
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12)),
@@ -1021,20 +947,16 @@ class _TemplateCard extends ConsumerWidget {
                           }
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
+                          backgroundColor: accentColor,
                           foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 20),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           elevation: 0,
                         ),
                         child: Text('Mulai Challenge Sekarang',
-                            style: GoogleFonts.quicksand(
-                                fontSize: 11, fontWeight: FontWeight.w900)),
+                            style: GoogleFonts.quicksand(fontSize: 13, fontWeight: FontWeight.bold)),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
                   ],
                 ),
               ),
@@ -1049,7 +971,7 @@ class _TemplateCard extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
+        color: color.withOpacity(0.08),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
@@ -1057,19 +979,16 @@ class _TemplateCard extends ConsumerWidget {
         style: GoogleFonts.quicksand(
           color: color,
           fontSize: 11,
-          fontWeight: FontWeight.w900,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );
   }
 }
 
-/// ═══════════════════════════════════
-/// 🏆 BADGE COLLECTION TAB
-/// ═══════════════════════════════════
-
 class _BadgesTab extends ConsumerWidget {
-  const _BadgesTab();
+  final Color accentColor;
+  const _BadgesTab({required this.accentColor});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -1078,24 +997,12 @@ class _BadgesTab extends ConsumerWidget {
 
     return Column(
       children: [
-        // 📈 Stats Header
         Container(
-          margin: const EdgeInsets.all(16),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [AppColors.primary, AppColors.primaryLight],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+            color: accentColor,
             borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.primary.withValues(alpha: 0.3),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -1106,15 +1013,15 @@ class _BadgesTab extends ConsumerWidget {
                     badgeStats['earned'].toString(),
                     style: GoogleFonts.quicksand(
                       color: Colors.white,
-                      fontSize: 21,
-                      fontWeight: FontWeight.w900,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     'Badge Diraih',
                     style: GoogleFonts.quicksand(
-                      color: Colors.white70,
+                      color: Colors.white.withOpacity(0.8),
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
                     ),
@@ -1123,8 +1030,8 @@ class _BadgesTab extends ConsumerWidget {
               ),
               Container(
                 width: 1,
-                height: 40,
-                color: Colors.white.withValues(alpha: 0.3),
+                height: 36,
+                color: Colors.white.withOpacity(0.2),
               ),
               Column(
                 children: [
@@ -1132,15 +1039,15 @@ class _BadgesTab extends ConsumerWidget {
                     '${badgeStats['percentage']}%',
                     style: GoogleFonts.quicksand(
                       color: Colors.white,
-                      fontSize: 21,
-                      fontWeight: FontWeight.w900,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     'Koleksi',
                     style: GoogleFonts.quicksand(
-                      color: Colors.white70,
+                      color: Colors.white.withOpacity(0.8),
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
                     ),
@@ -1151,38 +1058,35 @@ class _BadgesTab extends ConsumerWidget {
           ),
         ),
 
-        // 🎯 Badge Collection Grid
         Expanded(
           child: badgesAsync.when(
             data: (badges) {
               return GridView.builder(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 3,
-                  childAspectRatio: 0.70, // Taller cards to accommodate text
-                  crossAxisSpacing: 14,
-                  mainAxisSpacing: 14,
+                  childAspectRatio: 0.75,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
                 ),
                 itemCount: badges.length,
                 itemBuilder: (context, index) {
-                  return _BadgeItem(badge: badges[index]);
+                  return _BadgeItem(badge: badges[index], accentColor: accentColor);
                 },
               );
             },
-            loading: () => const Center(child: CircularProgressIndicator()),
+            loading: () => Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(accentColor))),
             error: (error, _) => Center(
               child: Padding(
                 padding: const EdgeInsets.all(32),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  spacing: 16,
                   children: [
-                    Icon(Icons.error_outline_rounded,
-                        size: 64, color: Colors.grey[400]),
+                    Icon(Icons.error_outline_rounded, size: 48, color: Colors.grey[400]),
+                    const SizedBox(height: 16),
                     Text(
                       'Terjadi kesalahan',
-                      style: TextStyle(color: Colors.grey[600], fontSize: 11),
+                      style: GoogleFonts.quicksand(color: Colors.grey[600], fontSize: 12, fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
@@ -1197,72 +1101,71 @@ class _BadgesTab extends ConsumerWidget {
 
 class _BadgeItem extends StatelessWidget {
   final BadgeModel badge;
+  final Color accentColor;
 
-  const _BadgeItem({required this.badge});
+  const _BadgeItem({required this.badge, required this.accentColor});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Card(
-      elevation: badge.isEarned ? 3 : 1,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      color: badge.isEarned
-          ? theme.cardColor
-          : (isDark ? Colors.grey[850] : Colors.grey[200]),
-      child: InkWell(
-        onTap: () => _showBadgeDetail(context),
-        borderRadius: BorderRadius.circular(14),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            spacing: 4, // Reduced spacing
-            children: [
-              // 🎖️ Badge Icon
-              Container(
-                width: 48, // Reduced from 56
-                height: 48, // Reduced from 56
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: badge.isEarned
-                      ? _getCategoryColor()
-                      : (theme.brightness == Brightness.dark
-                          ? Colors.grey[700]
-                          : Colors.grey[400]),
-                  boxShadow: badge.isEarned
-                      ? [
-                          BoxShadow(
-                            color: _getCategoryColor().withValues(alpha: 0.35),
-                            blurRadius: 10,
-                            offset: const Offset(0, 2),
-                          )
-                        ]
-                      : null,
+    return Container(
+      decoration: BoxDecoration(
+        color: badge.isEarned
+            ? (isDark ? AppColors.surfaceDark : Colors.white)
+            : (isDark ? Colors.white.withOpacity(0.02) : Colors.grey[100]),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: badge.isEarned
+              ? accentColor.withOpacity(0.2)
+              : (isDark ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.03)),
+          width: badge.isEarned ? 1.5 : 1.0,
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          onTap: () => _showBadgeDetail(context),
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: badge.isEarned
+                        ? _getCategoryColor()
+                        : (isDark ? Colors.grey[800] : Colors.grey[300]),
+                  ),
+                  child: Icon(
+                    _getCategoryIcon(),
+                    color: Colors.white,
+                    size: 20,
+                  ),
                 ),
-                child: Icon(
-                  _getCategoryIcon(),
-                  color: Colors.white,
-                  size: 24, // Reduced from 28
+                const SizedBox(height: 8),
+                Text(
+                  badge.name,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.quicksand(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: badge.isEarned
+                        ? (isDark ? Colors.white : AppColors.primaryDark)
+                        : Colors.grey[500],
+                    height: 1.2,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-              Text(
-                badge.name,
-                textAlign: TextAlign.center,
-                style: GoogleFonts.quicksand(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w900,
-                  color: badge.isEarned
-                      ? (isDark ? Colors.white : AppColors.primaryDark)
-                      : Colors.grey[600],
-                  height: 1.2,
-                  letterSpacing: 0.2,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -1273,16 +1176,15 @@ class _BadgeItem extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         title: Row(
           children: [
-            Icon(_getCategoryIcon(), color: _getCategoryColor(), size: 28),
+            Icon(_getCategoryIcon(), color: _getCategoryColor(), size: 24),
             const SizedBox(width: 12),
             Expanded(
               child: Text(badge.name,
-                  style: GoogleFonts.quicksand(
-                      fontSize: 11, fontWeight: FontWeight.w900)),
+                  style: GoogleFonts.quicksand(fontSize: 14, fontWeight: FontWeight.bold)),
             ),
           ],
         ),
@@ -1291,9 +1193,8 @@ class _BadgeItem extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(badge.description,
-                style: GoogleFonts.quicksand(
-                    fontSize: 11, height: 1.5, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 14),
+                style: GoogleFonts.quicksand(fontSize: 13, height: 1.4, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 12),
             if (badge.requiredPoints > 0)
               _buildRequirement('🎯 Butuh ${badge.requiredPoints} poin'),
             if (badge.requiredStreak != null)
@@ -1301,23 +1202,21 @@ class _BadgeItem extends StatelessWidget {
             if (badge.isEarned) ...[
               const SizedBox(height: 12),
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: Colors.green.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                      color: Colors.green.withValues(alpha: 0.3), width: 1.5),
+                  color: Colors.green.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.green.withOpacity(0.2)),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.check_circle_rounded,
-                        color: Colors.green, size: 20),
+                    const Icon(Icons.check_circle_rounded, color: Colors.green, size: 18),
                     const SizedBox(width: 8),
                     Text(
                       'Sudah Diraih!',
                       style: GoogleFonts.quicksand(
                         color: Colors.green,
-                        fontWeight: FontWeight.w900,
+                        fontWeight: FontWeight.bold,
                         fontSize: 11,
                       ),
                     ),
@@ -1331,8 +1230,7 @@ class _BadgeItem extends StatelessWidget {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text('Tutup',
-                style: GoogleFonts.quicksand(
-                    fontWeight: FontWeight.w900, color: AppColors.primary)),
+                style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: accentColor)),
           ),
         ],
       ),
@@ -1341,11 +1239,10 @@ class _BadgeItem extends StatelessWidget {
 
   Widget _buildRequirement(String text) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: 6),
       child: Row(
         children: [
-          const Icon(Icons.check_circle_outline_rounded,
-              size: 14, color: Colors.grey),
+          const Icon(Icons.check_circle_outline_rounded, size: 12, color: Colors.grey),
           const SizedBox(width: 8),
           Text(text,
               style: GoogleFonts.quicksand(

@@ -67,23 +67,26 @@ class _CompoundInterestPageState extends ConsumerState<CompoundInterestPage> {
     final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
         (ref.watch(themeProvider) == ThemeMode.system && theme.brightness == Brightness.dark);
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
+    
+    // Page Theme: Mint Green Accent & Pure Dark/Light backgrounds
+    final pageBgColor = isDarkMode ? AppColors.backgroundDark : const Color(0xFFF8FAF9);
+    final accentColor = isDarkMode ? const Color(0xFF2ECC71) : const Color(0xFF27AE60);
 
     return Scaffold(
-      backgroundColor: isDarkMode ? AppColors.backgroundDark : const Color(0xFFF8FAF9),
+      backgroundColor: pageBgColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
           onPressed: () => Navigator.pop(context),
-          icon: Icon(Icons.arrow_back_ios_new_rounded,
-              color: contentColor, size: 20),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: contentColor, size: 20),
         ),
         title: Text(
-          'Simulasi Bunga Majemuk',
+          'Bunga Majemuk',
           style: GoogleFonts.quicksand(
             fontWeight: FontWeight.bold,
-            fontSize: 11,
+            fontSize: 14,
             color: contentColor,
           ),
         ),
@@ -93,25 +96,29 @@ class _CompoundInterestPageState extends ConsumerState<CompoundInterestPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildInfoCard(),
-            const SizedBox(height: 24),
+            _buildInfoCard(accentColor),
+            const SizedBox(height: 28),
 
             _buildAlignedInput(
-              'MODAL AWAL', 
+              'Modal Awal', 
               _initialAmountController, 
               (_) => _calculate(), 
               Icons.account_balance_rounded, 
               isDarkMode,
+              accentColor,
+              'Modal Awal',
               isCurrency: true
             ),
             const SizedBox(height: 20),
             
             _buildAlignedInput(
-              'TABUNGAN BULANAN', 
+              'Tabungan Bulanan', 
               _monthlyContributionController, 
               (_) => _calculate(), 
               Icons.add_circle_outline_rounded, 
               isDarkMode,
+              accentColor,
+              'Tabungan Bulanan',
               isCurrency: true
             ),
             const SizedBox(height: 20),
@@ -120,49 +127,53 @@ class _CompoundInterestPageState extends ConsumerState<CompoundInterestPage> {
               children: [
                 Expanded(
                   child: _buildAlignedInput(
-                    'BUNGA (%)', 
+                    'Bunga (%)', 
                     _interestRateController, 
                     (_) => _calculate(), 
                     Icons.percent_rounded, 
-                    isDarkMode
+                    isDarkMode,
+                    accentColor,
+                    'Bunga (%)',
                   ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: _buildAlignedInput(
-                    'DURASI (THN)', 
+                    'Durasi (Tahun)', 
                     _yearsController, 
                     (_) => _calculate(), 
                     Icons.calendar_today_rounded, 
-                    isDarkMode
+                    isDarkMode,
+                    accentColor,
+                    'Durasi (Tahun)',
                   ),
                 ),
               ],
             ),
             
             const SizedBox(height: 32),
-            _buildResultCard(isDarkMode),
+            _buildResultCard(isDarkMode, accentColor),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildInfoCard() {
+  Widget _buildInfoCard(Color accentColor) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.1),
+        color: accentColor.withOpacity(0.08),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: const Row(
+      child: Row(
         children: [
-          Icon(Icons.info_outline_rounded, color: AppColors.primary, size: 18),
-          const SizedBox(width: 8),
+          Icon(Icons.info_outline_rounded, color: accentColor, size: 18),
+          const SizedBox(width: 10),
           Expanded(
             child: Text(
               'Simulasi ini membantu Anda memproyeksikan pertumbuhan investasi Anda seiring waktu.',
-              style: TextStyle(fontSize: 10, color: AppColors.primary, fontWeight: FontWeight.bold),
+              style: GoogleFonts.quicksand(fontSize: 11, color: accentColor, fontWeight: FontWeight.bold),
             ),
           ),
         ],
@@ -176,6 +187,8 @@ class _CompoundInterestPageState extends ConsumerState<CompoundInterestPage> {
     Function(String) onChanged, 
     IconData icon, 
     bool isDarkMode,
+    Color accentColor,
+    String hintText,
     {bool isCurrency = false}
   ) {
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
@@ -184,43 +197,55 @@ class _CompoundInterestPageState extends ConsumerState<CompoundInterestPage> {
       children: [
         Padding(
           padding: const EdgeInsets.only(left: 4, bottom: 8),
-          child: Text(label, style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: contentColor.withValues(alpha: 0.5), letterSpacing: 1)),
+          child: Text(
+            label, 
+            style: GoogleFonts.quicksand(
+              fontSize: 11, 
+              fontWeight: FontWeight.bold, 
+              color: contentColor.withOpacity(0.4),
+            ),
+          ),
         ),
         TextFormField(
           controller: controller,
           keyboardType: TextInputType.number,
           inputFormatters: isCurrency ? [_RibuanFormatter()] : [],
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: contentColor),
+          style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
           onChanged: onChanged,
           decoration: InputDecoration(
-            hintText: '0',
-            hintStyle: TextStyle(
-                fontSize: 11,
-                color: isDarkMode ? Colors.white10 : Colors.black38),
+            hintText: hintText,
+            hintStyle: GoogleFonts.quicksand(
+              fontSize: 13,
+              color: isDarkMode ? Colors.white.withOpacity(0.2) : Colors.black.withOpacity(0.25),
+              fontWeight: FontWeight.bold,
+            ),
             prefixIcon: Container(
-              padding: const EdgeInsets.only(left: 20, right: 8),
+              padding: const EdgeInsets.only(left: 16, right: 8),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(icon, color: AppColors.primary, size: 20),
+                  Icon(icon, color: accentColor, size: 18),
                   if (isCurrency) ...[
                     const SizedBox(width: 8),
-                    const Text('Rp', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 11)),
+                    Text(
+                      'Rp', 
+                      style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: accentColor, fontSize: 13),
+                    ),
                   ],
                 ],
               ),
             ),
             filled: true,
-            fillColor: isDarkMode ? Colors.white.withValues(alpha: 0.05) : AppColors.background,
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            fillColor: isDarkMode ? Colors.white.withOpacity(0.05) : AppColors.background,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildResultCard(bool isDarkMode) {
+  Widget _buildResultCard(bool isDarkMode, Color accentColor) {
     final hexBg = isDarkMode ? AppColors.surfaceDark : Colors.white;
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
     
@@ -229,27 +254,44 @@ class _CompoundInterestPageState extends ConsumerState<CompoundInterestPage> {
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: hexBg,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: isDarkMode ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: isDarkMode ? 0.3 : 0.05), blurRadius: 15, offset: const Offset(0, 8))],
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDarkMode ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.03),
+        ),
       ),
       child: Column(
         children: [
-          Text('ESTIMASI SALDO AKHIR', style: TextStyle(color: contentColor.withValues(alpha: 0.4), fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 2)),
-          const SizedBox(height: 12),
+          Text(
+            'Estimasi Saldo Akhir', 
+            style: GoogleFonts.quicksand(
+              color: contentColor.withOpacity(0.4), 
+              fontSize: 11, 
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
           FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(
               _formatRupiah(_finalBalance), 
-              style: GoogleFonts.quicksand(fontSize: 21, fontWeight: FontWeight.bold, color: _finalBalance > 0 ? AppColors.primary : contentColor.withValues(alpha: 0.1))
+              style: GoogleFonts.quicksand(
+                fontSize: 24, 
+                fontWeight: FontWeight.bold, 
+                color: _finalBalance > 0 ? accentColor : contentColor.withOpacity(0.1),
+              ),
             ),
+          ),
+          const SizedBox(height: 24),
+          Divider(
+            height: 1,
+            color: isDarkMode ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.03),
           ),
           const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildMiniBreakdown('MODAL', _formatRupiah(_totalContributions), isDarkMode),
-              _buildMiniBreakdown('BUNGA', _formatRupiah(_totalInterest), isDarkMode),
+              _buildMiniBreakdown('Total Setoran', _formatRupiah(_totalContributions), isDarkMode),
+              _buildMiniBreakdown('Akumulasi Bunga', _formatRupiah(_totalInterest), isDarkMode, isHighlight: true, accentColor: accentColor),
             ],
           ),
         ],
@@ -257,13 +299,27 @@ class _CompoundInterestPageState extends ConsumerState<CompoundInterestPage> {
     );
   }
 
-  Widget _buildMiniBreakdown(String label, String value, bool isDarkMode) {
+  Widget _buildMiniBreakdown(String label, String value, bool isDarkMode, {bool isHighlight = false, Color? accentColor}) {
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
     return Column(
       children: [
-        Text(label, style: TextStyle(color: contentColor.withValues(alpha: 0.4), fontSize: 9, fontWeight: FontWeight.bold)),
+        Text(
+          label, 
+          style: GoogleFonts.quicksand(
+            color: contentColor.withOpacity(0.4), 
+            fontSize: 10, 
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         const SizedBox(height: 4),
-        Text(value, style: TextStyle(color: contentColor, fontSize: 11, fontWeight: FontWeight.bold)),
+        Text(
+          value, 
+          style: GoogleFonts.quicksand(
+            color: isHighlight && _finalBalance > 0 ? accentColor : contentColor, 
+            fontSize: 13, 
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ],
     );
   }

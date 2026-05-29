@@ -110,7 +110,7 @@ class TransactionDetailSheet extends ConsumerWidget {
             context,
             ref,
             'ID Transaksi',
-            '#${transaction.id.replaceAll('paid_debt_', '').toUpperCase()}',
+            '#${transaction.id.replaceAll('paid_debt_', '').replaceAll('shopping_', '').toUpperCase()}',
           ),
           const SizedBox(height: 16),
           _buildReceiptRow(
@@ -129,7 +129,16 @@ class TransactionDetailSheet extends ConsumerWidget {
           const SizedBox(height: 16),
           _buildReceiptRow(context, ref, 'Kategori', transaction.category),
           const SizedBox(height: 16),
-          _buildReceiptRow(context, ref, 'Keterangan', transaction.title),
+          _buildReceiptRow(
+            context,
+            ref,
+            transaction.id.startsWith('shopping_') ? 'Nama Barang' : 'Keterangan',
+            transaction.title,
+            subValue: transaction.description.isNotEmpty &&
+                    transaction.description != transaction.title
+                ? transaction.description
+                : null,
+          ),
           const SizedBox(height: 48),
 
           // Actions

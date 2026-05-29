@@ -14,6 +14,7 @@ import 'package:tabunganku/providers/user_provider.dart';
 import 'package:tabunganku/features/transaction/presentation/widgets/transaction_detail_sheet.dart';
 import 'package:tabunganku/providers/saving_target_provider.dart';
 import 'package:tabunganku/core/theme/app_colors.dart';
+import 'package:tabunganku/core/widgets/high_vis_input.dart';
 import 'package:tabunganku/core/theme/theme_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:tabunganku/features/transaction/presentation/pages/debt_list_page.dart';
@@ -22,7 +23,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tabunganku/models/transaction_model.dart';
 import 'package:tabunganku/models/saving_target_model.dart';
 import 'package:tabunganku/features/settings/presentation/pages/settings_page.dart';
-import 'package:tabunganku/features/transaction/presentation/pages/recurring_list_page.dart';
+import 'package:tabunganku/features/transaction/presentation/pages/recurring_list_page.dart' hide HighVisInput;
 import 'package:tabunganku/core/utils/currency_formatter.dart';
 import 'package:tabunganku/core/services/export_service.dart';
 import 'package:tabunganku/features/home/presentation/widgets/smart_clock_widgets.dart';
@@ -50,6 +51,56 @@ class DashboardPage extends ConsumerStatefulWidget {
 
 class _DashboardPageState extends ConsumerState<DashboardPage> {
   bool _showBalance = true;
+  int? _wisdomIndex;
+  int _savingsXp = 0;
+  final List<_QuickChallenge> _quickChallenges = [
+    _QuickChallenge(
+      icon: '💧',
+      title: 'Bawa Botol Sendiri',
+      subtitle: 'Hemat beli air kemasan',
+      xpReward: 15,
+      savingsAmount: 5000,
+      category: 'Makanan & Minuman',
+    ),
+    _QuickChallenge(
+      icon: '🍱',
+      title: 'Bawa Bekal Makan',
+      subtitle: 'Bawa bekal dari rumah',
+      xpReward: 20,
+      savingsAmount: 20000,
+      category: 'Makanan & Minuman',
+    ),
+    _QuickChallenge(
+      icon: '☕',
+      title: 'Skip Kopi Kafe',
+      subtitle: 'Seduh kopi sendiri',
+      xpReward: 15,
+      savingsAmount: 15000,
+      category: 'Makanan & Minuman',
+    ),
+    _QuickChallenge(
+      icon: '🚶',
+      title: 'Jalan Kaki / Bus',
+      subtitle: 'Hemat bensin & parkir',
+      xpReward: 15,
+      savingsAmount: 10000,
+      category: 'Transportasi',
+    ),
+  ];
+  final List<_DailyMission> _dailyMissions = [
+    _DailyMission(
+      title: "Seduh Kopi Sendiri ☕",
+      subtitle: "Seduh kopi sendiri di rumah & simpan sisa dana belanja kafe.",
+    ),
+    _DailyMission(
+      title: "Saring Keinginan 24 Jam ⏳",
+      subtitle: "Tunda belanja impulsif barang non-esensial selama 24 jam.",
+    ),
+    _DailyMission(
+      title: "Jurnal Finansial Aktif 📝",
+      subtitle: "Catat minimal 1 pengeluaran/pemasukan atau cap kalender Rp0 hari ini.",
+    ),
+  ];
   final PageController _targetPageController = PageController();
   // Timer removed for optimization - isolated in specialized widgets
 
@@ -73,6 +124,270 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => const NotificationSheet(),
+    );
+  }
+
+  void _showAddMissionSheet() {
+    final titleController = TextEditingController();
+    final subtitleController = TextEditingController();
+    String selectedEmoji = '💰';
+    final isDark = ref.read(themeProvider) == ThemeMode.dark ||
+        (ref.read(themeProvider) == ThemeMode.system &&
+            Theme.of(context).brightness == Brightness.dark);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(ctx).viewInsets.bottom,
+        ),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(28, 12, 28, 36),
+          decoration: BoxDecoration(
+            color: isDark ? AppColors.surfaceDark : Colors.white,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Swipe handle
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 24),
+                  decoration: BoxDecoration(
+                    color: isDark ? Colors.white10 : Colors.grey.shade200,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              // Header title
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: const Icon(
+                      Icons.add_task_rounded,
+                      color: AppColors.primary,
+                      size: 22,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Text(
+                    'Tambah Misi Baru',
+                    style: GoogleFonts.quicksand(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.white : Colors.black87,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              // Input field: Title
+              Text(
+                'NAMA MISI',
+                style: GoogleFonts.quicksand(
+                  fontSize: 9,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1.5,
+                  color: isDark ? Colors.white30 : Colors.black38,
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: titleController,
+                style: GoogleFonts.quicksand(
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white : Colors.black87,
+                ),
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(Icons.edit_note_rounded, color: AppColors.primary),
+                  hintText: 'Masukkan nama misi menabung',
+                  hintStyle: GoogleFonts.quicksand(
+                    fontSize: 13,
+                    color: isDark ? Colors.white24 : Colors.black38,
+                  ),
+                  filled: true,
+                  fillColor: isDark ? Colors.white.withOpacity(0.02) : Colors.grey.shade50,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(
+                      color: isDark ? Colors.white10 : Colors.grey.shade200,
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(
+                      color: isDark ? Colors.white10 : Colors.grey.shade100,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(
+                      color: AppColors.primary,
+                      width: 1.5,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              // Input field: Subtitle
+              Text(
+                'DESKRIPSI MISI',
+                style: GoogleFonts.quicksand(
+                  fontSize: 9,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1.5,
+                  color: isDark ? Colors.white30 : Colors.black38,
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: subtitleController,
+                style: GoogleFonts.quicksand(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w500,
+                  color: isDark ? Colors.white70 : Colors.black87,
+                ),
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(Icons.notes_rounded, color: AppColors.primary),
+                  hintText: 'Masukkan deskripsi misi (opsional)',
+                  hintStyle: GoogleFonts.quicksand(
+                    fontSize: 12,
+                    color: isDark ? Colors.white24 : Colors.black38,
+                  ),
+                  filled: true,
+                  fillColor: isDark ? Colors.white.withOpacity(0.02) : Colors.grey.shade50,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(
+                      color: isDark ? Colors.white10 : Colors.grey.shade200,
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(
+                      color: isDark ? Colors.white10 : Colors.grey.shade100,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(
+                      color: AppColors.primary,
+                      width: 1.5,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              // Input field: Emoji selection
+              Text(
+                'PILIH IKON MISI',
+                style: GoogleFonts.quicksand(
+                  fontSize: 9,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1.5,
+                  color: isDark ? Colors.white30 : Colors.black38,
+                ),
+              ),
+              const SizedBox(height: 10),
+              StatefulBuilder(
+                builder: (ctx2, setStateSheet) {
+                  final emojis = ['💰', '☕', '🍱', '🛍️', '💸', '🚗', '🏡', '🎯'];
+                  return SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
+                    child: Row(
+                      children: emojis.map((emoji) {
+                        final isSelected = selectedEmoji == emoji;
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 12),
+                          child: GestureDetector(
+                            onTap: () {
+                              setStateSheet(() {
+                                selectedEmoji = emoji;
+                              });
+                              HapticFeedback.lightImpact();
+                            },
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? AppColors.primary.withOpacity(0.15)
+                                    : Colors.transparent,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: isSelected ? AppColors.primary : Colors.transparent,
+                                  width: 1.5,
+                                ),
+                              ),
+                              child: Text(
+                                emoji,
+                                style: const TextStyle(fontSize: 20),
+                              ),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 28),
+              // Submit button
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton(
+                  onPressed: () {
+                    final title = titleController.text.trim();
+                    final subtitle = subtitleController.text.trim();
+                    if (title.isEmpty) return;
+
+                    setState(() {
+                      _dailyMissions.add(
+                        _DailyMission(
+                          title: '$title $selectedEmoji',
+                          subtitle: subtitle.isEmpty ? 'Misi menabung pilihan Anda.' : subtitle,
+                        ),
+                      );
+                    });
+
+                    HapticFeedback.mediumImpact();
+                    Navigator.pop(ctx);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: Text(
+                    'Tambah Misi',
+                    style: GoogleFonts.quicksand(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -355,15 +670,1085 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       }
     }
 
+    final savedXp = prefs.getInt('savings_xp_$userId') ?? 0;
+    final todayStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    final savedDate = prefs.getString('completed_challenges_date_$userId') ?? '';
+    List<String> completedList = [];
+    if (savedDate == todayStr) {
+      completedList = prefs.getStringList('completed_challenges_list_$userId') ?? [];
+    } else {
+      await prefs.setString('completed_challenges_date_$userId', todayStr);
+      await prefs.setStringList('completed_challenges_list_$userId', []);
+    }
+
     if (!mounted) return;
     setState(() {
       _loadedUserId = userId;
+      _savingsXp = savedXp;
+      for (var ch in _quickChallenges) {
+        ch.isCompleted = completedList.contains(ch.title);
+      }
     });
 
     final targets = await ref.read(savingTargetServiceProvider).getTargets();
     for (final t in targets) {
       await _maybeShowTargetReminder(userId, t);
     }
+  }
+
+  int get _savingsLevel => (_savingsXp / 100).floor() + 1;
+  int get _xpToNextLevel => 100 - (_savingsXp % 100);
+  double get _levelProgress => (_savingsXp % 100) / 100.0;
+
+  String get _savingsLevelTitle {
+    final lvl = _savingsLevel;
+    if (lvl == 1) return '🌱 Penabung Pemula';
+    if (lvl == 2) return '💡 Penabung Cerdas';
+    if (lvl == 3) return '🛡️ Penjaga Anggaran';
+    if (lvl == 4) return '⚔️ Ksatria Finansial';
+    if (lvl == 5) return '👑 Master Kemakmuran';
+    return '🏆 Legenda Finansial';
+  }
+
+  Future<void> _updateSavingsXp(int delta) async {
+    const userId = 'default_user';
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _savingsXp = (_savingsXp + delta).clamp(0, 10000);
+    });
+    await prefs.setInt('savings_xp_$userId', _savingsXp);
+  }
+
+  void _showChallengeVerificationSheet(_QuickChallenge challenge) {
+    final isDark = ref.read(themeProvider) == ThemeMode.dark ||
+        (ref.read(themeProvider) == ThemeMode.system &&
+            Theme.of(context).brightness == Brightness.dark);
+
+    // Editable savings amount controller — pre-formatted with thousands separator
+    final amountController = TextEditingController(
+      text: NumberFormat.currency(locale: 'id_ID', symbol: '', decimalDigits: 0)
+          .format(challenge.savingsAmount.toInt())
+          .trim(),
+    );
+
+    // Mutable state for the sheet — declared outside the builder to survive rebuilds
+    bool check1 = false;
+    bool check2 = false;
+    bool logToKas = true;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+        child: StatefulBuilder(
+          builder: (ctx2, setFormState) {
+            final canComplete = check1 && check2;
+            return Container(
+                  padding: const EdgeInsets.fromLTRB(24, 12, 24, 36),
+                  decoration: BoxDecoration(
+                    color: isDark ? AppColors.surfaceDark : Colors.white,
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+                  ),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Drag handle
+                        Center(
+                          child: Container(
+                            width: 40,
+                            height: 4,
+                            margin: const EdgeInsets.only(bottom: 20),
+                            decoration: BoxDecoration(
+                              color: isDark ? Colors.white10 : Colors.grey.shade200,
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                        ),
+                        // Header row with emoji icon
+                        Row(
+                          children: [
+                            Container(
+                              width: 52,
+                              height: 52,
+                              decoration: BoxDecoration(
+                                color: AppColors.primary.withOpacity(0.12),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(
+                                challenge.icon,
+                                style: const TextStyle(fontSize: 26),
+                              ),
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'TANTANGAN HARI INI',
+                                    style: GoogleFonts.quicksand(
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.w900,
+                                      letterSpacing: 1.4,
+                                      color: AppColors.primary,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    challenge.title,
+                                    style: GoogleFonts.quicksand(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: isDark ? Colors.white : Colors.black87,
+                                    ),
+                                  ),
+                                  Text(
+                                    challenge.subtitle,
+                                    style: GoogleFonts.quicksand(
+                                      fontSize: 11.5,
+                                      color: isDark ? Colors.white.withOpacity(0.5) : Colors.black45,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            // XP Badge
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: Colors.amber.withOpacity(0.15),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: Colors.amber.withOpacity(0.3),
+                                  width: 1,
+                                ),
+                              ),
+                              child: Text(
+                                '+${challenge.xpReward} XP',
+                                style: GoogleFonts.quicksand(
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.amber.shade700,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 24),
+                        // Divider
+                        Divider(
+                          color: isDark ? Colors.white.withOpacity(0.06) : Colors.grey.shade100,
+                          thickness: 1,
+                        ),
+                        const SizedBox(height: 20),
+                        // Section: Nominal Penghematan
+                        Text(
+                          'NOMINAL PENGHEMATAN',
+                          style: GoogleFonts.quicksand(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 1.4,
+                            color: isDark ? Colors.white30 : Colors.black38,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Sesuaikan dengan penghematan nyata kamu hari ini.',
+                          style: GoogleFonts.quicksand(
+                            fontSize: 11,
+                            color: isDark ? Colors.white.withOpacity(0.4) : Colors.black38,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        // Editable amount input
+                        TextField(
+                          controller: amountController,
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                            _RibuanFormatter(),
+                          ],
+                          style: GoogleFonts.quicksand(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? Colors.white : Colors.black87,
+                          ),
+                          decoration: InputDecoration(
+                            prefixText: 'Rp ',
+                            prefixStyle: GoogleFonts.quicksand(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primary,
+                            ),
+                            filled: true,
+                            fillColor: isDark
+                                ? AppColors.primary.withOpacity(0.06)
+                                : AppColors.primary.withOpacity(0.04),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: BorderSide.none,
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: BorderSide(
+                                color: AppColors.primary.withOpacity(0.4),
+                                width: 1.5,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        // Section: Verifikasi Komitmen
+                        Text(
+                          'VERIFIKASI KOMITMEN',
+                          style: GoogleFonts.quicksand(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 1.4,
+                            color: isDark ? Colors.white30 : Colors.black38,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Centang kedua pernyataan untuk mengaktifkan tombol selesai.',
+                          style: GoogleFonts.quicksand(
+                            fontSize: 11,
+                            color: isDark ? Colors.white.withOpacity(0.4) : Colors.black38,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        // Checkbox 1
+                        InkWell(
+                          onTap: () {
+                            setFormState(() => check1 = !check1);
+                            HapticFeedback.selectionClick();
+                          },
+                          borderRadius: BorderRadius.circular(12),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: check1
+                                  ? Colors.teal.withOpacity(0.08)
+                                  : isDark
+                                      ? Colors.white.withOpacity(0.03)
+                                      : Colors.grey.shade50,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: check1
+                                    ? Colors.teal.withOpacity(0.3)
+                                    : isDark
+                                        ? Colors.white.withOpacity(0.06)
+                                        : Colors.grey.shade200,
+                                width: 1.2,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                AnimatedContainer(
+                                  duration: const Duration(milliseconds: 200),
+                                  width: 22,
+                                  height: 22,
+                                  decoration: BoxDecoration(
+                                    color: check1 ? Colors.teal : Colors.transparent,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: check1
+                                          ? Colors.teal
+                                          : isDark
+                                              ? Colors.white24
+                                              : Colors.grey.shade400,
+                                      width: 2,
+                                    ),
+                                  ),
+                                  child: check1
+                                      ? const Icon(
+                                          Icons.check,
+                                          color: Colors.white,
+                                          size: 14,
+                                        )
+                                      : null,
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    'Saya benar-benar telah menyelesaikan tantangan "${challenge.title}" hari ini.',
+                                    style: GoogleFonts.quicksand(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: isDark ? Colors.white70 : Colors.black87,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        // Checkbox 2
+                        InkWell(
+                          onTap: () {
+                            setFormState(() => check2 = !check2);
+                            HapticFeedback.selectionClick();
+                          },
+                          borderRadius: BorderRadius.circular(12),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: check2
+                                  ? Colors.teal.withOpacity(0.08)
+                                  : isDark
+                                      ? Colors.white.withOpacity(0.03)
+                                      : Colors.grey.shade50,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: check2
+                                    ? Colors.teal.withOpacity(0.3)
+                                    : isDark
+                                        ? Colors.white.withOpacity(0.06)
+                                        : Colors.grey.shade200,
+                                width: 1.2,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                AnimatedContainer(
+                                  duration: const Duration(milliseconds: 200),
+                                  width: 22,
+                                  height: 22,
+                                  decoration: BoxDecoration(
+                                    color: check2 ? Colors.teal : Colors.transparent,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: check2
+                                          ? Colors.teal
+                                          : isDark
+                                              ? Colors.white24
+                                              : Colors.grey.shade400,
+                                      width: 2,
+                                    ),
+                                  ),
+                                  child: check2
+                                      ? const Icon(
+                                          Icons.check,
+                                          color: Colors.white,
+                                          size: 14,
+                                        )
+                                      : null,
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    'Saya berkomitmen mengalokasikan dana hemat ini ke tabungan aktif.',
+                                    style: GoogleFonts.quicksand(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: isDark ? Colors.white70 : Colors.black87,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        // Log to Kas toggle row
+                        InkWell(
+                          onTap: () {
+                            setFormState(() => logToKas = !logToKas);
+                            HapticFeedback.selectionClick();
+                          },
+                          borderRadius: BorderRadius.circular(12),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withOpacity(0.05),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: AppColors.primary.withOpacity(0.15),
+                                width: 1,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.savings_rounded,
+                                  color: AppColors.primary,
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    'Catat nominal hemat ke Buku Kas utama',
+                                    style: GoogleFonts.quicksand(
+                                      fontSize: 12.5,
+                                      fontWeight: FontWeight.bold,
+                                      color: isDark ? Colors.white70 : Colors.black87,
+                                    ),
+                                  ),
+                                ),
+                                Switch(
+                                  value: logToKas,
+                                  onChanged: (val) {
+                                    setFormState(() => logToKas = val);
+                                    HapticFeedback.selectionClick();
+                                  },
+                                  activeColor: AppColors.primary,
+                                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 28),
+                        // Completion button
+                        SizedBox(
+                          width: double.infinity,
+                          height: 52,
+                          child: ElevatedButton(
+                            onPressed: canComplete
+                                ? () async {
+                                    final rawText = amountController.text
+                                        .replaceAll('.', '')
+                                        .replaceAll(',', '');
+                                    final actualAmount =
+                                        double.tryParse(rawText) ?? challenge.savingsAmount;
+
+                                    // Mark completed & update XP
+                                    setState(() {
+                                      challenge.isCompleted = true;
+                                    });
+                                    await _updateSavingsXp(challenge.xpReward);
+
+                                    // Persist completed list
+                                    final prefs = await SharedPreferences.getInstance();
+                                    const userId = 'default_user';
+                                    final completedTitles = _quickChallenges
+                                        .where((c) => c.isCompleted)
+                                        .map((c) => c.title)
+                                        .toList();
+                                    await prefs.setStringList(
+                                        'completed_challenges_list_$userId', completedTitles);
+
+                                    // Optionally log to cashbook
+                                    if (logToKas) {
+                                      final tx = TransactionModel(
+                                        id: DateTime.now().millisecondsSinceEpoch.toString(),
+                                        title: 'Hemat: ${challenge.title} ${challenge.icon}',
+                                        description: 'Tabungan nyata dari tantangan harian.',
+                                        amount: actualAmount,
+                                        type: TransactionType.income,
+                                        date: DateTime.now(),
+                                        category: challenge.category,
+                                        creatorName: ref.read(userNameProvider),
+                                      );
+                                      await ref
+                                          .read(transactionServiceProvider)
+                                          .addTransaction(tx);
+                                    }
+
+                                    HapticFeedback.heavyImpact();
+                                    if (ctx.mounted) Navigator.pop(ctx);
+                                    if (mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            logToKas
+                                                ? 'Luar biasa! +${challenge.xpReward} XP & ${_formatRupiah(actualAmount)} tercatat di tabungan! 💰'
+                                                : 'Keren! +${challenge.xpReward} XP dikreditkan ke level kamu! 🚀',
+                                            style: GoogleFonts.quicksand(fontWeight: FontWeight.bold),
+                                          ),
+                                          backgroundColor: Colors.teal.shade700,
+                                        ),
+                                      );
+                                    }
+                                  }
+                                : null,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                                  canComplete ? AppColors.primary : Colors.grey.shade400,
+                              disabledBackgroundColor: isDark
+                                  ? Colors.white.withOpacity(0.07)
+                                  : Colors.grey.shade200,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              elevation: canComplete ? 4 : 0,
+                              shadowColor: AppColors.primary.withOpacity(0.3),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  canComplete
+                                      ? Icons.emoji_events_rounded
+                                      : Icons.lock_outline_rounded,
+                                  color: canComplete
+                                      ? Colors.white
+                                      : isDark
+                                          ? Colors.white24
+                                          : Colors.grey.shade400,
+                                  size: 18,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  canComplete
+                                      ? 'Selesaikan & Klaim XP! 🚀'
+                                      : 'Centang kedua pernyataan dulu',
+                                  style: GoogleFonts.quicksand(
+                                    fontSize: 13.5,
+                                    fontWeight: FontWeight.bold,
+                                    color: canComplete
+                                        ? Colors.white
+                                        : isDark
+                                            ? Colors.white24
+                                            : Colors.grey.shade400,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+          },
+        ),
+      ),
+    );
+  }
+
+  // Kept for compatibility but no longer called directly
+  void _showChallengeSuccessSheet(_QuickChallenge challenge) {
+    final isDark = ref.read(themeProvider) == ThemeMode.dark ||
+        (ref.read(themeProvider) == ThemeMode.system &&
+            Theme.of(context).brightness == Brightness.dark);
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) => Container(
+        padding: const EdgeInsets.fromLTRB(28, 20, 28, 40),
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.surfaceDark : Colors.white,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Swipe handle
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 24),
+              decoration: BoxDecoration(
+                color: isDark ? Colors.white10 : Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            // Success Icon
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.12),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.emoji_events_rounded,
+                color: AppColors.primary,
+                size: 50,
+              ),
+            ),
+            const SizedBox(height: 20),
+            // Title
+            Text(
+              'TANTANGAN DISELESAIKAN!',
+              style: GoogleFonts.quicksand(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 12),
+            // Message
+            Text(
+              'Hebat! Kamu berhasil menyelesaikan tantangan "${challenge.title} ${challenge.icon}" hari ini dan berhak mengklaim +${challenge.xpReward} XP untuk mempercepat kenaikan Level Finansialmu! 🚀',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.quicksand(
+                fontSize: 13,
+                height: 1.5,
+                color: isDark ? Colors.white70 : Colors.black54,
+              ),
+            ),
+            const SizedBox(height: 24),
+            // Savings Card
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.06),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: AppColors.primary.withOpacity(0.15),
+                  width: 1,
+                ),
+              ),
+              child: Column(
+                children: [
+                  Text(
+                    'ESTIMASI DANA YANG DIHEMAT',
+                    style: GoogleFonts.quicksand(
+                      fontSize: 9,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.2,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    _formatRupiah(challenge.savingsAmount),
+                    style: GoogleFonts.quicksand(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.white : AppColors.primaryDark,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 28),
+            // Action Buttons
+            Column(
+              children: [
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      // Log real transaction
+                      final tx = TransactionModel(
+                        id: DateTime.now().millisecondsSinceEpoch.toString(),
+                        title: 'Hemat: ${challenge.title} ${challenge.icon}',
+                        description: 'Tabungan hasil penyelesaian tantangan cepat.',
+                        amount: challenge.savingsAmount,
+                        type: TransactionType.income,
+                        date: DateTime.now(),
+                        category: challenge.category,
+                        creatorName: ref.read(userNameProvider),
+                      );
+
+                      await ref.read(transactionServiceProvider).addTransaction(tx);
+                      HapticFeedback.heavyImpact();
+                      if (ctx.mounted) {
+                        Navigator.pop(ctx);
+                      }
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Dana hemat ${_formatRupiah(challenge.savingsAmount)} berhasil dimasukkan ke tabungan! 💰✨',
+                              style: GoogleFonts.quicksand(fontWeight: FontWeight.bold),
+                            ),
+                            backgroundColor: Colors.teal.shade700,
+                          ),
+                        );
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: Text(
+                      'Ya, Catat Tabungan! 💰',
+                      style: GoogleFonts.quicksand(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: OutlinedButton(
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      Navigator.pop(ctx);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'Klaim berhasil! +${challenge.xpReward} XP dikreditkan. 🚀',
+                            style: GoogleFonts.quicksand(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      );
+                    },
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(
+                        color: isDark ? Colors.white10 : Colors.grey.shade200,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                    child: Text(
+                      'Hanya Klaim XP',
+                      style: GoogleFonts.quicksand(
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white70 : Colors.black87,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLevelAndChallengesCard(bool isDarkMode) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: isDarkMode ? const Color(0xFF151618) : Colors.white,
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(
+          color: isDarkMode
+              ? Colors.white.withOpacity(0.04)
+              : Colors.black.withOpacity(0.03),
+          width: 1.2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: isDarkMode
+                ? Colors.black.withOpacity(0.12)
+                : Colors.black.withOpacity(0.02),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header: Level Finansial
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'LEVEL FINANSIAL',
+                      style: GoogleFonts.quicksand(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1.5,
+                        color: isDarkMode ? Colors.white30 : Colors.black38,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _savingsLevelTitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.quicksand(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: isDarkMode ? Colors.white : AppColors.primaryDark,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  '$_savingsXp XP',
+                  style: GoogleFonts.quicksand(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // Progress Indicator
+          ClipRRect(
+            borderRadius: BorderRadius.circular(5),
+            child: SizedBox(
+              height: 10,
+              child: LinearProgressIndicator(
+                value: _levelProgress,
+                backgroundColor: isDarkMode
+                    ? Colors.white.withOpacity(0.05)
+                    : Colors.grey.shade100,
+                valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '$_xpToNextLevel XP lagi menuju level berikutnya',
+            style: GoogleFonts.quicksand(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: isDarkMode ? Colors.white30 : Colors.black38,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Divider(
+              color: isDarkMode ? Colors.white.withOpacity(0.06) : Colors.grey.shade100,
+              thickness: 1,
+            ),
+          ),
+          const SizedBox(height: 12),
+          // Header: Tantangan Cepat Harian
+          Text(
+            'TANTANGAN CEPAT HARIAN',
+            style: GoogleFonts.quicksand(
+              fontSize: 9,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 1.5,
+              color: isDarkMode ? Colors.white30 : Colors.black38,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            'Selesaikan tantangan kecil & klaim XP + Catat Tabungan!',
+            style: GoogleFonts.quicksand(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: isDarkMode ? Colors.white70 : Colors.black54,
+            ),
+          ),
+          const SizedBox(height: 18),
+          // List of Challenges
+          Column(
+            children: _quickChallenges.map((challenge) {
+              return Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                decoration: BoxDecoration(
+                  color: challenge.isCompleted
+                      ? (isDarkMode
+                          ? Colors.teal.withOpacity(0.05)
+                          : Colors.teal.withOpacity(0.04))
+                      : (isDarkMode
+                          ? Colors.white.withOpacity(0.02)
+                          : Colors.grey.shade50),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: challenge.isCompleted
+                        ? Colors.teal.withOpacity(0.12)
+                        : (isDarkMode
+                            ? Colors.white.withOpacity(0.03)
+                            : Colors.black.withOpacity(0.04)),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Icon
+                    Container(
+                      width: 42,
+                      height: 42,
+                      decoration: BoxDecoration(
+                        color: challenge.isCompleted
+                            ? Colors.teal.withOpacity(0.12)
+                            : AppColors.primary.withOpacity(0.10),
+                        shape: BoxShape.circle,
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        challenge.icon,
+                        style: const TextStyle(fontSize: 19),
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    // Title & Subtitle
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            challenge.title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.quicksand(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: isDarkMode ? Colors.white : Colors.black87,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            challenge.subtitle,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.quicksand(
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w500,
+                              color: isDarkMode
+                                  ? Colors.white.withOpacity(0.45)
+                                  : Colors.black45,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          // XP chip + savings amount on one line
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 7, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: Colors.amber.withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  '+${challenge.xpReward} XP',
+                                  style: GoogleFonts.quicksand(
+                                    fontSize: 9.5,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.amber.shade700,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Flexible(
+                                child: Text(
+                                  'Hemat ${_formatRupiah(challenge.savingsAmount)}',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: GoogleFonts.quicksand(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.primary,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    // Action Button — fixed-width to prevent overflow
+                    challenge.isCompleted
+                        ? Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: Colors.teal.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: Colors.teal.withOpacity(0.2),
+                                width: 1,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.check_circle_rounded,
+                                  color: Colors.teal,
+                                  size: 13,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'Selesai',
+                                  style: GoogleFonts.quicksand(
+                                    fontSize: 10.5,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.teal,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: () {
+                                HapticFeedback.lightImpact();
+                                _showChallengeVerificationSheet(challenge);
+                              },
+                              borderRadius: BorderRadius.circular(16),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 7),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      AppColors.primary,
+                                      AppColors.primary.withOpacity(0.78),
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(16),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: AppColors.primary.withOpacity(0.28),
+                                      blurRadius: 6,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(
+                                      Icons.play_arrow_rounded,
+                                      color: Colors.white,
+                                      size: 13,
+                                    ),
+                                    const SizedBox(width: 3),
+                                    Text(
+                                      'Mulai',
+                                      style: GoogleFonts.quicksand(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _maybeShowTargetReminder(
@@ -431,8 +1816,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       case QuickActionType.simulator:
         _showSavingSimulatorSheet();
         break;
-      case QuickActionType.arisan:
-        context.push('/arisan');
+      case QuickActionType.nabungBersama:
+        context.push('/nabung-bersama');
         break;
       case QuickActionType.debt:
         Navigator.push(
@@ -571,7 +1956,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                           style: GoogleFonts.quicksand(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
-                              color: isDarkMode ? Colors.white : Colors.black87),
+                              color:
+                                  isDarkMode ? Colors.white : Colors.black87),
                         ),
                         Text(
                           'Target Tabungan',
@@ -643,7 +2029,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                           style: GoogleFonts.quicksand(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
-                              color: isDarkMode ? Colors.white : Colors.black87),
+                              color:
+                                  isDarkMode ? Colors.white : Colors.black87),
                         ),
                       ],
                     ),
@@ -789,8 +2176,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     );
   }
 
-  Widget _targetInfoCard(String label, String value, IconData icon,
-      bool isDarkMode, {Color? color, String? subLabel}) {
+  Widget _targetInfoCard(
+      String label, String value, IconData icon, bool isDarkMode,
+      {Color? color, String? subLabel}) {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -965,10 +2353,63 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     );
   }
 
+  void _applyTopUpBankNameToKeterangan({
+    required TextEditingController nameController,
+    required String bankName,
+    required StateSetter setSheetState,
+  }) {
+    if (nameController.text.isEmpty ||
+        nameController.text.startsWith('Biaya Admin')) {
+      final now = DateTime.now();
+      const monthNames = [
+        '',
+        'Januari', 'Februari', 'Maret',
+        'April', 'Mei', 'Juni', 'Juli',
+        'Agustus', 'September', 'Oktober',
+        'November', 'Desember',
+      ];
+      final monthName = monthNames[now.month];
+      final trimmed = bankName.trim();
+      setSheetState(() {
+        nameController.text = trimmed.isEmpty
+            ? 'Biaya Admin Bank ${now.day} $monthName ${now.year}'
+            : 'Biaya Admin Bank $trimmed ${now.day} $monthName ${now.year}';
+      });
+    }
+  }
+
+  void _applyInterestBankNameToKeterangan({
+    required TextEditingController nameController,
+    required String bankName,
+    required StateSetter setSheetState,
+  }) {
+    if (nameController.text.isEmpty ||
+        nameController.text.startsWith('Bunga ')) {
+      final now = DateTime.now();
+      const monthNames = [
+        '',
+        'Januari', 'Februari', 'Maret',
+        'April', 'Mei', 'Juni', 'Juli',
+        'Agustus', 'September', 'Oktober',
+        'November', 'Desember',
+      ];
+      final monthName = monthNames[now.month];
+      final trimmed = bankName.trim();
+      setSheetState(() {
+        nameController.text = trimmed.isEmpty
+            ? ''
+            : 'Bunga Bank $trimmed ${now.day} $monthName ${now.year}';
+        // Also set category when applying
+      });
+    }
+  }
+
   Future<void> _showManualTransactionSheet(TransactionType type) async {
     final amountController = TextEditingController();
     final nameController = TextEditingController();
     final customCategoryController = TextEditingController();
+    final topUpBankController = TextEditingController();
+    final interestBankController = TextEditingController();
     final formKey = GlobalKey<FormState>();
     final List<TransactionCategory> categoryObjects =
         type == TransactionType.income
@@ -997,7 +2438,192 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 .firstWhere((cat) => cat.label == selectedCategory)
                 .group
             : (categoryObjects.isNotEmpty ? categoryObjects.first.group : '');
+    var categoryUserSelected = false; // tracks if user has manually picked a category
     var noteText = '';
+    final interestBankOptions = [
+      {
+        'value': 'SeaBank (Standar)',
+        'label': 'SeaBank (Standar)',
+        'subtitle': '2,5% p.a. – Tanpa min. saldo',
+        'icon': Icons.savings_rounded,
+        'color': Colors.teal,
+      },
+      {
+        'value': 'SeaBank (Deposito)',
+        'label': 'SeaBank (Deposito)',
+        'subtitle': 'Up to 6% p.a. – Deposito Tinggi',
+        'icon': Icons.trending_up_rounded,
+        'color': Colors.orangeAccent,
+      },
+      {
+        'value': 'Bank Neo Commerce',
+        'label': 'Bank Neo Commerce',
+        'subtitle': 'Bunga cair harian & bunga tinggi',
+        'icon': Icons.bolt_rounded,
+        'color': Colors.amber.shade700,
+      },
+      {
+        'value': 'Bank Jago',
+        'label': 'Bank Jago',
+        'subtitle': 'Bunga cair bulanan & Kantong Jago',
+        'icon': Icons.account_balance_wallet_rounded,
+        'color': Colors.orange.shade800,
+      },
+      {
+        'value': 'Blu by BCA Digital',
+        'label': 'Blu by BCA Digital',
+        'subtitle': 'Blu – Digital banking by BCA',
+        'icon': Icons.water_drop_rounded,
+        'color': Colors.blue.shade500,
+      },
+      {
+        'value': 'Allo Bank',
+        'label': 'Allo Bank',
+        'subtitle': 'Allo – Belanja hemat & Bunga menarik',
+        'icon': Icons.credit_card_rounded,
+        'color': Colors.purple.shade600,
+      },
+      {
+        'value': 'Bank BCA',
+        'label': 'Bank BCA',
+        'subtitle': 'BCA – Bank Swasta Terbesar',
+        'icon': Icons.account_balance_rounded,
+        'color': Colors.blue.shade800,
+      },
+      {
+        'value': 'Bank Mandiri',
+        'label': 'Bank Mandiri',
+        'subtitle': 'Mandiri – Bank BUMN Terbesar',
+        'icon': Icons.account_balance_rounded,
+        'color': Colors.yellow.shade800,
+      },
+      {
+        'value': 'Bank BRI',
+        'label': 'Bank BRI',
+        'subtitle': 'BRI – Melayani Hingga Pelosok',
+        'icon': Icons.account_balance_rounded,
+        'color': Colors.blue.shade900,
+      },
+      {
+        'value': 'Bank BNI',
+        'label': 'Bank BNI',
+        'subtitle': 'BNI – Melayani Negeri Kebanggaan',
+        'icon': Icons.account_balance_rounded,
+        'color': Colors.orange.shade600,
+      },
+      {
+        'value': 'Bank Syariah Indonesia (BSI)',
+        'label': 'Bank Syariah Indonesia (BSI)',
+        'subtitle': 'BSI – Perbankan Syariah Modern',
+        'icon': Icons.account_balance_rounded,
+        'color': Colors.teal.shade700,
+      },
+      {
+        'value': 'Bank CIMB Niaga',
+        'label': 'Bank CIMB Niaga',
+        'subtitle': 'CIMB Niaga – Transaksi Cerdas',
+        'icon': Icons.account_balance_rounded,
+        'color': Colors.red.shade800,
+      },
+      {
+        'value': 'Bank Permata',
+        'label': 'Bank Permata',
+        'subtitle': 'Permata Bank – Solusi Finansial Modern',
+        'icon': Icons.account_balance_rounded,
+        'color': Colors.green.shade700,
+      },
+      {
+        'value': 'DBS Bank',
+        'label': 'DBS Bank',
+        'subtitle': 'DBS – Bank Terbesar di Asia Tenggara',
+        'icon': Icons.account_balance_rounded,
+        'color': Colors.red.shade600,
+      },
+      {
+        'value': 'UOB Bank',
+        'label': 'UOB Bank',
+        'subtitle': 'UOB – Solusi Keuangan Regional Asia',
+        'icon': Icons.account_balance_rounded,
+        'color': Colors.blue.shade700,
+      },
+      {
+        'value': 'HSBC Bank',
+        'label': 'HSBC Bank',
+        'subtitle': 'HSBC – Global Wealth & Banking',
+        'icon': Icons.account_balance_rounded,
+        'color': Colors.red.shade900,
+      },
+      {
+        'value': 'Citibank',
+        'label': 'Citibank',
+        'subtitle': 'Citibank – Layanan Finansial Global',
+        'icon': Icons.public_rounded,
+        'color': Colors.blue.shade600,
+      },
+      {
+        'value': 'Standard Chartered',
+        'label': 'Standard Chartered',
+        'subtitle': 'StanChart – Perbankan Internasional',
+        'icon': Icons.account_balance_rounded,
+        'color': Colors.green.shade800,
+      },
+      {
+        'value': 'GoPay',
+        'label': 'GoPay',
+        'subtitle': 'GoPay – Ekosistem GoTo terintegrasi',
+        'icon': Icons.account_balance_wallet_rounded,
+        'color': Colors.teal.shade500,
+      },
+      {
+        'value': 'OVO',
+        'label': 'OVO',
+        'subtitle': 'OVO – Cashback & merchant terluas',
+        'icon': Icons.account_balance_wallet_rounded,
+        'color': Colors.deepPurple.shade700,
+      },
+      {
+        'value': 'Dana',
+        'label': 'Dana',
+        'subtitle': 'DANA – Dompet digital serbabisa',
+        'icon': Icons.account_balance_wallet_rounded,
+        'color': Colors.blue.shade400,
+      },
+      {
+        'value': 'ShopeePay',
+        'label': 'ShopeePay',
+        'subtitle': 'ShopeePay – Belanja & promo Shopee',
+        'icon': Icons.account_balance_wallet_rounded,
+        'color': Colors.orange.shade900,
+      },
+      {
+        'value': 'LinkAja',
+        'label': 'LinkAja',
+        'subtitle': 'LinkAja – Layanan BUMN & Transportasi',
+        'icon': Icons.account_balance_wallet_rounded,
+        'color': Colors.red.shade700,
+      },
+      {
+        'value': 'PayPal',
+        'label': 'PayPal',
+        'subtitle': 'PayPal – Pembayaran Global Internasional',
+        'icon': Icons.payment_rounded,
+        'color': Colors.blue.shade900,
+      },
+      {
+        'value': 'Wise',
+        'label': 'Wise',
+        'subtitle': 'Wise – Transfer & Saldo Multi-Mata Uang',
+        'icon': Icons.sync_alt_rounded,
+        'color': Colors.green.shade600,
+      },
+      {
+        'value': 'Bank Lainnya',
+        'label': 'Bank Lainnya',
+        'subtitle': 'Bank digital/konvensional lainnya',
+        'icon': Icons.more_horiz_rounded,
+        'color': Colors.grey.shade600,
+      },
+    ];
     StateSetter? sheetSetter;
 
     // Add listener for auto-category detection
@@ -1036,12 +2662,197 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             theme.brightness == Brightness.dark);
 
     final topUpSources = [
-      {'label': 'Bank', 'icon': Icons.account_balance_rounded},
-      {'label': 'GoPay', 'icon': Icons.account_balance_wallet_rounded},
-      {'label': 'OVO', 'icon': Icons.account_balance_wallet_rounded},
-      {'label': 'Dana', 'icon': Icons.account_balance_wallet_rounded},
-      {'label': 'ShopeePay', 'icon': Icons.account_balance_wallet_rounded},
-      {'label': 'LinkAja', 'icon': Icons.account_balance_wallet_rounded},
+      {
+        'label': 'Bank (Kustom)',
+        'subtitle': 'Masukkan nama bank secara manual',
+        'icon': Icons.account_balance_rounded,
+        'color': Colors.blueGrey.shade600,
+      },
+      // ── E-Wallet Indonesia ──────────────────────────────
+      {
+        'label': 'GoPay',
+        'subtitle': 'GoPay – Ekosistem GoTo terintegrasi',
+        'icon': Icons.account_balance_wallet_rounded,
+        'color': Colors.teal.shade500,
+      },
+      {
+        'label': 'OVO',
+        'subtitle': 'OVO – Cashback & merchant terluas',
+        'icon': Icons.account_balance_wallet_rounded,
+        'color': Colors.deepPurple.shade600,
+      },
+      {
+        'label': 'Dana',
+        'subtitle': 'DANA – Dompet digital serbabisa',
+        'icon': Icons.account_balance_wallet_rounded,
+        'color': Colors.blue.shade500,
+      },
+      {
+        'label': 'ShopeePay',
+        'subtitle': 'ShopeePay – Belanja & promo Shopee',
+        'icon': Icons.account_balance_wallet_rounded,
+        'color': Colors.orange.shade800,
+      },
+      {
+        'label': 'LinkAja',
+        'subtitle': 'LinkAja – Layanan BUMN & Transportasi',
+        'icon': Icons.account_balance_wallet_rounded,
+        'color': Colors.red.shade600,
+      },
+      {
+        'label': 'Ovo Points',
+        'subtitle': 'OVO Points – Konversi cashback OVO',
+        'icon': Icons.star_rounded,
+        'color': Colors.purple.shade400,
+      },
+      // ── Bank Digital Indonesia ──────────────────────────
+      {
+        'label': 'SeaBank',
+        'subtitle': 'SeaBank – Top-up & transfer digital',
+        'icon': Icons.savings_rounded,
+        'color': Colors.teal.shade600,
+      },
+      {
+        'label': 'Bank Jago',
+        'subtitle': 'Jago – Fitur Kantong & transfer instan',
+        'icon': Icons.account_balance_wallet_rounded,
+        'color': Colors.orange.shade700,
+      },
+      {
+        'label': 'Bank Neo Commerce',
+        'subtitle': 'Neo – Admin gratis & bunga harian',
+        'icon': Icons.bolt_rounded,
+        'color': Colors.amber.shade700,
+      },
+      {
+        'label': 'Blu by BCA',
+        'subtitle': 'Blu – Bank digital by BCA',
+        'icon': Icons.water_drop_rounded,
+        'color': Colors.blue.shade400,
+      },
+      {
+        'label': 'Allo Bank',
+        'subtitle': 'Allo Bank – Belanja hemat Transmart',
+        'icon': Icons.credit_card_rounded,
+        'color': Colors.purple.shade500,
+      },
+      // ── Bank Nasional Indonesia ─────────────────────────
+      {
+        'label': 'Bank BCA',
+        'subtitle': 'BCA – Bank Swasta Nasional Terbesar',
+        'icon': Icons.account_balance_rounded,
+        'color': Colors.blue.shade800,
+      },
+      {
+        'label': 'Bank Mandiri',
+        'subtitle': 'Mandiri – Bank BUMN Terbesar',
+        'icon': Icons.account_balance_rounded,
+        'color': Colors.yellow.shade700,
+      },
+      {
+        'label': 'Bank BRI',
+        'subtitle': 'BRI – Melayani Hingga Pelosok',
+        'icon': Icons.account_balance_rounded,
+        'color': Colors.blue.shade900,
+      },
+      {
+        'label': 'Bank BNI',
+        'subtitle': 'BNI – Melayani Negeri Kebanggaan',
+        'icon': Icons.account_balance_rounded,
+        'color': Colors.orange.shade600,
+      },
+      {
+        'label': 'Bank BSI',
+        'subtitle': 'BSI – Perbankan Syariah Terbesar',
+        'icon': Icons.account_balance_rounded,
+        'color': Colors.teal.shade700,
+      },
+      {
+        'label': 'Bank CIMB Niaga',
+        'subtitle': 'CIMB Niaga – Transaksi Cerdas',
+        'icon': Icons.account_balance_rounded,
+        'color': Colors.red.shade700,
+      },
+      {
+        'label': 'Bank Permata',
+        'subtitle': 'PermataBank – Layanan Prima',
+        'icon': Icons.account_balance_rounded,
+        'color': Colors.green.shade700,
+      },
+      {
+        'label': 'Bank Danamon',
+        'subtitle': 'Danamon – Layanan Perbankan Lengkap',
+        'icon': Icons.account_balance_rounded,
+        'color': Colors.blue.shade600,
+      },
+      {
+        'label': 'Bank Mega',
+        'subtitle': 'Bank Mega – Solusi Finansial Modern',
+        'icon': Icons.account_balance_rounded,
+        'color': Colors.deepOrange.shade600,
+      },
+      {
+        'label': 'Bank Panin',
+        'subtitle': 'Panin Bank – Tabungan & Investasi',
+        'icon': Icons.account_balance_rounded,
+        'color': Colors.indigo.shade500,
+      },
+      // ── Bank Internasional ──────────────────────────────
+      {
+        'label': 'DBS Bank',
+        'subtitle': 'DBS – Bank Terbesar di Asia Tenggara',
+        'icon': Icons.account_balance_rounded,
+        'color': Colors.red.shade500,
+      },
+      {
+        'label': 'HSBC Bank',
+        'subtitle': 'HSBC – Global Wealth & Banking',
+        'icon': Icons.account_balance_rounded,
+        'color': Colors.red.shade800,
+      },
+      {
+        'label': 'Citibank',
+        'subtitle': 'Citibank – Layanan Finansial Global',
+        'icon': Icons.public_rounded,
+        'color': Colors.blue.shade600,
+      },
+      {
+        'label': 'UOB Bank',
+        'subtitle': 'UOB – Solusi Keuangan Regional Asia',
+        'icon': Icons.account_balance_rounded,
+        'color': Colors.blue.shade700,
+      },
+      {
+        'label': 'Standard Chartered',
+        'subtitle': 'StanChart – Perbankan Internasional',
+        'icon': Icons.account_balance_rounded,
+        'color': Colors.green.shade800,
+      },
+      // ── Dompet Digital Global ───────────────────────────
+      {
+        'label': 'PayPal',
+        'subtitle': 'PayPal – Pembayaran Global Internasional',
+        'icon': Icons.payment_rounded,
+        'color': Colors.blue.shade900,
+      },
+      {
+        'label': 'Wise',
+        'subtitle': 'Wise – Transfer Multi-Mata Uang',
+        'icon': Icons.sync_alt_rounded,
+        'color': Colors.green.shade600,
+      },
+      {
+        'label': 'Revolut',
+        'subtitle': 'Revolut – Neo-bank Digital Global',
+        'icon': Icons.account_balance_wallet_rounded,
+        'color': Colors.indigo.shade700,
+      },
+      {
+        'label': 'Jenius',
+        'subtitle': 'Jenius – Kartu Debit & Tabungan Digital',
+        'icon': Icons.credit_card_rounded,
+        'color': Colors.teal.shade400,
+      },
     ];
 
     await showModalBottomSheet<void>(
@@ -1063,7 +2874,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
 
             // Dynamic colors for high contrast and conditional branding
             final formContrastColor =
-                type == TransactionType.income ? Colors.teal : Colors.black87;
+                type == TransactionType.income ? Colors.teal : Colors.redAccent;
             final formLabelColor = isDarkMode ? Colors.white70 : Colors.black87;
             final formSubTextColor =
                 isDarkMode ? Colors.white54 : Colors.black54;
@@ -1085,6 +2896,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 padding: EdgeInsets.only(bottom: inset),
                 child: Form(
                   key: formKey,
+                  autovalidateMode: AutovalidateMode.disabled,
                   child: SingleChildScrollView(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
@@ -1128,18 +2940,29 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('NOMINAL TRANSAKSI *',
+                              RichText(
+                                text: TextSpan(
                                   style: GoogleFonts.quicksand(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
                                       color: isDarkMode
-                                          ? Colors.white24
-                                          : Colors.black38,
-                                      letterSpacing: 1.2)),
-                              const SizedBox(height: 6),
+                                          ? Colors.white70
+                                          : Colors.black87),
+                                  children: const [
+                                    TextSpan(text: 'Nominal Transaksi '),
+                                    TextSpan(
+                                      text: '*',
+                                      style: TextStyle(color: Colors.redAccent),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 8),
                               TextFormField(
                                 controller: amountController,
                                 autofocus: false,
+                                autovalidateMode:
+                                    AutovalidateMode.onUserInteraction,
                                 keyboardType: TextInputType.number,
                                 textAlign: TextAlign.left,
                                 style: GoogleFonts.quicksand(
@@ -1169,7 +2992,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                   ),
                                   prefixIcon: Container(
                                     padding: const EdgeInsets.only(
-                                        left: 20, right: 8),
+                                        left: 16, right: 8),
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
@@ -1189,7 +3012,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                                 type == TransactionType.income
                                                     ? AppColors.primary
                                                     : const Color(0xFFE53935),
-                                            fontSize: 11,
+                                            fontSize: 13,
                                           ),
                                         ),
                                       ],
@@ -1198,13 +3021,22 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                   filled: true,
                                   fillColor: isDarkMode
                                       ? Colors.white.withValues(alpha: 0.05)
-                                      : AppColors.background,
+                                      : Colors.grey.shade50,
                                   border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                    borderSide: BorderSide.none,
-                                  ),
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide(
+                                          color: formBorderColor, width: 1.2)),
+                                  enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide(
+                                          color: formBorderColor, width: 1.2)),
+                                  focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide(
+                                          color: formContrastColor,
+                                          width: 1.5)),
                                   contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 20, vertical: 16),
+                                      horizontal: 16, vertical: 12),
                                 ),
                                 validator: (val) {
                                   if (val == null || val.trim().isEmpty) {
@@ -1227,43 +3059,19 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Row(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 8, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        gradient: const LinearGradient(
-                                          colors: [
-                                            Color(0xFF1DA462),
-                                            Color(0xFF0C7A45)
-                                          ],
-                                        ),
-                                        borderRadius: BorderRadius.circular(6),
-                                      ),
-                                      child: Text('INSTAN',
-                                          style: GoogleFonts.quicksand(
-                                              color: Colors.white,
-                                              fontSize: 9,
-                                              fontWeight: FontWeight.bold,
-                                              letterSpacing: 0.5)),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text('BUNGA TABUNGAN (CEPAT) *',
-                                        style: GoogleFonts.quicksand(
-                                            fontSize: 9,
-                                            fontWeight: FontWeight.bold,
-                                            color: isDarkMode
-                                                ? Colors.white24
-                                                : Colors.black38,
-                                            letterSpacing: 1.2)),
-                                  ],
-                                ),
-                                const SizedBox(height: 6),
+                                Text('Pilih Bank / Jenis Bunga',
+                                    style: GoogleFonts.quicksand(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w700,
+                                        color: isDarkMode
+                                            ? Colors.white70
+                                            : Colors.black87)),
+                                const SizedBox(height: 8),
                                 DropdownButtonFormField<String>(
                                   initialValue: selectedInterestBank,
                                   isExpanded: true,
-                                  itemHeight: 60,
+                                  isDense: true,
+                                  itemHeight: 56,
                                   dropdownColor: isDarkMode
                                       ? AppColors.surfaceDark
                                       : Colors.white,
@@ -1274,43 +3082,43 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                         ? Colors.white.withValues(alpha: 0.05)
                                         : Colors.grey.shade50,
                                     border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(16),
-                                        borderSide:
-                                            BorderSide(color: formBorderColor)),
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide(
+                                            color: formBorderColor,
+                                            width: 1.2)),
                                     enabledBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(16),
-                                        borderSide:
-                                            BorderSide(color: formBorderColor)),
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide(
+                                            color: formBorderColor,
+                                            width: 1.2)),
                                     focusedBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(16),
+                                        borderRadius: BorderRadius.circular(12),
                                         borderSide: BorderSide(
                                             color: formContrastColor,
                                             width: 1.5)),
                                     prefixIcon: Icon(
                                         Icons.account_balance_rounded,
-                                        color: AppColors.primary),
+                                        color: AppColors.primary,
+                                        size: 20),
                                     labelStyle: GoogleFonts.quicksand(
                                         color: formLabelColor),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                        horizontal: 16, vertical: 12),
                                   ),
                                   selectedItemBuilder: (context) {
                                     return [
-                                      const Text('None'),
-                                      ...([
-                                        'SeaBank (Standar)',
-                                        'SeaBank (Deposito)',
-                                        'Bank Neo Commerce',
-                                        'Bank Jago',
-                                        'Blu by BCA Digital',
-                                        'Bank BRI',
-                                        'Bank BCA',
-                                        'Bank Mandiri',
-                                        'Bank BNI',
-                                        'Bank Lainnya',
-                                      ].map((label) {
-                                        return Text(label,
+                                      Text('None',
+                                          style: GoogleFonts.quicksand(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 13,
+                                              color: isDarkMode
+                                                  ? Colors.white54
+                                                  : Colors.black54)),
+                                      ...(interestBankOptions.map((item) {
+                                        return Text(item['label'] as String,
                                             style: GoogleFonts.quicksand(
                                                 fontWeight: FontWeight.bold,
-                                                fontSize: 11,
+                                                fontSize: 13,
                                                 color: isDarkMode
                                                     ? Colors.white70
                                                     : Colors.black87));
@@ -1326,81 +3134,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                                   ? Colors.white54
                                                   : Colors.black54)),
                                     ),
-                                    ...([
-                                      {
-                                        'value': 'SeaBank (Standar)',
-                                        'label': 'SeaBank (Standar)',
-                                        'subtitle':
-                                            '2,5% p.a. – Tanpa min. saldo',
-                                        'icon': Icons.savings_rounded,
-                                        'color': Colors.teal,
-                                      },
-                                      {
-                                        'value': 'SeaBank (Deposito)',
-                                        'label': 'SeaBank (Deposito)',
-                                        'subtitle':
-                                            'Up to 6% p.a. – Bunga Tinggi',
-                                        'icon': Icons.trending_up_rounded,
-                                        'color': Colors.orangeAccent,
-                                      },
-                                      {
-                                        'value': 'Bank Neo',
-                                        'label': 'Bank Neo Commerce',
-                                        'subtitle': 'Bunga cair harian',
-                                        'icon': Icons.bolt_rounded,
-                                        'color': Colors.amber.shade700,
-                                      },
-                                      {
-                                        'value': 'Bank Jago',
-                                        'label': 'Bank Jago',
-                                        'subtitle': 'Bunga cair bulanan',
-                                        'icon': Icons
-                                            .account_balance_wallet_rounded,
-                                        'color': Colors.orange.shade800,
-                                      },
-                                      {
-                                        'value': 'Blu by BCA',
-                                        'label': 'Blu by BCA Digital',
-                                        'subtitle': 'Bunga cair bulanan',
-                                        'icon': Icons.water_drop_rounded,
-                                        'color': Colors.blue.shade500,
-                                      },
-                                      {
-                                        'value': 'Bank BRI',
-                                        'label': 'Bank BRI',
-                                        'subtitle': 'Bunga bulanan',
-                                        'icon': Icons.account_balance_rounded,
-                                        'color': Colors.blue.shade900,
-                                      },
-                                      {
-                                        'value': 'Bank BCA',
-                                        'label': 'Bank BCA',
-                                        'subtitle': 'Bunga bulanan',
-                                        'icon': Icons.account_balance_rounded,
-                                        'color': Colors.blue.shade800,
-                                      },
-                                      {
-                                        'value': 'Bank Mandiri',
-                                        'label': 'Bank Mandiri',
-                                        'subtitle': 'Bunga bulanan',
-                                        'icon': Icons.account_balance_rounded,
-                                        'color': Colors.yellow.shade800,
-                                      },
-                                      {
-                                        'value': 'Bank BNI',
-                                        'label': 'Bank BNI',
-                                        'subtitle': 'Bunga bulanan',
-                                        'icon': Icons.account_balance_rounded,
-                                        'color': Colors.orange.shade600,
-                                      },
-                                      {
-                                        'value': 'Bank Lainnya',
-                                        'label': 'Bank Lainnya',
-                                        'subtitle': 'Bank digital/konvensional',
-                                        'icon': Icons.more_horiz_rounded,
-                                        'color': Colors.grey.shade600,
-                                      },
-                                    ].map((item) {
+                                    ...(interestBankOptions.map((item) {
                                       return DropdownMenuItem<String>(
                                         value: item['value'] as String,
                                         child: Row(
@@ -1408,7 +3142,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                             Icon(
                                               item['icon'] as IconData,
                                               size: 18,
-                                              color: AppColors.primary,
+                                              color: item['color'] as Color,
                                             ),
                                             const SizedBox(width: 12),
                                             Expanded(
@@ -1438,7 +3172,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                                     overflow:
                                                         TextOverflow.ellipsis,
                                                     style: GoogleFonts.quicksand(
-                                                        fontSize: 11,
+                                                        fontSize: 9.5,
                                                         color:
                                                             formSubTextColor),
                                                   ),
@@ -1459,12 +3193,26 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                             .startsWith('Bunga ')) {
                                           nameController.clear();
                                         }
-                                        selectedCategory = 'Gaji Pokok';
-                                        selectedGroup = 'Pekerjaan Utama';
+                                        categoryUserSelected = false;
                                       } else if (val == 'Bank Lainnya') {
-                                        // nameController.clear(); // Removed to keep user input "diam"
+                                        // Auto-fill keterangan langsung saat pilih Bank Lainnya
+                                        if (nameController.text.isEmpty ||
+                                            nameController.text
+                                                .startsWith('Bunga ')) {
+                                          final now = DateTime.now();
+                                          const monthNames = [
+                                            '',
+                                            'Januari', 'Februari', 'Maret',
+                                            'April', 'Mei', 'Juni', 'Juli',
+                                            'Agustus', 'September', 'Oktober',
+                                            'November', 'Desember',
+                                          ];
+                                          nameController.text =
+                                              'Bunga Bank ${now.day} ${monthNames[now.month]} ${now.year}';
+                                        }
+                                        categoryUserSelected = true;
                                         selectedCategory =
-                                            'Bunga Tabungan Reguler';
+                                            'Bunga Bank & Deposito';
                                         selectedGroup = 'Keuangan & Bank';
                                       } else {
                                         final now = DateTime.now();
@@ -1492,11 +3240,12 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                             nameController.text
                                                 .startsWith('Bunga ')) {
                                           nameController.text =
-                                              'Bunga $bankClean $monthName ${now.year}';
+                                              'Bunga $bankClean ${now.day} $monthName ${now.year}';
                                         }
 
+                                        categoryUserSelected = true;
                                         selectedCategory =
-                                            'Bunga Tabungan Reguler';
+                                            'Bunga Bank & Deposito';
                                         selectedGroup = 'Keuangan & Bank';
                                       }
                                     });
@@ -1506,16 +3255,22 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                 ),
                                 if (selectedInterestBank == 'Bank Lainnya') ...[
                                   const SizedBox(height: 16),
-                                  Text('NAMA BANK *',
+                                  RichText(
+                                    text: TextSpan(
                                       style: GoogleFonts.quicksand(
-                                          fontSize: 9,
-                                          fontWeight: FontWeight.bold,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w700,
                                           color: isDarkMode
-                                              ? Colors.white24
-                                              : Colors.black38,
-                                          letterSpacing: 1.2)),
-                                  const SizedBox(height: 6),
+                                              ? Colors.white70
+                                              : Colors.black87),
+                                      children: const [
+                                        TextSpan(text: 'Nama Bank (Opsional)'),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
                                   TextFormField(
+                                    controller: interestBankController,
                                     style: GoogleFonts.quicksand(
                                         fontWeight: FontWeight.bold,
                                         color: isDarkMode
@@ -1529,61 +3284,50 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                           : Colors.grey.shade50,
                                       border: OutlineInputBorder(
                                           borderRadius:
-                                              BorderRadius.circular(16),
+                                              BorderRadius.circular(12),
                                           borderSide: BorderSide(
-                                              color: formBorderColor)),
+                                              color: formBorderColor,
+                                              width: 1.2)),
                                       enabledBorder: OutlineInputBorder(
                                           borderRadius:
-                                              BorderRadius.circular(16),
+                                              BorderRadius.circular(12),
                                           borderSide: BorderSide(
-                                              color: formBorderColor)),
+                                              color: formBorderColor,
+                                              width: 1.2)),
                                       focusedBorder: OutlineInputBorder(
                                           borderRadius:
-                                              BorderRadius.circular(16),
+                                              BorderRadius.circular(12),
                                           borderSide: BorderSide(
                                               color: formContrastColor,
                                               width: 1.5)),
                                       prefixIcon: Icon(
                                           Icons.account_balance_rounded,
-                                          color: AppColors.primary),
+                                          color: AppColors.primary,
+                                          size: 20),
                                       labelStyle: GoogleFonts.quicksand(
                                           color: formLabelColor),
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                              horizontal: 16, vertical: 12),
                                     ),
                                     onChanged: (val) {
                                       interestOtherBankName = val;
-                                      setSheetState(() {
-                                        final now = DateTime.now();
-                                        final monthName = [
-                                          '',
-                                          'Januari',
-                                          'Februari',
-                                          'Maret',
-                                          'April',
-                                          'Mei',
-                                          'Juni',
-                                          'Juli',
-                                          'Agustus',
-                                          'September',
-                                          'Oktober',
-                                          'November',
-                                          'Desember'
-                                        ][now.month];
-
-                                        // Only auto-fill if empty or already contains "Bunga " prefix
-                                        if (nameController.text.isEmpty ||
-                                            nameController.text
-                                                .startsWith('Bunga ')) {
-                                          nameController.text = val
-                                                  .trim()
-                                                  .isEmpty
-                                              ? ''
-                                              : 'Bunga ${val.trim()} $monthName ${now.year}';
-                                        }
-
-                                        selectedCategory =
-                                            'Bunga Tabungan Reguler';
-                                        selectedGroup = 'Keuangan & Bank';
-                                      });
+                                    },
+                                    onEditingComplete: () {
+                                      _applyInterestBankNameToKeterangan(
+                                        nameController: nameController,
+                                        bankName: interestBankController.text,
+                                        setSheetState: setSheetState,
+                                      );
+                                      FocusScope.of(context).unfocus();
+                                    },
+                                    onTapOutside: (_) {
+                                      _applyInterestBankNameToKeterangan(
+                                        nameController: nameController,
+                                        bankName: interestBankController.text,
+                                        setSheetState: setSheetState,
+                                      );
+                                      FocusScope.of(context).unfocus();
                                     },
                                   ),
                                 ],
@@ -1690,18 +3434,27 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('BIAYA ADMIN TOP-UP (CEPAT) *',
+                                RichText(
+                                  text: TextSpan(
                                     style: GoogleFonts.quicksand(
-                                        fontSize: 9,
-                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w700,
                                         color: isDarkMode
-                                            ? Colors.white24
-                                            : Colors.black38,
-                                        letterSpacing: 1.2)),
-                                const SizedBox(height: 6),
+                                            ? Colors.white70
+                                            : Colors.black87),
+                                    children: const [
+                                      TextSpan(
+                                          text:
+                                              'Biaya Admin Top-Up (Opsional)'),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
                                 DropdownButtonFormField<String>(
                                   initialValue: selectedTopUpSource,
                                   isExpanded: true,
+                                  isDense: true,
+                                  itemHeight: 56,
                                   dropdownColor: isDarkMode
                                       ? AppColors.surfaceDark
                                       : Colors.white,
@@ -1712,39 +3465,107 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                         ? Colors.white.withValues(alpha: 0.05)
                                         : Colors.grey.shade50,
                                     border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(16),
-                                        borderSide:
-                                            BorderSide(color: formBorderColor)),
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide(
+                                            color: formBorderColor,
+                                            width: 1.2)),
                                     enabledBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(16),
-                                        borderSide:
-                                            BorderSide(color: formBorderColor)),
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide(
+                                            color: formBorderColor,
+                                            width: 1.2)),
+                                    focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide(
+                                            color: formContrastColor,
+                                            width: 1.5)),
                                     prefixIcon: Icon(
-                                        selectedTopUpSource == 'Bank'
+                                        selectedTopUpSource == 'Bank (Kustom)'
                                             ? Icons.account_balance_rounded
                                             : Icons
                                                 .account_balance_wallet_rounded,
-                                        color: AppColors.primary),
+                                        color: AppColors.primary,
+                                        size: 20),
                                     labelStyle: GoogleFonts.quicksand(
                                         color: isDarkMode
                                             ? Colors.white38
                                             : Colors.black45),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                        horizontal: 16, vertical: 8),
                                   ),
+                                  selectedItemBuilder: (context) {
+                                    return [
+                                      Text('None',
+                                          style: GoogleFonts.quicksand(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 13,
+                                              color: isDarkMode
+                                                  ? Colors.white54
+                                                  : Colors.black54)),
+                                      ...topUpSources.map((source) {
+                                        return Text(
+                                            source['label'] as String,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: GoogleFonts.quicksand(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 13,
+                                                color: isDarkMode
+                                                    ? Colors.white70
+                                                    : Colors.black87));
+                                      }),
+                                    ];
+                                  },
                                   items: [
-                                    const DropdownMenuItem<String>(
+                                    DropdownMenuItem<String>(
                                       value: null,
-                                      child: Text('None'),
+                                      child: Text('None',
+                                          style: GoogleFonts.quicksand(
+                                              color: isDarkMode
+                                                  ? Colors.white54
+                                                  : Colors.black54)),
                                     ),
                                     ...topUpSources.map((source) {
                                       final label = source['label'] as String;
+                                      final subtitle = source['subtitle'] as String;
+                                      final icon = source['icon'] as IconData;
+                                      final color = source['color'] as Color;
                                       return DropdownMenuItem<String>(
                                         value: label,
-                                        child: Text(label,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: GoogleFonts.quicksand(
-                                                color: isDarkMode
-                                                    ? Colors.white70
-                                                    : Colors.black87)),
+                                        child: Row(
+                                          children: [
+                                            Icon(icon, size: 18, color: color),
+                                            const SizedBox(width: 12),
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Text(
+                                                    label,
+                                                    maxLines: 1,
+                                                    overflow: TextOverflow.ellipsis,
+                                                    style: GoogleFonts.quicksand(
+                                                        fontWeight: FontWeight.bold,
+                                                        fontSize: 11,
+                                                        color: isDarkMode
+                                                            ? Colors.white70
+                                                            : Colors.black87),
+                                                  ),
+                                                  Text(
+                                                    subtitle,
+                                                    maxLines: 1,
+                                                    overflow: TextOverflow.ellipsis,
+                                                    style: GoogleFonts.quicksand(
+                                                        fontSize: 9.5,
+                                                        color: formSubTextColor),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       );
                                     }),
                                   ],
@@ -1756,31 +3577,48 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                             .startsWith('Biaya Admin')) {
                                           nameController.clear();
                                         }
-                                        selectedCategory =
-                                            type == TransactionType.expense
-                                                ? 'Makanan & Minuman Harian'
-                                                : 'Gaji Pokok';
-                                        selectedGroup =
-                                            type == TransactionType.expense
-                                                ? 'Kebutuhan Pokok'
-                                                : 'Pekerjaan Utama';
-                                      } else if (val != 'Bank') {
+                                        categoryUserSelected = false;
+                                      } else if (val != 'Bank (Kustom)') {
                                         if (nameController.text.isEmpty ||
                                             nameController.text
                                                 .startsWith('Biaya Admin')) {
+                                          final now = DateTime.now();
+                                          final monthNames = [
+                                            '',
+                                            'Januari', 'Februari', 'Maret',
+                                            'April', 'Mei', 'Juni', 'Juli',
+                                            'Agustus', 'September', 'Oktober',
+                                            'November', 'Desember'
+                                          ];
+                                          final monthName =
+                                              monthNames[now.month];
                                           nameController.text =
-                                              'Biaya Admin $val';
+                                              'Biaya Admin $val ${now.day} $monthName ${now.year}';
                                         }
+                                        categoryUserSelected = true;
                                         selectedCategory = 'Biaya Admin Bank';
                                         selectedGroup = 'Keuangan';
                                       } else {
                                         if (nameController.text.isEmpty ||
                                             nameController.text
                                                 .startsWith('Biaya Admin')) {
-                                          nameController.text =
-                                              'Biaya Admin Bank ${topUpBankName.trim()}'
-                                                  .trim();
+                                          final now = DateTime.now();
+                                          final monthNames = [
+                                            '',
+                                            'Januari', 'Februari', 'Maret',
+                                            'April', 'Mei', 'Juni', 'Juli',
+                                            'Agustus', 'September', 'Oktober',
+                                            'November', 'Desember'
+                                          ];
+                                          final monthName =
+                                              monthNames[now.month];
+                                          final bankName =
+                                              topUpBankName.trim();
+                                          nameController.text = bankName.isEmpty
+                                              ? 'Biaya Admin Bank ${now.day} $monthName ${now.year}'
+                                              : 'Biaya Admin $bankName ${now.day} $monthName ${now.year}';
                                         }
+                                        categoryUserSelected = true;
                                         selectedCategory = 'Biaya Admin Bank';
                                         selectedGroup = 'Keuangan';
                                       }
@@ -1788,18 +3626,24 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                     FocusScope.of(context).unfocus();
                                   },
                                 ),
-                                if (selectedTopUpSource == 'Bank') ...[
+                                if (selectedTopUpSource == 'Bank (Kustom)') ...[
                                   const SizedBox(height: 16),
-                                  Text('NAMA BANK *',
+                                  RichText(
+                                    text: TextSpan(
                                       style: GoogleFonts.quicksand(
-                                          fontSize: 9,
-                                          fontWeight: FontWeight.bold,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w700,
                                           color: isDarkMode
-                                              ? Colors.white24
-                                              : Colors.black38,
-                                          letterSpacing: 1.2)),
-                                  const SizedBox(height: 6),
+                                              ? Colors.white70
+                                              : Colors.black87),
+                                      children: const [
+                                        TextSpan(text: 'Nama Bank (Opsional)'),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
                                   TextFormField(
+                                    controller: topUpBankController,
                                     style: GoogleFonts.quicksand(
                                         fontWeight: FontWeight.bold,
                                         color: isDarkMode
@@ -1813,33 +3657,52 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                           : Colors.grey.shade50,
                                       border: OutlineInputBorder(
                                           borderRadius:
-                                              BorderRadius.circular(16),
+                                              BorderRadius.circular(12),
                                           borderSide: BorderSide(
-                                              color: formBorderColor)),
+                                              color: formBorderColor,
+                                              width: 1.2)),
                                       enabledBorder: OutlineInputBorder(
                                           borderRadius:
-                                              BorderRadius.circular(16),
+                                              BorderRadius.circular(12),
                                           borderSide: BorderSide(
-                                              color: formBorderColor)),
+                                              color: formBorderColor,
+                                              width: 1.2)),
+                                      focusedBorder: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          borderSide: BorderSide(
+                                              color: formContrastColor,
+                                              width: 1.5)),
                                       prefixIcon: Icon(
                                           Icons.account_balance_rounded,
-                                          color: AppColors.primary),
+                                          color: AppColors.primary,
+                                          size: 20),
                                       labelStyle: GoogleFonts.quicksand(
                                           color: isDarkMode
                                               ? Colors.white38
                                               : Colors.black45),
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                              horizontal: 16, vertical: 12),
                                     ),
                                     onChanged: (val) {
                                       topUpBankName = val;
-                                      setSheetState(() {
-                                        if (nameController.text.isEmpty ||
-                                            nameController.text.startsWith(
-                                                'Biaya Admin Bank')) {
-                                          nameController.text =
-                                              'Biaya Admin Bank ${val.trim()}'
-                                                  .trim();
-                                        }
-                                      });
+                                    },
+                                    onEditingComplete: () {
+                                      _applyTopUpBankNameToKeterangan(
+                                        nameController: nameController,
+                                        bankName: topUpBankController.text,
+                                        setSheetState: setSheetState,
+                                      );
+                                      FocusScope.of(context).unfocus();
+                                    },
+                                    onTapOutside: (_) {
+                                      _applyTopUpBankNameToKeterangan(
+                                        nameController: nameController,
+                                        bankName: topUpBankController.text,
+                                        setSheetState: setSheetState,
+                                      );
+                                      FocusScope.of(context).unfocus();
                                     },
                                   ),
                                 ],
@@ -1853,17 +3716,28 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const SizedBox(height: 20),
-                              Text('KETERANGAN TRANSAKSI *',
+                              RichText(
+                                text: TextSpan(
                                   style: GoogleFonts.quicksand(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
                                       color: isDarkMode
-                                          ? Colors.white24
-                                          : Colors.black38,
-                                      letterSpacing: 1.2)),
-                              const SizedBox(height: 6),
+                                          ? Colors.white70
+                                          : Colors.black87),
+                                  children: const [
+                                    TextSpan(text: 'Keterangan Transaksi '),
+                                    TextSpan(
+                                      text: '*',
+                                      style: TextStyle(color: Colors.redAccent),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 8),
                               TextFormField(
                                 controller: nameController,
+                                autovalidateMode:
+                                    AutovalidateMode.onUserInteraction,
                                 style: GoogleFonts.quicksand(
                                     fontWeight: FontWeight.bold,
                                     color: isDarkMode
@@ -1876,17 +3750,24 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                       ? Colors.white.withValues(alpha: 0.05)
                                       : Colors.grey.shade50,
                                   border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                      borderSide:
-                                          BorderSide(color: formBorderColor)),
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide(
+                                          color: formBorderColor, width: 1.2)),
                                   enabledBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                      borderSide:
-                                          BorderSide(color: formBorderColor)),
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide(
+                                          color: formBorderColor, width: 1.2)),
+                                  focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide(
+                                          color: formContrastColor,
+                                          width: 1.5)),
                                   prefixIcon: Icon(Icons.edit_note_rounded,
-                                      color: AppColors.primary),
+                                      color: AppColors.primary, size: 20),
                                   hintStyle: GoogleFonts.quicksand(
                                       color: formSubTextColor),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 16, vertical: 12),
                                 ),
                                 onChanged: (val) {
                                   if (type == TransactionType.expense) {
@@ -1896,6 +3777,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                         lowerVal.contains('warung') ||
                                         lowerVal.contains('nasi')) {
                                       setSheetState(() {
+                                        categoryUserSelected = true;
                                         selectedCategory =
                                             'Makanan & Minuman Harian';
                                         selectedGroup = 'Kebutuhan Pokok';
@@ -1904,6 +3786,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                         lowerVal.contains('beras') ||
                                         lowerVal.contains('minyak')) {
                                       setSheetState(() {
+                                        categoryUserSelected = true;
                                         selectedCategory =
                                             'Belanja Sembako / Pasar';
                                         selectedGroup = 'Kebutuhan Pokok';
@@ -1912,6 +3795,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                         lowerVal.contains('pln') ||
                                         lowerVal.contains('token')) {
                                       setSheetState(() {
+                                        categoryUserSelected = true;
                                         selectedCategory =
                                             'Token Listrik / PLN';
                                         selectedGroup = 'Kebutuhan Pokok';
@@ -1921,6 +3805,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                         lowerVal.contains('pertamax') ||
                                         lowerVal.contains('spbu')) {
                                       setSheetState(() {
+                                        categoryUserSelected = true;
                                         selectedCategory = 'Bahan Bakar (BBM)';
                                         selectedGroup = 'Transportasi';
                                       });
@@ -1929,6 +3814,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                         lowerVal.contains('grab') ||
                                         lowerVal.contains('maxim')) {
                                       setSheetState(() {
+                                        categoryUserSelected = true;
                                         selectedCategory =
                                             'Ojek Online (Gojek/Grab)';
                                         selectedGroup = 'Transportasi';
@@ -1937,6 +3823,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                         lowerVal.contains('kuota') ||
                                         lowerVal.contains('data')) {
                                       setSheetState(() {
+                                        categoryUserSelected = true;
                                         selectedCategory =
                                             'Pulsa & Paket Data Seluler';
                                         selectedGroup = 'Teknologi';
@@ -1945,6 +3832,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                         lowerVal.contains('indihome') ||
                                         lowerVal.contains('biznet')) {
                                       setSheetState(() {
+                                        categoryUserSelected = true;
                                         selectedCategory =
                                             'WiFi / Internet Rumah';
                                         selectedGroup = 'Teknologi';
@@ -1954,6 +3842,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                         lowerVal.contains('spotify') ||
                                         lowerVal.contains('youtube')) {
                                       setSheetState(() {
+                                        categoryUserSelected = true;
                                         selectedCategory =
                                             'Langganan Netflix / Disney+';
                                         selectedGroup = 'Teknologi';
@@ -1963,6 +3852,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                         lowerVal.contains('vitamin') ||
                                         lowerVal.contains('apotek')) {
                                       setSheetState(() {
+                                        categoryUserSelected = true;
                                         selectedCategory = 'Obat & Vitamin';
                                         selectedGroup = 'Kesehatan';
                                       });
@@ -1971,6 +3861,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                         lowerVal.contains('cafe') ||
                                         lowerVal.contains('nongkrong')) {
                                       setSheetState(() {
+                                        categoryUserSelected = true;
                                         selectedCategory =
                                             'Nongkrong / Coffee Shop';
                                         selectedGroup = 'Gaya Hidup';
@@ -1979,6 +3870,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                         lowerVal.contains('sedekah') ||
                                         lowerVal.contains('infak')) {
                                       setSheetState(() {
+                                        categoryUserSelected = true;
                                         selectedCategory =
                                             'Zakat / Infak / Sedekah';
                                         selectedGroup = 'Sosial & Ibadah';
@@ -1988,6 +3880,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                         lowerVal.contains('fee') ||
                                         lowerVal.contains('top up')) {
                                       setSheetState(() {
+                                        categoryUserSelected = true;
                                         selectedCategory = 'Biaya Admin Bank';
                                         selectedGroup = 'Keuangan';
                                       });
@@ -1996,6 +3889,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                         lowerVal.contains('pinjol') ||
                                         lowerVal.contains('bayar')) {
                                       setSheetState(() {
+                                        categoryUserSelected = true;
                                         selectedCategory =
                                             'Bayar Hutang / Pinjol';
                                         selectedGroup = 'Keuangan';
@@ -2015,159 +3909,157 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                 },
                               ),
                               const SizedBox(height: 20),
-                              Text('GRUP KATEGORI *',
+                              RichText(
+                                text: TextSpan(
                                   style: GoogleFonts.quicksand(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
                                       color: isDarkMode
-                                          ? Colors.white24
-                                          : Colors.black38,
-                                      letterSpacing: 1.2)),
-                              const SizedBox(height: 6),
-                              // Group Dropdown
-                              DropdownButtonFormField<String>(
-                                value:
-                                    groupedCategories.containsKey(selectedGroup)
-                                        ? selectedGroup
-                                        : (groupedCategories.isNotEmpty
-                                            ? groupedCategories.keys.first
-                                            : null),
-                                key: ValueKey('group_${type}'),
-                                isExpanded: true,
-                                dropdownColor: isDarkMode
-                                    ? AppColors.surfaceDark
-                                    : Colors.white,
-                                decoration: InputDecoration(
-                                  hintText: 'Pilih Grup',
-                                  filled: true,
-                                  fillColor: isDarkMode
-                                      ? Colors.white.withValues(alpha: 0.05)
-                                      : Colors.grey.shade50,
-                                  border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                      borderSide: BorderSide.none),
-                                  prefixIcon: Icon(Icons.grid_view_rounded,
-                                      color: AppColors.primary),
-                                  labelStyle: GoogleFonts.quicksand(
-                                      color: isDarkMode
-                                          ? Colors.white38
-                                          : Colors.black45),
+                                          ? Colors.white70
+                                          : Colors.black87),
+                                  children: const [
+                                    TextSpan(text: 'Pilih Kategori '),
+                                    TextSpan(
+                                      text: '*',
+                                      style: TextStyle(color: Colors.redAccent),
+                                    ),
+                                  ],
                                 ),
-                                items: groupedCategories.keys
-                                    .map((group) => DropdownMenuItem(
-                                          value: group,
-                                          child: Text(group,
-                                              style: GoogleFonts.quicksand(
-                                                  color: isDarkMode
-                                                      ? Colors.white
-                                                      : Colors.black87,
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 11)),
-                                        ))
-                                    .toList(),
-                                onChanged: (val) {
-                                  if (val != null) {
-                                    setSheetState(() {
-                                      selectedGroup = val;
-                                      // Default to first category in new group
-                                      selectedCategory =
-                                          groupedCategories[val]!.first.label;
-                                    });
-                                    FocusScope.of(context).unfocus();
-                                  }
-                                },
                               ),
-                              const SizedBox(height: 16),
-                              Text('PILIH KATEGORI *',
-                                  style: GoogleFonts.quicksand(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.bold,
-                                      color: isDarkMode
-                                          ? Colors.white24
-                                          : Colors.black38,
-                                      letterSpacing: 1.2)),
-                              const SizedBox(height: 6),
-                              // Category Dropdown
-                              DropdownButtonFormField<String>(
-                                value: (groupedCategories[selectedGroup]?.any(
-                                            (c) =>
-                                                c.label == selectedCategory) ??
-                                        false)
-                                    ? selectedCategory
-                                    : (groupedCategories[selectedGroup]
-                                                ?.isNotEmpty ??
-                                            false
-                                        ? groupedCategories[selectedGroup]!
-                                            .first
-                                            .label
-                                        : null),
-                                key: ValueKey('category_${type}'),
-                                isExpanded: true,
-                                dropdownColor: isDarkMode
-                                    ? AppColors.surfaceDark
-                                    : Colors.white,
-                                decoration: InputDecoration(
-                                  hintText: 'Pilih Kategori',
-                                  filled: true,
-                                  fillColor: isDarkMode
-                                      ? Colors.white.withValues(alpha: 0.05)
-                                      : Colors.grey.shade50,
-                                  border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                      borderSide: BorderSide.none),
-                                  prefixIcon: Icon(
-                                    categoryObjects.any(
-                                            (c) => c.label == selectedCategory)
-                                        ? categoryObjects
-                                            .firstWhere((c) =>
-                                                c.label == selectedCategory)
-                                            .icon
-                                        : Icons.help_outline_rounded,
-                                    color: AppColors.primary,
-                                  ),
-                                  labelStyle: GoogleFonts.quicksand(
-                                      color: isDarkMode
-                                          ? Colors.white38
-                                          : Colors.black45),
-                                ),
-                                items: (groupedCategories[selectedGroup] ?? [])
-                                    .map((cat) => DropdownMenuItem(
-                                          value: cat.label,
-                                          child: Text(cat.label,
-                                              style: GoogleFonts.quicksand(
-                                                  color: isDarkMode
-                                                      ? Colors.white
-                                                      : Colors.black87,
-                                                  fontSize: 11,
-                                                  fontWeight: FontWeight.bold)),
-                                        ))
-                                    .toList(),
-                                onChanged: (val) {
-                                  if (val != null) {
-                                    setSheetState(() {
-                                      selectedCategory = val;
-                                    });
-                                    FocusScope.of(context).unfocus();
-                                  }
+                              const SizedBox(height: 8),
+                              // Premium Category Dropdown – all categories, grouped
+                              InkWell(
+                                onTap: () {
+                                  _showCategorySearchSheet(
+                                    context: context,
+                                    type: type,
+                                    isDarkMode: isDarkMode,
+                                    currentSelected: categoryUserSelected ? selectedCategory : '',
+                                    categoryObjects: categoryObjects,
+                                    onSelected: (cat) {
+                                      setSheetState(() {
+                                        categoryUserSelected = true;
+                                        selectedCategory = cat.label;
+                                        selectedGroup = cat.group;
+                                        categoryUserSelected = true;
+                                      });
+                                    },
+                                  );
                                 },
-                              ),
-                              if (selectedCategory == 'Lainnya') ...[
-                                const SizedBox(height: 16),
-                                Text(
-                                  'NAMA KATEGORI KUSTOM *',
-                                  style: GoogleFonts.quicksand(
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 1.2,
+                                borderRadius: BorderRadius.circular(12),
+                                child: Container(
+                                  height: 48,
+                                  decoration: BoxDecoration(
                                     color: isDarkMode
-                                        ? Colors.white24
-                                        : Colors.black38,
+                                        ? Colors.white.withValues(alpha: 0.05)
+                                        : Colors.grey.shade50,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: !categoryUserSelected
+                                          ? formBorderColor
+                                          : (categoryObjects.any((c) =>
+                                                  c.label == selectedCategory)
+                                              ? categoryObjects
+                                                  .firstWhere((c) =>
+                                                      c.label == selectedCategory)
+                                                  .color
+                                              : formBorderColor),
+                                      width: 1.2,
+                                    ),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        !categoryUserSelected
+                                            ? Icons.category_rounded
+                                            : (categoryObjects.any((c) =>
+                                                    c.label == selectedCategory)
+                                                ? categoryObjects
+                                                    .firstWhere((c) =>
+                                                        c.label == selectedCategory)
+                                                    .icon
+                                                : Icons.category_rounded),
+                                        size: 20,
+                                        color: !categoryUserSelected
+                                            ? (isDarkMode
+                                                ? Colors.white38
+                                                : Colors.black38)
+                                            : (selectedCategory ==
+                                                    AppCategories.otherLabel)
+                                                ? AppColors.primary
+                                                : (categoryObjects.any((c) =>
+                                                        c.label ==
+                                                        selectedCategory)
+                                                    ? categoryObjects
+                                                        .firstWhere((c) =>
+                                                            c.label ==
+                                                            selectedCategory)
+                                                        .color
+                                                    : AppColors.primary),
+                                      ),
+                                      const SizedBox(width: 14),
+                                      Expanded(
+                                        child: Text(
+                                          !categoryUserSelected
+                                              ? 'Pilih Kategori...'
+                                              : selectedCategory,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: GoogleFonts.quicksand(
+                                            fontWeight: !categoryUserSelected
+                                                ? FontWeight.w500
+                                                : FontWeight.bold,
+                                            fontSize: 14,
+                                            color: !categoryUserSelected
+                                                ? (isDarkMode
+                                                    ? Colors.white38
+                                                    : Colors.black38)
+                                                : (isDarkMode
+                                                    ? Colors.white
+                                                    : Colors.black87),
+                                          ),
+                                        ),
+                                      ),
+                                      Icon(
+                                        Icons.arrow_drop_down_rounded,
+                                        size: 28,
+                                        color: isDarkMode
+                                            ? Colors.white38
+                                            : Colors.black38,
+                                      ),
+                                    ],
                                   ),
                                 ),
-                                const SizedBox(height: 6),
+                              ),
+                              if (selectedCategory ==
+                                  AppCategories.otherLabel) ...[
+                                const SizedBox(height: 16),
+                                RichText(
+                                  text: TextSpan(
+                                    style: GoogleFonts.quicksand(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
+                                      color: isDarkMode
+                                          ? Colors.white70
+                                          : Colors.black87,
+                                    ),
+                                    children: const [
+                                      TextSpan(text: 'Nama Kategori Kustom '),
+                                      TextSpan(
+                                        text: '*',
+                                        style:
+                                            TextStyle(color: Colors.redAccent),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
                                 TextFormField(
                                   controller: customCategoryController,
                                   style: GoogleFonts.quicksand(
+                                      fontWeight: FontWeight.bold,
                                       color: isDarkMode
                                           ? Colors.white
                                           : Colors.black87),
@@ -2178,20 +4070,30 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                         ? Colors.white.withValues(alpha: 0.05)
                                         : Colors.grey.shade50,
                                     border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(16),
-                                        borderSide:
-                                            BorderSide(color: formBorderColor)),
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide(
+                                            color: formBorderColor,
+                                            width: 1.2)),
                                     enabledBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(16),
-                                        borderSide:
-                                            BorderSide(color: formBorderColor)),
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide(
+                                            color: formBorderColor,
+                                            width: 1.2)),
+                                    focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide(
+                                            color: formContrastColor,
+                                            width: 1.5)),
                                     prefixIcon: Icon(Icons.star_rounded,
-                                        color: AppColors.primary),
+                                        color: AppColors.primary, size: 20),
                                     hintStyle: GoogleFonts.quicksand(
                                         color: formSubTextColor),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                        horizontal: 16, vertical: 12),
                                   ),
                                   validator: (val) {
-                                    if (selectedCategory == 'Lainnya' &&
+                                    if (selectedCategory ==
+                                            AppCategories.otherLabel &&
                                         (val == null || val.trim().isEmpty)) {
                                       return 'Kategori kustom harus diisi!';
                                     }
@@ -2209,6 +4111,20 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                   if (!formKey.currentState!.validate()) {
                                     return;
                                   }
+                                  if (!categoryUserSelected) {
+                                    setSheetState(() {});
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          backgroundColor: Colors.redAccent,
+                                          content: Text(
+                                            'Pilih kategori terlebih dahulu!',
+                                            style: GoogleFonts.quicksand(
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.white),
+                                          ),
+                                        ));
+                                    return;
+                                  }
 
                                   final amount =
                                       _toAmount(amountController.text);
@@ -2216,13 +4132,13 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                     return; // Should be handled by validator
                                   }
 
-                                  final finalCategory =
-                                      (selectedCategory == 'Lainnya' &&
-                                              customCategoryController.text
-                                                  .trim()
-                                                  .isNotEmpty)
-                                          ? customCategoryController.text.trim()
-                                          : selectedCategory;
+                                  final finalCategory = (selectedCategory ==
+                                              AppCategories.otherLabel &&
+                                          customCategoryController.text
+                                              .trim()
+                                              .isNotEmpty)
+                                      ? customCategoryController.text.trim()
+                                      : selectedCategory;
 
                                   final tx = TransactionModel(
                                     id: DateTime.now()
@@ -2276,6 +4192,308 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                     ),
                   ),
                 ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showCategorySearchSheet({
+    required BuildContext context,
+    required TransactionType type,
+    required bool isDarkMode,
+    required String currentSelected,
+    required List<TransactionCategory> categoryObjects,
+    required ValueChanged<TransactionCategory> onSelected,
+  }) {
+    FocusScope.of(context).unfocus(); // Unfocus parent fields immediately!
+    final searchController = TextEditingController();
+    String searchQuery = '';
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            // Group filtered items dynamically
+            final Map<String, List<TransactionCategory>> displayGrouped = {};
+            for (var cat in categoryObjects) {
+              final labelLower = cat.label.toLowerCase();
+              final groupLower = cat.group.toLowerCase();
+              final queryLower = searchQuery.toLowerCase();
+              if (labelLower.contains(queryLower) ||
+                  groupLower.contains(queryLower)) {
+                displayGrouped.putIfAbsent(cat.group, () => []).add(cat);
+              }
+            }
+
+            return Container(
+              height: MediaQuery.of(context).size.height * 0.8,
+              decoration: BoxDecoration(
+                color: isDarkMode ? AppColors.surfaceDark : Colors.white,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(32),
+                  topRight: Radius.circular(32),
+                ),
+              ),
+              child: Column(
+                children: [
+                  const SizedBox(height: 12),
+                  Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: isDarkMode ? Colors.white10 : Colors.black12,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'CARI KATEGORI',
+                        style: GoogleFonts.quicksand(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                          letterSpacing: 1.5,
+                          color: isDarkMode ? Colors.white70 : Colors.black87,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+                    child: TextField(
+                      controller: searchController,
+                      autofocus: false,
+                      style: GoogleFonts.quicksand(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: isDarkMode ? Colors.white : Colors.black87,
+                      ),
+                      decoration: InputDecoration(
+                        isDense: true,
+                        hintText: 'Cari kategori...',
+                        hintStyle: GoogleFonts.quicksand(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: isDarkMode ? Colors.white30 : Colors.black38,
+                        ),
+                        prefixIcon: Icon(
+                          Icons.search_rounded,
+                          color: isDarkMode ? Colors.white38 : Colors.black45,
+                          size: 20,
+                        ),
+                        suffixIcon: searchQuery.isNotEmpty
+                            ? GestureDetector(
+                                onTap: () {
+                                  searchController.clear();
+                                  setModalState(() {
+                                    searchQuery = '';
+                                  });
+                                },
+                                child: Icon(
+                                  Icons.close_rounded,
+                                  color: isDarkMode
+                                      ? Colors.white54
+                                      : Colors.black54,
+                                  size: 20,
+                                ),
+                              )
+                            : null,
+                        filled: true,
+                        fillColor: isDarkMode
+                            ? Colors.white.withValues(alpha: 0.05)
+                            : Colors.grey.shade100,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: AppColors.primary,
+                            width: 1.5,
+                          ),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 10),
+                      ),
+                      onChanged: (val) {
+                        setModalState(() {
+                          searchQuery = val;
+                        });
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Expanded(
+                    child: displayGrouped.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.search_off_rounded,
+                                  size: 48,
+                                  color: isDarkMode
+                                      ? Colors.white38
+                                      : Colors.black26,
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  'Kategori tidak ditemukan.',
+                                  style: GoogleFonts.quicksand(
+                                    fontWeight: FontWeight.bold,
+                                    color: isDarkMode
+                                        ? Colors.white38
+                                        : Colors.black38,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : ListView.builder(
+                            padding: const EdgeInsets.only(bottom: 24),
+                            physics: const BouncingScrollPhysics(),
+                            itemCount: displayGrouped.length,
+                            itemBuilder: (context, groupIndex) {
+                              final groupName =
+                                  displayGrouped.keys.elementAt(groupIndex);
+                              final items = displayGrouped[groupName]!;
+                              final groupColor = items.isNotEmpty
+                                  ? items.first.color
+                                  : AppColors.primary;
+
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Group Header (Minimalist & Clear)
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                        top: 20,
+                                        bottom: 10,
+                                        left: 24,
+                                        right: 24),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          width: 3.5,
+                                          height: 14,
+                                          decoration: BoxDecoration(
+                                            color: groupColor,
+                                            borderRadius:
+                                                BorderRadius.circular(2),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 10),
+                                        Text(
+                                          groupName.toUpperCase(),
+                                          style: GoogleFonts.quicksand(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w800,
+                                            letterSpacing: 1.5,
+                                            color: groupColor,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  // Group Items
+                                  ...items.map((cat) {
+                                    final isSelected =
+                                        cat.label == currentSelected;
+                                    return GestureDetector(
+                                      onTap: () {
+                                        onSelected(cat);
+                                        Navigator.pop(sheetContext);
+                                      },
+                                      child: Container(
+                                        margin: const EdgeInsets.symmetric(
+                                            vertical: 3, horizontal: 20),
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 8, horizontal: 12),
+                                        decoration: BoxDecoration(
+                                          color: isDarkMode
+                                              ? Colors.white
+                                                  .withValues(alpha: 0.03)
+                                              : Colors.grey.shade50,
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          border: Border.all(
+                                            color: isSelected
+                                                ? cat.color
+                                                : (isDarkMode
+                                                    ? Colors.white
+                                                        .withValues(alpha: 0.05)
+                                                    : Colors.grey.shade100),
+                                            width: 1.2,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Container(
+                                              width: 30,
+                                              height: 30,
+                                              decoration: BoxDecoration(
+                                                color: cat.color.withValues(
+                                                    alpha: isDarkMode
+                                                        ? 0.15
+                                                        : 0.08),
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: Icon(
+                                                cat.icon,
+                                                size: 15,
+                                                color: cat.color,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 12),
+                                            Expanded(
+                                              child: Text(
+                                                cat.label,
+                                                style: GoogleFonts.quicksand(
+                                                  fontSize: 12,
+                                                  fontWeight: isSelected
+                                                      ? FontWeight.w800
+                                                      : FontWeight.bold,
+                                                  color: isSelected
+                                                      ? cat.color
+                                                      : (isDarkMode
+                                                          ? Colors.white
+                                                          : Colors.black87),
+                                                ),
+                                              ),
+                                            ),
+                                            if (isSelected)
+                                              Icon(
+                                                Icons.check_circle_rounded,
+                                                color: cat.color,
+                                                size: 16,
+                                              ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  }),
+                                ],
+                              );
+                            },
+                          ),
+                  ),
+                ],
               ),
             );
           },
@@ -2410,6 +4628,10 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       context: context,
       builder: (dialogContext) {
         bool prevKeyboardVisible = false;
+        bool nameHasError = false;
+        bool amountHasError = false;
+        bool dateIsFocused = false;
+
         return StatefulBuilder(
           builder: (context, setDialogState) {
             final inset = MediaQuery.of(context).viewInsets.bottom;
@@ -2419,6 +4641,19 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
               FocusManager.instance.primaryFocus?.unfocus();
             }
             prevKeyboardVisible = isKeyboardVisible;
+
+            final Color dateBorderColor;
+            final double dateBorderWidth;
+            if (dateIsFocused) {
+              dateBorderColor = AppColors.primary;
+              dateBorderWidth = 1.8;
+            } else {
+              dateBorderColor = isDarkMode 
+                  ? Colors.white.withValues(alpha: 0.05) 
+                  : Colors.grey.shade200;
+              dateBorderWidth = 1.2;
+            }
+
             return AlertDialog(
               backgroundColor:
                   isDarkMode ? AppColors.surfaceDark : Colors.white,
@@ -2436,82 +4671,52 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildInputLabel('Nominal Target', isDarkMode),
-                    const SizedBox(height: 12),
-                    TextFormField(
+                    HighVisInput(
                       controller: amountController,
-                      autofocus: true,
+                      icon: Icons.account_balance_wallet_rounded,
+                      label: 'Nominal Target',
+                      isDarkMode: isDarkMode,
+                      prefixText: 'Rp',
+                      hintText: '0',
                       keyboardType: TextInputType.number,
-                      style: GoogleFonts.quicksand(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                          color: isDarkMode ? Colors.white : Colors.black87),
                       inputFormatters: [
                         FilteringTextInputFormatter.digitsOnly,
                         RibuanFormatter(),
                       ],
-                      decoration: InputDecoration(
-                        hintText: '0',
-                        hintStyle: GoogleFonts.quicksand(
-                            color:
-                                isDarkMode ? Colors.white12 : Colors.black26),
-                        prefixIcon: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const SizedBox(width: 16),
-                            const Icon(Icons.account_balance_wallet_rounded,
-                                color: AppColors.primary, size: 20),
-                            const SizedBox(width: 8),
-                            Text('Rp',
-                                style: GoogleFonts.quicksand(
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.primary,
-                                    fontSize: 11)),
-                            const SizedBox(width: 8),
-                          ],
-                        ),
-                        filled: true,
-                        fillColor: isDarkMode
-                            ? AppColors.primary.withValues(alpha: 0.05)
-                            : AppColors.primary.withValues(alpha: 0.03),
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: BorderSide.none),
-                      ),
-                      onEditingComplete: () => FocusScope.of(context).unfocus(),
-                      onTapOutside: (event) => FocusScope.of(context).unfocus(),
+                      hasError: amountHasError,
+                      onChanged: (val) {
+                        if (amountHasError) {
+                          final amt = double.tryParse(val.replaceAll('.', '')) ?? 0;
+                          if (amt > 0) {
+                            setDialogState(() => amountHasError = false);
+                          }
+                        }
+                      },
                     ),
-                    const SizedBox(height: 24),
-                    _buildInputLabel('Target Pembelian', isDarkMode),
-                    const SizedBox(height: 12),
-                    TextFormField(
+                    const SizedBox(height: 20),
+                    HighVisInput(
                       controller: itemController,
-                      style: GoogleFonts.quicksand(
-                          fontWeight: FontWeight.bold,
-                          color: isDarkMode ? Colors.white : Colors.black87),
-                      decoration: InputDecoration(
-                        hintText: 'Contoh: Laptop, Motor, HP...',
-                        hintStyle: GoogleFonts.quicksand(
-                            color:
-                                isDarkMode ? Colors.white12 : Colors.black26),
-                        filled: true,
-                        fillColor: isDarkMode
-                            ? AppColors.primary.withValues(alpha: 0.05)
-                            : AppColors.primary.withValues(alpha: 0.03),
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: BorderSide.none),
-                        prefixIcon: const Icon(Icons.shopping_bag_rounded,
-                            color: AppColors.primary, size: 20),
-                      ),
-                      onEditingComplete: () => FocusScope.of(context).unfocus(),
-                      onTapOutside: (event) => FocusScope.of(context).unfocus(),
+                      icon: Icons.shopping_bag_rounded,
+                      label: 'Target Pembelian',
+                      isDarkMode: isDarkMode,
+                      hintText: 'Contoh: Laptop, HP...',
+                      hasError: nameHasError,
+                      onChanged: (val) {
+                        if (nameHasError && val.trim().isNotEmpty) {
+                          setDialogState(() => nameHasError = false);
+                        }
+                      },
                     ),
-                    const SizedBox(height: 24),
-                    _buildInputLabel('Target Tanggal Selesai', isDarkMode),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 20),
+                    Text('Target Tanggal Selesai',
+                        style: GoogleFonts.quicksand(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: isDarkMode ? Colors.white70 : Colors.black87)),
+                    const SizedBox(height: 8),
                     InkWell(
                       onTap: () async {
+                        setDialogState(() => dateIsFocused = true);
                         final picked = await showDatePicker(
                           context: context,
                           initialDate: selectedDate,
@@ -2538,20 +4743,26 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                             );
                           },
                         );
+                        setDialogState(() => dateIsFocused = false);
                         if (picked != null) {
                           setDialogState(() {
                             selectedDate = picked;
                           });
                         }
                       },
+                      borderRadius: BorderRadius.circular(16),
                       child: Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 16, vertical: 16),
                         decoration: BoxDecoration(
                           color: isDarkMode
-                              ? AppColors.primary.withValues(alpha: 0.05)
-                              : AppColors.primary.withValues(alpha: 0.03),
+                              ? Colors.white.withValues(alpha: 0.03)
+                              : Colors.grey.shade100,
                           borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: dateBorderColor,
+                            width: dateBorderWidth,
+                          ),
                         ),
                         child: Row(
                           children: [
@@ -2566,7 +4777,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                     fontWeight: FontWeight.bold,
                                     color: isDarkMode
                                         ? Colors.white70
-                                        : Colors.black87),
+                                        : Colors.black87,
+                                    fontSize: 12),
                               ),
                             ),
                           ],
@@ -2606,11 +4818,35 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                           final amount = _toAmount(amountController.text);
                           final name = itemController.text.trim();
 
-                          if (amount == null || amount <= 0 || name.isEmpty) {
+                          setDialogState(() {
+                            nameHasError = name.isEmpty;
+                            amountHasError = amount == null || amount <= 0;
+                          });
+
+                          if (nameHasError || amountHasError) {
+                            String errorMessage = 'Target pembelian tidak boleh kosong!';
+                            if (amountHasError) {
+                              errorMessage = 'Nominal target harus lebih dari 0!';
+                            }
                             ScaffoldMessenger.of(dialogContext).showSnackBar(
-                                const SnackBar(
-                                    content: Text(
-                                        'Mohon lengkapi data dengan benar.')));
+                              SnackBar(
+                                content: Row(
+                                  children: [
+                                    const Icon(Icons.error_outline_rounded, color: Colors.white, size: 18),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        errorMessage,
+                                        style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 12),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                backgroundColor: Colors.red.shade700,
+                                behavior: SnackBarBehavior.floating,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              ),
+                            );
                             return;
                           }
 
@@ -2618,7 +4854,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                           if (isEdit) {
                             final updated = target.copyWith(
                               name: name,
-                              targetAmount: amount,
+                              targetAmount: amount!,
                               dueDate: selectedDate,
                             );
                             await ref
@@ -2630,7 +4866,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                   .millisecondsSinceEpoch
                                   .toString(),
                               name: name,
-                              targetAmount: amount,
+                              targetAmount: amount!,
                               dueDate: selectedDate,
                               createdAt: DateTime.now(),
                             );
@@ -2691,16 +4927,29 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     return double.tryParse(digitsOnly);
   }
 
-  Widget _buildMiniAuditMetric(String label, String value, bool isDarkMode) {
+  Widget _buildMiniAuditMetric(String label, String value, bool isDarkMode, IconData icon, {Color? valueColor}) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          label,
-          style: GoogleFonts.quicksand(
-            fontSize: 9,
-            fontWeight: FontWeight.bold,
-            color: isDarkMode ? Colors.white24 : Colors.grey.shade500,
-          ),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 11,
+              color: isDarkMode ? Colors.white38 : Colors.teal.shade800.withOpacity(0.4),
+            ),
+            const SizedBox(width: 4),
+            Text(
+              label.toUpperCase(),
+              style: GoogleFonts.quicksand(
+                fontSize: 8,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.8,
+                color: isDarkMode ? Colors.white30 : Colors.black38,
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 4),
         Text(
@@ -2708,7 +4957,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           style: GoogleFonts.quicksand(
             fontSize: 11,
             fontWeight: FontWeight.bold,
-            color: isDarkMode ? Colors.white : AppColors.primaryDark,
+            color: valueColor ?? (isDarkMode ? Colors.white : AppColors.primaryDark),
           ),
         ),
       ],
@@ -2716,82 +4965,53 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
   }
 
   Widget _buildInlineAsset(
-      String label, double amount, Color color, bool isDarkMode) {
-    return Row(
-      children: [
-        Container(
-            width: 6,
-            height: 6,
-            decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
-        const SizedBox(width: 8),
-        Text(
-          _showBalance ? _formatCompactRupiah(amount) : '••••',
-          style: GoogleFonts.quicksand(
-            fontSize: 11,
-            fontWeight: FontWeight.bold,
-            color: isDarkMode
-                ? Colors.white38
-                : Colors.teal.shade800.withValues(alpha: 0.6),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCompactInsightCard(String label, String value, IconData icon,
-      Color color, double width, bool isDarkMode) {
-    return Container(
-      width: width,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: isDarkMode ? AppColors.surfaceDark : Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isDarkMode
-              ? Colors.white.withValues(alpha: 0.03)
-              : Colors.grey.shade100,
-        ),
-      ),
-      child: Row(
+      String label, double amount, Color color, bool isDarkMode, IconData icon) {
+    return Expanded(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: isDarkMode ? 0.1 : 0.05),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, color: color, size: 16),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                Icon(
+                  icon,
+                  size: 11,
+                  color: color,
+                ),
+                const SizedBox(width: 5),
                 Text(
                   label,
                   style: GoogleFonts.quicksand(
-                    fontSize: 9,
+                    fontSize: 9.5,
                     fontWeight: FontWeight.bold,
-                    color: isDarkMode ? Colors.white24 : Colors.grey.shade400,
-                  ),
-                ),
-                Text(
-                  value,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.quicksand(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    color: isDarkMode ? Colors.white70 : Colors.black87,
+                    color: isDarkMode ? Colors.white30 : Colors.black38,
                   ),
                 ),
               ],
+            ),
+          ),
+          const SizedBox(height: 4),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              _showBalance ? _formatRupiah(amount) : '••••',
+              style: GoogleFonts.quicksand(
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                color: isDarkMode
+                    ? Colors.white70
+                    : Colors.teal.shade900.withOpacity(0.8),
+              ),
             ),
           ),
         ],
       ),
     );
   }
+
+
 
   Widget _buildFinanceTab(
     AsyncValue<List<TransactionModel>> transactionsAsync,
@@ -2887,96 +5107,140 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. FINANCE HERO: Unified Net Worth & Audit Status
+          // 1. FINANCE HERO: Unified Net Worth & Audit Status (Premium Compact Glassmorphic Hero)
           Container(
             width: double.infinity,
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: isDarkMode
-                    ? [const Color(0xFF1E1E1E), const Color(0xFF121212)]
-                    : [const Color(0xFFF0FDF4), Colors.white],
+                    ? [const Color(0xFF161719), const Color(0xFF111714)]
+                    : [const Color(0xFFEDF7F4), Colors.white],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
-              borderRadius: BorderRadius.circular(32),
+              borderRadius: BorderRadius.circular(28),
               border: Border.all(
                 color: isDarkMode
-                    ? Colors.white.withValues(alpha: 0.05)
-                    : Colors.teal.shade50,
+                    ? const Color(0xFF2ECC71).withOpacity(0.06)
+                    : Colors.teal.shade100.withOpacity(0.4),
+                width: 1.2,
               ),
-              boxShadow: isDarkMode
-                  ? []
-                  : [
-                      BoxShadow(
-                        color: Colors.teal.withValues(alpha: 0.05),
-                        blurRadius: 20,
-                        offset: const Offset(0, 10),
-                      )
-                    ],
+              boxShadow: [
+                BoxShadow(
+                  color: isDarkMode 
+                      ? Colors.black.withOpacity(0.12) 
+                      : Colors.black.withOpacity(0.02),
+                  blurRadius: 16,
+                  offset: const Offset(0, 6),
+                ),
+              ],
             ),
             child: Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
                   child: Column(
                     children: [
-                      Text(
-                        'KEKAYAAN BERSIH',
-                        style: GoogleFonts.quicksand(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 2,
-                          color: isDarkMode
-                              ? Colors.white24
-                              : Colors.teal.shade800.withValues(alpha: 0.4),
+                      // Header Title & Interactive Eye Toggle
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'KEKAYAAN BERSIH',
+                            style: GoogleFonts.quicksand(
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 2,
+                              color: isDarkMode
+                                  ? Colors.white38
+                                  : Colors.teal.shade800.withOpacity(0.5),
+                            ),
+                          ),
+                          Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: () => setState(() => _showBalance = !_showBalance),
+                              borderRadius: BorderRadius.circular(30),
+                              child: Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  color: isDarkMode 
+                                      ? Colors.white.withOpacity(0.02) 
+                                      : Colors.teal.shade50.withOpacity(0.5),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  _showBalance 
+                                      ? Icons.visibility_outlined 
+                                      : Icons.visibility_off_outlined,
+                                  size: 14,
+                                  color: isDarkMode 
+                                      ? Colors.white54 
+                                      : Colors.teal.shade800.withOpacity(0.6),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      // Big Balance Display
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          _showBalance
+                              ? _formatRupiah(balance +
+                                  totalGoldGrams * 1200000.0 +
+                                  investmentValuation -
+                                  unpaidBillsAmount)
+                              : '••••••••',
+                          style: GoogleFonts.quicksand(
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold,
+                            color: isDarkMode ? Colors.white : AppColors.primaryDark,
+                            letterSpacing: -0.5,
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        _showBalance
-                            ? _formatRupiah(balance +
-                                totalGoldGrams * 1200000.0 +
-                                investmentValuation -
-                                unpaidBillsAmount)
-                            : '••••••',
-                        style: GoogleFonts.quicksand(
-                          fontSize: 21,
-                          fontWeight: FontWeight.bold,
-                          color:
-                              isDarkMode ? Colors.white : AppColors.primaryDark,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      // Audit Row (Compact)
+                      const SizedBox(height: 18),
+                      // Audit Row (Compact & Premium with Icons)
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
                           _buildMiniAuditMetric(
                               'Saving Rate',
                               '${((totalIncome - totalExpense) / (totalIncome > 0 ? totalIncome : 1) * 100).toStringAsFixed(0)}%',
-                              isDarkMode),
+                              isDarkMode,
+                              Icons.trending_up_rounded,
+                              valueColor: isDarkMode ? const Color(0xFF2ECC71) : const Color(0xFF27AE60)),
                           Container(
                               width: 1,
-                              height: 24,
+                              height: 20,
                               color: isDarkMode
-                                  ? Colors.white10
-                                  : Colors.teal.shade50),
+                                  ? Colors.white.withOpacity(0.05)
+                                  : Colors.black.withOpacity(0.05)),
                           _buildMiniAuditMetric(
                               'Ketahanan',
                               '${(totalExpense / 30 > 0 ? (balance / (totalExpense / 30)) : 0).toInt()} Hari',
-                              isDarkMode),
+                              isDarkMode,
+                              Icons.security_rounded,
+                              valueColor: isDarkMode ? const Color(0xFFF1C40F) : const Color(0xFFD4AC0D)),
                           Container(
                               width: 1,
-                              height: 24,
+                              height: 20,
                               color: isDarkMode
-                                  ? Colors.white10
-                                  : Colors.teal.shade50),
+                                  ? Colors.white.withOpacity(0.05)
+                                  : Colors.black.withOpacity(0.05)),
                           _buildMiniAuditMetric(
                               'Tagihan',
                               unpaidBillsAmount > 0
-                                  ? _formatCompactRupiah(unpaidBillsAmount)
+                                  ? _formatRupiah(unpaidBillsAmount)
                                   : 'Lunas',
-                              isDarkMode),
+                              isDarkMode,
+                              Icons.receipt_long_rounded,
+                              valueColor: unpaidBillsAmount > 0
+                                  ? (isDarkMode ? const Color(0xFFE74C3C) : const Color(0xFFC0392B))
+                                  : (isDarkMode ? const Color(0xFF2ECC71) : const Color(0xFF27AE60))),
                         ],
                       ),
                     ],
@@ -2985,23 +5249,39 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 // Asset Breakdown (Minimalist Inline)
                 Container(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                   decoration: BoxDecoration(
                     color: isDarkMode
-                        ? Colors.white.withValues(alpha: 0.02)
-                        : Colors.teal.shade50.withValues(alpha: 0.3),
+                        ? Colors.white.withOpacity(0.02)
+                        : Colors.teal.shade50.withOpacity(0.15),
                     borderRadius: const BorderRadius.vertical(
-                        bottom: Radius.circular(32)),
+                        bottom: Radius.circular(28)),
+                    border: Border(
+                      top: BorderSide(
+                        color: isDarkMode ? Colors.white.withOpacity(0.02) : Colors.black.withOpacity(0.02),
+                      ),
+                    ),
                   ),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       _buildInlineAsset(
-                          'Saldo', balance, Colors.teal, isDarkMode),
+                          'Saldo', balance, const Color(0xFF2ECC71), isDarkMode, Icons.account_balance_wallet_rounded),
+                      Container(
+                          width: 1,
+                          height: 20,
+                          color: isDarkMode
+                              ? Colors.white.withOpacity(0.05)
+                              : Colors.black.withOpacity(0.05)),
                       _buildInlineAsset('Emas', totalGoldGrams * 1200000.0,
-                          Colors.amber, isDarkMode),
+                          const Color(0xFFF1C40F), isDarkMode, Icons.workspace_premium_rounded),
+                      Container(
+                          width: 1,
+                          height: 20,
+                          color: isDarkMode
+                              ? Colors.white.withOpacity(0.05)
+                              : Colors.black.withOpacity(0.05)),
                       _buildInlineAsset('Invest', investmentValuation,
-                          Colors.indigo, isDarkMode),
+                          const Color(0xFF3498DB), isDarkMode, Icons.show_chart_rounded),
                     ],
                   ),
                 ),
@@ -3009,73 +5289,25 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             ),
           ),
 
-          const SizedBox(height: 28),
+          const SizedBox(height: 24),
 
-          // 2. SMART SAVING PLANNER (NEW)
-          _buildSmartSavingPlannerSection(balance, targets, isDarkMode),
+          // 5. SPENDING CALENDAR (HEBAT & BOROS)
+          _buildSpendingCalendarCard(transactions, isDarkMode),
 
-          const SizedBox(height: 28),
+          const SizedBox(height: 24),
 
-          // 2. INSIGHTS GRID (Compact)
-          Text(
-            'INSIGHTS & HABITS',
-            style: GoogleFonts.quicksand(
-              fontSize: 10,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 1.5,
-              color: isDarkMode ? Colors.white24 : Colors.grey.shade400,
-            ),
-          ),
-          const SizedBox(height: 16),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final itemWidth = (constraints.maxWidth - 12) / 2;
-              return Wrap(
-                spacing: 12,
-                runSpacing: 12,
-                children: [
-                  _buildCompactInsightCard(
-                    'Terboros',
-                    topCategory != null
-                        ? '${topCategory.key} (${_formatCompactRupiah(topCategory.value)})'
-                        : 'Rp 0',
-                    AppCategories.getIconForCategory(topCategory?.key ?? ''),
-                    Colors.red,
-                    itemWidth,
-                    isDarkMode,
-                  ),
-                  _buildCompactInsightCard(
-                    'Terbesar',
-                    largestTransaction != null
-                        ? _formatCompactRupiah(largestTransaction.amount)
-                        : 'Rp 0',
-                    Icons.payments_rounded,
-                    Colors.blue,
-                    itemWidth,
-                    isDarkMode,
-                  ),
-                  _buildCompactInsightCard(
-                    'Aktivitas',
-                    '$monthlyActivity Transaksi',
-                    Icons.analytics_rounded,
-                    Colors.teal,
-                    itemWidth,
-                    isDarkMode,
-                  ),
-                ],
-              );
-            },
-          ),
-          const SizedBox(height: 28),
+          // 6. FINANCIAL MOTIVATOR CARD (STREAK & WISDOM DECK)
+          _buildFinancialMotivatorCard(transactions, isDarkMode),
 
-          // 4. EXPENSE ALLOCATION (NEW)
-          _buildExpenseAllocationSection(
-              categoryTotals, totalExpense, isDarkMode),
+          const SizedBox(height: 24),
 
-          const SizedBox(height: 28),
+          // 7. DAILY SAVINGS MISSION CARD (NEW HABIT SYSTEM)
+          _buildDailyMissionsCard(isDarkMode),
 
-          // 5. SAVINGS PET (MOVED FROM HOME)
-          _buildSavingsPetCard(balance, isDarkMode),
+          const SizedBox(height: 24),
+
+          // 8. LEVEL FINANSIAL & TANTANGAN CEPAT MENABUNG (NEW GAMIFICATION SYSTEM)
+          _buildLevelAndChallengesCard(isDarkMode),
 
           const SizedBox(height: 40),
           const SizedBox(height: 24), // Final padding
@@ -3084,369 +5316,975 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     );
   }
 
-  Widget _buildSmartSavingPlannerSection(
-      double currentBalance, List<SavingTargetModel> targets, bool isDarkMode) {
-    // Find the next incomplete target
-    final incomplete =
-        targets.where((t) => currentBalance < t.targetAmount).toList();
+  Widget _buildSpendingCalendarCard(List<TransactionModel> transactions, bool isDarkMode) {
+    final now = DateTime.now();
+    final year = now.year;
+    final month = now.month;
+
+    // Days in current month
+    final daysInMonth = DateTime(year, month + 1, 0).day;
+    final firstDayOfMonth = DateTime(year, month, 1);
+    final firstDayOffset = firstDayOfMonth.weekday - 1; // 0-6 (0 is Monday)
+
+    // Group transactions of the current month by day
+    final Map<int, List<TransactionModel>> dailyTx = {};
+    for (final t in transactions) {
+      if (t.date.year == year && t.date.month == month) {
+        dailyTx.putIfAbsent(t.date.day, () => []).add(t);
+      }
+    }
+
+    final weekdays = ['S', 'S', 'R', 'K', 'J', 'S', 'M'];
+
+    int hematCount = 0;
+    int borosCount = 0;
+    int tidakMenabungCount = 0;
+
+    for (int day = 1; day <= now.day; day++) {
+      final txs = dailyTx[day] ?? [];
+      final income = txs.where((t) => t.type == TransactionType.income).fold(0.0, (s, t) => s + t.amount);
+      final expense = txs.where((t) => t.type == TransactionType.expense).fold(0.0, (s, t) => s + t.amount);
+
+      if (income == 0 && expense == 0) {
+        tidakMenabungCount++;
+      } else if (expense > 0 && expense > income) {
+        borosCount++;
+      } else {
+        hematCount++;
+      }
+    }
+
+    final totalTracked = hematCount + tidakMenabungCount + borosCount;
+    final double disciplineScore = totalTracked > 0 ? ((hematCount + tidakMenabungCount) / totalTracked) : 1.0;
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isDarkMode ? AppColors.surfaceDark : Colors.white,
-        borderRadius: BorderRadius.circular(24),
+        color: isDarkMode ? const Color(0xFF151618) : Colors.white,
+        borderRadius: BorderRadius.circular(28),
         border: Border.all(
           color: isDarkMode
-              ? Colors.white.withValues(alpha: 0.05)
-              : Colors.teal.shade50,
+              ? Colors.white.withOpacity(0.04)
+              : Colors.black.withOpacity(0.03),
+          width: 1.2,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: isDarkMode 
+                ? Colors.black.withOpacity(0.12) 
+                : Colors.black.withOpacity(0.02),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
       ),
-      child: (targets.isEmpty || incomplete.isEmpty)
-          ? Column(
-              children: [
-                Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header Row
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.teal.withValues(alpha: 0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(Icons.bolt_rounded,
-                          color: Colors.teal, size: 16),
-                    ),
-                    const SizedBox(width: 10),
                     Text(
-                      'RENCANA NABUNG HARIAN',
+                      'JURNAL SPENDING HARI INI',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.quicksand(
-                        fontSize: 9,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 1.2,
-                        color:
-                            isDarkMode ? Colors.white24 : Colors.grey.shade400,
+                        fontSize: 9.5,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.5,
+                        color: isDarkMode ? Colors.white30 : Colors.black38,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      DateFormat('MMMM yyyy', 'id_ID').format(now).toUpperCase(),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.quicksand(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: isDarkMode ? Colors.white : AppColors.primaryDark,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                Icon(Icons.track_changes_rounded,
-                    size: 32,
-                    color: isDarkMode ? Colors.white10 : Colors.grey.shade200),
-                const SizedBox(height: 12),
-                Text(
-                  targets.isEmpty
-                      ? 'Belum ada target tabungan'
-                      : 'Semua target sudah tercapai!',
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          
+          // Weekdays Row
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: weekdays.map((day) {
+              return SizedBox(
+                width: 32,
+                child: Text(
+                  day,
+                  textAlign: TextAlign.center,
                   style: GoogleFonts.quicksand(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w900,
                     color: isDarkMode ? Colors.white24 : Colors.black26,
                   ),
                 ),
-              ],
-            )
-          : Builder(builder: (context) {
-              // Sort by due date or proximity
-              incomplete.sort((a, b) => a.dueDate.compareTo(b.dueDate));
-              final target = incomplete.first;
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 12),
 
-              final remaining = target.targetAmount - currentBalance;
-              final daysLeft = target.dueDate.difference(DateTime.now()).inDays;
-              final dailyTarget =
-                  daysLeft > 0 ? (remaining / daysLeft) : remaining;
+          // Days Grid
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 7,
+              mainAxisSpacing: 8,
+              crossAxisSpacing: 8,
+            ),
+            itemCount: daysInMonth + firstDayOffset,
+            itemBuilder: (context, index) {
+              if (index < firstDayOffset) {
+                return const SizedBox.shrink();
+              }
 
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.teal.withValues(alpha: 0.1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(Icons.bolt_rounded,
-                            color: Colors.teal, size: 16),
-                      ),
-                      const SizedBox(width: 10),
-                      Text(
-                        'RENCANA NABUNG HARIAN',
-                        style: GoogleFonts.quicksand(
-                          fontSize: 9,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 1.2,
-                          color: isDarkMode
-                              ? Colors.white24
-                              : Colors.grey.shade400,
-                        ),
-                      ),
-                    ],
+              final day = index - firstDayOffset + 1;
+              final isFuture = day > now.day;
+              final isToday = day == now.day;
+
+              // Calculate status
+              Color dayColor = isDarkMode ? const Color(0xFF1B1D1F) : const Color(0xFFF8FAFC);
+              Color textColor = isDarkMode ? Colors.white30 : Colors.black26;
+              Border border = Border.all(color: Colors.transparent);
+
+              if (!isFuture) {
+                final txs = dailyTx[day] ?? [];
+                final income = txs.where((t) => t.type == TransactionType.income).fold(0.0, (s, t) => s + t.amount);
+                final expense = txs.where((t) => t.type == TransactionType.expense).fold(0.0, (s, t) => s + t.amount);
+
+                if (income == 0 && expense == 0) {
+                  // Tidak Menabung (Abu-Abu Premium)
+                  dayColor = isDarkMode ? const Color(0xFF222528) : const Color(0xFFF1F5F9);
+                  textColor = isDarkMode ? Colors.white60 : Colors.black54;
+                  border = Border.all(
+                    color: isDarkMode ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.05),
+                    width: 1,
+                  );
+                } else if (expense > 0 && expense > income) {
+                  // Boros
+                  dayColor = isDarkMode ? const Color(0xFF2C1515) : const Color(0xFFFDF0F0);
+                  textColor = const Color(0xFFE74C3C);
+                  border = Border.all(color: const Color(0xFFE74C3C).withOpacity(0.2), width: 1);
+                } else {
+                  // Hemat
+                  dayColor = isDarkMode ? const Color(0xFF102A1F) : const Color(0xFFE8F8F0);
+                  textColor = const Color(0xFF2ECC71);
+                  border = Border.all(color: const Color(0xFF2ECC71).withOpacity(0.2), width: 1);
+                }
+              }
+
+              if (isToday) {
+                border = Border.all(
+                  color: isDarkMode ? Colors.white : AppColors.primary,
+                  width: 1.6,
+                );
+              }
+
+              return Container(
+                decoration: BoxDecoration(
+                  color: dayColor,
+                  borderRadius: BorderRadius.circular(12),
+                  border: border,
+                ),
+                child: Center(
+                  child: Text(
+                    '$day',
+                    style: GoogleFonts.quicksand(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w900,
+                      color: textColor,
+                    ),
                   ),
-                  const SizedBox(height: 12),
+                ),
+              );
+            },
+          ),
+          
+          const SizedBox(height: 20),
+          
+          // Discipline Score Ratio Bar
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
                   Text(
-                    'Target: ${target.name}',
+                    'SKOR DISIPLIN KEUANGAN',
+                    style: GoogleFonts.quicksand(
+                      fontSize: 8.5,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.8,
+                      color: isDarkMode ? Colors.white30 : Colors.black38,
+                    ),
+                  ),
+                  Text(
+                    '${(disciplineScore * 100).toStringAsFixed(0)}%',
                     style: GoogleFonts.quicksand(
                       fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      color: isDarkMode ? Colors.white70 : Colors.black87,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.baseline,
-                    textBaseline: TextBaseline.alphabetic,
-                    children: [
-                      Text(
-                        _formatRupiah(dailyTarget),
-                        style: GoogleFonts.quicksand(
-                          fontSize: 19,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.teal,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '/ hr',
-                        style: GoogleFonts.quicksand(
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          color: isDarkMode
-                              ? Colors.white24
-                              : Colors.grey.shade400,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
-                    child: LinearProgressIndicator(
-                      value: (currentBalance / target.targetAmount).clamp(0, 1),
-                      backgroundColor: isDarkMode
-                          ? Colors.white.withValues(alpha: 0.05)
-                          : Colors.grey.shade100,
-                      valueColor:
-                          const AlwaysStoppedAnimation<Color>(Colors.teal),
-                      minHeight: 4,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Sisa ${_formatRupiah(remaining)} • $daysLeft hr lagi',
-                    style: GoogleFonts.quicksand(
-                      fontSize: 10,
-                      color: isDarkMode ? Colors.white38 : Colors.grey.shade500,
+                      fontWeight: FontWeight.w900,
+                      color: disciplineScore >= 0.5 ? const Color(0xFF2ECC71) : const Color(0xFFE74C3C),
                     ),
                   ),
                 ],
-              );
-            }),
+              ),
+              const SizedBox(height: 8),
+              // Multi-Segmented Progress Bar
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Container(
+                  height: 6,
+                  width: double.infinity,
+                  color: isDarkMode ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.05),
+                  child: totalTracked == 0
+                      ? const SizedBox.shrink()
+                      : Row(
+                          children: [
+                            if (hematCount > 0)
+                              Expanded(
+                                flex: hematCount,
+                                child: Container(
+                                  color: const Color(0xFF2ECC71),
+                                ),
+                              ),
+                            if (tidakMenabungCount > 0)
+                              Expanded(
+                                flex: tidakMenabungCount,
+                                child: Container(
+                                  color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300,
+                                ),
+                              ),
+                            if (borosCount > 0)
+                              Expanded(
+                                flex: borosCount,
+                                child: Container(
+                                  color: const Color(0xFFE74C3C),
+                                ),
+                              ),
+                          ],
+                        ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // Legend Row
+          Wrap(
+            spacing: 16,
+            runSpacing: 8,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 7,
+                    height: 7,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF2ECC71),
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Hemat: $hematCount Hari',
+                    style: GoogleFonts.quicksand(
+                      fontSize: 9.5,
+                      fontWeight: FontWeight.bold,
+                      color: isDarkMode ? Colors.white60 : Colors.black54,
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 7,
+                    height: 7,
+                    decoration: BoxDecoration(
+                      color: isDarkMode ? Colors.grey.shade500 : Colors.grey.shade400,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Tidak Menabung: $tidakMenabungCount Hari',
+                    style: GoogleFonts.quicksand(
+                      fontSize: 9.5,
+                      fontWeight: FontWeight.bold,
+                      color: isDarkMode ? Colors.white60 : Colors.black54,
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 7,
+                    height: 7,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFE74C3C),
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Boros: $borosCount Hari',
+                    style: GoogleFonts.quicksand(
+                      fontSize: 9.5,
+                      fontWeight: FontWeight.bold,
+                      color: isDarkMode ? Colors.white60 : Colors.black54,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildExpenseAllocationSection(Map<String, double> categoryTotals,
-      double totalExpense, bool isDarkMode) {
-    final sortedCategories = categoryTotals.entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'DISTRIBUSI PENGELUARAN',
-          style: GoogleFonts.quicksand(
-            fontSize: 10,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 1.5,
-            color: isDarkMode ? Colors.white24 : Colors.grey.shade400,
-          ),
+  Widget _buildFinancialMotivatorCard(List<TransactionModel> transactions, bool isDarkMode) {
+    final now = DateTime.now();
+    final year = now.year;
+    final month = now.month;
+
+    // Group transactions of the current month by day
+    final Map<int, List<TransactionModel>> dailyTx = {};
+    for (final t in transactions) {
+      if (t.date.year == year && t.date.month == month) {
+        dailyTx.putIfAbsent(t.date.day, () => []).add(t);
+      }
+    }
+
+    // Calculate "Streak Bebas Boros"
+    int streak = 0;
+    for (int day = now.day; day >= 1; day--) {
+      final txs = dailyTx[day] ?? [];
+      final income = txs.where((t) => t.type == TransactionType.income).fold(0.0, (s, t) => s + t.amount);
+      final expense = txs.where((t) => t.type == TransactionType.expense).fold(0.0, (s, t) => s + t.amount);
+
+      final isBoros = expense > 0 && expense > income;
+      if (!isBoros) {
+        streak++;
+      } else {
+        break;
+      }
+    }
+
+    // Determine Badge Level
+    String badgeTitle = "Pemula Bijak";
+    String badgeEmoji = "🌱";
+    double badgeProgress = 0.0;
+    String nextBadgeText = "";
+
+    if (streak <= 2) {
+      badgeTitle = "Pemula Bijak";
+      badgeEmoji = "🌱";
+      badgeProgress = streak / 3;
+      nextBadgeText = "${3 - streak} hari menuju Penjaga Anggaran";
+    } else if (streak <= 5) {
+      badgeTitle = "Penjaga Anggaran";
+      badgeEmoji = "🛡️";
+      badgeProgress = (streak - 3) / 3;
+      nextBadgeText = "${6 - streak} hari menuju Ksatria Finansial";
+    } else if (streak <= 9) {
+      badgeTitle = "Ksatria Finansial";
+      badgeEmoji = "⚔️";
+      badgeProgress = (streak - 6) / 4;
+      nextBadgeText = "${10 - streak} hari menuju Master Hemat";
+    } else {
+      badgeTitle = "Master Hemat";
+      badgeEmoji = "👑";
+      badgeProgress = 1.0;
+      nextBadgeText = "Tingkat Tertinggi Dicapai!";
+    }
+
+    final quotes = [
+      "Menabung hari ini adalah tiket menuju kebebasan finansial esok hari! 🎟️",
+      "Disiplin bukanlah tentang membatasi dirimu, melainkan tentang memberdayakan masa depanmu. 💪",
+      "Aturan 24 Jam: Tunggu 24 jam sebelum membeli barang keinginan non-esensial untuk menghindari pembelian impulsif. ⏰",
+      "Jangan habiskan uang yang belum kamu miliki demi membuat orang lain terkesan. 🤫",
+      "Kekayaan sejati tidak dinilai dari apa yang kamu belanjakan, melainkan dari kedamaian pikiran yang kamu tabung. 🍃",
+      "Investasi terbaik adalah investasi pada pengetahuan dan kedisiplinan dirimu sendiri. 📚",
+      "Setiap rupiah yang kamu hemat hari ini akan menjadi benteng pertahanan yang kuat bagi impian-impianmu. 🏰",
+      "Menabung sedikit demi sedikit, seperti tetesan air yang lambat laun bisa mengisi danau yang besar. Bersabarlah! 🌊",
+      "Bedakan keinginan vs kebutuhan. Kebutuhan menopang hidupmu, keinginan sering kali hanya menopang gengsimu. ⚖️",
+      "Keuangan yang sehat memberimu kebebasan untuk memilih apa yang ingin kamu lakukan dalam hidup ini. 🕊️"
+    ];
+
+    if (_wisdomIndex == null) {
+      _wisdomIndex = now.day % quotes.length;
+    }
+
+    final activeQuote = quotes[_wisdomIndex! % quotes.length];
+
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: isDarkMode ? const Color(0xFF151618) : Colors.white,
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(
+          color: isDarkMode
+              ? Colors.white.withOpacity(0.04)
+              : Colors.black.withOpacity(0.03),
+          width: 1.2,
         ),
-        const SizedBox(height: 16),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: isDarkMode ? AppColors.surfaceDark : Colors.white,
-            borderRadius: BorderRadius.circular(32),
-            border: Border.all(
-              color: isDarkMode
-                  ? Colors.white.withValues(alpha: 0.05)
-                  : Colors.teal.shade50,
-            ),
+        boxShadow: [
+          BoxShadow(
+            color: isDarkMode 
+                ? Colors.black.withOpacity(0.12) 
+                : Colors.black.withOpacity(0.02),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
           ),
-          child: categoryTotals.isEmpty
-              ? Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.pie_chart_outline_rounded,
-                        size: 40,
-                        color:
-                            isDarkMode ? Colors.white10 : Colors.grey.shade200),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Belum ada data pengeluaran bulan ini',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.quicksand(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        color: isDarkMode ? Colors.white24 : Colors.black26,
-                      ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Row for Streak and Badge
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+            child: Row(
+              children: [
+                // Glowing circular fire/badge container
+                Container(
+                  width: 54,
+                  height: 54,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: isDarkMode
+                          ? [const Color(0xFFE67E22).withOpacity(0.15), const Color(0xFFF1C40F).withOpacity(0.05)]
+                          : [const Color(0xFFF39C12).withOpacity(0.2), const Color(0xFFF1C40F).withOpacity(0.1)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
-                  ],
-                )
-              : Column(
-                  children: sortedCategories.take(4).map((entry) {
-                    final percentage =
-                        totalExpense > 0 ? (entry.value / totalExpense) : 0.0;
-                    final color = AppCategories.getColorForCategory(entry.key);
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      child: Column(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: const Color(0xFFE67E22).withOpacity(0.3),
+                      width: 1.5,
+                    ),
+                  ),
+                  child: Center(
+                    child: Text(
+                      streak > 0 ? '🔥' : '🌱',
+                      style: const TextStyle(fontSize: 26),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                // Streak details
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 6,
+                        alignment: WrapAlignment.spaceBetween,
+                        crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                children: [
-                                  Container(
-                                    width: 8,
-                                    height: 8,
-                                    decoration: BoxDecoration(
-                                        color: color, shape: BoxShape.circle),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Text(
-                                    entry.key,
-                                    style: GoogleFonts.quicksand(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.bold,
-                                      color: isDarkMode
-                                          ? Colors.white70
-                                          : Colors.black87,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Text(
-                                '${(percentage * 100).toStringAsFixed(1)}%',
-                                style: GoogleFonts.quicksand(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                  color: isDarkMode
-                                      ? Colors.white38
-                                      : Colors.grey.shade600,
-                                ),
-                              ),
-                            ],
+                          Text(
+                            streak > 0 ? 'STREAK BEBAS BOROS' : 'MULAI STREAK KAMU',
+                            style: GoogleFonts.quicksand(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 1.0,
+                              color: isDarkMode ? Colors.white30 : Colors.black38,
+                            ),
                           ),
-                          const SizedBox(height: 8),
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(4),
-                            child: LinearProgressIndicator(
-                              value: percentage,
-                              backgroundColor: isDarkMode
-                                  ? Colors.white.withValues(alpha: 0.05)
-                                  : Colors.grey.shade100,
-                              valueColor: AlwaysStoppedAnimation<Color>(color),
-                              minHeight: 6,
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: isDarkMode ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.03),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              '$badgeEmoji $badgeTitle',
+                              style: GoogleFonts.quicksand(
+                                fontSize: 9.5,
+                                fontWeight: FontWeight.w900,
+                                color: isDarkMode ? Colors.white70 : Colors.black87,
+                              ),
                             ),
                           ),
                         ],
                       ),
-                    );
-                  }).toList(),
-                ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSavingsPetCard(double totalBalance, bool isDarkMode) {
-    // Logic: Pet grows based on balance
-    // 0-100k: Sprout, 100k-1M: Small Tree, 1M+: Golden Tree
-    String petName = "Tunas Tabungan";
-    IconData petIcon = Icons.eco_rounded;
-    Color petColor = Colors.green;
-    String status = "Baru mulai tumbuh!";
-    double growth = (totalBalance / 1000000).clamp(0.0, 1.0);
-
-    if (totalBalance >= 1000000) {
-      petName = "Pohon Emas";
-      petIcon = Icons.park_rounded;
-      petColor = Colors.amber;
-      status = "Luar biasa! Pohonmu sudah berbuah.";
-    } else if (totalBalance >= 100000) {
-      petName = "Pohon Muda";
-      petIcon = Icons.forest_rounded;
-      petColor = Colors.lightGreen;
-      status = "Sedang rajin tumbuh!";
-    }
-
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: isDarkMode ? AppColors.surfaceDark : Colors.white,
-        borderRadius: BorderRadius.circular(32),
-        border: Border.all(
-          color: petColor.withValues(alpha: 0.1),
-          width: 1,
-        ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: petColor.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(petIcon, size: 40, color: petColor),
-          ),
-          const SizedBox(width: 20),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(petName,
+                      const SizedBox(height: 4),
+                      Text(
+                        streak > 0 ? '$streak Hari Beruntun!' : 'Catat transaksi non-boros esok hari!',
                         style: GoogleFonts.quicksand(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            color: isDarkMode ? Colors.white : Colors.black87)),
-                    Text('${(growth * 100).toInt()}%',
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: isDarkMode ? Colors.white : AppColors.primaryDark,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      // Badge Level Progress Bar
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Container(
+                          height: 4,
+                          width: double.infinity,
+                          color: isDarkMode ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.03),
+                          child: FractionallySizedBox(
+                            alignment: Alignment.centerLeft,
+                            widthFactor: badgeProgress.clamp(0.0, 1.0),
+                            child: Container(
+                              color: const Color(0xFFF39C12),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        nextBadgeText,
                         style: GoogleFonts.quicksand(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            color: petColor)),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: LinearProgressIndicator(
-                    value: growth,
-                    minHeight: 6,
-                    backgroundColor: petColor.withValues(alpha: 0.1),
-                    color: petColor,
+                          fontSize: 8.5,
+                          fontWeight: FontWeight.w900,
+                          color: isDarkMode ? Colors.white24 : Colors.black38,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 8),
-                Text(status,
-                    style: GoogleFonts.quicksand(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        color: isDarkMode ? Colors.white38 : Colors.black54)),
               ],
+            ),
+          ),
+          
+          // Divider
+          Container(
+            height: 1,
+            color: isDarkMode ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.03),
+          ),
+
+          // Wisdom Quote Card Widget
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () {
+                // Shake wisdom animation or select another random quote
+                setState(() {
+                  final random = DateTime.now().microsecondsSinceEpoch;
+                  _wisdomIndex = (random) % quotes.length;
+                });
+                // Provide light tactile feedback
+                HapticFeedback.lightImpact();
+              },
+              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: isDarkMode
+                        ? [Colors.white.withOpacity(0.01), Colors.white.withOpacity(0.02)]
+                        : [Colors.black.withOpacity(0.01), Colors.black.withOpacity(0.02)],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  ),
+                  borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.lightbulb_outline_rounded,
+                          size: 14,
+                          color: Color(0xFFF1C40F),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'KARTU KEBIJAKSANAAN FINANSIAL',
+                          style: GoogleFonts.quicksand(
+                            fontSize: 8.5,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 1.2,
+                            color: isDarkMode ? Colors.white30 : Colors.black38,
+                          ),
+                        ),
+                        const Spacer(),
+                        Text(
+                          'Ketuk Kartu 🃏',
+                          style: GoogleFonts.quicksand(
+                            fontSize: 8.5,
+                            fontWeight: FontWeight.w900,
+                            color: isDarkMode ? Colors.white38 : Colors.black45,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 300),
+                      transitionBuilder: (child, anim) => FadeTransition(
+                        opacity: anim,
+                        child: child,
+                      ),
+                      child: Text(
+                        activeQuote,
+                        key: ValueKey<int>(_wisdomIndex!),
+                        style: GoogleFonts.quicksand(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          height: 1.5,
+                          color: isDarkMode ? Colors.white.withOpacity(0.9) : Colors.black87,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         ],
       ),
     );
   }
+
+
+  Widget _buildDailyMissionsCard(bool isDarkMode) {
+    final completedCount = _dailyMissions.where((m) => m.isCompleted).length;
+    final totalCount = _dailyMissions.length;
+    final progress = totalCount > 0 ? completedCount / totalCount : 0.0;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: isDarkMode ? const Color(0xFF151618) : Colors.white,
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(
+          color: isDarkMode
+              ? Colors.white.withOpacity(0.04)
+              : Colors.black.withOpacity(0.03),
+          width: 1.2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: isDarkMode 
+                ? Colors.black.withOpacity(0.12) 
+                : Colors.black.withOpacity(0.02),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header Row
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'MISI MENABUNG HARIAN',
+                      style: GoogleFonts.quicksand(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1.5,
+                        color: isDarkMode ? Colors.white30 : Colors.black38,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'BANGUN HABIT POSITIF',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.quicksand(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: isDarkMode ? Colors.white : AppColors.primaryDark,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              // Add custom mission button
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: _showAddMissionSheet,
+                  borderRadius: BorderRadius.circular(30),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: AppColors.primary.withOpacity(0.3),
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.add_rounded,
+                          color: AppColors.primary,
+                          size: 14,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Tambah',
+                          style: GoogleFonts.quicksand(
+                            fontSize: 9.5,
+                            fontWeight: FontWeight.w900,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 18),
+
+          // Progress Row with linear progress bar & stats label
+          Row(
+            children: [
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: Container(
+                    height: 5,
+                    color: isDarkMode ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.03),
+                    child: totalCount == 0
+                        ? const SizedBox.shrink()
+                        : FractionallySizedBox(
+                            alignment: Alignment.centerLeft,
+                            widthFactor: progress,
+                            child: Container(
+                              color: progress == 1.0 ? const Color(0xFF2ECC71) : const Color(0xFF3498DB),
+                            ),
+                          ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                '$completedCount/$totalCount Selesai',
+                style: GoogleFonts.quicksand(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w900,
+                  color: progress == 1.0 ? const Color(0xFF2ECC71) : const Color(0xFF3498DB),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 20),
+
+          // Dynamic Challenge Items list
+          totalCount == 0
+              ? Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 24),
+                  child: Center(
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.task_alt_rounded,
+                          size: 36,
+                          color: isDarkMode ? Colors.white24 : Colors.black26,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Belum ada misi harian.\nKetuk "+ Tambah" untuk memulai!',
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.quicksand(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: isDarkMode ? Colors.white30 : Colors.black38,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              : ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: totalCount,
+                  separatorBuilder: (context, index) => const SizedBox(height: 12),
+                  itemBuilder: (context, index) {
+                    final mission = _dailyMissions[index];
+                    final isCompleted = mission.isCompleted;
+
+                    return Container(
+                      decoration: BoxDecoration(
+                        color: isCompleted
+                            ? (isDarkMode ? const Color(0xFF102A1F) : const Color(0xFFE8F8F0))
+                            : (isDarkMode ? Colors.white.withOpacity(0.02) : Colors.black.withOpacity(0.01)),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: isCompleted
+                              ? const Color(0xFF2ECC71).withOpacity(0.3)
+                              : Colors.transparent,
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          // Interactive Checkbox & Description Area
+                          Expanded(
+                            child: InkWell(
+                              onTap: () {
+                                setState(() {
+                                  mission.isCompleted = !isCompleted;
+                                });
+                                HapticFeedback.mediumImpact();
+                              },
+                              borderRadius: const BorderRadius.horizontal(left: Radius.circular(16)),
+                              child: Padding(
+                                padding: const EdgeInsets.all(12),
+                                child: Row(
+                                  children: [
+                                    // Animated Checkbox circle
+                                    Container(
+                                      width: 22,
+                                      height: 22,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: isCompleted
+                                            ? const Color(0xFF2ECC71)
+                                            : Colors.transparent,
+                                        border: Border.all(
+                                          color: isCompleted
+                                              ? const Color(0xFF2ECC71)
+                                              : (isDarkMode ? Colors.white24 : Colors.black26),
+                                          width: 1.8,
+                                        ),
+                                      ),
+                                      child: isCompleted
+                                          ? const Icon(
+                                              Icons.check_rounded,
+                                              color: Colors.white,
+                                              size: 14,
+                                            )
+                                          : null,
+                                    ),
+                                    const SizedBox(width: 14),
+                                    // Text Description
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            mission.title,
+                                            style: GoogleFonts.quicksand(
+                                              fontSize: 12.5,
+                                              fontWeight: FontWeight.bold,
+                                              color: isCompleted
+                                                  ? const Color(0xFF2ECC71)
+                                                  : (isDarkMode ? Colors.white.withOpacity(0.9) : Colors.black87),
+                                              decoration: isCompleted
+                                                  ? TextDecoration.lineThrough
+                                                  : TextDecoration.none,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            mission.subtitle,
+                                            style: GoogleFonts.quicksand(
+                                              fontSize: 9.5,
+                                              fontWeight: FontWeight.w500,
+                                              color: isCompleted
+                                                  ? const Color(0xFF2ECC71).withOpacity(0.7)
+                                                  : (isDarkMode ? Colors.white38 : Colors.black45),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          // Deletion trash can button on the right
+                          IconButton(
+                            icon: Icon(
+                              Icons.delete_outline_rounded,
+                              size: 18,
+                              color: isCompleted
+                                  ? const Color(0xFFE74C3C).withOpacity(0.5)
+                                  : const Color(0xFFE74C3C).withOpacity(0.7),
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _dailyMissions.removeAt(index);
+                              });
+                              HapticFeedback.lightImpact();
+                            },
+                          ),
+                          const SizedBox(width: 4),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+          
+          if (totalCount > 0 && progress == 1.0) ...[
+            const SizedBox(height: 18),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF2ECC71), Color(0xFF27AE60)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Center(
+                child: Text(
+                  '🔥 SEMUA MISI TERCAPAI! LUAR BIASA! 🎉',
+                  style: GoogleFonts.quicksand(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white,
+                    letterSpacing: 1.0,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
 
   Widget _buildHistoryTab(
     AsyncValue<List<TransactionModel>> transactionsAsync,
@@ -4919,35 +7757,6 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
                                 isDark
                                     ? Colors.redAccent.shade200
                                     : Colors.red),
-                            // ── Tombol ekspor per bulan ────────────────
-                            GestureDetector(
-                              onTap: () => widget.onExportMonth(
-                                monthTx: allMonthTx,
-                                monthLabel: monthKey,
-                              ),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 12, vertical: 8),
-                                decoration: BoxDecoration(
-                                  color: AppColors.primary
-                                      .withValues(alpha: isDark ? 0.18 : 0.10),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(Icons.share_rounded,
-                                        size: 13, color: AppColors.primary),
-                                    SizedBox(width: 4),
-                                    Text('EKSPOR',
-                                        style: GoogleFonts.quicksand(
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.bold,
-                                            color: AppColors.primary)),
-                                  ],
-                                ),
-                              ),
-                            ),
                           ],
                         )
                       ],
@@ -5392,4 +8201,37 @@ class _RibuanFormatter extends TextInputFormatter {
         text: newText,
         selection: TextSelection.collapsed(offset: newText.length));
   }
+}
+
+
+class _DailyMission {
+  final String title;
+  final String subtitle;
+  bool isCompleted;
+
+  _DailyMission({
+    required this.title,
+    required this.subtitle,
+    this.isCompleted = false,
+  });
+}
+
+class _QuickChallenge {
+  final String icon;
+  final String title;
+  final String subtitle;
+  final int xpReward;
+  final double savingsAmount;
+  final String category;
+  bool isCompleted;
+
+  _QuickChallenge({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.xpReward,
+    required this.savingsAmount,
+    required this.category,
+    this.isCompleted = false,
+  });
 }

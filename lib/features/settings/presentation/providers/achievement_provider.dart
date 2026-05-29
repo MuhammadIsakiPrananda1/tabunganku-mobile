@@ -62,18 +62,12 @@ final achievementsProvider = Provider<List<Achievement>>((ref) {
           ..sort((a, b) => b.compareTo(a));
           
         if (sortedDates.isNotEmpty) {
-          DateTime current = DateTime.now();
-          current = DateTime(current.year, current.month, current.day);
-          
-          // Check if today or yesterday has a transaction to keep streak alive
-          if (sortedDates.first == current || sortedDates.first == current.subtract(const Duration(days: 1))) {
-            streak = 1;
-            for (int i = 0; i < sortedDates.length - 1; i++) {
-              if (sortedDates[i].difference(sortedDates[i+1]).inDays == 1) {
-                streak++;
-              } else {
-                break;
-              }
+          streak = 1;
+          for (int i = 0; i < sortedDates.length - 1; i++) {
+            if (sortedDates[i].difference(sortedDates[i+1]).inDays == 1) {
+              streak++;
+            } else {
+              break;
             }
           }
         }
@@ -160,6 +154,54 @@ final achievementsProvider = Provider<List<Achievement>>((ref) {
           icon: Icons.account_balance_rounded,
           isUnlocked: currentBalance >= 2500000,
           progress: (currentBalance / 2500000).clamp(0.0, 1.0),
+        ),
+        Achievement(
+          id: 'first_expense',
+          title: 'Pecah Telur',
+          description: 'Berhasil mencatat pengeluaran pertama kali.',
+          icon: Icons.shopping_bag_rounded,
+          isUnlocked: transactions.any((t) => t.type == TransactionType.expense),
+          progress: transactions.any((t) => t.type == TransactionType.expense) ? 1.0 : 0.0,
+        ),
+        Achievement(
+          id: 'collector_wealth',
+          title: 'Kolektor Harta',
+          description: 'Total pemasukan mencapai Rp 5.000.000.',
+          icon: Icons.monetization_on_rounded,
+          isUnlocked: totalIncome >= 5000000,
+          progress: (totalIncome / 5000000).clamp(0.0, 1.0),
+        ),
+        Achievement(
+          id: 'super_saving_master',
+          title: 'Guru Finansial',
+          description: 'Mencatat total 30 kali transaksi (pemasukan/pengeluaran).',
+          icon: Icons.psychology_rounded,
+          isUnlocked: transactions.length >= 30,
+          progress: (transactions.length / 30).clamp(0.0, 1.0),
+        ),
+        Achievement(
+          id: 'half_millionaire',
+          title: 'Langkah Awal',
+          description: 'Memiliki saldo aktif di atas Rp 100.000.',
+          icon: Icons.explore_rounded,
+          isUnlocked: currentBalance >= 100000,
+          progress: (currentBalance / 100000).clamp(0.0, 1.0),
+        ),
+        Achievement(
+          id: 'saving_legend',
+          title: 'Legenda Menabung',
+          description: 'Total pemasukan mencapai Rp 30.000.000.',
+          icon: Icons.diamond_rounded,
+          isUnlocked: totalIncome >= 30000000,
+          progress: (totalIncome / 30000000).clamp(0.0, 1.0),
+        ),
+        Achievement(
+          id: 'future_billionaire',
+          title: 'Calon Miliarder',
+          description: 'Memiliki saldo aktif di atas Rp 20.000.000.',
+          icon: Icons.flight_takeoff_rounded,
+          isUnlocked: currentBalance >= 20000000,
+          progress: (currentBalance / 20000000).clamp(0.0, 1.0),
         ),
       ];
     },

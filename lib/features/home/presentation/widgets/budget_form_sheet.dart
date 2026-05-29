@@ -7,6 +7,7 @@ import 'package:tabunganku/models/budget_model.dart';
 import 'package:tabunganku/providers/budget_provider.dart';
 import 'package:tabunganku/core/utils/currency_formatter.dart';
 import 'package:tabunganku/core/constants/transaction_categories.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 // ────────────────────────────────────────────────────────────────────────────
 
@@ -37,6 +38,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
   String? _selectedCategory;
   String? _selectedGroup;
   bool _isCustomCategory = false;
+  bool _amountHasError = false;
 
   static final _fixedCategories = AppCategories.expenseCategories
       .map((c) => {'label': c.label, 'icon': c.icon})
@@ -111,7 +113,12 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
     final amountRaw =
         _amountController.text.replaceAll('.', '').replaceAll(',', '');
     final amount = double.tryParse(amountRaw) ?? 0;
-    if (amount <= 0) return;
+    if (amount <= 0) {
+      setState(() {
+        _amountHasError = true;
+      });
+      return;
+    }
     if (_effectiveCategory.isEmpty) return;
 
     final now = DateTime.now();
@@ -263,75 +270,86 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
 
             const SizedBox(height: 32),
 
-            // ── Pilih Kategori (Grouped Dropdowns) ────────────────────────
+            // ── Pilih Kategori (Searchable) ────────────────────────
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Group Dropdown
-                  DropdownButtonFormField<String>(
-                    value: _selectedGroup,
-                    isExpanded: true,
-                    dropdownColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
-                    style: TextStyle(color: isDarkMode ? Colors.white : Colors.black87, fontWeight: FontWeight.bold),
-                    decoration: InputDecoration(
-                      labelText: 'Grup Kategori',
-                      filled: true,
-                      fillColor: isDarkMode ? Colors.white.withValues(alpha: 0.03) : Colors.grey.shade50,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
-                      prefixIcon: const Icon(Icons.grid_view_rounded, color: AppColors.primary),
-                      labelStyle: TextStyle(color: isDarkMode ? Colors.white38 : Colors.grey),
+                  Text(
+                    'Kategori Budget',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: isDarkMode ? Colors.white70 : Colors.black87,
                     ),
-                    items: groupedCategories.keys.map((group) => DropdownMenuItem(
-                      value: group,
-                      child: Text(group, 
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
-                    )).toList(),
-                    onChanged: (val) {
-                      if (val != null) {
-                        setState(() {
-                          _selectedGroup = val;
-                          _selectedCategory = groupedCategories[val]!.first.label;
-                          _isCustomCategory = _selectedCategory == AppCategories.otherLabel;
-                        });
-                        FocusScope.of(context).unfocus();
-                      }
-                    },
                   ),
-                  const SizedBox(height: 16),
-                  // Category Dropdown
-                  DropdownButtonFormField<String>(
-                    value: _selectedCategory,
-                    isExpanded: true,
-                    dropdownColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
-                    style: TextStyle(color: isDarkMode ? Colors.white : Colors.black87, fontWeight: FontWeight.bold),
-                    decoration: InputDecoration(
-                      labelText: 'Kategori Budget',
-                      filled: true,
-                      fillColor: isDarkMode ? Colors.white.withValues(alpha: 0.03) : Colors.grey.shade50,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
-                      prefixIcon: Icon(
-                        AppCategories.expenseCategories.firstWhere((c) => c.label == _selectedCategory).icon,
-                        color: AppColors.primary,
-                      ),
-                      labelStyle: TextStyle(color: isDarkMode ? Colors.white38 : Colors.grey),
-                    ),
-                    items: groupedCategories[_selectedGroup]!.map((cat) => DropdownMenuItem(
-                      value: cat.label,
-                      child: Text(cat.label, 
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 11)),
-                    )).toList(),
-                    onChanged: (val) {
-                      if (val != null) {
-                        setState(() {
-                          _selectedCategory = val;
-                          _isCustomCategory = val == AppCategories.otherLabel;
-                        });
-                        FocusScope.of(context).unfocus();
-                      }
+                  const SizedBox(height: 6),
+                  InkWell(
+                    onTap: () {
+                      _showCategorySearchSheet(
+                        context: context,
+                        isDarkMode: isDarkMode,
+                        currentSelected: _selectedCategory ?? '',
+                        categoryObjects: AppCategories.expenseCategories,
+                        onSelected: (cat) {
+                          setState(() {
+                            _selectedCategory = cat.label;
+                            _selectedGroup = cat.group;
+                            _isCustomCategory = cat.label == AppCategories.otherLabel;
+                          });
+                        },
+                      );
                     },
+                    borderRadius: BorderRadius.circular(20),
+                    child: Container(
+                      height: 58,
+                      decoration: BoxDecoration(
+                        color: isDarkMode
+                            ? Colors.white.withValues(alpha: 0.03)
+                            : Colors.grey.shade50,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: isDarkMode
+                              ? Colors.white.withValues(alpha: 0.05)
+                              : Colors.grey.shade200,
+                          width: 1.5,
+                        ),
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Row(
+                        children: [
+                          Icon(
+                            AppCategories.expenseCategories.any((c) =>
+                                    c.label == _selectedCategory)
+                                ? AppCategories.expenseCategories
+                                    .firstWhere((c) => c.label == _selectedCategory)
+                                    .icon
+                                : Icons.category_rounded,
+                            size: 20,
+                            color: AppColors.primary,
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Text(
+                              _selectedCategory ?? 'Pilih Kategori',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                                color: isDarkMode ? Colors.white : Colors.black87,
+                              ),
+                            ),
+                          ),
+                          Icon(
+                            Icons.arrow_drop_down_rounded,
+                            size: 28,
+                            color: isDarkMode ? Colors.white38 : Colors.grey,
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -389,7 +407,10 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
                       color: isDarkMode ? Colors.white.withValues(alpha: 0.03) : Colors.grey.shade50,
                       borderRadius: BorderRadius.circular(24),
                       border: Border.all(
-                        color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade200,
+                        color: _amountHasError 
+                            ? Colors.redAccent 
+                            : (isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade200),
+                        width: _amountHasError ? 1.5 : 1.0,
                       ),
                     ),
                     child: Row(
@@ -412,6 +433,15 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
                               FilteringTextInputFormatter.digitsOnly,
                               RibuanFormatter(),
                             ],
+                            onChanged: (val) {
+                              final amountRaw = val.replaceAll('.', '').replaceAll(',', '');
+                              final amount = double.tryParse(amountRaw) ?? 0;
+                              if (amount > 0 && _amountHasError) {
+                                setState(() {
+                                  _amountHasError = false;
+                                });
+                              }
+                            },
                             style: TextStyle(
                               fontSize: 21,
                               fontWeight: FontWeight.w900,
@@ -430,6 +460,20 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
                       ],
                     ),
                   ),
+                  if (_amountHasError) ...[
+                    const SizedBox(height: 8),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        'Nominal limit anggaran harus lebih besar dari Rp 0!',
+                        style: GoogleFonts.quicksand(
+                          color: Colors.redAccent,
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -468,6 +512,280 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
           ],
         ),
       ),
+    );
+  }
+
+  void _showCategorySearchSheet({
+    required BuildContext context,
+    required bool isDarkMode,
+    required String currentSelected,
+    required List<TransactionCategory> categoryObjects,
+    required ValueChanged<TransactionCategory> onSelected,
+  }) {
+    FocusScope.of(context).unfocus(); // Unfocus parent fields immediately!
+    final searchController = TextEditingController();
+    String searchQuery = '';
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            // Group filtered items dynamically
+            final Map<String, List<TransactionCategory>> displayGrouped = {};
+            for (var cat in categoryObjects) {
+              final labelLower = cat.label.toLowerCase();
+              final groupLower = cat.group.toLowerCase();
+              final queryLower = searchQuery.toLowerCase();
+              if (labelLower.contains(queryLower) ||
+                  groupLower.contains(queryLower)) {
+                displayGrouped.putIfAbsent(cat.group, () => []).add(cat);
+              }
+            }
+
+            return Container(
+              height: MediaQuery.of(context).size.height * 0.8,
+              decoration: BoxDecoration(
+                color: isDarkMode ? AppColors.surfaceDark : Colors.white,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(32),
+                  topRight: Radius.circular(32),
+                ),
+              ),
+              child: Column(
+                children: [
+                  const SizedBox(height: 12),
+                  Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: isDarkMode ? Colors.white10 : Colors.black12,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'CARI KATEGORI',
+                        style: GoogleFonts.quicksand(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                          letterSpacing: 1.5,
+                          color: isDarkMode ? Colors.white70 : Colors.black87,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+                    child: TextField(
+                      controller: searchController,
+                      autofocus: true,
+                      style: GoogleFonts.quicksand(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: isDarkMode ? Colors.white : Colors.black87,
+                      ),
+                      decoration: InputDecoration(
+                        isDense: true,
+                        hintText: 'Cari kategori...',
+                        hintStyle: GoogleFonts.quicksand(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: isDarkMode ? Colors.white30 : Colors.black38,
+                        ),
+                        prefixIcon: Icon(
+                          Icons.search_rounded,
+                          color: isDarkMode ? Colors.white38 : Colors.black45,
+                          size: 20,
+                        ),
+                        suffixIcon: searchQuery.isNotEmpty
+                            ? GestureDetector(
+                                onTap: () {
+                                  searchController.clear();
+                                  setModalState(() {
+                                    searchQuery = '';
+                                  });
+                                },
+                                child: Icon(
+                                  Icons.close_rounded,
+                                  color: isDarkMode ? Colors.white54 : Colors.black54,
+                                  size: 20,
+                                ),
+                              )
+                            : null,
+                        filled: true,
+                        fillColor: isDarkMode
+                            ? Colors.white.withValues(alpha: 0.05)
+                            : Colors.grey.shade100,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: AppColors.primary,
+                            width: 1.5,
+                          ),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      ),
+                      onChanged: (val) {
+                         setModalState(() {
+                           searchQuery = val;
+                         });
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Expanded(
+                    child: displayGrouped.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.search_off_rounded,
+                                  size: 48,
+                                  color: isDarkMode ? Colors.white24 : Colors.black26,
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  'Kategori tidak ditemukan.',
+                                  style: GoogleFonts.quicksand(
+                                    fontWeight: FontWeight.bold,
+                                    color: isDarkMode ? Colors.white38 : Colors.black38,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : ListView.builder(
+                            padding: const EdgeInsets.only(bottom: 24),
+                            physics: const BouncingScrollPhysics(),
+                            itemCount: displayGrouped.length,
+                            itemBuilder: (context, groupIndex) {
+                              final groupName = displayGrouped.keys.elementAt(groupIndex);
+                              final items = displayGrouped[groupName]!;
+                              final groupColor = items.isNotEmpty ? items.first.color : AppColors.primary;
+
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Group Header (Minimalist & Clear)
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                        top: 20, bottom: 10, left: 24, right: 24),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          width: 3.5,
+                                          height: 14,
+                                          decoration: BoxDecoration(
+                                            color: groupColor,
+                                            borderRadius: BorderRadius.circular(2),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 10),
+                                        Text(
+                                          groupName.toUpperCase(),
+                                          style: GoogleFonts.quicksand(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w800,
+                                            letterSpacing: 1.5,
+                                            color: groupColor,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  // Group Items
+                                  ...items.map((cat) {
+                                    final isSelected = cat.label == currentSelected;
+                                    return GestureDetector(
+                                      onTap: () {
+                                        onSelected(cat);
+                                        Navigator.pop(sheetContext);
+                                      },
+                                      child: Container(
+                                        margin: const EdgeInsets.symmetric(
+                                            vertical: 4, horizontal: 20),
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 10, horizontal: 16),
+                                        decoration: BoxDecoration(
+                                          color: isDarkMode
+                                              ? Colors.white.withValues(alpha: 0.03)
+                                              : Colors.grey.shade50,
+                                          borderRadius: BorderRadius.circular(16),
+                                          border: Border.all(
+                                            color: isSelected
+                                                ? cat.color
+                                                : (isDarkMode
+                                                    ? Colors.white.withValues(alpha: 0.05)
+                                                    : Colors.grey.shade100),
+                                            width: 1.5,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Container(
+                                              width: 36,
+                                              height: 36,
+                                              decoration: BoxDecoration(
+                                                color: cat.color.withValues(
+                                                    alpha: isDarkMode ? 0.15 : 0.08),
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: Icon(
+                                                cat.icon,
+                                                size: 18,
+                                                color: cat.color,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 16),
+                                            Expanded(
+                                              child: Text(
+                                                cat.label,
+                                                style: GoogleFonts.quicksand(
+                                                  fontSize: 13,
+                                                  fontWeight: isSelected ? FontWeight.w800 : FontWeight.bold,
+                                                  color: isSelected
+                                                      ? cat.color
+                                                      : (isDarkMode ? Colors.white : Colors.black87),
+                                                ),
+                                              ),
+                                            ),
+                                            if (isSelected)
+                                              Icon(
+                                                Icons.check_circle_rounded,
+                                                color: cat.color,
+                                                size: 20,
+                                              ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  }),
+                                ],
+                              );
+                            },
+                          ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }

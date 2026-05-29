@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,7 +15,28 @@ class TaxCalculatorPage extends ConsumerStatefulWidget {
 class _TaxCalculatorPageState extends ConsumerState<TaxCalculatorPage> {
   final TextEditingController _valController = TextEditingController();
   double _taxResult = 0;
-  String _taxType = 'PBB'; // PBB or PKB
+  String _taxType = 'PBB'; // PBB, PKB, PPh, PPN, BPHTB, PB1
+
+  final List<Map<String, dynamic>> _taxTypes = [
+    {'code': 'PBB', 'label': 'Pajak Bumi & Bangunan', 'icon': Icons.home_rounded},
+    {'code': 'PKB', 'label': 'Pajak Kendaraan Bermotor', 'icon': Icons.directions_car_rounded},
+    {'code': 'PPh', 'label': 'Pajak Penghasilan (PPh 21)', 'icon': Icons.wallet_rounded},
+    {'code': 'PPN', 'label': 'Pajak Pertambahan Nilai (PPN)', 'icon': Icons.receipt_rounded},
+    {'code': 'BPHTB', 'label': 'Bea Perolehan Hak Tanah & Bangunan', 'icon': Icons.domain_rounded},
+    {'code': 'PB1', 'label': 'Pajak Restoran & Hotel (PB1)', 'icon': Icons.restaurant_rounded},
+  ];
+
+  IconData _getTaxIcon(String code) {
+    switch (code) {
+      case 'PBB': return Icons.home_rounded;
+      case 'PKB': return Icons.directions_car_rounded;
+      case 'PPh': return Icons.wallet_rounded;
+      case 'PPN': return Icons.receipt_rounded;
+      case 'BPHTB': return Icons.domain_rounded;
+      case 'PB1': return Icons.restaurant_rounded;
+      default: return Icons.payments_rounded;
+    }
+  }
 
   void _calculateTax() {
     final text = _valController.text.replaceAll('.', '');
@@ -24,43 +44,33 @@ class _TaxCalculatorPageState extends ConsumerState<TaxCalculatorPage> {
     setState(() {
       switch (_taxType) {
         case 'PBB':
-          // Standar PBB: (NJOP - NJOPTKP) * 0.1% (Tarif minimal umum)
           const njoptkp = 12000000;
           _taxResult = amount > njoptkp ? (amount - njoptkp) * 0.001 : 0;
           break;
         case 'PKB':
-          // Standar PKB: NJKB * 2% (Tarif kendaraan pertama umum)
           _taxResult = amount * 0.02;
           break;
         case 'PPh':
-          // Standar PPh 21 (Bulanan - Sederhana TK/0):
-          // PTKP TK/0 = 54jt/tahun = 4.5jt/bulan
           const ptkpBulanan = 4500000;
           double pkp = amount - ptkpBulanan;
           if (pkp <= 0) {
             _taxResult = 0;
           } else {
-            // Progresif Layer 1: 5% up to 60jt/tahun (5jt/bulan PKP)
             if (pkp <= 5000000) {
               _taxResult = pkp * 0.05;
             } else {
-              // Layer 2: 15% (untuk simulasi sederhana kita batasi atau tambahkan layer)
               _taxResult = (5000000 * 0.05) + ((pkp - 5000000) * 0.15);
             }
           }
           break;
         case 'PPN':
-          // Standar PPN Indonesia: 11%
           _taxResult = amount * 0.11;
           break;
         case 'BPHTB':
-          // Standar BPHTB: (Harga - NPOPTKP) * 5%
-          // NPOPTKP standar umum Rp 60jt
           const npoptkp = 60000000;
           _taxResult = amount > npoptkp ? (amount - npoptkp) * 0.05 : 0;
           break;
         case 'PB1':
-          // Standar Pajak Restoran/Hotel: 10%
           _taxResult = amount * 0.10;
           break;
         default:
@@ -75,12 +85,16 @@ class _TaxCalculatorPageState extends ConsumerState<TaxCalculatorPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDarkMode = theme.brightness == Brightness.dark;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
+    
+    // Page Theme: Mint Green Accent & Classic Black/Light background
+    final pageBgColor = isDarkMode ? AppColors.backgroundDark : const Color(0xFFF8FAF9);
+    final accentColor = isDarkMode ? const Color(0xFF2ECC71) : const Color(0xFF27AE60);
+    final inputBgColor = isDarkMode ? Colors.white.withOpacity(0.05) : AppColors.background;
 
     return Scaffold(
-      backgroundColor: isDarkMode ? AppColors.backgroundDark : const Color(0xFFF8FAF9),
+      backgroundColor: pageBgColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -88,7 +102,14 @@ class _TaxCalculatorPageState extends ConsumerState<TaxCalculatorPage> {
           onPressed: () => Navigator.pop(context),
           icon: Icon(Icons.arrow_back_ios_new_rounded, color: contentColor, size: 20),
         ),
-        title: Text('Kalkulator Pajak', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: contentColor)),
+        title: Text(
+          'Kalkulator Pajak',
+          style: GoogleFonts.quicksand(
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+            color: contentColor,
+          ),
+        ),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -99,82 +120,77 @@ class _TaxCalculatorPageState extends ConsumerState<TaxCalculatorPage> {
             _buildInfoCard(isDarkMode),
             const SizedBox(height: 24),
             
-            Text('TIPE PAJAK', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5, color: contentColor.withValues(alpha: 0.4))),
-            const SizedBox(height: 12),
-            GridView.count(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: 2,
-              childAspectRatio: 2.8,
-              mainAxisSpacing: 8,
-              crossAxisSpacing: 8,
-              children: [
-                _buildCompactTypeCard('PBB', 'Bumi & Bangunan', Icons.home_rounded, isDarkMode),
-                _buildCompactTypeCard('PKB', 'Kendaraan Bermotor', Icons.directions_car_rounded, isDarkMode),
-                _buildCompactTypeCard('PPh', 'Pajak Penghasilan', Icons.wallet_rounded, isDarkMode),
-                _buildCompactTypeCard('PPN', 'Pertambahan Nilai', Icons.receipt_rounded, isDarkMode),
-                _buildCompactTypeCard('BPHTB', 'Bea Perolehan Tanah', Icons.domain_rounded, isDarkMode),
-                _buildCompactTypeCard('PB1', 'Restoran & Hotel', Icons.restaurant_rounded, isDarkMode),
-              ],
+            // Tipe Pajak - Title
+            Padding(
+              padding: const EdgeInsets.only(left: 4, bottom: 8),
+              child: Text(
+                'Tipe Pajak',
+                style: GoogleFonts.quicksand(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: contentColor.withOpacity(0.5),
+                ),
+              ),
             ),
             
-            const SizedBox(height: 24),
+            // Minimalist Custom Dropdown
+            Container(
+              height: 48,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                color: inputBgColor,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  Icon(_getTaxIcon(_taxType), color: accentColor, size: 18),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: _taxType,
+                        isExpanded: true,
+                        dropdownColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
+                        icon: Icon(Icons.arrow_drop_down_rounded, color: contentColor.withOpacity(0.4), size: 20),
+                        style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: contentColor, fontSize: 13),
+                        items: _taxTypes.map((t) {
+                          return DropdownMenuItem<String>(
+                            value: t['code'] as String,
+                            child: Text(
+                              t['label'] as String,
+                              style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (val) {
+                          setState(() {
+                            _taxType = val!;
+                            _calculateTax();
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            
+            const SizedBox(height: 20),
             _buildAlignedInput(
-              _taxType == 'PBB' ? 'Nilai Jual (NJOP)' : 
-              _taxType == 'PKB' ? 'Nilai Jual (NJKB)' :
-              _taxType == 'PPh' ? 'Total Penghasilan' :
-              _taxType == 'PPN' ? 'Nilai Transaksi' :
+              _taxType == 'PBB' ? 'Nilai Jual Bumi Bangunan (NJOP)' : 
+              _taxType == 'PKB' ? 'Nilai Jual Kendaraan (NJKB)' :
+              _taxType == 'PPh' ? 'Total Penghasilan Bulanan' :
+              _taxType == 'PPN' ? 'Nilai Transaksi Barang/Jasa' :
               _taxType == 'BPHTB' ? 'Harga Transaksi Properti' :
-              'Total Bill', 
+              'Total Tagihan Restoran/Hotel', 
               _valController, 
               (_) => _calculateTax(), 
-              _taxType == 'PBB' ? Icons.home_work_rounded : Icons.payments_rounded, 
+              _getTaxIcon(_taxType), 
               isDarkMode
             ),
             
-            const SizedBox(height: 24),
+            const SizedBox(height: 28),
             _buildResultCard(isDarkMode),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCompactTypeCard(String type, String label, IconData icon, bool isDarkMode) {
-    final isSelected = _taxType == type;
-    final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
-    
-    return GestureDetector(
-      onTap: () => setState(() {
-        _taxType = type;
-        _calculateTax();
-      }),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : (isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.white),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: isSelected ? AppColors.primary : (isDarkMode ? Colors.white10 : Colors.black.withValues(alpha: 0.05))),
-          boxShadow: isSelected ? [BoxShadow(color: AppColors.primary.withValues(alpha: 0.2), blurRadius: 4, offset: const Offset(0, 2))] : [],
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon,
-                color: isSelected ? Colors.white : AppColors.primary, size: 16),
-            const SizedBox(width: 6),
-            Expanded(
-              child: Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 11,
-                    color: isSelected ? Colors.white : contentColor),
-              ),
-            ),
           ],
         ),
       ),
@@ -183,38 +199,46 @@ class _TaxCalculatorPageState extends ConsumerState<TaxCalculatorPage> {
 
   Widget _buildAlignedInput(String label, TextEditingController controller, Function(String) onChanged, IconData icon, bool isDarkMode) {
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
+    final accentColor = isDarkMode ? const Color(0xFF2ECC71) : const Color(0xFF27AE60);
+    final inputBgColor = isDarkMode ? Colors.white.withOpacity(0.05) : AppColors.background;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.only(left: 4, bottom: 8),
-          child: Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: contentColor.withValues(alpha: 0.5))),
+          child: Text(
+            label,
+            style: GoogleFonts.quicksand(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              color: contentColor.withOpacity(0.5),
+            ),
+          ),
         ),
         TextFormField(
           controller: controller,
           keyboardType: TextInputType.number,
           inputFormatters: [_RibuanFormatter()],
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: contentColor),
+          style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
           onChanged: onChanged,
           decoration: InputDecoration(
-            hintText: '0',
-            hintStyle: TextStyle(
-                fontSize: 11,
-                color: isDarkMode ? Colors.white10 : Colors.black38),
+            hintText: 'Nominal Dasar Pajak',
+            hintStyle: GoogleFonts.quicksand(fontSize: 13, color: isDarkMode ? Colors.white.withOpacity(0.3) : Colors.black.withOpacity(0.25)),
             prefixIcon: Container(
-              padding: const EdgeInsets.only(left: 20, right: 8),
+              padding: const EdgeInsets.only(left: 16, right: 8),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(icon, color: AppColors.primary, size: 20),
+                  Icon(icon, color: accentColor, size: 18),
                   const SizedBox(width: 8),
-                  const Text('Rp', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 11)),
+                  Text('Rp', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: accentColor, fontSize: 13)),
                 ],
               ),
             ),
             filled: true,
-            fillColor: isDarkMode ? Colors.white.withValues(alpha: 0.05) : AppColors.background,
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+            fillColor: inputBgColor,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           ),
         ),
@@ -223,20 +247,28 @@ class _TaxCalculatorPageState extends ConsumerState<TaxCalculatorPage> {
   }
 
   Widget _buildInfoCard(bool isDarkMode) {
+    final accentColor = isDarkMode ? const Color(0xFF2ECC71) : const Color(0xFF27AE60);
+    final infoBgColor = accentColor.withOpacity(0.08);
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.1),
+        color: infoBgColor,
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: accentColor.withOpacity(0.15)),
       ),
-      child: const Row(
+      child: Row(
         children: [
-          Icon(Icons.info_outline_rounded, color: AppColors.primary, size: 18),
-          const SizedBox(width: 8),
+          Icon(Icons.info_outline_rounded, color: accentColor, size: 18),
+          const SizedBox(width: 10),
           Expanded(
             child: Text(
               'Cek nilai akurat pada STNK atau SPPT terbaru Anda.',
-              style: TextStyle(fontSize: 10, color: AppColors.primary, fontWeight: FontWeight.bold),
+              style: GoogleFonts.quicksand(
+                fontSize: 11,
+                color: isDarkMode ? Colors.white.withOpacity(0.9) : const Color(0xFF1E5F3B),
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ],
@@ -245,43 +277,57 @@ class _TaxCalculatorPageState extends ConsumerState<TaxCalculatorPage> {
   }
 
   Widget _buildResultCard(bool isDarkMode) {
-    final hexBg = isDarkMode ? AppColors.surfaceDark : Colors.white;
+    final cardBgColor = isDarkMode ? AppColors.surfaceDark : Colors.white;
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
+    final accentColor = isDarkMode ? const Color(0xFF2ECC71) : const Color(0xFF27AE60);
     
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: hexBg,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: isDarkMode ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: isDarkMode ? 0.3 : 0.05), blurRadius: 15, offset: const Offset(0, 8))],
+        color: cardBgColor,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: isDarkMode ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.03)),
       ),
       child: Column(
         children: [
-          Text('ESTIMASI PAJAK ${_taxType}', style: TextStyle(color: contentColor.withValues(alpha: 0.4), fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 2)),
+          Text(
+            'Estimasi Pajak ${_taxType}',
+            style: GoogleFonts.quicksand(
+              color: contentColor.withOpacity(0.5),
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           const SizedBox(height: 12),
           FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(
               _formatRupiah(_taxResult), 
-              style: GoogleFonts.quicksand(fontSize: 21, fontWeight: FontWeight.bold, color: _taxResult > 0 ? AppColors.primary : contentColor.withValues(alpha: 0.1))
+              style: GoogleFonts.quicksand(
+                fontSize: 24,
+                fontWeight: FontWeight.bold, 
+                color: _taxResult > 0 ? accentColor : contentColor.withOpacity(0.2),
+              ),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 18),
           SizedBox(
             width: double.infinity,
-            height: 48,
+            height: 46,
             child: ElevatedButton(
               onPressed: _taxResult > 0 ? () {} : null,
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
+                backgroundColor: accentColor,
                 foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 elevation: 0,
-                disabledBackgroundColor: isDarkMode ? Colors.white.withValues(alpha: 0.03) : Colors.grey.shade100,
+                disabledBackgroundColor: isDarkMode ? Colors.white.withOpacity(0.02) : Colors.grey.shade100,
               ),
-              child: const Text('Simpan Pengingat', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
+              child: Text(
+                'Simpan Pengingat',
+                style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: _taxResult > 0 ? Colors.white : Colors.grey),
+              ),
             ),
           ),
         ],

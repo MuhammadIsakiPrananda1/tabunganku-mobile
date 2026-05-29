@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:tabunganku/core/theme/app_colors.dart';
+import 'package:tabunganku/core/widgets/high_vis_input.dart';
 import 'package:tabunganku/providers/saving_target_provider.dart';
 import 'package:tabunganku/providers/transaction_provider.dart';
 import 'package:tabunganku/models/saving_target_model.dart';
@@ -32,6 +33,10 @@ class _SpecializedSavingPageState extends ConsumerState<SpecializedSavingPage> {
   late final TextEditingController _nameController;
   final _amountController = TextEditingController();
   DateTime _selectedDate = DateTime.now().add(const Duration(days: 365));
+
+  bool _nameHasError = false;
+  bool _amountHasError = false;
+  bool _dateIsFocused = false;
 
   @override
   void initState() {
@@ -64,6 +69,12 @@ class _SpecializedSavingPageState extends ConsumerState<SpecializedSavingPage> {
         ),
         title: Text(widget.title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: contentColor)),
         centerTitle: true,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: Center(child: _buildAddButton(isDarkMode)),
+          ),
+        ],
       ),
       body: targetsAsync.when(
         data: (targets) {
@@ -98,6 +109,18 @@ class _SpecializedSavingPageState extends ConsumerState<SpecializedSavingPage> {
   }
 
   Widget _buildInlineInputForm(bool isDarkMode) {
+    final Color dateBorderColor;
+    final double dateBorderWidth;
+    if (_dateIsFocused) {
+      dateBorderColor = AppColors.primary;
+      dateBorderWidth = 1.8;
+    } else {
+      dateBorderColor = isDarkMode 
+          ? Colors.white.withValues(alpha: 0.05) 
+          : Colors.grey.shade200;
+      dateBorderWidth = 1.2;
+    }
+
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -116,6 +139,12 @@ class _SpecializedSavingPageState extends ConsumerState<SpecializedSavingPage> {
             color: AppColors.primary,
             isDarkMode: isDarkMode,
             hint: 'Masukkan nama...',
+            hasError: _nameHasError,
+            onChanged: (val) {
+              if (_nameHasError && val.trim().isNotEmpty) {
+                setState(() => _nameHasError = false);
+              }
+            },
           ),
           const SizedBox(height: 16),
           _buildHighVisInput(
@@ -126,18 +155,36 @@ class _SpecializedSavingPageState extends ConsumerState<SpecializedSavingPage> {
             color: Colors.green,
             isDarkMode: isDarkMode,
             isPremium: true,
+            hasError: _amountHasError,
+            onChanged: (val) {
+              if (_amountHasError) {
+                final amt = double.tryParse(val.replaceAll('.', '')) ?? 0;
+                if (amt > 0) {
+                  setState(() => _amountHasError = false);
+                }
+              }
+            },
           ),
           const SizedBox(height: 20),
           Row(
             children: [
               Expanded(
                 child: InkWell(
-                  onTap: () => _pickDateInline(isDarkMode),
+                  onTap: () async {
+                    setState(() => _dateIsFocused = true);
+                    await _pickDateInline(isDarkMode);
+                    setState(() => _dateIsFocused = false);
+                  },
+                  borderRadius: BorderRadius.circular(16),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                     decoration: BoxDecoration(
-                      color: isDarkMode ? Colors.white.withValues(alpha: 0.03) : AppColors.background,
+                      color: isDarkMode ? Colors.white.withValues(alpha: 0.03) : Colors.grey.shade100,
                       borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: dateBorderColor,
+                        width: dateBorderWidth,
+                      ),
                     ),
                     child: Row(
                       children: [
@@ -154,20 +201,72 @@ class _SpecializedSavingPageState extends ConsumerState<SpecializedSavingPage> {
                 flex: 2,
                 child: ElevatedButton(
                   onPressed: () async {
+                    final nameVal = _nameController.text.trim();
                     final amount = double.tryParse(_amountController.text.replaceAll('.', '')) ?? 0;
-                    if (amount > 0) {
-                      final target = SavingTargetModel(
-                        id: DateTime.now().millisecondsSinceEpoch.toString(),
-                        name: _nameController.text,
-                        targetAmount: amount,
-                        dueDate: _selectedDate,
-                        createdAt: DateTime.now(),
-                      );
-                      await ref.read(savingTargetServiceProvider).addTarget(target);
-                      _amountController.clear();
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Rencana Berhasil Dibuat')));
+
+                    setState(() {
+                      _nameHasError = nameVal.isEmpty;
+                      _amountHasError = amount <= 0;
+                    });
+
+                    if (_nameHasError || _amountHasError) {
+                      String errorMessage = 'Nama rencana tidak boleh kosong!';
+                      if (_amountHasError) {
+                        errorMessage = 'Nominal target harus lebih dari 0!';
                       }
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Row(
+                            children: [
+                              const Icon(Icons.error_outline_rounded, color: Colors.white, size: 18),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  errorMessage,
+                                  style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 12),
+                                ),
+                              ),
+                            ],
+                          ),
+                          backgroundColor: Colors.red.shade700,
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                      );
+                      return;
+                    }
+
+                    final target = SavingTargetModel(
+                      id: DateTime.now().millisecondsSinceEpoch.toString(),
+                      name: nameVal,
+                      targetAmount: amount,
+                      dueDate: _selectedDate,
+                      createdAt: DateTime.now(),
+                    );
+                    await ref.read(savingTargetServiceProvider).addTarget(target);
+                    _amountController.clear();
+                    setState(() {
+                      _nameHasError = false;
+                      _amountHasError = false;
+                    });
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Row(
+                            children: [
+                              const Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 18),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Rencana Berhasil Dibuat',
+                                style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 12),
+                              ),
+                            ],
+                          ),
+                          backgroundColor: AppColors.primary,
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                      );
                     }
                   },
                   style: ElevatedButton.styleFrom(
@@ -187,7 +286,7 @@ class _SpecializedSavingPageState extends ConsumerState<SpecializedSavingPage> {
     );
   }
 
-  void _pickDateInline(bool isDarkMode) async {
+  Future<void> _pickDateInline(bool isDarkMode) async {
     final picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate,
@@ -208,37 +307,20 @@ class _SpecializedSavingPageState extends ConsumerState<SpecializedSavingPage> {
     required bool isDarkMode,
     bool isPremium = false,
     String? hint,
+    bool hasError = false,
+    ValueChanged<String>? onChanged,
   }) {
-    final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
-    
-    return TextFormField(
+    return HighVisInput(
       controller: controller,
+      icon: icon,
+      label: label,
+      isDarkMode: isDarkMode,
+      prefixText: unit.isNotEmpty ? unit : null,
+      hintText: hint,
       keyboardType: isPremium ? TextInputType.number : TextInputType.text,
       inputFormatters: isPremium ? [_RibuanFormatter()] : null,
-      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: contentColor),
-      decoration: InputDecoration(
-        hintText: hint ?? '0',
-        hintStyle: TextStyle(
-            fontSize: 11,
-            color: isDarkMode ? Colors.white10 : Colors.black38),
-        prefixIcon: Container(
-          padding: const EdgeInsets.only(left: 16, right: 8),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, color: color, size: 20),
-              if (unit.isNotEmpty) ...[
-                const SizedBox(width: 8),
-                Text(unit, style: TextStyle(fontWeight: FontWeight.bold, color: color, fontSize: 11)),
-              ],
-            ],
-          ),
-        ),
-        filled: true,
-        fillColor: isDarkMode ? Colors.white.withValues(alpha: 0.03) : AppColors.background,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      ),
+      hasError: hasError,
+      onChanged: onChanged,
     );
   }
 
@@ -386,7 +468,10 @@ class _SpecializedSavingPageState extends ConsumerState<SpecializedSavingPage> {
     final nameController = TextEditingController(text: '${widget.category} ');
     final amountController = TextEditingController();
     DateTime selectedDate = DateTime.now().add(const Duration(days: 365));
-    final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
+
+    bool nameHasError = false;
+    bool amountHasError = false;
+    bool dateIsFocused = false;
 
     showModalBottomSheet(
       context: context,
@@ -420,28 +505,113 @@ class _SpecializedSavingPageState extends ConsumerState<SpecializedSavingPage> {
                   style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : Colors.teal.shade900)),
               ),
               const SizedBox(height: 24),
-              _buildCompactInput('Nama Rencana', nameController, Icons.edit_note_rounded, isDarkMode, isPremium: false),
+              _buildCompactInput(
+                'Nama Rencana', 
+                nameController, 
+                Icons.edit_note_rounded, 
+                isDarkMode, 
+                isPremium: false,
+                hasError: nameHasError,
+                onChanged: (val) {
+                  if (nameHasError && val.trim().isNotEmpty) {
+                    setSheetState(() => nameHasError = false);
+                  }
+                },
+              ),
               const SizedBox(height: 16),
-              _buildCompactInput('Nominal Target', amountController, Icons.account_balance_wallet_rounded, isDarkMode, isPremium: true),
+              _buildCompactInput(
+                'Nominal Target', 
+                amountController, 
+                Icons.account_balance_wallet_rounded, 
+                isDarkMode, 
+                isPremium: true,
+                hasError: amountHasError,
+                onChanged: (val) {
+                  if (amountHasError) {
+                    final amt = double.tryParse(val.replaceAll('.', '')) ?? 0;
+                    if (amt > 0) {
+                      setSheetState(() => amountHasError = false);
+                    }
+                  }
+                },
+              ),
               const SizedBox(height: 16),
-              _buildDatePicker(selectedDate, (d) => setSheetState(() => selectedDate = d), isDarkMode),
+              _buildDatePicker(
+                selectedDate, 
+                (d) => setSheetState(() => selectedDate = d), 
+                isDarkMode,
+                isFocused: dateIsFocused,
+                onTapDate: () => setSheetState(() => dateIsFocused = true),
+                onDoneDate: () => setSheetState(() => dateIsFocused = false),
+              ),
               const SizedBox(height: 32),
               SizedBox(
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
                   onPressed: () async {
+                    final nameVal = nameController.text.trim();
                     final amount = double.tryParse(amountController.text.replaceAll('.', '')) ?? 0;
-                    if (amount > 0) {
-                      final target = SavingTargetModel(
-                        id: DateTime.now().millisecondsSinceEpoch.toString(),
-                        name: nameController.text,
-                        targetAmount: amount,
-                        dueDate: selectedDate,
-                        createdAt: DateTime.now(),
+
+                    setSheetState(() {
+                      nameHasError = nameVal.isEmpty;
+                      amountHasError = amount <= 0;
+                    });
+
+                    if (nameHasError || amountHasError) {
+                      String errorMessage = 'Nama rencana tidak boleh kosong!';
+                      if (amountHasError) {
+                        errorMessage = 'Nominal target harus lebih dari 0!';
+                      }
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Row(
+                            children: [
+                              const Icon(Icons.error_outline_rounded, color: Colors.white, size: 18),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  errorMessage,
+                                  style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 12),
+                                ),
+                              ),
+                            ],
+                          ),
+                          backgroundColor: Colors.red.shade700,
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
                       );
-                      await ref.read(savingTargetServiceProvider).addTarget(target);
-                      if (context.mounted) Navigator.pop(context);
+                      return;
+                    }
+
+                    final target = SavingTargetModel(
+                      id: DateTime.now().millisecondsSinceEpoch.toString(),
+                      name: nameVal,
+                      targetAmount: amount,
+                      dueDate: selectedDate,
+                      createdAt: DateTime.now(),
+                    );
+                    await ref.read(savingTargetServiceProvider).addTarget(target);
+                    if (context.mounted) {
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Row(
+                            children: [
+                              const Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 18),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Rencana Berhasil Dibuat',
+                                style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 12),
+                              ),
+                            ],
+                          ),
+                          backgroundColor: AppColors.primary,
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                      );
                     }
                   },
                   style: ElevatedButton.styleFrom(
@@ -459,63 +629,72 @@ class _SpecializedSavingPageState extends ConsumerState<SpecializedSavingPage> {
     );
   }
 
-  Widget _buildCompactInput(String label, TextEditingController controller, IconData icon, bool isDarkMode, {required bool isPremium}) {
-    final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 8),
-          child: Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: contentColor.withValues(alpha: 0.5))),
-        ),
-        TextFormField(
-          controller: controller,
-          keyboardType: isPremium ? TextInputType.number : TextInputType.text,
-          inputFormatters: isPremium ? [_RibuanFormatter()] : null,
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: contentColor),
-          decoration: InputDecoration(
-            hintText: isPremium ? '0' : 'Masukkan nama...',
-            hintStyle: TextStyle(fontSize: 11, color: isDarkMode ? Colors.white10 : Colors.teal.shade50),
-            prefixIcon: Container(
-              padding: const EdgeInsets.only(left: 20, right: 8),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(icon, color: AppColors.primary, size: 20),
-                  if (isPremium) ...[
-                    const SizedBox(width: 8),
-                    const Text('Rp', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 11)),
-                  ],
-                ],
-              ),
-            ),
-            filled: true,
-            fillColor: isDarkMode ? Colors.white.withValues(alpha: 0.05) : AppColors.background,
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          ),
-        ),
-      ],
+  Widget _buildCompactInput(
+    String label, 
+    TextEditingController controller, 
+    IconData icon, 
+    bool isDarkMode, {
+    required bool isPremium,
+    bool hasError = false,
+    ValueChanged<String>? onChanged,
+  }) {
+    return HighVisInput(
+      controller: controller,
+      icon: icon,
+      label: label,
+      isDarkMode: isDarkMode,
+      prefixText: isPremium ? 'Rp' : null,
+      hintText: isPremium ? '0' : 'Masukkan nama...',
+      keyboardType: isPremium ? TextInputType.number : TextInputType.text,
+      inputFormatters: isPremium ? [_RibuanFormatter()] : null,
+      hasError: hasError,
+      onChanged: onChanged,
     );
   }
 
-  Widget _buildDatePicker(DateTime selected, Function(DateTime) onPicked, bool isDarkMode) {
+  Widget _buildDatePicker(
+    DateTime selected, 
+    Function(DateTime) onPicked, 
+    bool isDarkMode, {
+    bool isFocused = false,
+    VoidCallback? onTapDate,
+    VoidCallback? onDoneDate,
+  }) {
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
+    final Color dateBorderColor;
+    final double dateBorderWidth;
+    if (isFocused) {
+      dateBorderColor = AppColors.primary;
+      dateBorderWidth = 1.8;
+    } else {
+      dateBorderColor = isDarkMode 
+          ? Colors.white.withValues(alpha: 0.05) 
+          : Colors.grey.shade200;
+      dateBorderWidth = 1.2;
+    }
+
     return InkWell(
       onTap: () async {
+        if (onTapDate != null) onTapDate();
         final picked = await showDatePicker(
           context: context,
           initialDate: selected,
           firstDate: DateTime.now(),
           lastDate: DateTime.now().add(const Duration(days: 3650)),
         );
+        if (onDoneDate != null) onDoneDate();
         if (picked != null) onPicked(picked);
       },
+      borderRadius: BorderRadius.circular(16),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : AppColors.background,
+          color: isDarkMode ? Colors.white.withValues(alpha: 0.03) : Colors.grey.shade100,
           borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: dateBorderColor,
+            width: dateBorderWidth,
+          ),
         ),
         child: Row(
           children: [

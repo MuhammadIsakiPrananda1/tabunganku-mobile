@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -41,8 +40,6 @@ class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
 
-
-    
     return Scaffold(
       backgroundColor: isDarkMode ? AppColors.backgroundDark : const Color(0xFFF8FAF9),
       appBar: AppBar(
@@ -52,7 +49,14 @@ class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
           onPressed: () => Navigator.pop(context),
           icon: Icon(Icons.arrow_back_ios_new_rounded, color: contentColor, size: 20),
         ),
-        title: Text('Tabungan Emas', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11, color: contentColor)),
+        title: Text(
+          'Tabungan Emas',
+          style: GoogleFonts.quicksand(
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+            color: contentColor,
+          ),
+        ),
         centerTitle: true,
       ),
       body: StreamBuilder<List<GoldTransactionModel>>(
@@ -61,254 +65,152 @@ class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
           final txs = snapshot.data ?? [];
           final totalGrams = ref.read(goldServiceProvider).calculateTotalGrams(txs);
           final avgPrice = ref.read(goldServiceProvider).calculateAveragePrice(txs);
-          final currentValue = totalGrams * currentGoldPrice;
+          final currentValue = totalGrams * buyPrice; // Valuation always based on current buy price
           final totalInvestment = totalGrams * avgPrice;
           final profitLoss = currentValue - totalInvestment;
 
           return SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildPortfolioCard(totalGrams, currentValue, profitLoss, isDarkMode),
+                const SizedBox(height: 16),
+                _buildRealtimePriceCard(isDarkMode),
                 const SizedBox(height: 24),
-                Padding(
-                  padding: const EdgeInsets.only(left: 4),
-                  child: Text('HARGA EMAS HARI INI', style: GoogleFonts.quicksand(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1, color: contentColor.withValues(alpha: 0.3))),
+                Text(
+                  'RIWAYAT TRANSAKSI',
+                  style: GoogleFonts.quicksand(
+                    fontSize: 9,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.5,
+                    color: contentColor.withOpacity(0.35),
+                  ),
                 ),
                 const SizedBox(height: 12),
-                _buildRealtimePriceCard(isDarkMode),
-                const SizedBox(height: 32),
-                _buildInlineInputForm(isDarkMode),
-                const SizedBox(height: 32),
-                Text('HISTORY TRANSAKSI', style: GoogleFonts.quicksand(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5, color: contentColor.withValues(alpha: 0.4))),
-                const SizedBox(height: 16),
-                if (txs.isEmpty)
-                   _buildEmptyState(isDarkMode)
+                if (snapshot.connectionState == ConnectionState.waiting)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 40),
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFDAA520)),
+                      ),
+                    ),
+                  )
+                else if (txs.isEmpty)
+                  _buildEmptyState(isDarkMode)
                 else
                   ...txs.reversed.map((tx) => _buildTransactionItem(tx, isDarkMode)),
+                const SizedBox(height: 80), // Extra space for FAB
               ],
             ),
           );
         },
       ),
-    );
-  }
-
-  Widget _buildInlineInputForm(bool isDarkMode) {
-    
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: isDarkMode ? AppColors.surfaceDark : Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: isDarkMode ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              _buildCompactTypeToggle(GoldTransactionType.buy, 'Beli', Icons.add_shopping_cart_rounded, isDarkMode),
-              const SizedBox(width: 8),
-              _buildCompactTypeToggle(GoldTransactionType.sell, 'Jual', Icons.sell_rounded, isDarkMode),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Column(
-            children: [
-                _buildHighVisInput(
-                  controller: _amountController,
-                  icon: Icons.payments_rounded,
-                  label: 'Nominal Transaksi',
-                  unit: 'Rp',
-                  color: _selectedType == GoldTransactionType.buy ? Colors.green : Colors.red,
-                  isDarkMode: isDarkMode,
-                ),
-                ValueListenableBuilder<TextEditingValue>(
-                  valueListenable: _amountController,
-                  builder: (context, value, child) {
-                    final amount = double.tryParse(value.text.replaceAll('.', '')) ?? 0;
-                    final estGrams = amount / currentGoldPrice;
-                    final accentColor = _selectedType == GoldTransactionType.buy ? Colors.green : Colors.red;
-                    if (amount <= 0) return const SizedBox.shrink();
-                    return Padding(
-                      padding: const EdgeInsets.only(top: 12),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Icon(Icons.scale_rounded, size: 14, color: accentColor),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Estimasi Emas: ${estGrams.toStringAsFixed(4)} gram',
-                            style: GoogleFonts.quicksand(
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                              color: isDarkMode ? Colors.white70 : accentColor,
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: () async {
-                    final amount = double.tryParse(_amountController.text.replaceAll('.', '')) ?? 0;
-                    if (amount > 0) {
-                      final grams = amount / currentGoldPrice;
-                      final tx = GoldTransactionModel(
-                        id: DateTime.now().millisecondsSinceEpoch.toString(),
-                        grams: grams,
-                        pricePerGram: currentGoldPrice,
-                        date: DateTime.now(),
-                        type: _selectedType,
-                      );
-                      await ref.read(goldServiceProvider).addTransaction(tx);
-                      _amountController.clear();
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Transaksi Berhasil Disimpan', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold)),
-                            backgroundColor: Colors.amber,
-                          ),
-                        );
-                      }
-                    }
-                  },
-                  icon: const Icon(Icons.check_rounded, size: 18),
-                  label: Text('Simpan Transaksi', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 16)),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    elevation: 0,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCompactTypeToggle(GoldTransactionType type, String label, IconData icon, bool isDarkMode) {
-    final isSelected = _selectedType == type;
-    final accentColor = type == GoldTransactionType.buy ? Colors.green : Colors.red;
-    
-    return Expanded(
-      child: InkWell(
-        onTap: () => setState(() => _selectedType = type),
-        borderRadius: BorderRadius.circular(12),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          decoration: BoxDecoration(
-            color: isSelected ? accentColor.withValues(alpha: 0.1) : Colors.transparent,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: isSelected ? accentColor : (isDarkMode ? Colors.white10 : Colors.grey.shade300)),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, color: isSelected ? accentColor : Colors.grey, size: 16),
-              const SizedBox(width: 6),
-              Text(label, style: GoogleFonts.quicksand(fontSize: 11, fontWeight: FontWeight.bold, color: isSelected ? accentColor : Colors.grey)),
-            ],
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _showTransactionSheet(isDarkMode: isDarkMode),
+        backgroundColor: const Color(0xFFC48E2E),
+        elevation: 0,
+        icon: const Icon(Icons.add_rounded, color: Colors.white),
+        label: Text(
+          'Tambah Transaksi',
+          style: GoogleFonts.quicksand(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 13,
           ),
         ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
     );
   }
-
-  Widget _buildHighVisInput({
-    required TextEditingController controller,
-    required IconData icon,
-    required String label,
-    required String unit,
-    required Color color,
-    required bool isDarkMode,
-  }) {
-    final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
-    
-    return TextFormField(
-      controller: controller,
-      keyboardType: TextInputType.number,
-      inputFormatters: [_RibuanFormatter()],
-      style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 14, color: contentColor),
-      decoration: InputDecoration(
-        hintText: '0',
-        hintStyle: GoogleFonts.quicksand(
-            fontSize: 14,
-            color: isDarkMode ? Colors.white10 : Colors.black38),
-        prefixIcon: Container(
-          padding: const EdgeInsets.only(left: 16, right: 8),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, color: color, size: 18),
-              const SizedBox(width: 8),
-              Text(unit, style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: color, fontSize: 13)),
-            ],
-          ),
-        ),
-        filled: true,
-        fillColor: isDarkMode ? Colors.white.withValues(alpha: 0.03) : AppColors.background,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      ),
-    );
-  }
-
 
   Widget _buildPortfolioCard(double grams, double value, double pl, bool isDarkMode) {
     final isProfit = pl >= 0;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFFFFD700), Color(0xFFDAA520)],
+          colors: [
+            Color(0xFFE5A93B),
+            Color(0xFFC48E2E),
+          ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(color: const Color(0xFFDAA520).withValues(alpha: 0.3), blurRadius: 20, offset: const Offset(0, 8)),
-        ],
+        borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
         children: [
-          Text('TOTAL SALDO EMAS', style: GoogleFonts.quicksand(color: Colors.white.withValues(alpha: 0.6), fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
+          Text(
+            'TOTAL SALDO EMAS',
+            style: GoogleFonts.quicksand(
+              color: Colors.white.withOpacity(0.65),
+              fontSize: 9,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.5,
+            ),
+          ),
           const SizedBox(height: 4),
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Text('${grams.toStringAsFixed(3)} g', 
-              style: GoogleFonts.quicksand(color: Colors.white, fontSize: 38, fontWeight: FontWeight.bold, letterSpacing: -1)),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                grams.toStringAsFixed(4),
+                style: GoogleFonts.quicksand(
+                  color: Colors.white,
+                  fontSize: 34,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -1,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                'g',
+                style: GoogleFonts.quicksand(
+                  color: Colors.white.withOpacity(0.65),
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 2),
-          Text(_formatRupiah(value), 
-            style: GoogleFonts.quicksand(color: Colors.white.withValues(alpha: 0.8), fontSize: 11, fontWeight: FontWeight.bold)),
+          Text(
+            _formatRupiah(value),
+            style: GoogleFonts.quicksand(
+              color: Colors.white.withOpacity(0.85),
+              fontSize: 13,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           const SizedBox(height: 16),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
             decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(10),
+              color: Colors.black.withOpacity(0.08),
+              borderRadius: BorderRadius.circular(16),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(isProfit ? Icons.trending_up_rounded : Icons.trending_down_rounded, color: Colors.white, size: 12),
+                Icon(
+                  isProfit ? Icons.trending_up_rounded : Icons.trending_down_rounded,
+                  color: isProfit ? Colors.greenAccent.shade200 : Colors.redAccent.shade100,
+                  size: 14,
+                ),
                 const SizedBox(width: 6),
                 Text(
                   '${isProfit ? 'Profit' : 'Loss'}: ${_formatRupiah(pl.abs())}',
-                  style: GoogleFonts.quicksand(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 10),
+                  style: GoogleFonts.quicksand(
+                    color: Colors.white.withOpacity(0.9),
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ],
             ),
@@ -320,46 +222,189 @@ class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
 
   Widget _buildRealtimePriceCard(bool isDarkMode) {
     final priceAsync = ref.watch(goldPriceProvider);
-    final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
+    final cardBgColor = isDarkMode ? AppColors.surfaceDark : Colors.white;
 
     return priceAsync.when(
       data: (prices) {
-        // Update local state for calculations
         buyPrice = prices['buy'] ?? buyPrice;
         sellPrice = prices['sell'] ?? sellPrice;
         priceChange = prices['change'] ?? priceChange;
 
         return Container(
-          padding: const EdgeInsets.all(18),
+          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: isDarkMode ? AppColors.surfaceDark : Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: isDarkMode ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
-            boxShadow: isDarkMode ? [] : [
-              BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 20, offset: const Offset(0, 10)),
+            color: cardBgColor,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: isDarkMode ? Colors.white.withValues(alpha: 0.06) : Colors.black.withValues(alpha: 0.04),
+              width: 1.2,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDarkMode ? 0.2 : 0.02),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
             ],
           ),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Header Row: LIVE status & Percentage
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('HARGA EMAS TERKINI', 
-                    style: GoogleFonts.quicksand(fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1.5, color: contentColor.withValues(alpha: 0.4))),
+                  Row(
+                    children: [
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: const BoxDecoration(
+                          color: Colors.green,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.green,
+                              blurRadius: 4,
+                              offset: Offset(0, 0),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'LIVE HARGA EMAS HARI INI',
+                        style: GoogleFonts.quicksand(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w900,
+                          color: isDarkMode ? Colors.white.withValues(alpha: 0.5) : AppColors.primaryDark.withValues(alpha: 0.5),
+                          letterSpacing: 1.0,
+                        ),
+                      ),
+                    ],
+                  ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(color: Colors.green.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
-                    child: Text('${priceChange > 0 ? '+' : ''}${priceChange.toStringAsFixed(2)}%', 
-                      style: GoogleFonts.quicksand(color: Colors.green, fontSize: 10, fontWeight: FontWeight.bold)),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFC48E2E).withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '${priceChange > 0 ? '+' : ''}${priceChange.toStringAsFixed(2)}%',
+                      style: GoogleFonts.quicksand(
+                        color: const Color(0xFFC48E2E),
+                        fontSize: 10,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 14),
+              // Dual side-by-side price blocks
               Row(
                 children: [
-                  Expanded(child: _buildPriceInfo('HARGA BELI', buyPrice, Colors.green, isDarkMode)),
-                  Container(width: 1, height: 40, color: isDarkMode ? Colors.white10 : Colors.grey.shade100),
-                  Expanded(child: _buildPriceInfo('HARGA JUAL', sellPrice, Colors.red, isDarkMode)),
+                  // HARGA BELI
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: isDarkMode ? Colors.green.withValues(alpha: 0.05) : Colors.green.shade50.withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: isDarkMode ? Colors.green.withValues(alpha: 0.15) : Colors.green.shade100,
+                          width: 1,
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.add_shopping_cart_rounded,
+                                size: 12,
+                                color: isDarkMode ? Colors.greenAccent : Colors.green.shade700,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                'HARGA BELI',
+                                style: GoogleFonts.quicksand(
+                                  fontSize: 8.5,
+                                  fontWeight: FontWeight.bold,
+                                  color: isDarkMode ? Colors.white38 : Colors.grey.shade600,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              _formatRupiah(buyPrice),
+                              style: GoogleFonts.quicksand(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w900,
+                                color: isDarkMode ? Colors.greenAccent : Colors.green.shade700,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  // HARGA JUAL
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: isDarkMode ? Colors.red.withValues(alpha: 0.05) : Colors.red.shade50.withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: isDarkMode ? Colors.red.withValues(alpha: 0.15) : Colors.red.shade100,
+                          width: 1,
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.sell_rounded,
+                                size: 12,
+                                color: isDarkMode ? Colors.redAccent : Colors.red.shade700,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                'HARGA JUAL',
+                                style: GoogleFonts.quicksand(
+                                  fontSize: 8.5,
+                                  fontWeight: FontWeight.bold,
+                                  color: isDarkMode ? Colors.white38 : Colors.grey.shade600,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              _formatRupiah(sellPrice),
+                              style: GoogleFonts.quicksand(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w900,
+                                color: isDarkMode ? Colors.redAccent : Colors.red.shade700,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ],
@@ -371,24 +416,13 @@ class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
     );
   }
 
-  Widget _buildPriceInfo(String label, double price, Color color, bool isDarkMode) {
-    final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
-    return Column(
-      children: [
-        Text(label, style: GoogleFonts.quicksand(fontSize: 8, fontWeight: FontWeight.bold, color: contentColor.withValues(alpha: 0.3), letterSpacing: 1)),
-        const SizedBox(height: 4),
-        Text(_formatRupiah(price), style: GoogleFonts.quicksand(fontSize: 11, fontWeight: FontWeight.bold, color: color)),
-      ],
-    );
-  }
-
   Widget _buildPriceLoading(bool isDarkMode) {
     return Container(
-      height: 120,
+      height: 42,
       width: double.infinity,
       decoration: BoxDecoration(
         color: isDarkMode ? AppColors.surfaceDark : Colors.white,
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
     );
@@ -398,17 +432,30 @@ class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: Theme.of(context).brightness == Brightness.dark ? AppColors.surfaceDark : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: Text('Hapus Transaksi?', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold)),
-        content: Text('Data transaksi emas ini akan dihapus secara permanen.', style: GoogleFonts.quicksand()),
+        title: Text(
+          'Hapus Transaksi?',
+          style: GoogleFonts.quicksand(fontWeight: FontWeight.bold),
+        ),
+        content: Text(
+          'Data transaksi emas ini akan dihapus secara permanen.',
+          style: GoogleFonts.quicksand(),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('Batal', style: GoogleFonts.quicksand(color: Colors.grey.shade600, fontWeight: FontWeight.bold)),
+            child: Text(
+              'Batal',
+              style: GoogleFonts.quicksand(color: Colors.grey.shade600, fontWeight: FontWeight.bold),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text('Hapus', style: GoogleFonts.quicksand(color: Colors.red, fontWeight: FontWeight.bold)),
+            child: Text(
+              'Hapus',
+              style: GoogleFonts.quicksand(color: Colors.red, fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),
@@ -419,107 +466,258 @@ class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
     }
   }
 
-  void _showEditGoldTransactionSheet(GoldTransactionModel tx, bool isDarkMode) {
-    final initialAmount = (tx.grams * tx.pricePerGram).toInt();
+  void _showTransactionSheet({GoldTransactionModel? tx, required bool isDarkMode}) {
+    final isEdit = tx != null;
+    final initialAmount = isEdit ? (tx.grams * tx.pricePerGram).toInt() : 0;
+    
     final amountController = TextEditingController(
-      text: NumberFormat.currency(locale: 'id_ID', symbol: '', decimalDigits: 0)
-          .format(initialAmount)
-          .trim(),
+      text: isEdit 
+          ? NumberFormat.currency(locale: 'id_ID', symbol: '', decimalDigits: 0)
+              .format(initialAmount)
+              .trim()
+          : '',
     );
-    GoldTransactionType type = tx.type;
+    GoldTransactionType type = isEdit ? tx.type : _selectedType;
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => StatefulBuilder(
-        builder: (context, setSheetState) => Container(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-            top: 16,
-            left: 24,
-            right: 24,
-          ),
-          decoration: BoxDecoration(
-            color: isDarkMode ? AppColors.surfaceDark : Colors.white,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 32, height: 4,
-                  decoration: BoxDecoration(color: isDarkMode ? Colors.white10 : Colors.grey.shade300, borderRadius: BorderRadius.circular(2)),
+        builder: (context, setSheetState) {
+          final isBuy = type == GoldTransactionType.buy;
+          final accentColor = isBuy ? Colors.green.shade600 : Colors.red.shade600;
+
+          return Container(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+              top: 16,
+              left: 24,
+              right: 24,
+            ),
+            decoration: BoxDecoration(
+              color: isDarkMode ? AppColors.surfaceDark : Colors.white,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+              border: Border.all(
+                color: isDarkMode ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.03),
+                width: 1,
+              ),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 36,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: isDarkMode ? Colors.white10 : Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              Center(
-                child: Text('UBAH TRANSAKSI EMAS', 
-                  style: GoogleFonts.quicksand(fontSize: 11, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : Colors.teal.shade900)),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(child: _buildTypeOption(GoldTransactionType.buy, 'Beli', Icons.add_circle_outline_rounded, type, (v) => setSheetState(() => type = v), isDarkMode)),
-                  const SizedBox(width: 12),
-                  Expanded(child: _buildTypeOption(GoldTransactionType.sell, 'Jual', Icons.remove_circle_outline_rounded, type, (v) => setSheetState(() => type = v), isDarkMode)),
-                ],
-              ),
-              const SizedBox(height: 16),
-              _buildCompactInput('Nominal Transaksi (Rp)', amountController, Icons.payments_rounded, isDarkMode, 'Rp', 
-                color: type == GoldTransactionType.buy ? Colors.green : Colors.red),
-              ValueListenableBuilder<TextEditingValue>(
-                valueListenable: amountController,
-                builder: (context, value, child) {
-                  final amount = double.tryParse(value.text.replaceAll('.', '')) ?? 0;
-                  final estGrams = amount / currentGoldPrice;
-                  if (amount <= 0) return const SizedBox.shrink();
-                  return Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Center(
-                      child: Text(
-                        'Estimasi: ${estGrams.toStringAsFixed(4)} gram',
-                        style: GoogleFonts.quicksand(
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          color: isDarkMode ? Colors.white38 : Colors.teal.shade900.withValues(alpha: 0.5),
+                const SizedBox(height: 16),
+                Center(
+                  child: Text(
+                    isEdit ? 'UBAH TRANSAKSI EMAS' : 'TAMBAH TRANSAKSI EMAS',
+                    style: GoogleFonts.quicksand(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w900,
+                      color: isDarkMode ? Colors.white : AppColors.primaryDark,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: InkWell(
+                        onTap: () {
+                          setSheetState(() => type = GoldTransactionType.buy);
+                          if (!isEdit) setState(() => _selectedType = GoldTransactionType.buy);
+                        },
+                        borderRadius: BorderRadius.circular(16),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          decoration: BoxDecoration(
+                            color: type == GoldTransactionType.buy
+                                ? Colors.green.shade600
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: type == GoldTransactionType.buy
+                                  ? Colors.green.shade600
+                                  : (isDarkMode ? Colors.white10 : Colors.grey.shade300),
+                              width: type == GoldTransactionType.buy ? 1.5 : 1,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.add_shopping_cart_rounded,
+                                color: type == GoldTransactionType.buy ? Colors.white : Colors.grey,
+                                size: 16,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Beli Emas',
+                                style: GoogleFonts.quicksand(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: type == GoldTransactionType.buy ? Colors.white : Colors.grey,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  );
-                },
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    final amount = double.tryParse(amountController.text.replaceAll('.', '')) ?? 0;
-                    if (amount > 0) {
-                      final grams = amount / currentGoldPrice;
-                      final updatedTx = tx.copyWith(
-                        grams: grams,
-                        type: type,
-                      );
-                      await ref.read(goldServiceProvider).updateTransaction(updatedTx);
-                      if (context.mounted) Navigator.pop(context);
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: type == GoldTransactionType.buy ? Colors.green : Colors.red,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    elevation: 0,
-                  ),
-                  child: Text('Simpan Perubahan', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11)),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: InkWell(
+                        onTap: () {
+                          setSheetState(() => type = GoldTransactionType.sell);
+                          if (!isEdit) setState(() => _selectedType = GoldTransactionType.sell);
+                        },
+                        borderRadius: BorderRadius.circular(16),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          decoration: BoxDecoration(
+                            color: type == GoldTransactionType.sell
+                                ? Colors.red.shade600
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: type == GoldTransactionType.sell
+                                  ? Colors.red.shade600
+                                  : (isDarkMode ? Colors.white10 : Colors.grey.shade300),
+                              width: type == GoldTransactionType.sell ? 1.5 : 1,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.sell_rounded,
+                                color: type == GoldTransactionType.sell ? Colors.white : Colors.grey,
+                                size: 16,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Jual Emas',
+                                style: GoogleFonts.quicksand(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: type == GoldTransactionType.sell ? Colors.white : Colors.grey,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          ),
-        ),
+                const SizedBox(height: 20),
+                _buildCompactInput(
+                  'Nominal Transaksi (Rp)',
+                  amountController,
+                  Icons.payments_rounded,
+                  isDarkMode,
+                  'Rp',
+                  color: accentColor,
+                ),
+                ValueListenableBuilder<TextEditingValue>(
+                  valueListenable: amountController,
+                  builder: (context, value, child) {
+                    final amount = double.tryParse(value.text.replaceAll('.', '')) ?? 0;
+                    final priceForCalculation = type == GoldTransactionType.sell ? sellPrice : buyPrice;
+                    final estGrams = amount / priceForCalculation;
+                    if (amount <= 0) return const SizedBox.shrink();
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 12),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.scale_rounded, size: 14, color: accentColor),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Estimasi Emas: ${estGrams.toStringAsFixed(4)} gram',
+                            style: GoogleFonts.quicksand(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: isDarkMode ? Colors.white70 : accentColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      final amount = double.tryParse(amountController.text.replaceAll('.', '')) ?? 0;
+                      if (amount > 0) {
+                        final priceForCalculation = type == GoldTransactionType.sell ? sellPrice : buyPrice;
+                        final grams = amount / priceForCalculation;
+                        
+                        if (isEdit) {
+                          final updatedTx = tx.copyWith(
+                            grams: grams,
+                            pricePerGram: priceForCalculation,
+                            type: type,
+                          );
+                          await ref.read(goldServiceProvider).updateTransaction(updatedTx);
+                        } else {
+                          final newTx = GoldTransactionModel(
+                            id: DateTime.now().millisecondsSinceEpoch.toString(),
+                            grams: grams,
+                            pricePerGram: priceForCalculation,
+                            date: DateTime.now(),
+                            type: type,
+                          );
+                          await ref.read(goldServiceProvider).addTransaction(newTx);
+                        }
+                        
+                        if (context.mounted) {
+                          Navigator.pop(context);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                isEdit ? 'Transaksi Berhasil Diubah' : 'Transaksi Berhasil Disimpan',
+                                style: GoogleFonts.quicksand(fontWeight: FontWeight.bold),
+                              ),
+                              backgroundColor: const Color(0xFFDAA520),
+                            ),
+                          );
+                        }
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: accentColor,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      elevation: 0,
+                    ),
+                    child: Text(
+                      isEdit ? 'Simpan Perubahan' : 'Simpan Transaksi',
+                      style: GoogleFonts.quicksand(fontWeight: FontWeight.w800, fontSize: 13),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
@@ -527,53 +725,118 @@ class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
   Widget _buildTransactionItem(GoldTransactionModel tx, bool isDarkMode) {
     final isBuy = tx.type == GoldTransactionType.buy;
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
+    
+    // Premium contrasting colors: greenAccent/redAccent in dark mode, shade700 in light mode
+    final accentColor = isBuy 
+        ? (isDarkMode ? Colors.greenAccent : Colors.green.shade700)
+        : (isDarkMode ? Colors.redAccent : Colors.red.shade700);
+
+    final iconBgColor = isBuy 
+        ? (isDarkMode ? Colors.greenAccent.withOpacity(0.12) : Colors.green.withOpacity(0.08))
+        : (isDarkMode ? Colors.redAccent.withOpacity(0.12) : Colors.red.withOpacity(0.08));
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: isDarkMode ? Colors.white.withValues(alpha: 0.02) : Colors.white,
+        color: isDarkMode ? Colors.white.withOpacity(0.02) : Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: isDarkMode ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
+        border: Border.all(
+          color: isDarkMode ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.04),
+          width: 1.2,
+        ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: (isBuy ? Colors.amber : Colors.orange).withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
+              color: iconBgColor,
+              borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(isBuy ? Icons.add_shopping_cart_rounded : Icons.sell_rounded, color: isBuy ? Colors.amber : Colors.orange, size: 18),
+            child: Icon(
+              isBuy ? Icons.add_shopping_cart_rounded : Icons.sell_rounded,
+              color: accentColor,
+              size: 16,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(isBuy ? 'Beli Emas' : 'Jual Emas', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11, color: contentColor)),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      isBuy ? 'Beli Emas' : 'Jual Emas',
+                      style: GoogleFonts.quicksand(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 12,
+                        color: contentColor,
+                      ),
+                    ),
+                    Text(
+                      '${isBuy ? '+' : '-'}${tx.grams.toStringAsFixed(4)} g',
+                      style: GoogleFonts.quicksand(
+                        fontWeight: FontWeight.w900,
+                        fontSize: 12,
+                        color: accentColor,
+                      ),
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 2),
-                Text('${isBuy ? '+' : '-'}${tx.grams.toStringAsFixed(3)} g', 
-                  style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11, color: isBuy ? Colors.green : Colors.red)),
-                const SizedBox(height: 2),
-                Text(_formatRupiah(tx.grams * tx.pricePerGram), 
-                  style: GoogleFonts.quicksand(color: contentColor, fontSize: 11, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 4),
-                Text(DateFormat('EEEE, d MMM yyyy').format(tx.date), 
-                  style: GoogleFonts.quicksand(color: isDarkMode ? Colors.white24 : Colors.black38, fontSize: 9, fontWeight: FontWeight.bold)),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      _formatRupiah(tx.grams * tx.pricePerGram),
+                      style: GoogleFonts.quicksand(
+                        color: isDarkMode ? Colors.white70 : AppColors.primaryDark.withOpacity(0.8),
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      DateFormat('d MMM yyyy').format(tx.date),
+                      style: GoogleFonts.quicksand(
+                        color: isDarkMode ? Colors.white30 : Colors.black38,
+                        fontSize: 9,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
           const SizedBox(width: 4),
           PopupMenuButton<String>(
-            icon: Icon(Icons.more_vert_rounded, size: 18, color: contentColor.withValues(alpha: 0.3)),
+            icon: Icon(
+              Icons.more_vert_rounded,
+              size: 18,
+              color: contentColor.withOpacity(0.4),
+            ),
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(
+                color: isDarkMode ? Colors.white10 : Colors.grey.shade100,
+                width: 1,
+              ),
+            ),
+            color: isDarkMode ? AppColors.surfaceDark : Colors.white,
+            elevation: 4,
             onSelected: (value) {
-              if (value == 'edit') _showEditGoldTransactionSheet(tx, isDarkMode);
-              if (value == 'delete') _deleteGoldTransaction(tx.id);
+              if (value == 'edit') {
+                _showTransactionSheet(tx: tx, isDarkMode: isDarkMode);
+              }
+              if (value == 'delete') {
+                _deleteGoldTransaction(tx.id);
+              }
             },
             itemBuilder: (context) => [
               PopupMenuItem(
@@ -582,7 +845,13 @@ class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
                   children: [
                     const Icon(Icons.edit_note_rounded, size: 18, color: Colors.blue),
                     const SizedBox(width: 8),
-                    Text('Edit', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11)),
+                    Text(
+                      'Ubah',
+                      style: GoogleFonts.quicksand(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 11,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -592,66 +861,20 @@ class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
                   children: [
                     const Icon(Icons.delete_outline_rounded, size: 18, color: Colors.red),
                     const SizedBox(width: 8),
-                    Text('Hapus', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11, color: Colors.red)),
+                    Text(
+                      'Hapus',
+                      style: GoogleFonts.quicksand(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 11,
+                        color: Colors.red,
+                      ),
+                    ),
                   ],
                 ),
               ),
             ],
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildCompactSubStat(String label, String value, bool isDarkMode, {Color? color}) {
-    final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label.toUpperCase(), style: GoogleFonts.quicksand(fontSize: 8, color: isDarkMode ? Colors.white24 : Colors.black38, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 2),
-        Text(value, style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11, color: color ?? contentColor)),
-      ],
-    );
-  }
-
-
-  Widget _buildEmptyState(bool isDarkMode) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 60),
-        child: Column(
-          children: [
-            Icon(Icons.history_toggle_off_rounded, size: 64, color: isDarkMode ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
-            const SizedBox(height: 24),
-            const Text('Belum ada riwayat transaksi.', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
-          ],
-        ),
-      ),
-    );
-  }
-
-
-  Widget _buildTypeOption(GoldTransactionType value, String label, IconData icon, GoldTransactionType selected, Function(GoldTransactionType) onTap, bool isDarkMode) {
-    final isSelected = value == selected;
-    final accentColor = value == GoldTransactionType.buy ? Colors.green : Colors.red;
-    return InkWell(
-      onTap: () => onTap(value),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        decoration: BoxDecoration(
-          color: isSelected ? accentColor : (isDarkMode ? Colors.white.withValues(alpha: 0.05) : AppColors.background),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, color: isSelected ? Colors.white : Colors.grey, size: 18),
-            const SizedBox(width: 8),
-            Text(label, style: GoogleFonts.quicksand(fontSize: 11, fontWeight: FontWeight.bold, color: isSelected ? Colors.white : Colors.grey)),
-          ],
-        ),
       ),
     );
   }
@@ -664,16 +887,26 @@ class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
       children: [
         Padding(
           padding: const EdgeInsets.only(left: 4, bottom: 6),
-          child: Text(label, style: GoogleFonts.quicksand(fontSize: 9, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white24 : Colors.black38)),
+          child: Text(
+            label, 
+            style: GoogleFonts.quicksand(
+              fontSize: 10, 
+              fontWeight: FontWeight.bold, 
+              color: isDarkMode ? Colors.white.withOpacity(0.6) : Colors.black54,
+            ),
+          ),
         ),
         TextFormField(
           controller: controller,
           keyboardType: TextInputType.number,
           inputFormatters: [_RibuanFormatter()],
-          style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11, color: contentColor),
+          style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
           decoration: InputDecoration(
             hintText: '0',
-            hintStyle: GoogleFonts.quicksand(fontSize: 11, color: isDarkMode ? Colors.white10 : Colors.teal.shade50),
+            hintStyle: GoogleFonts.quicksand(
+              fontSize: 13, 
+              color: isDarkMode ? Colors.white.withOpacity(0.3) : Colors.black.withOpacity(0.25),
+            ),
             prefixIcon: Container(
               padding: const EdgeInsets.only(left: 16, right: 8),
               child: Row(
@@ -681,17 +914,35 @@ class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
                 children: [
                   Icon(icon, color: accentColor, size: 18),
                   const SizedBox(width: 8),
-                  Text(unit, style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: accentColor, fontSize: 11)),
+                  Text(unit, style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: accentColor, fontSize: 13)),
                 ],
               ),
             ),
             filled: true,
-            fillColor: isDarkMode ? Colors.white.withValues(alpha: 0.05) : AppColors.background,
+            fillColor: isDarkMode ? Colors.white.withOpacity(0.05) : AppColors.background,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildEmptyState(bool isDarkMode) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 60),
+        child: Column(
+          children: [
+            Icon(Icons.history_toggle_off_rounded, size: 64, color: isDarkMode ? Colors.white10 : Colors.black.withOpacity(0.05)),
+            const SizedBox(height: 24),
+            Text(
+              'Belum ada riwayat transaksi.',
+              style: GoogleFonts.quicksand(color: Colors.grey, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

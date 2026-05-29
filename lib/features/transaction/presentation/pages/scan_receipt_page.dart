@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:tabunganku/core/services/permission_service.dart';
@@ -25,6 +26,7 @@ class _ScanReceiptPageState extends ConsumerState<ScanReceiptPage> {
   
   File? _image;
   bool _isScanning = false;
+  bool _titleHasError = false;
   
   // Scanned Data
   double _amount = 0.0;
@@ -94,7 +96,7 @@ class _ScanReceiptPageState extends ConsumerState<ScanReceiptPage> {
         setState(() {
           _amount = result['amount'];
           _type = result['type'];
-          _detectedTitle = result['brandName'] ?? 'Bukti Transaksi';
+          _detectedTitle = result['brandName'] ?? '';
           
           _amountController.text = _formatDigitsWithDots(_amount.toStringAsFixed(0));
           _titleController.text = _detectedTitle;
@@ -108,6 +110,32 @@ class _ScanReceiptPageState extends ConsumerState<ScanReceiptPage> {
   }
 
   Future<void> _saveTransaction() async {
+    final titleVal = _titleController.text.trim();
+    setState(() {
+      _titleHasError = titleVal.isEmpty;
+    });
+
+    if (_titleHasError) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.error_outline_rounded, color: Colors.white, size: 18),
+              const SizedBox(width: 8),
+              Text(
+                'Keterangan / nama toko tidak boleh kosong!',
+                style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 12),
+              ),
+            ],
+          ),
+          backgroundColor: Colors.red.shade700,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
+      return;
+    }
+
     final amount = double.tryParse(_amountController.text.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0.0;
     if (amount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Nominal harus lebih dari 0')));
@@ -116,7 +144,7 @@ class _ScanReceiptPageState extends ConsumerState<ScanReceiptPage> {
 
     final transaction = TransactionModel(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
-      title: _titleController.text.trim().isEmpty ? _detectedTitle : _titleController.text.trim(),
+      title: titleVal,
       description: _noteController.text.trim().isEmpty ? 'Bukti Transaksi' : _noteController.text.trim(),
       amount: amount,
       type: _type,
@@ -140,18 +168,28 @@ class _ScanReceiptPageState extends ConsumerState<ScanReceiptPage> {
     final theme = Theme.of(context);
     final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
         (ref.watch(themeProvider) == ThemeMode.system && theme.brightness == Brightness.dark);
+    final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('Scan Bukti Transaksi', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(
+          'Scan Bukti Transaksi',
+          style: GoogleFonts.quicksand(
+            fontWeight: FontWeight.bold,
+            color: contentColor,
+          ),
+        ),
         centerTitle: true,
         elevation: 0,
-        backgroundColor: theme.appBarTheme.backgroundColor,
+        backgroundColor: theme.scaffoldBackgroundColor,
+        iconTheme: IconThemeData(
+          color: contentColor,
+        ),
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -159,26 +197,18 @@ class _ScanReceiptPageState extends ConsumerState<ScanReceiptPage> {
               GestureDetector(
                 onTap: () => _isScanning ? null : _showPickerOptions(),
                 child: Container(
-                  height: 320,
+                  height: 200,
                   decoration: BoxDecoration(
-                    color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100,
-                    borderRadius: BorderRadius.circular(32),
+                    color: isDarkMode ? Colors.white.withValues(alpha: 0.02) : Colors.grey.shade50,
+                    borderRadius: BorderRadius.circular(24),
                     border: Border.all(
-                      color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
-                      width: 2,
+                      color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade300,
+                      width: 1.5,
                     ),
-                    boxShadow: [
-                      if (_image == null)
-                        BoxShadow(
-                          color: AppColors.primary.withValues(alpha: isDarkMode ? 0.05 : 0.02),
-                          blurRadius: 40,
-                          offset: const Offset(0, 10),
-                        ),
-                    ],
                   ),
                   child: _image != null
                       ? ClipRRect(
-                          borderRadius: BorderRadius.circular(30),
+                          borderRadius: BorderRadius.circular(22),
                           child: Stack(
                             fit: StackFit.expand,
                             children: [
@@ -191,25 +221,22 @@ class _ScanReceiptPageState extends ConsumerState<ScanReceiptPage> {
                 ),
               ),
               if (_image == null) ...[
-                const SizedBox(height: 32),
+                const SizedBox(height: 20),
                 _buildScanningTips(isDarkMode),
               ],
-              const SizedBox(height: 32),
+              const SizedBox(height: 20),
               
               if (_image != null && !_isScanning) ...[
                 // Extraction Result Form
                 Container(
-                  padding: const EdgeInsets.all(28),
+                  padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.white,
-                    borderRadius: BorderRadius.circular(32),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: isDarkMode ? 0.3 : 0.04),
-                        blurRadius: 30,
-                        offset: const Offset(0, 15),
-                      ),
-                    ],
+                    color: isDarkMode ? Colors.white.withValues(alpha: 0.04) : Colors.white,
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(
+                      color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade200,
+                      width: 1,
+                    ),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -217,44 +244,55 @@ class _ScanReceiptPageState extends ConsumerState<ScanReceiptPage> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('HASIL ANALISA AI', 
-                            style: TextStyle(
-                              fontSize: 10, 
+                          Text(
+                            'HASIL SCAN AI', 
+                            style: GoogleFonts.quicksand(
+                              fontSize: 9, 
                               fontWeight: FontWeight.bold, 
-                              letterSpacing: 2.0, 
-                              color: isDarkMode ? Colors.white38 : Colors.black38
-                            )),
+                              letterSpacing: 1.5, 
+                              color: isDarkMode ? Colors.white38 : Colors.black45,
+                            ),
+                          ),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
                               color: Colors.green.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(8),
                             ),
-                            child: const Row(
+                            child: Row(
                               children: [
-                                Icon(Icons.check_circle_outline_rounded, size: 12, color: Colors.green),
-                                SizedBox(width: 4),
-                                Text('CONFIRMED', style: TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: Colors.green)),
+                                const Icon(Icons.check_circle_outline_rounded, size: 10, color: Colors.green),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'CONFIRMED', 
+                                  style: GoogleFonts.quicksand(
+                                    fontSize: 8, 
+                                    fontWeight: FontWeight.bold, 
+                                    color: Colors.green,
+                                  ),
+                                ),
                               ],
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 16),
                       
                       // Title Input (Auto-filled)
-                      TextField(
+                      _buildHighVisInput(
                         controller: _titleController,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                        decoration: InputDecoration(
-                          labelText: 'Keterangan Transaksi',
-                          prefixIcon: const Icon(Icons.edit_note_rounded, color: Colors.teal),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
-                          filled: true,
-                          fillColor: actsAsSurface(isDarkMode),
-                        ),
+                        icon: Icons.storefront_rounded,
+                        label: 'Keterangan / Toko',
+                        isDarkMode: isDarkMode,
+                        hintText: 'Contoh: Supermarket, Kopi, dll...',
+                        hasError: _titleHasError,
+                        onChanged: (val) {
+                          if (_titleHasError && val.trim().isNotEmpty) {
+                            setState(() => _titleHasError = false);
+                          }
+                        },
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 16),
 
                       // Type Selector
                       Row(
@@ -280,33 +318,30 @@ class _ScanReceiptPageState extends ConsumerState<ScanReceiptPage> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 16),
                       
                       // Amount Input
-                      TextField(
+                      _buildHighVisInput(
                         controller: _amountController,
+                        icon: Icons.payments_rounded,
+                        label: 'Nominal Transaksi',
+                        isDarkMode: isDarkMode,
+                        hintText: '0',
+                        prefixText: 'Rp',
                         keyboardType: TextInputType.number,
                         inputFormatters: [
                           FilteringTextInputFormatter.digitsOnly,
                           _RibuanSeparatorInputFormatter(),
                         ],
-                        style: const TextStyle(fontSize: 21, fontWeight: FontWeight.bold),
-                        decoration: InputDecoration(
-                          labelText: 'Nominal yang Terdeteksi',
-                          prefixText: 'Rp ',
-                          prefixStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.teal),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
-                          filled: true,
-                          fillColor: actsAsSurface(isDarkMode),
-                        ),
+                        style: GoogleFonts.quicksand(fontSize: 16, fontWeight: FontWeight.bold, color: contentColor),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 16),
                       
                       _buildInfoRow(isDarkMode),
                     ],
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 20),
                 
                 // Action Buttons
                 SizedBox(
@@ -316,15 +351,20 @@ class _ScanReceiptPageState extends ConsumerState<ScanReceiptPage> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 22),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                      elevation: 8,
-                      shadowColor: AppColors.primary.withValues(alpha: 0.4),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      elevation: 0,
                     ),
-                    child: const Text('Simpan Transaksi', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+                    child: Text(
+                      'Simpan Transaksi', 
+                      style: GoogleFonts.quicksand(
+                        fontSize: 12, 
+                        fontWeight: FontWeight.bold, 
+                      ),
+                    ),
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
                 Center(
                   child: TextButton.icon(
                     onPressed: () => setState(() {
@@ -332,8 +372,14 @@ class _ScanReceiptPageState extends ConsumerState<ScanReceiptPage> {
                       _amountController.clear();
                       _titleController.clear();
                     }),
-                    icon: const Icon(Icons.refresh_rounded, size: 18),
-                    label: const Text('Abaikan & Scan Ulang', style: TextStyle(fontWeight: FontWeight.bold)),
+                    icon: const Icon(Icons.refresh_rounded, size: 16),
+                    label: Text(
+                      'Abaikan & Scan Ulang', 
+                      style: GoogleFonts.quicksand(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 11,
+                      ),
+                    ),
                     style: TextButton.styleFrom(foregroundColor: Colors.red.shade400),
                   ),
                 ),
@@ -355,21 +401,21 @@ class _ScanReceiptPageState extends ConsumerState<ScanReceiptPage> {
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        padding: const EdgeInsets.symmetric(vertical: 16),
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? color.withValues(alpha: isDarkMode ? 0.15 : 0.08) : Colors.transparent,
+          color: isSelected ? color.withValues(alpha: isDarkMode ? 0.12 : 0.06) : Colors.transparent,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? color : (isDarkMode ? Colors.white10 : Colors.grey.shade200),
-            width: 2,
+            color: isSelected ? color.withValues(alpha: 0.8) : (isDarkMode ? Colors.white10 : Colors.grey.shade200),
+            width: 1.5,
           ),
         ),
         child: Center(
           child: Text(
             label,
-            style: TextStyle(
-              color: isSelected ? color : (isDarkMode ? Colors.white38 : Colors.black38),
+            style: GoogleFonts.quicksand(
+              color: isSelected ? color : (isDarkMode ? Colors.white38 : Colors.black54),
               fontWeight: FontWeight.bold,
               fontSize: 11,
             ),
@@ -380,150 +426,162 @@ class _ScanReceiptPageState extends ConsumerState<ScanReceiptPage> {
   }
 
   Widget _buildPlaceholder(bool isDarkMode) {
+    final titleColor = isDarkMode ? Colors.white : AppColors.primaryDark;
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Container(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: AppColors.primary.withValues(alpha: 0.1),
             shape: BoxShape.circle,
           ),
-          child: const Icon(Icons.qr_code_scanner_rounded, size: 64, color: AppColors.primary),
+          child: const Icon(Icons.document_scanner_rounded, size: 28, color: AppColors.primary),
         ),
-        const SizedBox(height: 24),
-        Text('Scan Bukti Transaksi', 
-          style: TextStyle(
-            fontSize: 11, 
-            fontWeight: FontWeight.bold, 
-            color: isDarkMode ? Colors.white70 : Colors.black87
-          )),
-        const SizedBox(height: 8),
-        Text('Ambil foto struk atau screenshot transfer', 
-          style: TextStyle(
-            fontSize: 11, 
-            color: isDarkMode ? Colors.white38 : Colors.black38
-          )),
+        const SizedBox(height: 12),
+        Text(
+          'Pindai Bukti Transaksi',
+          style: GoogleFonts.quicksand(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            color: titleColor,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          child: Text(
+            'Ambil foto struk atau screenshot untuk pencatatan otomatis',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.quicksand(
+              fontSize: 9,
+              color: isDarkMode ? Colors.white38 : Colors.black45,
+            ),
+          ),
+        ),
       ],
     );
   }
 
   Widget _buildScanningEffect(bool isDarkMode) {
-    return Stack(
-      children: [
-        Container(color: Colors.black.withValues(alpha: 0.6)),
-        Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(
-                width: 60,
-                height: 60,
-                child: CircularProgressIndicator(
-                  color: AppColors.primary,
-                  strokeWidth: 3,
-                ),
+    return Container(
+      color: Colors.black.withValues(alpha: 0.7),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(
+              width: 44,
+              height: 44,
+              child: CircularProgressIndicator(
+                color: AppColors.primary,
+                strokeWidth: 3,
               ),
-              const SizedBox(height: 24),
-              Text('MEMINDAI DATA...', 
-                style: TextStyle(
-                  color: Colors.white, 
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 2.0,
-                  fontSize: 11,
-                  shadows: [Shadow(color: Colors.black.withValues(alpha: 0.5), blurRadius: 10)]
-                )),
-            ],
-          ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'MEMINDAI DOKUMEN...',
+              style: GoogleFonts.quicksand(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.5,
+                fontSize: 10,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Mesin AI sedang membaca struk Anda',
+              style: GoogleFonts.quicksand(
+                color: Colors.white60,
+                fontSize: 9,
+              ),
+            ),
+          ],
         ),
-        // Laser Scan Line
-        TweenAnimationBuilder<double>(
-          tween: Tween(begin: 0.0, end: 1.0),
-          duration: const Duration(seconds: 2),
-          builder: (context, value, child) {
-            return Positioned(
-              top: value * 320,
-              left: 0,
-              right: 0,
-              child: Container(
-                height: 3,
-                decoration: BoxDecoration(
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primary.withValues(alpha: 0.8),
-                      blurRadius: 15,
-                      spreadRadius: 2,
-                    )
-                  ],
-                  gradient: LinearGradient(
-                    colors: [
-                      AppColors.primary.withValues(alpha: 0),
-                      AppColors.primary,
-                      AppColors.primary.withValues(alpha: 0),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          },
-          onEnd: () {}, // Handled by continuous rebuild during _isScanning
-        )
-      ],
+      ),
     );
   }
 
   Widget _buildScanningTips(bool isDarkMode) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('TIPS SCANNING', 
-          style: TextStyle(
-            fontSize: 10, 
-            fontWeight: FontWeight.bold, 
-            letterSpacing: 1.5,
-            color: isDarkMode ? Colors.white24 : Colors.black26
-          )),
-        const SizedBox(height: 16),
-        SizedBox(
-          height: 100,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: _scanTips.length,
-            itemBuilder: (context, index) {
-              final tip = _scanTips[index];
-              return Container(
-                width: 160,
-                margin: const EdgeInsets.only(right: 12),
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: isDarkMode ? Colors.white.withValues(alpha: 0.03) : Colors.grey.shade50,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: isDarkMode ? Colors.white10 : Colors.grey.shade100),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(tip['icon'] as IconData, size: 20, color: AppColors.primary),
-                    const SizedBox(height: 8),
-                    Text(tip['title'] as String, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
-                    Text(tip['subtitle'] as String, style: TextStyle(fontSize: 9, color: isDarkMode ? Colors.white38 : Colors.black38)),
-                  ],
-                ),
-              );
-            },
-          ),
+    final titleColor = isDarkMode ? Colors.white70 : AppColors.primaryDark;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: isDarkMode ? Colors.white.withValues(alpha: 0.02) : AppColors.background,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade200,
+          width: 1,
         ),
-      ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.lightbulb_rounded, size: 14, color: Colors.amber),
+              const SizedBox(width: 6),
+              Text(
+                'PETUNJUK PEMINDAIAN',
+                style: GoogleFonts.quicksand(
+                  fontSize: 9,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.0,
+                  color: isDarkMode ? Colors.white38 : Colors.black45,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          ..._scanTips.map((tip) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4.0),
+              child: Row(
+                children: [
+                  Icon(tip['icon'] as IconData, size: 14, color: AppColors.primary),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: '${tip['title']}: ',
+                            style: GoogleFonts.quicksand(
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold,
+                              color: titleColor,
+                            ),
+                          ),
+                          TextSpan(
+                            text: tip['subtitle'] as String,
+                            style: GoogleFonts.quicksand(
+                              fontSize: 9,
+                              color: isDarkMode ? Colors.white38 : Colors.black54,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
+        ],
+      ),
     );
   }
 
   Widget _buildInfoRow(bool isDarkMode) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
         color: Colors.orange.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Colors.orange.withValues(alpha: 0.15),
+          width: 1,
+        ),
       ),
       child: Row(
         children: [
@@ -532,10 +590,10 @@ class _ScanReceiptPageState extends ConsumerState<ScanReceiptPage> {
           Expanded(
             child: Text(
               'Pastikan nominal dan judul sudah sesuai dengan bukti transfer kamu.',
-              style: TextStyle(
-                fontSize: 11, 
+              style: GoogleFonts.quicksand(
+                fontSize: 10, 
                 fontWeight: FontWeight.bold,
-                color: isDarkMode ? Colors.orange.shade200 : Colors.orange.shade800
+                color: isDarkMode ? Colors.orange.shade200 : Colors.orange.shade800,
               ),
             ),
           ),
@@ -544,48 +602,145 @@ class _ScanReceiptPageState extends ConsumerState<ScanReceiptPage> {
     );
   }
 
+  Widget _buildHighVisInput({
+    required TextEditingController controller,
+    required IconData icon,
+    required String label,
+    required bool isDarkMode,
+    String? prefixText,
+    String? hintText,
+    List<TextInputFormatter>? inputFormatters,
+    TextInputType? keyboardType,
+    TextStyle? style,
+    bool hasError = false,
+    ValueChanged<String>? onChanged,
+  }) {
+    return HighVisInput(
+      controller: controller,
+      icon: icon,
+      label: label,
+      isDarkMode: isDarkMode,
+      prefixText: prefixText,
+      hintText: hintText,
+      inputFormatters: inputFormatters,
+      keyboardType: keyboardType,
+      style: style,
+      hasError: hasError,
+      onChanged: onChanged,
+    );
+  }
+
   Color actsAsSurface(bool isDarkMode) => isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade50;
 
   void _showPickerOptions() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
+    
     showModalBottomSheet(
       context: context,
+      backgroundColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
       shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
       builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 12),
-            Container(
-                width: 40,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 36,
                 height: 4,
                 decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(2))),
-            const SizedBox(height: 24),
-            const Text('Upload Bukti Transfer',
-                style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 24),
-            ListTile(
-              leading:
-                  const Icon(Icons.camera_alt_rounded, color: AppColors.primary),
-              title: const Text('Ambil Foto'),
-              onTap: () {
-                Navigator.pop(context);
-                _pickImage(ImageSource.camera);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.photo_library_rounded,
-                  color: AppColors.primary),
-              title: const Text('Pilih dari Galeri'),
-              onTap: () {
-                Navigator.pop(context);
-                _pickImage(ImageSource.gallery);
-              },
-            ),
-            const SizedBox(height: 16),
-          ],
+                  color: isDarkMode ? Colors.white24 : Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'Pilih Sumber Dokumen',
+                style: GoogleFonts.quicksand(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  color: contentColor,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: InkWell(
+                      onTap: () {
+                        Navigator.pop(context);
+                        _pickImage(ImageSource.camera);
+                      },
+                      borderRadius: BorderRadius.circular(20),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 20),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: AppColors.primary.withValues(alpha: 0.15),
+                            width: 1.5,
+                          ),
+                        ),
+                        child: Column(
+                          children: [
+                            const Icon(Icons.camera_alt_rounded, size: 28, color: AppColors.primary),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Ambil Foto',
+                              style: GoogleFonts.quicksand(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: contentColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: InkWell(
+                      onTap: () {
+                        Navigator.pop(context);
+                        _pickImage(ImageSource.gallery);
+                      },
+                      borderRadius: BorderRadius.circular(20),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 20),
+                        decoration: BoxDecoration(
+                          color: Colors.green.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: Colors.green.withValues(alpha: 0.15),
+                            width: 1.5,
+                          ),
+                        ),
+                        child: Column(
+                          children: [
+                            const Icon(Icons.photo_library_rounded, size: 28, color: Colors.green),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Pilih dari Galeri',
+                              style: GoogleFonts.quicksand(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: contentColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -635,6 +790,156 @@ class _RibuanSeparatorInputFormatter extends TextInputFormatter {
     return TextEditingValue(
       text: formatted,
       selection: TextSelection.collapsed(offset: newSelectionIndex),
+    );
+  }
+}
+
+class HighVisInput extends StatefulWidget {
+  final TextEditingController controller;
+  final IconData icon;
+  final String label;
+  final bool isDarkMode;
+  final String? prefixText;
+  final String? hintText;
+  final List<TextInputFormatter>? inputFormatters;
+  final TextInputType? keyboardType;
+  final TextStyle? style;
+  final bool hasError;
+  final ValueChanged<String>? onChanged;
+
+  const HighVisInput({
+    super.key,
+    required this.controller,
+    required this.icon,
+    required this.label,
+    required this.isDarkMode,
+    this.prefixText,
+    this.hintText,
+    this.inputFormatters,
+    this.keyboardType,
+    this.style,
+    this.hasError = false,
+    this.onChanged,
+  });
+
+  @override
+  State<HighVisInput> createState() => _HighVisInputState();
+}
+
+class _HighVisInputState extends State<HighVisInput> {
+  final FocusNode _focusNode = FocusNode();
+  bool _isFocused = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode.addListener(_onFocusChange);
+  }
+
+  void _onFocusChange() {
+    setState(() {
+      _isFocused = _focusNode.hasFocus;
+    });
+  }
+
+  @override
+  void dispose() {
+    _focusNode.removeListener(_onFocusChange);
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final contentColor = widget.isDarkMode ? Colors.white : AppColors.primaryDark;
+    final surfaceColor = widget.isDarkMode ? Colors.white.withValues(alpha: 0.06) : Colors.grey.shade100;
+
+    final Color borderColor;
+    final double borderWidth;
+    if (widget.hasError) {
+      borderColor = Colors.red.shade400;
+      borderWidth = 1.5;
+    } else if (_isFocused) {
+      borderColor = AppColors.primary;
+      borderWidth = 1.8;
+    } else {
+      borderColor = widget.isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade200;
+      borderWidth = 1.2;
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          widget.label,
+          style: GoogleFonts.quicksand(
+            fontSize: 11,
+            fontWeight: FontWeight.bold,
+            color: widget.isDarkMode ? Colors.white70 : Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            color: surfaceColor,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: borderColor,
+              width: borderWidth,
+            ),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(widget.icon, color: AppColors.primary, size: 20),
+              if (widget.prefixText != null) ...[
+                const SizedBox(width: 8),
+                Text(
+                  widget.prefixText!,
+                  style: GoogleFonts.quicksand(
+                    fontWeight: FontWeight.bold,
+                    color: widget.isDarkMode ? Colors.white70 : Colors.black87,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+              const SizedBox(width: 12),
+              Expanded(
+                child: TextFormField(
+                  focusNode: _focusNode,
+                  controller: widget.controller,
+                  onChanged: widget.onChanged,
+                  keyboardType: widget.keyboardType ?? TextInputType.text,
+                  inputFormatters: widget.inputFormatters,
+                  style: widget.style ?? GoogleFonts.quicksand(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                    color: contentColor,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: widget.hintText,
+                    hintStyle: GoogleFonts.quicksand(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: widget.isDarkMode ? Colors.white30 : Colors.black38,
+                    ),
+                    border: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    errorBorder: InputBorder.none,
+                    disabledBorder: InputBorder.none,
+                    isDense: true,
+                    filled: false,
+                    fillColor: Colors.transparent,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

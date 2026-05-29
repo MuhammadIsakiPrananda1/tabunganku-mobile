@@ -10,6 +10,10 @@ import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:image_cropper/image_cropper.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tabunganku/main.dart' show flutterLocalNotificationsPlugin;
+import 'package:timezone/timezone.dart' as tz;
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import 'package:tabunganku/core/theme/app_colors.dart';
 import 'package:tabunganku/core/theme/theme_provider.dart';
@@ -21,6 +25,9 @@ import 'package:tabunganku/features/settings/presentation/providers/achievement_
 import 'package:tabunganku/providers/budget_provider.dart';
 import 'package:tabunganku/core/constants/app_version.dart';
 import 'package:intl/intl.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:tabunganku/features/settings/presentation/pages/crop_page.dart';
+import 'package:tabunganku/core/services/export_service.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
@@ -32,10 +39,378 @@ class SettingsPage extends ConsumerStatefulWidget {
 class _SettingsPageState extends ConsumerState<SettingsPage> {
   bool _isUploadingPhoto = false;
   String? _uploadError;
+  bool _dailyReminder = false;
+  String _defaultCurrency = 'IDR';
+  String _reminderTime = '19:00';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPreferences();
+  }
+
+  Future<void> _loadPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _dailyReminder = prefs.getBool('pref_daily_reminder') ?? false;
+      _defaultCurrency = prefs.getString('pref_default_currency') ?? 'IDR';
+      _reminderTime = prefs.getString('pref_reminder_time') ?? '19:00';
+    });
+  }
+
+  Future<void> _toggleDailyReminder(bool value) async {
+    if (value) {
+      await _selectReminderTime();
+    } else {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('pref_daily_reminder', false);
+      await _cancelDailyReminder();
+      setState(() {
+        _dailyReminder = false;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Pengingat menabung dinonaktifkan',
+              style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.white),
+            ),
+            backgroundColor: Colors.grey.shade700,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _selectReminderTime() async {
+    final parts = _reminderTime.split(':');
+    final initialHour = parts.length == 2 ? int.tryParse(parts[0]) ?? 19 : 19;
+    final initialMinute = parts.length == 2 ? int.tryParse(parts[1]) ?? 0 : 0;
+
+    final selectedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay(hour: initialHour, minute: initialMinute),
+      helpText: 'SETEL JAM PENGINGAT MENABUNG',
+      confirmText: 'SETEL',
+      cancelText: 'BATAL',
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                textStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (selectedTime != null) {
+      final formattedTime = '${selectedTime.hour.toString().padLeft(2, '0')}:${selectedTime.minute.toString().padLeft(2, '0')}';
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('pref_daily_reminder', true);
+      await prefs.setString('pref_reminder_time', formattedTime);
+      
+      await _scheduleDailyReminder(selectedTime.hour, selectedTime.minute);
+
+      setState(() {
+        _dailyReminder = true;
+        _reminderTime = formattedTime;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Pengingat menabung harian diaktifkan pukul $formattedTime! ⏰',
+              style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.white),
+            ),
+            backgroundColor: AppColors.primary,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _scheduleDailyReminder(int hour, int minute) async {
+    try {
+      await flutterLocalNotificationsPlugin.cancel(1001);
+
+      // Request permission untuk Android 13+ (Notifikasi)
+      final androidPlugin =
+          flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>();
+      if (androidPlugin != null) {
+        await androidPlugin.requestNotificationsPermission();
+      }
+
+      final now = tz.TZDateTime.now(tz.local);
+      var scheduledDate = tz.TZDateTime(
+        tz.local,
+        now.year,
+        now.month,
+        now.day,
+        hour,
+        minute,
+      );
+      
+      if (scheduledDate.isBefore(now)) {
+        scheduledDate = scheduledDate.add(const Duration(days: 1));
+      }
+
+      const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+        'tabunganku_reminder',
+        'Pengingat Menabung',
+        channelDescription: 'Pengingat harian untuk mencatat tabungan',
+        importance: Importance.max,
+        priority: Priority.high,
+      );
+
+      const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+      );
+
+      const NotificationDetails platformDetails = NotificationDetails(
+        android: androidDetails,
+        iOS: iosDetails,
+      );
+
+      await flutterLocalNotificationsPlugin.zonedSchedule(
+        1001,
+        'Waktunya Menabung! 💰',
+        'Ayo raih impian finansialmu, jangan lupa catat tabungan hari ini ya! 😉',
+        scheduledDate,
+        platformDetails,
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+        matchDateTimeComponents: DateTimeComponents.time,
+      );
+    } catch (e) {
+      debugPrint('Failed to schedule reminder: $e');
+    }
+  }
+
+  Future<void> _cancelDailyReminder() async {
+    await flutterLocalNotificationsPlugin.cancel(1001);
+  }
+
+  Future<void> _changeDefaultCurrency(String currency) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('pref_default_currency', currency);
+    setState(() {
+      _defaultCurrency = currency;
+    });
+  }
 
   @override
   void dispose() {
     super.dispose();
+  }
+
+  void _showMonthlyExportBottomSheet(bool isDarkMode, List<TransactionModel> transactions) {
+    final regular = transactions.where((t) {
+      if (t.category == 'Hutang' || t.category == 'Piutang') return false;
+      if (t.id.startsWith('shopping_')) return false;
+      return true;
+    }).toList();
+
+    // Group transactions by month
+    final Map<String, List<TransactionModel>> grouped = {};
+    for (final t in regular) {
+      final k = DateFormat('MMMM yyyy', 'id_ID').format(t.date).toUpperCase();
+      grouped.putIfAbsent(k, () => []).add(t);
+    }
+
+    final monthKeys = grouped.keys.toList();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return Container(
+          padding: const EdgeInsets.fromLTRB(28, 12, 28, 36),
+          decoration: BoxDecoration(
+            color: isDarkMode ? AppColors.surfaceDark : Colors.white,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Handle
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 24),
+                  decoration: BoxDecoration(
+                    color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              // Header
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: const Icon(Icons.picture_as_pdf_outlined,
+                        color: Colors.red, size: 22),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Ekspor PDF Bulanan',
+                          style: GoogleFonts.quicksand(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: isDarkMode ? Colors.white : Colors.black87,
+                          ),
+                        ),
+                        Text(
+                          'Pilih bulan laporan statement yang ingin diunduh',
+                          style: GoogleFonts.quicksand(
+                            fontSize: 10,
+                            color: isDarkMode ? Colors.white38 : Colors.black45,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              // Month List
+              if (monthKeys.isEmpty)
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 32),
+                    child: Column(
+                      children: [
+                        Icon(Icons.description_outlined,
+                            size: 40,
+                            color: isDarkMode ? Colors.white10 : Colors.grey.shade300),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Belum ada transaksi reguler',
+                          style: GoogleFonts.quicksand(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: isDarkMode ? Colors.white30 : Colors.black38,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              else
+                ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxHeight: MediaQuery.of(context).size.height * 0.45,
+                  ),
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    itemCount: monthKeys.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 10),
+                    itemBuilder: (context, index) {
+                      final monthKey = monthKeys[index];
+                      final monthTx = grouped[monthKey]!;
+                      return Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: isDarkMode
+                              ? Colors.white.withOpacity(0.02)
+                              : Colors.grey.shade50,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: isDarkMode
+                                ? Colors.white.withOpacity(0.04)
+                                : Colors.black.withOpacity(0.02),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  monthKey,
+                                  style: GoogleFonts.quicksand(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: isDarkMode ? Colors.white70 : Colors.teal.shade900,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  '${monthTx.length} Transaksi',
+                                  style: GoogleFonts.quicksand(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w600,
+                                    color: isDarkMode ? Colors.white38 : Colors.grey,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            ElevatedButton.icon(
+                              onPressed: () async {
+                                Navigator.pop(ctx);
+                                await ExportService.shareMonthlyReport(
+                                  context: context,
+                                  transactions: monthTx,
+                                  monthLabel: monthKey,
+                                  asPdf: true,
+                                );
+                              },
+                              icon: const Icon(Icons.share_rounded, size: 12),
+                              label: Text(
+                                'EKSPOR',
+                                style: GoogleFonts.quicksand(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.primary.withOpacity(0.12),
+                                foregroundColor: AppColors.primary,
+                                elevation: 0,
+                                shadowColor: Colors.transparent,
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   Future<void> _pickAndUploadPhoto() async {
@@ -86,15 +461,21 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     if (pickedFile == null) return;
     if (!mounted) return;
 
-    // ── Crop Image ──────────────────────────────────────────────
-    final croppedFile = await _cropImage(pickedFile.path);
-    if (croppedFile == null) return;
+    // ── Crop Image (Custom Minimalist 3-Button Screen!) ──────────
+    if (!mounted) return;
+    final croppedFilePath = await Navigator.push<String>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CropPage(imagePath: pickedFile!.path),
+      ),
+    );
+    if (croppedFilePath == null) return;
 
     setState(() => _isUploadingPhoto = true);
 
     final result = await ref
         .read(userProfileProvider.notifier)
-        .uploadAndSetPhoto(File(croppedFile.path));
+        .uploadAndSetPhoto(File(croppedFilePath));
 
     if (!mounted) return;
     setState(() {
@@ -102,43 +483,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       _uploadError =
           result != null ? null : 'Gagal mengupload foto. Coba lagi.';
     });
-  }
-
-  Future<CroppedFile?> _cropImage(String path) async {
-    final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
-        (ref.watch(themeProvider) == ThemeMode.system &&
-            Theme.of(context).brightness == Brightness.dark);
-    final bgColor =
-        isDarkMode ? AppColors.backgroundDark : const Color(0xFFF8FAF9);
-    final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
-
-    return await ImageCropper().cropImage(
-      sourcePath: path,
-      uiSettings: [
-        AndroidUiSettings(
-          toolbarTitle: 'Potong Foto Profil',
-          toolbarColor: bgColor,
-          toolbarWidgetColor: contentColor,
-          initAspectRatio: CropAspectRatioPreset.square,
-          lockAspectRatio: true,
-          activeControlsWidgetColor: AppColors.primary,
-          statusBarColor: bgColor,
-          backgroundColor: bgColor,
-        ),
-        IOSUiSettings(
-          title: 'Potong Foto Profil',
-          doneButtonTitle: 'Selesai',
-          cancelButtonTitle: 'Batal',
-          aspectRatioLockEnabled: true,
-        ),
-        WebUiSettings(
-          context: context,
-        ),
-      ],
-      aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
-      maxWidth: 600,
-      maxHeight: 600,
-    );
   }
 
   Future<ImageSource?> _showImageSourceDialog() async {
@@ -293,25 +637,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         ..sort((a, b) => b.compareTo(a));
 
       if (incomeDates.isNotEmpty) {
-        DateTime checkDate = DateTime(
-            DateTime.now().year, DateTime.now().month, DateTime.now().day);
-
-        if (incomeDates.first.isAtSameMomentAs(checkDate) ||
-            incomeDates.first.isAtSameMomentAs(
-                checkDate.subtract(const Duration(days: 1)))) {
-          for (int i = 0; i < incomeDates.length; i++) {
-            if (i == 0) {
-              streak = 1;
-              checkDate = incomeDates[i];
-              continue;
-            }
-            if (incomeDates[i].isAtSameMomentAs(
-                checkDate.subtract(const Duration(days: 1)))) {
-              streak++;
-              checkDate = incomeDates[i];
-            } else {
-              break;
-            }
+        streak = 1;
+        for (int i = 0; i < incomeDates.length - 1; i++) {
+          if (incomeDates[i].difference(incomeDates[i + 1]).inDays == 1) {
+            streak++;
+          } else {
+            break;
           }
         }
       }
@@ -335,7 +666,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
             // ── Statistik Baris ───────────────────────────────────
             _buildStatsRow(streak, currentBalance, unlockedCount,
-                currencyFormatter, isDarkMode),
+                achievements.length, currencyFormatter, isDarkMode),
             const SizedBox(height: 16),
 
             // ── Lencana Pencapaian ─────────────────────────────────
@@ -344,126 +675,190 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             const SizedBox(height: 8), // Reduced from 16 to 8
 
             _buildSectionHeader('Preferensi'),
-            _buildSettingTile(
-              Icons.campaign_outlined,
-              'Saluran WhatsApp',
-              () async {
-                final url = Uri.parse(
-                    'https://whatsapp.com/channel/0029Vb7hUrM23n3a6dSem72v');
-                try {
-                  await launchUrl(
-                    url,
-                    mode: LaunchMode.externalApplication,
-                  );
-                } catch (e) {
-                  // Fallback to in-app browser if external fails
-                  await launchUrl(
-                    url,
-                    mode: LaunchMode.platformDefault,
-                  );
-                }
-              },
-              subtitle: 'Join untuk update aplikasi terbaru',
-              color: Colors.green,
-            ),
-            _buildSettingTile(
-              Icons.dark_mode_outlined,
-              'Mode Gelap',
-              () => ref.read(themeProvider.notifier).toggleTheme(),
-              trailing: Switch(
-                value: isDarkMode,
-                onChanged: (val) =>
-                    ref.read(themeProvider.notifier).toggleTheme(),
-                activeThumbColor: AppColors.primary,
+            _buildSettingGroup([
+              _buildSettingTile(
+                Icons.dark_mode_outlined,
+                'Mode Gelap',
+                () => ref.read(themeProvider.notifier).toggleTheme(),
+                trailing: Switch(
+                  value: isDarkMode,
+                  onChanged: (val) =>
+                      ref.read(themeProvider.notifier).toggleTheme(),
+                  activeColor: AppColors.primary,
+                  activeTrackColor: AppColors.primary.withValues(alpha: 0.3),
+                  inactiveThumbColor: isDarkMode ? Colors.white30 : Colors.grey.shade400,
+                  inactiveTrackColor: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
+                  trackOutlineColor: WidgetStateProperty.resolveWith<Color?>((states) => Colors.transparent),
+                ),
+                isDarkMode: isDarkMode,
               ),
-            ),
+              _buildSettingTile(
+                Icons.notifications_active_outlined,
+                'Pengingat Menabung',
+                () => _dailyReminder ? _selectReminderTime() : _toggleDailyReminder(true),
+                trailing: Switch(
+                  value: _dailyReminder,
+                  onChanged: (val) => _toggleDailyReminder(val),
+                  activeColor: AppColors.primary,
+                  activeTrackColor: AppColors.primary.withValues(alpha: 0.3),
+                  inactiveThumbColor: isDarkMode ? Colors.white30 : Colors.grey.shade400,
+                  inactiveTrackColor: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
+                  trackOutlineColor: WidgetStateProperty.resolveWith<Color?>((states) => Colors.transparent),
+                ),
+                subtitle: _dailyReminder 
+                    ? 'Aktif setiap hari pukul $_reminderTime ⏰' 
+                    : 'Ingatkan catat tabungan harian',
+                color: Colors.amber,
+                isDarkMode: isDarkMode,
+              ),
+              _buildSettingTile(
+                Icons.picture_as_pdf_outlined,
+                'Ekspor Laporan Bulanan (PDF)',
+                () => _showMonthlyExportBottomSheet(isDarkMode, transactions),
+                subtitle: 'Unduh rekap statement bulanan sekaligus',
+                color: Colors.red,
+                isDarkMode: isDarkMode,
+              ),
+            ], isDarkMode),
             const SizedBox(height: 16),
 
             _buildSectionHeader('Keamanan'),
-            _buildSettingTile(
-              Icons.fingerprint_rounded,
-              'Kunci Biometrik',
-              () {}, // Empty now as logic is in Switch
-              trailing: Opacity(
-                opacity:
-                    1.0, // Making it always appear active to encourage setup
-                child: Switch(
-                  value:
-                      securityState.isBiometricEnabled && securityState.hasPin,
-                  onChanged: (val) {
-                    if (!securityState.hasPin) {
-                      context.push('/pin-setup');
-                    } else {
-                      ref.read(securityProvider.notifier).toggleBiometric(val);
-                    }
-                  },
-                  activeThumbColor: AppColors.primary,
+            _buildSettingGroup([
+              _buildSettingTile(
+                Icons.fingerprint_rounded,
+                'Kunci Biometrik',
+                () {}, // Empty now as logic is in Switch
+                trailing: Opacity(
+                  opacity:
+                      1.0, // Making it always appear active to encourage setup
+                  child: Switch(
+                    value:
+                        securityState.isBiometricEnabled && securityState.hasPin,
+                    onChanged: (val) {
+                      if (!securityState.hasPin) {
+                        context.push('/pin-setup');
+                      } else {
+                        ref.read(securityProvider.notifier).toggleBiometric(val);
+                      }
+                    },
+                    activeColor: AppColors.primary,
+                    activeTrackColor: AppColors.primary.withValues(alpha: 0.3),
+                    inactiveThumbColor: isDarkMode ? Colors.white30 : Colors.grey.shade400,
+                    inactiveTrackColor: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
+                    trackOutlineColor: WidgetStateProperty.resolveWith<Color?>((states) => Colors.transparent),
+                  ),
                 ),
+                subtitle: securityState.hasPin
+                    ? 'Gunakan sidik jari/wajah'
+                    : 'Pasang PIN terlebih dahulu',
+                isDarkMode: isDarkMode,
               ),
-              subtitle: securityState.hasPin
-                  ? 'Gunakan sidik jari/wajah'
-                  : 'Pasang PIN terlebih dahulu',
-            ),
-            _buildSettingTile(
+              _buildSettingTile(
                 Icons.lock_outline_rounded,
                 securityState.hasPin
                     ? 'Ubah PIN Keamanan'
                     : 'Pasang PIN Keamanan',
-                () => context.push('/pin-setup')),
-
-            if (securityState.hasPin)
-              _buildSettingTile(
-                Icons.lock_reset_rounded,
-                'Hapus PIN Keamanan',
-                () => _showDeletePinDialog(),
-                color: Colors.red,
-                subtitle: 'Matikan semua fitur keamanan',
+                () => context.push('/pin-setup'),
+                isDarkMode: isDarkMode,
               ),
-            const SizedBox(height: 32),
+              if (securityState.hasPin)
+                _buildSettingTile(
+                  Icons.lock_reset_rounded,
+                  'Hapus PIN Keamanan',
+                  () => _showDeletePinDialog(),
+                  color: Colors.red,
+                  subtitle: 'Matikan semua fitur keamanan',
+                  isDarkMode: isDarkMode,
+                ),
+            ], isDarkMode),
+            const SizedBox(height: 16),
+
             _buildSectionHeader('Sosial & Komunitas'),
-            _buildSettingTile(
-              Icons.camera_alt_outlined,
-              'Instagram',
-              () async {
-                final url =
-                    Uri.parse('https://www.instagram.com/tuanmudazaky_/');
-                if (await canLaunchUrl(url)) {
-                  await launchUrl(url, mode: LaunchMode.externalApplication);
-                }
-              },
-              subtitle: 'Follow untuk update visual',
-              color: Colors.purple,
-            ),
-            _buildSettingTile(
-              Icons.code_rounded,
-              'GitHub Developer',
-              () async {
-                final url =
-                    Uri.parse('https://github.com/MuhammadIsakiPrananda1');
-                if (await canLaunchUrl(url)) {
-                  await launchUrl(url, mode: LaunchMode.externalApplication);
-                }
-              },
-              subtitle: 'Cek source code aplikasi',
-              color: isDarkMode ? Colors.white : Colors.black87,
-            ),
-            _buildSettingTile(
-              Icons.share_rounded,
-              'Bagikan Aplikasi',
-              () => _shareApp(),
-              color: Colors.pink,
-            ),
+            _buildSettingGroup([
+              _buildSettingTile(
+                Icons.campaign_outlined,
+                'Saluran WhatsApp',
+                () async {
+                  final url = Uri.parse(
+                      'https://whatsapp.com/channel/0029Vb7hUrM23n3a6dSem72v');
+                  try {
+                    await launchUrl(
+                      url,
+                      mode: LaunchMode.externalApplication,
+                    );
+                  } catch (e) {
+                    // Fallback to in-app browser if external fails
+                    await launchUrl(
+                      url,
+                      mode: LaunchMode.platformDefault,
+                    );
+                  }
+                },
+                subtitle: 'Join untuk update aplikasi terbaru',
+                color: Colors.green,
+                isDarkMode: isDarkMode,
+              ),
+              _buildSettingTile(
+                Icons.camera_alt_outlined,
+                'Instagram',
+                () async {
+                  final url =
+                      Uri.parse('https://www.instagram.com/tuanmudazaky_/');
+                  if (await canLaunchUrl(url)) {
+                    await launchUrl(url, mode: LaunchMode.externalApplication);
+                  }
+                },
+                subtitle: 'Follow untuk update visual',
+                color: Colors.purple,
+                isDarkMode: isDarkMode,
+              ),
+              _buildSettingTile(
+                Icons.code_rounded,
+                'GitHub Developer',
+                () async {
+                  final url =
+                      Uri.parse('https://github.com/MuhammadIsakiPrananda1');
+                  if (await canLaunchUrl(url)) {
+                    await launchUrl(url, mode: LaunchMode.externalApplication);
+                  }
+                },
+                subtitle: 'Cek source code aplikasi',
+                color: isDarkMode ? Colors.white : Colors.black87,
+                isDarkMode: isDarkMode,
+              ),
+              _buildSettingTile(
+                Icons.share_rounded,
+                'Bagikan Aplikasi',
+                () => _shareApp(),
+                color: Colors.pink,
+                isDarkMode: isDarkMode,
+              ),
+            ], isDarkMode),
             const SizedBox(height: 16),
 
             _buildSectionHeader('Bantuan & Informasi'),
-            _buildSettingTile(Icons.help_outline_rounded, 'Pusat Bantuan',
-                () => _showHelpDialog()),
-            _buildSettingTile(Icons.info_outline_rounded, 'Tentang Aplikasi',
-                () => _showAboutDialog()),
-            const SizedBox(height: 16),
+            _buildSettingGroup([
+              _buildSettingTile(
+                Icons.help_outline_rounded,
+                'Pusat Bantuan',
+                () => _showHelpDialog(),
+                isDarkMode: isDarkMode,
+              ),
+              _buildSettingTile(
+                Icons.info_outline_rounded,
+                'Tentang Aplikasi',
+                () => _showAboutDialog(),
+                isDarkMode: isDarkMode,
+              ),
+            ], isDarkMode),
+            const SizedBox(height: 24),
 
-            const Text('Versi ${AppVersion.version}',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 11)),
+            Center(
+              child: Text(
+                'Versi ${AppVersion.version}',
+                style: const TextStyle(color: AppColors.textSecondary, fontSize: 11),
+              ),
+            ),
           ],
         ),
       ),
@@ -672,140 +1067,264 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   }
 
   Widget _buildStatsRow(int streak, double currentBalance, int unlockedCount,
-      NumberFormat formatter, bool isDarkMode) {
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      int totalAchievements, NumberFormat formatter, bool isDarkMode) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.03),
+          width: 1.2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDarkMode ? 0.25 : 0.05),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          _buildStatCard('Streak', '$streak Hari', Icons.whatshot_rounded,
-              Colors.orange, isDarkMode),
-          const SizedBox(width: 8),
-          _buildStatCard('Total Saldo', formatter.format(currentBalance),
-              Icons.account_balance_wallet_rounded, Colors.blue, isDarkMode),
-          const SizedBox(width: 8),
-          _buildStatCard('Lencana', '$unlockedCount/10',
-              Icons.emoji_events_rounded, Colors.amber, isDarkMode),
+          // Row 1: Streak
+          _buildTableRow(
+            'Streak',
+            '$streak Hari',
+            Icons.whatshot_rounded,
+            Colors.orange,
+            isDarkMode,
+          ),
+          _buildTableHorizontalDivider(isDarkMode),
+          // Row 2: Total Saldo
+          _buildTableRow(
+            'Total Saldo',
+            formatter.format(currentBalance),
+            Icons.account_balance_wallet_rounded,
+            Colors.blue,
+            isDarkMode,
+          ),
+          _buildTableHorizontalDivider(isDarkMode),
+          // Row 3: Lencana
+          _buildTableRow(
+            'Lencana',
+            '$unlockedCount/$totalAchievements',
+            Icons.emoji_events_rounded,
+            Colors.amber,
+            isDarkMode,
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildStatCard(
+  Widget _buildTableRow(
       String label, String value, IconData icon, Color color, bool isDarkMode) {
-    return Expanded(
-      child: Container(
-        height: 110, // Fixed height kept as original
-        padding: const EdgeInsets.symmetric(
-            vertical: 10,
-            horizontal: 8), // Reduced vertical padding from 16 to 10
-        decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: isDarkMode ? 0.25 : 0.05),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          children: [
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 9.5,
-                color: isDarkMode ? Colors.white38 : Colors.black38,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 0.3,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, color: color, size: 16),
               ),
-            ),
-            const SizedBox(height: 8), // Reduced spacing from 12 to 8
-            Expanded(
-              child: Center(
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    value,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 13,
-                      height: 0.8,
-                      color: isDarkMode ? Colors.white : Colors.black87,
-                    ),
-                  ),
+              const SizedBox(width: 12),
+              Text(
+                label,
+                style: GoogleFonts.quicksand(
+                  fontSize: 12,
+                  color: isDarkMode ? Colors.white70 : Colors.black87,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
+            ],
+          ),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              value,
+              style: GoogleFonts.quicksand(
+                fontWeight: FontWeight.w900,
+                fontSize: 13.5,
+                color: isDarkMode ? Colors.white : Colors.black87,
+              ),
             ),
-            const SizedBox(height: 6), // Reduced spacing from 8 to 6
-            Icon(icon, color: color, size: 20),
-          ],
-        ),
+          ),
+        ],
       ),
+    );
+  }
+
+  Widget _buildTableHorizontalDivider(bool isDarkMode) {
+    return Divider(
+      height: 1,
+      thickness: 1,
+      color: isDarkMode
+          ? Colors.white.withValues(alpha: 0.06)
+          : Colors.black.withValues(alpha: 0.04),
     );
   }
 
   Widget _buildAchievementList(
       List<Achievement> achievements, bool isDarkMode) {
     return SizedBox(
-      height: 95, // Reduced from 110 to tighten the gap with the next section
+      height: 125, // Height updated to fit the new card design perfectly
       child: ListView.separated(
-        padding: const EdgeInsets.symmetric(horizontal: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
         scrollDirection: Axis.horizontal,
         itemCount: achievements.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 16),
+        separatorBuilder: (_, __) => const SizedBox(width: 12),
         itemBuilder: (context, index) {
           final item = achievements[index];
           final bool unlocked = item.isUnlocked;
+
           return Container(
-            width: 80,
+            width: 180, // Symmetrical, compact, and extremely neat card width
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: unlocked
+                    ? AppColors.primary.withValues(alpha: 0.15)
+                    : (isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.03)),
+                width: 1.2,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: isDarkMode ? 0.2 : 0.02),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Container(
-                  width: 50, // Reduced from 56
-                  height: 50, // Reduced from 56
-                  decoration: BoxDecoration(
-                    color: unlocked
-                        ? AppColors.primary.withValues(alpha: 0.1)
-                        : (isDarkMode ? Colors.white10 : Colors.grey.shade100),
-                    shape: BoxShape.circle,
-                    border: unlocked
-                        ? Border.all(
-                            color: AppColors.primary.withValues(alpha: 0.3))
-                        : null,
-                    boxShadow: unlocked
-                        ? [
-                            BoxShadow(
-                              color: AppColors.primary.withValues(alpha: 0.2),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            )
-                          ]
-                        : null,
-                  ),
-                  child: Icon(
-                    item.icon,
-                    size: 24,
-                    color: unlocked
-                        ? AppColors.primary
-                        : (isDarkMode ? Colors.white24 : Colors.grey.shade300),
+                // Top Row: Icon & Title & Status
+                Row(
+                  children: [
+                    Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: unlocked
+                            ? AppColors.primary.withValues(alpha: 0.1)
+                            : (isDarkMode ? Colors.white.withValues(alpha: 0.04) : Colors.grey.shade100),
+                        shape: BoxShape.circle,
+                        border: unlocked
+                            ? Border.all(
+                                color: AppColors.primary.withValues(alpha: 0.25),
+                                width: 1.2,
+                              )
+                            : null,
+                      ),
+                      child: Icon(
+                        unlocked ? item.icon : Icons.lock_outline_rounded,
+                        size: 15,
+                        color: unlocked
+                            ? AppColors.primary
+                            : (isDarkMode ? Colors.white24 : Colors.grey.shade400),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            item.title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.quicksand(
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w900,
+                              color: unlocked
+                                  ? (isDarkMode ? Colors.white : Colors.black87)
+                                  : (isDarkMode ? Colors.white38 : Colors.grey.shade500),
+                            ),
+                          ),
+                          Text(
+                            unlocked ? 'Terbuka' : 'Terkunci',
+                            style: GoogleFonts.quicksand(
+                              fontSize: 8,
+                              fontWeight: FontWeight.bold,
+                              color: unlocked
+                                  ? Colors.green.shade600
+                                  : Colors.orange.shade600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                
+                // Middle Description Text
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 2),
+                  child: Text(
+                    item.description,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.quicksand(
+                      fontSize: 8.5,
+                      height: 1.2,
+                      fontWeight: FontWeight.w600,
+                      color: isDarkMode ? Colors.white30 : Colors.black45,
+                    ),
                   ),
                 ),
-                const SizedBox(height: 4), // Reduced spacing from 8 to 4
-                Text(
-                  item.title,
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 9,
-                    height: 1.1,
-                    fontWeight: unlocked ? FontWeight.bold : FontWeight.bold,
-                    color: unlocked
-                        ? (isDarkMode ? Colors.white : Colors.black87)
-                        : (isDarkMode ? Colors.white24 : Colors.grey.shade400),
-                  ),
+
+                // Bottom Progress Tracker
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Progres',
+                          style: GoogleFonts.quicksand(
+                            fontSize: 7.5,
+                            fontWeight: FontWeight.bold,
+                            color: isDarkMode ? Colors.white30 : Colors.black38,
+                          ),
+                        ),
+                        Text(
+                          '${(item.progress * 100).toInt()}%',
+                          style: GoogleFonts.quicksand(
+                            fontSize: 8,
+                            fontWeight: FontWeight.w900,
+                            color: unlocked 
+                                ? AppColors.primary 
+                                : (isDarkMode ? Colors.white.withValues(alpha: 0.5) : Colors.grey.shade600),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 3),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(2),
+                      child: LinearProgressIndicator(
+                        value: item.progress,
+                        minHeight: 2.5,
+                        backgroundColor: isDarkMode ? Colors.white.withValues(alpha: 0.04) : Colors.grey.shade200,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          unlocked ? AppColors.primary : Colors.grey.shade400,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -893,9 +1412,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       padding: const EdgeInsets.only(top: 8, bottom: 8, left: 4),
       child: Text(
         title,
-        style: TextStyle(
+        style: GoogleFonts.quicksand(
           fontWeight: FontWeight.bold,
-          fontSize: 11,
+          fontSize: 12,
           color: Theme.of(context).textTheme.titleLarge?.color,
         ),
       ),
@@ -910,36 +1429,160 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   
 
   Widget _buildSettingTile(IconData icon, String title, VoidCallback onTap,
-      {Widget? trailing, String? subtitle, Color? color}) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: Material(
-          color: Colors.transparent,
+      {Widget? trailing, String? subtitle, Color? color, bool isDarkMode = false}) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
           child: ListTile(
-            onTap: onTap,
-            leading: Icon(icon, color: color ?? AppColors.primary),
-            title: Text(title,
-                style: TextStyle(
-                    fontSize: 10.5,
-                    color:
-                        color ?? Theme.of(context).textTheme.bodyLarge?.color,
-                    fontWeight: FontWeight.bold)),
+            leading: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: (color ?? AppColors.primary).withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, color: color ?? AppColors.primary, size: 16),
+            ),
+            title: Text(
+              title,
+              style: GoogleFonts.quicksand(
+                fontSize: 12,
+                color: color == Colors.red 
+                    ? Colors.red.shade600 
+                    : Theme.of(context).textTheme.bodyLarge?.color,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             subtitle: subtitle != null
-                ? Text(subtitle,
-                    style: TextStyle(
-                        fontSize: 9.5,
-                        color: Theme.of(context).textTheme.bodySmall?.color))
+                ? Text(
+                    subtitle,
+                    style: GoogleFonts.quicksand(
+                      fontSize: 10,
+                      color: Theme.of(context).textTheme.bodySmall?.color,
+                    ),
+                  )
                 : null,
             trailing: trailing ??
-                Icon(Icons.chevron_right,
-                    color: Theme.of(context).textTheme.bodySmall?.color),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.4),
+                  size: 16,
+                ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSettingGroup(List<Widget> children, bool isDarkMode) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: isDarkMode
+              ? Colors.white.withValues(alpha: 0.05)
+              : Colors.black.withValues(alpha: 0.03),
+          width: 1.2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDarkMode ? 0.25 : 0.05),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(22.8), // Perfectly seals inner content including the borders!
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: List.generate(children.length, (index) {
+            if (index == children.length - 1) {
+              return children[index];
+            }
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                children[index],
+                Divider(
+                  height: 1,
+                  thickness: 1,
+                  indent: 52, // Beautifully indented past the icon capsule!
+                  endIndent: 16,
+                  color: isDarkMode
+                      ? Colors.white.withValues(alpha: 0.06)
+                      : Colors.black.withValues(alpha: 0.04),
+                ),
+              ],
+            );
+          }),
+        ),
+      ),
+    );
+  }
+
+  void _showCurrencySelectionDialog(bool isDarkMode) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Theme.of(context).canvasColor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: Text(
+          'Pilih Mata Uang Utama',
+          style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildCurrencyOption('IDR', 'Rupiah Indonesia (Rp)', isDarkMode),
+            _buildCurrencyOption('USD', 'Dolar Amerika Serikat (\$)', isDarkMode),
+            _buildCurrencyOption('EUR', 'Euro Eropa (€)', isDarkMode),
+            _buildCurrencyOption('JPY', 'Yen Jepang (¥)', isDarkMode),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCurrencyOption(String value, String label, bool isDarkMode) {
+    final isSelected = _defaultCurrency == value;
+    return ListTile(
+      onTap: () {
+        _changeDefaultCurrency(value);
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Mata uang utama berhasil diubah ke $value ✓',
+              style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.white),
+            ),
+            backgroundColor: AppColors.primary,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          ),
+        );
+      },
+      leading: Container(
+        padding: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.primary.withValues(alpha: 0.1) : Colors.transparent,
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          isSelected ? Icons.check_circle_rounded : Icons.radio_button_off_rounded,
+          color: isSelected ? AppColors.primary : Theme.of(context).textTheme.bodySmall?.color,
+          size: 18,
+        ),
+      ),
+      title: Text(
+        label,
+        style: GoogleFonts.quicksand(
+          fontSize: 12,
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+          color: Theme.of(context).textTheme.bodyLarge?.color,
         ),
       ),
     );

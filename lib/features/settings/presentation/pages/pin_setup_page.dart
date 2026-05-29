@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:tabunganku/core/theme/app_colors.dart';
-import 'package:tabunganku/core/theme/theme_provider.dart';
 import 'package:tabunganku/features/settings/presentation/providers/security_provider.dart';
 
 class PinSetupPage extends ConsumerStatefulWidget {
@@ -12,11 +13,14 @@ class PinSetupPage extends ConsumerStatefulWidget {
   ConsumerState<PinSetupPage> createState() => _PinSetupPageState();
 }
 
-class _PinSetupPageState extends ConsumerState<PinSetupPage> {
+class _PinSetupPageState extends ConsumerState<PinSetupPage> with TickerProviderStateMixin {
   String _currentPin = "";
   bool _isOldPinStage = false;
   bool _isConfirmStage = false;
   String _firstPin = "";
+  late AnimationController _shakeController;
+  bool _isError = false;
+  String _errorMessage = "";
 
   @override
   void initState() {
@@ -25,9 +29,24 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage> {
     if (security.hasPin) {
       _isOldPinStage = true;
     }
+    _shakeController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+  }
+
+  @override
+  void dispose() {
+    _shakeController.dispose();
+    super.dispose();
   }
 
   void _onKeyPress(String value) {
+    setState(() {
+      _isError = false;
+      _errorMessage = "";
+    });
+
     if (value == "back") {
       if (_currentPin.isNotEmpty) {
         setState(() => _currentPin = _currentPin.substring(0, _currentPin.length - 1));
@@ -36,7 +55,10 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage> {
       if (_currentPin.length < 4) {
         setState(() => _currentPin += value);
         if (_currentPin.length == 4) {
-          _handlePinCompletion();
+          // Add a minor delay for completion visual feedback
+          Future.delayed(const Duration(milliseconds: 150), () {
+            if (mounted) _handlePinCompletion();
+          });
         }
       }
     }
@@ -52,14 +74,13 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage> {
           _currentPin = "";
         });
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('PIN Lama Salah!'),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-        setState(() => _currentPin = "");
+        setState(() {
+          _isError = true;
+          _errorMessage = 'PIN Lama Salah!';
+          _currentPin = "";
+        });
+        _shakeController.forward(from: 0);
+        HapticFeedback.vibrate();
       }
     } else if (!_isConfirmStage) {
       // Move to confirmation stage
@@ -75,26 +96,27 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage> {
         ref.read(securityProvider.notifier).setPin(_currentPin);
         context.pop();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('PIN Keamanan Berhasil Diatur! ✓'),
-            backgroundColor: Colors.green,
+          SnackBar(
+            content: Text(
+              'PIN Keamanan Berhasil Diatur! ✓',
+              style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.white),
+            ),
+            backgroundColor: Colors.green.shade600,
             behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           ),
         );
       } else {
         // Mismatch
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('PIN tidak cocok, silakan coba lagi.'),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
         setState(() {
+          _isError = true;
+          _errorMessage = 'PIN tidak cocok, silakan coba lagi.';
           _currentPin = "";
           _isConfirmStage = false;
           _firstPin = "";
         });
+        _shakeController.forward(from: 0);
+        HapticFeedback.vibrate();
       }
     }
   }
@@ -102,7 +124,7 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -110,7 +132,7 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded, color: colorScheme.onSurface),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: colorScheme.onSurface, size: 20),
           onPressed: () => context.pop(),
         ),
       ),
@@ -120,71 +142,126 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage> {
             return SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                constraints: BoxConstraints(minHeight: constraints.maxHeight - 50),
                 child: IntrinsicHeight(
                   child: Column(
                     children: [
-                      const SizedBox(height: 16),
-                      Icon(
-                        _isOldPinStage 
-                          ? Icons.lock_outline_rounded 
-                          : (_isConfirmStage ? Icons.verified_user_rounded : Icons.vpn_key_rounded),
-                        size: 64,
-                        color: colorScheme.primary,
+                      const Spacer(flex: 1),
+                      
+                      // Top Header Illustration Icon
+                      Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: 0.1),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: AppColors.primary.withValues(alpha: 0.15),
+                            width: 1.5,
+                          ),
+                        ),
+                        child: Icon(
+                          _isOldPinStage 
+                            ? Icons.lock_outline_rounded 
+                            : (_isConfirmStage ? Icons.gpp_good_rounded : Icons.shield_outlined),
+                          size: 34,
+                          color: AppColors.primary,
+                        ),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 24),
+                      
+                      // Title Text
                       Text(
                         _isOldPinStage 
                           ? 'PIN Lama' 
                           : (_isConfirmStage ? 'Konfirmasi PIN Baru' : 'Atur PIN Baru'),
-                        style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold, color: colorScheme.onSurface),
+                        style: GoogleFonts.quicksand(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w900,
+                          color: colorScheme.onSurface,
+                        ),
                       ),
                       const SizedBox(height: 8),
+                      
+                      // Subtitle Instructions
                       Text(
                         _isOldPinStage
-                          ? 'Masukkan PIN lama kamu'
+                          ? 'Masukkan PIN lama kamu untuk verifikasi'
                           : (_isConfirmStage 
-                            ? 'Masukkan kembali PIN baru kamu'
-                            : 'Gunakan 4 digit angka rahasia'),
+                            ? 'Masukkan kembali 4 digit PIN baru kamu'
+                            : 'Gunakan 4 digit angka rahasia untuk keamanan'),
                         textAlign: TextAlign.center,
-                        style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
+                        style: GoogleFonts.quicksand(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: isDarkMode ? Colors.white38 : Colors.black45,
+                        ),
                       ),
-                      const SizedBox(height: 40),
+                      const SizedBox(height: 36),
                       
-                      // PIN Indicators
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: List.generate(4, (index) {
-                          final isActive = index < _currentPin.length;
-                          return AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            width: 14,
-                            height: 14,
-                            margin: const EdgeInsets.symmetric(horizontal: 14),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: isActive ? colorScheme.primary : Colors.transparent,
-                              border: Border.all(
-                                color: isActive ? colorScheme.primary : colorScheme.outline.withValues(alpha: 0.3),
-                                width: 2,
-                              ),
-                              boxShadow: isActive ? [
-                                BoxShadow(
-                                  color: colorScheme.primary.withValues(alpha: 0.2),
-                                  blurRadius: 8,
-                                )
-                              ] : null,
+                      // PIN Indicators with Shake Animation
+                      AnimatedBuilder(
+                        animation: _shakeController,
+                        builder: (context, child) {
+                          final offset = Curves.elasticIn.transform(_shakeController.value) * 10;
+                          return Transform.translate(
+                            offset: Offset(offset, 0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: List.generate(4, (index) {
+                                final active = index < _currentPin.length;
+                                return AnimatedContainer(
+                                  duration: const Duration(milliseconds: 150),
+                                  margin: const EdgeInsets.symmetric(horizontal: 12),
+                                  width: 16,
+                                  height: 16,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: active ? AppColors.primary : AppColors.primary.withValues(alpha: 0.15),
+                                    border: Border.all(
+                                      color: active ? AppColors.primary : AppColors.primary.withValues(alpha: 0.3),
+                                      width: 1.5,
+                                    ),
+                                    boxShadow: active ? [
+                                      BoxShadow(
+                                        color: AppColors.primary.withValues(alpha: 0.3),
+                                        blurRadius: 10,
+                                        spreadRadius: 1,
+                                      )
+                                    ] : null,
+                                  ),
+                                );
+                              }),
                             ),
                           );
-                        }),
+                        },
                       ),
                       
-                      const Spacer(),
-                      const SizedBox(height: 40),
+                      const SizedBox(height: 20),
+                      
+                      // Error Message if Mismatch or Wrong
+                      if (_isError)
+                        Container(
+                          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+                          decoration: BoxDecoration(
+                            color: Colors.red.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            _errorMessage,
+                            style: GoogleFonts.quicksand(
+                              fontSize: 11,
+                              color: Colors.red.shade600,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        
+                      const Spacer(flex: 2),
                       
                       // Numeric Keypad
-                      _buildKeypad(),
-                      const SizedBox(height: 24),
+                      _buildKeypad(isDarkMode),
+                      const SizedBox(height: 32),
                     ],
                   ),
                 ),
@@ -196,57 +273,110 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage> {
     );
   }
 
-  Widget _buildKeypad() {
+  Widget _buildKeypad(bool isDarkMode) {
     return Column(
       children: [
-        for (var row in [['1', '2', '3'], ['4', '5', '6'], ['7', '8', '9'], [null, '0', 'back']])
+        for (var row in [['1', '2', '3'], ['4', '5', '6'], ['7', '8', '9']])
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12),
+            padding: const EdgeInsets.symmetric(vertical: 10),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                for (var key in row)
-                  key == null 
-                    ? const SizedBox(width: 80)
-                    : _buildKeypadButton(key),
+                for (var val in row) _buildKeypadButton(val, isDarkMode),
               ],
             ),
           ),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              // Empty left space to match Lock Screen symmetry
+              const SizedBox(width: 72),
+              _buildKeypadButton('0', isDarkMode),
+              _buildKeypadIconButton(Icons.backspace_outlined, _onBackspace, isDarkMode),
+            ],
+          ),
+        ),
       ],
     );
   }
 
-  Widget _buildKeypadButton(String key) {
-    final isBack = key == "back";
+  void _onBackspace() {
+    _onKeyPress("back");
+  }
+
+  Widget _buildKeypadButton(String value, bool isDarkMode) {
     final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
 
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () => _onKeyPress(key),
+        onTap: () => _onKeyPress(value),
         borderRadius: BorderRadius.circular(40),
         child: Container(
-          width: 80,
-          height: 80,
+          width: 72,
+          height: 72,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.2),
+            color: Theme.of(context).cardColor,
             border: Border.all(
-              color: colorScheme.outline.withValues(alpha: 0.3),
+              color: isDarkMode 
+                  ? Colors.white.withValues(alpha: 0.05) 
+                  : Colors.black.withValues(alpha: 0.03),
               width: 1.2,
             ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDarkMode ? 0.2 : 0.02),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
           child: Center(
-            child: isBack
-              ? Icon(Icons.backspace_rounded, size: 28, color: colorScheme.primary)
-              : Text(
-                  key,
-                  style: textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: colorScheme.onSurface,
-                  ),
-                ),
+            child: Text(
+              value,
+              style: GoogleFonts.quicksand(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: colorScheme.onSurface,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildKeypadIconButton(IconData icon, VoidCallback onTap, bool isDarkMode) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(40),
+        child: Container(
+          width: 72,
+          height: 72,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Theme.of(context).cardColor,
+            border: Border.all(
+              color: isDarkMode 
+                  ? Colors.white.withValues(alpha: 0.05) 
+                  : Colors.black.withValues(alpha: 0.03),
+              width: 1.2,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDarkMode ? 0.2 : 0.02),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Center(
+            child: Icon(icon, color: AppColors.primary, size: 24),
           ),
         ),
       ),

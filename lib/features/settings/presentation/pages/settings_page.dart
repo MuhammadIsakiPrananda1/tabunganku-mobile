@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:ui';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -9,11 +11,11 @@ import 'package:tabunganku/core/services/permission_service.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:image_cropper/image_cropper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tabunganku/main.dart' show flutterLocalNotificationsPlugin;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'package:tabunganku/core/theme/app_colors.dart';
 import 'package:tabunganku/core/theme/theme_provider.dart';
@@ -22,7 +24,6 @@ import 'package:tabunganku/providers/transaction_provider.dart';
 import 'package:tabunganku/models/transaction_model.dart';
 import 'package:tabunganku/features/settings/presentation/providers/security_provider.dart';
 import 'package:tabunganku/features/settings/presentation/providers/achievement_provider.dart';
-import 'package:tabunganku/providers/budget_provider.dart';
 import 'package:tabunganku/core/constants/app_version.dart';
 import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -40,7 +41,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   bool _isUploadingPhoto = false;
   String? _uploadError;
   bool _dailyReminder = false;
-  String _defaultCurrency = 'IDR';
   String _reminderTime = '19:00';
 
   @override
@@ -53,7 +53,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       _dailyReminder = prefs.getBool('pref_daily_reminder') ?? false;
-      _defaultCurrency = prefs.getString('pref_default_currency') ?? 'IDR';
       _reminderTime = prefs.getString('pref_reminder_time') ?? '19:00';
     });
   }
@@ -203,13 +202,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     await flutterLocalNotificationsPlugin.cancel(1001);
   }
 
-  Future<void> _changeDefaultCurrency(String currency) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('pref_default_currency', currency);
-    setState(() {
-      _defaultCurrency = currency;
-    });
-  }
 
   @override
   void dispose() {
@@ -845,9 +837,60 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 isDarkMode: isDarkMode,
               ),
               _buildSettingTile(
+                Icons.privacy_tip_outlined,
+                'Kebijakan Privasi',
+                () => _showPrivacyPolicyDialog(isDarkMode),
+                color: Colors.teal,
+                isDarkMode: isDarkMode,
+              ),
+              _buildSettingTile(
+                Icons.gavel_rounded,
+                'Syarat & Ketentuan',
+                () => _showTermsDialog(isDarkMode),
+                color: Colors.indigo,
+                isDarkMode: isDarkMode,
+              ),
+              _buildSettingTile(
+                Icons.star_outline_rounded,
+                'Beri Rating Aplikasi',
+                () => _openRateApp(),
+                subtitle: 'Bantu kami dengan penilaianmu ⭐',
+                color: Colors.amber,
+                isDarkMode: isDarkMode,
+              ),
+              _buildSettingTile(
+                Icons.feedback_outlined,
+                'Kirim Masukan / Feedback',
+                () => _showFeedbackDialog(isDarkMode),
+                subtitle: 'Saran & kritik sangat kami hargai',
+                color: Colors.orange,
+                isDarkMode: isDarkMode,
+              ),
+              _buildSettingTile(
                 Icons.info_outline_rounded,
                 'Tentang Aplikasi',
                 () => _showAboutDialog(),
+                isDarkMode: isDarkMode,
+              ),
+            ], isDarkMode),
+            const SizedBox(height: 16),
+
+            _buildSectionHeader('Data & Privasi'),
+            _buildSettingGroup([
+              _buildSettingTile(
+                Icons.download_rounded,
+                'Ekspor Semua Data (CSV)',
+                () => _exportAllDataAsCsv(transactions),
+                subtitle: 'Unduh seluruh riwayat transaksi sebagai file CSV',
+                color: Colors.green.shade700,
+                isDarkMode: isDarkMode,
+              ),
+              _buildSettingTile(
+                Icons.delete_sweep_rounded,
+                'Reset Data Transaksi',
+                () => _showResetDataDialog(isDarkMode),
+                subtitle: 'Hapus semua data transaksi secara permanen',
+                color: Colors.red,
                 isDarkMode: isDarkMode,
               ),
             ], isDarkMode),
@@ -1426,6 +1469,723 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         'Ayo raih target finansialmu lebih mudah dengan TabunganKu! Download aplikasi resmi di sini: https://tabunganku.neverlandstudio.my.id/ 🎉');
   }
 
+  // ── Kebijakan Privasi ────────────────────────────────────────────
+  void _showPrivacyPolicyDialog(bool isDarkMode) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => _buildInfoBottomSheet(
+        isDarkMode: isDarkMode,
+        icon: Icons.privacy_tip_outlined,
+        iconColor: Colors.teal,
+        title: 'Kebijakan Privasi',
+        subtitle: 'Terakhir diperbarui: Juni 2026',
+        content: [
+          _infoSection('📱 TabunganKu Adalah Aplikasi Lokal',
+              'Semua data yang kamu masukkan di TabunganKu — mulai dari catatan pemasukan & pengeluaran, target tabungan, celengan bersama, daftar belanja, hingga foto profil — semuanya tersimpan 100% di memori HP kamu sendiri. Tidak ada server, tidak ada cloud, tidak ada akun yang perlu dibuat.'),
+          _infoSection('📋 Data Apa yang Tersimpan?',
+              'TabunganKu menyimpan: (1) Nama dan foto profil yang kamu atur sendiri, (2) Riwayat transaksi pemasukan & pengeluaran, (3) Data target tabungan dan progresnya, (4) Data celengan bersama & anggota grup, (5) Daftar wishlist belanja, (6) Pengaturan PIN keamanan (dalam bentuk terenkripsi), dan (7) Preferensi aplikasi seperti tema dan waktu pengingat.'),
+          _infoSection('🔒 Keamanan Berlapis',
+              'Kamu bisa memasang PIN 6 digit dan/atau kunci biometrik (sidik jari/wajah) untuk mencegah orang lain mengakses aplikasi. PIN disimpan dalam bentuk hash terenkripsi, bukan teks biasa, sehingga bahkan pengembang pun tidak bisa membacanya.'),
+          _infoSection('📤 Berbagi Data — Hanya Atas Kemauanmu',
+              'TabunganKu tidak pernah mengirim datamu ke mana pun tanpa izin. Fitur ekspor PDF bulanan dan ekspor CSV hanya berjalan saat kamu menekan tombolnya sendiri, dan hasilnya langsung dikirim ke aplikasi yang kamu pilih (WhatsApp, email, dll).'),
+          _infoSection('🔔 Notifikasi Pengingat',
+              'Jika kamu mengaktifkan pengingat menabung harian, TabunganKu menjadwalkan notifikasi lokal di HP kamu. Notifikasi ini tidak melewati server manapun — sepenuhnya diproses oleh sistem Android/iOS di perangkatmu.'),
+          _infoSection('🗑️ Menghapus Data',
+              'Kamu bisa menghapus seluruh data transaksi kapan saja melalui menu Data & Privasi → Reset Data Transaksi. Untuk menghapus semua data aplikasi sekaligus, cukup hapus (uninstall) TabunganKu dari HP kamu.'),
+          _infoSection('📬 Ada Pertanyaan?',
+              'Hubungi tim Neverland Studio di Arlianto032@gmail.com. Kami dengan senang hati menjawab pertanyaan seputar privasi dan keamanan datamu.'),
+        ],
+      ),
+    );
+  }
+
+  // ── Syarat & Ketentuan ────────────────────────────────────────────
+  void _showTermsDialog(bool isDarkMode) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => _buildInfoBottomSheet(
+        isDarkMode: isDarkMode,
+        icon: Icons.gavel_rounded,
+        iconColor: Colors.indigo,
+        title: 'Syarat & Ketentuan',
+        subtitle: 'Berlaku sejak Juni 2026',
+        content: [
+          _infoSection('✅ Untuk Siapa TabunganKu?',
+              'TabunganKu dibuat khusus untuk kamu yang ingin mencatat keuangan pribadi secara mandiri — mulai dari pemasukan harian, pengeluaran, target menabung, hingga nabung bareng teman atau keluarga lewat fitur Celengan Bersama. Aplikasi ini tidak memerlukan internet maupun akun untuk digunakan.'),
+          _infoSection('📝 Tanggung Jawab Pengguna',
+              'Semua data yang kamu masukkan — jumlah uang, kategori, catatan — adalah tanggung jawabmu sepenuhnya. TabunganKu hanya mencatat apa yang kamu input; kami tidak memverifikasi kebenaran data keuanganmu. Pastikan kamu mencatat dengan teliti agar laporan keuanganmu akurat.'),
+          _infoSection('👥 Fitur Celengan Bersama',
+              'Fitur Nabung Bersama memungkinkan kamu membuat grup tabungan dan menambahkan anggota. Semua data grup disimpan lokal di perangkatmu. Kamu sebagai pembuat grup bertanggung jawab atas pengelolaan anggota dan transparansi dana di dalam grup tersebut.'),
+          _infoSection('📄 Ekspor & Laporan',
+              'Hasil ekspor PDF maupun CSV yang dihasilkan TabunganKu hanya bersifat ringkasan dari data yang kamu masukkan sendiri. Dokumen ini tidak memiliki kekuatan hukum sebagai laporan keuangan resmi dan tidak ditandatangani oleh pihak manapun.'),
+          _infoSection('🎨 Hak Cipta & Kepemilikan',
+              'Seluruh desain antarmuka, ikon, ilustrasi, nama "TabunganKu", dan kode sumber aplikasi ini adalah milik Neverland Studio. Dilarang menggandakan, memodifikasi, atau mendistribusikan ulang dalam bentuk apapun tanpa izin tertulis dari Neverland Studio.'),
+          _infoSection('⚠️ Batas Tanggung Jawab',
+              'TabunganKu adalah alat bantu pencatatan, bukan penasihat keuangan. Kami tidak bertanggung jawab atas keputusan finansial yang kamu buat berdasarkan data di aplikasi ini. Selalu bijak dalam mengelola keuanganmu.'),
+          _infoSection('🔄 Pembaruan Aplikasi',
+              'Neverland Studio sewaktu-waktu dapat merilis pembaruan yang menambahkan fitur baru atau mengubah tampilan. Dengan terus menggunakan TabunganKu setelah pembaruan, kamu dianggap menyetujui perubahan yang ada. Syarat & Ketentuan terbaru selalu bisa dibaca di menu ini.'),
+        ],
+      ),
+    );
+  }
+
+  // ── Beri Rating ────────────────────────────────────────────────────
+  Future<void> _openRateApp() async {
+    // Pesan rating yang sudah diisi otomatis
+    final message = Uri.encodeComponent(
+      'Halo kak! 👋\n\n'
+      'Aku mau kasih penilaian untuk aplikasi TabunganKu nih 💰\n\n'
+      '⭐ Rating: ___/5\n\n'
+      '💬 Komentar:\n'
+      '___(tulis komentar kamu di sini)___\n\n'
+      '— Dikirim dari TabunganKu v${AppVersion.version}',
+    );
+
+    final whatsappUrl = Uri.parse('https://wa.me/6281252254886?text=$message');
+
+    try {
+      await launchUrl(whatsappUrl, mode: LaunchMode.externalApplication);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Tidak dapat membuka WhatsApp. Pastikan WhatsApp sudah terpasang.',
+              style: GoogleFonts.quicksand(
+                  fontWeight: FontWeight.bold, color: Colors.white),
+            ),
+            backgroundColor: Colors.grey.shade700,
+            behavior: SnackBarBehavior.floating,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          ),
+        );
+      }
+    }
+  }
+
+  // ── Kirim Masukan / Feedback ────────────────────────────────────────
+  void _showFeedbackDialog(bool isDarkMode) {
+    final controller = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+    String selectedType = 'Saran';
+    int textLength = 0;
+    
+    final types = ['Saran', 'Bug / Masalah', 'Pertanyaan', 'Lainnya'];
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setModalState) => Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
+            decoration: BoxDecoration(
+              color: isDarkMode ? AppColors.surfaceDark : Colors.white,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(isDarkMode ? 0.2 : 0.05),
+                  blurRadius: 15,
+                  offset: const Offset(0, -4),
+                )
+              ]
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 36,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: 20),
+                    decoration: BoxDecoration(
+                      color: isDarkMode ? Colors.white.withOpacity(0.1) : Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.mail_outline_rounded,
+                      color: AppColors.primary,
+                      size: 22,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Kirim Masukan',
+                            style: GoogleFonts.quicksand(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                              color: isDarkMode ? Colors.white : Colors.black87,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Kritik atau saran Anda akan terkirim langsung ke Gmail kami.',
+                            style: GoogleFonts.quicksand(
+                              fontSize: 11,
+                              color: isDarkMode ? Colors.white38 : Colors.black54,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  'Jenis Masukan',
+                  style: GoogleFonts.quicksand(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.bold,
+                    color: isDarkMode ? Colors.white60 : Colors.black54,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  physics: const BouncingScrollPhysics(),
+                  child: Row(
+                    children: types.map((type) {
+                      final isSelected = selectedType == type;
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: GestureDetector(
+                          onTap: () => setModalState(() => selectedType = type),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 150),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? AppColors.primary
+                                  : (isDarkMode
+                                      ? Colors.white.withOpacity(0.04)
+                                      : Colors.grey.shade100),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: isSelected
+                                    ? AppColors.primary
+                                    : (isDarkMode ? Colors.white10 : Colors.grey.shade200),
+                                width: 1,
+                              ),
+                            ),
+                            child: Text(
+                              type,
+                              style: GoogleFonts.quicksand(
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.bold,
+                                color: isSelected
+                                    ? Colors.white
+                                    : (isDarkMode ? Colors.white60 : Colors.black54),
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Form(
+                  key: formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      TextFormField(
+                        controller: controller,
+                        maxLines: 5,
+                        maxLength: 500,
+                        onChanged: (val) {
+                          setModalState(() {
+                            textLength = val.length;
+                          });
+                        },
+                        style: GoogleFonts.quicksand(
+                          fontSize: 12.5,
+                          color: isDarkMode ? Colors.white : Colors.black87,
+                        ),
+                        buildCounter: (context, {required currentLength, required isFocused, maxLength}) => null,
+                        decoration: InputDecoration(
+                          hintText: 'Tulis pesan Anda di sini secara lengkap...',
+                          hintStyle: GoogleFonts.quicksand(
+                            fontSize: 12,
+                            color: isDarkMode ? Colors.white24 : Colors.black26,
+                          ),
+                          fillColor: isDarkMode
+                              ? Colors.white.withOpacity(0.03)
+                              : Colors.grey.shade50,
+                          filled: true,
+                          contentPadding: const EdgeInsets.all(16),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide(
+                              color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
+                              width: 1,
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide(
+                              color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
+                              width: 1,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide(
+                              color: AppColors.primary,
+                              width: 1.2,
+                            ),
+                          ),
+                          errorStyle: GoogleFonts.quicksand(
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.redAccent,
+                          ),
+                        ),
+                        validator: (val) {
+                          if (val == null || val.trim().isEmpty) {
+                            return 'Pesan tidak boleh kosong';
+                          }
+                          if (val.trim().length < 5) {
+                            return 'Pesan minimal 5 karakter';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 6),
+                      Padding(
+                        padding: const EdgeInsets.only(right: 4),
+                        child: Text(
+                          '$textLength / 500',
+                          style: GoogleFonts.quicksand(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                            color: textLength >= 450
+                                ? Colors.redAccent
+                                : (isDarkMode ? Colors.white38 : Colors.grey.shade500),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      if (formKey.currentState!.validate()) {
+                        Navigator.pop(ctx);
+                        
+                        final subject = Uri.encodeComponent('[TabunganKu Feedback] $selectedType');
+                        final body = Uri.encodeComponent(
+                          'Jenis: $selectedType\n\n'
+                          'Pesan:\n${controller.text.trim()}\n\n'
+                          '---\n'
+                          'Informasi Aplikasi:\n'
+                          '- Nama: TabunganKu\n'
+                          '- Versi: v${AppVersion.version}\n'
+                          '- Waktu: ${DateFormat('dd MMMM yyyy, HH:mm').format(DateTime.now())}\n'
+                        );
+
+                        final gmailAppUri = Uri.parse('googlegmail:///co?to=Arlianto032@gmail.com&subject=$subject&body=$body');
+                        final mailtoUri = Uri.parse('mailto:Arlianto032@gmail.com?subject=$subject&body=$body');
+                        final gmailWebUri = Uri.parse('https://mail.google.com/mail/?view=cm&fs=1&to=Arlianto032@gmail.com&su=$subject&body=$body');
+
+                        bool launched = false;
+
+                        try {
+                          if (await canLaunchUrl(gmailAppUri)) {
+                            launched = await launchUrl(gmailAppUri, mode: LaunchMode.externalApplication);
+                          }
+                        } catch (_) {}
+
+                        if (!launched) {
+                          try {
+                            if (await canLaunchUrl(mailtoUri)) {
+                              launched = await launchUrl(mailtoUri, mode: LaunchMode.externalApplication);
+                            }
+                          } catch (_) {}
+                        }
+
+                        if (!launched) {
+                          try {
+                            launched = await launchUrl(gmailWebUri, mode: LaunchMode.externalApplication);
+                          } catch (_) {}
+                        }
+
+                        if (!launched) {
+                          await Clipboard.setData(ClipboardData(
+                            text: 'Subject: [TabunganKu Feedback] $selectedType\n\nPesan:\n${controller.text.trim()}'
+                          ));
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'Gagal membuka email. Pesan disalin ke clipboard untuk dikirim manual.',
+                                  style: GoogleFonts.quicksand(
+                                      fontWeight: FontWeight.bold, color: Colors.white, fontSize: 11),
+                                ),
+                                backgroundColor: Colors.grey.shade800,
+                                behavior: SnackBarBehavior.floating,
+                                margin: const EdgeInsets.all(16),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12)),
+                              ),
+                            );
+                          }
+                        } else {
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Row(
+                                  children: [
+                                    const Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 18),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: Text(
+                                        'Membuka Gmail. Terima kasih atas masukan Anda.',
+                                        style: GoogleFonts.quicksand(
+                                            fontWeight: FontWeight.bold, color: Colors.white, fontSize: 11.5),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                backgroundColor: AppColors.primary,
+                                behavior: SnackBarBehavior.floating,
+                                margin: const EdgeInsets.all(16),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12)),
+                              ),
+                            );
+                          }
+                        }
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.orange,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16)),
+                      elevation: 0,
+                    ),
+                    child: Text(
+                      'Kirim Masukan',
+                      style: GoogleFonts.quicksand(
+                          fontWeight: FontWeight.bold, fontSize: 13),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ── Ekspor Semua Data CSV ─────────────────────────────────────────
+  Future<void> _exportAllDataAsCsv(List<TransactionModel> transactions) async {
+    if (transactions.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Belum ada data transaksi untuk diekspor.',
+            style: GoogleFonts.quicksand(
+                fontWeight: FontWeight.bold, color: Colors.white),
+          ),
+          backgroundColor: Colors.grey.shade700,
+          behavior: SnackBarBehavior.floating,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        ),
+      );
+      return;
+    }
+
+    try {
+      // Buat isi CSV
+      final buffer = StringBuffer();
+      buffer.writeln(
+          'No,Tanggal,Waktu,Judul,Kategori,Jenis,Nominal (Rp),Catatan');
+
+      final sorted = [...transactions]
+        ..sort((a, b) => b.date.compareTo(a.date));
+
+      for (int i = 0; i < sorted.length; i++) {
+        final t = sorted[i];
+        final dateStr = DateFormat('dd/MM/yyyy').format(t.date);
+        final timeStr = DateFormat('HH:mm').format(t.date);
+        final type = t.type == TransactionType.income ? 'Pemasukan' : 'Pengeluaran';
+        final note = t.description.replaceAll(',', ';').replaceAll('\n', ' ');
+        final title = t.title.replaceAll(',', ';');
+        buffer.writeln(
+            '${i + 1},$dateStr,$timeStr,$title,${t.category},$type,${t.amount.toInt()},$note');
+      }
+
+      final dir = await getTemporaryDirectory();
+      final fileName =
+          'TabunganKu_Export_${DateFormat('yyyyMMdd_HHmm').format(DateTime.now())}.csv';
+      final file = File('${dir.path}/$fileName');
+      await file.writeAsString(buffer.toString(), encoding: utf8);
+
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(file.path)],
+          text:
+              'Ekspor Data TabunganKu – ${transactions.length} transaksi',
+        ),
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Gagal mengekspor data: $e',
+              style: GoogleFonts.quicksand(
+                  fontWeight: FontWeight.bold, color: Colors.white),
+            ),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16)),
+          ),
+        );
+      }
+    }
+  }
+
+  // ── Reset Data Transaksi ──────────────────────────────────────────
+  void _showResetDataDialog(bool isDarkMode) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Theme.of(context).canvasColor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(Icons.delete_sweep_rounded,
+                  color: Colors.red, size: 20),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              'Reset Data?',
+              style: GoogleFonts.quicksand(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: Colors.red,
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.06),
+                borderRadius: BorderRadius.circular(16),
+                border:
+                    Border.all(color: Colors.red.withOpacity(0.15), width: 1),
+              ),
+              child: Text(
+                '⚠️ Tindakan ini akan menghapus SEMUA riwayat transaksi secara permanen dan tidak dapat dibatalkan. Sebaiknya ekspor data terlebih dahulu sebelum melanjutkan.',
+                style: GoogleFonts.quicksand(
+                  fontSize: 11,
+                  height: 1.6,
+                  fontWeight: FontWeight.w600,
+                  color: isDarkMode ? Colors.white70 : Colors.black54,
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Batal',
+              style: GoogleFonts.quicksand(fontWeight: FontWeight.bold),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await ref
+                  .read(transactionServiceProvider)
+                  .clearAllTransactions();
+              ref.invalidate(transactionsStreamProvider);
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      'Semua data transaksi telah dihapus.',
+                      style: GoogleFonts.quicksand(
+                          fontWeight: FontWeight.bold, color: Colors.white),
+                    ),
+                    backgroundColor: Colors.red.shade700,
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
+                  ),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+              elevation: 0,
+            ),
+            child: Text(
+              'Hapus Semua',
+              style:
+                  GoogleFonts.quicksand(fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── Helper: Info Bottom Sheet (Privacy & Terms) ───────────────────
+  Widget _buildInfoBottomSheet({
+    required bool isDarkMode,
+    required IconData icon,
+    required Color iconColor,
+    required String title,
+    required String subtitle,
+    required List<Widget> content,
+  }) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(24, 12, 24, 36),
+      decoration: BoxDecoration(
+        color: isDarkMode ? AppColors.surfaceDark : Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 20),
+              decoration: BoxDecoration(
+                color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: iconColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Icon(icon, color: iconColor, size: 22),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: GoogleFonts.quicksand(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: isDarkMode ? Colors.white : Colors.black87,
+                      ),
+                    ),
+                    Text(
+                      subtitle,
+                      style: GoogleFonts.quicksand(
+                        fontSize: 10,
+                        color: isDarkMode ? Colors.white38 : Colors.black45,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.5,
+            ),
+            child: SingleChildScrollView(
+              child: Column(children: content),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _infoSection(String heading, String body) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            heading,
+            style: GoogleFonts.quicksand(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: isDark ? Colors.white : Colors.black87,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            body,
+            style: GoogleFonts.quicksand(
+              fontSize: 11,
+              height: 1.6,
+              fontWeight: FontWeight.w600,
+              color: isDark ? Colors.white54 : Colors.black54,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   
 
   Widget _buildSettingTile(IconData icon, String title, VoidCallback onTap,
@@ -1519,70 +2279,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               ],
             );
           }),
-        ),
-      ),
-    );
-  }
-
-  void _showCurrencySelectionDialog(bool isDarkMode) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: Theme.of(context).canvasColor,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: Text(
-          'Pilih Mata Uang Utama',
-          style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 16),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildCurrencyOption('IDR', 'Rupiah Indonesia (Rp)', isDarkMode),
-            _buildCurrencyOption('USD', 'Dolar Amerika Serikat (\$)', isDarkMode),
-            _buildCurrencyOption('EUR', 'Euro Eropa (€)', isDarkMode),
-            _buildCurrencyOption('JPY', 'Yen Jepang (¥)', isDarkMode),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCurrencyOption(String value, String label, bool isDarkMode) {
-    final isSelected = _defaultCurrency == value;
-    return ListTile(
-      onTap: () {
-        _changeDefaultCurrency(value);
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Mata uang utama berhasil diubah ke $value ✓',
-              style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.white),
-            ),
-            backgroundColor: AppColors.primary,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          ),
-        );
-      },
-      leading: Container(
-        padding: const EdgeInsets.all(6),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary.withValues(alpha: 0.1) : Colors.transparent,
-          shape: BoxShape.circle,
-        ),
-        child: Icon(
-          isSelected ? Icons.check_circle_rounded : Icons.radio_button_off_rounded,
-          color: isSelected ? AppColors.primary : Theme.of(context).textTheme.bodySmall?.color,
-          size: 18,
-        ),
-      ),
-      title: Text(
-        label,
-        style: GoogleFonts.quicksand(
-          fontSize: 12,
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-          color: Theme.of(context).textTheme.bodyLarge?.color,
         ),
       ),
     );

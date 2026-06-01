@@ -1,11 +1,10 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tabunganku/core/theme/app_colors.dart';
 import 'package:tabunganku/core/theme/theme_provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class KontakDaruratFinansialPage extends ConsumerStatefulWidget {
   const KontakDaruratFinansialPage({super.key});
@@ -15,8 +14,8 @@ class KontakDaruratFinansialPage extends ConsumerStatefulWidget {
 }
 
 class _KontakDaruratFinansialPageState extends ConsumerState<KontakDaruratFinansialPage> {
-  final String _prefKeyCustomCS = 'custom_emergency_cs_v1';
   List<Map<String, dynamic>> _customContacts = [];
+  final _formKey = GlobalKey<FormState>();
 
   // Controllers for Custom CS
   final TextEditingController _instController = TextEditingController();
@@ -93,7 +92,6 @@ class _KontakDaruratFinansialPageState extends ConsumerState<KontakDaruratFinans
   @override
   void initState() {
     super.initState();
-    _loadCustomCS();
   }
 
   @override
@@ -105,28 +103,13 @@ class _KontakDaruratFinansialPageState extends ConsumerState<KontakDaruratFinans
     super.dispose();
   }
 
-  Future<void> _loadCustomCS() async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_prefKeyCustomCS);
-    if (raw != null) {
-      final decoded = jsonDecode(raw) as List;
-      _customContacts = decoded.map((e) => Map<String, dynamic>.from(e)).toList();
-    }
-    if (mounted) setState(() {});
-  }
+  void _addCustomCS() {
+    if (!_formKey.currentState!.validate()) return;
 
-  Future<void> _saveCustomCS() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_prefKeyCustomCS, jsonEncode(_customContacts));
-  }
-
-  void _addCustomCS() async {
     final inst = _instController.text.trim();
     final phone = _phoneController.text.trim();
     final email = _emailController.text.trim();
     final note = _noteController.text.trim();
-
-    if (inst.isEmpty || phone.isEmpty) return;
 
     final newContact = {
       'id': DateTime.now().millisecondsSinceEpoch.toString(),
@@ -140,7 +123,6 @@ class _KontakDaruratFinansialPageState extends ConsumerState<KontakDaruratFinans
     setState(() {
       _customContacts.insert(0, newContact);
     });
-    await _saveCustomCS();
 
     _instController.clear();
     _phoneController.clear();
@@ -162,11 +144,10 @@ class _KontakDaruratFinansialPageState extends ConsumerState<KontakDaruratFinans
     }
   }
 
-  void _deleteCustomCS(String id) async {
+  void _deleteCustomCS(String id) {
     setState(() {
       _customContacts.removeWhere((c) => c['id'] == id);
     });
-    await _saveCustomCS();
   }
 
   void _performCopy(String label, String value) {
@@ -183,6 +164,30 @@ class _KontakDaruratFinansialPageState extends ConsumerState<KontakDaruratFinans
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
+  }
+
+  Future<void> _makePhoneCall(String phone) async {
+    final Uri launchUri = Uri(
+      scheme: 'tel',
+      path: phone,
+    );
+    try {
+      await launchUrl(launchUri, mode: LaunchMode.externalApplication);
+    } catch (_) {
+      _performCopy('Nomor Telepon CS', phone);
+    }
+  }
+
+  Future<void> _sendEmail(String email) async {
+    final Uri launchUri = Uri(
+      scheme: 'mailto',
+      path: email,
+    );
+    try {
+      await launchUrl(launchUri, mode: LaunchMode.externalApplication);
+    } catch (_) {
+      _performCopy('Email CS', email);
+    }
   }
 
   @override
@@ -205,7 +210,7 @@ class _KontakDaruratFinansialPageState extends ConsumerState<KontakDaruratFinans
           icon: Icon(Icons.arrow_back_ios_new_rounded, color: contentColor, size: 20),
         ),
         title: Text(
-          '📞 Kontak Darurat Finansial',
+          'Kontak Darurat Finansial',
           style: GoogleFonts.quicksand(
             fontWeight: FontWeight.bold,
             fontSize: 16,
@@ -256,14 +261,14 @@ class _KontakDaruratFinansialPageState extends ConsumerState<KontakDaruratFinans
 
           // Custom Contacts List Section
           if (_customContacts.isNotEmpty) ...[
-            _buildSectionHeader('📌 Kontak Darurat Pribadi Anda', isDarkMode),
+            _buildSectionHeader('Kontak Darurat Pribadi Anda', isDarkMode),
             const SizedBox(height: 8),
             ..._customContacts.map((c) => _buildContactCard(c, isDarkMode, contentColor, accentColor, isCustom: true)),
             const SizedBox(height: 20),
           ],
 
           // Prepopulated CS Section
-          _buildSectionHeader('🏢 Layanan Pengaduan Resmi Finansial', isDarkMode),
+          _buildSectionHeader('Layanan Pengaduan Resmi Finansial', isDarkMode),
           const SizedBox(height: 8),
           ..._prepopulatedCS.map((c) => _buildContactCard(c, isDarkMode, contentColor, accentColor, isCustom: false)),
         ],
@@ -377,7 +382,7 @@ class _KontakDaruratFinansialPageState extends ConsumerState<KontakDaruratFinans
                 // Call Phone Card Action
                 Expanded(
                   child: InkWell(
-                    onTap: () => _performCopy('Nomor Telepon CS', phone),
+                    onTap: () => _makePhoneCall(phone),
                     borderRadius: BorderRadius.circular(10),
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -408,7 +413,7 @@ class _KontakDaruratFinansialPageState extends ConsumerState<KontakDaruratFinans
                   // Copy Email
                   Expanded(
                     child: InkWell(
-                      onTap: () => _performCopy('Email CS', email),
+                      onTap: () => _sendEmail(email),
                       borderRadius: BorderRadius.circular(10),
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 8),
@@ -459,129 +464,213 @@ class _KontakDaruratFinansialPageState extends ConsumerState<KontakDaruratFinans
         final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
         final inputBg = isDarkMode ? Colors.white.withOpacity(0.04) : AppColors.background;
 
+        AutovalidateMode _autoValidate = AutovalidateMode.disabled;
         return StatefulBuilder(
           builder: (context, setModalState) {
             return Padding(
               padding: EdgeInsets.fromLTRB(20, 20, 20, MediaQuery.of(context).viewInsets.bottom + 24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                    child: Container(
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
-                        borderRadius: BorderRadius.circular(2),
+              child: SingleChildScrollView(
+                child: Form(
+                  key: _formKey,
+                  autovalidateMode: _autoValidate,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    'Tambah Kontak Finansial Penting',
-                    style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 15, color: contentColor),
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Institution Name
-                  Text(
-                    'Nama Instansi / Kontak',
-                    style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
-                  ),
-                  const SizedBox(height: 6),
-                  TextFormField(
-                    controller: _instController,
-                    style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: inputBg,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                      hintText: 'Masukkan Nama Instansi / Kontak',
-                      hintStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.grey.shade400, fontSize: 12.5),
+                    const SizedBox(height: 20),
+                    Text(
+                      'Tambah Kontak Finansial Penting',
+                      style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 15, color: contentColor),
                     ),
-                  ),
-                  const SizedBox(height: 16),
+                    const SizedBox(height: 20),
 
-                  // Phone Number
-                  Text(
-                    'Nomor Telepon CS',
-                    style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
-                  ),
-                  const SizedBox(height: 6),
-                  TextFormField(
-                    controller: _phoneController,
-                    keyboardType: TextInputType.phone,
-                    style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: inputBg,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                      hintText: 'Masukkan Nomor Telepon',
-                      hintStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.grey.shade400, fontSize: 12.5),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Email
-                  Text(
-                    'Email CS (Opsional)',
-                    style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
-                  ),
-                  const SizedBox(height: 6),
-                  TextFormField(
-                    controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: inputBg,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                      hintText: 'Masukkan Alamat Email',
-                      hintStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.grey.shade400, fontSize: 12.5),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Notes
-                  Text(
-                    'Catatan / Penjelasan Ringkas (Opsional)',
-                    style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
-                  ),
-                  const SizedBox(height: 6),
-                  TextFormField(
-                    controller: _noteController,
-                    style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: inputBg,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                      hintText: 'Masukkan Catatan / Penjelasan Ringkas',
-                      hintStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.grey.shade400, fontSize: 12.5),
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  SizedBox(
-                    width: double.infinity,
-                    height: 48,
-                    child: ElevatedButton(
-                      onPressed: _addCustomCS,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: accentColor,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        elevation: 0,
-                      ),
-                      child: Text(
-                        'Simpan Kontak Darurat',
-                        style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.white),
+                    // Institution Name
+                    RichText(
+                      text: TextSpan(
+                        text: 'Nama Instansi / Kontak',
+                        style: GoogleFonts.quicksand(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 10,
+                          color: contentColor.withOpacity(0.4),
+                        ),
+                        children: [
+                          TextSpan(
+                            text: ' *',
+                            style: GoogleFonts.quicksand(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 10,
+                              color: Colors.redAccent,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 6),
+                    TextFormField(
+                      controller: _instController,
+                      style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Nama instansi tidak boleh kosong';
+                        }
+                        return null;
+                      },
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: inputBg,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                        errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.redAccent, width: 1.5)),
+                        focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.redAccent, width: 1.5)),
+                        errorStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10.5, color: Colors.redAccent),
+                        hintText: 'Masukkan Nama Instansi / Kontak',
+                        hintStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.grey.shade400, fontSize: 12.5),
+                        prefixIcon: Icon(
+                          Icons.business_rounded,
+                          color: accentColor,
+                          size: 18,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Phone Number
+                    RichText(
+                      text: TextSpan(
+                        text: 'Nomor Telepon CS',
+                        style: GoogleFonts.quicksand(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 10,
+                          color: contentColor.withOpacity(0.4),
+                        ),
+                        children: [
+                          TextSpan(
+                            text: ' *',
+                            style: GoogleFonts.quicksand(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 10,
+                              color: Colors.redAccent,
+                        ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    TextFormField(
+                      controller: _phoneController,
+                      keyboardType: TextInputType.phone,
+                      style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Nomor telepon tidak boleh kosong';
+                        }
+                        return null;
+                      },
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: inputBg,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                        errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.redAccent, width: 1.5)),
+                        focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.redAccent, width: 1.5)),
+                        errorStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10.5, color: Colors.redAccent),
+                        hintText: 'Masukkan Nomor Telepon',
+                        hintStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.grey.shade400, fontSize: 12.5),
+                        prefixIcon: Icon(
+                          Icons.phone_rounded,
+                          color: accentColor,
+                          size: 18,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Email
+                    Text(
+                      'Email CS (Opsional)',
+                      style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
+                    ),
+                    const SizedBox(height: 6),
+                    TextFormField(
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: inputBg,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                        hintText: 'Masukkan Alamat Email',
+                        hintStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.grey.shade400, fontSize: 12.5),
+                        prefixIcon: Icon(
+                          Icons.email_rounded,
+                          color: accentColor,
+                          size: 18,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Notes
+                    Text(
+                      'Catatan / Penjelasan Ringkas (Opsional)',
+                      style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
+                    ),
+                    const SizedBox(height: 6),
+                    TextFormField(
+                      controller: _noteController,
+                      style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: inputBg,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                        hintText: 'Masukkan Catatan / Penjelasan Ringkas',
+                        hintStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.grey.shade400, fontSize: 12.5),
+                        prefixIcon: Icon(
+                          Icons.note_alt_rounded,
+                          color: accentColor,
+                          size: 18,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          setModalState(() {
+                            _autoValidate = AutovalidateMode.onUserInteraction;
+                          });
+                          _addCustomCS();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: accentColor,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          elevation: 0,
+                        ),
+                        child: Text(
+                          'Simpan Kontak Darurat',
+                          style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            );
+            ),
+          );
           },
         );
       },

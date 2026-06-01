@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tabunganku/core/security/secure_storage_service.dart';
 import 'package:tabunganku/core/theme/app_colors.dart';
 import 'package:tabunganku/core/theme/theme_provider.dart';
 
@@ -15,9 +15,10 @@ class BrankasFinansialPage extends ConsumerStatefulWidget {
 }
 
 class _BrankasFinansialPageState extends ConsumerState<BrankasFinansialPage> {
-  final String _prefKeyVault = 'financial_vault_v1';
   List<Map<String, dynamic>> _vaultItems = [];
   bool _isObscured = true; // Security obscure toggle
+  final _brankasFormKey = GlobalKey<FormState>();
+  final SecureStorageService _secureStorage = SecureStorageService();
 
   // Dialogue controllers
   final TextEditingController _titleController = TextEditingController();
@@ -29,7 +30,34 @@ class _BrankasFinansialPageState extends ConsumerState<BrankasFinansialPage> {
   @override
   void initState() {
     super.initState();
-    _loadVaultData();
+    _loadVaultItems();
+  }
+
+  Future<void> _loadVaultItems() async {
+    try {
+      final userId = await _secureStorage.getUserId() ?? 'default_user';
+      final raw = await _secureStorage.readSecureData('brankas_finansial_$userId');
+      if (raw != null && raw.isNotEmpty) {
+        final decoded = jsonDecode(raw);
+        if (decoded is List) {
+          setState(() {
+            _vaultItems = decoded.map((e) => Map<String, dynamic>.from(e)).toList();
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('Error loading vault items: $e');
+    }
+  }
+
+  Future<void> _saveVaultItems() async {
+    try {
+      final userId = await _secureStorage.getUserId() ?? 'default_user';
+      final raw = jsonEncode(_vaultItems);
+      await _secureStorage.writeSecureData('brankas_finansial_$userId', raw);
+    } catch (e) {
+      debugPrint('Error saving vault items: $e');
+    }
   }
 
   @override
@@ -41,30 +69,12 @@ class _BrankasFinansialPageState extends ConsumerState<BrankasFinansialPage> {
     super.dispose();
   }
 
-  Future<void> _loadVaultData() async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_prefKeyVault);
-    if (raw != null) {
-      final decoded = jsonDecode(raw) as List;
-      _vaultItems = decoded.map((e) => Map<String, dynamic>.from(e)).toList();
-    } else {
-      _vaultItems = [];
-    }
-    if (mounted) setState(() {});
-  }
-
-  Future<void> _saveVaultData() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_prefKeyVault, jsonEncode(_vaultItems));
-  }
-
-  void _addItem() async {
+  void _addItem() {
+    if (!_brankasFormKey.currentState!.validate()) return;
     final title = _titleController.text.trim();
     final val1 = _value1Controller.text.trim();
     final val2 = _value2Controller.text.trim();
     final notes = _notesController.text.trim();
-
-    if (title.isEmpty || val1.isEmpty) return;
 
     final newItem = {
       'id': DateTime.now().millisecondsSinceEpoch.toString(),
@@ -78,7 +88,7 @@ class _BrankasFinansialPageState extends ConsumerState<BrankasFinansialPage> {
     setState(() {
       _vaultItems.add(newItem);
     });
-    await _saveVaultData();
+    _saveVaultItems();
 
     _titleController.clear();
     _value1Controller.clear();
@@ -100,11 +110,11 @@ class _BrankasFinansialPageState extends ConsumerState<BrankasFinansialPage> {
     }
   }
 
-  void _deleteItem(String id) async {
+  void _deleteItem(String id) {
     setState(() {
       _vaultItems.removeWhere((item) => item['id'] == id);
     });
-    await _saveVaultData();
+    _saveVaultItems();
   }
 
   void _copyToClipboard(String label, String value) {
@@ -155,7 +165,7 @@ class _BrankasFinansialPageState extends ConsumerState<BrankasFinansialPage> {
           icon: Icon(Icons.arrow_back_ios_new_rounded, color: contentColor, size: 20),
         ),
         title: Text(
-          '📁 Brankas Finansial',
+          'Brankas Finansial',
           style: GoogleFonts.quicksand(
             fontWeight: FontWeight.bold,
             fontSize: 16,
@@ -219,10 +229,10 @@ class _BrankasFinansialPageState extends ConsumerState<BrankasFinansialPage> {
           const SizedBox(height: 24),
 
           // Categories Sections
-          _buildCategoryGroup('💳 Rekening Bank', bankItems, isDarkMode, contentColor, accentColor, 'Nomor Rekening', 'Atas Nama'),
-          _buildCategoryGroup('🛡️ Polis Asuransi', polisItems, isDarkMode, contentColor, accentColor, 'Nomor Polis', 'Info Detail'),
-          _buildCategoryGroup('📈 Portofolio & Broker', investItems, isDarkMode, contentColor, accentColor, 'ID Investasi', 'Detail Akun'),
-          _buildCategoryGroup('📄 Dokumen & Lainnya', docItems, isDarkMode, contentColor, accentColor, 'Kode / Kunci', 'Keterangan'),
+          _buildCategoryGroup('Rekening Bank', bankItems, isDarkMode, contentColor, accentColor, 'Nomor Rekening', 'Atas Nama'),
+          _buildCategoryGroup('Polis Asuransi', polisItems, isDarkMode, contentColor, accentColor, 'Nomor Polis', 'Info Detail'),
+          _buildCategoryGroup('Portofolio & Broker', investItems, isDarkMode, contentColor, accentColor, 'ID Investasi', 'Detail Akun'),
+          _buildCategoryGroup('Dokumen & Lainnya', docItems, isDarkMode, contentColor, accentColor, 'Kode / Kunci', 'Keterangan'),
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -394,166 +404,278 @@ class _BrankasFinansialPageState extends ConsumerState<BrankasFinansialPage> {
         final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
         final inputBg = isDarkMode ? Colors.white.withOpacity(0.04) : AppColors.background;
         
+        AutovalidateMode _autoValidate = AutovalidateMode.disabled;
         return StatefulBuilder(
           builder: (context, setModalState) {
             return Padding(
               padding: EdgeInsets.fromLTRB(20, 20, 20, MediaQuery.of(context).viewInsets.bottom + 24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                    child: Container(
-                      width: 40,
-                      height: 4,
+              child: SingleChildScrollView(
+                child: Form(
+                  key: _brankasFormKey,
+                  autovalidateMode: _autoValidate,
+                  child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      'Simpan Informasi Brankas',
+                      style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 15, color: contentColor),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Category selector
+                    Text(
+                      'Kategori',
+                      style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
+                    ),
+                    const SizedBox(height: 6),
+                    Container(
+                      height: 48,
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
                       decoration: BoxDecoration(
-                        color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
-                        borderRadius: BorderRadius.circular(2),
+                        color: inputBg,
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    'Simpan Informasi Brankas',
-                    style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 15, color: contentColor),
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Category selector
-                  Text(
-                    'Kategori',
-                    style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
-                  ),
-                  const SizedBox(height: 6),
-                  Container(
-                    height: 48,
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    decoration: BoxDecoration(
-                      color: inputBg,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        value: _selectedCategory,
-                        isExpanded: true,
-                        dropdownColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
-                        style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: contentColor, fontSize: 13),
-                        items: const [
-                          DropdownMenuItem(value: 'Rekening', child: Text('💳 Rekening Bank')),
-                          DropdownMenuItem(value: 'Polis', child: Text('🛡️ Polis Asuransi')),
-                          DropdownMenuItem(value: 'Investasi', child: Text('📈 Portofolio / Broker')),
-                          DropdownMenuItem(value: 'Dokumen', child: Text('📄 Dokumen / Lainnya')),
+                      child: Row(
+                        children: [
+                          Icon(
+                            _selectedCategory == 'Rekening' ? Icons.credit_card_rounded :
+                            _selectedCategory == 'Polis' ? Icons.security_rounded :
+                            _selectedCategory == 'Investasi' ? Icons.analytics_rounded : Icons.description_rounded,
+                            color: accentColor,
+                            size: 18,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton<String>(
+                                value: _selectedCategory,
+                                isExpanded: true,
+                                dropdownColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
+                                style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: contentColor, fontSize: 13),
+                                items: const [
+                                  DropdownMenuItem(
+                                    value: 'Rekening',
+                                    child: Text('Rekening Bank'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'Polis',
+                                    child: Text('Polis Asuransi'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'Investasi',
+                                    child: Text('Portofolio / Broker'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'Dokumen',
+                                    child: Text('Dokumen / Lainnya'),
+                                  ),
+                                ],
+                                onChanged: (val) {
+                                  setModalState(() {
+                                    _selectedCategory = val ?? 'Rekening';
+                                  });
+                                },
+                              ),
+                            ),
+                          ),
                         ],
-                        onChanged: (val) {
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Title
+                    RichText(
+                      text: TextSpan(
+                        text: 'Nama Layanan / Judul',
+                        style: GoogleFonts.quicksand(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 10,
+                          color: contentColor.withOpacity(0.4),
+                        ),
+                        children: [
+                          TextSpan(
+                            text: ' *',
+                            style: GoogleFonts.quicksand(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 10,
+                              color: Colors.redAccent,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    TextFormField(
+                      controller: _titleController,
+                      style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Nama layanan tidak boleh kosong';
+                        }
+                        return null;
+                      },
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: inputBg,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                        errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.redAccent, width: 1.5)),
+                        focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.redAccent, width: 1.5)),
+                        errorStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10.5, color: Colors.redAccent),
+                        hintText: 'Masukkan Nama Layanan / Judul',
+                        hintStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.grey.shade400, fontSize: 12.5),
+                        prefixIcon: Icon(
+                          Icons.title_rounded,
+                          color: accentColor,
+                          size: 18,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Value 1 (required)
+                    RichText(
+                      text: TextSpan(
+                        text: _selectedCategory == 'Rekening' ? 'Nomor Rekening' :
+                        _selectedCategory == 'Polis' ? 'Nomor Polis' :
+                        _selectedCategory == 'Investasi' ? 'User ID / Email Broker' : 'Kode / No Dokumen',
+                        style: GoogleFonts.quicksand(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 10,
+                          color: contentColor.withOpacity(0.4),
+                        ),
+                        children: [
+                          TextSpan(
+                            text: ' *',
+                            style: GoogleFonts.quicksand(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 10,
+                              color: Colors.redAccent,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    TextFormField(
+                      controller: _value1Controller,
+                      style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Kolom ini tidak boleh kosong';
+                        }
+                        return null;
+                      },
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: inputBg,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                        errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.redAccent, width: 1.5)),
+                        focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.redAccent, width: 1.5)),
+                        errorStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10.5, color: Colors.redAccent),
+                        hintText: 'Masukkan Nomor / Detail Kredensial',
+                        hintStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.grey.shade400, fontSize: 12.5),
+                        prefixIcon: Icon(
+                          _selectedCategory == 'Rekening' ? Icons.credit_card_rounded :
+                          _selectedCategory == 'Polis' ? Icons.security_rounded :
+                          _selectedCategory == 'Investasi' ? Icons.analytics_rounded : Icons.description_rounded,
+                          color: accentColor,
+                          size: 18,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Value 2
+                    Text(
+                      _selectedCategory == 'Rekening' ? 'Atas Nama Rekening (Opsional)' :
+                      _selectedCategory == 'Polis' ? 'Info Manfaat / Tertanggung (Opsional)' :
+                      _selectedCategory == 'Investasi' ? 'User ID Lainnya (Opsional)' : 'Detail / Keterangan Tambahan',
+                      style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
+                    ),
+                    const SizedBox(height: 6),
+                    TextFormField(
+                      controller: _value2Controller,
+                      style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: inputBg,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                        hintText: 'Masukkan Data Pelengkap',
+                        hintStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.grey.shade400, fontSize: 12.5),
+                        prefixIcon: Icon(
+                          Icons.info_outline_rounded,
+                          color: accentColor,
+                          size: 18,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Notes
+                    Text(
+                      'Catatan Ringkas (Opsional)',
+                      style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
+                    ),
+                    const SizedBox(height: 6),
+                    TextFormField(
+                      controller: _notesController,
+                      style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: inputBg,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                        hintText: 'Masukkan Catatan Ringkas',
+                        hintStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.grey.shade400, fontSize: 12.5),
+                        prefixIcon: Icon(
+                          Icons.sticky_note_2_rounded,
+                          color: accentColor,
+                          size: 18,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 24),
+                    
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: ElevatedButton(
+                        onPressed: () {
                           setModalState(() {
-                            _selectedCategory = val ?? 'Rekening';
+                            _autoValidate = AutovalidateMode.onUserInteraction;
                           });
+                          _addItem();
                         },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: accentColor,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          elevation: 0,
+                        ),
+                        child: Text(
+                          'Kunci & Simpan di Brankas',
+                          style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.white),
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Title
-                  Text(
-                    'Nama Layanan / Judul',
-                    style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
-                  ),
-                  const SizedBox(height: 6),
-                  TextFormField(
-                    controller: _titleController,
-                    style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: inputBg,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                      hintText: 'Masukkan Nama Layanan / Judul',
-                      hintStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.grey.shade400, fontSize: 12.5),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Value 1
-                  Text(
-                    _selectedCategory == 'Rekening' ? 'Nomor Rekening' :
-                    _selectedCategory == 'Polis' ? 'Nomor Polis' :
-                    _selectedCategory == 'Investasi' ? 'User ID / Email Broker' : 'Kode / No Dokumen',
-                    style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
-                  ),
-                  const SizedBox(height: 6),
-                  TextFormField(
-                    controller: _value1Controller,
-                    style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: inputBg,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                      hintText: 'Masukkan Nomor / Detail Kredensial',
-                      hintStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.grey.shade400, fontSize: 12.5),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Value 2
-                  Text(
-                    _selectedCategory == 'Rekening' ? 'Atas Nama Rekening (Opsional)' :
-                    _selectedCategory == 'Polis' ? 'Info Manfaat / Tertanggung (Opsional)' :
-                    _selectedCategory == 'Investasi' ? 'User ID Lainnya (Opsional)' : 'Detail / Keterangan Tambahan',
-                    style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
-                  ),
-                  const SizedBox(height: 6),
-                  TextFormField(
-                    controller: _value2Controller,
-                    style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: inputBg,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                      hintText: 'Masukkan Data Pelengkap',
-                      hintStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.grey.shade400, fontSize: 12.5),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Notes
-                  Text(
-                    'Catatan Ringkas (Opsional)',
-                    style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
-                  ),
-                  const SizedBox(height: 6),
-                  TextFormField(
-                    controller: _notesController,
-                    style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: inputBg,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                      hintText: 'Masukkan Catatan Ringkas',
-                      hintStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.grey.shade400, fontSize: 12.5),
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-                  
-                  SizedBox(
-                    width: double.infinity,
-                    height: 48,
-                    child: ElevatedButton(
-                      onPressed: _addItem,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: accentColor,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        elevation: 0,
-                      ),
-                      child: Text(
-                        'Kunci & Simpan di Brankas',
-                        style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.white),
-                      ),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            );
+            ),
+          );
           },
         );
       },

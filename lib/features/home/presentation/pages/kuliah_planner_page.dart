@@ -1,11 +1,9 @@
-import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tabunganku/core/theme/app_colors.dart';
 import 'package:tabunganku/core/theme/theme_provider.dart';
 
@@ -17,34 +15,35 @@ class BiayaKuliahPlannerPage extends ConsumerStatefulWidget {
 }
 
 class _BiayaKuliahPlannerPageState extends ConsumerState<BiayaKuliahPlannerPage> {
-  final String _prefKeyKuliah = 'kuliah_planner_data_v1';
-
-  // Config variables
+  // Config variables - All starting from 0 / clean defaults
   String _childName = '';
-  String _academicLevel = 'S1 Dalam Negeri';
+  String _academicLevel = 'S1 PTN Favorit';
   int _currentAge = 0;
   int _targetAge = 18;
-  double _costToday = 0.0;
-  double _inflationRate = 10.0; // Keep standard 10% inflation baseline as slider helper
-  double _currentSaved = 0.0;
+  double _costToday = 0.0; // Starts from 0
+  final double _inflationRate = 10.0; // Fixed 10% annual education inflation
+  double _currentSaved = 0.0; // Starts from 0
+
+  // College Cost Presets
+  final Map<String, double> _costPresets = {
+    'S1 PTN Favorit': 60000000.0,
+    'S1 PTS Premium': 150000000.0,
+    'S1 Kedokteran': 300000000.0,
+    'S1 Luar Negeri': 600000000.0,
+  };
+
+  final List<String> _dropdownOptions = [
+    'S1 PTN Favorit',
+    'S1 PTS Premium',
+    'S1 Kedokteran',
+    'S1 Luar Negeri',
+    'Custom',
+  ];
 
   // Controllers
   final TextEditingController _childNameController = TextEditingController();
   final TextEditingController _costTodayController = TextEditingController();
   final TextEditingController _currentSavedController = TextEditingController();
-
-  final List<String> _levels = [
-    'S1 Dalam Negeri',
-    'S1 Luar Negeri',
-    'S2 Dalam Negeri',
-    'S2 Luar Negeri',
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-    _loadPlannerData();
-  }
 
   @override
   void dispose() {
@@ -52,36 +51,6 @@ class _BiayaKuliahPlannerPageState extends ConsumerState<BiayaKuliahPlannerPage>
     _costTodayController.dispose();
     _currentSavedController.dispose();
     super.dispose();
-  }
-
-  Future<void> _loadPlannerData() async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_prefKeyKuliah);
-    if (raw != null) {
-      final decoded = jsonDecode(raw) as Map<String, dynamic>;
-      _childName = decoded['childName'] as String? ?? '';
-      _academicLevel = decoded['academicLevel'] as String? ?? 'S1 Dalam Negeri';
-      _currentAge = decoded['currentAge'] as int? ?? 0;
-      _targetAge = decoded['targetAge'] as int? ?? 18;
-      _costToday = (decoded['costToday'] as num?)?.toDouble() ?? 0.0;
-      _inflationRate = (decoded['inflationRate'] as num?)?.toDouble() ?? 10.0;
-      _currentSaved = (decoded['currentSaved'] as num?)?.toDouble() ?? 0.0;
-    }
-    if (mounted) setState(() {});
-  }
-
-  Future<void> _savePlannerData() async {
-    final prefs = await SharedPreferences.getInstance();
-    final data = {
-      'childName': _childName,
-      'academicLevel': _academicLevel,
-      'currentAge': _currentAge,
-      'targetAge': _targetAge,
-      'costToday': _costToday,
-      'inflationRate': _inflationRate,
-      'currentSaved': _currentSaved,
-    };
-    await prefs.setString(_prefKeyKuliah, jsonEncode(data));
   }
 
   // Calculated getters
@@ -101,21 +70,33 @@ class _BiayaKuliahPlannerPageState extends ConsumerState<BiayaKuliahPlannerPage>
     return gap / (_yearsToStudy * 12);
   }
 
-  void _saveParameters() async {
-    setState(() {
-      if (_childNameController.text.trim().isNotEmpty) {
-        _childName = _childNameController.text.trim();
+  // Smart helper to display preset name matching the cost
+  String get _displayAcademicLevel {
+    if (_academicLevel == 'Custom') {
+      for (final entry in _costPresets.entries) {
+        if ((_costToday - entry.value).abs() < 1) {
+          return entry.key;
+        }
       }
-      final costText = _costTodayController.text.replaceAll('.', '');
-      final cost = double.tryParse(costText) ?? 0.0;
-      if (cost > 0) _costToday = cost;
+      return 'Custom Biaya';
+    }
+    return _academicLevel;
+  }
+
+  void _saveParameters() {
+    setState(() {
+      _childName = _childNameController.text.trim();
+      
+      if (_academicLevel != 'Custom') {
+        _costToday = _costPresets[_academicLevel] ?? 0.0;
+      } else {
+        final costText = _costTodayController.text.replaceAll('.', '');
+        _costToday = double.tryParse(costText) ?? 0.0;
+      }
 
       final savedText = _currentSavedController.text.replaceAll('.', '');
-      final saved = double.tryParse(savedText) ?? 0.0;
-      if (saved >= 0) _currentSaved = saved;
+      _currentSaved = double.tryParse(savedText) ?? 0.0;
     });
-
-    await _savePlannerData();
 
     _childNameController.clear();
     _costTodayController.clear();
@@ -126,7 +107,7 @@ class _BiayaKuliahPlannerPageState extends ConsumerState<BiayaKuliahPlannerPage>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Planner Pendidikan Anak berhasil disimpan!',
+            'Rencana Pendidikan Anak berhasil diperbarui!',
             style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.white),
           ),
           backgroundColor: const Color(0xFF2196F3),
@@ -156,7 +137,7 @@ class _BiayaKuliahPlannerPageState extends ConsumerState<BiayaKuliahPlannerPage>
           icon: Icon(Icons.arrow_back_ios_new_rounded, color: contentColor, size: 20),
         ),
         title: Text(
-          '🎓 Rencana Kuliah Anak',
+          'Rencana Kuliah Anak',
           style: GoogleFonts.quicksand(
             fontWeight: FontWeight.bold,
             fontSize: 16,
@@ -167,20 +148,35 @@ class _BiayaKuliahPlannerPageState extends ConsumerState<BiayaKuliahPlannerPage>
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 48),
         children: [
-          // Elegant Cost Projection Dashboard Card
+          // Premium Minimalist Dashboard Card
           Container(
-            padding: const EdgeInsets.all(22),
+            padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(28),
               gradient: LinearGradient(
-                colors: isDarkMode
-                    ? [const Color(0xFF0F3A5F), const Color(0xFF0B253F)]
-                    : [const Color(0xFFE3F2FD), const Color(0xFFBBDEFB)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
+                colors: isDarkMode
+                    ? [
+                        const Color(0xFF0F3A5F), // Deep sky/ocean blue
+                        const Color(0xFF0B253F),
+                      ]
+                    : [
+                        const Color(0xFFE3F2FD), // Soft baby blue light
+                        const Color(0xFFF2F8FD),
+                      ],
               ),
-              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: accentColor.withOpacity(isDarkMode ? 0.05 : 0.08),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
+                ),
+              ],
               border: Border.all(
-                color: isDarkMode ? Colors.white.withOpacity(0.04) : Colors.transparent,
+                color: isDarkMode
+                    ? accentColor.withOpacity(0.1)
+                    : accentColor.withOpacity(0.15),
               ),
             ),
             child: Column(
@@ -189,65 +185,77 @@ class _BiayaKuliahPlannerPageState extends ConsumerState<BiayaKuliahPlannerPage>
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: isDarkMode ? Colors.white.withOpacity(0.05) : Colors.white,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          '$_academicLevel • ${_childName.isEmpty ? "Belum Diisi" : _childName}',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.quicksand(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w800,
-                            color: isDarkMode ? Colors.white70 : Colors.blue.shade900,
-                          ),
+                    Text(
+                      'RENCANA KULIAH',
+                      style: GoogleFonts.quicksand(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w900,
+                        color: isDarkMode ? Colors.white70 : Colors.blue.shade900,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: (isDarkMode ? Colors.white : accentColor).withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(100),
+                      ),
+                      child: Text(
+                        _displayAcademicLevel,
+                        style: GoogleFonts.quicksand(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          color: isDarkMode ? Colors.white : Colors.blue.shade900,
                         ),
                       ),
                     ),
-                    Icon(Icons.school_rounded, color: isDarkMode ? Colors.white : accentColor),
                   ],
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 18),
+                Text(
+                  _childName.isEmpty ? 'Target Kuliah Anak' : 'Target Kuliah: $_childName',
+                  style: GoogleFonts.quicksand(
+                    fontSize: 14.5,
+                    fontWeight: FontWeight.bold,
+                    color: contentColor,
+                  ),
+                ),
+                const SizedBox(height: 12),
                 Text(
                   'Estimasi Biaya Masa Depan (${_yearsToStudy} Thn Lagi):',
                   style: GoogleFonts.quicksand(
-                    fontSize: 10,
+                    fontSize: 10.5,
                     fontWeight: FontWeight.bold,
-                    color: isDarkMode ? Colors.white30 : Colors.blue.shade900.withOpacity(0.5),
+                    color: isDarkMode ? Colors.white30 : Colors.grey.shade600,
                   ),
                 ),
-                const SizedBox(height: 3),
+                const SizedBox(height: 4),
                 FittedBox(
                   fit: BoxFit.scaleDown,
                   child: Text(
                     NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(_futureCost),
                     style: GoogleFonts.quicksand(
                       fontSize: 24,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w800,
                       color: isDarkMode ? Colors.white : Colors.blue.shade900,
                     ),
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
                 Text(
-                  'Berdasarkan biaya saat ini: Rp ${NumberFormat.decimalPattern('id_ID').format(_costToday)} (Inflasi $_inflationRate%/Thn)',
+                  'Uang Kuliah Sekarang: Rp ${NumberFormat.decimalPattern('id_ID').format(_costToday)} (Inflasi $_inflationRate%/thn)',
                   style: GoogleFonts.quicksand(
-                    fontSize: 9.5,
+                    fontSize: 10,
                     fontWeight: FontWeight.bold,
-                    color: isDarkMode ? Colors.white38 : Colors.blue.shade800,
+                    color: isDarkMode ? Colors.white38 : Colors.grey.shade600,
                   ),
                 ),
+                const SizedBox(height: 20),
+                Divider(height: 1, color: isDarkMode ? Colors.white.withOpacity(0.04) : Colors.grey.shade200),
                 const SizedBox(height: 16),
-                Divider(height: 1, color: isDarkMode ? Colors.white10 : Colors.blue.shade100),
-                const SizedBox(height: 14),
-
-                // Saving Advice
+                
+                // Savings summary row
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(
                       child: Column(
@@ -255,28 +263,53 @@ class _BiayaKuliahPlannerPageState extends ConsumerState<BiayaKuliahPlannerPage>
                         children: [
                           Text(
                             'Tabungan Terkumpul',
-                            style: GoogleFonts.quicksand(fontSize: 9.5, fontWeight: FontWeight.bold, color: Colors.grey.shade600),
+                            style: GoogleFonts.quicksand(
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.bold,
+                              color: isDarkMode ? Colors.white38 : Colors.grey.shade500,
+                            ),
                           ),
-                          const SizedBox(height: 2),
-                          Text(
-                            NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(_currentSaved),
-                            style: GoogleFonts.quicksand(fontSize: 11.5, fontWeight: FontWeight.bold, color: contentColor),
+                          const SizedBox(height: 4),
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(_currentSaved),
+                              style: GoogleFonts.quicksand(
+                                fontSize: 13.5,
+                                fontWeight: FontWeight.bold,
+                                color: contentColor,
+                              ),
+                            ),
                           ),
                         ],
                       ),
                     ),
+                    const SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
-                            'Rekomendasi Nabung / Bln',
-                            style: GoogleFonts.quicksand(fontSize: 9.5, fontWeight: FontWeight.bold, color: Colors.grey.shade600),
+                            'Nabung / Bulan',
+                            style: GoogleFonts.quicksand(
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.bold,
+                              color: isDarkMode ? Colors.white38 : Colors.grey.shade500,
+                            ),
                           ),
-                          const SizedBox(height: 2),
-                          Text(
-                            NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(_recommendedMonthlySavings),
-                            style: GoogleFonts.quicksand(fontSize: 13, fontWeight: FontWeight.bold, color: accentColor),
+                          const SizedBox(height: 4),
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerRight,
+                            child: Text(
+                              NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(_recommendedMonthlySavings),
+                              style: GoogleFonts.quicksand(
+                                fontSize: 14.5,
+                                fontWeight: FontWeight.bold,
+                                color: accentColor,
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -286,125 +319,60 @@ class _BiayaKuliahPlannerPageState extends ConsumerState<BiayaKuliahPlannerPage>
               ],
             ),
           ),
-          const SizedBox(height: 28),
+          
+          const SizedBox(height: 20),
 
-          // Planner Controls
-          Text(
-            '⚙️ Atur Parameter & Kalkulator',
-            style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
-          ),
-          const SizedBox(height: 14),
-
-          // Parameters Container
+          // Parameter Perencanaan Card (Premium, Rapi & Aesthetic)
           Container(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(24),
               border: Border.all(
                 color: isDarkMode ? Colors.white.withOpacity(0.04) : Colors.grey.shade100,
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(isDarkMode ? 0.02 : 0.01),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Age Slider Current
-                _buildSliderRow(
-                  'Umur Anak Sekarang',
-                  '$_currentAge Tahun',
-                  _currentAge.toDouble(),
-                  0,
-                  17,
-                  (val) {
-                    setState(() {
-                      _currentAge = val.round();
-                    });
-                    _savePlannerData();
-                  },
+                Text(
+                  'Parameter Perencanaan',
+                  style: GoogleFonts.quicksand(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13.5,
+                    color: contentColor,
+                  ),
                 ),
-                const SizedBox(height: 16),
-
-                // Age Slider Target
-                _buildSliderRow(
-                  'Target Mulai Kuliah',
-                  '$_targetAge Tahun',
-                  _targetAge.toDouble(),
-                  18,
-                  25,
-                  (val) {
-                    setState(() {
-                      _targetAge = val.round();
-                    });
-                    _savePlannerData();
-                  },
-                ),
-                const SizedBox(height: 16),
-
-                // Inflation Slider
-                _buildSliderRow(
-                  'Estimasi Inflasi Pendidikan',
-                  '$_inflationRate%',
-                  _inflationRate,
-                  3.0,
-                  15.0,
-                  (val) {
-                    setState(() {
-                      _inflationRate = double.parse(val.toStringAsFixed(1));
-                    });
-                    _savePlannerData();
-                  },
-                  divisions: 120,
-                ),
+                const SizedBox(height: 18),
+                
+                _buildSummaryRow(isDarkMode, contentColor, 'Nama Anak', _childName.isEmpty ? '-' : _childName, Icons.child_care_rounded, const Color(0xFF2196F3)),
+                _buildSummaryRow(isDarkMode, contentColor, 'Tingkat Pendidikan', _displayAcademicLevel, Icons.school_rounded, const Color(0xFF4CAF50)),
+                _buildSummaryRow(isDarkMode, contentColor, 'Umur Anak Sekarang', '$_currentAge Tahun', Icons.calendar_today_rounded, const Color(0xFFFF9800)),
+                _buildSummaryRow(isDarkMode, contentColor, 'Mulai Kuliah', '$_targetAge Tahun ($_yearsToStudy Tahun Lagi)', Icons.rocket_launch_rounded, const Color(0xFFE91E63)),
+                _buildSummaryRow(isDarkMode, contentColor, 'Estimasi Inflasi', '$_inflationRate% / Tahun', Icons.trending_up_rounded, const Color(0xFF9C27B0)),
+                
                 const SizedBox(height: 20),
-
-                // Academic Level Dropdown Selector
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Tingkat Pendidikan',
-                      style: GoogleFonts.quicksand(fontSize: 12, fontWeight: FontWeight.bold, color: contentColor),
-                    ),
-                    Container(
-                      height: 38,
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      decoration: BoxDecoration(
-                        color: isDarkMode ? Colors.white.withOpacity(0.02) : Colors.grey.shade50,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<String>(
-                          value: _academicLevel,
-                          dropdownColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
-                          style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: contentColor, fontSize: 11.5),
-                          items: _levels.map((l) {
-                            return DropdownMenuItem(value: l, child: Text(l));
-                          }).toList(),
-                          onChanged: (val) {
-                            setState(() {
-                              _academicLevel = val ?? _levels.first;
-                            });
-                            _savePlannerData();
-                          },
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 24),
                 SizedBox(
                   width: double.infinity,
                   height: 44,
-                  child: ElevatedButton(
+                  child: ElevatedButton.icon(
                     onPressed: () => _showEditValuesDialog(isDarkMode, accentColor),
+                    icon: const Icon(Icons.tune_rounded, size: 16, color: Colors.white),
+                    label: Text(
+                      'Sesuaikan Rencana',
+                      style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 12.5, color: Colors.white),
+                    ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: accentColor,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                       elevation: 0,
-                    ),
-                    child: Text(
-                      'Edit Detail Nama & Biaya',
-                      style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 12.5, color: Colors.white),
                     ),
                   ),
                 ),
@@ -416,192 +384,424 @@ class _BiayaKuliahPlannerPageState extends ConsumerState<BiayaKuliahPlannerPage>
     );
   }
 
-  Widget _buildSliderRow(
-    String label, 
-    String displayVal, 
-    double currentVal, 
-    double minVal, 
-    double maxVal, 
-    Function(double) onChanged,
-    {int? divisions}
-  ) {
-    final theme = Theme.of(context);
-    final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
-        (ref.watch(themeProvider) == ThemeMode.system && theme.brightness == Brightness.dark);
-    final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
+  Widget _buildSummaryRow(bool isDarkMode, Color contentColor, String label, String value, IconData icon, Color iconColor) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: iconColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, size: 14, color: iconColor),
+          ),
+          const SizedBox(width: 10),
+          Text(
+            label,
+            style: GoogleFonts.quicksand(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: isDarkMode ? Colors.white38 : Colors.grey.shade500,
+            ),
+          ),
+          const Spacer(),
+          Text(
+            value,
+            style: GoogleFonts.quicksand(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: contentColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCounterRow({
+    required String label,
+    required String valueText,
+    required VoidCallback onDecrement,
+    required VoidCallback onIncrement,
+    required bool isDarkMode,
+    required Color contentColor,
+    required Color accentColor,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: GoogleFonts.quicksand(
+              fontWeight: FontWeight.bold,
+              fontSize: 12.5,
+              color: contentColor,
+            ),
+          ),
+          Container(
+            decoration: BoxDecoration(
+              color: isDarkMode ? Colors.white.withOpacity(0.04) : Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: isDarkMode ? Colors.white.withOpacity(0.05) : Colors.grey.shade200,
+              ),
+            ),
+            child: Row(
+              children: [
+                IconButton(
+                  onPressed: onDecrement,
+                  icon: Icon(
+                    Icons.remove_circle_outline_rounded,
+                    color: accentColor,
+                    size: 20,
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  constraints: const BoxConstraints(),
+                  splashRadius: 20,
+                ),
+                Text(
+                  valueText,
+                  style: GoogleFonts.quicksand(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                    color: contentColor,
+                  ),
+                ),
+                IconButton(
+                  onPressed: onIncrement,
+                  icon: Icon(
+                    Icons.add_circle_outline_rounded,
+                    color: accentColor,
+                    size: 20,
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  constraints: const BoxConstraints(),
+                  splashRadius: 20,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDropdownField({
+    required String label,
+    required String value,
+    required List<String> items,
+    required ValueChanged<String?> onChanged,
+    required bool isDarkMode,
+    required Color contentColor,
+    required Color accentColor,
+  }) {
+    final inputBg = isDarkMode ? Colors.white.withOpacity(0.04) : const Color(0xFFF8F9FA);
+    
+    final String sanitizedValue = items.contains(value) ? value : 'S1 PTN Favorit';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              label,
-              style: GoogleFonts.quicksand(fontSize: 12, fontWeight: FontWeight.bold, color: contentColor),
-            ),
-            Text(
-              displayVal,
-              style: GoogleFonts.quicksand(fontSize: 12, fontWeight: FontWeight.w800, color: const Color(0xFF2196F3)),
-            ),
-          ],
+        Text(
+          label,
+          style: GoogleFonts.quicksand(
+            fontWeight: FontWeight.bold,
+            fontSize: 10,
+            color: contentColor.withOpacity(0.4),
+          ),
         ),
-        SliderTheme(
-          data: SliderThemeData(
-            activeTrackColor: const Color(0xFF2196F3),
-            inactiveTrackColor: isDarkMode ? Colors.white.withOpacity(0.04) : Colors.grey.shade100,
-            thumbColor: const Color(0xFF2196F3),
-            overlayColor: const Color(0xFF2196F3).withOpacity(0.12),
-            trackHeight: 4,
+        const SizedBox(height: 6),
+        DropdownButtonFormField<String>(
+          value: sanitizedValue,
+          dropdownColor: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
+          style: GoogleFonts.quicksand(
+            fontWeight: FontWeight.bold,
+            fontSize: 13,
+            color: contentColor,
           ),
-          child: Slider(
-            min: minVal,
-            max: maxVal,
-            value: currentVal,
-            divisions: divisions ?? (maxVal - minVal).round(),
-            onChanged: onChanged,
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: inputBg,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            prefixIcon: Icon(
+              Icons.school_rounded,
+              color: accentColor.withOpacity(0.8),
+              size: 18,
+            ),
           ),
+          icon: Icon(
+            Icons.keyboard_arrow_down_rounded,
+            color: contentColor.withOpacity(0.5),
+          ),
+          items: items.map((String val) {
+            String labelText = val;
+            if (_costPresets.containsKey(val)) {
+              final presetCost = _costPresets[val]!;
+              labelText = '$val (Rp ${NumberFormat.compactLong(locale: 'id_ID').format(presetCost)})';
+            } else if (val == 'Custom') {
+              labelText = 'Custom (Input Manual)';
+            }
+            return DropdownMenuItem<String>(
+              value: val,
+              child: Text(labelText),
+            );
+          }).toList(),
+          onChanged: onChanged,
         ),
       ],
     );
   }
 
   void _showEditValuesDialog(bool isDarkMode, Color accentColor) {
+    if (!_dropdownOptions.contains(_academicLevel)) {
+      _academicLevel = 'S1 PTN Favorit';
+    }
+
+    _childNameController.text = _childName;
+    _costTodayController.text = _costToday > 0 ? NumberFormat.decimalPattern('id_ID').format(_costToday.round()) : '';
+    _currentSavedController.text = _currentSaved > 0 ? NumberFormat.decimalPattern('id_ID').format(_currentSaved.round()) : '';
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
       builder: (context) {
         final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
         final inputBg = isDarkMode ? Colors.white.withOpacity(0.04) : AppColors.background;
 
-        return Padding(
-          padding: EdgeInsets.fromLTRB(20, 20, 20, MediaQuery.of(context).viewInsets.bottom + 24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                'Sesuaikan Rincian Target',
-                style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 15, color: contentColor),
-              ),
-              const SizedBox(height: 20),
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            bool showCustomCost = _academicLevel == 'Custom';
 
-              // Child Name
-              Text(
-                'Nama Anak',
-                style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
-              ),
-              const SizedBox(height: 6),
-              TextFormField(
-                controller: _childNameController,
-                style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: inputBg,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                  hintText: 'Masukkan Nama Anak',
-                  hintStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.grey.shade400, fontSize: 12.5),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Cost today
-              Text(
-                'Uang Kuliah Hari Ini',
-                style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
-              ),
-              const SizedBox(height: 6),
-              TextFormField(
-                controller: _costTodayController,
-                keyboardType: TextInputType.number,
-                inputFormatters: [_RibuanFormatter()],
-                style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: inputBg,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                  hintText: 'Masukkan Uang Kuliah Hari Ini',
-                  hintStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.grey.shade400, fontSize: 12.5),
-                  prefixIcon: Container(
-                    padding: const EdgeInsets.only(left: 16, right: 8),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'Rp',
-                          style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: accentColor, fontSize: 13),
+            return Padding(
+              padding: EdgeInsets.fromLTRB(20, 20, 20, MediaQuery.of(context).viewInsets.bottom + 24),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
+                          borderRadius: BorderRadius.circular(2),
                         ),
-                      ],
+                      ),
                     ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Savings
-              Text(
-                'Tabungan Terkumpul',
-                style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
-              ),
-              const SizedBox(height: 6),
-              TextFormField(
-                controller: _currentSavedController,
-                keyboardType: TextInputType.number,
-                inputFormatters: [_RibuanFormatter()],
-                style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: inputBg,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                  hintText: 'Masukkan Tabungan Terkumpul',
-                  hintStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.grey.shade400, fontSize: 12.5),
-                  prefixIcon: Container(
-                    padding: const EdgeInsets.only(left: 16, right: 8),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'Rp',
-                          style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: accentColor, fontSize: 13),
+                    const SizedBox(height: 20),
+                    Text(
+                      'Sesuaikan Rencana Kuliah',
+                      style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 15, color: contentColor),
+                    ),
+                    const SizedBox(height: 20),
+       
+                    // Child Name
+                    Text(
+                      'Nama Anak',
+                      style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
+                    ),
+                    const SizedBox(height: 6),
+                    TextFormField(
+                      controller: _childNameController,
+                      style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: inputBg,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                        hintText: 'Masukkan Nama Anak',
+                        hintStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.grey.shade400, fontSize: 12.5),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        prefixIcon: Icon(
+                          Icons.child_care_rounded,
+                          color: accentColor.withOpacity(0.8),
+                          size: 18,
                         ),
-                      ],
+                      ),
                     ),
-                  ),
-                ),
-              ),
+                    const SizedBox(height: 16),
 
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: ElevatedButton(
-                  onPressed: _saveParameters,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: accentColor,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    elevation: 0,
-                  ),
-                  child: Text(
-                    'Simpan Rincian Baru',
-                    style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.white),
-                  ),
+                    // Counter Umur Anak Sekarang
+                    _buildCounterRow(
+                      label: 'Umur Anak Sekarang',
+                      valueText: '$_currentAge Tahun',
+                      onDecrement: () {
+                        if (_currentAge > 0) {
+                          setModalState(() {
+                            _currentAge--;
+                            if (_targetAge <= _currentAge) {
+                              _targetAge = _currentAge + 1;
+                            }
+                          });
+                          setState(() {});
+                        }
+                      },
+                      onIncrement: () {
+                        if (_currentAge < 17) {
+                          setModalState(() {
+                            _currentAge++;
+                            if (_targetAge <= _currentAge) {
+                              _targetAge = _currentAge + 1;
+                            }
+                          });
+                          setState(() {});
+                        }
+                      },
+                      isDarkMode: isDarkMode,
+                      contentColor: contentColor,
+                      accentColor: accentColor,
+                    ),
+                    const SizedBox(height: 8),
+
+                    // Counter Target Mulai Kuliah
+                    _buildCounterRow(
+                      label: 'Target Mulai Kuliah',
+                      valueText: '$_targetAge Tahun',
+                      onDecrement: () {
+                        if (_targetAge > _currentAge + 1 && _targetAge > 18) {
+                          setModalState(() {
+                            _targetAge--;
+                          });
+                          setState(() {});
+                        }
+                      },
+                      onIncrement: () {
+                        if (_targetAge < 25) {
+                          setModalState(() {
+                            _targetAge++;
+                          });
+                          setState(() {});
+                        }
+                      },
+                      isDarkMode: isDarkMode,
+                      contentColor: contentColor,
+                      accentColor: accentColor,
+                    ),
+                    const SizedBox(height: 18),
+
+                    // Dropdown Pilihan Universitas
+                    _buildDropdownField(
+                      label: 'Pilihan Universitas & Jenjang',
+                      value: _academicLevel,
+                      items: _dropdownOptions,
+                      onChanged: (val) {
+                        setModalState(() {
+                          _academicLevel = val ?? 'S1 PTN Favorit';
+                          showCustomCost = _academicLevel == 'Custom';
+                          if (_academicLevel != 'Custom') {
+                            _costToday = _costPresets[_academicLevel] ?? 0.0;
+                            _costTodayController.text = NumberFormat.decimalPattern('id_ID').format(_costToday.round());
+                          }
+                        });
+                        setState(() {});
+                      },
+                      isDarkMode: isDarkMode,
+                      contentColor: contentColor,
+                      accentColor: accentColor,
+                    ),
+                    const SizedBox(height: 18),
+
+                    // Conditionally show custom cost input
+                    if (showCustomCost) ...[
+                      Text(
+                        'Biaya Kuliah Hari Ini',
+                        style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
+                      ),
+                      const SizedBox(height: 6),
+                      TextFormField(
+                        controller: _costTodayController,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [_RibuanFormatter()],
+                        style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: inputBg,
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                          hintText: 'Masukkan Biaya Kuliah Hari Ini',
+                          hintStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.grey.shade400, fontSize: 12.5),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          prefixIcon: Container(
+                            padding: const EdgeInsets.only(left: 16, right: 8),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'Rp',
+                                  style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: accentColor, fontSize: 13),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+       
+                    // Savings
+                    Text(
+                      'Tabungan Terkumpul',
+                      style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
+                    ),
+                    const SizedBox(height: 6),
+                    TextFormField(
+                      controller: _currentSavedController,
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [_RibuanFormatter()],
+                      style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: inputBg,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                        hintText: 'Masukkan Tabungan Terkumpul',
+                        hintStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.grey.shade400, fontSize: 12.5),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        prefixIcon: Container(
+                          padding: const EdgeInsets.only(left: 16, right: 8),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'Rp',
+                                style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: accentColor, fontSize: 13),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+       
+                    const SizedBox(height: 28),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: ElevatedButton(
+                        onPressed: _saveParameters,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: accentColor,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          elevation: 0,
+                        ),
+                        child: Text(
+                          'Simpan Rencana',
+                          style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
+            );
+          }
         );
       },
     );

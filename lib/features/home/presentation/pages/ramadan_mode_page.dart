@@ -17,8 +17,7 @@ class RamadanModePage extends ConsumerStatefulWidget {
   ConsumerState<RamadanModePage> createState() => _RamadanModePageState();
 }
 
-class _RamadanModePageState extends ConsumerState<RamadanModePage> with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+class _RamadanModePageState extends ConsumerState<RamadanModePage> {
   final String _prefKeyTarawih = 'ramadan_tarawih_v1';
   final String _prefKeySedekah = 'ramadan_sedekah_v1';
   final String _prefKeyQuran = 'ramadan_quran_juz_v1';
@@ -30,19 +29,20 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> with SingleTi
   List<Map<String, dynamic>> _expenses = [];
 
   final TextEditingController _expenseTitleController = TextEditingController();
-  final TextEditingController _expenseAmountController = TextEditingController();
+  final TextEditingController _expenseAmountController =
+      TextEditingController();
   bool _syncWithMainTransactions = true;
+  String _selectedTab = 'Target Amal';
+  final _ramadanFormKey = GlobalKey<FormState>();
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
     _loadData();
   }
 
   @override
   void dispose() {
-    _tabController.dispose();
     _expenseTitleController.dispose();
     _expenseAmountController.dispose();
     super.dispose();
@@ -50,7 +50,7 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> with SingleTi
 
   Future<void> _loadData() async {
     final prefs = await SharedPreferences.getInstance();
-    
+
     // Load Tarawih
     final tarawihRaw = prefs.getString(_prefKeyTarawih);
     if (tarawihRaw != null) {
@@ -99,11 +99,10 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> with SingleTi
   }
 
   void _addExpense() async {
+    if (!_ramadanFormKey.currentState!.validate()) return;
     final title = _expenseTitleController.text.trim();
     final amountText = _expenseAmountController.text.replaceAll('.', '');
     final amount = double.tryParse(amountText) ?? 0.0;
-
-    if (title.isEmpty || amount <= 0) return;
 
     final newExpense = {
       'id': DateTime.now().millisecondsSinceEpoch.toString(),
@@ -138,7 +137,8 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> with SingleTi
         SnackBar(
           content: Text(
             'Pengeluaran Ramadan berhasil ditambahkan!',
-            style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.white),
+            style: GoogleFonts.quicksand(
+                fontWeight: FontWeight.bold, color: Colors.white),
           ),
           backgroundColor: const Color(0xFF009688),
           behavior: SnackBarBehavior.floating,
@@ -155,7 +155,8 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> with SingleTi
   }
 
   double get _totalRamadanExpense {
-    return _expenses.fold(0.0, (sum, item) => sum + (item['amount'] as num).toDouble());
+    return _expenses.fold(
+        0.0, (sum, item) => sum + (item['amount'] as num).toDouble());
   }
 
   int get _tarawihCount => _tarawihDays.where((d) => d).length;
@@ -165,9 +166,11 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> with SingleTi
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
-        (ref.watch(themeProvider) == ThemeMode.system && theme.brightness == Brightness.dark);
+        (ref.watch(themeProvider) == ThemeMode.system &&
+            theme.brightness == Brightness.dark);
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
-    final pageBgColor = isDarkMode ? AppColors.backgroundDark : const Color(0xFFF4F9F8);
+    final pageBgColor =
+        isDarkMode ? AppColors.backgroundDark : const Color(0xFFF4F9F8);
     final accentColor = const Color(0xFF009688); // Serene Emerald Green
     final goldColor = const Color(0xFFD4AF37); // Rich gold accent
 
@@ -179,10 +182,11 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> with SingleTi
         centerTitle: true,
         leading: IconButton(
           onPressed: () => Navigator.pop(context),
-          icon: Icon(Icons.arrow_back_ios_new_rounded, color: contentColor, size: 20),
+          icon: Icon(Icons.arrow_back_ios_new_rounded,
+              color: contentColor, size: 20),
         ),
         title: Text(
-          '🌙 Mode Ramadan',
+          'Mode Ramadan',
           style: GoogleFonts.quicksand(
             fontWeight: FontWeight.bold,
             fontSize: 16,
@@ -207,7 +211,9 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> with SingleTi
                 ),
                 borderRadius: BorderRadius.circular(24),
                 border: Border.all(
-                  color: isDarkMode ? Colors.white.withOpacity(0.05) : Colors.transparent,
+                  color: isDarkMode
+                      ? Colors.white.withOpacity(0.05)
+                      : Colors.transparent,
                 ),
               ),
               child: Row(
@@ -231,70 +237,105 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> with SingleTi
                             fontSize: 11,
                             fontWeight: FontWeight.bold,
                             height: 1.4,
-                            color: isDarkMode ? Colors.white70 : Colors.teal.shade900,
+                            color: isDarkMode
+                                ? Colors.white70
+                                : Colors.teal.shade900,
                           ),
                         ),
                       ],
                     ),
                   ),
                   const SizedBox(width: 12),
-                  Icon(Icons.nightlight_round_rounded, size: 50, color: isDarkMode ? goldColor : accentColor),
+                  Icon(Icons.nightlight_round_rounded,
+                      size: 50, color: isDarkMode ? goldColor : accentColor),
                 ],
               ),
             ),
           ),
 
-          // Custom Premium Tab Bar
+          // Custom Premium Dropdown Selector
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Container(
-              height: 48,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
                 color: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: isDarkMode ? Colors.white.withOpacity(0.05) : Colors.grey.shade100,
+                  color: isDarkMode
+                      ? Colors.white.withOpacity(0.05)
+                      : Colors.grey.shade100,
                 ),
               ),
-              child: TabBar(
-                controller: _tabController,
-                indicatorSize: TabBarIndicatorSize.tab,
-                indicator: BoxDecoration(
-                  borderRadius: BorderRadius.circular(14),
-                  color: accentColor,
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: _selectedTab,
+                  isExpanded: true,
+                  dropdownColor:
+                      isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
+                  icon: Icon(Icons.keyboard_arrow_down_rounded,
+                      color: accentColor),
+                  style: GoogleFonts.quicksand(
+                    fontWeight: FontWeight.bold,
+                    color: contentColor,
+                    fontSize: 13,
+                  ),
+                  onChanged: (String? newValue) {
+                    if (newValue != null) {
+                      setState(() {
+                        _selectedTab = newValue;
+                      });
+                    }
+                  },
+                  items: <String>['Target Amal', 'Tadarrus', 'Pengeluaran']
+                      .map<DropdownMenuItem<String>>((String value) {
+                    IconData iconData;
+                    Color iconColor;
+                    if (value == 'Target Amal') {
+                      iconData = Icons.mosque_rounded;
+                      iconColor = accentColor;
+                    } else if (value == 'Tadarrus') {
+                      iconData = Icons.menu_book_rounded;
+                      iconColor = goldColor;
+                    } else {
+                      iconData = Icons.payments_rounded;
+                      iconColor = Colors.redAccent;
+                    }
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Row(
+                        children: [
+                          Icon(iconData, color: iconColor, size: 18),
+                          const SizedBox(width: 12),
+                          Text(value),
+                        ],
+                      ),
+                    );
+                  }).toList(),
                 ),
-                labelColor: Colors.white,
-                unselectedLabelColor: isDarkMode ? Colors.white38 : Colors.grey.shade500,
-                labelStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11.5),
-                unselectedLabelStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11.5),
-                tabs: const [
-                  Tab(text: 'Target Amal'),
-                  Tab(text: 'Tadarrus'),
-                  Tab(text: 'Pengeluaran'),
-                ],
               ),
             ),
           ),
 
           const SizedBox(height: 16),
 
-          // Tab content area
+          // Content area based on selected dropdown value
           Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                _buildTargetAmalTab(isDarkMode, accentColor, goldColor, contentColor),
-                _buildTadarrusTab(isDarkMode, accentColor, goldColor, contentColor),
-                _buildExpensesTab(isDarkMode, accentColor, contentColor),
-              ],
-            ),
+            child: _selectedTab == 'Target Amal'
+                ? _buildTargetAmalTab(
+                    isDarkMode, accentColor, goldColor, contentColor)
+                : _selectedTab == 'Tadarrus'
+                    ? _buildTadarrusTab(
+                        isDarkMode, accentColor, goldColor, contentColor)
+                    : _buildExpensesTab(isDarkMode, accentColor, contentColor),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildTargetAmalTab(bool isDarkMode, Color accentColor, Color goldColor, Color contentColor) {
+  Widget _buildTargetAmalTab(
+      bool isDarkMode, Color accentColor, Color goldColor, Color contentColor) {
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
       child: Column(
@@ -331,8 +372,11 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> with SingleTi
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                '📅 Checklist Sholat Tarawih',
-                style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
+                'Checklist Sholat Tarawih',
+                style: GoogleFonts.quicksand(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                    color: contentColor),
               ),
               TextButton(
                 onPressed: () {
@@ -343,7 +387,10 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> with SingleTi
                 },
                 child: Text(
                   'Check Semua',
-                  style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11, color: accentColor),
+                  style: GoogleFonts.quicksand(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 11,
+                      color: accentColor),
                 ),
               ),
             ],
@@ -363,8 +410,11 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> with SingleTi
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                '🤲 Sedekah Harian Ramadan',
-                style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
+                'Sedekah Harian Ramadan',
+                style: GoogleFonts.quicksand(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                    color: contentColor),
               ),
               TextButton(
                 onPressed: () {
@@ -375,7 +425,10 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> with SingleTi
                 },
                 child: Text(
                   'Check Semua',
-                  style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11, color: goldColor),
+                  style: GoogleFonts.quicksand(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 11,
+                      color: goldColor),
                 ),
               ),
             ],
@@ -392,14 +445,17 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> with SingleTi
     );
   }
 
-  Widget _buildStatCard(String label, String value, IconData icon, Color color, bool isDarkMode) {
+  Widget _buildStatCard(
+      String label, String value, IconData icon, Color color, bool isDarkMode) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
         color: isDarkMode ? const Color(0xFF1A1A1A) : Colors.white,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: isDarkMode ? Colors.white.withOpacity(0.04) : Colors.grey.shade100,
+          color: isDarkMode
+              ? Colors.white.withOpacity(0.04)
+              : Colors.grey.shade100,
         ),
       ),
       child: Row(
@@ -442,7 +498,8 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> with SingleTi
     );
   }
 
-  Widget _build30DaysGrid(List<bool> daysList, Color activeColor, Function(int) onTap, bool isDarkMode) {
+  Widget _build30DaysGrid(List<bool> daysList, Color activeColor,
+      Function(int) onTap, bool isDarkMode) {
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -461,14 +518,16 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> with SingleTi
           child: Container(
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: active 
-                  ? activeColor 
+              color: active
+                  ? activeColor
                   : (isDarkMode ? const Color(0xFF1E1E1E) : Colors.white),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: active 
-                    ? Colors.transparent 
-                    : (isDarkMode ? Colors.white.withOpacity(0.05) : Colors.grey.shade200),
+                color: active
+                    ? Colors.transparent
+                    : (isDarkMode
+                        ? Colors.white.withOpacity(0.05)
+                        : Colors.grey.shade200),
               ),
             ),
             child: Text(
@@ -487,7 +546,8 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> with SingleTi
     );
   }
 
-  Widget _buildTadarrusTab(bool isDarkMode, Color accentColor, Color goldColor, Color contentColor) {
+  Widget _buildTadarrusTab(
+      bool isDarkMode, Color accentColor, Color goldColor, Color contentColor) {
     final progress = _currentJuz / 30.0;
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -499,7 +559,9 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> with SingleTi
               color: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
               borderRadius: BorderRadius.circular(24),
               border: Border.all(
-                color: isDarkMode ? Colors.white.withOpacity(0.05) : Colors.grey.shade100,
+                color: isDarkMode
+                    ? Colors.white.withOpacity(0.05)
+                    : Colors.grey.shade100,
               ),
             ),
             child: Column(
@@ -508,14 +570,17 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> with SingleTi
                 const SizedBox(height: 16),
                 Text(
                   'Progres Khatam Quran',
-                  style: GoogleFonts.quicksand(fontSize: 15, fontWeight: FontWeight.bold, color: contentColor),
+                  style: GoogleFonts.quicksand(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: contentColor),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   'Target: 30 Juz di bulan Ramadan',
                   style: GoogleFonts.quicksand(
-                    fontSize: 11, 
-                    fontWeight: FontWeight.bold, 
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
                     color: isDarkMode ? Colors.white30 : Colors.grey.shade400,
                   ),
                 ),
@@ -529,7 +594,9 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> with SingleTi
                       child: CircularProgressIndicator(
                         value: progress,
                         strokeWidth: 10,
-                        backgroundColor: isDarkMode ? Colors.white.withOpacity(0.03) : Colors.grey.shade100,
+                        backgroundColor: isDarkMode
+                            ? Colors.white.withOpacity(0.03)
+                            : Colors.grey.shade100,
                         valueColor: AlwaysStoppedAnimation<Color>(accentColor),
                       ),
                     ),
@@ -550,7 +617,9 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> with SingleTi
                           style: GoogleFonts.quicksand(
                             fontSize: 9.5,
                             fontWeight: FontWeight.w800,
-                            color: isDarkMode ? Colors.white24 : Colors.grey.shade400,
+                            color: isDarkMode
+                                ? Colors.white24
+                                : Colors.grey.shade400,
                           ),
                         ),
                       ],
@@ -563,27 +632,38 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> with SingleTi
                   children: [
                     Text(
                       'Sudah Khatam: $_currentJuz Juz',
-                      style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
+                      style: GoogleFonts.quicksand(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                          color: contentColor),
                     ),
                     Row(
                       children: [
                         IconButton(
-                          onPressed: _currentJuz > 0 ? () {
-                            setState(() {
-                              _currentJuz--;
-                            });
-                            _saveQuran();
-                          } : null,
-                          icon: Icon(Icons.remove_circle_outline_rounded, color: _currentJuz > 0 ? accentColor : Colors.grey),
+                          onPressed: _currentJuz > 0
+                              ? () {
+                                  setState(() {
+                                    _currentJuz--;
+                                  });
+                                  _saveQuran();
+                                }
+                              : null,
+                          icon: Icon(Icons.remove_circle_outline_rounded,
+                              color:
+                                  _currentJuz > 0 ? accentColor : Colors.grey),
                         ),
                         IconButton(
-                          onPressed: _currentJuz < 30 ? () {
-                            setState(() {
-                              _currentJuz++;
-                            });
-                            _saveQuran();
-                          } : null,
-                          icon: Icon(Icons.add_circle_outline_rounded, color: _currentJuz < 30 ? accentColor : Colors.grey),
+                          onPressed: _currentJuz < 30
+                              ? () {
+                                  setState(() {
+                                    _currentJuz++;
+                                  });
+                                  _saveQuran();
+                                }
+                              : null,
+                          icon: Icon(Icons.add_circle_outline_rounded,
+                              color:
+                                  _currentJuz < 30 ? accentColor : Colors.grey),
                         ),
                       ],
                     ),
@@ -593,7 +673,9 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> with SingleTi
                 SliderTheme(
                   data: SliderThemeData(
                     activeTrackColor: accentColor,
-                    inactiveTrackColor: isDarkMode ? Colors.white.withOpacity(0.05) : Colors.grey.shade100,
+                    inactiveTrackColor: isDarkMode
+                        ? Colors.white.withOpacity(0.05)
+                        : Colors.grey.shade100,
                     thumbColor: goldColor,
                     overlayColor: goldColor.withOpacity(0.12),
                     trackHeight: 6,
@@ -619,7 +701,8 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> with SingleTi
     );
   }
 
-  Widget _buildExpensesTab(bool isDarkMode, Color accentColor, Color contentColor) {
+  Widget _buildExpensesTab(
+      bool isDarkMode, Color accentColor, Color contentColor) {
     return Column(
       children: [
         // Total Ramadan spend
@@ -632,7 +715,9 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> with SingleTi
               color: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: isDarkMode ? Colors.white.withOpacity(0.05) : Colors.grey.shade100,
+                color: isDarkMode
+                    ? Colors.white.withOpacity(0.05)
+                    : Colors.grey.shade100,
               ),
             ),
             child: Row(
@@ -647,14 +732,20 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> with SingleTi
                         style: GoogleFonts.quicksand(
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
-                          color: isDarkMode ? Colors.white30 : Colors.grey.shade400,
+                          color: isDarkMode
+                              ? Colors.white30
+                              : Colors.grey.shade400,
                         ),
                       ),
                       const SizedBox(height: 4),
                       FittedBox(
                         fit: BoxFit.scaleDown,
                         child: Text(
-                          NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(_totalRamadanExpense),
+                          NumberFormat.currency(
+                                  locale: 'id_ID',
+                                  symbol: 'Rp ',
+                                  decimalDigits: 0)
+                              .format(_totalRamadanExpense),
                           style: GoogleFonts.quicksand(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
@@ -667,13 +758,20 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> with SingleTi
                 ),
                 const SizedBox(width: 12),
                 ElevatedButton.icon(
-                  onPressed: () => _showAddExpenseDialog(isDarkMode, accentColor),
-                  icon: const Icon(Icons.add_rounded, size: 16, color: Colors.white),
-                  label: Text('Tambah', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.white)),
+                  onPressed: () =>
+                      _showAddExpenseDialog(isDarkMode, accentColor),
+                  icon: const Icon(Icons.add_rounded,
+                      size: 16, color: Colors.white),
+                  label: Text('Tambah',
+                      style: GoogleFonts.quicksand(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                          color: Colors.white)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: accentColor,
                     elevation: 0,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
                   ),
                 ),
               ],
@@ -688,21 +786,28 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> with SingleTi
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.payments_outlined, size: 48, color: isDarkMode ? Colors.white12 : Colors.grey.shade300),
+                      Icon(Icons.payments_outlined,
+                          size: 48,
+                          color: isDarkMode
+                              ? Colors.white12
+                              : Colors.grey.shade300),
                       const SizedBox(height: 12),
                       Text(
                         'Belum ada pengeluaran Ramadan.',
                         style: GoogleFonts.quicksand(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
-                          color: isDarkMode ? Colors.white24 : Colors.grey.shade400,
+                          color: isDarkMode
+                              ? Colors.white24
+                              : Colors.grey.shade400,
                         ),
                       ),
                     ],
                   ),
                 )
               : ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
                   itemCount: _expenses.length,
                   itemBuilder: (context, index) {
                     final item = _expenses[index];
@@ -713,10 +818,14 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> with SingleTi
                       child: Container(
                         padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
-                          color: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
+                          color: isDarkMode
+                              ? const Color(0xFF1E1E1E)
+                              : Colors.white,
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
-                            color: isDarkMode ? Colors.white.withOpacity(0.04) : Colors.grey.shade100,
+                            color: isDarkMode
+                                ? Colors.white.withOpacity(0.04)
+                                : Colors.grey.shade100,
                           ),
                         ),
                         child: Row(
@@ -727,7 +836,8 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> with SingleTi
                                 color: Colors.red.withOpacity(0.08),
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child: const Icon(Icons.shopping_bag_rounded, color: Colors.redAccent, size: 18),
+                              child: const Icon(Icons.shopping_bag_rounded,
+                                  color: Colors.redAccent, size: 18),
                             ),
                             const SizedBox(width: 14),
                             Expanded(
@@ -744,11 +854,14 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> with SingleTi
                                   ),
                                   const SizedBox(height: 2),
                                   Text(
-                                    DateFormat('dd MMM yyyy, HH:mm', 'id_ID').format(date),
+                                    DateFormat('dd MMM yyyy, HH:mm', 'id_ID')
+                                        .format(date),
                                     style: GoogleFonts.quicksand(
                                       fontSize: 9.5,
                                       fontWeight: FontWeight.bold,
-                                      color: isDarkMode ? Colors.white30 : Colors.grey.shade400,
+                                      color: isDarkMode
+                                          ? Colors.white30
+                                          : Colors.grey.shade400,
                                     ),
                                   ),
                                 ],
@@ -767,12 +880,15 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> with SingleTi
                                 ),
                                 const SizedBox(height: 2),
                                 InkWell(
-                                  onTap: () => _deleteExpense(item['id'] as String),
+                                  onTap: () =>
+                                      _deleteExpense(item['id'] as String),
                                   borderRadius: BorderRadius.circular(100),
                                   child: Icon(
                                     Icons.delete_outline_rounded,
                                     size: 16,
-                                    color: isDarkMode ? Colors.white24 : Colors.grey.shade400,
+                                    color: isDarkMode
+                                        ? Colors.white24
+                                        : Colors.grey.shade400,
                                   ),
                                 ),
                               ],
@@ -793,25 +909,33 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> with SingleTi
       context: context,
       isScrollControlled: true,
       backgroundColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (context) {
         final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
-        final inputBg = isDarkMode ? Colors.white.withOpacity(0.04) : AppColors.background;
-        
+        final inputBg =
+            isDarkMode ? Colors.white.withOpacity(0.04) : AppColors.background;
+
+        AutovalidateMode autoValidate = AutovalidateMode.disabled;
         return StatefulBuilder(
           builder: (context, setModalState) {
             return Padding(
-              padding: EdgeInsets.fromLTRB(20, 20, 20, MediaQuery.of(context).viewInsets.bottom + 24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+              padding: EdgeInsets.fromLTRB(
+                  20, 20, 20, MediaQuery.of(context).viewInsets.bottom + 24),
+              child: Form(
+                key: _ramadanFormKey,
+                autovalidateMode: autoValidate,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                   Center(
                     child: Container(
                       width: 40,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
+                        color:
+                            isDarkMode ? Colors.white10 : Colors.grey.shade200,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -819,46 +943,134 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> with SingleTi
                   const SizedBox(height: 20),
                   Text(
                     'Tambah Pengeluaran Ramadan',
-                    style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 15, color: contentColor),
+                    style: GoogleFonts.quicksand(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                        color: contentColor),
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Label & input nama pengeluaran
-                  Text(
-                    'Nama Pengeluaran',
-                    style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
+                  RichText(
+                    text: TextSpan(
+                      text: 'Nama Pengeluaran',
+                      style: GoogleFonts.quicksand(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 10,
+                          color: contentColor.withOpacity(0.4)),
+                      children: [
+                        TextSpan(
+                          text: ' *',
+                          style: GoogleFonts.quicksand(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 10,
+                            color: Colors.redAccent,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 6),
                   TextFormField(
                     controller: _expenseTitleController,
-                    style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
+                    style: GoogleFonts.quicksand(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                        color: contentColor),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Nama pengeluaran tidak boleh kosong';
+                      }
+                      return null;
+                    },
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: inputBg,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none),
+                      enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none),
+                      errorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: Colors.redAccent, width: 1.5)),
+                      focusedErrorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: Colors.redAccent, width: 1.5)),
+                      errorStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10.5, color: Colors.redAccent),
                       hintText: 'Masukkan Nama Pengeluaran',
-                      hintStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.grey.shade400, fontSize: 12.5),
+                      hintStyle: GoogleFonts.quicksand(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey.shade400,
+                          fontSize: 12.5),
+                      prefixIcon: Icon(
+                        Icons.shopping_bag_rounded,
+                        color: accentColor,
+                        size: 18,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 16),
 
                   // Label & input nominal
-                  Text(
-                    'Nominal Belanja',
-                    style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
+                  RichText(
+                    text: TextSpan(
+                      text: 'Nominal Belanja',
+                      style: GoogleFonts.quicksand(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 10,
+                          color: contentColor.withOpacity(0.4)),
+                      children: [
+                        TextSpan(
+                          text: ' *',
+                          style: GoogleFonts.quicksand(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 10,
+                            color: Colors.redAccent,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 6),
                   TextFormField(
                     controller: _expenseAmountController,
                     keyboardType: TextInputType.number,
                     inputFormatters: [_RibuanFormatter()],
-                    style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
+                    style: GoogleFonts.quicksand(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                        color: contentColor),
+                    validator: (value) {
+                      final raw = (value ?? '').replaceAll('.', '');
+                      final amount = double.tryParse(raw) ?? 0.0;
+                      if (raw.isEmpty || amount <= 0) {
+                        return 'Nominal harus lebih dari 0';
+                      }
+                      return null;
+                    },
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: inputBg,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none),
+                      enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none),
+                      errorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: Colors.redAccent, width: 1.5)),
+                      focusedErrorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: Colors.redAccent, width: 1.5)),
+                      errorStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10.5, color: Colors.redAccent),
                       hintText: 'Masukkan Nominal Belanja',
-                      hintStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.grey.shade400, fontSize: 12.5),
+                      hintStyle: GoogleFonts.quicksand(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey.shade400,
+                          fontSize: 12.5),
                       prefixIcon: Container(
                         padding: const EdgeInsets.only(left: 16, right: 8),
                         child: Row(
@@ -866,7 +1078,10 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> with SingleTi
                           children: [
                             Text(
                               'Rp',
-                              style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: accentColor, fontSize: 13),
+                              style: GoogleFonts.quicksand(
+                                  fontWeight: FontWeight.bold,
+                                  color: accentColor,
+                                  fontSize: 13),
                             ),
                           ],
                         ),
@@ -875,7 +1090,7 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> with SingleTi
                   ),
 
                   const SizedBox(height: 16),
-                  
+
                   // Sync with core transactions
                   CheckboxListTile(
                     value: _syncWithMainTransactions,
@@ -883,11 +1098,17 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> with SingleTi
                     contentPadding: EdgeInsets.zero,
                     title: Text(
                       'Sinkronkan ke Transaksi Utama',
-                      style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 12, color: contentColor),
+                      style: GoogleFonts.quicksand(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                          color: contentColor),
                     ),
                     subtitle: Text(
                       'Pencatatan ini akan langsung didaftarkan ke pengeluaran bulanan dompet utama.',
-                      style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 9.5, color: Colors.grey),
+                      style: GoogleFonts.quicksand(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 9.5,
+                          color: Colors.grey),
                     ),
                     onChanged: (val) {
                       setModalState(() {
@@ -897,27 +1118,37 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> with SingleTi
                   ),
 
                   const SizedBox(height: 24),
-                  
+
                   SizedBox(
                     width: double.infinity,
                     height: 48,
                     child: ElevatedButton(
-                      onPressed: _addExpense,
+                      onPressed: () {
+                        setModalState(() {
+                          autoValidate = AutovalidateMode.onUserInteraction;
+                        });
+                        _addExpense();
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: accentColor,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
                         elevation: 0,
                       ),
                       child: Text(
                         'Simpan Pengeluaran',
-                        style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.white),
+                        style: GoogleFonts.quicksand(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                            color: Colors.white),
                       ),
                     ),
                   ),
                 ],
               ),
-            );
-          },
+            ),
+          );
+        },
         );
       },
     );
@@ -926,11 +1157,13 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> with SingleTi
 
 class _RibuanFormatter extends TextInputFormatter {
   @override
-  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
     if (newValue.text.isEmpty) return newValue;
     String digits = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
     if (digits.isEmpty) return const TextEditingValue(text: '');
-    final formatted = digits.replaceAllMapped(RegExp(r'(\d)(?=(\d{3})+(?!\d))'), (match) => '${match[1]}.');
+    final formatted = digits.replaceAllMapped(
+        RegExp(r'(\d)(?=(\d{3})+(?!\d))'), (match) => '${match[1]}.');
     return TextEditingValue(
       text: formatted,
       selection: TextSelection.collapsed(offset: formatted.length),

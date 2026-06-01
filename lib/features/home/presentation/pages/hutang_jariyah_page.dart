@@ -1,10 +1,8 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tabunganku/core/theme/app_colors.dart';
 import 'package:tabunganku/core/theme/theme_provider.dart';
 import 'package:tabunganku/models/transaction_model.dart';
@@ -18,7 +16,6 @@ class HutangJariyahPage extends ConsumerStatefulWidget {
 }
 
 class _HutangJariyahPageState extends ConsumerState<HutangJariyahPage> {
-  final String _prefKeyJariyah = 'jariyah_commitments_v1';
   List<Map<String, dynamic>> _commitments = [];
 
   // Controllers for Add Pledge
@@ -26,15 +23,16 @@ class _HutangJariyahPageState extends ConsumerState<HutangJariyahPage> {
   final TextEditingController _recipientController = TextEditingController();
   final TextEditingController _amountController = TextEditingController();
   String _frequency = 'Bulanan'; // Bulanan, Mingguan, Tahunan, Sekali
+  final _pledgeFormKey = GlobalKey<FormState>();
   
   // Controllers for Log Donation
   final TextEditingController _donationAmountController = TextEditingController();
+  final _donationFormKey = GlobalKey<FormState>();
   bool _syncWithTransactions = true;
 
   @override
   void initState() {
     super.initState();
-    _loadData();
   }
 
   @override
@@ -46,30 +44,12 @@ class _HutangJariyahPageState extends ConsumerState<HutangJariyahPage> {
     super.dispose();
   }
 
-  Future<void> _loadData() async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_prefKeyJariyah);
-    if (raw != null) {
-      final decoded = jsonDecode(raw) as List;
-      _commitments = decoded.map((e) => Map<String, dynamic>.from(e)).toList();
-    } else {
-      _commitments = [];
-    }
-    if (mounted) setState(() {});
-  }
-
-  Future<void> _saveData() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_prefKeyJariyah, jsonEncode(_commitments));
-  }
-
-  void _addPledge() async {
+  void _addPledge() {
+    if (!_pledgeFormKey.currentState!.validate()) return;
     final title = _titleController.text.trim();
     final recipient = _recipientController.text.trim();
     final amountText = _amountController.text.replaceAll('.', '');
     final amount = double.tryParse(amountText) ?? 0.0;
-
-    if (title.isEmpty || recipient.isEmpty || amount <= 0) return;
 
     final newPledge = {
       'id': DateTime.now().millisecondsSinceEpoch.toString(),
@@ -85,7 +65,6 @@ class _HutangJariyahPageState extends ConsumerState<HutangJariyahPage> {
     setState(() {
       _commitments.insert(0, newPledge);
     });
-    await _saveData();
 
     _titleController.clear();
     _recipientController.clear();
@@ -107,10 +86,9 @@ class _HutangJariyahPageState extends ConsumerState<HutangJariyahPage> {
   }
 
   void _logPayment(String commitmentId) async {
+    if (!_donationFormKey.currentState!.validate()) return;
     final amountText = _donationAmountController.text.replaceAll('.', '');
     final amount = double.tryParse(amountText) ?? 0.0;
-
-    if (amount <= 0) return;
 
     final index = _commitments.indexWhere((c) => c['id'] == commitmentId);
     if (index == -1) return;
@@ -134,8 +112,6 @@ class _HutangJariyahPageState extends ConsumerState<HutangJariyahPage> {
         }
       }
     });
-
-    await _saveData();
 
     if (_syncWithTransactions) {
       final title = _commitments[index]['title'] as String;
@@ -167,7 +143,7 @@ class _HutangJariyahPageState extends ConsumerState<HutangJariyahPage> {
     }
   }
 
-  void _toggleStatus(String id) async {
+  void _toggleStatus(String id) {
     final index = _commitments.indexWhere((c) => c['id'] == id);
     if (index == -1) return;
 
@@ -175,14 +151,12 @@ class _HutangJariyahPageState extends ConsumerState<HutangJariyahPage> {
       final currentStatus = _commitments[index]['status'] as String;
       _commitments[index]['status'] = currentStatus == 'Aktif' ? 'Selesai' : 'Aktif';
     });
-    await _saveData();
   }
 
-  void _deletePledge(String id) async {
+  void _deletePledge(String id) {
     setState(() {
       _commitments.removeWhere((c) => c['id'] == id);
     });
-    await _saveData();
   }
 
   double get _totalDonated {
@@ -221,7 +195,7 @@ class _HutangJariyahPageState extends ConsumerState<HutangJariyahPage> {
           icon: Icon(Icons.arrow_back_ios_new_rounded, color: contentColor, size: 20),
         ),
         title: Text(
-          '🤲 Hutang Jariyah',
+          'Hutang Jariyah',
           style: GoogleFonts.quicksand(
             fontWeight: FontWeight.bold,
             fontSize: 16,
@@ -307,7 +281,7 @@ class _HutangJariyahPageState extends ConsumerState<HutangJariyahPage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  '📋 Daftar Komitmen Jariyah',
+                  'Daftar Komitmen Jariyah',
                   style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
                 ),
                 ElevatedButton.icon(
@@ -483,6 +457,18 @@ class _HutangJariyahPageState extends ConsumerState<HutangJariyahPage> {
                                         ),
                                       ],
                                     ),
+                                    if (frequency == 'Sekali') ...[
+                                      const SizedBox(height: 12),
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(100),
+                                        child: LinearProgressIndicator(
+                                          value: (totalPaid / amount).clamp(0.0, 1.0),
+                                          backgroundColor: isDarkMode ? Colors.white.withOpacity(0.03) : Colors.grey.shade100,
+                                          valueColor: AlwaysStoppedAnimation<Color>(accentColor),
+                                          minHeight: 6,
+                                        ),
+                                      ),
+                                    ],
                                   ],
                                 ),
                               ),
@@ -541,14 +527,18 @@ class _HutangJariyahPageState extends ConsumerState<HutangJariyahPage> {
         final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
         final inputBg = isDarkMode ? Colors.white.withOpacity(0.04) : AppColors.background;
         
+        AutovalidateMode autoValidate = AutovalidateMode.disabled;
         return StatefulBuilder(
           builder: (context, setModalState) {
             return Padding(
               padding: EdgeInsets.fromLTRB(20, 20, 20, MediaQuery.of(context).viewInsets.bottom + 24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+              child: Form(
+                key: _pledgeFormKey,
+                autovalidateMode: autoValidate,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                   Center(
                     child: Container(
                       width: 40,
@@ -567,39 +557,85 @@ class _HutangJariyahPageState extends ConsumerState<HutangJariyahPage> {
                   const SizedBox(height: 20),
 
                   // Title input
-                  Text(
-                    'Nama Program Jariyah',
-                    style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
+                  RichText(
+                    text: TextSpan(
+                      text: 'Nama Program Jariyah',
+                      style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
+                      children: [
+                        TextSpan(
+                          text: ' *',
+                          style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: Colors.redAccent),
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 6),
                   TextFormField(
                     controller: _titleController,
                     style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Nama program tidak boleh kosong';
+                      }
+                      return null;
+                    },
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: inputBg,
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                      errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.redAccent, width: 1.5)),
+                      focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.redAccent, width: 1.5)),
+                      errorStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10.5, color: Colors.redAccent),
                       hintText: 'Masukkan Nama Program Jariyah',
                       hintStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.grey.shade400, fontSize: 12.5),
+                      prefixIcon: Icon(
+                        Icons.volunteer_activism_rounded,
+                        color: accentColor,
+                        size: 18,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 16),
 
                   // Recipient
-                  Text(
-                    'Lembaga / Penerima Manfaat',
-                    style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
+                  RichText(
+                    text: TextSpan(
+                      text: 'Lembaga / Penerima Manfaat',
+                      style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
+                      children: [
+                        TextSpan(
+                          text: ' *',
+                          style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: Colors.redAccent),
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 6),
                   TextFormField(
                     controller: _recipientController,
                     style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Nama penerima tidak boleh kosong';
+                      }
+                      return null;
+                    },
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: inputBg,
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                      errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.redAccent, width: 1.5)),
+                      focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.redAccent, width: 1.5)),
+                      errorStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10.5, color: Colors.redAccent),
                       hintText: 'Masukkan Nama Penerima / Lembaga',
                       hintStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.grey.shade400, fontSize: 12.5),
+                      prefixIcon: Icon(
+                        Icons.account_balance_rounded,
+                        color: accentColor,
+                        size: 18,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -611,9 +647,17 @@ class _HutangJariyahPageState extends ConsumerState<HutangJariyahPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              'Nominal Target',
-                              style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
+                            RichText(
+                              text: TextSpan(
+                                text: 'Nominal Target',
+                                style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
+                                children: [
+                                  TextSpan(
+                                    text: ' *',
+                                    style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: Colors.redAccent),
+                                  ),
+                                ],
+                              ),
                             ),
                             const SizedBox(height: 6),
                             TextFormField(
@@ -621,13 +665,36 @@ class _HutangJariyahPageState extends ConsumerState<HutangJariyahPage> {
                               keyboardType: TextInputType.number,
                               inputFormatters: [_RibuanFormatter()],
                               style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
+                              validator: (value) {
+                                final raw = (value ?? '').replaceAll('.', '');
+                                final amount = double.tryParse(raw) ?? 0.0;
+                                if (raw.isEmpty || amount <= 0) {
+                                  return 'Nominal harus lebih dari 0';
+                                }
+                                return null;
+                              },
                               decoration: InputDecoration(
                                 filled: true,
                                 fillColor: inputBg,
                                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                                hintText: 'Masukkan Nominal Target',
+                                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                                errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.redAccent, width: 1.5)),
+                                focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.redAccent, width: 1.5)),
+                                errorStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10.5, color: Colors.redAccent),
+                                hintText: 'Nominal Target',
                                 hintStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.grey.shade400, fontSize: 11),
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                                prefixIcon: Container(
+                                  padding: const EdgeInsets.only(left: 14, right: 6),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        'Rp',
+                                        style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: accentColor, fontSize: 12.5),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
                             ),
                           ],
@@ -652,24 +719,32 @@ class _HutangJariyahPageState extends ConsumerState<HutangJariyahPage> {
                                 color: inputBg,
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child: DropdownButtonHideUnderline(
-                                child: DropdownButton<String>(
-                                  value: _frequency,
-                                  isExpanded: true,
-                                  dropdownColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
-                                  style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: contentColor, fontSize: 13),
-                                  items: ['Bulanan', 'Mingguan', 'Tahunan', 'Sekali'].map((f) {
-                                    return DropdownMenuItem<String>(
-                                      value: f,
-                                      child: Text(f),
-                                    );
-                                  }).toList(),
-                                  onChanged: (val) {
-                                    setModalState(() {
-                                      _frequency = val ?? 'Bulanan';
-                                    });
-                                  },
-                                ),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.event_repeat_rounded, color: accentColor, size: 18),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: DropdownButtonHideUnderline(
+                                      child: DropdownButton<String>(
+                                        value: _frequency,
+                                        isExpanded: true,
+                                        dropdownColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
+                                        style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: contentColor, fontSize: 13),
+                                        items: ['Bulanan', 'Mingguan', 'Tahunan', 'Sekali'].map((f) {
+                                          return DropdownMenuItem<String>(
+                                            value: f,
+                                            child: Text(f),
+                                          );
+                                        }).toList(),
+                                        onChanged: (val) {
+                                          setModalState(() {
+                                            _frequency = val ?? 'Bulanan';
+                                          });
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
@@ -684,7 +759,12 @@ class _HutangJariyahPageState extends ConsumerState<HutangJariyahPage> {
                     width: double.infinity,
                     height: 48,
                     child: ElevatedButton(
-                      onPressed: _addPledge,
+                      onPressed: () {
+                        setModalState(() {
+                          autoValidate = AutovalidateMode.onUserInteraction;
+                        });
+                        _addPledge();
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: accentColor,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -698,7 +778,8 @@ class _HutangJariyahPageState extends ConsumerState<HutangJariyahPage> {
                   ),
                 ],
               ),
-            );
+            ),
+          );
           },
         );
       },
@@ -715,102 +796,132 @@ class _HutangJariyahPageState extends ConsumerState<HutangJariyahPage> {
         final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
         final inputBg = isDarkMode ? Colors.white.withOpacity(0.04) : AppColors.background;
         
+        AutovalidateMode autoValidate = AutovalidateMode.disabled;
         return StatefulBuilder(
           builder: (context, setModalState) {
             return Padding(
               padding: EdgeInsets.fromLTRB(20, 20, 20, MediaQuery.of(context).viewInsets.bottom + 24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                    child: Container(
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    'Catat Pembayaran Sedekah Jariyah',
-                    style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 15, color: contentColor),
-                  ),
-                  const SizedBox(height: 20),
-
-                  Text(
-                    'Nominal yang Disalurkan',
-                    style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
-                  ),
-                  const SizedBox(height: 6),
-                  TextFormField(
-                    controller: _donationAmountController,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [_RibuanFormatter()],
-                    style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: inputBg,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                      hintText: 'Masukkan Nominal Pembayaran',
-                      hintStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.grey.shade400, fontSize: 12.5),
-                      prefixIcon: Container(
-                        padding: const EdgeInsets.only(left: 16, right: 8),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              'Rp',
-                              style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: accentColor, fontSize: 13),
-                            ),
-                          ],
+              child: Form(
+                key: _donationFormKey,
+                autovalidateMode: autoValidate,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
+                          borderRadius: BorderRadius.circular(2),
                         ),
                       ),
                     ),
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  CheckboxListTile(
-                    value: _syncWithTransactions,
-                    activeColor: accentColor,
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(
-                      'Potong dari Saldo & Catat Transaksi Utama',
-                      style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 12, color: contentColor),
+                    const SizedBox(height: 20),
+                    Text(
+                      'Catat Pembayaran Sedekah Jariyah',
+                      style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 15, color: contentColor),
                     ),
-                    subtitle: Text(
-                      'Pencatatan ini akan langsung didaftarkan ke pengeluaran bulanan dompet utama sebagai amal jariyah.',
-                      style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 9.5, color: Colors.grey),
-                    ),
-                    onChanged: (val) {
-                      setModalState(() {
-                        _syncWithTransactions = val ?? true;
-                      });
-                    },
-                  ),
+                    const SizedBox(height: 20),
 
-                  const SizedBox(height: 24),
-                  
-                  SizedBox(
-                    width: double.infinity,
-                    height: 48,
-                    child: ElevatedButton(
-                      onPressed: () => _logPayment(commitmentId),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: accentColor,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        elevation: 0,
-                      ),
-                      child: Text(
-                        'Konfirmasi Penyaluran',
-                        style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.white),
+                    RichText(
+                      text: TextSpan(
+                        text: 'Nominal yang Disalurkan',
+                        style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
+                        children: [
+                          TextSpan(
+                            text: ' *',
+                            style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: Colors.redAccent),
+                          ),
+                        ],
                       ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 6),
+                    TextFormField(
+                      controller: _donationAmountController,
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [_RibuanFormatter()],
+                      style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
+                      validator: (value) {
+                        final raw = (value ?? '').replaceAll('.', '');
+                        final amount = double.tryParse(raw) ?? 0.0;
+                        if (raw.isEmpty || amount <= 0) {
+                          return 'Nominal harus lebih dari 0';
+                        }
+                        return null;
+                      },
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: inputBg,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                        errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.redAccent, width: 1.5)),
+                        focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.redAccent, width: 1.5)),
+                        errorStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10.5, color: Colors.redAccent),
+                        hintText: 'Masukkan Nominal Pembayaran',
+                        hintStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.grey.shade400, fontSize: 12.5),
+                        prefixIcon: Container(
+                          padding: const EdgeInsets.only(left: 16, right: 8),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'Rp',
+                                style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: accentColor, fontSize: 13),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    CheckboxListTile(
+                      value: _syncWithTransactions,
+                      activeColor: accentColor,
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(
+                        'Potong dari Saldo & Catat Transaksi Utama',
+                        style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 12, color: contentColor),
+                      ),
+                      subtitle: Text(
+                        'Pencatatan ini akan langsung didaftarkan ke pengeluaran bulanan dompet utama sebagai amal jariyah.',
+                        style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 9.5, color: Colors.grey),
+                      ),
+                      onChanged: (val) {
+                        setModalState(() {
+                          _syncWithTransactions = val ?? true;
+                        });
+                      },
+                    ),
+
+                    const SizedBox(height: 24),
+                    
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          setModalState(() {
+                            autoValidate = AutovalidateMode.onUserInteraction;
+                          });
+                          _logPayment(commitmentId);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: accentColor,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          elevation: 0,
+                        ),
+                        child: Text(
+                          'Konfirmasi Penyaluran',
+                          style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             );
           },

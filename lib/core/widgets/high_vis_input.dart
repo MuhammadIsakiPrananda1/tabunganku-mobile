@@ -97,15 +97,17 @@ class _HighVisInputState extends State<HighVisInput> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          widget.label,
-          style: GoogleFonts.quicksand(
-            fontSize: 11,
-            fontWeight: FontWeight.bold,
-            color: widget.isDarkMode ? Colors.white70 : Colors.black87,
+        if (widget.label.isNotEmpty) ...[
+          Text(
+            widget.label,
+            style: GoogleFonts.quicksand(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              color: widget.isDarkMode ? Colors.white70 : Colors.black87,
+            ),
           ),
-        ),
-        const SizedBox(height: 8),
+          const SizedBox(height: 8),
+        ],
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(

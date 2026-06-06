@@ -44,11 +44,14 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
   int _selectedAllocationTab = 2; // 0: Pemasukan, 1: Pengeluaran, 2: Semua
 
   String _formatRupiah(double amount) {
-    return NumberFormat.currency(
+    final isNegative = amount < 0;
+    final absAmount = amount.abs();
+    final formatted = NumberFormat.currency(
       locale: 'id_ID',
       symbol: 'Rp ',
       decimalDigits: 0,
-    ).format(amount);
+    ).format(absAmount);
+    return isNegative ? '-$formatted' : formatted;
   }
 
   @override
@@ -292,52 +295,65 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
     final estIncome = (totalIncome / currentDay) * totalDays;
     final estExpense = (totalExpense / currentDay) * totalDays;
 
-    // Estimasi saldo akhir bulan: Saldo saat ini + (estimasi pendapatan - pendapatan saat ini) - (estimasi pengeluaran - pengeluaran saat ini)
-    final remainingNet =
+    final rawRemainingNet =
         (estIncome - totalIncome) - (estExpense - totalExpense);
+    
+    // Asymmetric Damping:
+    // Jika proyeksi positif (user menabung), gunakan proyeksi penuh (1.0) agar akurat dan motivatif bagi penabung harian.
+    // Jika proyeksi negatif (ada pengeluaran besar), redam di awal bulan karena biasanya itu tagihan bulanan satu kali, bukan pengeluaran harian.
+    final double dampingFactor = rawRemainingNet >= 0
+        ? 1.0
+        : (currentDay / 10.0).clamp(0.1, 1.0);
+    final remainingNet = rawRemainingNet * dampingFactor;
+    
     final projectedBalance = totalBalance + remainingNet;
 
-    final isDanger = projectedBalance <
-        totalBalance; // Diperkirakan saldo menurun dari posisi saat ini
+    final isDanger = projectedBalance < totalBalance;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: isDanger
-            ? Colors.red.withValues(alpha: 0.1)
+            ? Colors.red.withValues(alpha: isDarkMode ? 0.08 : 0.04)
             : (isDarkMode
-                ? Colors.white.withValues(alpha: 0.05)
-                : Colors.teal.shade50.withValues(alpha: 0.3)),
+                ? Colors.white.withValues(alpha: 0.02)
+                : Colors.teal.shade50.withValues(alpha: 0.25)),
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isDanger
+              ? Colors.red.withValues(alpha: 0.1)
+              : (isDarkMode ? Colors.white10 : Colors.teal.shade100.withValues(alpha: 0.15)),
+          width: 0.5,
+        ),
       ),
       child: FittedBox(
         fit: BoxFit.scaleDown,
-        alignment: Alignment.centerLeft,
         child: Row(
           mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-                isDanger
-                    ? Icons.trending_down_rounded
-                    : Icons.trending_up_rounded,
-                size: 12,
-                color: isDanger ? Colors.red : Colors.teal),
+              isDanger ? Icons.trending_down_rounded : Icons.trending_up_rounded,
+              size: 11,
+              color: isDanger ? Colors.red : Colors.teal,
+            ),
             const SizedBox(width: 6),
             Text(
-              'Estimasi Saldo Akhir: ',
+              'Saldo Akhir Bulan:',
               style: GoogleFonts.quicksand(
                 fontSize: 9,
                 fontWeight: FontWeight.bold,
                 color: isDarkMode ? Colors.white30 : Colors.teal.shade700,
               ),
             ),
+            const SizedBox(width: 4),
             Text(
               _formatRupiah(projectedBalance),
               style: GoogleFonts.quicksand(
                 fontSize: 9,
                 fontWeight: FontWeight.bold,
                 color: isDanger
-                    ? Colors.red
+                    ? Colors.redAccent.shade100
                     : (isDarkMode ? Colors.tealAccent : Colors.teal.shade900),
               ),
             ),

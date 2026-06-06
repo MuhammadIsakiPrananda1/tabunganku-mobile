@@ -53,6 +53,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
   bool _showBalance = true;
   int? _wisdomIndex;
   int _savingsXp = 0;
+  int _selectedQuickChallengeIndex = 0;
   final List<_QuickChallenge> _quickChallenges = [
     _QuickChallenge(
       icon: '💧',
@@ -85,6 +86,54 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       xpReward: 15,
       savingsAmount: 10000,
       category: 'Transportasi',
+    ),
+    _QuickChallenge(
+      icon: '🛒',
+      title: 'Belanja dengan Catatan',
+      subtitle: 'Hindari belanja impulsif',
+      xpReward: 20,
+      savingsAmount: 25000,
+      category: 'Belanja',
+    ),
+    _QuickChallenge(
+      icon: '🎬',
+      title: 'Bioskop di Rumah',
+      subtitle: 'Nonton hemat bareng keluarga',
+      xpReward: 30,
+      savingsAmount: 50000,
+      category: 'Hiburan',
+    ),
+    _QuickChallenge(
+      icon: '🚫',
+      title: 'Hari Tanpa Belanja',
+      subtitle: 'Tantang Rp 0 seharian penuh',
+      xpReward: 35,
+      savingsAmount: 30000,
+      category: 'Gaya Hidup',
+    ),
+    _QuickChallenge(
+      icon: '🗑️',
+      title: 'Bersihkan Keranjang',
+      subtitle: 'Hapus belanjaan tidak mendesak',
+      xpReward: 25,
+      savingsAmount: 75000,
+      category: 'Belanja',
+    ),
+    _QuickChallenge(
+      icon: '🍳',
+      title: 'Masak Dinner Sendiri',
+      subtitle: 'Gunakan bahan di kulkas',
+      xpReward: 25,
+      savingsAmount: 40000,
+      category: 'Makanan & Minuman',
+    ),
+    _QuickChallenge(
+      icon: '🔌',
+      title: 'Hemat Listrik & Air',
+      subtitle: 'Matikan lampu & cabut colokan',
+      xpReward: 10,
+      savingsAmount: 8000,
+      category: 'Tagihan',
     ),
   ];
   final List<_DailyMission> _dailyMissions = [];
@@ -687,14 +736,71 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
   int get _xpToNextLevel => 100 - (_savingsXp % 100);
   double get _levelProgress => (_savingsXp % 100) / 100.0;
 
+  String _getLevelName(int lvl) {
+    if (lvl == 1) return 'Penabung Pemula';
+    if (lvl == 2) return 'Penabung Cerdas';
+    if (lvl == 3) return 'Penjaga Anggaran';
+    if (lvl == 4) return 'Ksatria Finansial';
+    if (lvl == 5) return 'Master Kemakmuran';
+    return 'Legenda Finansial';
+  }
+
   String get _savingsLevelTitle {
-    final lvl = _savingsLevel;
-    if (lvl == 1) return '🌱 Penabung Pemula';
-    if (lvl == 2) return '💡 Penabung Cerdas';
-    if (lvl == 3) return '🛡️ Penjaga Anggaran';
-    if (lvl == 4) return '⚔️ Ksatria Finansial';
-    if (lvl == 5) return '👑 Master Kemakmuran';
-    return '🏆 Legenda Finansial';
+    return _getLevelName(_savingsLevel);
+  }
+
+  IconData _getChallengeIconData(String emoji) {
+    switch (emoji) {
+      case '💧':
+        return Icons.local_drink_rounded;
+      case '🍱':
+        return Icons.lunch_dining_rounded;
+      case '☕':
+        return Icons.coffee_rounded;
+      case '🚶':
+        return Icons.directions_walk_rounded;
+      case '🛒':
+        return Icons.shopping_cart_rounded;
+      case '🎬':
+        return Icons.movie_rounded;
+      case '🚫':
+        return Icons.do_not_disturb_on_rounded;
+      case '🗑️':
+        return Icons.delete_sweep_rounded;
+      case '🍳':
+        return Icons.restaurant_rounded;
+      case '🔌':
+        return Icons.power_rounded;
+      default:
+        return Icons.emoji_events_rounded;
+    }
+  }
+
+  Color _getChallengeIconColor(String emoji) {
+    switch (emoji) {
+      case '💧':
+        return const Color(0xFF2196F3); // Clean Blue
+      case '🍱':
+        return const Color(0xFFFF9800); // Clean Orange
+      case '☕':
+        return const Color(0xFF8D6E63); // Warm Coffee Brown
+      case '🚶':
+        return const Color(0xFF4CAF50); // Clean Green
+      case '🛒':
+        return const Color(0xFF9C27B0); // Deep Purple
+      case '🎬':
+        return const Color(0xFFE91E63); // Hot Pink
+      case '🚫':
+        return const Color(0xFF607D8B); // Blue Grey
+      case '🗑️':
+        return const Color(0xFFFF5722); // Deep Orange
+      case '🍳':
+        return const Color(0xFF009688); // Teal Green
+      case '🔌':
+        return const Color(0xFFFFC107); // Power Yellow
+      default:
+        return AppColors.primary;
+    }
   }
 
   Future<void> _updateSavingsXp(int delta) async {
@@ -1507,6 +1613,101 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             ),
           ),
           const SizedBox(height: 16),
+          // Road Map Level Finansial (Minimalist & Compact Roadmap)
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: isDarkMode ? Colors.white.withOpacity(0.02) : Colors.grey.shade50,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: isDarkMode ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.03),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'TINGKATAN LEVEL FINANSIAL',
+                  style: GoogleFonts.quicksand(
+                    fontSize: 8,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1.2,
+                    color: isDarkMode ? Colors.white30 : Colors.black38,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                // Milestones list
+                ...List.generate(6, (idx) {
+                  final lvlIndex = idx + 1;
+                  final lvlName = _getLevelName(lvlIndex);
+                  final isCurrent = _savingsLevel == lvlIndex;
+                  final isPassed = _savingsLevel > lvlIndex;
+                  
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 3.5),
+                    child: Row(
+                      children: [
+                        // Dot Indicator
+                        Container(
+                          width: 12,
+                          height: 12,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: isCurrent 
+                                ? AppColors.primary 
+                                : (isPassed ? AppColors.primary.withOpacity(0.4) : Colors.transparent),
+                            border: Border.all(
+                              color: isCurrent || isPassed 
+                                  ? AppColors.primary 
+                                  : (isDarkMode ? Colors.white24 : Colors.grey.shade300),
+                              width: 1.2,
+                            ),
+                          ),
+                          alignment: Alignment.center,
+                          child: isPassed 
+                              ? const Icon(Icons.check, size: 7, color: Colors.white) 
+                              : null,
+                        ),
+                        const SizedBox(width: 10),
+                        // Level Name & Status
+                        Expanded(
+                          child: Text(
+                            'Level $lvlIndex: $lvlName',
+                            style: GoogleFonts.quicksand(
+                              fontSize: 10.5,
+                              fontWeight: isCurrent ? FontWeight.bold : FontWeight.w600,
+                              color: isCurrent 
+                                  ? (isDarkMode ? Colors.white : AppColors.primaryDark)
+                                  : (isPassed 
+                                      ? (isDarkMode ? Colors.white54 : Colors.black87)
+                                      : (isDarkMode ? Colors.white24 : Colors.grey.shade400)),
+                            ),
+                          ),
+                        ),
+                        if (isCurrent)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 1.5),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withOpacity(0.12),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              'Kamu di Sini',
+                              style: GoogleFonts.quicksand(
+                                fontSize: 7.5,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  );
+                }),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 4),
             child: Divider(
@@ -1536,50 +1737,144 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           ),
           const SizedBox(height: 18),
           // List of Challenges
-          Column(
-            children: _quickChallenges.map((challenge) {
+          // Minimalist Dropdown Selector for Quick Challenges
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+            decoration: BoxDecoration(
+              color: isDarkMode ? Colors.white.withOpacity(0.02) : Colors.grey.shade50,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: isDarkMode
+                    ? Colors.white.withOpacity(0.04)
+                    : Colors.black.withOpacity(0.04),
+                width: 1.2,
+              ),
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<int>(
+                value: _selectedQuickChallengeIndex,
+                icon: Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  color: isDarkMode ? Colors.white54 : Colors.black45,
+                  size: 20,
+                ),
+                isExpanded: true,
+                dropdownColor: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                items: List.generate(_quickChallenges.length, (idx) {
+                  final challenge = _quickChallenges[idx];
+                  return DropdownMenuItem<int>(
+                    value: idx,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              _getChallengeIconData(challenge.icon),
+                              color: _getChallengeIconColor(challenge.icon),
+                              size: 16,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              challenge.title,
+                              style: GoogleFonts.quicksand(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: isDarkMode ? Colors.white : Colors.black87,
+                              ),
+                            ),
+                          ],
+                        ),
+                        if (challenge.isCompleted)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: Colors.teal.withOpacity(0.12),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              'Selesai',
+                              style: GoogleFonts.quicksand(
+                                fontSize: 8,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.teal,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  );
+                }),
+                onChanged: (int? newIndex) {
+                  if (newIndex != null) {
+                    setState(() {
+                      _selectedQuickChallengeIndex = newIndex;
+                    });
+                  }
+                },
+              ),
+            ),
+          ),
+          const SizedBox(height: 14),
+          // Render ONLY the currently selected challenge card!
+          Builder(
+            builder: (context) {
+              final challenge = _quickChallenges[_selectedQuickChallengeIndex];
+              final challengeColor = _getChallengeIconColor(challenge.icon);
+              final challengeIcon = _getChallengeIconData(challenge.icon);
+
               return Container(
-                margin: const EdgeInsets.only(bottom: 12),
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
                 decoration: BoxDecoration(
                   color: challenge.isCompleted
                       ? (isDarkMode
-                          ? Colors.teal.withOpacity(0.05)
-                          : Colors.teal.withOpacity(0.04))
+                          ? Colors.teal.withOpacity(0.04)
+                          : Colors.teal.withOpacity(0.03))
                       : (isDarkMode
-                          ? Colors.white.withOpacity(0.02)
-                          : Colors.grey.shade50),
+                          ? Colors.white.withOpacity(0.01)
+                          : Colors.white),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
                     color: challenge.isCompleted
                         ? Colors.teal.withOpacity(0.12)
                         : (isDarkMode
-                            ? Colors.white.withOpacity(0.03)
+                            ? Colors.white.withOpacity(0.04)
                             : Colors.black.withOpacity(0.04)),
-                    width: 1,
+                    width: 1.2,
                   ),
+                  boxShadow: isDarkMode || challenge.isCompleted
+                      ? []
+                      : [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.01),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          )
+                        ],
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // Icon
+                    // Beautiful Vector Icon instead of Emoji
                     Container(
-                      width: 42,
-                      height: 42,
+                      width: 44,
+                      height: 44,
                       decoration: BoxDecoration(
                         color: challenge.isCompleted
-                            ? Colors.teal.withOpacity(0.12)
-                            : AppColors.primary.withOpacity(0.10),
-                        shape: BoxShape.circle,
+                            ? Colors.teal.withOpacity(0.10)
+                            : challengeColor.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(14),
                       ),
                       alignment: Alignment.center,
-                      child: Text(
-                        challenge.icon,
-                        style: const TextStyle(fontSize: 19),
+                      child: Icon(
+                        challenge.isCompleted ? Icons.check_circle_outline_rounded : challengeIcon,
+                        color: challenge.isCompleted ? Colors.teal : challengeColor,
+                        size: 20,
                       ),
                     ),
                     const SizedBox(width: 14),
-                    // Title & Subtitle
+                    // Title, Subtitle, & Badges
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1600,41 +1895,47 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.quicksand(
-                              fontSize: 10.5,
-                              fontWeight: FontWeight.w500,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
                               color: isDarkMode
-                                  ? Colors.white.withOpacity(0.45)
+                                  ? Colors.white.withOpacity(0.35)
                                   : Colors.black45,
                             ),
                           ),
-                          const SizedBox(height: 4),
-                          // XP chip + savings amount on one line
-                          Row(
+                          const SizedBox(height: 6),
+                          // Wrap badges dynamically to prevent overflow on small/narrow screens
+                          Wrap(
+                            spacing: 6,
+                            runSpacing: 4,
+                            crossAxisAlignment: WrapCrossAlignment.center,
                             children: [
                               Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 7, vertical: 2),
+                                    horizontal: 6, vertical: 2),
                                 decoration: BoxDecoration(
-                                  color: Colors.amber.withOpacity(0.15),
-                                  borderRadius: BorderRadius.circular(8),
+                                  color: Colors.amber.withOpacity(0.12),
+                                  borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: Text(
                                   '+${challenge.xpReward} XP',
                                   style: GoogleFonts.quicksand(
-                                    fontSize: 9.5,
+                                    fontSize: 8.5,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.amber.shade700,
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 6),
-                              Flexible(
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary.withOpacity(0.08),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
                                 child: Text(
                                   'Hemat ${_formatRupiah(challenge.savingsAmount)}',
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
                                   style: GoogleFonts.quicksand(
-                                    fontSize: 10,
+                                    fontSize: 8.5,
                                     fontWeight: FontWeight.bold,
                                     color: AppColors.primary,
                                   ),
@@ -1645,38 +1946,23 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                         ],
                       ),
                     ),
-                    const SizedBox(width: 10),
-                    // Action Button — fixed-width to prevent overflow
+                    const SizedBox(width: 12),
+                    // Action Button
                     challenge.isCompleted
                         ? Container(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 10, vertical: 6),
                             decoration: BoxDecoration(
-                              color: Colors.teal.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: Colors.teal.withOpacity(0.2),
-                                width: 1,
-                              ),
+                              color: Colors.teal.withOpacity(0.08),
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(
-                                  Icons.check_circle_rounded,
-                                  color: Colors.teal,
-                                  size: 13,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  'Selesai',
-                                  style: GoogleFonts.quicksand(
-                                    fontSize: 10.5,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.teal,
-                                  ),
-                                ),
-                              ],
+                            child: Text(
+                              'Selesai',
+                              style: GoogleFonts.quicksand(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.teal,
+                              ),
                             ),
                           )
                         : Material(
@@ -1686,41 +1972,33 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                 HapticFeedback.lightImpact();
                                 _showChallengeVerificationSheet(challenge);
                               },
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.circular(14),
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 12, vertical: 7),
                                 decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [
-                                      AppColors.primary,
-                                      AppColors.primary.withOpacity(0.78),
-                                    ],
+                                  color: AppColors.primary.withOpacity(0.12),
+                                  borderRadius: BorderRadius.circular(14),
+                                  border: Border.all(
+                                    color: AppColors.primary.withOpacity(0.2),
+                                    width: 1,
                                   ),
-                                  borderRadius: BorderRadius.circular(16),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: AppColors.primary.withOpacity(0.28),
-                                      blurRadius: 6,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
                                 ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     const Icon(
                                       Icons.play_arrow_rounded,
-                                      color: Colors.white,
+                                      color: AppColors.primary,
                                       size: 13,
                                     ),
                                     const SizedBox(width: 3),
                                     Text(
                                       'Mulai',
                                       style: GoogleFonts.quicksand(
-                                        fontSize: 11,
+                                        fontSize: 10.5,
                                         fontWeight: FontWeight.bold,
-                                        color: Colors.white,
+                                        color: AppColors.primary,
                                       ),
                                     ),
                                   ],
@@ -1731,7 +2009,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   ],
                 ),
               );
-            }).toList(),
+            },
           ),
         ],
       ),
@@ -1878,7 +2156,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     final targetBalance = transactions
         .where((t) => !t.date.isBefore(target.createdAt))
         .fold<double>(
-            0, (s, t) => s + (t.type == TransactionType.income ? t.amount : 0));
+            0, (s, t) => s + (t.type == TransactionType.income ? t.amount : -t.amount));
 
     final progress = (target.targetAmount > 0)
         ? (targetBalance / target.targetAmount).clamp(0.0, 1.0)

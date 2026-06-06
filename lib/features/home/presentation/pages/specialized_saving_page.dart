@@ -388,7 +388,7 @@ class _SpecializedSavingPageState extends ConsumerState<SpecializedSavingPage> {
     final transactions = ref.watch(transactionsByGroupProvider(null));
     final targetBalance = transactions
         .where((t) => !t.date.isBefore(target.createdAt))
-        .fold<double>(0, (s, t) => s + (t.type == TransactionType.income ? t.amount : 0));
+        .fold<double>(0, (s, t) => s + (t.type == TransactionType.income ? t.amount : -t.amount));
     final progress = (target.targetAmount > 0) ? (targetBalance / target.targetAmount).clamp(0.0, 1.0) : 0.0;
 
     return Container(

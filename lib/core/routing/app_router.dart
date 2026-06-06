@@ -38,6 +38,8 @@ import 'package:tabunganku/features/home/presentation/pages/kontak_darurat_finan
 import 'package:tabunganku/features/home/presentation/pages/nikah_planner_page.dart';
 import 'package:tabunganku/features/home/presentation/pages/kuliah_planner_page.dart';
 import 'package:tabunganku/features/home/presentation/pages/wisata_planner_page.dart';
+import 'package:tabunganku/features/home/presentation/pages/notes_page.dart';
+import 'package:tabunganku/features/home/presentation/pages/qris_services_page.dart';
 
 final appRouterProvider = Provider((ref) {
   return GoRouter(
@@ -208,6 +210,11 @@ final appRouterProvider = Provider((ref) {
         builder: (context, state) => const AllServicesPage(),
       ),
       GoRoute(
+        path: '/qris-payment',
+        name: 'qris-payment',
+        builder: (context, state) => const QrisServicesPage(),
+      ),
+      GoRoute(
         path: '/recurring',
         name: 'recurring',
         builder: (context, state) => const RecurringListPage(),
@@ -293,6 +300,11 @@ final appRouterProvider = Provider((ref) {
         path: '/wisata-planner',
         name: 'wisata-planner',
         builder: (context, state) => const TabunganWisataPage(),
+      ),
+      GoRoute(
+        path: '/notes',
+        name: 'notes',
+        builder: (context, state) => const NotesPage(),
       ),
 
       // Catch-all redirect to splash

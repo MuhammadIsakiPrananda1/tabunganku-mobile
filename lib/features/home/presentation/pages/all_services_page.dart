@@ -179,6 +179,13 @@ class AllServicesPage extends ConsumerWidget {
               color: Colors.blue,
               route: '/currency-converter',
             ),
+            _ServiceData(
+              icon: Icons.qr_code_2_rounded,
+              title: 'QRIS Pembayaran Zaky',
+              subtitle: 'Dana Bisnis & Order Kuota',
+              color: Colors.redAccent,
+              route: '/qris-payment',
+            ),
           ]),
           _buildCategoryHeader(isDarkMode, 'SOSIAL & HADIAH'),
           _buildCompactCategoryCard(context, isDarkMode, [
@@ -240,6 +247,13 @@ class AllServicesPage extends ConsumerWidget {
               subtitle: 'Daftar kontak cs bank, broker, asuransi',
               color: Colors.redAccent,
               route: '/kontak-darurat',
+            ),
+            _ServiceData(
+              icon: Icons.note_alt_rounded,
+              title: 'Catatan Harian (Notes)',
+              subtitle: 'Tulis memo, pin & favoritkan catatanmu',
+              color: Colors.amber.shade700,
+              route: '/notes',
             ),
           ]),
         ],

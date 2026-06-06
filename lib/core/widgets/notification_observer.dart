@@ -7,6 +7,14 @@ import 'package:tabunganku/providers/transaction_provider.dart';
 import 'package:tabunganku/providers/notification_provider.dart';
 import 'package:tabunganku/models/notification_model.dart';
 import 'package:tabunganku/models/transaction_model.dart';
+import 'package:tabunganku/providers/gold_provider.dart';
+import 'package:tabunganku/models/gold_investment_model.dart';
+import 'package:tabunganku/providers/bills_provider.dart';
+import 'package:tabunganku/models/bill_model.dart';
+import 'package:tabunganku/providers/investment_provider.dart';
+import 'package:tabunganku/models/investment_model.dart';
+import 'package:tabunganku/providers/insurance_provider.dart';
+import 'package:tabunganku/models/insurance_model.dart';
 import 'package:intl/intl.dart';
 
 class NotificationObserver extends ConsumerStatefulWidget {
@@ -64,39 +72,196 @@ class _NotificationObserverState extends ConsumerState<NotificationObserver> {
       }
     });
 
-    // ── Saving Target Achievement Listener ─────────────────────
-    // Listen to changes in targets or transactions/balance
+    // ── Transaction & Target Achievement Listener ─────────────────────
     ref.listen(transactionsStreamProvider, (previous, next) {
-      final transactions = next.valueOrNull;
+      final prevList = previous?.valueOrNull;
+      final nextList = next.valueOrNull;
       final targets = ref.read(savingTargetsStreamProvider).valueOrNull;
       
-      if (transactions != null && targets != null) {
-        final personalTransactions = transactions.where((t) => t.groupId == null).toList();
-        final totalIncome = personalTransactions
-            .where((t) => t.type == TransactionType.income)
-            .fold<double>(0, (sum, t) => sum + t.amount);
-        final totalExpense = personalTransactions
-            .where((t) => t.type == TransactionType.expense)
-            .fold<double>(0, (sum, t) => sum + t.amount);
-        final currentBalance = totalIncome - totalExpense;
+      if (nextList != null) {
+        final personalTransactions = nextList.where((t) => t.groupId == null).toList();
 
-        for (final target in targets) {
-          final targetBalance = personalTransactions
-              .where((t) => !t.date.isBefore(target.createdAt))
-              .fold<double>(0, (s, t) => s + (t.type == TransactionType.income ? t.amount : 0));
+        // A. Check for new transactions
+        if (prevList != null) {
+          final prevIds = prevList.map((t) => t.id).toSet();
+          final newTxs = nextList.where((t) => !prevIds.contains(t.id)).toList();
 
-          if (targetBalance >= target.targetAmount && target.targetAmount > 0 && !_isNotified('target_reached_${target.id}')) {
+          for (final tx in newTxs) {
+            if (!_isNotified('tx_${tx.id}')) {
+              final isIncome = tx.type == TransactionType.income;
+              ref.read(notificationNotifierProvider.notifier).addNotification(
+                NotificationModel(
+                  id: 'tx_${tx.id}_${DateTime.now().millisecondsSinceEpoch}',
+                  title: isIncome ? 'Pemasukan Baru! 💰' : 'Pengeluaran Baru! 💸',
+                  message: isIncome
+                      ? 'Pemasukan "${tx.title}" sebesar ${currencyFormatter.format(tx.amount)} telah berhasil dicatat.'
+                      : 'Pengeluaran "${tx.title}" sebesar ${currencyFormatter.format(tx.amount)} telah berhasil dicatat.',
+                  timestamp: DateTime.now(),
+                  type: isIncome ? NotificationType.savings : NotificationType.system,
+                  actionData: tx.id,
+                ),
+              );
+              _markAsNotified('tx_${tx.id}');
+            }
+          }
+        }
+
+        // B. Check for target achievements
+        if (targets != null) {
+          for (final target in targets) {
+            final targetBalance = personalTransactions
+                .where((t) => !t.date.isBefore(target.createdAt))
+                .fold<double>(0, (s, t) => s + (t.type == TransactionType.income ? t.amount : -t.amount));
+
+            if (targetBalance >= target.targetAmount && target.targetAmount > 0 && !_isNotified('target_reached_${target.id}')) {
+              ref.read(notificationNotifierProvider.notifier).addNotification(
+                NotificationModel(
+                  id: 'target_reached_${target.id}_${DateTime.now().millisecondsSinceEpoch}',
+                  title: 'Target Tercapai! 🎯',
+                  message: 'Selamat! Saldo target "${target.name}" telah mencapai ${currencyFormatter.format(target.targetAmount)}.',
+                  timestamp: DateTime.now(),
+                  type: NotificationType.savings,
+                  actionData: target.id,
+                ),
+              );
+              _markAsNotified('target_reached_${target.id}');
+            }
+          }
+        }
+      }
+    });
+
+    // ── Gold Transactions Listener ──────────────────────────────
+    ref.listen(goldTransactionsStreamProvider, (previous, next) {
+      final prevList = previous?.valueOrNull;
+      final nextList = next.valueOrNull;
+
+      if (prevList != null && nextList != null && nextList.length > prevList.length) {
+        final prevIds = prevList.map((t) => t.id).toSet();
+        final newTxs = nextList.where((t) => !prevIds.contains(t.id)).toList();
+
+        for (final tx in newTxs) {
+          if (!_isNotified('gold_tx_${tx.id}')) {
+            final isBuy = tx.type == GoldTransactionType.buy;
+            final totalPrice = tx.grams * tx.pricePerGram;
             ref.read(notificationNotifierProvider.notifier).addNotification(
               NotificationModel(
-                id: 'target_reached_${target.id}_${DateTime.now().millisecondsSinceEpoch}',
-                title: 'Target Tercapai! 🎯',
-                message: 'Selamat! Saldo target "${target.name}" telah mencapai ${currencyFormatter.format(target.targetAmount)}.',
+                id: 'gold_tx_${tx.id}_${DateTime.now().millisecondsSinceEpoch}',
+                title: isBuy ? 'Beli Emas Berhasil! 🪙' : 'Jual Emas Berhasil! 💵',
+                message: isBuy
+                    ? 'Pembelian emas seberat ${tx.grams.toStringAsFixed(3)} gr senilai ${currencyFormatter.format(totalPrice)} telah berhasil dicatat.'
+                    : 'Penjualan emas seberat ${tx.grams.toStringAsFixed(3)} gr senilai ${currencyFormatter.format(totalPrice)} telah berhasil dicatat.',
                 timestamp: DateTime.now(),
-                type: NotificationType.savings,
-                actionData: target.id,
+                type: NotificationType.gold,
+                actionData: tx.id,
               ),
             );
-            _markAsNotified('target_reached_${target.id}');
+            _markAsNotified('gold_tx_${tx.id}');
+          }
+        }
+      }
+    });
+
+    // ── Bills Listener ──────────────────────────────────────────
+    ref.listen(billsStreamProvider, (previous, next) {
+      final prevList = previous?.valueOrNull;
+      final nextList = next.valueOrNull;
+
+      if (prevList != null && nextList != null) {
+        // A. Check for new bills added
+        if (nextList.length > prevList.length) {
+          final prevIds = prevList.map((b) => b.id).toSet();
+          final newBills = nextList.where((b) => !prevIds.contains(b.id)).toList();
+
+          for (final bill in newBills) {
+            if (!_isNotified('bill_add_${bill.id}')) {
+              ref.read(notificationNotifierProvider.notifier).addNotification(
+                NotificationModel(
+                  id: 'bill_add_${bill.id}_${DateTime.now().millisecondsSinceEpoch}',
+                  title: 'Tagihan Baru Terdaftar! 📋',
+                  message: 'Tagihan "${bill.name}" sebesar ${currencyFormatter.format(bill.amount)} (Jatuh tempo tanggal ${bill.dueDay}) telah terdaftar.',
+                  timestamp: DateTime.now(),
+                  type: NotificationType.bills,
+                  actionData: bill.id,
+                ),
+              );
+              _markAsNotified('bill_add_${bill.id}');
+            }
+          }
+        }
+
+        // B. Check for bills paid
+        for (final bill in nextList) {
+          final prevBill = prevList.firstWhere((b) => b.id == bill.id, orElse: () => bill);
+          if (bill.isPaid && !prevBill.isPaid) {
+            final notifyKey = 'bill_paid_${bill.id}_${bill.lastPaidDate?.millisecondsSinceEpoch}';
+            if (!_isNotified(notifyKey)) {
+              ref.read(notificationNotifierProvider.notifier).addNotification(
+                NotificationModel(
+                  id: 'bill_paid_${bill.id}_${DateTime.now().millisecondsSinceEpoch}',
+                  title: 'Pembayaran Tagihan Berhasil! ✅',
+                  message: 'Tagihan "${bill.name}" sebesar ${currencyFormatter.format(bill.amount)} telah berhasil dibayar.',
+                  timestamp: DateTime.now(),
+                  type: NotificationType.bills,
+                  actionData: bill.id,
+                ),
+              );
+              _markAsNotified(notifyKey);
+            }
+          }
+        }
+      }
+    });
+
+    // ── Investment Listener ──────────────────────────────────────
+    ref.listen(investmentStreamProvider, (previous, next) {
+      final prevList = previous?.valueOrNull;
+      final nextList = next.valueOrNull;
+
+      if (prevList != null && nextList != null && nextList.length > prevList.length) {
+        final prevIds = prevList.map((i) => i.id).toSet();
+        final newInv = nextList.where((i) => !prevIds.contains(i.id)).toList();
+
+        for (final inv in newInv) {
+          if (!_isNotified('inv_${inv.id}')) {
+            ref.read(notificationNotifierProvider.notifier).addNotification(
+              NotificationModel(
+                id: 'inv_${inv.id}_${DateTime.now().millisecondsSinceEpoch}',
+                title: 'Investasi Baru Ditambahkan! 📈',
+                message: 'Aset investasi "${inv.assetName}" dengan nilai nominal ${currencyFormatter.format(inv.totalInvested)} telah berhasil dicatat.',
+                timestamp: DateTime.now(),
+                type: NotificationType.investment,
+                actionData: inv.id,
+              ),
+            );
+            _markAsNotified('inv_${inv.id}');
+          }
+        }
+      }
+    });
+
+    // ── Insurance Listener ───────────────────────────────────────
+    ref.listen(insuranceStreamProvider, (previous, next) {
+      final prevList = previous?.valueOrNull;
+      final nextList = next.valueOrNull;
+
+      if (prevList != null && nextList != null && nextList.length > prevList.length) {
+        final prevIds = prevList.map((i) => i.id).toSet();
+        final newIns = nextList.where((i) => !prevIds.contains(i.id)).toList();
+
+        for (final ins in newIns) {
+          if (!_isNotified('ins_${ins.id}')) {
+            ref.read(notificationNotifierProvider.notifier).addNotification(
+              NotificationModel(
+                id: 'ins_${ins.id}_${DateTime.now().millisecondsSinceEpoch}',
+                title: 'Polis Asuransi Terdaftar! 🛡️',
+                message: 'Polis asuransi "${ins.policyName}" dari ${ins.provider} dengan premi bulanan ${currencyFormatter.format(ins.premiumAmount)} telah berhasil terdaftar.',
+                timestamp: DateTime.now(),
+                type: NotificationType.system,
+                actionData: ins.id,
+              ),
+            );
+            _markAsNotified('ins_${ins.id}');
           }
         }
       }

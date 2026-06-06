@@ -33,15 +33,37 @@ Future<void> _initNotifications() async {
 
   await flutterLocalNotificationsPlugin.initialize(initSettings);
 
-  // Request permission untuk Android 13+ (Notifikasi & Exact Alarm)
+  // Ambil referensi plugin Android
   final androidPlugin =
       flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin>();
 
   if (androidPlugin != null) {
+    // Request permission untuk Android 13+ (Notifikasi & Exact Alarm)
     await androidPlugin.requestNotificationsPermission();
+
+    // Android 8+ (API 26+) WAJIB membuat channel secara eksplisit.
+    // PENTING: Setelah channel dibuat, Android MENGUNCI importance-nya.
+    // Satu-satunya cara mengubahnya adalah: hapus channel lama → buat baru.
+    // Kita hapus & buat ulang sekali saat app diupdate agar suara tidak hilang.
+    const channel = AndroidNotificationChannel(
+      'tabunganku_activity',          // ID — harus cocok dengan yang di notification_service.dart
+      'Aktivitas TabunganKu',         // Nama yang tampil di Settings HP
+      description: 'Notifikasi untuk pencapaian dan aktivitas menabung',
+      importance: Importance.high,    // HIGH = ada suara & muncul sebagai heads-up
+      playSound: true,
+      enableVibration: true,
+      showBadge: true,
+    );
+
+    // Hapus channel lama (jika ada) untuk memastikan importance diperbarui
+    await androidPlugin.deleteNotificationChannel(channel.id);
+    // Buat ulang dengan konfigurasi terbaru
+    await androidPlugin.createNotificationChannel(channel);
+    debugPrint('NotificationChannel re-created: ${channel.id}');
   }
 }
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

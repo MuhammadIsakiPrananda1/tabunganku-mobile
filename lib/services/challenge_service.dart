@@ -310,11 +310,54 @@ class MockChallengeService implements ChallengeService {
     }
   }
 
+  // ── Secure storage backup keys ─────────────────────────────────────────
+  static const String _secureStreakPrefix = 'secure_streak_';
+  static const String _securePointsPrefix = 'secure_points_';
+  static const String _secureLastCompletionPrefix = 'secure_last_completion_';
+
+  /// Restore streak & points from secure storage into SharedPreferences
+  /// jika SharedPreferences kosong (misal setelah update/reinstall).
+  Future<void> _restoreFromSecureStorageIfNeeded(
+      SharedPreferences prefs, String userId) async {
+    final streakKey = '$_streakKey$userId';
+    final pointsKey = '$_pointsKey$userId';
+    final lastCompletionKey = '$_lastCompletionKey$userId';
+
+    final prefStreak = prefs.getInt(streakKey);
+    final prefPoints = prefs.getInt(pointsKey);
+
+    // Jika keduanya belum ada di SharedPreferences → pulihkan dari secure storage
+    if (prefStreak == null && prefPoints == null) {
+      final secStreak =
+          await _secureStorage.readSecureData('$_secureStreakPrefix$userId');
+      final secPoints =
+          await _secureStorage.readSecureData('$_securePointsPrefix$userId');
+      final secLastCompletion = await _secureStorage
+          .readSecureData('$_secureLastCompletionPrefix$userId');
+
+      if (secStreak != null) {
+        await prefs.setInt(streakKey, int.tryParse(secStreak) ?? 0);
+      }
+      if (secPoints != null) {
+        await prefs.setInt(pointsKey, int.tryParse(secPoints) ?? 0);
+      }
+      if (secLastCompletion != null) {
+        await prefs.setString(lastCompletionKey, secLastCompletion);
+      }
+
+      debugPrint(
+          'ChallengeService: Restored from secure storage → streak=$secStreak, points=$secPoints');
+    }
+  }
+
   Future<void> _updateStreakOnCompletion() async {
     final prefs = await _getPrefs();
     final userId = await _getCurrentUserId();
     final streakKey = '$_streakKey$userId';
     final lastCompletionKey = '$_lastCompletionKey$userId';
+
+    // Pulihkan dulu jika SharedPreferences kosong
+    await _restoreFromSecureStorageIfNeeded(prefs, userId);
 
     final currentStreak = prefs.getInt(streakKey) ?? 0;
     final lastCompletionStr = prefs.getString(lastCompletionKey);
@@ -322,6 +365,7 @@ class MockChallengeService implements ChallengeService {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
 
+    int newStreak;
     if (lastCompletionStr != null) {
       final lastCompletion = DateTime.parse(lastCompletionStr);
       final lastDate = DateTime(
@@ -330,18 +374,27 @@ class MockChallengeService implements ChallengeService {
 
       if (daysDiff == 1) {
         // Consecutive day
-        await prefs.setInt(streakKey, currentStreak + 1);
+        newStreak = currentStreak + 1;
       } else if (daysDiff > 1) {
         // Streak broken, reset
-        await prefs.setInt(streakKey, 1);
+        newStreak = 1;
+      } else {
+        // Same day, don't update streak
+        newStreak = currentStreak;
       }
-      // If same day, don't update streak
     } else {
       // First completion
-      await prefs.setInt(streakKey, 1);
+      newStreak = 1;
     }
 
+    await prefs.setInt(streakKey, newStreak);
     await prefs.setString(lastCompletionKey, now.toIso8601String());
+
+    // Backup ke secure storage
+    await _secureStorage.writeSecureData(
+        '$_secureStreakPrefix$userId', newStreak.toString());
+    await _secureStorage.writeSecureData(
+        '$_secureLastCompletionPrefix$userId', now.toIso8601String());
   }
 
   Future<void> _addPoints(int points) async {
@@ -349,14 +402,26 @@ class MockChallengeService implements ChallengeService {
     final userId = await _getCurrentUserId();
     final pointsKey = '$_pointsKey$userId';
 
+    // Pulihkan dulu jika SharedPreferences kosong
+    await _restoreFromSecureStorageIfNeeded(prefs, userId);
+
     final currentPoints = prefs.getInt(pointsKey) ?? 0;
-    await prefs.setInt(pointsKey, currentPoints + points);
+    final newPoints = currentPoints + points;
+    await prefs.setInt(pointsKey, newPoints);
+
+    // Backup ke secure storage
+    await _secureStorage.writeSecureData(
+        '$_securePointsPrefix$userId', newPoints.toString());
   }
 
   @override
   Future<int> getCurrentStreak() async {
     final prefs = await _getPrefs();
     final userId = await _getCurrentUserId();
+
+    // Pulihkan dulu jika SharedPreferences kosong
+    await _restoreFromSecureStorageIfNeeded(prefs, userId);
+
     final streakKey = '$_streakKey$userId';
     return prefs.getInt(streakKey) ?? 0;
   }
@@ -365,6 +430,10 @@ class MockChallengeService implements ChallengeService {
   Future<int> getTotalPoints() async {
     final prefs = await _getPrefs();
     final userId = await _getCurrentUserId();
+
+    // Pulihkan dulu jika SharedPreferences kosong
+    await _restoreFromSecureStorageIfNeeded(prefs, userId);
+
     final pointsKey = '$_pointsKey$userId';
     return prefs.getInt(pointsKey) ?? 0;
   }

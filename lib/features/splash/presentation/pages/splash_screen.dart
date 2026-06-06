@@ -112,8 +112,24 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final bgColor = isDark ? AppColors.backgroundDark : AppColors.background;
+    final titleColor =
+        isDark ? AppColors.textPrimaryDark : AppColors.primaryDark;
+    final versionColor =
+        isDark ? AppColors.textSecondaryDark : AppColors.textTertiary;
+    final badgeBg = AppColors.primaryLight.withValues(alpha: isDark ? 0.12 : 0.10);
+    final badgeBorder =
+        AppColors.primaryLight.withValues(alpha: isDark ? 0.25 : 0.20);
+    final ornament1Color =
+        AppColors.primaryLight.withValues(alpha: isDark ? 0.07 : 0.05);
+    final ornament2Color =
+        AppColors.primary.withValues(alpha: isDark ? 0.05 : 0.03);
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: bgColor,
       body: Stack(
         children: [
           // Background Ornaments
@@ -125,7 +141,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
               height: 300,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColors.primaryLight.withValues(alpha: 0.05),
+                color: ornament1Color,
               ),
             ),
           ),
@@ -137,7 +153,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
               height: 400,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColors.primary.withValues(alpha: 0.03),
+                color: ornament2Color,
               ),
             ),
           ),
@@ -159,7 +175,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                color: AppColors.primary.withValues(alpha: 0.15),
+                                color:
+                                    AppColors.primary.withValues(alpha: 0.15),
                                 blurRadius: 40 * _pulseAnimation.value,
                                 spreadRadius: 10 * _pulseAnimation.value,
                               ),
@@ -187,10 +204,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                     opacity: _textFade,
                     child: Column(
                       children: [
-                        const Text(
+                        Text(
                           'TabunganKu',
                           style: TextStyle(
-                            color: AppColors.primaryDark,
+                            color: titleColor,
                             fontSize: 36,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 1.2,
@@ -201,10 +218,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                           padding: const EdgeInsets.symmetric(
                               horizontal: 16, vertical: 6),
                           decoration: BoxDecoration(
-                            color: AppColors.primaryLight.withValues(alpha: 0.1),
+                            color: badgeBg,
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                              color: AppColors.primaryLight.withValues(alpha: 0.2),
+                              color: badgeBorder,
                               width: 1,
                             ),
                           ),
@@ -257,10 +274,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                     ),
                   ),
                   const SizedBox(height: 10),
-                  const Text(
+                  Text(
                     AppVersion.fullVersion,
                     style: TextStyle(
-                      color: AppColors.textTertiary,
+                      color: versionColor,
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 2.0,

@@ -59,60 +59,64 @@ class NotificationSheet extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 16),
-          ConstrainedBox(
-            constraints: BoxConstraints(
-              maxHeight: MediaQuery.of(context).size.height * 0.6,
-            ),
-            child: notificationsAsync.when(
-              data: (notifications) {
-                if (notifications.isEmpty) {
-                  return _buildEmptyState(isDarkMode);
-                }
-                final displayList = notifications.take(5).toList();
-                return Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: displayList.length,
-                      itemBuilder: (context, index) {
-                        final n = displayList[index];
-                        return _buildNotificationTile(context, ref, n, isDarkMode);
-                      },
-                    ),
-                    if (notifications.length > 5)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: TextButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => const NotificationsPage()),
-                            );
+          Flexible(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.6,
+              ),
+              child: notificationsAsync.when(
+                data: (notifications) {
+                  if (notifications.isEmpty) {
+                    return _buildEmptyState(isDarkMode);
+                  }
+                  final displayList = notifications.take(5).toList();
+                  return SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: displayList.length,
+                          itemBuilder: (context, index) {
+                            final n = displayList[index];
+                            return _buildNotificationTile(context, ref, n, isDarkMode);
                           },
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Lihat Semua (${notifications.length})',
-                                style: GoogleFonts.quicksand(
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.primary,
-                                ),
-                              ),
-                              const SizedBox(width: 4),
-                              const Icon(Icons.arrow_forward_ios_rounded, size: 12, color: AppColors.primary),
-                            ],
-                          ),
                         ),
-                      ),
-                  ],
-                );
-              },
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (err, stack) => Center(child: Text('Error: $err')),
+                        if (notifications.length > 5)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            child: TextButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => const NotificationsPage()),
+                                );
+                              },
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    'Lihat Semua (${notifications.length})',
+                                    style: GoogleFonts.quicksand(
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.primary,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  const Icon(Icons.arrow_forward_ios_rounded, size: 12, color: AppColors.primary),
+                                ],
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  );
+                },
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (err, stack) => Center(child: Text('Error: $err')),
+              ),
             ),
           ),
           if (notificationsAsync.hasValue && notificationsAsync.value!.isNotEmpty)

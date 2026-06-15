@@ -4,21 +4,23 @@ Seluruh evolusi, fitur, dan perbaikan aplikasi **TabunganKu** terdokumentasi sec
 
 ---
 
-## 💎 [1.5.1] — 15 Juni 2026: Minimalist Aesthetics & Smart Projection
-*Rilis ini menandai era baru desain TabunganKu dengan fokus pada kesederhanaan premium dan kecerdasan analisis prediktif.*
+## 💎 [1.5.1] — 15 Juni 2026: New Horizons & Advanced Financial Tools
+*Rilis v1.5.1 menghadirkan lompatan besar bagi ekosistem TabunganKu dengan integrasi sistem pencatatan terpadu, perombakan total fitur Arisan menjadi Nabung Bersama yang lebih andal, serta serangkaian kalkulator finansial tingkat lanjut.*
 
 ### 🆕 Fitur Yang Ditambah
-*   **Smart Balance Projection**: Algoritma cerdas yang menganalisis tren pemasukan dan pengeluaran harian untuk memberikan estimasi saldo akhir bulan secara akurat.
-*   **Dashboard Monthly Reset**: Sistem reset otomatis statistik setiap awal bulan untuk memastikan pemantauan keuangan tetap relevan dan fokus pada periode berjalan.
-*   **Premium Success Feedback**: Standarisasi pesan sukses (*snackbars*) dengan desain yang lebih bersih, profesional, dan tidak mengganggu alur pengguna.
+*   **Note-Taking System**: Integrasi CRUD Catatan lengkap dan halaman detail khusus untuk mendokumentasikan rencana keuangan.
+*   **Advanced Financial Calculators**: Serangkaian kalkulator baru untuk membimbing keputusan finansial (KPR, FIRE, Dana Darurat, Gaji Bersih, Aturan Anggaran 50/30/20, Rencana Pelunasan Utang & Skor Kesehatan Finansial).
+*   **Specialized Planners**: Modul baru untuk mewujudkan rencana khusus seperti Wisata/Liburan, Dana Pendidikan (Kuliah), Anggaran Pernikahan, dan pelacakan cicilan Hutang Jariyah.
+*   **Fitur Pendukung Baru**: Halaman layanan QRIS simulator, Halaman khusus Ramadan Mode, Brankas Finansial & Kontak Darurat, serta Premium Image Cropper untuk foto profil.
 
 ### 🛠️ Fitur Yang Diubah
-*   **Minimalist Detail Overhaul**: Pembersihan seluruh lembar detail transaksi dan target dari penggunaan emotikon berlebih untuk mencapai tampilan yang lebih lega dan berkelas.
-*   **Advanced Arisan Management**: Redesain total UI Arisan dengan sistem *checkbox* yang lebih bersih and implementasi tombol "Tambah Peserta" bergaya *dashed border*.
-*   **Compact UI Typography**: Penyesuaian ukuran font pada menu *Quick Actions* dan kartu target untuk memberikan keseimbangan visual yang lebih baik.
+*   **Arisan Migration**: Peningkatan dan migrasi total fitur Arisan menjadi "Nabung Bersama" dengan sinkronisasi database real-time dan UI yang dirancang ulang.
+*   **Dashboard & Settings Overhaul**: Peningkatan performa render grafik dashboard, perbaikan setelan PIN keamanan, serta integrasi image upload service.
+*   **Transactions Optimization**: Optimalisasi riwayat transaksi berulang (Recurring Transactions) dan modul pemindaian struk (Scan Receipt) agar lebih akurat.
 
 ### 🗑️ Fitur Yang Dihapus
-*   **Visual Clutter Elimination**: Penghapusan elemen dekoratif, bayangan berlebihan, dan garis pemisah yang tidak perlu pada lembar detail demi estetika minimalis.
+*   **Arisan Page & Providers**: Penghapusan modul arisan lama karena telah sepenuhnya digantikan oleh fitur Nabung Bersama.
+*   **Widget Test Cleanup**: Penghapusan file uji coba widget lama (`test/widget_test.dart`) untuk menjaga kebersihan repositori.
 
 ---
 

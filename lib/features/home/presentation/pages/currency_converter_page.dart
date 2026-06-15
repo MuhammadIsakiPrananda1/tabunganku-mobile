@@ -179,7 +179,7 @@ class _CurrencyConverterPageState extends ConsumerState<CurrencyConverterPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildReferenceLabel('Dari', isDarkMode),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 4),
                   _buildCurrencyCard(_fromCurrency, _amountStr, true, isDarkMode, accentColor),
                   
                   const SizedBox(height: 12),
@@ -197,7 +197,7 @@ class _CurrencyConverterPageState extends ConsumerState<CurrencyConverterPage> {
                   const SizedBox(height: 12),
 
                   _buildReferenceLabel('Ke', isDarkMode),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 4),
                   _buildCurrencyCard(_toCurrency, _formatValue(_convertedAmount), false, isDarkMode, accentColor),
 
                   if (_lastUpdated != null) ...[

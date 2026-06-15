@@ -686,13 +686,13 @@ class _InsuranceTrackerPageState extends ConsumerState<InsuranceTrackerPage> {
               color: isDarkMode ? Colors.white.withOpacity(0.3) : Colors.black.withOpacity(0.25),
             ),
             prefixIcon: Container(
-              padding: const EdgeInsets.only(left: 16, right: 8),
+              padding: const EdgeInsets.only(left: 12, right: 4),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(icon, color: iconColor, size: 18),
                   if (isPremium) ...[
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 4),
                     Text(
                       'Rp',
                       style: GoogleFonts.quicksand(
@@ -705,10 +705,11 @@ class _InsuranceTrackerPageState extends ConsumerState<InsuranceTrackerPage> {
                 ],
               ),
             ),
+            prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
             filled: true,
             fillColor: isDarkMode ? Colors.white.withOpacity(0.05) : AppColors.background,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            contentPadding: const EdgeInsets.only(left: 0, right: 16, top: 14, bottom: 14),
           ),
         ),
       ],

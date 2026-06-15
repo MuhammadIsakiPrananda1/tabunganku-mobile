@@ -287,7 +287,7 @@ class _KontakDaruratFinansialPageState extends ConsumerState<KontakDaruratFinans
 
   Widget _buildSectionHeader(String title, bool isDarkMode) {
     return Padding(
-      padding: const EdgeInsets.only(left: 4, bottom: 8),
+      padding: const EdgeInsets.only(left: 4, bottom: 4),
       child: Text(
         title,
         style: GoogleFonts.quicksand(
@@ -515,7 +515,7 @@ class _KontakDaruratFinansialPageState extends ConsumerState<KontakDaruratFinans
                         ],
                       ),
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 4),
                     TextFormField(
                       controller: _instController,
                       style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
@@ -565,7 +565,7 @@ class _KontakDaruratFinansialPageState extends ConsumerState<KontakDaruratFinans
                         ],
                       ),
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 4),
                     TextFormField(
                       controller: _phoneController,
                       keyboardType: TextInputType.phone,
@@ -600,7 +600,7 @@ class _KontakDaruratFinansialPageState extends ConsumerState<KontakDaruratFinans
                       'Email CS (Opsional)',
                       style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 4),
                     TextFormField(
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
@@ -625,7 +625,7 @@ class _KontakDaruratFinansialPageState extends ConsumerState<KontakDaruratFinans
                       'Catatan / Penjelasan Ringkas (Opsional)',
                       style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 4),
                     TextFormField(
                       controller: _noteController,
                       style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),

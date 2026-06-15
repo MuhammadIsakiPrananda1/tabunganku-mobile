@@ -565,7 +565,7 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
                     const SizedBox(height: 20),
 
                     _buildLabel('Nama Barang', isDarkMode, isRequired: true),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 4),
                     _buildTextField(
                       controller: _nameController,
                       hint: 'Masukkan nama barang',
@@ -576,7 +576,7 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
                     const SizedBox(height: 16),
 
                     _buildLabel('Harga/Unit', isDarkMode, isRequired: true),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 4),
                     _buildTextField(
                       controller: _pricePerUnitController,
                       hint: 'Masukkan harga',
@@ -593,7 +593,7 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
                     const SizedBox(height: 16),
 
                     _buildLabel('Jumlah', isDarkMode, isRequired: true),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 4),
                     _buildTextField(
                       controller: _quantityController,
                       hint: 'Masukkan jumlah',
@@ -605,7 +605,7 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
                     const SizedBox(height: 16),
 
                     _buildLabel('Satuan (Unit)', isDarkMode),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 4),
                     _buildTextField(
                       controller: _unitController,
                       hint: 'Masukkan satuan (contoh: pcs)',
@@ -615,7 +615,7 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
                     const SizedBox(height: 16),
 
                     _buildLabel('Kategori', isDarkMode),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 4),
                     _buildTextField(
                       controller: _categoryController,
                       hint: 'Masukkan kategori',
@@ -807,7 +807,7 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
         prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 46),
         filled: true,
         fillColor: fillColor,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        contentPadding: const EdgeInsets.only(left: 0, right: 14, top: 12, bottom: 12),
         border: borderStyle,
         enabledBorder: borderStyle,
         focusedBorder: OutlineInputBorder(

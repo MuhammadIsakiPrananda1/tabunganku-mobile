@@ -186,7 +186,7 @@ class _MonthlyBudgetPageState extends ConsumerState<MonthlyBudgetPage> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.calendar_month_rounded,
+                                const Icon(Icons.calendar_month_rounded,
                                     size: 14, color: AppColors.primary),
                                 const SizedBox(width: 7),
                                 Text(dateLabel,
@@ -225,41 +225,25 @@ class _MonthlyBudgetPageState extends ConsumerState<MonthlyBudgetPage> {
                           Padding(
                             padding: const EdgeInsets.fromLTRB(18, 16, 18, 14),
                             child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
 
                                 // Row: label + status icon
-                                Row(
-                                  children: [
-                                    Text(
-                                      'PENGELUARAN BULAN INI',
-                                      style: GoogleFonts.quicksand(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w800,
-                                        letterSpacing: 1.0,
-                                        color: subClr,
-                                      ),
-                                    ),
-                                    const Spacer(),
-                                    Container(
-                                      padding: const EdgeInsets.all(5),
-                                      decoration: BoxDecoration(
-                                        color: accent.withValues(alpha: 0.1),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Icon(
-                                        isOver ? Icons.warning_amber_rounded
-                                               : Icons.pie_chart_outline_rounded,
-                                        size: 14, color: accent,
-                                      ),
-                                    ),
-                                  ],
+                                Text(
+                                  'PENGELUARAN BULAN INI',
+                                  style: GoogleFonts.quicksand(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 1.0,
+                                    color: subClr,
+                                  ),
                                 ),
                                 const SizedBox(height: 6),
 
                                 // Hero: amount spent
                                 Text(
                                   fmt.format(spent),
+                                  textAlign: TextAlign.center,
                                   style: GoogleFonts.quicksand(
                                     fontSize: 26,
                                     fontWeight: FontWeight.w900,
@@ -274,6 +258,7 @@ class _MonthlyBudgetPageState extends ConsumerState<MonthlyBudgetPage> {
                                   _budgetLimit > 0
                                       ? 'dari ${fmt.format(_budgetLimit)}'
                                       : 'Belum ada limit budget',
+                                  textAlign: TextAlign.center,
                                   style: GoogleFonts.quicksand(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w500,

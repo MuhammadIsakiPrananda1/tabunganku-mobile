@@ -1,9 +1,10 @@
-import 'dart:math';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tabunganku/core/theme/app_colors.dart';
 import 'package:tabunganku/core/theme/theme_provider.dart';
 
@@ -15,9 +16,11 @@ class TabunganWisataPage extends ConsumerStatefulWidget {
 }
 
 class _TabunganWisataPageState extends ConsumerState<TabunganWisataPage> {
-  // Config variables - Clean state, starting from 0, resets on exit
+  // Config variables - Persisted local state
+  final String _prefKeyWisata = 'wisata_planner_data_v1';
   String _destination = '';
   double _savedAmount = 0.0;
+  double _targetBudget = 0.0;
   DateTime? _targetDate; // Nullable target date
   List<Map<String, dynamic>> _budgetItems = [];
   List<Map<String, dynamic>> _checklistItems = [];
@@ -35,6 +38,12 @@ class _TabunganWisataPageState extends ConsumerState<TabunganWisataPage> {
   final _todoFormKey = GlobalKey<FormState>();
 
   @override
+  void initState() {
+    super.initState();
+    _loadPlannerData();
+  }
+
+  @override
   void dispose() {
     _destinationController.dispose();
     _savedAmountController.dispose();
@@ -44,8 +53,52 @@ class _TabunganWisataPageState extends ConsumerState<TabunganWisataPage> {
     super.dispose();
   }
 
+  Future<void> _loadPlannerData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_prefKeyWisata);
+    if (raw != null) {
+      final decoded = jsonDecode(raw) as Map<String, dynamic>;
+      _destination = decoded['destination'] as String? ?? '';
+      _savedAmount = (decoded['savedAmount'] as num?)?.toDouble() ?? 0.0;
+      _targetBudget = (decoded['targetBudget'] as num?)?.toDouble() ?? 0.0;
+      if (decoded['targetDate'] != null) {
+        _targetDate = DateTime.parse(decoded['targetDate'] as String);
+      } else {
+        _targetDate = null;
+      }
+      _budgetItems = (decoded['budgetItems'] as List?)?.map((e) => Map<String, dynamic>.from(e)).toList() ?? [];
+      _checklistItems = (decoded['checklistItems'] as List?)?.map((e) => Map<String, dynamic>.from(e)).toList() ?? [];
+    } else {
+      _destination = '';
+      _savedAmount = 0.0;
+      _targetBudget = 0.0;
+      _targetDate = null;
+      _budgetItems = [];
+      _checklistItems = [];
+    }
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _savePlannerData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final data = {
+      'destination': _destination,
+      'savedAmount': _savedAmount,
+      'targetBudget': _targetBudget,
+      'targetDate': _targetDate?.toIso8601String(),
+      'budgetItems': _budgetItems,
+      'checklistItems': _checklistItems,
+    };
+    await prefs.setString(_prefKeyWisata, jsonEncode(data));
+  }
+
   double get _totalEstimatedCost {
     return _budgetItems.fold(0.0, (sum, item) => sum + (item['cost'] as num).toDouble());
+  }
+
+  double get _effectiveTargetBudget {
+    if (_targetBudget > 0) return _targetBudget;
+    return _totalEstimatedCost;
   }
 
   int get _monthsRemaining {
@@ -57,12 +110,12 @@ class _TabunganWisataPageState extends ConsumerState<TabunganWisataPage> {
 
   double get _monthlySavingsTarget {
     if (_targetDate == null) return 0.0;
-    final gap = _totalEstimatedCost - _savedAmount;
+    final gap = _effectiveTargetBudget - _savedAmount;
     if (gap <= 0) return 0.0;
     return gap / _monthsRemaining;
   }
 
-  void _updateSavings() {
+  void _updateSavings() async {
     if (!_savingsFormKey.currentState!.validate()) return;
     final text = _savedAmountController.text.replaceAll('.', '');
     final amount = double.tryParse(text) ?? 0.0;
@@ -70,11 +123,12 @@ class _TabunganWisataPageState extends ConsumerState<TabunganWisataPage> {
     setState(() {
       _savedAmount = amount;
     });
+    await _savePlannerData();
     _savedAmountController.clear();
     if (mounted) Navigator.pop(context);
   }
 
-  void _addBudgetItem() {
+  void _addBudgetItem() async {
     if (!_budgetFormKey.currentState!.validate()) return;
     final title = _budgetItemNameController.text.trim();
     final costText = _budgetItemCostController.text.replaceAll('.', '');
@@ -89,18 +143,20 @@ class _TabunganWisataPageState extends ConsumerState<TabunganWisataPage> {
     setState(() {
       _budgetItems.add(newItem);
     });
+    await _savePlannerData();
     _budgetItemNameController.clear();
     _budgetItemCostController.clear();
     if (mounted) Navigator.pop(context);
   }
 
-  void _deleteBudgetItem(String id) {
+  void _deleteBudgetItem(String id) async {
     setState(() {
       _budgetItems.removeWhere((i) => i['id'] == id);
     });
+    await _savePlannerData();
   }
 
-  void _addChecklistItem() {
+  void _addChecklistItem() async {
     if (!_todoFormKey.currentState!.validate()) return;
     final title = _todoNameController.text.trim();
 
@@ -113,23 +169,26 @@ class _TabunganWisataPageState extends ConsumerState<TabunganWisataPage> {
     setState(() {
       _checklistItems.add(newItem);
     });
+    await _savePlannerData();
     _todoNameController.clear();
     if (mounted) Navigator.pop(context);
   }
 
-  void _toggleChecklistItem(String id) {
+  void _toggleChecklistItem(String id) async {
     final index = _checklistItems.indexWhere((i) => i['id'] == id);
     if (index == -1) return;
 
     setState(() {
       _checklistItems[index]['checked'] = !(_checklistItems[index]['checked'] as bool);
     });
+    await _savePlannerData();
   }
 
-  void _deleteChecklistItem(String id) {
+  void _deleteChecklistItem(String id) async {
     setState(() {
       _checklistItems.removeWhere((i) => i['id'] == id);
     });
+    await _savePlannerData();
   }
 
   // Dynamic travel category icon generator based on title matching
@@ -161,7 +220,7 @@ class _TabunganWisataPageState extends ConsumerState<TabunganWisataPage> {
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
     final pageBgColor = isDarkMode ? AppColors.backgroundDark : const Color(0xFFFFFDFB); // Cozy ultra-soft tint
     final accentColor = const Color(0xFFFF9800); // Sunset Orange
-    final progress = _totalEstimatedCost > 0 ? (_savedAmount / _totalEstimatedCost).clamp(0.0, 1.0) : 0.0;
+    final progress = _effectiveTargetBudget > 0 ? (_savedAmount / _effectiveTargetBudget).clamp(0.0, 1.0) : 0.0;
 
     return Scaffold(
       backgroundColor: pageBgColor,
@@ -236,25 +295,13 @@ class _TabunganWisataPageState extends ConsumerState<TabunganWisataPage> {
                             ),
                           ),
                           const SizedBox(height: 6),
-                          Row(
-                            children: [
-                              Flexible(
-                                child: Text(
-                                  _destination.isEmpty ? 'Destinasi Impian' : _destination,
-                                  style: GoogleFonts.quicksand(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: contentColor,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              InkWell(
-                                onTap: () => _showEditDestinationDialog(isDarkMode, accentColor),
-                                borderRadius: BorderRadius.circular(100),
-                                child: Icon(Icons.edit_rounded, size: 14, color: accentColor),
-                              ),
-                            ],
+                          Text(
+                            _destination.isEmpty ? 'Destinasi Impian' : _destination,
+                            style: GoogleFonts.quicksand(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: contentColor,
+                            ),
                           ),
                         ],
                       ),
@@ -279,50 +326,76 @@ class _TabunganWisataPageState extends ConsumerState<TabunganWisataPage> {
                 const SizedBox(height: 18),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Estimasi Total Biaya',
-                          style: GoogleFonts.quicksand(
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.bold,
-                            color: isDarkMode ? Colors.white38 : Colors.grey.shade500,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _targetBudget > 0 ? 'Target Anggaran' : 'Estimasi Total Biaya',
+                            style: GoogleFonts.quicksand(
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.bold,
+                              color: isDarkMode ? Colors.white38 : Colors.grey.shade500,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(_totalEstimatedCost),
-                          style: GoogleFonts.quicksand(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w800,
-                            color: contentColor,
+                          const SizedBox(height: 4),
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(_effectiveTargetBudget),
+                              style: GoogleFonts.quicksand(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w800,
+                                color: contentColor,
+                              ),
+                            ),
                           ),
-                        ),
-                      ],
+                          if (_targetBudget > 0 && _totalEstimatedCost > 0) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              'Detail Kebutuhan: Rp ${NumberFormat.decimalPattern('id_ID').format(_totalEstimatedCost.round())}',
+                              style: GoogleFonts.quicksand(
+                                fontSize: 9.5,
+                                fontWeight: FontWeight.bold,
+                                color: isDarkMode ? Colors.white30 : Colors.grey.shade600,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
                     ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          'Dana Terkumpul',
-                          style: GoogleFonts.quicksand(
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.bold,
-                            color: isDarkMode ? Colors.white38 : Colors.grey.shade500,
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            'Dana Terkumpul',
+                            style: GoogleFonts.quicksand(
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.bold,
+                              color: isDarkMode ? Colors.white38 : Colors.grey.shade500,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(_savedAmount),
-                          style: GoogleFonts.quicksand(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: accentColor,
+                          const SizedBox(height: 4),
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerRight,
+                            child: Text(
+                              NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(_savedAmount),
+                              style: GoogleFonts.quicksand(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: accentColor,
+                              ),
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -376,7 +449,7 @@ class _TabunganWisataPageState extends ConsumerState<TabunganWisataPage> {
                             child: Text(
                               _targetDate != null
                                   ? 'Nabung per Bulan: Rp ${NumberFormat.decimalPattern('id_ID').format(_monthlySavingsTarget.round())}'
-                                  : 'Nabung per Bulan: - (Atur Tanggal Target)',
+                                  : 'Nabung per Bulan: - (Sesuaikan Rencana)',
                               style: GoogleFonts.quicksand(
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold,
@@ -397,7 +470,7 @@ class _TabunganWisataPageState extends ConsumerState<TabunganWisataPage> {
                       child: SizedBox(
                         height: 42,
                         child: OutlinedButton(
-                          onPressed: () => _selectTargetDate(context),
+                          onPressed: () => _showAdjustPlanSheet(isDarkMode, accentColor),
                           style: OutlinedButton.styleFrom(
                             padding: EdgeInsets.zero,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
@@ -407,20 +480,27 @@ class _TabunganWisataPageState extends ConsumerState<TabunganWisataPage> {
                                   : accentColor.withOpacity(0.2),
                             ),
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.edit_calendar_rounded, size: 14, color: contentColor),
-                              const SizedBox(width: 6),
-                              Text(
-                                'Atur Tanggal',
-                                style: GoogleFonts.quicksand(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 11.5,
-                                  color: contentColor,
-                                ),
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.center,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.tune_rounded, size: 14, color: contentColor),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    'Sesuaikan Rencana',
+                                    style: GoogleFonts.quicksand(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 11.5,
+                                      color: contentColor,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ],
+                            ),
                           ),
                         ),
                       ),
@@ -437,20 +517,27 @@ class _TabunganWisataPageState extends ConsumerState<TabunganWisataPage> {
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                             elevation: 0,
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(Icons.add_card_rounded, size: 14, color: Colors.white),
-                              const SizedBox(width: 6),
-                              Text(
-                                'Update Tabungan',
-                                style: GoogleFonts.quicksand(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 11.5,
-                                  color: Colors.white,
-                                ),
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.center,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(Icons.add_card_rounded, size: 14, color: Colors.white),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    'Update Tabungan',
+                                    style: GoogleFonts.quicksand(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 11.5,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ],
+                            ),
                           ),
                         ),
                       ),
@@ -791,34 +878,13 @@ class _TabunganWisataPageState extends ConsumerState<TabunganWisataPage> {
     );
   }
 
-  void _selectTargetDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: _targetDate ?? DateTime.now().add(const Duration(days: 180)),
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 3650)),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: Color(0xFFFF9800),
-              onPrimary: Colors.white,
-              onSurface: Colors.black,
-            ),
-          ),
-          child: child!,
-        );
-      },
-    );
-    if (picked != null && picked != _targetDate) {
-      setState(() {
-        _targetDate = picked;
-      });
-    }
-  }
-
-  void _showEditDestinationDialog(bool isDarkMode, Color accentColor) {
+  void _showAdjustPlanSheet(bool isDarkMode, Color accentColor) {
     _destinationController.text = _destination;
+    final targetBudgetController = TextEditingController(
+      text: _targetBudget > 0 ? NumberFormat.decimalPattern('id_ID').format(_targetBudget.round()) : ''
+    );
+    DateTime? tempTargetDate = _targetDate;
+ 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -827,111 +893,229 @@ class _TabunganWisataPageState extends ConsumerState<TabunganWisataPage> {
       builder: (context) {
         final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
         final inputBg = isDarkMode ? Colors.white.withOpacity(0.04) : AppColors.background;
-
+ 
         AutovalidateMode autoValidate = AutovalidateMode.disabled;
         return StatefulBuilder(
           builder: (context, setModalState) {
             return Padding(
               padding: EdgeInsets.fromLTRB(20, 20, 20, MediaQuery.of(context).viewInsets.bottom + 24),
-              child: Form(
-                key: _destinationFormKey,
-                autovalidateMode: autoValidate,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Center(
-                      child: Container(
-                        width: 40,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Text(
-                      'Ubah Destinasi Liburan',
-                      style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 15, color: contentColor),
-                    ),
-                    const SizedBox(height: 20),
-                    RichText(
-                      text: TextSpan(
-                        text: 'Destinasi Liburan',
-                        style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
-                        children: [
-                          TextSpan(
-                            text: ' *',
-                            style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: Colors.redAccent),
+              child: SingleChildScrollView(
+                child: Form(
+                  key: _destinationFormKey,
+                  autovalidateMode: autoValidate,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Center(
+                        child: Container(
+                          width: 40,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
+                            borderRadius: BorderRadius.circular(2),
                           ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    TextFormField(
-                      controller: _destinationController,
-                      style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Nama destinasi tidak boleh kosong';
-                        }
-                        return null;
-                      },
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: inputBg,
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                        errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.redAccent, width: 1.5)),
-                        focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.redAccent, width: 1.5)),
-                        errorStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10.5, color: Colors.redAccent),
-                        hintText: 'Masukkan Nama Destinasi',
-                        hintStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.grey.shade400, fontSize: 12.5),
-                        prefixIcon: Icon(
-                          Icons.place_rounded,
-                          color: accentColor.withOpacity(0.8),
-                          size: 18,
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 24),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 48,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          setModalState(() {
-                            autoValidate = AutovalidateMode.onUserInteraction;
-                          });
-                          if (_destinationFormKey.currentState!.validate()) {
-                            setState(() {
-                              _destination = _destinationController.text.trim();
+                      const SizedBox(height: 20),
+                      Text(
+                        'Sesuaikan Rencana Wisata',
+                        style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 15, color: contentColor),
+                      ),
+                      const SizedBox(height: 20),
+ 
+                      // Destinasi Liburan
+                      RichText(
+                        text: TextSpan(
+                          text: 'Destinasi Liburan',
+                          style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
+                          children: [
+                            TextSpan(
+                              text: ' *',
+                              style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: Colors.redAccent),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      TextFormField(
+                        controller: _destinationController,
+                        style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Nama destinasi tidak boleh kosong';
+                          }
+                          return null;
+                        },
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: inputBg,
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                          errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.redAccent, width: 1.5)),
+                          focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.redAccent, width: 1.5)),
+                          errorStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10.5, color: Colors.redAccent),
+                          hintText: 'Masukkan Nama Destinasi',
+                          hintStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.grey.shade400, fontSize: 12.5),
+                          prefixIcon: Icon(
+                            Icons.place_rounded,
+                            color: accentColor.withOpacity(0.8),
+                            size: 18,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Target Anggaran Wisata
+                      Text(
+                        'Target Anggaran Wisata (Rp)',
+                        style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
+                      ),
+                      const SizedBox(height: 6),
+                      TextFormField(
+                        controller: targetBudgetController,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [_RibuanFormatter()],
+                        style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: inputBg,
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                          hintText: 'Masukkan Target Anggaran',
+                          hintStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.grey.shade400, fontSize: 12.5),
+                          prefixIcon: Container(
+                            padding: const EdgeInsets.only(left: 12, right: 4),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'Rp',
+                                  style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: accentColor, fontSize: 13),
+                                ),
+                              ],
+                            ),
+                          ),
+                          prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+ 
+                      // Tanggal Target
+                      Text(
+                        'Rencana Tanggal Keberangkatan',
+                        style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
+                      ),
+                      const SizedBox(height: 6),
+                      InkWell(
+                        onTap: () async {
+                          final DateTime? picked = await showDatePicker(
+                            context: context,
+                            initialDate: tempTargetDate ?? DateTime.now().add(const Duration(days: 180)),
+                            firstDate: DateTime.now(),
+                            lastDate: DateTime.now().add(const Duration(days: 3650)),
+                            builder: (context, child) {
+                              return Theme(
+                                data: Theme.of(context).copyWith(
+                                  colorScheme: isDarkMode
+                                      ? ColorScheme.dark(
+                                          primary: accentColor,
+                                          onPrimary: Colors.white,
+                                          surface: AppColors.surfaceDark,
+                                          onSurface: Colors.white,
+                                        )
+                                      : ColorScheme.light(
+                                          primary: accentColor,
+                                          onPrimary: Colors.white,
+                                          surface: Colors.white,
+                                          onSurface: Colors.black87,
+                                        ),
+                                ),
+                                child: child!,
+                              );
+                            },
+                          );
+                          if (picked != null) {
+                            setModalState(() {
+                              tempTargetDate = picked;
                             });
-                            _destinationController.clear();
-                            if (mounted) Navigator.pop(context);
                           }
                         },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: accentColor,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                          elevation: 0,
-                        ),
-                        child: Text(
-                          'Simpan Destinasi',
-                          style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.white),
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: inputBg,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.calendar_month_rounded, color: accentColor, size: 18),
+                              const SizedBox(width: 12),
+                              Text(
+                                tempTargetDate != null
+                                    ? DateFormat('MMMM yyyy', 'id_ID').format(tempTargetDate!)
+                                    : 'Pilih Bulan & Tahun',
+                                style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+ 
+                      const SizedBox(height: 28),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 48,
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            setModalState(() {
+                              autoValidate = AutovalidateMode.onUserInteraction;
+                            });
+                            if (_destinationFormKey.currentState!.validate()) {
+                              final budgetText = targetBudgetController.text.replaceAll('.', '');
+                              final budget = double.tryParse(budgetText) ?? 0.0;
+
+                              setState(() {
+                                _destination = _destinationController.text.trim();
+                                _targetBudget = budget;
+                                _targetDate = tempTargetDate;
+                              });
+ 
+                              await _savePlannerData();
+                              _destinationController.clear();
+                              if (context.mounted) {
+                                Navigator.pop(context);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Rencana wisata berhasil disimpan!', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold)),
+                                    backgroundColor: accentColor,
+                                  ),
+                                );
+                              }
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: accentColor,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            elevation: 0,
+                          ),
+                          child: Text(
+                            'Simpan Rencana',
+                            style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.white),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             );
-          }
+          },
         );
       },
     );
   }
+
 
   void _showUpdateSavedDialog(bool isDarkMode, Color accentColor) {
     _savedAmountController.text = _savedAmount > 0 ? NumberFormat.decimalPattern('id_ID').format(_savedAmount.round()) : '';
@@ -1009,7 +1193,7 @@ class _TabunganWisataPageState extends ConsumerState<TabunganWisataPage> {
                         hintText: 'Masukkan Jumlah Tabungan',
                         hintStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.grey.shade400, fontSize: 12.5),
                         prefixIcon: Container(
-                          padding: const EdgeInsets.only(left: 16, right: 8),
+                          padding: const EdgeInsets.only(left: 12, right: 4),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -1020,6 +1204,7 @@ class _TabunganWisataPageState extends ConsumerState<TabunganWisataPage> {
                             ],
                           ),
                         ),
+            prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -1173,7 +1358,7 @@ class _TabunganWisataPageState extends ConsumerState<TabunganWisataPage> {
                         hintText: 'Masukkan Estimasi Biaya',
                         hintStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.grey.shade400, fontSize: 12.5),
                         prefixIcon: Container(
-                          padding: const EdgeInsets.only(left: 16, right: 8),
+                          padding: const EdgeInsets.only(left: 12, right: 4),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -1184,6 +1369,7 @@ class _TabunganWisataPageState extends ConsumerState<TabunganWisataPage> {
                             ],
                           ),
                         ),
+            prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
                       ),
                     ),
 

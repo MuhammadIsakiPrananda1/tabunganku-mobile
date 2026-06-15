@@ -526,7 +526,7 @@ class _BiayaKuliahPlannerPageState extends ConsumerState<BiayaKuliahPlannerPage>
           decoration: InputDecoration(
             filled: true,
             fillColor: inputBg,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            contentPadding: const EdgeInsets.only(left: 0, right: 16, top: 12, bottom: 12),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,
@@ -621,7 +621,7 @@ class _BiayaKuliahPlannerPageState extends ConsumerState<BiayaKuliahPlannerPage>
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                         hintText: 'Masukkan Nama Anak',
                         hintStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.grey.shade400, fontSize: 12.5),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        contentPadding: const EdgeInsets.only(left: 0, right: 16, top: 12, bottom: 12),
                         prefixIcon: Icon(
                           Icons.child_care_rounded,
                           color: accentColor.withOpacity(0.8),
@@ -729,9 +729,9 @@ class _BiayaKuliahPlannerPageState extends ConsumerState<BiayaKuliahPlannerPage>
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                           hintText: 'Masukkan Biaya Kuliah Hari Ini',
                           hintStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.grey.shade400, fontSize: 12.5),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          contentPadding: const EdgeInsets.only(left: 0, right: 16, top: 12, bottom: 12),
                           prefixIcon: Container(
-                            padding: const EdgeInsets.only(left: 16, right: 8),
+                            padding: const EdgeInsets.only(left: 12, right: 4),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
@@ -742,6 +742,7 @@ class _BiayaKuliahPlannerPageState extends ConsumerState<BiayaKuliahPlannerPage>
                               ],
                             ),
                           ),
+            prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -764,9 +765,9 @@ class _BiayaKuliahPlannerPageState extends ConsumerState<BiayaKuliahPlannerPage>
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                         hintText: 'Masukkan Tabungan Terkumpul',
                         hintStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.grey.shade400, fontSize: 12.5),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        contentPadding: const EdgeInsets.only(left: 0, right: 16, top: 12, bottom: 12),
                         prefixIcon: Container(
-                          padding: const EdgeInsets.only(left: 16, right: 8),
+                          padding: const EdgeInsets.only(left: 12, right: 4),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -777,6 +778,7 @@ class _BiayaKuliahPlannerPageState extends ConsumerState<BiayaKuliahPlannerPage>
                             ],
                           ),
                         ),
+            prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
                       ),
                     ),
        

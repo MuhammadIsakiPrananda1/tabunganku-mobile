@@ -2689,7 +2689,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
 
     var selectedCategory = type == TransactionType.expense
         ? 'Makanan & Minuman Harian'
-        : 'Gaji Pokok';
+        : 'Gaji Pokok Bulanan';
 
     // Ensure the default exists, otherwise pick the first one from the current list
     if (categoryObjects.isNotEmpty &&
@@ -3971,6 +3971,146 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                     },
                                   ),
                                 ],
+                                if (selectedTopUpSource != null) ...[
+                                  const SizedBox(height: 6),
+                                  Container(
+                                    padding: const EdgeInsets.all(14),
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                        colors: isDarkMode
+                                            ? [
+                                                formContrastColor
+                                                    .withValues(alpha: 0.25),
+                                                formContrastColor
+                                                    .withValues(alpha: 0.15),
+                                              ]
+                                            : [
+                                                Colors.grey.shade100,
+                                                Colors.white,
+                                              ],
+                                      ),
+                                      borderRadius: BorderRadius.circular(14),
+                                      border: Border.all(
+                                          color: formContrastColor
+                                              .withValues(alpha: 0.25)),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(8),
+                                          decoration: BoxDecoration(
+                                            color: formContrastColor
+                                                .withValues(alpha: 0.15),
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                          ),
+                                          child: Icon(
+                                            Icons.info_outline_rounded,
+                                            color: isDarkMode
+                                                ? Colors.white
+                                                : Colors.black87,
+                                            size: 18,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                selectedTopUpSource ==
+                                                            'Bank (Kustom)' &&
+                                                        topUpBankName
+                                                            .trim()
+                                                            .isNotEmpty
+                                                    ? 'Biaya Admin ${topUpBankName.trim()}'
+                                                    : 'Biaya Admin $selectedTopUpSource',
+                                                style: GoogleFonts.quicksand(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 11,
+                                                    color: isDarkMode
+                                                        ? Colors.white
+                                                        : Colors.black87),
+                                              ),
+                                              const SizedBox(height: 2),
+                                              Text(
+                                                selectedTopUpSource == 'GoPay'
+                                                    ? 'Biaya top-up Rp 1.000 - Rp 2.000 via Mobile Banking / ATM. Bebas biaya jika menggunakan GoPay Tabungan.'
+                                                    : selectedTopUpSource == 'OVO'
+                                                        ? 'Biaya top-up Rp 1.000 - Rp 1.500 dipotong langsung dari nominal yang Anda top-up.'
+                                                        : selectedTopUpSource == 'Dana'
+                                                            ? 'Biaya top-up Rp 500 - Rp 1.000 via Virtual Account. Bebas biaya admin transfer keluar 10x per bulan.'
+                                                            : selectedTopUpSource == 'ShopeePay'
+                                                                ? 'Biaya top-up Rp 500 - Rp 1.000 via Transfer Bank / Virtual Account.'
+                                                                : selectedTopUpSource == 'LinkAja'
+                                                                    ? 'Biaya top-up Rp 1.000 via ATM Himbara & Mobile Banking.'
+                                                                    : selectedTopUpSource == 'Ovo Points'
+                                                                        ? 'Menggunakan cashback points OVO. Bebas biaya admin tambahan.'
+                                                                        : selectedTopUpSource == 'SeaBank'
+                                                                            ? 'Bebas biaya transfer ke seluruh bank & e-wallet (kuota bulanan melimpah).'
+                                                                            : selectedTopUpSource == 'Bank Jago'
+                                                                                ? 'Bebas biaya transfer ke seluruh bank & e-wallet hingga 150x per bulan sesuai level Kantong.'
+                                                                                : selectedTopUpSource == 'Bank Neo Commerce'
+                                                                                    ? 'Bebas biaya transfer antar bank & bunga cair harian tinggi.'
+                                                                                    : selectedTopUpSource == 'Blu by BCA'
+                                                                                        ? 'Bebas biaya transfer antar bank (BI-Fast) dengan metode bluRewards.'
+                                                                                        : selectedTopUpSource == 'Allo Bank'
+                                                                                            ? 'Bebas biaya transfer jika menggunakan Allo Prime & saldo mencukupi.'
+                                                                                            : selectedTopUpSource == 'Bank BCA'
+                                                                                                ? 'Biaya transfer antar bank Rp 6.500 (Online) atau Rp 2.500 (BI-Fast).'
+                                                                                                : selectedTopUpSource == 'Bank Mandiri'
+                                                                                                    ? 'Biaya transfer antar bank Rp 6.500 (Online) atau Rp 2.500 (BI-Fast) via Livin\' by Mandiri.'
+                                                                                                    : selectedTopUpSource == 'Bank BRI'
+                                                                                                        ? 'Biaya transfer antar bank Rp 6.500 (Online) atau Rp 2.500 (BI-Fast) via BRIMO.'
+                                                                                                        : selectedTopUpSource == 'Bank BNI'
+                                                                                                            ? 'Biaya transfer antar bank Rp 6.500 (Online) atau Rp 2.500 (BI-Fast) via BNI Mobile.'
+                                                                                                            : selectedTopUpSource == 'Bank Syariah Indonesia (BSI)'
+                                                                                                                ? 'Biaya transfer antar bank Rp 6.500 (Online) atau Rp 2.500 (BI-Fast) via BSI Mobile.'
+                                                                                                                : selectedTopUpSource == 'Bank CIMB Niaga'
+                                                                                                                    ? 'Biaya transfer antar bank Rp 6.500 (Online) atau Rp 2.500 (BI-Fast) via OCTO Mobile.'
+                                                                                                                    : selectedTopUpSource == 'Bank Permata'
+                                                                                                                        ? 'Biaya transfer antar bank Rp 6.500 (Online) atau Rp 2.500 (BI-Fast) via PermataMobile X.'
+                                                                                                                        : selectedTopUpSource == 'Bank Danamon'
+                                                                                                                            ? 'Biaya transfer antar bank Rp 6.500 (Online) atau Rp 2.500 (BI-Fast) via D-Bank PRO.'
+                                                                                                                            : selectedTopUpSource == 'Bank Mega'
+                                                                                                                                ? 'Biaya transfer antar bank Rp 6.500 (Online) atau Rp 2.500 (BI-Fast) via M-Smile.'
+                                                                                                                                : selectedTopUpSource == 'Bank Panin'
+                                                                                                                                    ? 'Biaya transfer antar bank Rp 6.500 (Online) atau Rp 2.500 (BI-Fast) via Mobile Panin.'
+                                                                                                                                    : selectedTopUpSource == 'DBS Bank'
+                                                                                                                                        ? 'Bebas biaya transfer menggunakan Digibank ke seluruh bank di Indonesia.'
+                                                                                                                                        : selectedTopUpSource == 'HSBC Bank'
+                                                                                                                                            ? 'Biaya transfer antar bank internasional / lokal bervariasi bergantung jenis akun HSBC Anda.'
+                                                                                                                                            : selectedTopUpSource == 'Citibank'
+                                                                                                                                                ? 'Biaya transfer antar bank internasional / lokal bervariasi bergantung level wealth / nasabah prima.'
+                                                                                                                                                : selectedTopUpSource == 'UOB Bank'
+                                                                                                                                                    ? 'Biaya transfer antar bank Rp 6.500 (Online) atau Rp 2.500 (BI-Fast) via TMRW by UOB.'
+                                                                                                                                                    : selectedTopUpSource == 'Standard Chartered'
+                                                                                                                                                        ? 'Biaya transfer antar bank internasional / lokal bervariasi.'
+                                                                                                                                                        : selectedTopUpSource == 'PayPal'
+                                                                                                                                                            ? 'Fee penarikan ke bank lokal Rp 16.000 jika penarikan di bawah Rp 1.500.000. Gratis jika di atas Rp 1.500.000.'
+                                                                                                                                                            : selectedTopUpSource == 'Wise'
+                                                                                                                                                                ? 'Biaya pengiriman uang internasional murah & transparan, menggunakan kurs pasar riil tanpa markup.'
+                                                                                                                                                                : selectedTopUpSource == 'Revolut'
+                                                                                                                                                                    ? 'Biaya kirim / tukar mata uang asing bervariasi dengan kuota gratis sesuai jenis paket member bulanan.'
+                                                                                                                                                                    : selectedTopUpSource == 'Jenius'
+                                                                                                                                                                        ? 'Bebas biaya transfer ke seluruh bank & e-wallet hingga 25x per bulan tergantung level saldo (Feesible).'
+                                                                                                                                                                        : 'Biaya administrasi top-up/transfer default berkisar Rp 1.000 - Rp 6.500 bergantung pada bank yang Anda gunakan.',
+                                                style: GoogleFonts.quicksand(
+                                                    fontSize: 11,
+                                                    color: isDarkMode
+                                                        ? Colors.white54
+                                                        : Colors.black54),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ],
                             ),
                           ),
@@ -4329,7 +4469,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                           ? Colors.white
                                           : Colors.black87),
                                   decoration: InputDecoration(
-                                    hintText: 'Misal: Hibah dari Atasan',
+                                    hintText: type == TransactionType.income
+                                        ? 'Misal: Hibah dari Atasan'
+                                        : 'Misal: Gym, Netflix, Skincare...',
                                     filled: true,
                                     fillColor: isDarkMode
                                         ? Colors.white.withValues(alpha: 0.05)

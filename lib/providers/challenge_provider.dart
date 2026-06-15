@@ -9,7 +9,12 @@ import 'package:tabunganku/providers/notification_provider.dart';
 // ==================== SERVICE PROVIDERS ====================
 
 final challengeServiceProvider = Provider<ChallengeService>((ref) {
-  return MockChallengeService();
+  final badgeService = ref.watch(badgeServiceProvider);
+  return MockChallengeService(badgeService: badgeService);
+});
+
+final challengeUpdateStreamProvider = StreamProvider.autoDispose<void>((ref) {
+  return MockChallengeService.updateStream;
 });
 
 final badgeServiceProvider = Provider<BadgeService>((ref) {
@@ -21,18 +26,21 @@ final badgeServiceProvider = Provider<BadgeService>((ref) {
 
 // Provider untuk mendapatkan semua challenges
 final challengesProvider = FutureProvider.autoDispose<List<ChallengeModel>>((ref) async {
+  ref.watch(challengeUpdateStreamProvider);
   final service = ref.watch(challengeServiceProvider);
   return service.getChallenges();
 });
 
 // Provider untuk active challenges
 final activeChallengesProvider = FutureProvider.autoDispose<List<ChallengeModel>>((ref) async {
+  ref.watch(challengeUpdateStreamProvider);
   final service = ref.watch(challengeServiceProvider);
   return service.getActiveChallenges();
 });
 
 // Provider untuk completed challenges
 final completedChallengesProvider = FutureProvider.autoDispose<List<ChallengeModel>>((ref) async {
+  ref.watch(challengeUpdateStreamProvider);
   final service = ref.watch(challengeServiceProvider);
   return service.getCompletedChallenges();
 });
@@ -83,12 +91,14 @@ final templateProvider = Provider.family<ChallengeTemplateModel?, String>((ref, 
 
 // Provider untuk current streak
 final currentStreakProvider = FutureProvider.autoDispose<int>((ref) async {
+  ref.watch(challengeUpdateStreamProvider);
   final service = ref.watch(challengeServiceProvider);
   return service.getCurrentStreak();
 });
 
 // Provider untuk total points
 final totalPointsProvider = FutureProvider.autoDispose<int>((ref) async {
+  ref.watch(challengeUpdateStreamProvider);
   final service = ref.watch(challengeServiceProvider);
   return service.getTotalPoints();
 });
@@ -97,18 +107,21 @@ final totalPointsProvider = FutureProvider.autoDispose<int>((ref) async {
 
 // Provider untuk semua badges
 final allBadgesProvider = FutureProvider.autoDispose<List<BadgeModel>>((ref) async {
+  ref.watch(challengeUpdateStreamProvider);
   final service = ref.watch(badgeServiceProvider);
   return service.getAllBadges();
 });
 
 // Provider untuk earned badges
 final earnedBadgesProvider = FutureProvider.autoDispose<List<BadgeModel>>((ref) async {
+  ref.watch(challengeUpdateStreamProvider);
   final service = ref.watch(badgeServiceProvider);
   return service.getEarnedBadges();
 });
 
 // Provider untuk available badges (not earned yet)
 final availableBadgesProvider = FutureProvider.autoDispose<List<BadgeModel>>((ref) async {
+  ref.watch(challengeUpdateStreamProvider);
   final service = ref.watch(badgeServiceProvider);
   return service.getAvailableBadges();
 });

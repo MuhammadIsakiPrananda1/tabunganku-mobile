@@ -450,7 +450,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
                             ),
                             decoration: InputDecoration(
                               border: InputBorder.none,
-                              hintText: '0',
+                              hintText: 'Masukkan Nominal',
                               hintStyle: TextStyle(
                                 color: isDarkMode ? Colors.white12 : Colors.grey.shade300,
                               ),

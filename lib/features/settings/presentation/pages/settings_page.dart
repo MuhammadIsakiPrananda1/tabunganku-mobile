@@ -12,9 +12,7 @@ import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:tabunganku/main.dart' show flutterLocalNotificationsPlugin;
-import 'package:timezone/timezone.dart' as tz;
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
 import 'package:path_provider/path_provider.dart';
 
 import 'package:tabunganku/core/theme/app_colors.dart';
@@ -25,10 +23,12 @@ import 'package:tabunganku/models/transaction_model.dart';
 import 'package:tabunganku/features/settings/presentation/providers/security_provider.dart';
 import 'package:tabunganku/features/settings/presentation/providers/achievement_provider.dart';
 import 'package:tabunganku/core/constants/app_version.dart';
+import 'package:tabunganku/providers/challenge_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tabunganku/features/settings/presentation/pages/crop_page.dart';
 import 'package:tabunganku/core/services/export_service.dart';
+import 'package:tabunganku/core/security/secure_storage_service.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
@@ -40,167 +40,9 @@ class SettingsPage extends ConsumerStatefulWidget {
 class _SettingsPageState extends ConsumerState<SettingsPage> {
   bool _isUploadingPhoto = false;
   String? _uploadError;
-  bool _dailyReminder = false;
-  String _reminderTime = '19:00';
 
-  @override
-  void initState() {
-    super.initState();
-    _loadPreferences();
-  }
 
-  Future<void> _loadPreferences() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _dailyReminder = prefs.getBool('pref_daily_reminder') ?? false;
-      _reminderTime = prefs.getString('pref_reminder_time') ?? '19:00';
-    });
-  }
 
-  Future<void> _toggleDailyReminder(bool value) async {
-    if (value) {
-      await _selectReminderTime();
-    } else {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('pref_daily_reminder', false);
-      await _cancelDailyReminder();
-      setState(() {
-        _dailyReminder = false;
-      });
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Pengingat menabung dinonaktifkan',
-              style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.white),
-            ),
-            backgroundColor: Colors.grey.shade700,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          ),
-        );
-      }
-    }
-  }
-
-  Future<void> _selectReminderTime() async {
-    final parts = _reminderTime.split(':');
-    final initialHour = parts.length == 2 ? int.tryParse(parts[0]) ?? 19 : 19;
-    final initialMinute = parts.length == 2 ? int.tryParse(parts[1]) ?? 0 : 0;
-
-    final selectedTime = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay(hour: initialHour, minute: initialMinute),
-      helpText: 'SETEL JAM PENGINGAT MENABUNG',
-      confirmText: 'SETEL',
-      cancelText: 'BATAL',
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            textButtonTheme: TextButtonThemeData(
-              style: TextButton.styleFrom(
-                textStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold),
-              ),
-            ),
-          ),
-          child: child!,
-        );
-      },
-    );
-
-    if (selectedTime != null) {
-      final formattedTime = '${selectedTime.hour.toString().padLeft(2, '0')}:${selectedTime.minute.toString().padLeft(2, '0')}';
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('pref_daily_reminder', true);
-      await prefs.setString('pref_reminder_time', formattedTime);
-      
-      await _scheduleDailyReminder(selectedTime.hour, selectedTime.minute);
-
-      setState(() {
-        _dailyReminder = true;
-        _reminderTime = formattedTime;
-      });
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Pengingat menabung harian diaktifkan pukul $formattedTime! ⏰',
-              style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.white),
-            ),
-            backgroundColor: AppColors.primary,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          ),
-        );
-      }
-    }
-  }
-
-  Future<void> _scheduleDailyReminder(int hour, int minute) async {
-    try {
-      await flutterLocalNotificationsPlugin.cancel(1001);
-
-      // Request permission untuk Android 13+ (Notifikasi)
-      final androidPlugin =
-          flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>();
-      if (androidPlugin != null) {
-        await androidPlugin.requestNotificationsPermission();
-      }
-
-      final now = tz.TZDateTime.now(tz.local);
-      var scheduledDate = tz.TZDateTime(
-        tz.local,
-        now.year,
-        now.month,
-        now.day,
-        hour,
-        minute,
-      );
-      
-      if (scheduledDate.isBefore(now)) {
-        scheduledDate = scheduledDate.add(const Duration(days: 1));
-      }
-
-      const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-        'tabunganku_reminder',
-        'Pengingat Menabung',
-        channelDescription: 'Pengingat harian untuk mencatat tabungan',
-        importance: Importance.max,
-        priority: Priority.high,
-      );
-
-      const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
-        presentAlert: true,
-        presentBadge: true,
-        presentSound: true,
-      );
-
-      const NotificationDetails platformDetails = NotificationDetails(
-        android: androidDetails,
-        iOS: iosDetails,
-      );
-
-      await flutterLocalNotificationsPlugin.zonedSchedule(
-        1001,
-        'Waktunya Menabung! 💰',
-        'Ayo raih impian finansialmu, jangan lupa catat tabungan hari ini ya! 😉',
-        scheduledDate,
-        platformDetails,
-        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
-        matchDateTimeComponents: DateTimeComponents.time,
-      );
-    } catch (e) {
-      debugPrint('Failed to schedule reminder: $e');
-    }
-  }
-
-  Future<void> _cancelDailyReminder() async {
-    await flutterLocalNotificationsPlugin.cancel(1001);
-  }
 
 
   @override
@@ -618,27 +460,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     final IconData rankIcon = _getRankIcon(totalIncome);
     final Color rankColor = _getRankColor(totalIncome);
 
-    // Hitung Streak Menabung (Hari beruntun ada income)
-    int streak = 0;
-    if (transactions.isNotEmpty) {
-      final incomeDates = transactions
-          .where((t) => t.type == TransactionType.income)
-          .map((t) => DateTime(t.date.year, t.date.month, t.date.day))
-          .toSet()
-          .toList()
-        ..sort((a, b) => b.compareTo(a));
-
-      if (incomeDates.isNotEmpty) {
-        streak = 1;
-        for (int i = 0; i < incomeDates.length - 1; i++) {
-          if (incomeDates[i].difference(incomeDates[i + 1]).inDays == 1) {
-            streak++;
-          } else {
-            break;
-          }
-        }
-      }
-    }
+    // Ambil Streak Menabung resmi dari ChallengeService (yang dibackup di SecureStorage)
+    final streak = ref.watch(currentStreakProvider).value ?? 0;
 
     final currencyFormatter =
         NumberFormat.currency(locale: 'id_ID', symbol: 'Rp', decimalDigits: 0);
@@ -684,25 +507,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 ),
                 isDarkMode: isDarkMode,
               ),
-              _buildSettingTile(
-                Icons.notifications_active_outlined,
-                'Pengingat Menabung',
-                () => _dailyReminder ? _selectReminderTime() : _toggleDailyReminder(true),
-                trailing: Switch(
-                  value: _dailyReminder,
-                  onChanged: (val) => _toggleDailyReminder(val),
-                  activeColor: AppColors.primary,
-                  activeTrackColor: AppColors.primary.withValues(alpha: 0.3),
-                  inactiveThumbColor: isDarkMode ? Colors.white30 : Colors.grey.shade400,
-                  inactiveTrackColor: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
-                  trackOutlineColor: WidgetStateProperty.resolveWith<Color?>((states) => Colors.transparent),
-                ),
-                subtitle: _dailyReminder 
-                    ? 'Aktif setiap hari pukul $_reminderTime ⏰' 
-                    : 'Ingatkan catat tabungan harian',
-                color: Colors.amber,
-                isDarkMode: isDarkMode,
-              ),
+
               _buildSettingTile(
                 Icons.picture_as_pdf_outlined,
                 'Ekspor Laporan Bulanan (PDF)',
@@ -883,6 +688,30 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 () => _exportAllDataAsCsv(transactions),
                 subtitle: 'Unduh seluruh riwayat transaksi sebagai file CSV',
                 color: Colors.green.shade700,
+                isDarkMode: isDarkMode,
+              ),
+              _buildSettingTile(
+                Icons.backup_rounded,
+                'Cadangkan Data (JSON)',
+                () => _backupData(),
+                subtitle: 'Ekspor berkas cadangan database transaksi lokal Anda',
+                color: Colors.blue,
+                isDarkMode: isDarkMode,
+              ),
+              _buildSettingTile(
+                Icons.settings_backup_restore_rounded,
+                'Pulihkan Data (Clipboard)',
+                () => _restoreDataFromClipboard(),
+                subtitle: 'Pulihkan database transaksi dari teks JSON di clipboard',
+                color: Colors.orange,
+                isDarkMode: isDarkMode,
+              ),
+              _buildSettingTile(
+                Icons.cleaning_services_rounded,
+                'Bersihkan Cache Aplikasi',
+                () => _clearCache(),
+                subtitle: 'Hapus file dan cache sementara untuk membebaskan ruang',
+                color: Colors.teal,
                 isDarkMode: isDarkMode,
               ),
               _buildSettingTile(
@@ -1090,12 +919,15 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     children: [
                       Icon(rankIcon, color: rankColor, size: 14),
                       const SizedBox(width: 6),
-                      Text(
-                        rank,
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          color: rankColor,
+                      Flexible(
+                        child: Text(
+                          rank,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: rankColor,
+                          ),
                         ),
                       ),
                     ],
@@ -1169,35 +1001,43 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(10),
+          Expanded(
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(icon, color: color, size: 16),
                 ),
-                child: Icon(icon, color: color, size: 16),
-              ),
-              const SizedBox(width: 12),
-              Text(
-                label,
-                style: GoogleFonts.quicksand(
-                  fontSize: 12,
-                  color: isDarkMode ? Colors.white70 : Colors.black87,
-                  fontWeight: FontWeight.bold,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    label,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.quicksand(
+                      fontSize: 12,
+                      color: isDarkMode ? Colors.white70 : Colors.black87,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Text(
-              value,
-              style: GoogleFonts.quicksand(
-                fontWeight: FontWeight.w900,
-                fontSize: 13.5,
-                color: isDarkMode ? Colors.white : Colors.black87,
+          const SizedBox(width: 16),
+          Flexible(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                value,
+                style: GoogleFonts.quicksand(
+                  fontWeight: FontWeight.w900,
+                  fontSize: 13.5,
+                  color: isDarkMode ? Colors.white : Colors.black87,
+                ),
               ),
             ),
           ),
@@ -1973,6 +1813,236 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         );
       }
     }
+  }
+
+  Future<void> _clearCache() async {
+    try {
+      final tempDir = await getTemporaryDirectory();
+      int clearedFilesCount = 0;
+      if (tempDir.existsSync()) {
+        final list = tempDir.listSync(recursive: true);
+        for (final entity in list) {
+          if (entity is File) {
+            try {
+              entity.deleteSync();
+              clearedFilesCount++;
+            } catch (_) {
+              // Ignore failure for individual locked files
+            }
+          }
+        }
+      }
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Berhasil membersihkan cache & file sementara! ($clearedFilesCount file dihapus) 🧹',
+              style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.white),
+            ),
+            backgroundColor: AppColors.primary,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Gagal membersihkan cache: $e',
+              style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.white),
+            ),
+            backgroundColor: Colors.redAccent,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _backupData() async {
+    try {
+      final secureStorage = SecureStorageService();
+      final rawUserId = await secureStorage.getUserId();
+      final userId = (rawUserId == null || rawUserId.isEmpty) ? 'guest' : rawUserId;
+      final prefs = await SharedPreferences.getInstance();
+      final rawData = prefs.getString('transactions_user_$userId');
+
+      if (rawData == null || rawData.isEmpty || rawData == '[]') {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Tidak ada data transaksi untuk dicadangkan.',
+                style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.white),
+              ),
+              backgroundColor: Colors.orange,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            ),
+          );
+        }
+        return;
+      }
+
+      // Format beautiful JSON
+      final parsed = jsonDecode(rawData);
+      final prettyString = const JsonEncoder.withIndent('  ').convert(parsed);
+
+      final dir = await getTemporaryDirectory();
+      final fileName = 'TabunganKu_Backup_${DateFormat('yyyyMMdd_HHmm').format(DateTime.now())}.json';
+      final file = File('${dir.path}/$fileName');
+      await file.writeAsString(prettyString, encoding: utf8);
+
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(file.path)],
+          text: 'File Cadangan Data TabunganKu 💾',
+        ),
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Gagal mencadangkan data: $e',
+              style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.white),
+            ),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _restoreDataFromClipboard() async {
+    try {
+      final clipboardData = await Clipboard.getData(Clipboard.kTextPlain);
+      final jsonText = clipboardData?.text;
+
+      if (jsonText == null || jsonText.trim().isEmpty) {
+        _showRestoreError('Clipboard kosong. Silakan salin isi file cadangan (.json) terlebih dahulu.');
+        return;
+      }
+
+      dynamic decoded;
+      try {
+        decoded = jsonDecode(jsonText);
+      } catch (_) {
+        _showRestoreError('Format data di clipboard tidak valid. Pastikan Anda menyalin teks JSON cadangan dengan benar.');
+        return;
+      }
+
+      if (decoded is! List) {
+        _showRestoreError('Format data cadangan tidak sesuai. Struktur harus berupa daftar transaksi.');
+        return;
+      }
+
+      // Validasi sederhana elemen pertama
+      if (decoded.isNotEmpty) {
+        final first = decoded.first;
+        if (first is! Map || !first.containsKey('id') || !first.containsKey('amount') || !first.containsKey('title')) {
+          _showRestoreError('Format transaksi tidak valid. Pastikan data berasal dari cadangan TabunganKu.');
+          return;
+        }
+      }
+
+      // Tampilkan dialog konfirmasi
+      if (!mounted) return;
+      final confirm = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          backgroundColor: Theme.of(context).canvasColor,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          title: Text(
+            'Pulihkan Data?',
+            style: GoogleFonts.quicksand(fontWeight: FontWeight.bold),
+          ),
+          content: Text(
+            'Ditemukan ${decoded.length} transaksi di clipboard.\n\nPeringatan: Proses ini akan menimpa seluruh data transaksi saat ini secara permanen. Apakah Anda yakin ingin memulihkan?',
+            style: GoogleFonts.quicksand(),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(
+                'Batal',
+                style: GoogleFonts.quicksand(color: Colors.grey),
+              ),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: Text(
+                'Pulihkan',
+                style: GoogleFonts.quicksand(color: AppColors.primary, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
+      );
+
+      if (confirm != true) return;
+
+      final secureStorage = SecureStorageService();
+      final rawUserId = await secureStorage.getUserId();
+      final userId = (rawUserId == null || rawUserId.isEmpty) ? 'guest' : rawUserId;
+      final prefs = await SharedPreferences.getInstance();
+
+      // Simpan ke SharedPreferences
+      await prefs.setString('transactions_user_$userId', jsonText);
+
+      // Invalidate provider agar UI ter-update
+      ref.invalidate(transactionsProvider);
+      ref.invalidate(transactionsStreamProvider);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Berhasil memulihkan ${decoded.length} transaksi! 🎉',
+              style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.white),
+            ),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          ),
+        );
+      }
+    } catch (e) {
+      _showRestoreError('Gagal memulihkan data: $e');
+    }
+  }
+
+  void _showRestoreError(String message) {
+    if (!mounted) return;
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Theme.of(context).canvasColor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: Text(
+          'Gagal Memulihkan',
+          style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.redAccent),
+        ),
+        content: Text(
+          message,
+          style: GoogleFonts.quicksand(),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'OK',
+              style: GoogleFonts.quicksand(color: AppColors.primary, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   // ── Reset Data Transaksi ──────────────────────────────────────────

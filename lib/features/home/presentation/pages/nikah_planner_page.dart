@@ -18,6 +18,10 @@ class BiayaNikahPlannerPage extends ConsumerStatefulWidget {
 class _BiayaNikahPlannerPageState extends ConsumerState<BiayaNikahPlannerPage> {
   final String _prefKeyNikah = 'nikah_planner_data_v1';
 
+  double _targetBudget = 0.0;
+
+
+
   // State fields
   double _savedAmount = 0.0;
   DateTime? _targetDate;
@@ -97,6 +101,7 @@ class _BiayaNikahPlannerPageState extends ConsumerState<BiayaNikahPlannerPage> {
     if (raw != null) {
       final decoded = jsonDecode(raw) as Map<String, dynamic>;
       _savedAmount = (decoded['savedAmount'] as num).toDouble();
+      _targetBudget = (decoded['targetBudget'] as num?)?.toDouble() ?? 0.0;
       if (decoded['targetDate'] != null) {
         _targetDate = DateTime.parse(decoded['targetDate'] as String);
       } else {
@@ -105,6 +110,7 @@ class _BiayaNikahPlannerPageState extends ConsumerState<BiayaNikahPlannerPage> {
       _checklistItems = (decoded['items'] as List).map((e) => Map<String, dynamic>.from(e)).toList();
     } else {
       _savedAmount = 0.0;
+      _targetBudget = 0.0;
       _targetDate = null;
       _checklistItems = [];
     }
@@ -115,6 +121,7 @@ class _BiayaNikahPlannerPageState extends ConsumerState<BiayaNikahPlannerPage> {
     final prefs = await SharedPreferences.getInstance();
     final data = {
       'savedAmount': _savedAmount,
+      'targetBudget': _targetBudget,
       'targetDate': _targetDate?.toIso8601String(),
       'items': _checklistItems,
     };
@@ -201,6 +208,11 @@ class _BiayaNikahPlannerPageState extends ConsumerState<BiayaNikahPlannerPage> {
     return _checklistItems.fold(0.0, (sum, item) => sum + (item['cost'] as num).toDouble());
   }
 
+  double get _effectiveTargetBudget {
+    if (_targetBudget > 0) return _targetBudget;
+    return _totalEstimatedCost;
+  }
+
   int get _monthsRemaining {
     if (_targetDate == null) return 0;
     final now = DateTime.now();
@@ -210,7 +222,7 @@ class _BiayaNikahPlannerPageState extends ConsumerState<BiayaNikahPlannerPage> {
 
   double get _recommendedMonthlySavings {
     if (_targetDate == null) return 0.0;
-    final gap = _totalEstimatedCost - _savedAmount;
+    final gap = _effectiveTargetBudget - _savedAmount;
     if (gap <= 0) return 0.0;
     return gap / _monthsRemaining;
   }
@@ -223,7 +235,7 @@ class _BiayaNikahPlannerPageState extends ConsumerState<BiayaNikahPlannerPage> {
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
     final pageBgColor = isDarkMode ? AppColors.backgroundDark : const Color(0xFFFFF9FA);
     final accentColor = const Color(0xFFEC407A); // Romantic Pink Accent
-    final progress = _totalEstimatedCost > 0 ? (_savedAmount / _totalEstimatedCost).clamp(0.0, 1.0) : 0.0;
+    final progress = _effectiveTargetBudget > 0 ? (_savedAmount / _effectiveTargetBudget).clamp(0.0, 1.0) : 0.0;
 
     return Scaffold(
       backgroundColor: pageBgColor,
@@ -247,6 +259,7 @@ class _BiayaNikahPlannerPageState extends ConsumerState<BiayaNikahPlannerPage> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 48),
         children: [
+          _buildTipCard(isDarkMode, accentColor),
           // Premium Minimalist Dashboard Card
           Container(
             padding: const EdgeInsets.all(24),
@@ -321,7 +334,7 @@ class _BiayaNikahPlannerPageState extends ConsumerState<BiayaNikahPlannerPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Estimasi Total Biaya',
+                            _targetBudget > 0 ? 'Target Anggaran' : 'Estimasi Total Biaya',
                             style: GoogleFonts.quicksand(
                               fontSize: 10.5,
                               fontWeight: FontWeight.bold,
@@ -333,7 +346,7 @@ class _BiayaNikahPlannerPageState extends ConsumerState<BiayaNikahPlannerPage> {
                             fit: BoxFit.scaleDown,
                             alignment: Alignment.centerLeft,
                             child: Text(
-                              NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(_totalEstimatedCost),
+                              NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(_effectiveTargetBudget),
                               style: GoogleFonts.quicksand(
                                 fontSize: 20,
                                 fontWeight: FontWeight.w800,
@@ -341,6 +354,17 @@ class _BiayaNikahPlannerPageState extends ConsumerState<BiayaNikahPlannerPage> {
                               ),
                             ),
                           ),
+                          if (_targetBudget > 0 && _totalEstimatedCost > 0) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              'Detail Kebutuhan: Rp ${NumberFormat.decimalPattern('id_ID').format(_totalEstimatedCost.round())}',
+                              style: GoogleFonts.quicksand(
+                                fontSize: 9.5,
+                                fontWeight: FontWeight.bold,
+                                color: isDarkMode ? Colors.white30 : Colors.grey.shade600,
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                     ),
@@ -425,7 +449,7 @@ class _BiayaNikahPlannerPageState extends ConsumerState<BiayaNikahPlannerPage> {
                             child: Text(
                               _targetDate != null
                                   ? 'Nabung per Bulan: Rp ${NumberFormat.decimalPattern('id_ID').format(_recommendedMonthlySavings.round())}'
-                                  : 'Nabung per Bulan: - (Atur Tanggal Target)',
+                                  : 'Nabung per Bulan: - (Sesuaikan Rencana)',
                               style: GoogleFonts.quicksand(
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold,
@@ -447,7 +471,7 @@ class _BiayaNikahPlannerPageState extends ConsumerState<BiayaNikahPlannerPage> {
                       child: SizedBox(
                         height: 42,
                         child: OutlinedButton(
-                          onPressed: () => _selectTargetDate(context),
+                          onPressed: () => _showAdjustPlanSheet(isDarkMode, accentColor),
                           style: OutlinedButton.styleFrom(
                             padding: EdgeInsets.zero,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
@@ -457,20 +481,27 @@ class _BiayaNikahPlannerPageState extends ConsumerState<BiayaNikahPlannerPage> {
                                   : accentColor.withOpacity(0.2),
                             ),
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.edit_calendar_rounded, size: 14, color: contentColor),
-                              const SizedBox(width: 6),
-                              Text(
-                                'Atur Tanggal',
-                                style: GoogleFonts.quicksand(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 11.5,
-                                  color: contentColor,
-                                ),
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.center,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.tune_rounded, size: 14, color: contentColor),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    'Sesuaikan Rencana',
+                                    style: GoogleFonts.quicksand(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 11.5,
+                                      color: contentColor,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ],
+                            ),
                           ),
                         ),
                       ),
@@ -487,20 +518,27 @@ class _BiayaNikahPlannerPageState extends ConsumerState<BiayaNikahPlannerPage> {
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                             elevation: 0,
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(Icons.add_card_rounded, size: 14, color: Colors.white),
-                              const SizedBox(width: 6),
-                              Text(
-                                'Update Tabungan',
-                                style: GoogleFonts.quicksand(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 11.5,
-                                  color: Colors.white,
-                                ),
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.center,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(Icons.add_card_rounded, size: 14, color: Colors.white),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    'Update Tabungan',
+                                    style: GoogleFonts.quicksand(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 11.5,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ],
+                            ),
                           ),
                         ),
                       ),
@@ -529,23 +567,28 @@ class _BiayaNikahPlannerPageState extends ConsumerState<BiayaNikahPlannerPage> {
                 ),
               ),
               const SizedBox(width: 8),
-              ElevatedButton.icon(
-                onPressed: () => _showAddItemDialog(isDarkMode, accentColor),
-                icon: const Icon(Icons.add_rounded, size: 14, color: Colors.white),
-                label: Text(
-                  'Tambah',
-                  style: GoogleFonts.quicksand(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 11.5,
-                    color: Colors.white,
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ElevatedButton.icon(
+                    onPressed: () => _showAddItemDialog(isDarkMode, accentColor),
+                    icon: const Icon(Icons.add_rounded, size: 14, color: Colors.white),
+                    label: Text(
+                      'Tambah',
+                      style: GoogleFonts.quicksand(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 11.5,
+                        color: Colors.white,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: accentColor,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    ),
                   ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: accentColor,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                ),
+                ],
               ),
             ],
           ),
@@ -553,16 +596,40 @@ class _BiayaNikahPlannerPageState extends ConsumerState<BiayaNikahPlannerPage> {
           // Group by category and build lists
           if (_checklistItems.isEmpty)
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 40),
-              child: Center(
-                child: Text(
-                  'Belum ada anggaran. Silakan tambah kebutuhan pernikahan Anda.',
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.quicksand(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: isDarkMode ? Colors.white30 : Colors.grey.shade400,
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
+                decoration: BoxDecoration(
+                  color: isDarkMode ? Colors.white.withOpacity(0.01) : Colors.white,
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(
+                    color: isDarkMode ? Colors.white.withOpacity(0.04) : Colors.grey.shade100,
                   ),
+                ),
+                child: Column(
+                  children: [
+                    Icon(Icons.list_alt_rounded, size: 40, color: accentColor.withOpacity(0.3)),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Anggaran Masih Kosong',
+                      style: GoogleFonts.quicksand(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: contentColor,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Belum ada rincian anggaran. Silakan tambah kebutuhan pernikahan Anda.',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.quicksand(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: isDarkMode ? Colors.white30 : Colors.grey.shade400,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -574,7 +641,7 @@ class _BiayaNikahPlannerPageState extends ConsumerState<BiayaNikahPlannerPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(left: 4, bottom: 8, top: 16),
+                  padding: const EdgeInsets.only(left: 4, bottom: 4, top: 16),
                   child: Text(
                     cat.toUpperCase(),
                     style: GoogleFonts.quicksand(
@@ -725,32 +792,6 @@ class _BiayaNikahPlannerPageState extends ConsumerState<BiayaNikahPlannerPage> {
     );
   }
 
-  void _selectTargetDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: _targetDate ?? DateTime.now().add(const Duration(days: 365)),
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 3650)),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: Color(0xFFEC407A),
-              onPrimary: Colors.white,
-              onSurface: Colors.black,
-            ),
-          ),
-          child: child!,
-        );
-      },
-    );
-    if (picked != null && picked != _targetDate) {
-      setState(() {
-        _targetDate = picked;
-      });
-      await _savePlannerData();
-    }
-  }
 
   void _showUpdateSavedDialog(bool isDarkMode, Color accentColor) {
     showModalBottomSheet(
@@ -828,7 +869,7 @@ class _BiayaNikahPlannerPageState extends ConsumerState<BiayaNikahPlannerPage> {
                           hintText: 'Masukkan Jumlah Tabungan',
                           hintStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.grey.shade400, fontSize: 12.5),
                           prefixIcon: Container(
-                            padding: const EdgeInsets.only(left: 16, right: 8),
+                            padding: const EdgeInsets.only(left: 12, right: 4),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
@@ -839,6 +880,7 @@ class _BiayaNikahPlannerPageState extends ConsumerState<BiayaNikahPlannerPage> {
                               ],
                             ),
                           ),
+            prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
                         ),
                       ),
                       const SizedBox(height: 24),
@@ -964,7 +1006,7 @@ class _BiayaNikahPlannerPageState extends ConsumerState<BiayaNikahPlannerPage> {
                         decoration: InputDecoration(
                           filled: true,
                           fillColor: inputBg,
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                          contentPadding: const EdgeInsets.only(left: 0, right: 16, top: 4, bottom: 4),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide.none,
@@ -1049,7 +1091,7 @@ class _BiayaNikahPlannerPageState extends ConsumerState<BiayaNikahPlannerPage> {
                           errorStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10.5, color: Colors.redAccent),
                           hintText: 'Masukkan Nama Kebutuhan',
                           hintStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.grey.shade400, fontSize: 12.5),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          contentPadding: const EdgeInsets.only(left: 0, right: 16, top: 12, bottom: 12),
                           prefixIcon: Icon(
                             Icons.label_outline_rounded,
                             color: accentColor.withOpacity(0.8),
@@ -1096,9 +1138,9 @@ class _BiayaNikahPlannerPageState extends ConsumerState<BiayaNikahPlannerPage> {
                           errorStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10.5, color: Colors.redAccent),
                           hintText: 'Masukkan Estimasi Biaya',
                           hintStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.grey.shade400, fontSize: 12.5),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          contentPadding: const EdgeInsets.only(left: 0, right: 16, top: 12, bottom: 12),
                           prefixIcon: Container(
-                            padding: const EdgeInsets.only(left: 16, right: 8),
+                            padding: const EdgeInsets.only(left: 12, right: 4),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
@@ -1109,6 +1151,7 @@ class _BiayaNikahPlannerPageState extends ConsumerState<BiayaNikahPlannerPage> {
                               ],
                             ),
                           ),
+            prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
                         ),
                       ),
     
@@ -1148,6 +1191,238 @@ class _BiayaNikahPlannerPageState extends ConsumerState<BiayaNikahPlannerPage> {
       },
     );
   }
+
+
+
+  void _showAdjustPlanSheet(bool isDarkMode, Color accentColor) {
+    final targetBudgetController = TextEditingController(
+      text: _targetBudget > 0 ? NumberFormat.decimalPattern('id_ID').format(_targetBudget.round()) : ''
+    );
+    DateTime? tempTargetDate = _targetDate;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
+      builder: (context) {
+        final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
+        final inputBg = isDarkMode ? Colors.white.withOpacity(0.04) : AppColors.background;
+
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Padding(
+              padding: EdgeInsets.fromLTRB(20, 20, 20, MediaQuery.of(context).viewInsets.bottom + 24),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      'Sesuaikan Rencana Nikah',
+                      style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 15, color: contentColor),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Target Anggaran
+                    Text(
+                      'Target Anggaran Pernikahan (Rp)',
+                      style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
+                    ),
+                    const SizedBox(height: 6),
+                    TextFormField(
+                      controller: targetBudgetController,
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [_RibuanFormatter()],
+                      style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: inputBg,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                        hintText: 'Masukkan Target Anggaran',
+                        hintStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.grey.shade400, fontSize: 12.5),
+                        contentPadding: const EdgeInsets.only(left: 0, right: 16, top: 12, bottom: 12),
+                        prefixIcon: Container(
+                          padding: const EdgeInsets.only(left: 12, right: 4),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text('Rp', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: accentColor, fontSize: 13)),
+                            ],
+                          ),
+                        ),
+                        prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+
+
+                    // Tanggal Target
+                    Text(
+                      'Tanggal Pernikahan',
+                      style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
+                    ),
+                    const SizedBox(height: 6),
+                    InkWell(
+                      onTap: () async {
+                        final DateTime? picked = await showDatePicker(
+                          context: context,
+                          initialDate: tempTargetDate ?? DateTime.now().add(const Duration(days: 365)),
+                          firstDate: DateTime.now(),
+                          lastDate: DateTime.now().add(const Duration(days: 3650)),
+                          builder: (context, child) {
+                            return Theme(
+                              data: Theme.of(context).copyWith(
+                                colorScheme: isDarkMode
+                                    ? ColorScheme.dark(
+                                        primary: accentColor,
+                                        onPrimary: Colors.white,
+                                        surface: AppColors.surfaceDark,
+                                        onSurface: Colors.white,
+                                      )
+                                    : ColorScheme.light(
+                                        primary: accentColor,
+                                        onPrimary: Colors.white,
+                                        surface: Colors.white,
+                                        onSurface: AppColors.primaryDark,
+                                      ),
+                              ),
+                              child: child!,
+                            );
+                          },
+                        );
+                        if (picked != null) {
+                          setModalState(() {
+                            tempTargetDate = picked;
+                          });
+                        }
+                      },
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: inputBg,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.calendar_month_rounded, color: accentColor, size: 18),
+                            const SizedBox(width: 12),
+                            Text(
+                              tempTargetDate != null
+                                  ? DateFormat('MMMM yyyy', 'id_ID').format(tempTargetDate!)
+                                  : 'Pilih Bulan & Tahun',
+                              style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 28),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          final budgetText = targetBudgetController.text.replaceAll('.', '');
+                          final budget = double.tryParse(budgetText) ?? 0.0;
+
+                          setState(() {
+                            _targetBudget = budget;
+                            _targetDate = tempTargetDate;
+                          });
+
+                          await _savePlannerData();
+                          Navigator.pop(context);
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Rencana pernikahan berhasil disimpan!', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold)),
+                              backgroundColor: accentColor,
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: accentColor,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          elevation: 0,
+                        ),
+                        child: Text(
+                          'Simpan Rencana',
+                          style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+
+  Widget _buildTipCard(bool isDarkMode, Color accentColor) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDarkMode ? Colors.white.withOpacity(0.02) : accentColor.withOpacity(0.06),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: isDarkMode ? Colors.white.withOpacity(0.05) : accentColor.withOpacity(0.12),
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.tips_and_updates_rounded, color: accentColor, size: 20),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Panduan Planner Pernikahan',
+                  style: GoogleFonts.quicksand(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.bold,
+                    color: isDarkMode ? Colors.white : AppColors.primaryDark,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '1. Gunakan tombol "Template" di kanan untuk memuat preset anggaran secara instan.\n'
+                  '2. Klik "Sesuaikan Rencana" untuk mengatur target anggaran, sisa waktu, dan tabungan Anda.',
+                  style: GoogleFonts.quicksand(
+                    fontSize: 11,
+                    color: isDarkMode ? Colors.white70 : Colors.grey.shade700,
+                    height: 1.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+
 }
 
 class _RibuanFormatter extends TextInputFormatter {

@@ -10,6 +10,20 @@ import 'package:tabunganku/providers/overseas_travel_provider.dart';
 import 'package:tabunganku/services/currency_service.dart';
 import 'package:uuid/uuid.dart';
 
+class DestinationPreset {
+  final String name;
+  final String currencyCode;
+  final String countryCode;
+  final double cost2026;
+
+  const DestinationPreset({
+    required this.name,
+    required this.currencyCode,
+    required this.countryCode,
+    required this.cost2026,
+  });
+}
+
 class OverseasTravelPage extends ConsumerStatefulWidget {
   const OverseasTravelPage({super.key});
 
@@ -18,6 +32,17 @@ class OverseasTravelPage extends ConsumerStatefulWidget {
 }
 
 class _OverseasTravelPageState extends ConsumerState<OverseasTravelPage> {
+  final List<DestinationPreset> _presets = const [
+    DestinationPreset(name: 'Singapura', currencyCode: 'SGD', countryCode: 'SG', cost2026: 1500),
+    DestinationPreset(name: 'Tokyo, Jepang', currencyCode: 'JPY', countryCode: 'JP', cost2026: 250000),
+    DestinationPreset(name: 'Seoul, Korea Selatan', currencyCode: 'KRW', countryCode: 'KR', cost2026: 2000000),
+    DestinationPreset(name: 'Makkah, Arab Saudi', currencyCode: 'SAR', countryCode: 'SA', cost2026: 8500),
+    DestinationPreset(name: 'Kuala Lumpur, Malaysia', currencyCode: 'MYR', countryCode: 'MY', cost2026: 3000),
+    DestinationPreset(name: 'Bangkok, Thailand', currencyCode: 'THB', countryCode: 'TH', cost2026: 25000),
+    DestinationPreset(name: 'Paris, Prancis (Eropa)', currencyCode: 'EUR', countryCode: 'EU', cost2026: 3500),
+    DestinationPreset(name: 'New York, Amerika Serikat', currencyCode: 'USD', countryCode: 'US', cost2026: 4000),
+  ];
+
   final List<Map<String, String>> _currencies = [
     {'code': 'USD', 'name': 'United States Dollar', 'country': 'US'},
     {'code': 'JPY', 'name': 'Japanese Yen', 'country': 'JP'},
@@ -315,10 +340,16 @@ class _OverseasTravelPageState extends ConsumerState<OverseasTravelPage> {
 
   void _showAddGoalSheet(bool isDarkMode) {
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
-    final nameController = TextEditingController();
+    final customNameController = TextEditingController();
     final amountController = TextEditingController();
-    String selectedCurrency = 'USD';
-    String selectedCountry = 'US';
+    
+    // Default to the first preset (Singapura)
+    DestinationPreset? selectedPreset = _presets.first;
+    String selectedCurrency = selectedPreset.currencyCode;
+    String selectedCountry = selectedPreset.countryCode;
+    
+    // Initialize amount for the default preset
+    amountController.text = NumberFormat.decimalPattern('id_ID').format(selectedPreset.cost2026.round());
 
     showModalBottomSheet(
       context: context,
@@ -327,6 +358,13 @@ class _OverseasTravelPageState extends ConsumerState<OverseasTravelPage> {
       builder: (context) => StatefulBuilder(
         builder: (context, setSheetState) {
           final iconColor = isDarkMode ? Colors.white.withOpacity(0.7) : const Color(0xFF2E3D49);
+          final bool isCustom = selectedPreset == null;
+          
+          final rates = ref.read(currencyRatesProvider).valueOrNull ?? {};
+          final currentRate = rates[selectedCurrency] ?? 1.0;
+          final double currentAmount = double.tryParse(amountController.text.replaceAll('.', '')) ?? 0.0;
+          final double idrEquivalent = currentAmount * currentRate;
+
           return Container(
             padding: EdgeInsets.only(
               bottom: MediaQuery.of(context).viewInsets.bottom + 24,
@@ -364,7 +402,93 @@ class _OverseasTravelPageState extends ConsumerState<OverseasTravelPage> {
                   ),
                 ),
                 const SizedBox(height: 24),
-                _buildCompactInput('Nama Tujuan', nameController, Icons.map_rounded, isDarkMode, isText: true, hint: 'Nama Tujuan'),
+                
+                // Dropdown untuk Nama Tujuan
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 4, bottom: 4),
+                      child: Text(
+                        'Pilih Tujuan Wisata',
+                        style: GoogleFonts.quicksand(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          color: isDarkMode ? Colors.white.withOpacity(0.6) : Colors.black54,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      height: 48,
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: isDarkMode ? Colors.white.withOpacity(0.05) : AppColors.background,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.map_rounded, color: iconColor, size: 18),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton<DestinationPreset?>(
+                                value: selectedPreset,
+                                isExpanded: true,
+                                dropdownColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
+                                icon: Icon(Icons.arrow_drop_down_rounded, color: contentColor.withOpacity(0.4), size: 20),
+                                style: GoogleFonts.quicksand(
+                                  fontWeight: FontWeight.bold, 
+                                  color: isDarkMode ? Colors.white : AppColors.primaryDark, 
+                                  fontSize: 13,
+                                ),
+                                items: [
+                                  ..._presets.map((preset) {
+                                    return DropdownMenuItem<DestinationPreset?>(
+                                      value: preset,
+                                      child: Text('${_getFlag(preset.countryCode)} ${preset.name}'),
+                                    );
+                                  }),
+                                  const DropdownMenuItem<DestinationPreset?>(
+                                    value: null,
+                                    child: Text('➕ Kustom (Input Manual)'),
+                                  ),
+                                ],
+                                onChanged: (val) {
+                                  setSheetState(() {
+                                    selectedPreset = val;
+                                    if (val != null) {
+                                      selectedCurrency = val.currencyCode;
+                                      selectedCountry = val.countryCode;
+                                      amountController.text = NumberFormat.decimalPattern('id_ID').format(val.cost2026.round());
+                                    } else {
+                                      selectedCurrency = 'USD';
+                                      selectedCountry = 'US';
+                                      amountController.clear();
+                                      customNameController.clear();
+                                    }
+                                  });
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                
+                if (isCustom) ...[
+                  const SizedBox(height: 16),
+                  _buildCompactInput(
+                    'Nama Tujuan Kustom',
+                    customNameController,
+                    Icons.edit_location_alt_rounded,
+                    isDarkMode,
+                    isText: true,
+                    hint: 'Masukkan Nama Tujuan',
+                  ),
+                ],
+                
                 const SizedBox(height: 16),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -375,7 +499,7 @@ class _OverseasTravelPageState extends ConsumerState<OverseasTravelPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Padding(
-                            padding: const EdgeInsets.only(left: 4, bottom: 6),
+                            padding: const EdgeInsets.only(left: 4, bottom: 4),
                             child: Text(
                               'Valuta Asing',
                               style: GoogleFonts.quicksand(
@@ -389,12 +513,18 @@ class _OverseasTravelPageState extends ConsumerState<OverseasTravelPage> {
                             height: 48,
                             padding: const EdgeInsets.symmetric(horizontal: 12),
                             decoration: BoxDecoration(
-                              color: isDarkMode ? Colors.white.withOpacity(0.05) : AppColors.background,
+                              color: isDarkMode 
+                                  ? (isCustom ? Colors.white.withOpacity(0.05) : Colors.white.withOpacity(0.02))
+                                  : (isCustom ? AppColors.background : Colors.grey.shade100),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Row(
                               children: [
-                                Icon(Icons.currency_exchange_rounded, color: iconColor, size: 18),
+                                Icon(
+                                  Icons.currency_exchange_rounded, 
+                                  color: isCustom ? iconColor : iconColor.withOpacity(0.5), 
+                                  size: 18,
+                                ),
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: DropdownButtonHideUnderline(
@@ -403,19 +533,27 @@ class _OverseasTravelPageState extends ConsumerState<OverseasTravelPage> {
                                       isExpanded: true,
                                       dropdownColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
                                       icon: Icon(Icons.arrow_drop_down_rounded, color: contentColor.withOpacity(0.4), size: 20),
-                                      style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : AppColors.primaryDark, fontSize: 13),
+                                      style: GoogleFonts.quicksand(
+                                        fontWeight: FontWeight.bold, 
+                                        color: isCustom
+                                            ? (isDarkMode ? Colors.white : AppColors.primaryDark)
+                                            : (isDarkMode ? Colors.white60 : Colors.grey.shade600), 
+                                        fontSize: 13,
+                                      ),
                                       items: _currencies.map((c) {
                                         return DropdownMenuItem(
                                           value: c['code'],
                                           child: Text('${_getFlag(c['country']!)} ${c['code']}'),
                                         );
                                       }).toList(),
-                                      onChanged: (val) {
-                                        setSheetState(() {
-                                          selectedCurrency = val!;
-                                          selectedCountry = _currencies.firstWhere((c) => c['code'] == val)['country']!;
-                                        });
-                                      },
+                                      onChanged: isCustom 
+                                          ? (val) {
+                                              setSheetState(() {
+                                                selectedCurrency = val!;
+                                                selectedCountry = _currencies.firstWhere((c) => c['code'] == val)['country']!;
+                                              });
+                                            }
+                                          : null,
                                     ),
                                   ),
                                 ),
@@ -425,87 +563,122 @@ class _OverseasTravelPageState extends ConsumerState<OverseasTravelPage> {
                         ],
                       ),
                     ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    flex: 3,
-                    child: _buildCompactInput('Nominal Target', amountController, Icons.ads_click_rounded, isDarkMode, isText: false, hint: 'Nominal Target'),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      flex: 3,
+                      child: _buildCompactInput(
+                        isCustom ? 'Nominal Target' : 'Nominal Target (Otomatis 2026)',
+                        amountController,
+                        Icons.ads_click_rounded,
+                        isDarkMode,
+                        isText: false,
+                        hint: 'Nominal Target',
+                        readOnly: !isCustom,
+                      ),
+                    ),
+                  ],
+                ),
+                
+                if (currentAmount > 0) ...[
+                  const SizedBox(height: 12),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 4),
+                    child: Text(
+                      isCustom
+                          ? '* Setara dengan: ${_formatRupiah(idrEquivalent)}'
+                          : '* Estimasi biaya otomatis tahun 2026: ${_formatRupiah(idrEquivalent)} (kurs real-time)',
+                      style: GoogleFonts.quicksand(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: isDarkMode ? Colors.tealAccent : const Color(0xFF2E3D49),
+                      ),
+                    ),
                   ),
                 ],
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: ElevatedButton(
-                  onPressed: () {
-                    if (nameController.text.isEmpty) {
+                
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      final String destinationName = isCustom ? customNameController.text.trim() : selectedPreset!.name;
+                      if (destinationName.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Nama Tujuan tidak boleh kosong!', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold)),
+                            backgroundColor: AppColors.error,
+                          ),
+                        );
+                        return;
+                      }
+                      final targetVal = double.tryParse(amountController.text.replaceAll('.', '')) ?? 0;
+                      if (targetVal <= 0) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Nominal Target harus diisi!', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold)),
+                            backgroundColor: AppColors.error,
+                          ),
+                        );
+                        return;
+                      }
+
+                      final goal = OverseasTravelGoalModel(
+                        id: const Uuid().v4(),
+                        destinationName: destinationName,
+                        currencyCode: selectedCurrency,
+                        targetForeignAmount: targetVal,
+                        collectedIdrAmount: 0,
+                        createdAt: DateTime.now(),
+                        countryCode: selectedCountry,
+                      );
+
+                      ref.read(overseasTravelServiceProvider).addGoal(goal);
+                      Navigator.pop(context);
+
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('Nama Tujuan tidak boleh kosong!', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold)),
-                          backgroundColor: AppColors.error,
+                          content: Text('Target liburan berhasil dibuat!', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold)),
+                          backgroundColor: const Color(0xFF2E3D49),
                         ),
                       );
-                      return;
-                    }
-                    final targetVal = double.tryParse(amountController.text.replaceAll('.', '')) ?? 0;
-                    if (targetVal <= 0) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Nominal Target harus diisi!', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold)),
-                          backgroundColor: AppColors.error,
-                        ),
-                      );
-                      return;
-                    }
-
-                    final goal = OverseasTravelGoalModel(
-                      id: const Uuid().v4(),
-                      destinationName: nameController.text,
-                      currencyCode: selectedCurrency,
-                      targetForeignAmount: targetVal,
-                      collectedIdrAmount: 0,
-                      createdAt: DateTime.now(),
-                      countryCode: selectedCountry,
-                    );
-
-                    ref.read(overseasTravelServiceProvider).addGoal(goal);
-                    Navigator.pop(context);
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Target liburan berhasil dibuat!', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold)),
-                        backgroundColor: const Color(0xFF2E3D49),
-                      ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2E3D49),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    elevation: 0,
-                  ),
-                  child: Text(
-                    'Simpan Target',
-                    style: GoogleFonts.quicksand(fontWeight: FontWeight.w800, fontSize: 13),
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF2E3D49),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      elevation: 0,
+                    ),
+                    child: Text(
+                      'Simpan Target',
+                      style: GoogleFonts.quicksand(fontWeight: FontWeight.w800, fontSize: 13),
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-        );
-      },
-    ),
-  );
-}
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
 
-  Widget _buildCompactInput(String label, TextEditingController controller, IconData icon, bool isDarkMode, {required bool isText, String? hint}) {
+  Widget _buildCompactInput(
+    String label, 
+    TextEditingController controller, 
+    IconData icon, 
+    bool isDarkMode, {
+    required bool isText, 
+    String? hint,
+    bool readOnly = false,
+  }) {
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
     final iconColor = isDarkMode ? Colors.white.withOpacity(0.7) : const Color(0xFF2E3D49);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 6),
+          padding: const EdgeInsets.only(left: 4, bottom: 4),
           child: Text(
             label,
             style: GoogleFonts.quicksand(
@@ -517,9 +690,14 @@ class _OverseasTravelPageState extends ConsumerState<OverseasTravelPage> {
         ),
         TextFormField(
           controller: controller,
+          readOnly: readOnly,
           keyboardType: isText ? TextInputType.text : TextInputType.number,
           inputFormatters: isText ? [] : [_RibuanFormatter()],
-          style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
+          style: GoogleFonts.quicksand(
+            fontWeight: FontWeight.bold, 
+            fontSize: 13, 
+            color: readOnly ? contentColor.withOpacity(0.6) : contentColor,
+          ),
           decoration: InputDecoration(
             hintText: hint ?? label,
             hintStyle: GoogleFonts.quicksand(
@@ -528,12 +706,14 @@ class _OverseasTravelPageState extends ConsumerState<OverseasTravelPage> {
             ),
             prefixIcon: Container(
               padding: const EdgeInsets.only(left: 16, right: 8),
-              child: Icon(icon, color: iconColor, size: 18),
+              child: Icon(icon, color: readOnly ? iconColor.withOpacity(0.5) : iconColor, size: 18),
             ),
             filled: true,
-            fillColor: isDarkMode ? Colors.white.withOpacity(0.05) : AppColors.background,
+            fillColor: isDarkMode 
+                ? (readOnly ? Colors.white.withOpacity(0.02) : Colors.white.withOpacity(0.05))
+                : (readOnly ? Colors.grey.shade100 : AppColors.background),
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            contentPadding: const EdgeInsets.only(left: 0, right: 16, top: 14, bottom: 14),
           ),
         ),
       ],
@@ -567,7 +747,7 @@ class _OverseasTravelPageState extends ConsumerState<OverseasTravelPage> {
               decoration: InputDecoration(
                 prefixText: 'Rp ',
                 prefixStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white.withOpacity(0.8) : const Color(0xFF2E3D49)),
-                hintText: 'Nominal',
+                hintText: 'Masukkan Nominal',
                 hintStyle: GoogleFonts.quicksand(
                   fontSize: 13,
                   color: isDarkMode ? Colors.white.withOpacity(0.3) : Colors.black.withOpacity(0.25),

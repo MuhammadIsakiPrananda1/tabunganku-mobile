@@ -96,6 +96,7 @@ class ChallengeTemplateModel {
       points: points,
       isGroupChallenge: isGroupChallenge,
       groupId: groupId,
+      badgeId: id,
     );
   }
 

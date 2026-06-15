@@ -1441,7 +1441,7 @@ class _HighVisInputState extends State<HighVisInput> {
                   ),
                 ),
               ],
-              const SizedBox(width: 12),
+              SizedBox(width: widget.prefixText != null ? 4 : 8),
               Expanded(
                 child: TextFormField(
                   focusNode: _focusNode,

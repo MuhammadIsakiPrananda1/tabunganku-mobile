@@ -2,7 +2,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_native_contact_picker/flutter_native_contact_picker.dart';
+
 import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tabunganku/core/theme/app_colors.dart';
@@ -44,8 +44,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
   late DebtType _type;
   DateTime? _debtDate; // Tanggal Hutang – wajib
 
-  final FlutterNativeContactPicker _contactPicker =
-      FlutterNativeContactPicker();
+
 
   @override
   void initState() {
@@ -202,7 +201,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                     // ── Type Selector ─────────────────────────────────
                     if (widget.initialType == null || widget.debt != null) ...[
                       _buildLabel('Jenis Catatan', labelColor),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 4),
                       _TypeToggle(
                         selected: _type,
                         isDark: isDark,
@@ -213,7 +212,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
 
                     // ── Nama Kontak ───────────────────────────────────
                     _buildLabel('Nama Kontak', labelColor, required: true),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 4),
                     TextFormField(
                       controller: _contactController,
                       style: GoogleFonts.quicksand(
@@ -234,21 +233,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                         ),
                         prefixIconConstraints:
                             const BoxConstraints(minWidth: 0, minHeight: 0),
-                        suffixIcon: IconButton(
-                          icon: Icon(Icons.contact_phone_rounded,
-                              size: 20, color: AppColors.primary),
-                          onPressed: () async {
-                            try {
-                              final contact =
-                                  await _contactPicker.selectContact();
-                              if (contact != null && contact.fullName != null) {
-                                setState(() {
-                                  _contactController.text = contact.fullName!;
-                                });
-                              }
-                            } catch (_) {}
-                          },
-                        ),
+
                         filled: true,
                         fillColor: fillColor,
                         border: normalBorder,
@@ -264,15 +249,15 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                           borderSide: const BorderSide(
                               color: Colors.redAccent, width: 1.5),
                         ),
-                        contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 12),
+                        contentPadding: const EdgeInsets.only(
+                            left: 0, right: 16, top: 12, bottom: 12),
                       ),
                     ),
                     const SizedBox(height: 16),
 
                     // ── Nominal ───────────────────────────────────────
                     _buildLabel('Nominal', labelColor, required: true),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 4),
                     TextFormField(
                       controller: _amountController,
                       keyboardType: TextInputType.number,
@@ -288,7 +273,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                       validator: (v) =>
                           v!.trim().isEmpty ? 'Nominal harus diisi' : null,
                       decoration: InputDecoration(
-                        hintText: '0',
+                        hintText: 'Masukkan Nominal',
                         hintStyle: GoogleFonts.quicksand(
                             fontSize: 13, color: subColor),
                         prefixIcon: Padding(
@@ -327,15 +312,15 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                           borderSide: const BorderSide(
                               color: Colors.redAccent, width: 1.5),
                         ),
-                        contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 12),
+                        contentPadding: const EdgeInsets.only(
+                            left: 0, right: 16, top: 12, bottom: 12),
                       ),
                     ),
                     const SizedBox(height: 16),
 
                     // ── Keterangan ────────────────────────────────────
                     _buildLabel('Keterangan', labelColor, required: true),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 4),
                     TextFormField(
                       controller: _titleController,
                       style: GoogleFonts.quicksand(
@@ -371,15 +356,15 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                           borderSide: const BorderSide(
                               color: Colors.redAccent, width: 1.5),
                         ),
-                        contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 12),
+                        contentPadding: const EdgeInsets.only(
+                            left: 0, right: 16, top: 12, bottom: 12),
                       ),
                     ),
                     const SizedBox(height: 16),
 
                     // ── Tanggal Hutang (WAJIB) ────────────────────────
                     _buildLabel('Tanggal Hutang', labelColor, required: true),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 4),
                     FormField<DateTime>(
                       initialValue: _debtDate,
                       validator: (_) => _debtDate == null

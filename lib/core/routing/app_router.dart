@@ -29,6 +29,7 @@ import 'package:tabunganku/features/home/presentation/pages/compound_interest_pa
 import 'package:tabunganku/features/home/presentation/pages/currency_converter_page.dart';
 import 'package:tabunganku/features/home/presentation/pages/mosque_donation_page.dart';
 import 'package:tabunganku/features/home/presentation/pages/hajj_umrah_planner_page.dart';
+import 'package:tabunganku/features/home/presentation/pages/net_salary_calculator_page.dart';
 
 import 'package:tabunganku/features/budget/presentation/pages/overseas_travel_page.dart';
 import 'package:tabunganku/features/home/presentation/pages/ramadan_mode_page.dart';
@@ -39,7 +40,15 @@ import 'package:tabunganku/features/home/presentation/pages/nikah_planner_page.d
 import 'package:tabunganku/features/home/presentation/pages/kuliah_planner_page.dart';
 import 'package:tabunganku/features/home/presentation/pages/wisata_planner_page.dart';
 import 'package:tabunganku/features/home/presentation/pages/notes_page.dart';
+import 'package:tabunganku/features/home/presentation/pages/note_detail_page.dart';
+import 'package:tabunganku/models/note_model.dart';
 import 'package:tabunganku/features/home/presentation/pages/qris_services_page.dart';
+import 'package:tabunganku/features/home/presentation/pages/budget_rule_page.dart';
+import 'package:tabunganku/features/home/presentation/pages/debt_payoff_planner_page.dart';
+import 'package:tabunganku/features/home/presentation/pages/fire_calculator_page.dart';
+import 'package:tabunganku/features/home/presentation/pages/financial_health_page.dart';
+import 'package:tabunganku/features/home/presentation/pages/kpr_calculator_page.dart';
+import 'package:tabunganku/features/home/presentation/pages/emergency_fund_calculator_page.dart';
 
 final appRouterProvider = Provider((ref) {
   return GoRouter(
@@ -210,6 +219,11 @@ final appRouterProvider = Provider((ref) {
         builder: (context, state) => const AllServicesPage(),
       ),
       GoRoute(
+        path: '/net-salary',
+        name: 'net-salary',
+        builder: (context, state) => const NetSalaryCalculatorPage(),
+      ),
+      GoRoute(
         path: '/qris-payment',
         name: 'qris-payment',
         builder: (context, state) => const QrisServicesPage(),
@@ -305,6 +319,41 @@ final appRouterProvider = Provider((ref) {
         path: '/notes',
         name: 'notes',
         builder: (context, state) => const NotesPage(),
+      ),
+      GoRoute(
+        path: '/note-detail',
+        name: 'note-detail',
+        builder: (context, state) => NoteDetailPage(note: state.extra as NoteModel?),
+      ),
+      GoRoute(
+        path: '/budget-rule',
+        name: 'budget-rule',
+        builder: (context, state) => const BudgetRulePage(),
+      ),
+      GoRoute(
+        path: '/debt-payoff',
+        name: 'debt-payoff',
+        builder: (context, state) => const DebtPayoffPlannerPage(),
+      ),
+      GoRoute(
+        path: '/fire-calculator',
+        name: 'fire-calculator',
+        builder: (context, state) => const FIRECalculatorPage(),
+      ),
+      GoRoute(
+        path: '/financial-health',
+        name: 'financial-health',
+        builder: (context, state) => const FinancialHealthPage(),
+      ),
+      GoRoute(
+        path: '/kpr-calculator',
+        name: 'kpr-calculator',
+        builder: (context, state) => const KPRCalculatorPage(),
+      ),
+      GoRoute(
+        path: '/emergency-fund-calculator',
+        name: 'emergency-fund-calculator',
+        builder: (context, state) => const EmergencyFundCalculatorPage(),
       ),
 
       // Catch-all redirect to splash

@@ -9,7 +9,6 @@ import 'package:tabunganku/providers/shopping_item_provider.dart';
 import 'package:tabunganku/providers/transaction_provider.dart';
 import 'package:tabunganku/core/theme/app_colors.dart';
 import 'package:tabunganku/core/theme/theme_provider.dart';
-import 'package:tabunganku/services/image_upload_service.dart';
 import '../widgets/shopping_form_sheet.dart';
 
 class ShoppingListPage extends ConsumerStatefulWidget {
@@ -169,7 +168,6 @@ class _ShoppingListPageState extends ConsumerState<ShoppingListPage> {
 
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 2, 16, 12),
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: isDarkMode 
@@ -178,7 +176,7 @@ class _ShoppingListPageState extends ConsumerState<ShoppingListPage> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
             color: AppColors.primary.withValues(alpha: isDarkMode ? 0.12 : 0.25),
@@ -187,211 +185,249 @@ class _ShoppingListPageState extends ConsumerState<ShoppingListPage> {
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      clipBehavior: Clip.antiAlias,
+      child: Stack(
         children: [
-          // Bagian Atas: Ringkasan Anggaran Utama
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'TOTAL ANGGARAN BELANJA',
-                    style: GoogleFonts.quicksand(
-                      fontSize: 9,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white.withValues(alpha: 0.8),
-                      letterSpacing: 0.8,
-                    ),
-                  ),
-                  const SizedBox(height: 3),
-                  Text(
-                    _formatRupiah(totalEstimated),
-                    style: GoogleFonts.quicksand(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ],
+          // Background decorative glow circle 1
+          Positioned(
+            right: -24,
+            top: -24,
+            child: Container(
+              width: 130,
+              height: 130,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.08),
+                shape: BoxShape.circle,
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
+            ),
+          ),
+          // Background decorative glow circle 2
+          Positioned(
+            left: -40,
+            bottom: -50,
+            child: Container(
+              width: 160,
+              height: 160,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.04),
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+          // Content
+          Padding(
+            padding: const EdgeInsets.all(18),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Bagian Atas: Ringkasan Anggaran Utama
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(
-                      totalCount == 0 
-                          ? Icons.hourglass_empty_rounded 
-                          : (progress >= 1.0 ? Icons.check_circle_rounded : Icons.cached_rounded),
-                      color: Colors.white,
-                      size: 11,
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'TOTAL ANGGARAN BELANJA',
+                          style: GoogleFonts.quicksand(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white.withValues(alpha: 0.7),
+                            letterSpacing: 1.0,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          _formatRupiah(totalEstimated),
+                          style: GoogleFonts.quicksand(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white,
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 4),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(30),
+                        border: Border.all(color: Colors.white.withValues(alpha: 0.1), width: 1),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            totalCount == 0 
+                                ? Icons.hourglass_empty_rounded 
+                                : (progress >= 1.0 ? Icons.check_circle_rounded : Icons.cached_rounded),
+                            color: Colors.white,
+                            size: 12,
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            totalCount == 0 
+                                ? 'Kosong' 
+                                : '${(progress * 100).toInt()}% Selesai',
+                            style: GoogleFonts.quicksand(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 18),
+                // Bagian Tengah: Progress Bar & Info Barang
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.shopping_bag_rounded, color: Colors.white.withValues(alpha: 0.7), size: 14),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Progres Barang',
+                          style: GoogleFonts.quicksand(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white.withValues(alpha: 0.7),
+                          ),
+                        ),
+                      ],
+                    ),
                     Text(
-                      totalCount == 0 
-                          ? 'Kosong' 
-                          : '${(progress * 100).toInt()}% Selesai',
+                      '$boughtCount dari $totalCount Barang',
                       style: GoogleFonts.quicksand(
-                        fontSize: 9,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
                         color: Colors.white,
                       ),
                     ),
                   ],
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          // Bagian Tengah: Progress Bar & Info Barang
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Icon(Icons.shopping_bag_outlined, color: Colors.white.withValues(alpha: 0.85), size: 13),
-                  const SizedBox(width: 6),
-                  Text(
-                    'Progres Barang',
-                    style: GoogleFonts.quicksand(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white.withValues(alpha: 0.85),
-                    ),
+                const SizedBox(height: 8),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: LinearProgressIndicator(
+                    value: totalCount > 0 ? progress : 0.0,
+                    backgroundColor: Colors.white.withValues(alpha: 0.1),
+                    valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                    minHeight: 6,
                   ),
-                ],
-              ),
-              Text(
-                '$boughtCount dari $totalCount Barang',
-                style: GoogleFonts.quicksand(
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: LinearProgressIndicator(
-              value: totalCount > 0 ? progress : 0.0,
-              backgroundColor: Colors.white.withValues(alpha: 0.15),
-              valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
-              minHeight: 5,
+                const SizedBox(height: 16),
+                // Bagian Bawah: Dua Kolom Terbelanja vs Sisa
+                Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  width: 6,
+                                  height: 6,
+                                  decoration: const BoxDecoration(
+                                    color: Colors.amberAccent,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  'TERBELANJA',
+                                  style: GoogleFonts.quicksand(
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white.withValues(alpha: 0.75),
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                _formatRupiah(totalBought),
+                                style: GoogleFonts.quicksand(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  width: 6,
+                                  height: 6,
+                                  decoration: const BoxDecoration(
+                                    color: Colors.lightBlueAccent,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  'SISA ANGGARAN',
+                                  style: GoogleFonts.quicksand(
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white.withValues(alpha: 0.75),
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                _formatRupiah(remainingCost),
+                                style: GoogleFonts.quicksand(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ),
-          const SizedBox(height: 12),
-          // Pembatas Tipis Horizontal
-          Container(
-            height: 1,
-            color: Colors.white.withValues(alpha: 0.15),
-          ),
-          const SizedBox(height: 10),
-          // Bagian Bawah: Dua Kolom Terbelanja vs Sisa
-          Row(
-            children: [
-              Expanded(
-                child: Row(
-                  children: [
-                    Container(
-                      width: 6,
-                      height: 6,
-                      decoration: const BoxDecoration(
-                        color: Colors.amberAccent,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'TERBELANJA',
-                            style: GoogleFonts.quicksand(
-                              fontSize: 9,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white.withValues(alpha: 0.75),
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                          const SizedBox(height: 1),
-                          FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: Text(
-                              _formatRupiah(totalBought),
-                              style: GoogleFonts.quicksand(
-                                fontSize: 13,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                width: 1,
-                height: 24,
-                color: Colors.white.withValues(alpha: 0.15),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Row(
-                  children: [
-                    Container(
-                      width: 6,
-                      height: 6,
-                      decoration: const BoxDecoration(
-                        color: Colors.lightBlueAccent,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'SISA ANGGARAN',
-                            style: GoogleFonts.quicksand(
-                              fontSize: 9,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white.withValues(alpha: 0.75),
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                          const SizedBox(height: 1),
-                          FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: Text(
-                              _formatRupiah(remainingCost),
-                              style: GoogleFonts.quicksand(
-                                fontSize: 13,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
           ),
         ],
       ),
@@ -512,20 +548,20 @@ class _ShoppingListPageState extends ConsumerState<ShoppingListPage> {
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
         color: isBought
-            ? (isDarkMode ? Colors.white.withOpacity(0.02) : Colors.grey.shade50)
+            ? (isDarkMode ? Colors.white.withValues(alpha: 0.02) : Colors.grey.shade50)
             : theme.cardColor,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: isBought
-              ? (isDarkMode ? Colors.white.withOpacity(0.02) : Colors.grey.shade200)
-              : (isDarkMode ? Colors.white.withOpacity(0.06) : Colors.grey.shade100),
+              ? (isDarkMode ? Colors.white.withValues(alpha: 0.02) : Colors.grey.shade200)
+              : (isDarkMode ? Colors.white.withValues(alpha: 0.06) : Colors.grey.shade100),
           width: 1.2,
         ),
         boxShadow: isBought 
             ? [] 
             : [
                 BoxShadow(
-                  color: Colors.black.withOpacity(isDarkMode ? 0.15 : 0.02),
+                  color: Colors.black.withValues(alpha: isDarkMode ? 0.15 : 0.02),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
@@ -579,7 +615,7 @@ class _ShoppingListPageState extends ConsumerState<ShoppingListPage> {
                       width: 46,
                       height: 46,
                       decoration: BoxDecoration(
-                        color: AppColors.primary.withOpacity(isDarkMode ? 0.15 : 0.08),
+                        color: AppColors.primary.withValues(alpha: isDarkMode ? 0.15 : 0.08),
                         borderRadius: BorderRadius.circular(14),
                       ),
                       child: item.isOnline && item.url != null && item.url!.isNotEmpty
@@ -670,7 +706,7 @@ class _ShoppingListPageState extends ConsumerState<ShoppingListPage> {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                               decoration: BoxDecoration(
-                                color: AppColors.primary.withOpacity(isBought ? 0.04 : 0.1),
+                                color: AppColors.primary.withValues(alpha: isBought ? 0.04 : 0.1),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
@@ -819,7 +855,7 @@ class _ShoppingListPageState extends ConsumerState<ShoppingListPage> {
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Icon(icon, color: color, size: 20),

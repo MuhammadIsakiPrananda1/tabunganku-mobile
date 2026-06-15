@@ -117,7 +117,7 @@ class _BillsTrackerPageState extends ConsumerState<BillsTrackerPage> {
             label: 'Nominal',
             prefixText: 'Rp',
             isDarkMode: isDarkMode,
-            hintText: '0',
+            hintText: 'Masukkan Nominal',
             keyboardType: TextInputType.number,
             inputFormatters: [
               FilteringTextInputFormatter.digitsOnly,
@@ -391,7 +391,7 @@ class _BillsTrackerPageState extends ConsumerState<BillsTrackerPage> {
                 label: 'Nominal Tagihan',
                 prefixText: 'Rp',
                 isDarkMode: isDarkMode,
-                hintText: '0',
+                hintText: 'Masukkan Nominal',
                 keyboardType: TextInputType.number,
                 inputFormatters: [
                   FilteringTextInputFormatter.digitsOnly,
@@ -586,7 +586,7 @@ class _BillsTrackerPageState extends ConsumerState<BillsTrackerPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 8),
+          padding: const EdgeInsets.only(left: 4, bottom: 4),
           child: Text('TANGGAL JATUH TEMPO', style: GoogleFonts.quicksand(fontSize: 11, fontWeight: FontWeight.bold, color: contentColor.withValues(alpha: 0.5))),
         ),
         Material(
@@ -745,7 +745,7 @@ class _HighVisInputState extends State<HighVisInput> {
               color: widget.isDarkMode ? Colors.white70 : Colors.black87,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
         ],
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -772,7 +772,7 @@ class _HighVisInputState extends State<HighVisInput> {
                   ),
                 ),
               ],
-              const SizedBox(width: 12),
+              SizedBox(width: widget.prefixText != null ? 4 : 8),
               Expanded(
                 child: TextFormField(
                   focusNode: _focusNode,

@@ -108,7 +108,7 @@ class _BillingManagementPageState extends ConsumerState<BillingManagementPage> {
                   label: 'Nominal',
                   prefixText: 'Rp',
                   isDarkMode: isDarkMode,
-                  hintText: '0',
+                  hintText: 'Masukkan Nominal',
                   keyboardType: TextInputType.number,
                   inputFormatters: [
                     FilteringTextInputFormatter.digitsOnly,
@@ -195,7 +195,7 @@ class _BillingManagementPageState extends ConsumerState<BillingManagementPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 8),
+          padding: const EdgeInsets.only(left: 4, bottom: 4),
           child: Text(
             'TANGGAL JATUH TEMPO',
             style: GoogleFonts.quicksand(
@@ -364,7 +364,7 @@ class _BillingManagementPageState extends ConsumerState<BillingManagementPage> {
                   label: 'Nominal',
                   prefixText: 'Rp',
                   isDarkMode: isDarkMode,
-                  hintText: '0',
+                  hintText: 'Masukkan Nominal',
                   keyboardType: TextInputType.number,
                   inputFormatters: [
                     FilteringTextInputFormatter.digitsOnly,

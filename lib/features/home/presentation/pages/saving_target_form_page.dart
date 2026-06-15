@@ -305,7 +305,7 @@ class _SavingTargetFormPageState extends ConsumerState<SavingTargetFormPage> {
                 label: 'Nominal Target',
                 prefixText: 'Rp',
                 isDarkMode: isDarkMode,
-                hintText: '0',
+                hintText: 'Masukkan Nominal',
                 keyboardType: TextInputType.number,
                 inputFormatters: [
                   FilteringTextInputFormatter.digitsOnly,
@@ -333,7 +333,7 @@ class _SavingTargetFormPageState extends ConsumerState<SavingTargetFormPage> {
                   color: isDarkMode ? Colors.white70 : Colors.black87,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 4),
               Focus(
                 onFocusChange: (hasFocus) {
                   setState(() => _categoryIsFocused = hasFocus);
@@ -398,7 +398,7 @@ class _SavingTargetFormPageState extends ConsumerState<SavingTargetFormPage> {
                   color: isDarkMode ? Colors.white70 : Colors.black87,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 4),
               InkWell(
                 onTap: () async {
                   setState(() => _dateIsFocused = true);

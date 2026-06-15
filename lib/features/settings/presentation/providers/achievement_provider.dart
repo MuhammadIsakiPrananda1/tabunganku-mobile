@@ -1,7 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/material.dart';
 import 'package:tabunganku/models/transaction_model.dart';
 import 'package:tabunganku/providers/transaction_provider.dart';
-import 'package:flutter/material.dart';
+import 'package:tabunganku/providers/challenge_provider.dart';
 
 class Achievement {
   final String id;
@@ -34,6 +35,8 @@ class Achievement {
 
 final achievementsProvider = Provider<List<Achievement>>((ref) {
   final transactionsAsync = ref.watch(transactionsStreamProvider);
+  final streakAsync = ref.watch(currentStreakProvider);
+  final streak = streakAsync.value ?? 0;
   
   return transactionsAsync.maybeWhen(
     data: (allTransactions) {
@@ -51,28 +54,6 @@ final achievementsProvider = Provider<List<Achievement>>((ref) {
           
       final currentBalance = totalIncome - totalExpense;
       
-      // Calculate Streak (Simplified: consecutive days with income)
-      int streak = 0;
-      if (transactions.isNotEmpty) {
-        final sortedDates = transactions
-            .where((t) => t.type == TransactionType.income)
-            .map((t) => DateTime(t.date.year, t.date.month, t.date.day))
-            .toSet()
-            .toList()
-          ..sort((a, b) => b.compareTo(a));
-          
-        if (sortedDates.isNotEmpty) {
-          streak = 1;
-          for (int i = 0; i < sortedDates.length - 1; i++) {
-            if (sortedDates[i].difference(sortedDates[i+1]).inDays == 1) {
-              streak++;
-            } else {
-              break;
-            }
-          }
-        }
-      }
-
       // 2. Define Achievements logic
       return [
         Achievement(

@@ -15,6 +15,8 @@ abstract class BadgeService {
   Future<BadgeModel?> getBadgeById(String id);
   Future<void> unlockBadge(String badgeId);
   Future<bool> checkAndUnlockBadges(int currentPoints, int currentStreak);
+  Future<void> unlockChallengeBadge(String challengeTemplateId);
+  Future<void> unlockFirstChallengeBadge();
 }
 
 /// Mock implementation dengan SharedPreferences

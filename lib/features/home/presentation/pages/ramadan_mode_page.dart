@@ -1072,7 +1072,7 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> {
                           color: Colors.grey.shade400,
                           fontSize: 12.5),
                       prefixIcon: Container(
-                        padding: const EdgeInsets.only(left: 16, right: 8),
+                        padding: const EdgeInsets.only(left: 12, right: 4),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -1086,6 +1086,7 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> {
                           ],
                         ),
                       ),
+            prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
                     ),
                   ),
 

@@ -283,7 +283,7 @@ class _MosqueDonationPageState extends ConsumerState<MosqueDonationPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 8),
+          padding: const EdgeInsets.only(left: 4, bottom: 4),
           child: Text(
             label, 
             style: GoogleFonts.quicksand(
@@ -307,13 +307,13 @@ class _MosqueDonationPageState extends ConsumerState<MosqueDonationPage> {
               fontWeight: FontWeight.bold,
             ),
             prefixIcon: Container(
-              padding: const EdgeInsets.only(left: 16, right: 8),
+              padding: const EdgeInsets.only(left: 12, right: 4),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(icon, color: accentColor, size: 18),
                   if (isCurrency) ...[
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 4),
                     Text(
                       'Rp', 
                       style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: accentColor, fontSize: 13),
@@ -322,10 +322,11 @@ class _MosqueDonationPageState extends ConsumerState<MosqueDonationPage> {
                 ],
               ),
             ),
+            prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
             filled: true,
             fillColor: isDarkMode ? Colors.white.withOpacity(0.05) : AppColors.background,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            contentPadding: const EdgeInsets.only(left: 0, right: 16, top: 12, bottom: 12),
           ),
         ),
       ],

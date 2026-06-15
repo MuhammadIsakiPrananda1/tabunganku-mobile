@@ -439,7 +439,7 @@ class _BrankasFinansialPageState extends ConsumerState<BrankasFinansialPage> {
                       'Kategori',
                       style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 4),
                     Container(
                       height: 48,
                       padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -516,7 +516,7 @@ class _BrankasFinansialPageState extends ConsumerState<BrankasFinansialPage> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 4),
                     TextFormField(
                       controller: _titleController,
                       style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
@@ -568,7 +568,7 @@ class _BrankasFinansialPageState extends ConsumerState<BrankasFinansialPage> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 4),
                     TextFormField(
                       controller: _value1Controller,
                       style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
@@ -606,7 +606,7 @@ class _BrankasFinansialPageState extends ConsumerState<BrankasFinansialPage> {
                       _selectedCategory == 'Investasi' ? 'User ID Lainnya (Opsional)' : 'Detail / Keterangan Tambahan',
                       style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 4),
                     TextFormField(
                       controller: _value2Controller,
                       style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
@@ -630,7 +630,7 @@ class _BrankasFinansialPageState extends ConsumerState<BrankasFinansialPage> {
                       'Catatan Ringkas (Opsional)',
                       style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 4),
                     TextFormField(
                       controller: _notesController,
                       style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),

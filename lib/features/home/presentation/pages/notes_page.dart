@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:tabunganku/core/theme/app_colors.dart';
@@ -16,12 +17,9 @@ class NotesPage extends ConsumerStatefulWidget {
 
 class _NotesPageState extends ConsumerState<NotesPage> {
   final TextEditingController _searchController = TextEditingController();
-  final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _contentController = TextEditingController();
 
   String _searchQuery = '';
   bool _filterFavoritesOnly = false;
-  int _selectedColorValue = 0xFFE3F2FD; // Default Sky Blue
 
   // A premium palette of 6 pastel colors
   final List<Map<String, dynamic>> _pastelColors = [
@@ -36,8 +34,6 @@ class _NotesPageState extends ConsumerState<NotesPage> {
   @override
   void dispose() {
     _searchController.dispose();
-    _titleController.dispose();
-    _contentController.dispose();
     super.dispose();
   }
 
@@ -68,205 +64,6 @@ class _NotesPageState extends ConsumerState<NotesPage> {
     return Colors.blueGrey.shade700;
   }
 
-  void _showNoteForm({NoteModel? note}) {
-    final isEditing = note != null;
-    if (isEditing) {
-      _titleController.text = note.title;
-      _contentController.text = note.content;
-      _selectedColorValue = note.colorValue;
-    } else {
-      _titleController.clear();
-      _contentController.clear();
-      _selectedColorValue = 0xFFE3F2FD; // Reset to default Sky Blue
-    }
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        final theme = Theme.of(context);
-        final isDark = ref.watch(themeProvider) == ThemeMode.dark ||
-            (ref.watch(themeProvider) == ThemeMode.system && theme.brightness == Brightness.dark);
-        final contentColor = isDark ? Colors.white : AppColors.primaryDark;
-
-        return StatefulBuilder(
-          builder: (context, setModalState) {
-            return Container(
-              padding: EdgeInsets.fromLTRB(20, 16, 20, MediaQuery.of(context).viewInsets.bottom + 24),
-              decoration: BoxDecoration(
-                color: isDark ? AppColors.surfaceDark : Colors.white,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                    child: Container(
-                      width: 48,
-                      height: 5,
-                      decoration: BoxDecoration(
-                        color: isDark ? Colors.white12 : Colors.grey.shade200,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    isEditing ? 'Edit Catatan' : 'Catatan Baru',
-                    style: GoogleFonts.quicksand(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: contentColor,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _titleController,
-                    style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 14, color: isDark ? Colors.white : Colors.black87),
-                    decoration: InputDecoration(
-                      hintText: 'Judul Catatan',
-                      hintStyle: GoogleFonts.quicksand(color: isDark ? Colors.white24 : Colors.grey.shade400, fontWeight: FontWeight.bold),
-                      filled: true,
-                      fillColor: isDark ? Colors.white.withOpacity(0.03) : AppColors.background,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    controller: _contentController,
-                    maxLines: 6,
-                    minLines: 3,
-                    style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: isDark ? Colors.white70 : Colors.black87),
-                    decoration: InputDecoration(
-                      hintText: 'Tulis sesuatu di sini...',
-                      hintStyle: GoogleFonts.quicksand(color: isDark ? Colors.white24 : Colors.grey.shade400, fontWeight: FontWeight.bold),
-                      filled: true,
-                      fillColor: isDark ? Colors.white.withOpacity(0.03) : AppColors.background,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    'Pilih Warna Kartu',
-                    style: GoogleFonts.quicksand(
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      color: contentColor.withOpacity(0.5),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  SizedBox(
-                    height: 48,
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: _pastelColors.length,
-                      separatorBuilder: (_, __) => const SizedBox(width: 12),
-                      itemBuilder: (context, index) {
-                        final colorMap = _pastelColors[index];
-                        final int value = colorMap['value'] as int;
-                        final isSelected = _selectedColorValue == value;
-
-                        return GestureDetector(
-                          onTap: () {
-                            setModalState(() {
-                              _selectedColorValue = value;
-                            });
-                            setState(() {});
-                          },
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            width: 38,
-                            height: 38,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Color(value),
-                              border: Border.all(
-                                color: isSelected 
-                                    ? (isDark ? Colors.white : AppColors.primary) 
-                                    : Colors.transparent,
-                                width: isSelected ? 3 : 0,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.05),
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 2),
-                                )
-                              ],
-                            ),
-                            child: isSelected
-                                ? Icon(
-                                    Icons.check_rounded,
-                                    size: 16,
-                                    color: Colors.blueGrey.shade900,
-                                  )
-                                : null,
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 28),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 46,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        if (_titleController.text.trim().isEmpty && _contentController.text.trim().isEmpty) {
-                          Navigator.pop(context);
-                          return;
-                        }
-
-                        final service = ref.read(noteServiceProvider);
-                        if (isEditing) {
-                          final updated = note.copyWith(
-                            title: _titleController.text.trim(),
-                            content: _contentController.text.trim(),
-                            colorValue: _selectedColorValue,
-                          );
-                          service.updateNote(updated);
-                        } else {
-                          final newNote = NoteModel(
-                            id: DateTime.now().millisecondsSinceEpoch.toString(),
-                            title: _titleController.text.trim().isEmpty ? 'Catatan Tanpa Judul' : _titleController.text.trim(),
-                            content: _contentController.text.trim(),
-                            createdAt: DateTime.now(),
-                            colorValue: _selectedColorValue,
-                            isPinned: false,
-                            isFavorite: false,
-                          );
-                          service.addNote(newNote);
-                        }
-
-                        Navigator.pop(context);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                        elevation: 0,
-                      ),
-                      child: Text(
-                        isEditing ? 'Simpan Perubahan' : 'Tambah Catatan',
-                        style: GoogleFonts.quicksand(
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
 
   void _confirmDelete(String id) {
     showDialog(
@@ -356,7 +153,7 @@ class _NotesPageState extends ConsumerState<NotesPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _showNoteForm(),
+        onPressed: () => context.push('/note-detail'),
         backgroundColor: AppColors.primary,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
         child: const Icon(Icons.add_rounded, color: Colors.white, size: 28),
@@ -570,7 +367,7 @@ class _NotesPageState extends ConsumerState<NotesPage> {
     final dateStr = DateFormat('d MMM, HH:mm', 'id_ID').format(note.createdAt);
 
     return GestureDetector(
-      onTap: () => _showNoteForm(note: note),
+      onTap: () => context.push('/note-detail', extra: note),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.all(14),

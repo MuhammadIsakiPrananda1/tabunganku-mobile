@@ -326,7 +326,7 @@ class _ScanReceiptPageState extends ConsumerState<ScanReceiptPage> {
                         icon: Icons.payments_rounded,
                         label: 'Nominal Transaksi',
                         isDarkMode: isDarkMode,
-                        hintText: '0',
+                        hintText: 'Masukkan Nominal',
                         prefixText: 'Rp',
                         keyboardType: TextInputType.number,
                         inputFormatters: [
@@ -906,7 +906,7 @@ class _HighVisInputState extends State<HighVisInput> {
                   ),
                 ),
               ],
-              const SizedBox(width: 12),
+              SizedBox(width: widget.prefixText != null ? 4 : 8),
               Expanded(
                 child: TextFormField(
                   focusNode: _focusNode,

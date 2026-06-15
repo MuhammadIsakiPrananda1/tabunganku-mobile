@@ -122,7 +122,7 @@ class _TaxCalculatorPageState extends ConsumerState<TaxCalculatorPage> {
             
             // Tipe Pajak - Title
             Padding(
-              padding: const EdgeInsets.only(left: 4, bottom: 8),
+              padding: const EdgeInsets.only(left: 4, bottom: 4),
               child: Text(
                 'Tipe Pajak',
                 style: GoogleFonts.quicksand(
@@ -206,7 +206,7 @@ class _TaxCalculatorPageState extends ConsumerState<TaxCalculatorPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 8),
+          padding: const EdgeInsets.only(left: 4, bottom: 4),
           child: Text(
             label,
             style: GoogleFonts.quicksand(
@@ -223,23 +223,24 @@ class _TaxCalculatorPageState extends ConsumerState<TaxCalculatorPage> {
           style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
           onChanged: onChanged,
           decoration: InputDecoration(
-            hintText: 'Nominal Dasar Pajak',
+            hintText: 'Masukkan Nominal',
             hintStyle: GoogleFonts.quicksand(fontSize: 13, color: isDarkMode ? Colors.white.withOpacity(0.3) : Colors.black.withOpacity(0.25)),
             prefixIcon: Container(
-              padding: const EdgeInsets.only(left: 16, right: 8),
+              padding: const EdgeInsets.only(left: 12, right: 4),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(icon, color: accentColor, size: 18),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 4),
                   Text('Rp', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: accentColor, fontSize: 13)),
                 ],
               ),
             ),
+            prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
             filled: true,
             fillColor: inputBgColor,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            contentPadding: const EdgeInsets.only(left: 0, right: 16, top: 14, bottom: 14),
           ),
         ),
       ],

@@ -11,67 +11,68 @@
 
 ---
 
-# 💎 TabunganKu Versi 1.5.1: Minimalist Aesthetics & Smart Projection
+# 💎 TabunganKu Versi 1.5.1: New Horizons & Advanced Financial Tools
 
-Rilis v1.5.1 merupakan puncak dari evolusi desain TabunganKu, menghadirkan perombakan estetika besar-besaran untuk mencapai tampilan yang lebih bersih, profesional, dan minimalis. Kami beralih dari pendekatan visual yang padat menjadi antarmuka yang lebih "lega" dan berkelas, tanpa mengorbankan kecerdasan fungsional yang selama ini menjadi keunggulan kami.
+Rilis v1.5.1 menghadirkan lompatan besar bagi ekosistem TabunganKu. Kami memperkenalkan modul pencatatan catatan terpadu (*Note-Taking System*), perombakan total fitur Arisan menjadi *Nabung Bersama* yang lebih andal, serta serangkaian kalkulator finansial tingkat lanjut (*KPR, FIRE, Gaji Bersih, Dana Darurat*) untuk memperkuat kendali keuangan Anda secara menyeluruh.
 
 ---
 
 ### 🆕 Fitur Yang Ditambah
 
-#### 🔮 Smart Balance Projection (Proyeksi Saldo Cerdas)
-Fitur analisis prediktif untuk membantu Anda melihat masa depan finansial Anda.
-*   **Trend-Based Estimation**: Algoritma cerdas yang menganalisis pola pemasukan dan pengeluaran harian Anda untuk memberikan estimasi saldo akhir bulan yang akurat.
-*   **Financial Goal Alignment**: Membantu Anda mengevaluasi apakah pengeluaran saat ini masih selaras dengan target saldo bulanan yang Anda harapkan.
-*   **Dynamic Calculation**: Proyeksi yang terus diperbarui secara real-time setiap kali Anda menambahkan transaksi baru.
+#### 📝 Note-Taking System (Catatan Finansial Terpadu)
+Integrasi sistem manajemen catatan lengkap di dalam aplikasi untuk mendokumentasikan rencana keuangan Anda.
+*   **CRUD Notes**: Buat, baca, perbarui, dan hapus catatan harian atau memo keuangan secara langsung.
+*   **Note Details View**: Halaman detail khusus untuk membaca catatan panjang secara nyaman dengan visualisasi minimalis.
 
-#### 📅 Dashboard Monthly Reset (Manajemen Bulanan Relevan)
-Sistem pemantauan yang selalu segar setiap bulannya.
-*   **Automated Statistics Reset**: Statistik dashboard kini secara otomatis melakukan reset setiap awal bulan, memberikan fokus penuh pada performa keuangan periode berjalan.
-*   **Historical Comparison Support**: Meskipun dashboard di-reset, Anda tetap dapat mengakses data bulan sebelumnya melalui arsip laporan yang tetap terjaga.
+#### 🧮 Advanced Financial Calculators (Kalkulator Keuangan Mandiri)
+Serangkaian kalkulator baru untuk membimbing keputusan finansial masa depan Anda:
+*   **KPR Calculator**: Hitung estimasi cicilan bulanan rumah, tenor pinjaman, dan rincian total bunga secara ringkas.
+*   **FIRE Calculator**: Rencanakan masa pensiun dini Anda dengan menghitung target akumulasi dana pensiun (*Financial Independence, Retire Early*).
+*   **Emergency Fund Calculator**: Tentukan target dana darurat ideal berdasarkan kebutuhan pengeluaran bulanan Anda.
+*   **Net Salary Calculator**: Hitung gaji bersih Anda setelah dihitung dengan pajak penghasilan dan potongan wajib lainnya.
+*   **Budget Rule Analyzer (50/30/20)**: Modul pembagi pos keuangan otomatis berdasarkan aturan anggaran populer (Kebutuhan, Keinginan, Tabungan).
 
-#### ✨ Premium Success Feedback (Respon Visual Elegan)
-Meningkatkan kualitas interaksi melalui umpan balik yang lebih profesional.
-*   **Standardized Snackbars**: Pesan sukses dan informasi (snackbars) kini telah distandarisasi dengan desain yang lebih bersih, menggunakan tipografi yang tajam dan palet warna yang tenang.
-*   **Non-Intrusive Feedback**: Memastikan informasi tersampaikan tanpa mengganggu alur navigasi atau estetika antarmuka utama.
+#### 🧳 Specialized Financial Planners (Perencana Rencana Khusus)
+Modul baru untuk merencanakan sasaran finansial jangka panjang:
+*   **Wisata Planner**: Kelola alokasi dana liburan impian domestik atau internasional dengan lebih tertarget.
+*   **Kuliah Planner**: Perencana anggaran biaya pendidikan tinggi per semester secara aman.
+*   **Nikah Planner**: Rincian pengeluaran pos gedung, katering, undangan, dan mas kawin pernikahan dalam satu dashboard terpusat.
+*   **Hutang Jariyah Tracker**: Kelola data utang piutang dengan pelacakan cicilan dan waktu jatuh tempo.
 
----
-
-### 🛠️ Fitur Yang Diubah (Minimalist Transformation)
-
-#### 🧼 Minimalist Detail Overhaul (Penyederhanaan Premium)
-Langkah besar dalam menghilangkan gangguan visual untuk fokus pada substansi data.
-*   **Emoji Decluttering**: Pembersihan seluruh lembar detail transaksi dan target dari penggunaan emotikon yang berlebihan, memberikan kesan aplikasi yang lebih serius dan profesional.
-*   **Clean Detailed Sheets**: Redesain struktur informasi pada lembar detail agar lebih terorganisir dengan ruang putih (*white space*) yang proporsional.
-
-#### 🎲 Advanced Arisan Management (Redesain Modul Arisan)
-Transformasi total pada salah satu fitur sosial paling populer di TabunganKu.
-*   **Clean Checkbox UI**: Implementasi sistem centang peserta arisan dengan desain yang lebih modern dan minimalis.
-*   **Dashed Border Interaction**: Tombol "Tambah Peserta" baru dengan gaya *dashed border* yang elegan, memberikan petunjuk visual yang jelas namun tetap menyatu dengan tema minimalis.
-*   **Responsive Member List**: Peningkatan kenyamanan dalam mengelola daftar peserta arisan yang panjang dengan performa *scrolling* yang lebih halus.
-
-#### 📐 Compact UI Typography & Layout
-Optimalisasi tata letak untuk kenyamanan navigasi harian.
-*   **Quick Actions Refinement**: Penyesuaian ukuran font dan ikon pada menu *Quick Actions* agar terasa lebih proporsional dan tidak memakan banyak ruang visual.
-*   **Target Card Optimization**: Redesain kartu target untuk memberikan informasi progres yang lebih padat namun tetap mudah dibaca.
+#### 📲 Fitur Pendukung Lainnya
+*   **QRIS Services Page**: Layanan transaksi simulator QRIS merchant dengan aset visual pendukung.
+*   **Ramadan Mode Page**: Mode khusus ramadan untuk membantu alokasi pengeluaran ibadah, takjil, zakat, infaq, dan mudik lebaran.
+*   **Brankas Finansial & Kontak Darurat**: Penyimpanan aman info aset berharga serta daftar kontak darurat finansial keluarga Anda.
+*   **Premium Image Cropper**: Modul pangkas foto profil pengguna agar pas dengan rasio lingkaran profil secara presisi.
 
 ---
 
-### 🗑️ Fitur Yang Dihapus (The Great Cleanup)
+### 🛠️ Fitur Yang Diubah
 
-#### 🧹 Visual Clutter Elimination
-Menghapus elemen dekoratif yang tidak memberikan nilai tambah pada pengalaman pengguna.
-*   **Over-Decorative Elements removal**: Penghapusan ornamen visual, bayangan berlebihan, dan border yang tidak perlu pada lembar detail untuk mempertahankan estetika minimalis.
-*   **Legacy Animation Modules**: Eliminasi transisi lama yang terasa berat, digantikan dengan animasi mikro yang lebih cepat dan gegas.
+#### 👥 Migrasi Arisan ke Nabung Bersama
+*   Fitur **Arisan** lama kini ditingkatkan dan diubah menjadi **Nabung Bersama** dengan sinkronisasi database cloud Firestore real-time yang lebih andal, alur kolaborasi anggota grup yang lebih transparan, serta antarmuka yang dirancang ulang.
+
+#### 📊 Dashboard & Settings Overhaul
+*   **Dashboard Page**: Peningkatan kecepatan render grafik keuangan (*chart rendering*) dan restrukturisasi layout ringkasan pos anggaran agar lebih lega.
+*   **Settings Page**: Optimalisasi tata letak menu setelan, perbaikan alur pengaturan PIN keamanan, serta integrasi image upload service.
+*   **Transactions Optimization**: Pembaruan sistem riwayat transaksi berulang (*Recurring Transactions*) dan modul pemindaian struk (*Scan Receipt*) agar berjalan lebih responsif.
+
+---
+
+### 🗑️ Fitur Yang Dihapus
+
+#### 🚫 Modul Legacy & Widget Test
+*   **Arisan Page & Providers**: Penghapusan modul arisan lama karena telah digantikan oleh fitur *Nabung Bersama*.
+*   **Widget Test Cleanup**: Penghapusan file uji coba widget lama (`test/widget_test.dart`) untuk menjaga kebersihan struktur repositori.
 
 ---
 
 ### ⚡ Detail Teknis & Performa
-*   **Optimized UI Execution**: Pengurangan beban render pada komponen detail transaksi, mempercepat pembukaan halaman hingga **25%**.
-*   **Enhanced Data Integrity**: Pembaruan sistem pemetaan data untuk mendukung fitur *Monthly Reset* tanpa risiko kehilangan data historis.
+*   **Architecture Refinement**: Pemisahan module logic ke dalam clean architecture layer untuk performa loading dashboard yang lebih optimal.
+*   **Asset Compression**: Penambahan aset visual (`icon_compressed.png`, `promo_banner.png`) dengan kompresi optimal untuk menghemat ruang unduhan APK.
 
 ---
 
-Terima kasih telah menemani perjalanan evolusi TabunganKu hingga versi 1.5.1. Kami percaya bahwa keindahan terletak pada kesederhanaan, dan efisiensi lahir dari kecerdasan data.
+Terima kasih telah menemani perjalanan evolusi TabunganKu hingga versi 1.5.1. Kami berkomitmen untuk selalu mendampingi perencanaan finansial Anda dengan teknologi cerdas dan estetika premium.
 
-**Desain Minimalis, Strategi Maksimal!** 💰✨
+**Kendali Penuh Keuangan, Masa Depan Cemerlang!** 💰✨

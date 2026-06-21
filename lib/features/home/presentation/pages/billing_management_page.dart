@@ -109,7 +109,7 @@ class _BillingManagementPageState extends ConsumerState<BillingManagementPage> {
                   prefixText: 'Rp',
                   isDarkMode: isDarkMode,
                   hintText: 'Masukkan Nominal',
-                  keyboardType: TextInputType.number,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   inputFormatters: [
                     FilteringTextInputFormatter.digitsOnly,
                     _RibuanFormatter(),
@@ -365,7 +365,7 @@ class _BillingManagementPageState extends ConsumerState<BillingManagementPage> {
                   prefixText: 'Rp',
                   isDarkMode: isDarkMode,
                   hintText: 'Masukkan Nominal',
-                  keyboardType: TextInputType.number,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   inputFormatters: [
                     FilteringTextInputFormatter.digitsOnly,
                     _RibuanFormatter(),

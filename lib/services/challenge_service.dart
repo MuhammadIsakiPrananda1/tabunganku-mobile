@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
@@ -32,6 +33,7 @@ abstract class ChallengeService {
   Future<void> updateChallengeProgress(String challengeId, double progress);
   Future<void> checkAndUpdateChallengeFromTransaction(
       TransactionModel transaction);
+  Future<void> updateStreakOnIncome();
   Future<int> getCurrentStreak();
   Future<int> getTotalPoints();
   Stream<List<ChallengeModel>> watchActiveChallenges();
@@ -45,12 +47,23 @@ class MockChallengeService implements ChallengeService {
 
   MockChallengeService({this.badgeService});
 
-  static final StreamController<void> _updateController =
-      StreamController<void>.broadcast();
-  static Stream<void> get updateStream => _updateController.stream;
+  static int _updateCounter = 0;
+  static final StreamController<int> _updateController =
+      StreamController<int>.broadcast();
+  static Stream<int> get updateStream => _updateController.stream;
+
+  static void _logToFile(String message) {
+    try {
+      final file = File('c:/Users/Neverland Studio/Documents/Folder Semua Aplikasi/Aplikasi TabunganKu/debug_log.txt');
+      file.writeAsStringSync('${DateTime.now().toIso8601String()}: $message\n', mode: FileMode.append);
+    } catch (e) {
+      debugPrint('Failed to log to file: $e');
+    }
+  }
 
   void _notifyListeners() {
-    _updateController.add(null);
+    _updateCounter++;
+    _updateController.add(_updateCounter);
   }
 
   static const String _storagePrefix = 'challenges_user_';
@@ -70,8 +83,13 @@ class MockChallengeService implements ChallengeService {
   }
 
   Future<String> _getCurrentUserId() async {
-    final userId = await _secureStorage.getUserId();
-    return (userId == null || userId.isEmpty) ? 'guest' : userId;
+    try {
+      final userId = await _secureStorage.getUserId();
+      return (userId == null || userId.isEmpty) ? 'guest' : userId;
+    } catch (e) {
+      _logToFile('_getCurrentUserId ERROR: $e');
+      return 'guest';
+    }
   }
 
   Future<void> _ensureUserLoaded(String userId) async {
@@ -118,6 +136,7 @@ class MockChallengeService implements ChallengeService {
   Future<List<ChallengeModel>> getChallenges() async {
     final userId = await _getCurrentUserId();
     await _ensureUserLoaded(userId);
+    await _evaluateExpiredChallenges(userId);
     return List.from(_userChallenges[userId] ?? []);
   }
 
@@ -322,6 +341,13 @@ class MockChallengeService implements ChallengeService {
   @override
   Future<void> checkAndUpdateChallengeFromTransaction(
       TransactionModel transaction) async {
+    final userId = await _getCurrentUserId();
+    final allChallenges = _userChallenges[userId] ?? [];
+    debugPrint('ChallengeService debug: userId=$userId, total challenges in memory=${allChallenges.length}');
+    for (var c in allChallenges) {
+      debugPrint('ChallengeService debug: challenge title="${c.title}" status=${c.status.toString()} endDate=${c.endDate}');
+    }
+
     final activeChallenges = await getActiveChallenges();
     debugPrint(
         'ChallengeService: Checking ${activeChallenges.length} active challenges for transaction: ${transaction.title} (${transaction.category})');
@@ -411,132 +437,357 @@ class MockChallengeService implements ChallengeService {
   /// jika SharedPreferences kosong (misal setelah update/reinstall).
   Future<void> _restoreFromSecureStorageIfNeeded(
       SharedPreferences prefs, String userId) async {
-    final streakKey = '$_streakKey$userId';
-    final pointsKey = '$_pointsKey$userId';
-    final lastCompletionKey = '$_lastCompletionKey$userId';
+    _logToFile('_restoreFromSecureStorageIfNeeded() called');
+    try {
+      final streakKey = '$_streakKey$userId';
+      final pointsKey = '$_pointsKey$userId';
+      final lastCompletionKey = '$_lastCompletionKey$userId';
 
-    final prefStreak = prefs.getInt(streakKey);
-    final prefPoints = prefs.getInt(pointsKey);
-    final prefLastCompletion = prefs.getString(lastCompletionKey);
+      final prefStreak = prefs.getInt(streakKey);
+      final prefPoints = prefs.getInt(pointsKey);
+      final prefLastCompletion = prefs.getString(lastCompletionKey);
+      _logToFile('_restoreFromSecureStorageIfNeeded: prefStreak=$prefStreak, prefPoints=$prefPoints, prefLastCompletion=$prefLastCompletion');
 
-    // Pulihkan streak jika null atau 0
-    if (prefStreak == null || prefStreak == 0) {
-      final secStreak =
-          await _secureStorage.readSecureData('$_secureStreakPrefix$userId');
-      if (secStreak != null) {
-        final val = int.tryParse(secStreak) ?? 0;
-        if (val > 0) {
-          await prefs.setInt(streakKey, val);
-          debugPrint('ChallengeService: Restored streak from secure storage: $val');
+      // Pulihkan streak jika null atau 0
+      if (prefStreak == null || prefStreak == 0) {
+        try {
+          final secStreak =
+              await _secureStorage.readSecureData('$_secureStreakPrefix$userId');
+          _logToFile('_restoreFromSecureStorageIfNeeded: secStreak=$secStreak');
+          if (secStreak != null) {
+            final val = int.tryParse(secStreak) ?? 0;
+            if (val > 0) {
+              await prefs.setInt(streakKey, val);
+              debugPrint('ChallengeService: Restored streak from secure storage: $val');
+              _logToFile('_restoreFromSecureStorageIfNeeded: Restored streak: $val');
+            }
+          }
+        } catch (secErr) {
+          _logToFile('_restoreFromSecureStorageIfNeeded: secure storage read streak error: $secErr');
         }
       }
-    }
 
-    // Pulihkan points jika null atau 0
-    if (prefPoints == null || prefPoints == 0) {
-      final secPoints =
-          await _secureStorage.readSecureData('$_securePointsPrefix$userId');
-      if (secPoints != null) {
-        final val = int.tryParse(secPoints) ?? 0;
-        if (val > 0) {
-          await prefs.setInt(pointsKey, val);
-          debugPrint('ChallengeService: Restored points from secure storage: $val');
+      // Pulihkan points jika null atau 0
+      if (prefPoints == null || prefPoints == 0) {
+        try {
+          final secPoints =
+              await _secureStorage.readSecureData('$_securePointsPrefix$userId');
+          _logToFile('_restoreFromSecureStorageIfNeeded: secPoints=$secPoints');
+          if (secPoints != null) {
+            final val = int.tryParse(secPoints) ?? 0;
+            if (val > 0) {
+              await prefs.setInt(pointsKey, val);
+              debugPrint('ChallengeService: Restored points from secure storage: $val');
+              _logToFile('_restoreFromSecureStorageIfNeeded: Restored points: $val');
+            }
+          }
+        } catch (secErr) {
+          _logToFile('_restoreFromSecureStorageIfNeeded: secure storage read points error: $secErr');
         }
       }
-    }
 
-    // Pulihkan last completion jika null atau kosong
-    if (prefLastCompletion == null || prefLastCompletion.isEmpty) {
-      final secLastCompletion = await _secureStorage
-          .readSecureData('$_secureLastCompletionPrefix$userId');
-      if (secLastCompletion != null && secLastCompletion.isNotEmpty) {
-        await prefs.setString(lastCompletionKey, secLastCompletion);
-        debugPrint('ChallengeService: Restored last completion from secure storage: $secLastCompletion');
+      // Pulihkan last completion jika null atau kosong
+      if (prefLastCompletion == null || prefLastCompletion.isEmpty) {
+        try {
+          final secLastCompletion = await _secureStorage
+              .readSecureData('$_secureLastCompletionPrefix$userId');
+          _logToFile('_restoreFromSecureStorageIfNeeded: secLastCompletion=$secLastCompletion');
+          if (secLastCompletion != null && secLastCompletion.isNotEmpty) {
+            await prefs.setString(lastCompletionKey, secLastCompletion);
+            debugPrint('ChallengeService: Restored last completion from secure storage: $secLastCompletion');
+            _logToFile('_restoreFromSecureStorageIfNeeded: Restored last completion: $secLastCompletion');
+          }
+        } catch (secErr) {
+          _logToFile('_restoreFromSecureStorageIfNeeded: secure storage read last completion error: $secErr');
+        }
       }
-    }
 
-    final lastVersionKey = 'challenge_last_version_$userId';
-    final prefLastVersion = prefs.getString(lastVersionKey);
+      final lastVersionKey = 'challenge_last_version_$userId';
+      final prefLastVersion = prefs.getString(lastVersionKey);
 
-    // Pulihkan last completed version jika null atau kosong
-    if (prefLastVersion == null || prefLastVersion.isEmpty) {
-      final secLastVersion = await _secureStorage
-          .readSecureData('secure_last_completed_version_$userId');
-      if (secLastVersion != null && secLastVersion.isNotEmpty) {
-        await prefs.setString(lastVersionKey, secLastVersion);
-        debugPrint('ChallengeService: Restored last completed version from secure storage: $secLastVersion');
+      // Pulihkan last completed version jika null atau kosong
+      if (prefLastVersion == null || prefLastVersion.isEmpty) {
+        try {
+          final secLastVersion = await _secureStorage
+              .readSecureData('secure_last_completed_version_$userId');
+          _logToFile('_restoreFromSecureStorageIfNeeded: secLastVersion=$secLastVersion');
+          if (secLastVersion != null && secLastVersion.isNotEmpty) {
+            await prefs.setString(lastVersionKey, secLastVersion);
+            debugPrint('ChallengeService: Restored last completed version from secure storage: $secLastVersion');
+            _logToFile('_restoreFromSecureStorageIfNeeded: Restored last completed version: $secLastVersion');
+          }
+        } catch (secErr) {
+          _logToFile('_restoreFromSecureStorageIfNeeded: secure storage read last completed version error: $secErr');
+        }
       }
+    } catch (e, stack) {
+      _logToFile('_restoreFromSecureStorageIfNeeded ERROR: $e\n$stack');
+    }
+  }
+
+  static bool _isEvaluating = false;
+
+  Future<void> _evaluateExpiredChallenges(String userId) async {
+    if (_isEvaluating) return;
+    _isEvaluating = true;
+    _logToFile('_evaluateExpiredChallenges() called for userId=$userId');
+    try {
+      final challenges = _userChallenges[userId];
+      if (challenges == null || challenges.isEmpty) {
+        _logToFile('_evaluateExpiredChallenges: no challenges found');
+        return;
+      }
+
+      final now = DateTime.now();
+      bool updated = false;
+      int streakIncrementCount = 0;
+      int pointsEarned = 0;
+
+      final List<ChallengeModel> updatedList = [];
+
+      for (final challenge in challenges) {
+        _logToFile('_evaluateExpiredChallenges: challenge title="${challenge.title}" status=${challenge.status} endDate=${challenge.endDate}');
+        if (challenge.status == ChallengeStatus.active && now.isAfter(challenge.endDate)) {
+          ChallengeStatus newStatus = ChallengeStatus.failed;
+          DateTime? completedDate;
+
+          switch (challenge.targetType) {
+            case ChallengeTargetType.zeroExpense:
+            case ChallengeTargetType.noTransactionType:
+              // Passive challenges succeed if no violation happened
+              newStatus = ChallengeStatus.completed;
+              completedDate = challenge.endDate;
+              break;
+            case ChallengeTargetType.limitExpense:
+            case ChallengeTargetType.categoryLimit:
+              // Succeeds if currentProgress has not exceeded the limit
+              if (challenge.targetAmount != null && challenge.currentProgress <= challenge.targetAmount!) {
+                newStatus = ChallengeStatus.completed;
+                completedDate = challenge.endDate;
+              } else {
+                newStatus = ChallengeStatus.failed;
+              }
+              break;
+            case ChallengeTargetType.saveAmount:
+              // Succeeds if currentProgress reached target
+              if (challenge.targetAmount != null && challenge.currentProgress >= challenge.targetAmount!) {
+                newStatus = ChallengeStatus.completed;
+                completedDate = challenge.endDate;
+              } else {
+                newStatus = ChallengeStatus.failed;
+              }
+              break;
+            case ChallengeTargetType.custom:
+              // Custom challenges: check if they met the target amount (if any) or assume success
+              if (challenge.targetAmount == null || challenge.currentProgress >= challenge.targetAmount!) {
+                newStatus = ChallengeStatus.completed;
+                completedDate = challenge.endDate;
+              } else {
+                newStatus = ChallengeStatus.failed;
+              }
+              break;
+          }
+
+          _logToFile('_evaluateExpiredChallenges: challenge "${challenge.title}" evaluated as $newStatus');
+          final updatedChallenge = challenge.copyWith(
+            status: newStatus,
+            completedDate: completedDate,
+          );
+          updatedList.add(updatedChallenge);
+          updated = true;
+
+          if (newStatus == ChallengeStatus.completed) {
+            streakIncrementCount++;
+            pointsEarned += challenge.points;
+          }
+        } else {
+          updatedList.add(challenge);
+        }
+      }
+
+      if (updated) {
+        _userChallenges[userId] = updatedList;
+        await _saveUserChallenges(userId);
+        _logToFile('_evaluateExpiredChallenges: saved updated challenges. pointsEarned=$pointsEarned, streakIncrementCount=$streakIncrementCount');
+
+        if (pointsEarned > 0) {
+          await _addPoints(pointsEarned);
+        }
+        if (streakIncrementCount > 0) {
+          await _updateStreakOnCompletion();
+        }
+
+        final prefs = await _getPrefs();
+        final streakKey = '$_streakKey$userId';
+        final pointsKey = '$_pointsKey$userId';
+        final currentStreakVal = prefs.getInt(streakKey) ?? 0;
+        final currentPointsVal = prefs.getInt(pointsKey) ?? 0;
+
+        if (badgeService != null) {
+          await badgeService!.checkAndUnlockBadges(currentPointsVal, currentStreakVal);
+          for (final challenge in updatedList) {
+            if (challenge.status == ChallengeStatus.completed && challenge.badgeId != null) {
+              await badgeService!.unlockChallengeBadge(challenge.badgeId!);
+            }
+          }
+        }
+
+        await _emitChallenges(userId);
+      }
+    } catch (e, stack) {
+      _logToFile('_evaluateExpiredChallenges ERROR: $e\n$stack');
+      debugPrint('ChallengeService: Error in _evaluateExpiredChallenges: $e');
+    } finally {
+      _isEvaluating = false;
+    }
+  }
+
+  @override
+  Future<void> updateStreakOnIncome() async {
+    _logToFile('updateStreakOnIncome() called');
+    try {
+      final prefs = await _getPrefs();
+      final userId = await _getCurrentUserId();
+      final streakKey = '$_streakKey$userId';
+      final lastCompletionKey = '$_lastCompletionKey$userId';
+      final lastVersionKey = 'challenge_last_version_$userId';
+
+      // Pulihkan dulu jika SharedPreferences kosong atau parsial
+      await _restoreFromSecureStorageIfNeeded(prefs, userId);
+
+      final currentStreak = prefs.getInt(streakKey) ?? 0;
+      final lastCompletionStr = prefs.getString(lastCompletionKey);
+      _logToFile('updateStreakOnIncome: currentStreak=$currentStreak, lastCompletionStr=$lastCompletionStr');
+
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+
+      int newStreak;
+      if (lastCompletionStr != null && lastCompletionStr.isNotEmpty) {
+        final lastCompletion = DateTime.tryParse(lastCompletionStr);
+        if (lastCompletion != null) {
+          final lastDate = DateTime(
+              lastCompletion.year, lastCompletion.month, lastCompletion.day);
+          final daysDiff = today.difference(lastDate).inDays;
+          _logToFile('updateStreakOnIncome: daysDiff=$daysDiff');
+
+          if (daysDiff == 1) {
+            newStreak = currentStreak + 1;
+          } else if (daysDiff > 1) {
+            newStreak = 1;
+          } else {
+            // Same day, keep current streak (or set to 1 if it was 0)
+            newStreak = currentStreak > 0 ? currentStreak : 1;
+          }
+        } else {
+          newStreak = currentStreak > 0 ? currentStreak + 1 : 1;
+        }
+      } else {
+        newStreak = currentStreak > 0 ? currentStreak + 1 : 1;
+      }
+      _logToFile('updateStreakOnIncome: newStreak=$newStreak');
+
+      await prefs.setInt(streakKey, newStreak);
+      await prefs.setString(lastCompletionKey, now.toIso8601String());
+      await prefs.setString(lastVersionKey, AppVersion.version);
+
+      // Backup ke secure storage
+      try {
+        await _secureStorage.writeSecureData(
+            '$_secureStreakPrefix$userId', newStreak.toString());
+        await _secureStorage.writeSecureData(
+            '$_secureLastCompletionPrefix$userId', now.toIso8601String());
+        await _secureStorage.writeSecureData(
+            'secure_last_completed_version_$userId', AppVersion.version);
+        _logToFile('updateStreakOnIncome: secure storage write success');
+      } catch (secError) {
+        _logToFile('updateStreakOnIncome: secure storage write failed: $secError');
+      }
+
+      _notifyListeners();
+    } catch (e, stack) {
+      _logToFile('updateStreakOnIncome ERROR: $e\n$stack');
+      rethrow;
     }
   }
 
   Future<void> _updateStreakOnCompletion() async {
-    final prefs = await _getPrefs();
-    final userId = await _getCurrentUserId();
-    final streakKey = '$_streakKey$userId';
-    final lastCompletionKey = '$_lastCompletionKey$userId';
-    final lastVersionKey = 'challenge_last_version_$userId';
+    _logToFile('_updateStreakOnCompletion() called');
+    try {
+      final prefs = await _getPrefs();
+      final userId = await _getCurrentUserId();
+      final streakKey = '$_streakKey$userId';
+      final lastCompletionKey = '$_lastCompletionKey$userId';
+      final lastVersionKey = 'challenge_last_version_$userId';
 
-    // Pulihkan dulu jika SharedPreferences kosong atau parsial
-    await _restoreFromSecureStorageIfNeeded(prefs, userId);
+      // Pulihkan dulu jika SharedPreferences kosong atau parsial
+      await _restoreFromSecureStorageIfNeeded(prefs, userId);
 
-    final currentStreak = prefs.getInt(streakKey) ?? 0;
-    final lastCompletionStr = prefs.getString(lastCompletionKey);
-    final lastCompletedVersion = prefs.getString(lastVersionKey) ??
-        await _secureStorage.readSecureData('secure_last_completed_version_$userId');
+      final currentStreak = prefs.getInt(streakKey) ?? 0;
+      final lastCompletionStr = prefs.getString(lastCompletionKey);
+      final lastCompletedVersion = prefs.getString(lastVersionKey) ??
+          await _secureStorage.readSecureData('secure_last_completed_version_$userId');
+      _logToFile('_updateStreakOnCompletion: currentStreak=$currentStreak, lastCompletionStr=$lastCompletionStr, lastCompletedVersion=$lastCompletedVersion');
 
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
 
-    int newStreak;
-    // Deteksi jika aplikasi baru di-update (versi berbeda, atau versi null tapi streak > 0)
-    final isAppUpdated = (lastCompletedVersion == null && currentStreak > 0) ||
-        (lastCompletedVersion != null && lastCompletedVersion != AppVersion.version);
+      int newStreak;
+      // Deteksi jika aplikasi baru di-update (versi berbeda, atau versi null tapi streak > 0)
+      final isAppUpdated = (lastCompletedVersion == null && currentStreak > 0) ||
+          (lastCompletedVersion != null && lastCompletedVersion != AppVersion.version);
+      _logToFile('_updateStreakOnCompletion: isAppUpdated=$isAppUpdated');
 
-    if (isAppUpdated) {
-      newStreak = currentStreak > 0 ? currentStreak + 1 : 1;
-      debugPrint('ChallengeService: App updated from $lastCompletedVersion to ${AppVersion.version}. Continuing streak: $newStreak');
-    } else if (lastCompletionStr != null && lastCompletionStr.isNotEmpty) {
-      final lastCompletion = DateTime.tryParse(lastCompletionStr);
-      if (lastCompletion != null) {
-        final lastDate = DateTime(
-            lastCompletion.year, lastCompletion.month, lastCompletion.day);
-        final daysDiff = today.difference(lastDate).inDays;
+      if (isAppUpdated) {
+        newStreak = currentStreak > 0 ? currentStreak + 1 : 1;
+        debugPrint('ChallengeService: App updated from $lastCompletedVersion to ${AppVersion.version}. Continuing streak: $newStreak');
+      } else if (lastCompletionStr != null && lastCompletionStr.isNotEmpty) {
+        final lastCompletion = DateTime.tryParse(lastCompletionStr);
+        if (lastCompletion != null) {
+          final lastDate = DateTime(
+              lastCompletion.year, lastCompletion.month, lastCompletion.day);
+          final daysDiff = today.difference(lastDate).inDays;
+          _logToFile('_updateStreakOnCompletion: daysDiff=$daysDiff');
 
-        if (daysDiff == 1) {
-          // Consecutive day
-          newStreak = currentStreak + 1;
-        } else if (daysDiff > 1) {
-          // Streak broken, reset
-          newStreak = 1;
+          if (daysDiff == 1) {
+            newStreak = currentStreak + 1;
+          } else if (daysDiff > 1) {
+            newStreak = 1;
+          } else {
+            newStreak = currentStreak;
+          }
         } else {
-          // Same day, don't update streak
-          newStreak = currentStreak;
+          newStreak = currentStreak > 0 ? currentStreak + 1 : 1;
         }
       } else {
-        // Parse error, fallback to preserving streak
         newStreak = currentStreak > 0 ? currentStreak + 1 : 1;
       }
-    } else {
-      // First completion, or lastCompletionStr is null/missing
-      // If we already have a streak restored/saved, don't reset it to 1!
-      // Instead, assume this completes/continues the streak.
-      newStreak = currentStreak > 0 ? currentStreak + 1 : 1;
+      _logToFile('_updateStreakOnCompletion: newStreak=$newStreak');
+
+      await prefs.setInt(streakKey, newStreak);
+      await prefs.setString(lastCompletionKey, now.toIso8601String());
+      await prefs.setString(lastVersionKey, AppVersion.version);
+
+      // Backup ke secure storage
+      try {
+        await _secureStorage.writeSecureData(
+            '$_secureStreakPrefix$userId', newStreak.toString());
+        await _secureStorage.writeSecureData(
+            '$_secureLastCompletionPrefix$userId', now.toIso8601String());
+        await _secureStorage.writeSecureData(
+            'secure_last_completed_version_$userId', AppVersion.version);
+        _logToFile('_updateStreakOnCompletion: secure storage write success');
+      } catch (secError) {
+        _logToFile('_updateStreakOnCompletion: secure storage write failed: $secError');
+      }
+
+      _notifyListeners();
+    } catch (e, stack) {
+      _logToFile('_updateStreakOnCompletion ERROR: $e\n$stack');
+      rethrow;
     }
-
-    await prefs.setInt(streakKey, newStreak);
-    await prefs.setString(lastCompletionKey, now.toIso8601String());
-    await prefs.setString(lastVersionKey, AppVersion.version);
-
-    // Backup ke secure storage
-    await _secureStorage.writeSecureData(
-        '$_secureStreakPrefix$userId', newStreak.toString());
-    await _secureStorage.writeSecureData(
-        '$_secureLastCompletionPrefix$userId', now.toIso8601String());
-    await _secureStorage.writeSecureData(
-        'secure_last_completed_version_$userId', AppVersion.version);
-
-    _notifyListeners();
   }
+
 
   Future<void> _addPoints(int points) async {
     final prefs = await _getPrefs();
@@ -559,47 +810,70 @@ class MockChallengeService implements ChallengeService {
 
   @override
   Future<int> getCurrentStreak() async {
-    final prefs = await _getPrefs();
-    final userId = await _getCurrentUserId();
+    _logToFile('getCurrentStreak() called');
+    try {
+      final prefs = await _getPrefs();
+      final userId = await _getCurrentUserId();
+      _logToFile('getCurrentStreak: userId=$userId');
 
-    // Pulihkan dulu jika SharedPreferences kosong
-    await _restoreFromSecureStorageIfNeeded(prefs, userId);
+      // Pulihkan dulu jika SharedPreferences kosong
+      await _restoreFromSecureStorageIfNeeded(prefs, userId);
+      await _ensureUserLoaded(userId);
+      await _evaluateExpiredChallenges(userId);
 
-    final streakKey = '$_streakKey$userId';
-    final lastCompletionKey = '$_lastCompletionKey$userId';
+      final streakKey = '$_streakKey$userId';
+      final lastCompletionKey = '$_lastCompletionKey$userId';
 
-    final currentStreak = prefs.getInt(streakKey) ?? 0;
-    final lastCompletionStr = prefs.getString(lastCompletionKey);
+      final currentStreak = prefs.getInt(streakKey) ?? 0;
+      final lastCompletionStr = prefs.getString(lastCompletionKey);
+      _logToFile('getCurrentStreak: currentStreak=$currentStreak, lastCompletionStr=$lastCompletionStr');
 
-    if (currentStreak > 0 && lastCompletionStr != null && lastCompletionStr.isNotEmpty) {
-      final lastCompletion = DateTime.tryParse(lastCompletionStr);
-      if (lastCompletion != null) {
-        final now = DateTime.now();
-        final today = DateTime(now.year, now.month, now.day);
-        final lastDate = DateTime(
-            lastCompletion.year, lastCompletion.month, lastCompletion.day);
-        final daysDiff = today.difference(lastDate).inDays;
+      if (currentStreak > 0 && lastCompletionStr != null && lastCompletionStr.isNotEmpty) {
+        final lastCompletion = DateTime.tryParse(lastCompletionStr);
+        if (lastCompletion != null) {
+          final now = DateTime.now();
+          final today = DateTime(now.year, now.month, now.day);
+          final lastDate = DateTime(
+              lastCompletion.year, lastCompletion.month, lastCompletion.day);
+          final daysDiff = today.difference(lastDate).inDays;
+          _logToFile('getCurrentStreak: daysDiff=$daysDiff');
 
-        if (daysDiff > 1) {
-          // Streak is broken, return 0 dynamically
-          return 0;
+          if (daysDiff > 1) {
+            _logToFile('getCurrentStreak: Streak is broken, returning 0 dynamically');
+            return 0;
+          }
         }
       }
-    }
 
-    return currentStreak;
+      _logToFile('getCurrentStreak: returning $currentStreak');
+      return currentStreak;
+    } catch (e, stack) {
+      _logToFile('getCurrentStreak ERROR: $e\n$stack');
+      rethrow;
+    }
   }
 
   @override
   Future<int> getTotalPoints() async {
-    final prefs = await _getPrefs();
-    final userId = await _getCurrentUserId();
+    _logToFile('getTotalPoints() called');
+    try {
+      final prefs = await _getPrefs();
+      final userId = await _getCurrentUserId();
+      _logToFile('getTotalPoints: userId=$userId');
 
-    // Pulihkan dulu jika SharedPreferences kosong
-    await _restoreFromSecureStorageIfNeeded(prefs, userId);
+      // Pulihkan dulu jika SharedPreferences kosong
+      await _restoreFromSecureStorageIfNeeded(prefs, userId);
+      await _ensureUserLoaded(userId);
+      await _evaluateExpiredChallenges(userId);
 
-    final pointsKey = '$_pointsKey$userId';
-    return prefs.getInt(pointsKey) ?? 0;
+      final pointsKey = '$_pointsKey$userId';
+      final points = prefs.getInt(pointsKey) ?? 0;
+      _logToFile('getTotalPoints: returning $points');
+      return points;
+    } catch (e, stack) {
+      _logToFile('getTotalPoints ERROR: $e\n$stack');
+      rethrow;
+    }
   }
 
   @override

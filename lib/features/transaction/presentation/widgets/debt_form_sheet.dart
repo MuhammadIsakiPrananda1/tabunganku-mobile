@@ -260,7 +260,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                     const SizedBox(height: 4),
                     TextFormField(
                       controller: _amountController,
-                      keyboardType: TextInputType.number,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       inputFormatters: [
                         FilteringTextInputFormatter.digitsOnly,
                         _RibuanSeparatorInputFormatter(),

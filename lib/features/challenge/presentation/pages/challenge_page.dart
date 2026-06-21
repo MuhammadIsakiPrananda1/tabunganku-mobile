@@ -5,6 +5,7 @@ import 'package:tabunganku/models/challenge_model.dart';
 import 'package:tabunganku/models/challenge_template_model.dart';
 import 'package:tabunganku/models/badge_model.dart';
 import 'package:tabunganku/providers/challenge_provider.dart';
+import 'package:tabunganku/providers/transaction_provider.dart';
 import 'package:tabunganku/core/theme/app_colors.dart';
 import 'package:intl/intl.dart';
 
@@ -103,8 +104,8 @@ class _ChallengePageState extends ConsumerState<ChallengePage>
         body: TabBarView(
           controller: _tabController,
           children: [
-            _ActiveChallengesTab(accentColor: accentColor),
-            _TemplatesTab(accentColor: accentColor),
+            _ActiveChallengesTab(accentColor: accentColor, tabController: _tabController),
+            _TemplatesTab(accentColor: accentColor, tabController: _tabController),
             _BadgesTab(accentColor: accentColor),
           ],
         ),
@@ -236,7 +237,8 @@ class _SliverTabBarDelegate extends SliverPersistentHeaderDelegate {
 
 class _ActiveChallengesTab extends ConsumerWidget {
   final Color accentColor;
-  const _ActiveChallengesTab({required this.accentColor});
+  final TabController tabController;
+  const _ActiveChallengesTab({required this.accentColor, required this.tabController});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -287,6 +289,26 @@ class _ActiveChallengesTab extends ConsumerWidget {
                       height: 1.4,
                     ),
                     textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton(
+                    onPressed: () {
+                      tabController.animateTo(1);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: accentColor,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      elevation: 0,
+                    ),
+                    child: Text(
+                      'Pilih Challenge',
+                      style: GoogleFonts.quicksand(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -513,7 +535,8 @@ class _ActiveChallengesTab extends ConsumerWidget {
 
 class _TemplatesTab extends ConsumerWidget {
   final Color accentColor;
-  const _TemplatesTab({required this.accentColor});
+  final TabController tabController;
+  const _TemplatesTab({required this.accentColor, required this.tabController});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -571,7 +594,7 @@ class _TemplatesTab extends ConsumerWidget {
             ),
           ),
         ),
-        ...templates.map((template) => _TemplateCard(template: template, accentColor: accentColor)),
+        ...templates.map((template) => _TemplateCard(template: template, accentColor: accentColor, tabController: tabController)),
       ],
     );
   }
@@ -580,8 +603,9 @@ class _TemplatesTab extends ConsumerWidget {
 class _TemplateCard extends ConsumerWidget {
   final ChallengeTemplateModel template;
   final Color accentColor;
+  final TabController tabController;
 
-  const _TemplateCard({required this.template, required this.accentColor});
+  const _TemplateCard({required this.template, required this.accentColor, required this.tabController});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -700,268 +724,207 @@ class _TemplateCard extends ConsumerWidget {
 
   void _showTemplateDetail(
       BuildContext parentContext, WidgetRef ref, ThemeData theme) {
-    final durationController =
-        TextEditingController(text: template.defaultDurationDays.toString());
-
     showModalBottomSheet(
       context: parentContext,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setSheetState) {
-            final currentDuration = int.tryParse(durationController.text) ??
-                template.defaultDurationDays;
-            final endDate = DateTime.now().add(Duration(days: currentDuration));
-            final isDarkMode = theme.brightness == Brightness.dark;
+        final endDate = DateTime.now().add(Duration(days: template.defaultDurationDays));
+        final isDarkMode = theme.brightness == Brightness.dark;
 
-            return Container(
-              decoration: BoxDecoration(
-                color: theme.scaffoldBackgroundColor,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-              ),
-              padding: EdgeInsets.only(
-                left: 20,
-                right: 20,
-                top: 24,
-                bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-              ),
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
+        return Container(
+          decoration: BoxDecoration(
+            color: theme.scaffoldBackgroundColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          padding: EdgeInsets.only(
+            left: 20,
+            right: 20,
+            top: 24,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   children: [
-                    Row(
-                      children: [
-                        if (template.icon != null)
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: accentColor.withOpacity(0.08),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(template.icon, color: accentColor, size: 24),
-                          ),
-                        if (template.icon != null) const SizedBox(width: 16),
-                        Expanded(
-                          child: Text(
-                            template.title,
-                            style: GoogleFonts.quicksand(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                              color: theme.textTheme.bodyLarge?.color,
-                            ),
-                          ),
+                    if (template.icon != null)
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: accentColor.withValues(alpha: 0.08),
+                          shape: BoxShape.circle,
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      template.description,
-                      style: GoogleFonts.quicksand(
-                        color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                        height: 1.4,
+                        child: Icon(template.icon, color: accentColor, size: 24),
                       ),
-                    ),
-                    const SizedBox(height: 20),
-
-                    Row(
-                      children: [
-                        _buildBadge(template.difficultyLabel,
-                            _getDifficultyColor(template.difficulty)),
-                        const SizedBox(width: 8),
-                        _buildBadge(
-                            '${template.points} Poin', Colors.amber[700]!),
-                      ],
-                    ),
-                    const SizedBox(height: 28),
-
-                    Text(
-                      'Target Waktu Pengerjaan:',
-                      style: GoogleFonts.quicksand(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13,
-                        color: theme.textTheme.bodyLarge?.color,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: isDarkMode ? Colors.white.withOpacity(0.03) : AppColors.background,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                            color: isDarkMode ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.03)),
-                      ),
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              IconButton(
-                                onPressed: () {
-                                  final val =
-                                      int.tryParse(durationController.text) ??
-                                          1;
-                                  if (val > 1) {
-                                    setSheetState(() {
-                                      durationController.text =
-                                          (val - 1).toString();
-                                    });
-                                  }
-                                },
-                                icon: Icon(Icons.remove_circle_outline_rounded, color: accentColor),
-                              ),
-                              Expanded(
-                                child: TextField(
-                                  controller: durationController,
-                                  keyboardType: TextInputType.number,
-                                  textAlign: TextAlign.center,
-                                  style: GoogleFonts.quicksand(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                      color: accentColor),
-                                  decoration: const InputDecoration(
-                                    border: InputBorder.none,
-                                    suffixText: ' Hari',
-                                    suffixStyle: TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.grey),
-                                  ),
-                                  onChanged: (_) => setSheetState(() {}),
-                                ),
-                              ),
-                              IconButton(
-                                onPressed: () {
-                                  final val =
-                                      int.tryParse(durationController.text) ??
-                                          0;
-                                  setSheetState(() {
-                                    durationController.text =
-                                        (val + 1).toString();
-                                  });
-                                },
-                                icon: Icon(Icons.add_circle_outline_rounded, color: accentColor),
-                              ),
-                            ],
-                          ),
-                          const Divider(height: 12),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(Icons.calendar_today_rounded, size: 12, color: Colors.grey),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Akan berakhir pada: ${DateFormat('d MMM yyyy', 'id_ID').format(endDate)}',
-                                style: GoogleFonts.quicksand(
-                                    fontSize: 11,
-                                    color: Colors.grey,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-
-                    if (template.tips.isNotEmpty) ...[
-                      Text(
-                        'Tips Sukses:',
+                    if (template.icon != null) const SizedBox(width: 16),
+                    Expanded(
+                      child: Text(
+                        template.title,
                         style: GoogleFonts.quicksand(
+                          fontSize: 15,
                           fontWeight: FontWeight.bold,
-                          fontSize: 13,
                           color: theme.textTheme.bodyLarge?.color,
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      ...template.tips.map((tip) => Padding(
-                            padding: const EdgeInsets.only(bottom: 8),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Icon(Icons.check_circle_rounded, color: Colors.green, size: 16),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Text(
-                                    tip,
-                                    style: GoogleFonts.quicksand(
-                                        color: isDarkMode ? Colors.grey[400] : Colors.grey[700],
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )),
-                      const SizedBox(height: 20),
-                    ],
-
-                    SizedBox(
-                      width: double.infinity,
-                      height: 44,
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          final duration =
-                              int.tryParse(durationController.text) ??
-                                  template.defaultDurationDays;
-
-                          if (duration < 1) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('Durasi challenge minimal 1 hari!',
-                                    style: GoogleFonts.quicksand(fontWeight: FontWeight.bold)),
-                                backgroundColor: Colors.red,
-                                behavior: SnackBarBehavior.floating,
-                              ),
-                            );
-                            return;
-                          }
-
-                          Navigator.pop(context);
-                          final service = ref.read(challengeServiceProvider);
-                          await service.createChallenge(template,
-                              customDuration: duration);
-
-                          if (parentContext.mounted) {
-                            ScaffoldMessenger.of(parentContext).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  'Challenge "${template.title}" dimulai selama $duration hari!',
-                                  style: GoogleFonts.quicksand(fontWeight: FontWeight.bold),
-                                ),
-                                backgroundColor: accentColor,
-                                behavior: SnackBarBehavior.floating,
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12)),
-                              ),
-                            );
-                            ref.invalidate(activeChallengesProvider);
-                            try {
-                              DefaultTabController.of(parentContext)
-                                  .animateTo(0);
-                            } catch (_) {}
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: accentColor,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          elevation: 0,
-                        ),
-                        child: Text('Mulai Challenge Sekarang',
-                            style: GoogleFonts.quicksand(fontSize: 13, fontWeight: FontWeight.bold)),
-                      ),
                     ),
-                    const SizedBox(height: 12),
                   ],
                 ),
-              ),
-            );
-          },
+                const SizedBox(height: 16),
+                Text(
+                  template.description,
+                  style: GoogleFonts.quicksand(
+                    color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                Row(
+                  children: [
+                    _buildBadge(template.difficultyLabel,
+                        _getDifficultyColor(template.difficulty)),
+                    const SizedBox(width: 8),
+                    _buildBadge(
+                        '${template.points} Poin', Colors.amber[700]!),
+                  ],
+                ),
+                const SizedBox(height: 28),
+
+                Text(
+                  'Target Waktu Pengerjaan:',
+                  style: GoogleFonts.quicksand(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                    color: theme.textTheme.bodyLarge?.color,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: isDarkMode ? Colors.white.withValues(alpha: 0.03) : AppColors.background,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                        color: isDarkMode ? Colors.white.withValues(alpha: 0.04) : Colors.black.withValues(alpha: 0.03)),
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.timer_outlined, color: accentColor, size: 18),
+                          const SizedBox(width: 8),
+                          Text(
+                            '${template.defaultDurationDays} Hari${template.defaultDurationDays == 7 ? " (1 Minggu)" : template.defaultDurationDays == 30 ? " (1 Bulan)" : ""}',
+                            style: GoogleFonts.quicksand(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: accentColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const Divider(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.calendar_today_rounded, size: 12, color: Colors.grey),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Akan berakhir pada: ${DateFormat('d MMM yyyy', 'id_ID').format(endDate)}',
+                            style: GoogleFonts.quicksand(
+                                fontSize: 11,
+                                color: Colors.grey,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                if (template.tips.isNotEmpty) ...[
+                  Text(
+                    'Tips Sukses:',
+                    style: GoogleFonts.quicksand(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                      color: theme.textTheme.bodyLarge?.color,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  ...template.tips.map((tip) => Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(Icons.check_circle_rounded, color: Colors.green, size: 16),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                tip,
+                                style: GoogleFonts.quicksand(
+                                    color: isDarkMode ? Colors.grey[400] : Colors.grey[700],
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )),
+                  const SizedBox(height: 20),
+                ],
+
+                SizedBox(
+                  width: double.infinity,
+                  height: 44,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      final duration = template.defaultDurationDays;
+
+                      Navigator.pop(context);
+                      final service = ref.read(challengeServiceProvider);
+                      await service.createChallenge(template,
+                          customDuration: duration);
+
+                      if (parentContext.mounted) {
+                        ScaffoldMessenger.of(parentContext).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Challenge "${template.title}" dimulai selama $duration hari!',
+                              style: GoogleFonts.quicksand(fontWeight: FontWeight.bold),
+                            ),
+                            backgroundColor: accentColor,
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
+                          ),
+                        );
+                        ref.invalidate(activeChallengesProvider);
+                        tabController.animateTo(0);
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: accentColor,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      elevation: 0,
+                    ),
+                    child: Text('Mulai Challenge Sekarang',
+                        style: GoogleFonts.quicksand(fontSize: 13, fontWeight: FontWeight.bold)),
+                  ),
+                ),
+                const SizedBox(height: 12),
+              ],
+            ),
+          ),
         );
       },
     );

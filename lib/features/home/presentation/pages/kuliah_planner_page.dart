@@ -720,7 +720,7 @@ class _BiayaKuliahPlannerPageState extends ConsumerState<BiayaKuliahPlannerPage>
                       const SizedBox(height: 6),
                       TextFormField(
                         controller: _costTodayController,
-                        keyboardType: TextInputType.number,
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
                         inputFormatters: [_RibuanFormatter()],
                         style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
                         decoration: InputDecoration(
@@ -756,7 +756,7 @@ class _BiayaKuliahPlannerPageState extends ConsumerState<BiayaKuliahPlannerPage>
                     const SizedBox(height: 6),
                     TextFormField(
                       controller: _currentSavedController,
-                      keyboardType: TextInputType.number,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       inputFormatters: [_RibuanFormatter()],
                       style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
                       decoration: InputDecoration(

@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:tabunganku/models/transaction_model.dart';
 import 'package:tabunganku/providers/transaction_provider.dart';
-import 'package:tabunganku/providers/challenge_provider.dart';
 
 class Achievement {
   final String id;
@@ -35,8 +34,7 @@ class Achievement {
 
 final achievementsProvider = Provider<List<Achievement>>((ref) {
   final transactionsAsync = ref.watch(transactionsStreamProvider);
-  final streakAsync = ref.watch(currentStreakProvider);
-  final streak = streakAsync.value ?? 0;
+  final streak = ref.watch(savingStreakProvider);
   
   return transactionsAsync.maybeWhen(
     data: (allTransactions) {

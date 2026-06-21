@@ -262,7 +262,7 @@ class _HajjUmrahPlannerPageState extends ConsumerState<HajjUmrahPlannerPage> {
         ),
         TextFormField(
           controller: controller,
-          keyboardType: isAmount ? TextInputType.number : TextInputType.text,
+          keyboardType: isAmount ? const TextInputType.numberWithOptions(decimal: true) : TextInputType.text,
           inputFormatters: isAmount ? [_RibuanFormatter()] : null,
           style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
           decoration: InputDecoration(

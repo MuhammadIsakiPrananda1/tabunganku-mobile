@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:tabunganku/core/services/permission_service.dart';
 import 'package:tabunganku/core/theme/app_colors.dart';
 import 'package:tabunganku/core/theme/theme_provider.dart';
 import 'package:tabunganku/models/transaction_model.dart';
@@ -58,31 +57,16 @@ class _ScanReceiptPageState extends ConsumerState<ScanReceiptPage> {
       // SET external operation to true to prevent appraisal lockout
       ref.read(securityProvider.notifier).setExternalOperation(true);
 
-      // Check permissions based on source
+      // Request native permission directly
       bool hasPermission = false;
       if (source == ImageSource.camera) {
-        hasPermission = await PermissionService.requestPermission(
-          context,
-          permission: Permission.camera,
-          title: 'Kamera',
-          description: 'Aplikasi membutuhkan akses kamera untuk memindai teks pada struk belanja Anda secara otomatis.',
-          icon: Icons.camera_alt_rounded,
-        );
+        hasPermission = await Permission.camera.request().isGranted;
       } else {
-        // For Gallery
-        // On Android 13+ (SDK 33+), we should check for photos permission
-        // PermissionHandler handles the platform specifics
-        hasPermission = await PermissionService.requestPermission(
-          context,
-          permission: Permission.photos,
-          title: 'Galeri',
-          description: 'Aplikasi membutuhkan akses galeri untuk mengambil foto atau screenshot struk belanja yang ingin Anda pindai.',
-          icon: Icons.photo_library_rounded,
-        );
+        hasPermission = await Permission.photos.request().isGranted;
       }
 
       if (!hasPermission) return;
-      
+
       final XFile? pickedFile = await _picker.pickImage(source: source);
       
       if (pickedFile != null) {
@@ -328,7 +312,7 @@ class _ScanReceiptPageState extends ConsumerState<ScanReceiptPage> {
                         isDarkMode: isDarkMode,
                         hintText: 'Masukkan Nominal',
                         prefixText: 'Rp',
-                        keyboardType: TextInputType.number,
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
                         inputFormatters: [
                           FilteringTextInputFormatter.digitsOnly,
                           _RibuanSeparatorInputFormatter(),

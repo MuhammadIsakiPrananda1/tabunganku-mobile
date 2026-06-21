@@ -662,7 +662,7 @@ class _HutangJariyahPageState extends ConsumerState<HutangJariyahPage> {
                             const SizedBox(height: 6),
                             TextFormField(
                               controller: _amountController,
-                              keyboardType: TextInputType.number,
+                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
                               inputFormatters: [_RibuanFormatter()],
                               style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
                               validator: (value) {
@@ -841,7 +841,7 @@ class _HutangJariyahPageState extends ConsumerState<HutangJariyahPage> {
                     const SizedBox(height: 6),
                     TextFormField(
                       controller: _donationAmountController,
-                      keyboardType: TextInputType.number,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       inputFormatters: [_RibuanFormatter()],
                       style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
                       validator: (value) {

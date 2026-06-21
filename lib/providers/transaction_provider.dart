@@ -24,6 +24,8 @@ final addTransactionProvider = Provider((ref) {
     // Refresh providers
     ref.invalidate(transactionsProvider);
     ref.invalidate(activeChallengesProvider);
+    ref.invalidate(currentStreakProvider);
+    ref.invalidate(totalPointsProvider);
     
     return result;
   };
@@ -57,4 +59,49 @@ final transactionProvider =
     FutureProvider.autoDispose.family<TransactionModel, String>((ref, id) async {
   final service = ref.watch(transactionServiceProvider);
   return service.getTransaction(id);
+});
+
+// Provider untuk menghitung streak secara mandiri dari transaksi
+final savingStreakProvider = Provider.autoDispose<int>((ref) {
+  final transactionsAsync = ref.watch(transactionsStreamProvider);
+  return transactionsAsync.maybeWhen(
+    data: (transactions) {
+      // Ambil transaksi personal (groupId null), baik pemasukan (income) maupun pengeluaran (expense)
+      final personalTx = transactions
+          .where((t) => t.groupId == null)
+          .toList();
+      if (personalTx.isEmpty) return 0;
+
+      // Dapatkan tanggal unik (hanya hari/bulan/tahun) dan urutkan descending (terbaru dahulu)
+      final dates = personalTx
+          .map((t) => DateTime(t.date.year, t.date.month, t.date.day))
+          .toSet()
+          .toList()
+        ..sort((a, b) => b.compareTo(a));
+
+      if (dates.isEmpty) return 0;
+
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      final newestDate = dates.first;
+
+      final daysDiffFromToday = today.difference(newestDate).inDays;
+      if (daysDiffFromToday > 1) {
+        // Jika transaksi terakhir lebih lama dari kemarin, streak pecah/reset ke 0
+        return 0;
+      }
+
+      int streakCount = 1;
+      for (int i = 0; i < dates.length - 1; i++) {
+        final diff = dates[i].difference(dates[i + 1]).inDays;
+        if (diff == 1) {
+          streakCount++;
+        } else {
+          break;
+        }
+      }
+      return streakCount;
+    },
+    orElse: () => 0,
+  );
 });

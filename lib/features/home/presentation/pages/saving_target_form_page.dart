@@ -306,7 +306,7 @@ class _SavingTargetFormPageState extends ConsumerState<SavingTargetFormPage> {
                 prefixText: 'Rp',
                 isDarkMode: isDarkMode,
                 hintText: 'Masukkan Nominal',
-                keyboardType: TextInputType.number,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 inputFormatters: [
                   FilteringTextInputFormatter.digitsOnly,
                   _RibuanFormatter(),

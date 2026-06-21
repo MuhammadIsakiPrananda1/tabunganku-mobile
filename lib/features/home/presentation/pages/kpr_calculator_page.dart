@@ -300,7 +300,7 @@ class _KPRCalculatorPageState extends ConsumerState<KPRCalculatorPage> {
         ),
         TextFormField(
           controller: controller,
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          keyboardType: isCurrency ? const TextInputType.numberWithOptions(decimal: true) : TextInputType.text,
           inputFormatters: isCurrency 
               ? [_RibuanFormatter()] 
               : [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],

@@ -571,6 +571,12 @@ class _BrankasFinansialPageState extends ConsumerState<BrankasFinansialPage> {
                     const SizedBox(height: 4),
                     TextFormField(
                       controller: _value1Controller,
+                      keyboardType: _selectedCategory == 'Rekening'
+                          ? TextInputType.number
+                          : TextInputType.text,
+                      inputFormatters: _selectedCategory == 'Rekening'
+                          ? [FilteringTextInputFormatter.digitsOnly]
+                          : null,
                       style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {

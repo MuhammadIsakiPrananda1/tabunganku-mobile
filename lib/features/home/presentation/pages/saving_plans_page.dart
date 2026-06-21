@@ -265,7 +265,7 @@ class _SavingPlansPageState extends ConsumerState<SavingPlansPage> {
                     isDarkMode: isDark,
                     hintText: 'Masukkan Nominal Target',
                     prefixText: 'Rp',
-                    keyboardType: TextInputType.number,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     inputFormatters: [
                       FilteringTextInputFormatter.digitsOnly,
                       _RibuanFormatter(),
@@ -310,7 +310,7 @@ class _SavingPlansPageState extends ConsumerState<SavingPlansPage> {
                   ),
                   const SizedBox(height: 20),
 
-                  // Category Chips Selector
+                  // Category Dropdown Selector
                   Text(
                     'Kategori Rencana',
                     style: GoogleFonts.quicksand(
@@ -320,32 +320,60 @@ class _SavingPlansPageState extends ConsumerState<SavingPlansPage> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: ['Darurat', 'Pendidikan', 'Pensiun', 'Kurban'].map((cat) {
-                      final isSelected = selectedCategory == cat;
-                      final catColor = _getCategoryColor(cat);
-                      return ChoiceChip(
-                        label: Text(
-                          _getCategoryTitle(cat),
-                          style: GoogleFonts.quicksand(
-                            color: isSelected ? Colors.white : (isDark ? Colors.white70 : Colors.black87),
-                            fontWeight: FontWeight.bold,
-                            fontSize: 11,
+                  Container(
+                    height: 52,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.05)
+                          : Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: isDark ? Colors.white10 : Colors.grey.shade200,
+                        width: 1.2,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          _getCategoryIcon(selectedCategory),
+                          size: 18,
+                          color: _getCategoryColor(selectedCategory),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<String>(
+                              value: selectedCategory,
+                              isExpanded: true,
+                              dropdownColor: isDark ? AppColors.surfaceDark : Colors.white,
+                              style: GoogleFonts.quicksand(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                                color: isDark ? Colors.white : Colors.black87,
+                              ),
+                              icon: Icon(
+                                Icons.arrow_drop_down_rounded,
+                                color: isDark ? Colors.white38 : Colors.grey,
+                              ),
+                              items: ['Darurat', 'Pendidikan', 'Pensiun', 'Kurban'].map((cat) {
+                                return DropdownMenuItem<String>(
+                                  value: cat,
+                                  child: Text(_getCategoryTitle(cat)),
+                                );
+                              }).toList(),
+                              onChanged: (val) {
+                                if (val != null) {
+                                  setSheetState(() {
+                                    selectedCategory = val;
+                                  });
+                                }
+                              },
+                            ),
                           ),
                         ),
-                        selected: isSelected,
-                        onSelected: (_) => setSheetState(() => selectedCategory = cat),
-                        selectedColor: catColor,
-                        backgroundColor: isDark ? Colors.white.withOpacity(0.05) : Colors.grey.shade100,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          side: BorderSide.none,
-                        ),
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      );
-                    }).toList(),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 32),
 

@@ -614,7 +614,7 @@ class _NabungBersamaPageState extends ConsumerState<NabungBersamaPage> {
         const SizedBox(height: 8),
         TextField(
           controller: controller,
-          keyboardType: isTextArea ? TextInputType.multiline : ((isRupiah || isNumber) ? TextInputType.number : TextInputType.text),
+          keyboardType: isTextArea ? TextInputType.multiline : (isRupiah ? const TextInputType.numberWithOptions(decimal: true) : TextInputType.text),
           maxLines: isTextArea ? 3 : 1,
           minLines: 1,
           inputFormatters: (isRupiah || isNumber) ? [_RibuanFormatter()] : null,

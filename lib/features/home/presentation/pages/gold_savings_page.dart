@@ -6,6 +6,9 @@ import 'package:tabunganku/core/theme/app_colors.dart';
 import 'package:tabunganku/models/gold_investment_model.dart';
 import 'package:tabunganku/services/gold_service.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'dart:async';
+import 'dart:ui';
 
 class GoldSavingsPage extends ConsumerStatefulWidget {
   const GoldSavingsPage({super.key});
@@ -17,6 +20,135 @@ class GoldSavingsPage extends ConsumerStatefulWidget {
 class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
   final _amountController = TextEditingController();
   GoldTransactionType _selectedType = GoldTransactionType.buy;
+
+  bool _isNoInternetDialogShowing = false;
+  BuildContext? _dialogContext;
+  StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkInternet();
+    _connectivitySubscription = Connectivity().onConnectivityChanged.listen((results) {
+      if (results.contains(ConnectivityResult.none)) {
+        _showNoInternetPopup();
+      } else {
+        _dismissNoInternetPopup();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _connectivitySubscription?.cancel();
+    _amountController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _checkInternet() async {
+    final results = await Connectivity().checkConnectivity();
+    if (results.contains(ConnectivityResult.none) && mounted) {
+      _showNoInternetPopup();
+    }
+  }
+
+  void _showNoInternetPopup() {
+    if (_isNoInternetDialogShowing) return;
+    _isNoInternetDialogShowing = true;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Colors.black.withValues(alpha: 0.35),
+      builder: (dialogCtx) {
+        _dialogContext = dialogCtx;
+        final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+        return BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+          child: PopScope(
+            canPop: false,
+            onPopInvokedWithResult: (didPop, result) {
+              if (didPop) return;
+              _dismissNoInternetPopup();
+              Navigator.of(context).pop();
+            },
+            child: AlertDialog(
+              backgroundColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+              content: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 8),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const SizedBox(
+                      width: 48,
+                      height: 48,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 3,
+                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFC48E2E)),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      'Koneksi Terputus',
+                      style: GoogleFonts.quicksand(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: isDarkMode ? Colors.white : AppColors.primaryDark,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      'Sambungkan ke internet untuk memperbarui harga emas live dan memproses data.',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.quicksand(
+                        fontSize: 13,
+                        color: isDarkMode ? Colors.white70 : Colors.black54,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 44,
+                      child: OutlinedButton(
+                        onPressed: () {
+                          _dismissNoInternetPopup();
+                          Navigator.of(context).pop();
+                        },
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(color: isDarkMode ? Colors.white24 : Colors.grey.shade300),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: Text(
+                          'Kembali',
+                          style: GoogleFonts.quicksand(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                            color: isDarkMode ? Colors.white70 : Colors.grey.shade700,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    ).then((_) {
+      _isNoInternetDialogShowing = false;
+      _dialogContext = null;
+    });
+  }
+
+  void _dismissNoInternetPopup() {
+    if (_isNoInternetDialogShowing && _dialogContext != null) {
+      Navigator.of(_dialogContext!).pop();
+      _isNoInternetDialogShowing = false;
+      _dialogContext = null;
+    }
+  }
 
   // Real-time prices from provider
   double buyPrice = 1250000;
@@ -46,7 +178,10 @@ class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            _dismissNoInternetPopup();
+            Navigator.pop(context);
+          },
           icon: Icon(Icons.arrow_back_ios_new_rounded, color: contentColor, size: 20),
         ),
         title: Text(
@@ -898,7 +1033,7 @@ class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
         ),
         TextFormField(
           controller: controller,
-          keyboardType: TextInputType.number,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
           inputFormatters: [_RibuanFormatter()],
           style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
           decoration: InputDecoration(

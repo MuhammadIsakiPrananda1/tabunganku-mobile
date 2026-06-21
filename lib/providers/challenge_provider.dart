@@ -13,7 +13,7 @@ final challengeServiceProvider = Provider<ChallengeService>((ref) {
   return MockChallengeService(badgeService: badgeService);
 });
 
-final challengeUpdateStreamProvider = StreamProvider.autoDispose<void>((ref) {
+final challengeUpdateStreamProvider = StreamProvider.autoDispose<int>((ref) {
   return MockChallengeService.updateStream;
 });
 

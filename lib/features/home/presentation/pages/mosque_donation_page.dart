@@ -295,7 +295,7 @@ class _MosqueDonationPageState extends ConsumerState<MosqueDonationPage> {
         ),
         TextFormField(
           controller: controller,
-          keyboardType: isCurrency ? TextInputType.number : TextInputType.text,
+          keyboardType: isCurrency ? const TextInputType.numberWithOptions(decimal: true) : TextInputType.text,
           inputFormatters: isCurrency ? [_RibuanFormatter()] : [],
           style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
           onChanged: onChanged,

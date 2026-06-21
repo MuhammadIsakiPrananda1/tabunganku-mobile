@@ -974,7 +974,7 @@ class _TabunganWisataPageState extends ConsumerState<TabunganWisataPage> {
                       const SizedBox(height: 6),
                       TextFormField(
                         controller: targetBudgetController,
-                        keyboardType: TextInputType.number,
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
                         inputFormatters: [_RibuanFormatter()],
                         style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
                         decoration: InputDecoration(
@@ -1171,7 +1171,7 @@ class _TabunganWisataPageState extends ConsumerState<TabunganWisataPage> {
                     const SizedBox(height: 6),
                     TextFormField(
                       controller: _savedAmountController,
-                      keyboardType: TextInputType.number,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       inputFormatters: [_RibuanFormatter()],
                       style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
                       validator: (value) {
@@ -1336,7 +1336,7 @@ class _TabunganWisataPageState extends ConsumerState<TabunganWisataPage> {
                     const SizedBox(height: 6),
                     TextFormField(
                       controller: _budgetItemCostController,
-                      keyboardType: TextInputType.number,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       inputFormatters: [_RibuanFormatter()],
                       style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
                       validator: (value) {

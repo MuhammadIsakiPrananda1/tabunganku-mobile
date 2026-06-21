@@ -676,7 +676,7 @@ class _InsuranceTrackerPageState extends ConsumerState<InsuranceTrackerPage> {
         ),
         TextFormField(
           controller: controller,
-          keyboardType: isPremium ? TextInputType.number : TextInputType.text,
+          keyboardType: isPremium ? const TextInputType.numberWithOptions(decimal: true) : TextInputType.text,
           inputFormatters: isPremium ? [_RibuanFormatter()] : null,
           style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
           decoration: InputDecoration(

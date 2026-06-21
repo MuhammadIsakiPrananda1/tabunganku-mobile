@@ -91,7 +91,7 @@ class _PiggyBankPageState extends ConsumerState<PiggyBankPage> {
           'Tabungan Receh',
           style: GoogleFonts.quicksand(
             fontWeight: FontWeight.bold,
-            fontSize: 18,
+            fontSize: 16,
             color: contentColor,
           ),
         ),
@@ -141,9 +141,9 @@ class _PiggyBankPageState extends ConsumerState<PiggyBankPage> {
                       // Input Field
                       TextFormField(
                         controller: _amountController,
-                        keyboardType: TextInputType.number,
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
                         style: GoogleFonts.quicksand(
-                          fontSize: 15,
+                          fontSize: 13,
                           fontWeight: FontWeight.bold,
                           color: isDarkMode ? Colors.white : Colors.black87,
                         ),
@@ -154,7 +154,7 @@ class _PiggyBankPageState extends ConsumerState<PiggyBankPage> {
                         decoration: InputDecoration(
                           hintText: 'Masukkan Nominal',
                           hintStyle: GoogleFonts.quicksand(
-                            fontSize: 15,
+                            fontSize: 13,
                             fontWeight: FontWeight.bold,
                             color: isDarkMode ? Colors.white10 : Colors.black26,
                           ),
@@ -166,7 +166,7 @@ class _PiggyBankPageState extends ConsumerState<PiggyBankPage> {
                                 const Icon(
                                   Icons.payments_rounded,
                                   color: AppColors.primary,
-                                  size: 20,
+                                  size: 18,
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
@@ -174,7 +174,7 @@ class _PiggyBankPageState extends ConsumerState<PiggyBankPage> {
                                   style: GoogleFonts.quicksand(
                                     fontWeight: FontWeight.bold,
                                     color: AppColors.primary,
-                                    fontSize: 15,
+                                    fontSize: 13,
                                   ),
                                 ),
                               ],
@@ -206,7 +206,7 @@ class _PiggyBankPageState extends ConsumerState<PiggyBankPage> {
                           ),
                           contentPadding: const EdgeInsets.symmetric(
                             horizontal: 16,
-                            vertical: 14,
+                            vertical: 12,
                           ),
                         ),
                         validator: (val) {
@@ -227,7 +227,7 @@ class _PiggyBankPageState extends ConsumerState<PiggyBankPage> {
                       // Submit Button
                       SizedBox(
                         width: double.infinity,
-                        height: 50,
+                        height: 48,
                         child: ElevatedButton(
                           onPressed: _submitAmount,
                           style: ElevatedButton.styleFrom(
@@ -242,7 +242,7 @@ class _PiggyBankPageState extends ConsumerState<PiggyBankPage> {
                             'Simpan ke Celengan',
                             style: GoogleFonts.quicksand(
                               fontWeight: FontWeight.bold,
-                              fontSize: 14,
+                              fontSize: 13,
                             ),
                           ),
                         ),
@@ -253,7 +253,7 @@ class _PiggyBankPageState extends ConsumerState<PiggyBankPage> {
                       // Break Jar Button
                       SizedBox(
                         width: double.infinity,
-                        height: 50,
+                        height: 48,
                         child: ElevatedButton.icon(
                           onPressed: balance > 0 ? () => _showBreakJarDialog(context, ref, balance) : null,
                           style: ElevatedButton.styleFrom(
@@ -264,12 +264,12 @@ class _PiggyBankPageState extends ConsumerState<PiggyBankPage> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          icon: const Icon(Icons.gavel_rounded, size: 18),
+                          icon: const Icon(Icons.gavel_rounded, size: 16),
                           label: Text(
                             'Pecahkan Celengan',
                             style: GoogleFonts.quicksand(
                               fontWeight: FontWeight.bold,
-                              fontSize: 14,
+                              fontSize: 13,
                             ),
                           ),
                         ),
@@ -290,7 +290,7 @@ class _PiggyBankPageState extends ConsumerState<PiggyBankPage> {
   Widget _buildCompactBalanceCard(double balance, bool isDarkMode) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
+      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: isDarkMode 
@@ -313,22 +313,22 @@ class _PiggyBankPageState extends ConsumerState<PiggyBankPage> {
           Text(
             'TOTAL ISI CELENGAN',
             style: GoogleFonts.quicksand(
-              fontSize: 13,
+              fontSize: 10,
               fontWeight: FontWeight.w800,
               color: Colors.white.withValues(alpha: 0.5),
-              letterSpacing: 2,
+              letterSpacing: 1.2,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 6),
           FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(
               _formatRupiah(balance),
               style: GoogleFonts.quicksand(
-                fontSize: 36,
+                fontSize: 26,
                 fontWeight: FontWeight.w900,
                 color: Colors.white,
-                letterSpacing: -1,
+                letterSpacing: -0.5,
               ),
             ),
           ),
@@ -336,8 +336,8 @@ class _PiggyBankPageState extends ConsumerState<PiggyBankPage> {
           Text(
             'Uang receh yang terselamatkan',
             style: GoogleFonts.quicksand(
-              fontSize: 13,
-              color: Colors.white38,
+              fontSize: 10.5,
+              color: Colors.white60,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -355,15 +355,15 @@ class _PiggyBankPageState extends ConsumerState<PiggyBankPage> {
             ? AppColors.surfaceDark 
             : Colors.white,
         title: Text('Pecahkan Celengan?', 
-            style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11)),
+            style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 16)),
         content: Text(
           'Kamu akan mengambil semua uang di celengan sebesar ${_formatRupiah(balance)}. Celengan akan kembali kosong.',
-          style: GoogleFonts.quicksand(fontSize: 11),
+          style: GoogleFonts.quicksand(fontSize: 13),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context), 
-            child: Text('Batal', style: GoogleFonts.quicksand(color: Colors.grey, fontSize: 11))),
+            child: Text('Batal', style: GoogleFonts.quicksand(color: Colors.grey, fontSize: 13))),
           ElevatedButton(
             onPressed: () async {
               // Create transaction record
@@ -394,7 +394,7 @@ class _PiggyBankPageState extends ConsumerState<PiggyBankPage> {
               elevation: 0,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            child: Text('Pecahkan!', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 11)),
+            child: Text('Pecahkan!', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13)),
           ),
         ],
       ),
@@ -416,13 +416,13 @@ class _PiggyBankPageState extends ConsumerState<PiggyBankPage> {
             const SizedBox(height: 16),
             Text(
               'Selamat!',
-              style: GoogleFonts.quicksand(fontSize: 19, fontWeight: FontWeight.w900),
+              style: GoogleFonts.quicksand(fontSize: 16, fontWeight: FontWeight.w900),
             ),
             const SizedBox(height: 8),
             Text(
               'Kamu telah mengumpulkan ${_formatRupiah(amount)} dari uang receh!',
               textAlign: TextAlign.center,
-              style: GoogleFonts.quicksand(fontSize: 11),
+              style: GoogleFonts.quicksand(fontSize: 13),
             ),
             const SizedBox(height: 24),
             SizedBox(
@@ -436,7 +436,7 @@ class _PiggyBankPageState extends ConsumerState<PiggyBankPage> {
                   elevation: 0,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 ),
-                child: Text('Mantap!', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold)),
+                child: Text('Mantap!', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13)),
               ),
             ),
           ],

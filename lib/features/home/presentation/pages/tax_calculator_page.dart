@@ -218,7 +218,7 @@ class _TaxCalculatorPageState extends ConsumerState<TaxCalculatorPage> {
         ),
         TextFormField(
           controller: controller,
-          keyboardType: TextInputType.number,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
           inputFormatters: [_RibuanFormatter()],
           style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
           onChanged: onChanged,

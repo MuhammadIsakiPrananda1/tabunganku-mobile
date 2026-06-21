@@ -122,7 +122,7 @@ class _BudgetRulePageState extends ConsumerState<BudgetRulePage> {
                 ),
                 TextFormField(
                   controller: _incomeController,
-                  keyboardType: TextInputType.number,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   inputFormatters: [_RibuanFormatter()],
                   style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
                   onChanged: (_) => _calculate(),

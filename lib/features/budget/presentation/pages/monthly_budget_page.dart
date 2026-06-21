@@ -397,7 +397,7 @@ class _MonthlyBudgetPageState extends ConsumerState<MonthlyBudgetPage> {
                           // Input field
                           TextFormField(
                             controller: _ctrl,
-                            keyboardType: TextInputType.number,
+                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
                             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                             style: GoogleFonts.quicksand(
                                 fontSize: 13,

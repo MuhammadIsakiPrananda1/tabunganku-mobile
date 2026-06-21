@@ -9,6 +9,9 @@ import 'package:tabunganku/providers/shopping_item_provider.dart';
 import 'package:tabunganku/providers/transaction_provider.dart';
 import 'package:tabunganku/core/theme/app_colors.dart';
 import 'package:tabunganku/core/theme/theme_provider.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'dart:async';
+import 'dart:ui';
 import '../widgets/shopping_form_sheet.dart';
 
 class ShoppingListPage extends ConsumerStatefulWidget {
@@ -22,15 +25,133 @@ class _ShoppingListPageState extends ConsumerState<ShoppingListPage> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
+  bool _isNoInternetDialogShowing = false;
+  BuildContext? _dialogContext;
+  StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
+
   @override
   void initState() {
     super.initState();
+    _checkInternet();
+    _connectivitySubscription = Connectivity().onConnectivityChanged.listen((results) {
+      if (results.contains(ConnectivityResult.none)) {
+        _showNoInternetPopup();
+      } else {
+        _dismissNoInternetPopup();
+      }
+    });
   }
 
   @override
   void dispose() {
+    _connectivitySubscription?.cancel();
     _searchController.dispose();
     super.dispose();
+  }
+
+  Future<void> _checkInternet() async {
+    final results = await Connectivity().checkConnectivity();
+    if (results.contains(ConnectivityResult.none) && mounted) {
+      _showNoInternetPopup();
+    }
+  }
+
+  void _showNoInternetPopup() {
+    if (_isNoInternetDialogShowing) return;
+    _isNoInternetDialogShowing = true;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Colors.black.withValues(alpha: 0.35),
+      builder: (dialogCtx) {
+        _dialogContext = dialogCtx;
+        final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+        return BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+          child: PopScope(
+            canPop: false,
+            onPopInvokedWithResult: (didPop, result) {
+              if (didPop) return;
+              _dismissNoInternetPopup();
+              Navigator.of(context).pop();
+            },
+            child: AlertDialog(
+              backgroundColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+              content: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 8),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const SizedBox(
+                      width: 48,
+                      height: 48,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 3,
+                        valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      'Koneksi Terputus',
+                      style: GoogleFonts.quicksand(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: isDarkMode ? Colors.white : AppColors.primaryDark,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      'Sambungkan ke internet untuk memuat gambar belanja dari server dan mengelola data.',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.quicksand(
+                        fontSize: 13,
+                        color: isDarkMode ? Colors.white70 : Colors.black54,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 44,
+                      child: OutlinedButton(
+                        onPressed: () {
+                          _dismissNoInternetPopup();
+                          Navigator.of(context).pop();
+                        },
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(color: isDarkMode ? Colors.white24 : Colors.grey.shade300),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: Text(
+                          'Kembali',
+                          style: GoogleFonts.quicksand(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                            color: isDarkMode ? Colors.white70 : Colors.grey.shade700,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    ).then((_) {
+      _isNoInternetDialogShowing = false;
+      _dialogContext = null;
+    });
+  }
+
+  void _dismissNoInternetPopup() {
+    if (_isNoInternetDialogShowing && _dialogContext != null) {
+      Navigator.of(_dialogContext!).pop();
+      _isNoInternetDialogShowing = false;
+      _dialogContext = null;
+    }
   }
 
   String _formatRupiah(double amount) {
@@ -98,52 +219,82 @@ class _ShoppingListPageState extends ConsumerState<ShoppingListPage> {
         (ref.watch(themeProvider) == ThemeMode.system &&
             theme.brightness == Brightness.dark);
 
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: Text(
-          'Catatan Belanja',
-          style: GoogleFonts.quicksand(fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: theme.scaffoldBackgroundColor,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-      ),
-      body: shoppingItemsAsync.when(
-        data: (items) {
-          // Filter daftar belanja berdasarkan kriteria pencarian
-          final filteredItems = items.where((item) {
-            return item.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-                (item.category != null && item.category!.toLowerCase().contains(_searchQuery.toLowerCase()));
-          }).toList();
+    final pageBg = isDarkMode ? AppColors.backgroundDark : const Color(0xFFF0F3F7);
+    final txtClr = isDarkMode ? Colors.white : Colors.black87;
 
-          return Column(
-            children: [
-              // Dashboard Ringkasan Premium
-              _buildDashboardHeader(items, isDarkMode),
-              
-              // Search Bar minimalis
-              _buildSearchAndFilters(isDarkMode),
-              
-              // List Catatan Belanja
-              Expanded(
-                child: filteredItems.isEmpty
-                    ? _buildEmptyState(isDarkMode, hasFilter: _searchQuery.isNotEmpty)
-                    : ListView.builder(
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
-                        itemCount: filteredItems.length,
-                        physics: const BouncingScrollPhysics(),
-                        itemBuilder: (context, index) {
-                          final item = filteredItems[index];
-                          return _buildShoppingCard(context, ref, item, isDarkMode);
-                        },
-                      ),
+    return Scaffold(
+      backgroundColor: pageBg,
+      body: SafeArea(
+        child: Column(
+          children: [
+            // ── AppBar (Catatan Pinjaman style) ────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(4, 8, 16, 0),
+              child: Row(
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      _dismissNoInternetPopup();
+                      Navigator.pop(context);
+                    },
+                    icon: Icon(Icons.arrow_back_ios_new_rounded,
+                        size: 17,
+                        color: isDarkMode ? Colors.white70 : AppColors.primaryDark),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+                  ),
+                  Expanded(
+                    child: Text(
+                      'Catatan Belanja',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.quicksand(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: txtClr),
+                    ),
+                  ),
+                  const SizedBox(width: 40),
+                ],
               ),
-            ],
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
-        error: (e, st) => Center(child: Text('Error: $e')),
+            ),
+            const SizedBox(height: 10),
+
+            // ── Body content ───────────────────────────────────────────
+            Expanded(
+              child: shoppingItemsAsync.when(
+                data: (items) {
+                  final filteredItems = items.where((item) {
+                    return item.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+                        (item.category != null &&
+                            item.category!.toLowerCase().contains(_searchQuery.toLowerCase()));
+                  }).toList();
+
+                  return Column(
+                    children: [
+                      _buildDashboardHeader(items, isDarkMode),
+                      _buildSearchAndFilters(isDarkMode),
+                      Expanded(
+                        child: filteredItems.isEmpty
+                            ? _buildEmptyState(isDarkMode, hasFilter: _searchQuery.isNotEmpty)
+                            : ListView.builder(
+                                padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+                                itemCount: filteredItems.length,
+                                physics: const BouncingScrollPhysics(),
+                                itemBuilder: (context, index) {
+                                  final item = filteredItems[index];
+                                  return _buildShoppingCard(context, ref, item, isDarkMode);
+                                },
+                              ),
+                      ),
+                    ],
+                  );
+                },
+                loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
+                error: (e, st) => Center(child: Text('Error: $e')),
+              ),
+            ),
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => ShoppingFormSheet.show(context),
@@ -166,268 +317,236 @@ class _ShoppingListPageState extends ConsumerState<ShoppingListPage> {
     final boughtCount = items.where((i) => i.isBought).length;
     final progress = totalCount > 0 ? boughtCount / totalCount : 0.0;
 
+    final theme = Theme.of(context);
+    final cardBg = isDarkMode ? theme.cardColor : Colors.white;
+    final borderColor = isDarkMode 
+        ? Colors.white.withValues(alpha: 0.08) 
+        : Colors.black.withValues(alpha: 0.05);
+
     return Container(
-      margin: const EdgeInsets.fromLTRB(16, 2, 16, 12),
+      margin: const EdgeInsets.fromLTRB(16, 2, 16, 16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: isDarkMode 
-              ? [AppColors.primaryDark.withValues(alpha: 0.85), AppColors.primary.withValues(alpha: 0.55)]
-              : [AppColors.primary, AppColors.primaryDark],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: cardBg,
         borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: isDarkMode ? 0.12 : 0.25),
-            blurRadius: 16,
-            offset: const Offset(0, 8),
-          ),
-        ],
+        border: Border.all(color: borderColor, width: 1.2),
+        boxShadow: isDarkMode 
+            ? [] 
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.02),
+                  blurRadius: 16,
+                  offset: const Offset(0, 8),
+                ),
+              ],
       ),
-      clipBehavior: Clip.antiAlias,
-      child: Stack(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Background decorative glow circle 1
-          Positioned(
-            right: -24,
-            top: -24,
-            child: Container(
-              width: 130,
-              height: 130,
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.08),
-                shape: BoxShape.circle,
-              ),
-            ),
-          ),
-          // Background decorative glow circle 2
-          Positioned(
-            left: -40,
-            bottom: -50,
-            child: Container(
-              width: 160,
-              height: 160,
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.04),
-                shape: BoxShape.circle,
-              ),
-            ),
-          ),
-          // Content
-          Padding(
-            padding: const EdgeInsets.all(18),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Bagian Atas: Ringkasan Anggaran Utama
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'TOTAL ANGGARAN BELANJA',
-                          style: GoogleFonts.quicksand(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white.withValues(alpha: 0.7),
-                            letterSpacing: 1.0,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          _formatRupiah(totalEstimated),
-                          style: GoogleFonts.quicksand(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w900,
-                            color: Colors.white,
-                            letterSpacing: -0.5,
-                          ),
-                        ),
-                      ],
+          // Row 1: Title & Status Badge
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'TOTAL ANGGARAN BELANJA',
+                    style: GoogleFonts.quicksand(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: isDarkMode ? Colors.white38 : Colors.grey.shade500,
+                      letterSpacing: 1.0,
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(30),
-                        border: Border.all(color: Colors.white.withValues(alpha: 0.1), width: 1),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            totalCount == 0 
-                                ? Icons.hourglass_empty_rounded 
-                                : (progress >= 1.0 ? Icons.check_circle_rounded : Icons.cached_rounded),
-                            color: Colors.white,
-                            size: 12,
-                          ),
-                          const SizedBox(width: 5),
-                          Text(
-                            totalCount == 0 
-                                ? 'Kosong' 
-                                : '${(progress * 100).toInt()}% Selesai',
-                            style: GoogleFonts.quicksand(
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    _formatRupiah(totalEstimated),
+                    style: GoogleFonts.quicksand(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      color: isDarkMode ? Colors.white : AppColors.primaryDark,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: totalCount == 0 
+                      ? (isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100)
+                      : (progress >= 1.0 
+                          ? Colors.green.withValues(alpha: 0.1) 
+                          : AppColors.primary.withValues(alpha: 0.1)),
+                  borderRadius: BorderRadius.circular(30),
+                  border: Border.all(
+                    color: totalCount == 0 
+                        ? (isDarkMode ? Colors.white10 : Colors.grey.shade300)
+                        : (progress >= 1.0 
+                            ? Colors.green.withValues(alpha: 0.2) 
+                            : AppColors.primary.withValues(alpha: 0.2)),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      totalCount == 0 
+                          ? Icons.hourglass_empty_rounded 
+                          : (progress >= 1.0 ? Icons.check_circle_rounded : Icons.cached_rounded),
+                      color: totalCount == 0 
+                          ? (isDarkMode ? Colors.white30 : Colors.grey.shade500)
+                          : (progress >= 1.0 ? Colors.green : AppColors.primary),
+                      size: 11,
+                    ),
+                    const SizedBox(width: 5),
+                    Text(
+                      totalCount == 0 
+                          ? 'Kosong' 
+                          : '${(progress * 100).toInt()}% Selesai',
+                      style: GoogleFonts.quicksand(
+                        fontSize: 9.5,
+                        fontWeight: FontWeight.bold,
+                        color: totalCount == 0 
+                            ? (isDarkMode ? Colors.white54 : Colors.grey.shade600)
+                            : (progress >= 1.0 ? Colors.green : AppColors.primary),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 18),
-                // Bagian Tengah: Progress Bar & Info Barang
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              ),
+            ],
+          ),
+          const SizedBox(height: 18),
+          
+          // Row 2: Progress Text & Sleek Progress Bar
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Progres Barang',
+                style: GoogleFonts.quicksand(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: isDarkMode ? Colors.white38 : Colors.grey.shade500,
+                ),
+              ),
+              Text(
+                '$boughtCount dari $totalCount Barang',
+                style: GoogleFonts.quicksand(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: isDarkMode ? Colors.white70 : Colors.black87,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: LinearProgressIndicator(
+              value: totalCount > 0 ? progress : 0.0,
+              backgroundColor: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100,
+              valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
+              minHeight: 4,
+            ),
+          ),
+          const SizedBox(height: 20),
+          
+          // Divider
+          Divider(
+            height: 1, 
+            color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100,
+          ),
+          const SizedBox(height: 16),
+
+          // Row 3: Terbelanja & Sisa Anggaran (Minimalist Columns)
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.shopping_bag_rounded, color: Colors.white.withValues(alpha: 0.7), size: 14),
+                        Container(
+                          width: 6,
+                          height: 6,
+                          decoration: const BoxDecoration(
+                            color: Colors.amber,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
                         const SizedBox(width: 6),
                         Text(
-                          'Progres Barang',
+                          'TERBELANJA',
                           style: GoogleFonts.quicksand(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white.withValues(alpha: 0.7),
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                            color: isDarkMode ? Colors.white38 : Colors.grey.shade500,
+                            letterSpacing: 0.5,
                           ),
                         ),
                       ],
                     ),
+                    const SizedBox(height: 4),
                     Text(
-                      '$boughtCount dari $totalCount Barang',
+                      _formatRupiah(totalBought),
                       style: GoogleFonts.quicksand(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: isDarkMode ? Colors.white70 : Colors.black87,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: LinearProgressIndicator(
-                    value: totalCount > 0 ? progress : 0.0,
-                    backgroundColor: Colors.white.withValues(alpha: 0.1),
-                    valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
-                    minHeight: 6,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                // Bagian Bawah: Dua Kolom Terbelanja vs Sisa
-                Row(
+              ),
+              Container(
+                width: 1,
+                height: 30,
+                color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade200,
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+                    Row(
+                      children: [
+                        Container(
+                          width: 6,
+                          height: 6,
+                          decoration: const BoxDecoration(
+                            color: Colors.blueAccent,
+                            shape: BoxShape.circle,
+                          ),
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Container(
-                                  width: 6,
-                                  height: 6,
-                                  decoration: const BoxDecoration(
-                                    color: Colors.amberAccent,
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  'TERBELANJA',
-                                  style: GoogleFonts.quicksand(
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white.withValues(alpha: 0.75),
-                                    letterSpacing: 0.5,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 4),
-                            FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Text(
-                                _formatRupiah(totalBought),
-                                style: GoogleFonts.quicksand(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ],
+                        const SizedBox(width: 6),
+                        Text(
+                          'SISA ANGGARAN',
+                          style: GoogleFonts.quicksand(
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                            color: isDarkMode ? Colors.white38 : Colors.grey.shade500,
+                            letterSpacing: 0.5,
+                          ),
                         ),
-                      ),
+                      ],
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Container(
-                                  width: 6,
-                                  height: 6,
-                                  decoration: const BoxDecoration(
-                                    color: Colors.lightBlueAccent,
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  'SISA ANGGARAN',
-                                  style: GoogleFonts.quicksand(
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white.withValues(alpha: 0.75),
-                                    letterSpacing: 0.5,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 4),
-                            FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Text(
-                                _formatRupiah(remainingCost),
-                                style: GoogleFonts.quicksand(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _formatRupiah(remainingCost),
+                      style: GoogleFonts.quicksand(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: isDarkMode ? Colors.white70 : Colors.black87,
                       ),
                     ),
                   ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ],
       ),

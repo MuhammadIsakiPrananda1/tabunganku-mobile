@@ -1,19 +1,13 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:ui';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:tabunganku/core/services/permission_service.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
-import 'package:path_provider/path_provider.dart';
 
 import 'package:tabunganku/core/theme/app_colors.dart';
 import 'package:tabunganku/core/theme/theme_provider.dart';
@@ -23,12 +17,10 @@ import 'package:tabunganku/models/transaction_model.dart';
 import 'package:tabunganku/features/settings/presentation/providers/security_provider.dart';
 import 'package:tabunganku/features/settings/presentation/providers/achievement_provider.dart';
 import 'package:tabunganku/core/constants/app_version.dart';
-import 'package:tabunganku/providers/challenge_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tabunganku/features/settings/presentation/pages/crop_page.dart';
 import 'package:tabunganku/core/services/export_service.dart';
-import 'package:tabunganku/core/security/secure_storage_service.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
@@ -257,26 +249,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       // SET external operation to true to prevent appraisal lockout
       ref.read(securityProvider.notifier).setExternalOperation(true);
 
-      // Check permissions based on source
+      // Request native permission directly
       bool hasPermission = false;
       if (source == ImageSource.camera) {
-        hasPermission = await PermissionService.requestPermission(
-          context,
-          permission: Permission.camera,
-          title: 'Kamera',
-          description:
-              'Aplikasi membutuhkan akses kamera untuk mengambil foto profil baru Anda secara langsung.',
-          icon: Icons.camera_alt_rounded,
-        );
+        hasPermission = await Permission.camera.request().isGranted;
       } else {
-        hasPermission = await PermissionService.requestPermission(
-          context,
-          permission: Permission.photos,
-          title: 'Galeri',
-          description:
-              'Aplikasi membutuhkan akses galeri untuk memilih foto profil terbaik dari koleksi foto Anda.',
-          icon: Icons.photo_library_rounded,
-        );
+        hasPermission = await Permission.photos.request().isGranted;
       }
 
       if (!hasPermission) return;
@@ -460,8 +438,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     final IconData rankIcon = _getRankIcon(totalIncome);
     final Color rankColor = _getRankColor(totalIncome);
 
-    // Ambil Streak Menabung resmi dari ChallengeService (yang dibackup di SecureStorage)
-    final streak = ref.watch(currentStreakProvider).value ?? 0;
+    // Ambil Streak Menabung resmi secara mandiri dari transaksi
+    final streak = ref.watch(savingStreakProvider);
 
     final currencyFormatter =
         NumberFormat.currency(locale: 'id_ID', symbol: 'Rp', decimalDigits: 0);
@@ -682,38 +660,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
             _buildSectionHeader('Data & Privasi'),
             _buildSettingGroup([
-              _buildSettingTile(
-                Icons.download_rounded,
-                'Ekspor Semua Data (CSV)',
-                () => _exportAllDataAsCsv(transactions),
-                subtitle: 'Unduh seluruh riwayat transaksi sebagai file CSV',
-                color: Colors.green.shade700,
-                isDarkMode: isDarkMode,
-              ),
-              _buildSettingTile(
-                Icons.backup_rounded,
-                'Cadangkan Data (JSON)',
-                () => _backupData(),
-                subtitle: 'Ekspor berkas cadangan database transaksi lokal Anda',
-                color: Colors.blue,
-                isDarkMode: isDarkMode,
-              ),
-              _buildSettingTile(
-                Icons.settings_backup_restore_rounded,
-                'Pulihkan Data (Clipboard)',
-                () => _restoreDataFromClipboard(),
-                subtitle: 'Pulihkan database transaksi dari teks JSON di clipboard',
-                color: Colors.orange,
-                isDarkMode: isDarkMode,
-              ),
-              _buildSettingTile(
-                Icons.cleaning_services_rounded,
-                'Bersihkan Cache Aplikasi',
-                () => _clearCache(),
-                subtitle: 'Hapus file dan cache sementara untuk membebaskan ruang',
-                color: Colors.teal,
-                isDarkMode: isDarkMode,
-              ),
               _buildSettingTile(
                 Icons.delete_sweep_rounded,
                 'Reset Data Transaksi',
@@ -1744,306 +1690,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     );
   }
 
-  // ── Ekspor Semua Data CSV ─────────────────────────────────────────
-  Future<void> _exportAllDataAsCsv(List<TransactionModel> transactions) async {
-    if (transactions.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Belum ada data transaksi untuk diekspor.',
-            style: GoogleFonts.quicksand(
-                fontWeight: FontWeight.bold, color: Colors.white),
-          ),
-          backgroundColor: Colors.grey.shade700,
-          behavior: SnackBarBehavior.floating,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        ),
-      );
-      return;
-    }
 
-    try {
-      // Buat isi CSV
-      final buffer = StringBuffer();
-      buffer.writeln(
-          'No,Tanggal,Waktu,Judul,Kategori,Jenis,Nominal (Rp),Catatan');
-
-      final sorted = [...transactions]
-        ..sort((a, b) => b.date.compareTo(a.date));
-
-      for (int i = 0; i < sorted.length; i++) {
-        final t = sorted[i];
-        final dateStr = DateFormat('dd/MM/yyyy').format(t.date);
-        final timeStr = DateFormat('HH:mm').format(t.date);
-        final type = t.type == TransactionType.income ? 'Pemasukan' : 'Pengeluaran';
-        final note = t.description.replaceAll(',', ';').replaceAll('\n', ' ');
-        final title = t.title.replaceAll(',', ';');
-        buffer.writeln(
-            '${i + 1},$dateStr,$timeStr,$title,${t.category},$type,${t.amount.toInt()},$note');
-      }
-
-      final dir = await getTemporaryDirectory();
-      final fileName =
-          'TabunganKu_Export_${DateFormat('yyyyMMdd_HHmm').format(DateTime.now())}.csv';
-      final file = File('${dir.path}/$fileName');
-      await file.writeAsString(buffer.toString(), encoding: utf8);
-
-      await SharePlus.instance.share(
-        ShareParams(
-          files: [XFile(file.path)],
-          text:
-              'Ekspor Data TabunganKu – ${transactions.length} transaksi',
-        ),
-      );
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Gagal mengekspor data: $e',
-              style: GoogleFonts.quicksand(
-                  fontWeight: FontWeight.bold, color: Colors.white),
-            ),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16)),
-          ),
-        );
-      }
-    }
-  }
-
-  Future<void> _clearCache() async {
-    try {
-      final tempDir = await getTemporaryDirectory();
-      int clearedFilesCount = 0;
-      if (tempDir.existsSync()) {
-        final list = tempDir.listSync(recursive: true);
-        for (final entity in list) {
-          if (entity is File) {
-            try {
-              entity.deleteSync();
-              clearedFilesCount++;
-            } catch (_) {
-              // Ignore failure for individual locked files
-            }
-          }
-        }
-      }
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Berhasil membersihkan cache & file sementara! ($clearedFilesCount file dihapus) 🧹',
-              style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.white),
-            ),
-            backgroundColor: AppColors.primary,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Gagal membersihkan cache: $e',
-              style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.white),
-            ),
-            backgroundColor: Colors.redAccent,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          ),
-        );
-      }
-    }
-  }
-
-  Future<void> _backupData() async {
-    try {
-      final secureStorage = SecureStorageService();
-      final rawUserId = await secureStorage.getUserId();
-      final userId = (rawUserId == null || rawUserId.isEmpty) ? 'guest' : rawUserId;
-      final prefs = await SharedPreferences.getInstance();
-      final rawData = prefs.getString('transactions_user_$userId');
-
-      if (rawData == null || rawData.isEmpty || rawData == '[]') {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'Tidak ada data transaksi untuk dicadangkan.',
-                style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.white),
-              ),
-              backgroundColor: Colors.orange,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            ),
-          );
-        }
-        return;
-      }
-
-      // Format beautiful JSON
-      final parsed = jsonDecode(rawData);
-      final prettyString = const JsonEncoder.withIndent('  ').convert(parsed);
-
-      final dir = await getTemporaryDirectory();
-      final fileName = 'TabunganKu_Backup_${DateFormat('yyyyMMdd_HHmm').format(DateTime.now())}.json';
-      final file = File('${dir.path}/$fileName');
-      await file.writeAsString(prettyString, encoding: utf8);
-
-      await SharePlus.instance.share(
-        ShareParams(
-          files: [XFile(file.path)],
-          text: 'File Cadangan Data TabunganKu 💾',
-        ),
-      );
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Gagal mencadangkan data: $e',
-              style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.white),
-            ),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          ),
-        );
-      }
-    }
-  }
-
-  Future<void> _restoreDataFromClipboard() async {
-    try {
-      final clipboardData = await Clipboard.getData(Clipboard.kTextPlain);
-      final jsonText = clipboardData?.text;
-
-      if (jsonText == null || jsonText.trim().isEmpty) {
-        _showRestoreError('Clipboard kosong. Silakan salin isi file cadangan (.json) terlebih dahulu.');
-        return;
-      }
-
-      dynamic decoded;
-      try {
-        decoded = jsonDecode(jsonText);
-      } catch (_) {
-        _showRestoreError('Format data di clipboard tidak valid. Pastikan Anda menyalin teks JSON cadangan dengan benar.');
-        return;
-      }
-
-      if (decoded is! List) {
-        _showRestoreError('Format data cadangan tidak sesuai. Struktur harus berupa daftar transaksi.');
-        return;
-      }
-
-      // Validasi sederhana elemen pertama
-      if (decoded.isNotEmpty) {
-        final first = decoded.first;
-        if (first is! Map || !first.containsKey('id') || !first.containsKey('amount') || !first.containsKey('title')) {
-          _showRestoreError('Format transaksi tidak valid. Pastikan data berasal dari cadangan TabunganKu.');
-          return;
-        }
-      }
-
-      // Tampilkan dialog konfirmasi
-      if (!mounted) return;
-      final confirm = await showDialog<bool>(
-        context: context,
-        builder: (context) => AlertDialog(
-          backgroundColor: Theme.of(context).canvasColor,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-          title: Text(
-            'Pulihkan Data?',
-            style: GoogleFonts.quicksand(fontWeight: FontWeight.bold),
-          ),
-          content: Text(
-            'Ditemukan ${decoded.length} transaksi di clipboard.\n\nPeringatan: Proses ini akan menimpa seluruh data transaksi saat ini secara permanen. Apakah Anda yakin ingin memulihkan?',
-            style: GoogleFonts.quicksand(),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: Text(
-                'Batal',
-                style: GoogleFonts.quicksand(color: Colors.grey),
-              ),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: Text(
-                'Pulihkan',
-                style: GoogleFonts.quicksand(color: AppColors.primary, fontWeight: FontWeight.bold),
-              ),
-            ),
-          ],
-        ),
-      );
-
-      if (confirm != true) return;
-
-      final secureStorage = SecureStorageService();
-      final rawUserId = await secureStorage.getUserId();
-      final userId = (rawUserId == null || rawUserId.isEmpty) ? 'guest' : rawUserId;
-      final prefs = await SharedPreferences.getInstance();
-
-      // Simpan ke SharedPreferences
-      await prefs.setString('transactions_user_$userId', jsonText);
-
-      // Invalidate provider agar UI ter-update
-      ref.invalidate(transactionsProvider);
-      ref.invalidate(transactionsStreamProvider);
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Berhasil memulihkan ${decoded.length} transaksi! 🎉',
-              style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.white),
-            ),
-            backgroundColor: Colors.green,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          ),
-        );
-      }
-    } catch (e) {
-      _showRestoreError('Gagal memulihkan data: $e');
-    }
-  }
-
-  void _showRestoreError(String message) {
-    if (!mounted) return;
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: Theme.of(context).canvasColor,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: Text(
-          'Gagal Memulihkan',
-          style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.redAccent),
-        ),
-        content: Text(
-          message,
-          style: GoogleFonts.quicksand(),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'OK',
-              style: GoogleFonts.quicksand(color: AppColors.primary, fontWeight: FontWeight.bold),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   // ── Reset Data Transaksi ──────────────────────────────────────────
   void _showResetDataDialog(bool isDarkMode) {

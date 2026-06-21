@@ -128,6 +128,53 @@ class _NotificationObserverState extends ConsumerState<NotificationObserver> {
             }
           }
         }
+
+        // C. Check for monthly budget warning notifications
+        if (_prefs != null) {
+          final now = DateTime.now();
+          final limit = _prefs!.getDouble('monthly_budget_${now.year}_${now.month}') ?? 0.0;
+          if (limit > 0) {
+            final monthlyTransactions = personalTransactions
+                .where((t) => t.date.year == now.year && t.date.month == now.month)
+                .toList();
+            final totalExpense = monthlyTransactions
+                .where((t) => t.type == TransactionType.expense)
+                .fold<double>(0, (sum, t) => sum + t.amount);
+
+            final progress = totalExpense / limit;
+            final isOver = totalExpense > limit;
+            final isCritical = progress >= 0.9 && !isOver;
+
+            final warning10Key = 'budget_warning_10percent_${now.year}_${now.month}';
+            final warningExceededKey = 'budget_warning_exceeded_${now.year}_${now.month}';
+
+            if (isCritical && !_isNotified(warning10Key)) {
+              ref.read(notificationNotifierProvider.notifier).addNotification(
+                NotificationModel(
+                  id: 'budget_warning_10percent_${now.year}_${now.month}_${DateTime.now().millisecondsSinceEpoch}',
+                  title: 'Batas Budget Mendekati! ⚠️',
+                  message: 'Pengeluaran Anda bulan ini telah mencapai ${(progress * 100).toStringAsFixed(0)}%. Sisa budget kurang dari 10%!',
+                  timestamp: DateTime.now(),
+                  type: NotificationType.system,
+                  actionData: 'monthly-budget',
+                ),
+              );
+              _markAsNotified(warning10Key);
+            } else if (isOver && !_isNotified(warningExceededKey)) {
+              ref.read(notificationNotifierProvider.notifier).addNotification(
+                NotificationModel(
+                  id: 'budget_warning_exceeded_${now.year}_${now.month}_${DateTime.now().millisecondsSinceEpoch}',
+                  title: 'Limit Budget Terlampaui! 🚨',
+                  message: 'Waduh! Pengeluaran Anda bulan ini (${currencyFormatter.format(totalExpense)}) telah melebihi limit budget Anda (${currencyFormatter.format(limit)}).',
+                  timestamp: DateTime.now(),
+                  type: NotificationType.system,
+                  actionData: 'monthly-budget',
+                ),
+              );
+              _markAsNotified(warningExceededKey);
+            }
+          }
+        }
       }
     });
 

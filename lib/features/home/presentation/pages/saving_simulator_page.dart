@@ -218,7 +218,7 @@ class _SavingSimulatorPageState extends ConsumerState<SavingSimulatorPage> {
         ),
         TextFormField(
           controller: controller,
-          keyboardType: TextInputType.number,
+          keyboardType: isCurrency ? const TextInputType.numberWithOptions(decimal: true) : TextInputType.text,
           inputFormatters: [isCurrency ? _RibuanSeparatorInputFormatter() : FilteringTextInputFormatter.digitsOnly],
           style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor),
           onChanged: onChanged,

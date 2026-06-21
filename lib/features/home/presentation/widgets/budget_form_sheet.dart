@@ -428,7 +428,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
                         Expanded(
                           child: TextField(
                             controller: _amountController,
-                            keyboardType: TextInputType.number,
+                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
                             inputFormatters: [
                               FilteringTextInputFormatter.digitsOnly,
                               RibuanFormatter(),

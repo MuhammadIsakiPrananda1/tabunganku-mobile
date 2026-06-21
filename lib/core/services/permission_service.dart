@@ -8,7 +8,7 @@ class PermissionService {
     return await permission.isGranted;
   }
 
-  /// Request a permission with a custom explanatory dialog
+  /// Request a permission directly triggering the native system dialog
   static Future<bool> requestPermission(
     BuildContext context, {
     required Permission permission,
@@ -22,7 +22,10 @@ class PermissionService {
     // 2. If already granted, return true
     if (status.isGranted) return true;
 
-    // 3. If permanently denied, show settings dialog
+    // 3. Request native permission directly
+    status = await permission.request();
+
+    // 4. If permanently denied, show settings dialog
     if (status.isPermanentlyDenied) {
       if (context.mounted) {
         _showSettingsDialog(context, title);
@@ -30,35 +33,7 @@ class PermissionService {
       return false;
     }
 
-    // 4. Show explanatory dialog before system prompt
-    final bool? proceed = await showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => PermissionDialog(
-        title: title,
-        description: description,
-        icon: icon,
-        onAllow: () => Navigator.pop(context, true),
-        onCancel: () => Navigator.pop(context, false),
-      ),
-    );
-
-    if (proceed != true) return false;
-
-    // 5. Request permission
-    status = await permission.request();
-
-    // 6. Handle the result
-    if (status.isGranted) {
-      return true;
-    } else if (status.isPermanentlyDenied) {
-      if (context.mounted) {
-        _showSettingsDialog(context, title);
-      }
-      return false;
-    }
-
-    return false;
+    return status.isGranted;
   }
 
   /// Show a dialog directing the user to app settings

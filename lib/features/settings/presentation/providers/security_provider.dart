@@ -127,7 +127,11 @@ class SecurityNotifier extends StateNotifier<SecurityState> {
   Future<void> setPin(String pin) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_pinKey, pin);
-    state = state.copyWith(hasPin: true);
+    state = state.copyWith(
+      hasPin: true,
+      isAuthorized: true,
+      lastAuthenticatedAt: DateTime.now(),
+    );
   }
 
   Future<void> clearPin() async {

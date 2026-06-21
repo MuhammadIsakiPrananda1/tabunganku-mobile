@@ -13,7 +13,6 @@ import 'package:tabunganku/core/theme/theme_provider.dart';
 import 'package:tabunganku/models/shopping_item_model.dart';
 import 'package:tabunganku/providers/shopping_item_provider.dart';
 import 'package:tabunganku/features/settings/presentation/providers/security_provider.dart';
-import 'package:tabunganku/core/constants/transaction_categories.dart';
 import 'package:tabunganku/services/image_upload_service.dart';
 
 class ShoppingFormSheet extends ConsumerStatefulWidget {
@@ -581,7 +580,7 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
                       controller: _pricePerUnitController,
                       hint: 'Masukkan harga',
                       icon: Icons.payments_outlined,
-                      keyboardType: TextInputType.number,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       inputFormatters: [
                         FilteringTextInputFormatter.digitsOnly,
                         _RibuanSeparatorInputFormatter(),
@@ -598,7 +597,7 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
                       controller: _quantityController,
                       hint: 'Masukkan jumlah',
                       icon: Icons.onetwothree_rounded,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      keyboardType: TextInputType.text,
                       isDarkMode: isDarkMode,
                       validator: (v) => v!.isEmpty ? 'Wajib diisi' : null,
                     ),

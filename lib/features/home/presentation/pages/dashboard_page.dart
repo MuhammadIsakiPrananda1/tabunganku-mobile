@@ -961,7 +961,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                         // Editable amount input
                         TextField(
                           controller: amountController,
-                          keyboardType: TextInputType.number,
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
                           inputFormatters: [
                             FilteringTextInputFormatter.digitsOnly,
                             _RibuanFormatter(),
@@ -3138,8 +3138,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             prevKeyboardVisible = isKeyboardVisible;
 
             // Dynamic colors for high contrast and conditional branding
-            final formContrastColor =
-                type == TransactionType.income ? Colors.teal : Colors.redAccent;
+            final formContrastColor = Colors.teal;
             final formLabelColor = isDarkMode ? Colors.white70 : Colors.black87;
             final formSubTextColor =
                 isDarkMode ? Colors.white54 : Colors.black54;
@@ -3228,7 +3227,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                 autofocus: false,
                                 autovalidateMode:
                                     AutovalidateMode.onUserInteraction,
-                                keyboardType: TextInputType.number,
+                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                 textAlign: TextAlign.left,
                                 style: GoogleFonts.quicksand(
                                   fontSize: 14,
@@ -3247,7 +3246,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                 onTapOutside: (event) =>
                                     FocusScope.of(context).unfocus(),
                                 decoration: InputDecoration(
-                                  hintText: '0',
+                                  hintText: 'Masukkan Nominal',
                                   hintStyle: GoogleFonts.quicksand(
                                     fontSize: 14,
                                     fontWeight: FontWeight.bold,
@@ -5084,8 +5083,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                       label: 'Nominal Target',
                       isDarkMode: isDarkMode,
                       prefixText: 'Rp',
-                      hintText: '0',
-                      keyboardType: TextInputType.number,
+                      hintText: 'Masukkan Nominal',
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       inputFormatters: [
                         FilteringTextInputFormatter.digitsOnly,
                         RibuanFormatter(),
@@ -6939,7 +6938,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                       TextFormField(
                         controller: amountController,
                         autofocus: t.type == TransactionType.expense,
-                        keyboardType: TextInputType.number,
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
                         inputFormatters: [
                           FilteringTextInputFormatter.digitsOnly,
                           RibuanFormatter()

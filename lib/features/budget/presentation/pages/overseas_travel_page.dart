@@ -691,7 +691,7 @@ class _OverseasTravelPageState extends ConsumerState<OverseasTravelPage> {
         TextFormField(
           controller: controller,
           readOnly: readOnly,
-          keyboardType: isText ? TextInputType.text : TextInputType.number,
+          keyboardType: isText ? TextInputType.text : const TextInputType.numberWithOptions(decimal: true),
           inputFormatters: isText ? [] : [_RibuanFormatter()],
           style: GoogleFonts.quicksand(
             fontWeight: FontWeight.bold, 
@@ -740,7 +740,7 @@ class _OverseasTravelPageState extends ConsumerState<OverseasTravelPage> {
             const SizedBox(height: 16),
             TextFormField(
               controller: controller,
-              keyboardType: TextInputType.number,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
               inputFormatters: [_RibuanFormatter()],
               autofocus: true,
               style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: contentColor),

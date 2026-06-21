@@ -36,60 +36,91 @@ class _BuyingTargetsPageState extends ConsumerState<BuyingTargetsPage> {
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
-    final bgColor = isDarkMode ? AppColors.backgroundDark : const Color(0xFFF8FAF9);
     final targetsAsync = ref.watch(savingTargetsStreamProvider);
 
+    final txtClr = isDarkMode ? Colors.white : Colors.black87;
+    final pageBg = isDarkMode ? AppColors.backgroundDark : const Color(0xFFF0F3F7);
+
     return Scaffold(
-      backgroundColor: bgColor,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
-        leading: IconButton(
-          onPressed: () => Navigator.pop(context),
-          icon: Icon(Icons.arrow_back_ios_new_rounded, color: contentColor, size: 20),
-        ),
-        title: Text('Target Saya', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: contentColor)),
-      ),
-      body: targetsAsync.when(
-        data: (targets) {
-          final buyingTargets = targets.where((t) => t.category == 'Pembelian' || t.category == 'Umum').toList();
-          
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildDashboardHeader(buyingTargets, isDarkMode),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                child: Text(
-                  'DAFTAR TARGET BELANJA', 
-                  style: GoogleFonts.quicksand(
-                    fontSize: 9, 
-                    fontWeight: FontWeight.bold, 
-                    letterSpacing: 1.2,
-                    color: contentColor.withValues(alpha: 0.4),
+      backgroundColor: pageBg,
+      body: SafeArea(
+        child: Column(
+          children: [
+            // ── AppBar (Catatan Pinjaman style) ────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(4, 8, 16, 0),
+              child: Row(
+                children: [
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: Icon(Icons.arrow_back_ios_new_rounded,
+                        size: 17,
+                        color: isDarkMode ? Colors.white70 : AppColors.primaryDark),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
                   ),
-                ),
+                  Expanded(
+                    child: Text(
+                      'Target Saya',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.quicksand(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: txtClr),
+                    ),
+                  ),
+                  const SizedBox(width: 40),
+                ],
               ),
-              Expanded(
-                child: buyingTargets.isEmpty
-                    ? _buildEmptyState(isDarkMode)
-                    : ListView.builder(
-                        padding: const EdgeInsets.fromLTRB(16, 4, 16, 100),
-                        itemCount: buyingTargets.length,
-                        physics: const BouncingScrollPhysics(),
-                        itemBuilder: (context, index) {
-                          final t = buyingTargets[index];
-                          return _buildTargetItem(t, isDarkMode);
-                        },
+            ),
+            const SizedBox(height: 6),
+
+            // ── Body content ───────────────────────────────────────────
+            Expanded(
+              child: targetsAsync.when(
+                data: (targets) {
+                  final buyingTargets = targets
+                      .where((t) => t.category == 'Pembelian' || t.category == 'Umum')
+                      .toList();
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildDashboardHeader(buyingTargets, isDarkMode),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                        child: Text(
+                          'DAFTAR TARGET BELANJA',
+                          style: GoogleFonts.quicksand(
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.2,
+                            color: txtClr.withValues(alpha: 0.35),
+                          ),
+                        ),
                       ),
+                      Expanded(
+                        child: buyingTargets.isEmpty
+                            ? _buildEmptyState(isDarkMode)
+                            : ListView.builder(
+                                padding: const EdgeInsets.fromLTRB(16, 4, 16, 100),
+                                itemCount: buyingTargets.length,
+                                physics: const BouncingScrollPhysics(),
+                                itemBuilder: (context, index) {
+                                  final t = buyingTargets[index];
+                                  return _buildTargetItem(t, isDarkMode);
+                                },
+                              ),
+                      ),
+                    ],
+                  );
+                },
+                loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
+                error: (e, _) => Center(child: Text('Error: $e')),
               ),
-            ],
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
-        error: (e, _) => Center(child: Text('Error: $e')),
+            ),
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showAddTargetSheet(context, isDarkMode),
@@ -138,7 +169,7 @@ class _BuyingTargetsPageState extends ConsumerState<BuyingTargetsPage> {
       isDarkMode: isDarkMode,
       prefixText: unit.isNotEmpty ? unit : null,
       hintText: hint,
-      keyboardType: isPremium ? TextInputType.number : TextInputType.text,
+      keyboardType: isPremium ? const TextInputType.numberWithOptions(decimal: true) : TextInputType.text,
       inputFormatters: isPremium ? [_RibuanFormatter()] : null,
       hasError: hasError,
       onChanged: onChanged,
@@ -163,274 +194,243 @@ class _BuyingTargetsPageState extends ConsumerState<BuyingTargetsPage> {
     final overallProgress = totalEstimated > 0 ? totalSaved / totalEstimated : 0.0;
     final totalCount = buyingTargets.length;
 
+    final cardBg = isDarkMode ? const Color(0xFF1A1A1A) : Colors.white;
+    final borderColor = isDarkMode
+        ? Colors.white.withValues(alpha: 0.08)
+        : Colors.black.withValues(alpha: 0.05);
+    final subClr = isDarkMode ? Colors.white38 : Colors.grey.shade500;
+    final txtClr = isDarkMode ? Colors.white : AppColors.primaryDark;
+
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 2, 16, 12),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: isDarkMode
-              ? [
-                  AppColors.primaryDark.withValues(alpha: 0.85),
-                  AppColors.primary.withValues(alpha: 0.55),
-                ]
-              : [
-                  AppColors.primary,
-                  AppColors.primaryDark,
-                ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: cardBg,
         borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: isDarkMode ? 0.12 : 0.25),
-            blurRadius: 16,
-            offset: const Offset(0, 8),
-          ),
-        ],
+        border: Border.all(color: borderColor, width: 1.2),
+        boxShadow: isDarkMode
+            ? []
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.02),
+                  blurRadius: 16,
+                  offset: const Offset(0, 8),
+                ),
+              ],
       ),
-      clipBehavior: Clip.antiAlias,
-      child: Stack(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Background decorative glow circle 1
-          Positioned(
-            right: -24,
-            top: -24,
-            child: Container(
-              width: 130,
-              height: 130,
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.08),
-                shape: BoxShape.circle,
-              ),
-            ),
-          ),
-          // Background decorative glow circle 2
-          Positioned(
-            left: -40,
-            bottom: -50,
-            child: Container(
-              width: 160,
-              height: 160,
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.04),
-                shape: BoxShape.circle,
-              ),
-            ),
-          ),
-          // Content
-          Padding(
-            padding: const EdgeInsets.all(18),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Bagian Atas: Ringkasan Anggaran Utama
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'TOTAL TARGET IMPIAN',
-                          style: GoogleFonts.quicksand(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white.withValues(alpha: 0.7),
-                            letterSpacing: 1.0,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          _formatRupiah(totalEstimated),
-                          style: GoogleFonts.quicksand(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w900,
-                            color: Colors.white,
-                            letterSpacing: -0.5,
-                          ),
-                        ),
-                      ],
+          // Row 1: Title & Status Badge
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'TOTAL TARGET IMPIAN',
+                    style: GoogleFonts.quicksand(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: subClr,
+                      letterSpacing: 1.0,
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(30),
-                        border: Border.all(color: Colors.white.withValues(alpha: 0.1), width: 1),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            totalCount == 0 
-                                ? Icons.hourglass_empty_rounded 
-                                : (overallProgress >= 1.0 ? Icons.check_circle_rounded : Icons.cached_rounded),
-                            color: Colors.white,
-                            size: 12,
-                          ),
-                          const SizedBox(width: 5),
-                          Text(
-                            totalCount == 0 
-                                ? 'Kosong' 
-                                : '${(overallProgress * 100).toInt()}% Tercapai',
-                            style: GoogleFonts.quicksand(
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    _formatRupiah(totalEstimated),
+                    style: GoogleFonts.quicksand(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      color: txtClr,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: totalCount == 0
+                      ? (isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100)
+                      : (overallProgress >= 1.0
+                          ? Colors.green.withValues(alpha: 0.1)
+                          : AppColors.primary.withValues(alpha: 0.1)),
+                  borderRadius: BorderRadius.circular(30),
+                  border: Border.all(
+                    color: totalCount == 0
+                        ? (isDarkMode ? Colors.white10 : Colors.grey.shade300)
+                        : (overallProgress >= 1.0
+                            ? Colors.green.withValues(alpha: 0.2)
+                            : AppColors.primary.withValues(alpha: 0.2)),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      totalCount == 0
+                          ? Icons.hourglass_empty_rounded
+                          : (overallProgress >= 1.0
+                              ? Icons.check_circle_rounded
+                              : Icons.cached_rounded),
+                      color: totalCount == 0
+                          ? (isDarkMode ? Colors.white30 : Colors.grey.shade500)
+                          : (overallProgress >= 1.0 ? Colors.green : AppColors.primary),
+                      size: 11,
+                    ),
+                    const SizedBox(width: 5),
+                    Text(
+                      totalCount == 0
+                          ? 'Kosong'
+                          : '${(overallProgress * 100).toInt()}% Tercapai',
+                      style: GoogleFonts.quicksand(
+                        fontSize: 9.5,
+                        fontWeight: FontWeight.bold,
+                        color: totalCount == 0
+                            ? (isDarkMode ? Colors.white54 : Colors.grey.shade600)
+                            : (overallProgress >= 1.0 ? Colors.green : AppColors.primary),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 18),
-                // Bagian Tengah: Progress Bar & Info Barang
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              ),
+            ],
+          ),
+          const SizedBox(height: 18),
+
+          // Row 2: Progress Bar
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Progres Target',
+                style: GoogleFonts.quicksand(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: subClr,
+                ),
+              ),
+              Text(
+                '$totalCount Barang Impian',
+                style: GoogleFonts.quicksand(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: txtClr,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: LinearProgressIndicator(
+              value: totalEstimated > 0 ? overallProgress : 0.0,
+              backgroundColor: isDarkMode
+                  ? Colors.white.withValues(alpha: 0.05)
+                  : Colors.grey.shade100,
+              valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
+              minHeight: 4,
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // Divider
+          Divider(
+            height: 1,
+            color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100,
+          ),
+          const SizedBox(height: 16),
+
+          // Row 3: Terkumpul & Sisa Target
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.stars_rounded, color: Colors.white.withValues(alpha: 0.7), size: 14),
+                        Container(
+                          width: 6,
+                          height: 6,
+                          decoration: const BoxDecoration(
+                            color: Colors.amber,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
                         const SizedBox(width: 6),
                         Text(
-                          'Progres Pemenuhan',
+                          'TERKUMPUL',
                           style: GoogleFonts.quicksand(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white.withValues(alpha: 0.7),
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                            color: subClr,
+                            letterSpacing: 0.5,
                           ),
                         ),
                       ],
                     ),
+                    const SizedBox(height: 4),
                     Text(
-                      '$totalCount Barang Impian',
+                      _formatRupiah(totalSaved),
                       style: GoogleFonts.quicksand(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: txtClr,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: LinearProgressIndicator(
-                    value: totalEstimated > 0 ? overallProgress : 0.0,
-                    backgroundColor: Colors.white.withValues(alpha: 0.1),
-                    valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
-                    minHeight: 6,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                // Bagian Bawah: Dua Kolom Terbelanja vs Sisa
-                Row(
+              ),
+              Container(
+                width: 1,
+                height: 30,
+                color: isDarkMode
+                    ? Colors.white.withValues(alpha: 0.05)
+                    : Colors.grey.shade200,
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+                    Row(
+                      children: [
+                        Container(
+                          width: 6,
+                          height: 6,
+                          decoration: const BoxDecoration(
+                            color: Colors.blueAccent,
+                            shape: BoxShape.circle,
+                          ),
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Container(
-                                  width: 6,
-                                  height: 6,
-                                  decoration: const BoxDecoration(
-                                    color: Colors.amberAccent,
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  'TERKUMPUL',
-                                  style: GoogleFonts.quicksand(
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white.withValues(alpha: 0.75),
-                                    letterSpacing: 0.5,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 4),
-                            FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Text(
-                                _formatRupiah(totalSaved),
-                                style: GoogleFonts.quicksand(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ],
+                        const SizedBox(width: 6),
+                        Text(
+                          'SISA TARGET',
+                          style: GoogleFonts.quicksand(
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                            color: subClr,
+                            letterSpacing: 0.5,
+                          ),
                         ),
-                      ),
+                      ],
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Container(
-                                  width: 6,
-                                  height: 6,
-                                  decoration: const BoxDecoration(
-                                    color: Colors.lightBlueAccent,
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  'SISA TARGET',
-                                  style: GoogleFonts.quicksand(
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white.withValues(alpha: 0.75),
-                                    letterSpacing: 0.5,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 4),
-                            FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Text(
-                                _formatRupiah(remainingNeeded),
-                                style: GoogleFonts.quicksand(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _formatRupiah(remainingNeeded),
+                      style: GoogleFonts.quicksand(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: txtClr,
                       ),
                     ),
                   ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ],
       ),
@@ -713,248 +713,174 @@ class _BuyingTargetsPageState extends ConsumerState<BuyingTargetsPage> {
         ? (targetBalance / target.targetAmount).clamp(0.0, 1.0)
         : 0.0;
     const baseColor = AppColors.primary;
-    final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
 
     final daysLeft = target.dueDate.difference(DateTime.now()).inDays;
-    final remainingAmount = target.targetAmount - targetBalance;
+    final remainingAmount = (target.targetAmount - targetBalance).clamp(0.0, double.infinity);
+    final deadlineColor = daysLeft <= 7
+        ? Colors.redAccent
+        : daysLeft <= 30
+            ? Colors.orange
+            : baseColor;
+
+    final cardBg = isDarkMode ? const Color(0xFF1A1A1A) : Colors.white;
+    final borderColor = isDarkMode
+        ? Colors.white.withValues(alpha: 0.06)
+        : Colors.grey.shade100;
+    final subClr = isDarkMode ? Colors.white30 : Colors.grey.shade400;
+    final txtClr = isDarkMode ? Colors.white : Colors.black87;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
-        color: isDarkMode ? const Color(0xFF111111) : Colors.white,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100,
-        ),
+        color: cardBg,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: borderColor, width: 1.2),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDarkMode ? 0.25 : 0.03),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
+            color: Colors.black.withValues(alpha: isDarkMode ? 0.15 : 0.02),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(18),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(20),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: () => _showEditDialog(target),
+          onLongPress: () => _deleteTarget(target.id),
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Row(
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        target.name.toUpperCase(),
-                        style: GoogleFonts.quicksand(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 0.5,
-                          color: contentColor,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: (daysLeft <= 30 ? Colors.redAccent : AppColors.primary)
-                              .withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.alarm_rounded,
-                              size: 10,
-                              color: daysLeft <= 30 ? Colors.redAccent : AppColors.primary,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              daysLeft > 0 ? '$daysLeft Hari Lagi' : 'Tenggat Terlampaui',
-                              style: GoogleFonts.quicksand(
-                                fontSize: 8.5,
-                                fontWeight: FontWeight.bold,
-                                color: daysLeft <= 30 ? Colors.redAccent : AppColors.primary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                // Icon placeholder
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  width: 50,
+                  height: 50,
                   decoration: BoxDecoration(
-                    color: baseColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(20),
+                    color: baseColor.withValues(alpha: isDarkMode ? 0.15 : 0.08),
+                    borderRadius: BorderRadius.circular(15),
                   ),
-                  child: Text(
-                    '${(progress * 100).toInt()}%',
-                    style: GoogleFonts.quicksand(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w900,
-                      color: baseColor,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: LinearProgressIndicator(
-                value: progress,
-                minHeight: 8,
-                backgroundColor: baseColor.withValues(alpha: 0.1),
-                valueColor: const AlwaysStoppedAnimation<Color>(baseColor),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'TARGET',
-                        style: GoogleFonts.quicksand(
-                          fontSize: 8,
-                          color: isDarkMode ? Colors.white30 : Colors.grey.shade400,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          _formatRupiah(target.targetAmount),
-                          style: GoogleFonts.quicksand(
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.bold,
-                            color: contentColor,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Container(width: 1, height: 20, color: isDarkMode ? Colors.white10 : Colors.grey.shade200),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        'TERKUMPUL',
-                        style: GoogleFonts.quicksand(
-                          fontSize: 8,
-                          color: isDarkMode ? Colors.white30 : Colors.grey.shade400,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          _formatRupiah(targetBalance),
-                          style: GoogleFonts.quicksand(
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.green,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Container(width: 1, height: 20, color: isDarkMode ? Colors.white10 : Colors.grey.shade200),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        'SISA',
-                        style: GoogleFonts.quicksand(
-                          fontSize: 8,
-                          color: isDarkMode ? Colors.white30 : Colors.grey.shade400,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          _formatRupiah(remainingAmount.clamp(0, double.infinity)),
-                          style: GoogleFonts.quicksand(
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.bold,
-                            color: baseColor,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Divider(height: 1, color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100),
-            const SizedBox(height: 14),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () => _showEditDialog(target),
-                    icon: const Icon(Icons.edit_rounded, size: 14),
-                    label: Text(
-                      'Ubah Target',
-                      style: GoogleFonts.quicksand(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 10,
-                      ),
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: baseColor,
-                      side: BorderSide(color: baseColor.withValues(alpha: 0.2)),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                    ),
+                  child: const Icon(
+                    Icons.local_mall_rounded,
+                    color: baseColor,
+                    size: 22,
                   ),
                 ),
                 const SizedBox(width: 12),
+
+                // Name & meta
                 Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () => _deleteTarget(target.id),
-                    icon: const Icon(Icons.delete_outline_rounded, size: 14),
-                    label: Text(
-                      'Hapus',
-                      style: GoogleFonts.quicksand(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 10,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        target.name,
+                        style: GoogleFonts.quicksand(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: txtClr,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.redAccent,
-                      side: BorderSide(color: Colors.redAccent.withValues(alpha: 0.2)),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                      const SizedBox(height: 5),
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: deadlineColor.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.alarm_rounded, size: 9, color: deadlineColor),
+                                const SizedBox(width: 3),
+                                Text(
+                                  daysLeft > 0 ? '$daysLeft hari lagi' : 'Tenggat lewat',
+                                  style: GoogleFonts.quicksand(
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.bold,
+                                    color: deadlineColor,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            DateFormat('dd MMM yyyy', 'id_ID').format(target.dueDate),
+                            style: GoogleFonts.quicksand(
+                              fontSize: 9,
+                              color: subClr,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                    ),
+                      const SizedBox(height: 8),
+                      // Thin progress bar
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(6),
+                        child: LinearProgressIndicator(
+                          value: progress,
+                          minHeight: 4,
+                          backgroundColor: isDarkMode
+                              ? Colors.white.withValues(alpha: 0.06)
+                              : Colors.grey.shade100,
+                          valueColor: const AlwaysStoppedAnimation<Color>(baseColor),
+                        ),
+                      ),
+                    ],
                   ),
+                ),
+                const SizedBox(width: 12),
+
+                // Price & percentage on the right
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      _formatRupiah(target.targetAmount),
+                      style: GoogleFonts.quicksand(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: baseColor,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: baseColor.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        '${(progress * 100).toInt()}%',
+                        style: GoogleFonts.quicksand(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w900,
+                          color: baseColor,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Sisa ${_formatRupiah(remainingAmount)}',
+                      style: GoogleFonts.quicksand(
+                        fontSize: 9,
+                        fontWeight: FontWeight.bold,
+                        color: subClr,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
-          ],
+          ),
         ),
       ),
     );

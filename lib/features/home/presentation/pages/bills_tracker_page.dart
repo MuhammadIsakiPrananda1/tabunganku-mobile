@@ -118,7 +118,7 @@ class _BillsTrackerPageState extends ConsumerState<BillsTrackerPage> {
             prefixText: 'Rp',
             isDarkMode: isDarkMode,
             hintText: 'Masukkan Nominal',
-            keyboardType: TextInputType.number,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
             inputFormatters: [
               FilteringTextInputFormatter.digitsOnly,
               _RibuanFormatter(),
@@ -392,7 +392,7 @@ class _BillsTrackerPageState extends ConsumerState<BillsTrackerPage> {
                 prefixText: 'Rp',
                 isDarkMode: isDarkMode,
                 hintText: 'Masukkan Nominal',
-                keyboardType: TextInputType.number,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 inputFormatters: [
                   FilteringTextInputFormatter.digitsOnly,
                   _RibuanFormatter(),

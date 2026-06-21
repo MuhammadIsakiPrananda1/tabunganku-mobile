@@ -125,6 +125,11 @@ class MockTransactionService implements TransactionService {
     // Trigger challenge update
     if (challengeService != null) {
       await challengeService!.checkAndUpdateChallengeFromTransaction(transaction);
+      
+      // Challenge streak is separate from profile saving streak and should only update on challenge completion
+      // if (transaction.groupId == null) {
+      //   await challengeService!.updateStreakOnIncome();
+      // }
     }
 
     return transaction;

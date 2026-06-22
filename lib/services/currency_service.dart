@@ -27,16 +27,14 @@ class CurrencyService {
 
   Future<Map<String, double>> fetchLatestRates() async {
     try {
-      // Fetch rates relative to IDR
+
       final response = await http.get(Uri.parse('$_baseUrl?from=IDR')).timeout(const Duration(seconds: 10));
       
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final rates = Map<String, dynamic>.from(data['rates']);
-        
-        // Convert rates (1 IDR = X Currency) to (1 Currency = Y IDR)
-        // Y = 1 / X
-        final Map<String, double> idrRates = {};
+
+final Map<String, double> idrRates = {};
         idrRates['IDR'] = 1.0;
         
         rates.forEach((code, rate) {
@@ -48,9 +46,8 @@ class CurrencyService {
     } catch (e) {
       print('Currency API error: $e');
     }
-    
-    // Fallback hardcoded rates if API fails
-    return {
+
+return {
       'IDR': 1.0,
       'USD': 16250.0,
       'EUR': 17400.0,

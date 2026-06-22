@@ -52,7 +52,7 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
   @override
   void dispose() {
     _contentController.removeListener(_onContentChanged);
-    // Auto-save on dispose if not explicitly saved/exited
+
     if (!_hasSaved) {
       _saveNote();
     }
@@ -72,9 +72,8 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
       try {
         final int cursor = selection.start;
 
-        // 1. Handle ENTER (Newline)
-        if (cursor > 0 && text[cursor - 1] == '\n') {
-          // Find the start of the line that was just ended
+if (cursor > 0 && text[cursor - 1] == '\n') {
+
           int lineStart = 0;
           for (int i = cursor - 2; i >= 0; i--) {
             if (text[i] == '\n') {
@@ -94,7 +93,7 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
 
             if (endedLine.trim() == '$numStr.') {
               if (numStr != '1') {
-                // Cancel list
+
                 final newText = text.substring(0, lineStart) + text.substring(cursor);
                 _contentController.value = TextEditingValue(
                   text: newText,
@@ -103,7 +102,7 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
                 _previousText = newText;
                 return;
               } else {
-                // First list item. Continue to 2.
+
                 final nextNum = int.parse(numStr) + 1;
                 final prefix = '$nextNum. ';
                 final newText = text.substring(0, cursor) + prefix + text.substring(cursor);
@@ -115,7 +114,7 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
                 return;
               }
             } else {
-              // Increment and continue list
+
               final nextNum = int.parse(numStr) + 1;
               final prefix = '$nextNum. ';
               final newText = text.substring(0, cursor) + prefix + text.substring(cursor);
@@ -131,7 +130,7 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
             final bulletChar = match.group(1)!;
 
             if (endedLine.trim() == bulletChar) {
-              // Check if there is a line before this one that starts with a bullet
+
               bool hasPreviousBulletLine = false;
               if (lineStart > 1) {
                 int prevLineStart = 0;
@@ -148,7 +147,7 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
               }
 
               if (hasPreviousBulletLine) {
-                // Cancel list
+
                 final newText = text.substring(0, lineStart) + text.substring(cursor);
                 _contentController.value = TextEditingValue(
                   text: newText,
@@ -157,7 +156,7 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
                 _previousText = newText;
                 return;
               } else {
-                // First bullet. Continue list.
+
                 final prefix = '$bulletChar ';
                 final newText = text.substring(0, cursor) + prefix + text.substring(cursor);
                 _contentController.value = TextEditingValue(
@@ -168,7 +167,7 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
                 return;
               }
             } else {
-              // Continue bullet list
+
               final prefix = '$bulletChar ';
               final newText = text.substring(0, cursor) + prefix + text.substring(cursor);
               _contentController.value = TextEditingValue(
@@ -181,8 +180,7 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
           }
         }
 
-        // 2. Handle SPACE (Auto-convert list bullet characters)
-        if (cursor > 0 && text[cursor - 1] == ' ') {
+if (cursor > 0 && text[cursor - 1] == ' ') {
           int lineStart = 0;
           for (int i = cursor - 2; i >= 0; i--) {
             if (text[i] == '\n') {
@@ -299,9 +297,9 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
             TextButton(
               onPressed: () {
                 ref.read(noteServiceProvider).deleteNote(widget.note!.id);
-                _hasSaved = true; // Mark saved so dispose doesn't rewrite it
-                Navigator.pop(context); // Close dialog
-                Navigator.pop(this.context); // Exit detail page
+                _hasSaved = true;
+                Navigator.pop(context);
+                Navigator.pop(this.context);
               },
               child: Text(
                 'Hapus',
@@ -387,7 +385,7 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Date stamp
+
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
                 child: Text(
@@ -399,9 +397,8 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
                   ),
                 ),
               ),
-              
-              // Title input
-              Padding(
+
+Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: TextFormField(
                   controller: _titleController,
@@ -429,9 +426,8 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
                 ),
               ),
               const SizedBox(height: 6),
-              
-              // Divider Line
-              Padding(
+
+Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Divider(
                   color: textColor.withOpacity(0.12),
@@ -439,10 +435,9 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
                   height: 1,
                 ),
               ),
-              const SizedBox(height: 8), // Perfect spacing right under the line
-              
-              // Scrollable Note content
-              Expanded(
+              const SizedBox(height: 8),
+
+Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: TextFormField(
@@ -475,9 +470,8 @@ class _NoteDetailPageState extends ConsumerState<NoteDetailPage> {
                   ),
                 ),
               ),
-              
-              // Bottom Color Picker Bar
-              Container(
+
+Container(
                 padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
                 decoration: BoxDecoration(
                   color: isDarkMode ? Colors.black.withOpacity(0.2) : Colors.black.withOpacity(0.03),

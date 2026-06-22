@@ -14,7 +14,6 @@ import 'features/settings/presentation/providers/security_provider.dart';
 import 'features/auth/presentation/pages/lock_screen.dart';
 import 'core/widgets/notification_observer.dart';
 
-/// Global instance agar bisa diakses dari mana saja
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
 
@@ -33,46 +32,38 @@ Future<void> _initNotifications() async {
 
   await flutterLocalNotificationsPlugin.initialize(initSettings);
 
-  // Ambil referensi plugin Android
-  final androidPlugin =
+final androidPlugin =
       flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin>();
 
   if (androidPlugin != null) {
-    // Request permission untuk Android 13+ (Notifikasi & Exact Alarm)
+
     await androidPlugin.requestNotificationsPermission();
 
-    // Android 8+ (API 26+) WAJIB membuat channel secara eksplisit.
-    // PENTING: Setelah channel dibuat, Android MENGUNCI importance-nya.
-    // Satu-satunya cara mengubahnya adalah: hapus channel lama → buat baru.
-    // Kita hapus & buat ulang sekali saat app diupdate agar suara tidak hilang.
-    const channel = AndroidNotificationChannel(
-      'tabunganku_activity',          // ID — harus cocok dengan yang di notification_service.dart
-      'Aktivitas TabunganKu',         // Nama yang tampil di Settings HP
+const channel = AndroidNotificationChannel(
+      'tabunganku_activity',
+      'Aktivitas TabunganKu',
       description: 'Notifikasi untuk pencapaian dan aktivitas menabung',
-      importance: Importance.high,    // HIGH = ada suara & muncul sebagai heads-up
+      importance: Importance.high,
       playSound: true,
       enableVibration: true,
       showBadge: true,
     );
 
-    // Hapus channel lama (jika ada) untuk memastikan importance diperbarui
-    await androidPlugin.deleteNotificationChannel(channel.id);
-    // Buat ulang dengan konfigurasi terbaru
+await androidPlugin.deleteNotificationChannel(channel.id);
+
     await androidPlugin.createNotificationChannel(channel);
     debugPrint('NotificationChannel re-created: ${channel.id}');
   }
 }
 
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Inisialisasi timezone dengan fallback yang lebih aman
-  try {
+try {
     tz_data.initializeTimeZones();
     final dynamic location = await FlutterTimezone.getLocalTimezone();
-    // flutter_timezone v5.x returns TimezoneInfo object with 'identifier' property
+
     final String locationName = location is String
         ? location
         : (location as dynamic).identifier.toString();
@@ -88,22 +79,18 @@ void main() async {
     }
   }
 
-  // Inisialisasi notifikasi di level app
-  await _initNotifications();
+await _initNotifications();
 
-  // Inisialisasi locale data untuk DateFormat('...', 'id_ID')
-  await initializeDateFormatting('id_ID', null);
+await initializeDateFormatting('id_ID', null);
 
-  // Tangkap unhandled Flutter errors agar tidak force close diam-diam
-  FlutterError.onError = (FlutterErrorDetails details) {
+FlutterError.onError = (FlutterErrorDetails details) {
     FlutterError.presentError(details);
     debugPrint('FlutterError: ${details.exceptionAsString()}');
   };
 
-  // Tangkap error di luar Flutter framework
-  PlatformDispatcher.instance.onError = (error, stack) {
+PlatformDispatcher.instance.onError = (error, stack) {
     debugPrint('Unhandled error: $error\n$stack');
-    return true; // true = error sudah ditangani, jangan crash
+    return true;
   };
 
   runApp(
@@ -159,8 +146,7 @@ class _TabunganKuAppState extends ConsumerState<TabunganKuApp>
                 final security = ref.watch(securityProvider);
                 final router = ref.watch(appRouterProvider);
 
-                // Get current location safely to exclude lock from splash/setup
-                String location = '/';
+String location = '/';
                 try {
                   location =
                       router.routerDelegate.currentConfiguration.fullPath;

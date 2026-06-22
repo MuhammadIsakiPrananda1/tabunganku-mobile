@@ -10,29 +10,25 @@ final imageUploadServiceProvider = Provider<ImageUploadService>((ref) {
 });
 
 class ImageUploadService {
-  // URL Server VPS permanen
+
   static const String _serverUrl = 'http://103.6.201.118:8089/upload';
 
-  /// Mendapatkan URL server penampung gambar secara permanen.
-  Future<String> getServerUrl() async {
+Future<String> getServerUrl() async {
     return _serverUrl;
   }
 
-  /// Mengunggah gambar ke server VPS permanen.
-  /// Mengembalikan URL gambar di server jika berhasil, atau null jika offline/gagal.
-  Future<String?> uploadImage(File file) async {
+Future<String?> uploadImage(File file) async {
     try {
       debugPrint('[ImageUploadService] Mengunggah gambar ke VPS: $_serverUrl');
       final uri = Uri.parse(_serverUrl);
 
       final request = http.MultipartRequest('POST', uri);
 
-      // Tambahkan file gambar
-      final stream = http.ByteStream(file.openRead());
+final stream = http.ByteStream(file.openRead());
       final length = await file.length();
 
       final multipartFile = http.MultipartFile(
-        'image', // Field name di backend (multer 'image')
+        'image',
         stream,
         length,
         filename: p.basename(file.path),
@@ -40,8 +36,7 @@ class ImageUploadService {
 
       request.files.add(multipartFile);
 
-      // Kirim request dengan timeout agar tidak menggantung jika VPS offline
-      final streamedResponse = await request.send().timeout(
+final streamedResponse = await request.send().timeout(
             const Duration(seconds: 15),
           );
 

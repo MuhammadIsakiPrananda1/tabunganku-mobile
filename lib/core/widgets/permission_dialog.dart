@@ -50,7 +50,7 @@ class PermissionDialog extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Icon Header
+
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
@@ -64,9 +64,8 @@ class PermissionDialog extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 24),
-                
-                // Title
-                Text(
+
+Text(
                   'Izin $title',
                   style: TextStyle(
                     fontSize: 19,
@@ -76,9 +75,8 @@ class PermissionDialog extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 12),
-                
-                // Description
-                Text(
+
+Text(
                   description,
                   style: TextStyle(
                     fontSize: 14,
@@ -88,9 +86,8 @@ class PermissionDialog extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 32),
-                
-                // Buttons
-                Column(
+
+Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     ElevatedButton(

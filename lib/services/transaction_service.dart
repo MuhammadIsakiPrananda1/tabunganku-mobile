@@ -6,21 +6,18 @@ import 'package:tabunganku/core/security/secure_storage_service.dart';
 import 'package:tabunganku/models/transaction_model.dart';
 import 'package:tabunganku/services/challenge_service.dart';
 
-/// Service untuk mengelola data transaksi
 abstract class TransactionService {
-  /// Hapus semua transaksi user saat ini
+
   Future<void> clearAllTransactions();
   Future<List<TransactionModel>> getTransactions();
   Future<TransactionModel> getTransaction(String id);
   Future<TransactionModel> addTransaction(TransactionModel transaction);
   Future<void> updateTransaction(TransactionModel transaction);
   Future<void> deleteTransaction(String id);
-  
-  /// Menonton transaksi secara real-time.
-  Stream<List<TransactionModel>> watchTransactions();
+
+Stream<List<TransactionModel>> watchTransactions();
 }
 
-/// Hybrid implementation: Local for Personal
 class MockTransactionService implements TransactionService {
   final ChallengeService? challengeService;
 
@@ -122,15 +119,10 @@ class MockTransactionService implements TransactionService {
     await _saveUserTransactions(userId);
     await _emitTransactions(userId);
 
-    // Trigger challenge update
-    if (challengeService != null) {
+if (challengeService != null) {
       await challengeService!.checkAndUpdateChallengeFromTransaction(transaction);
-      
-      // Challenge streak is separate from profile saving streak and should only update on challenge completion
-      // if (transaction.groupId == null) {
-      //   await challengeService!.updateStreakOnIncome();
-      // }
-    }
+
+}
 
     return transaction;
   }
@@ -160,20 +152,18 @@ class MockTransactionService implements TransactionService {
 
   @override
   Stream<List<TransactionModel>> watchTransactions() {
-    // Controller to manage the stream
+
     final controller = StreamController<List<TransactionModel>>.broadcast();
 
     StreamSubscription<List<TransactionModel>>? localSub;
 
-    // Initialize local data
-    Future<void> init() async {
+Future<void> init() async {
       final userId = await _getCurrentUserId();
       await _ensureUserLoaded(userId);
       final initialData = _userTransactions[userId] ?? [];
       controller.add(_ordered(initialData));
-      
-      // Listen to future local changes
-      localSub = _streamController.stream.listen((newList) {
+
+localSub = _streamController.stream.listen((newList) {
         if (!controller.isClosed) {
           controller.add(_ordered(newList));
         }

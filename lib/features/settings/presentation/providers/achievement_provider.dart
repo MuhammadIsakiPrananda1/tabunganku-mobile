@@ -9,7 +9,7 @@ class Achievement {
   final String description;
   final IconData icon;
   final bool isUnlocked;
-  final double progress; // 0.0 to 1.0
+  final double progress;
 
   Achievement({
     required this.id,
@@ -38,11 +38,10 @@ final achievementsProvider = Provider<List<Achievement>>((ref) {
   
   return transactionsAsync.maybeWhen(
     data: (allTransactions) {
-      // Filter ONLY private transactions
+
       final transactions = allTransactions.where((t) => t.groupId == null).toList();
-      
-      // 1. Calculate stats
-      final totalIncome = transactions
+
+final totalIncome = transactions
           .where((t) => t.type == TransactionType.income)
           .fold<double>(0, (sum, t) => sum + t.amount);
       
@@ -51,9 +50,8 @@ final achievementsProvider = Provider<List<Achievement>>((ref) {
           .fold<double>(0, (sum, t) => sum + t.amount);
           
       final currentBalance = totalIncome - totalExpense;
-      
-      // 2. Define Achievements logic
-      return [
+
+return [
         Achievement(
           id: 'first_deposit',
           title: 'Top Up Pertama',

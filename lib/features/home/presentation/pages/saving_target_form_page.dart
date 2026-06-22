@@ -23,9 +23,8 @@ class _SavingTargetFormPageState extends ConsumerState<SavingTargetFormPage> {
   late TextEditingController _nameController;
   late TextEditingController _amountController;
   DateTime _selectedDate = DateTime.now().add(const Duration(days: 30));
-  
-  // Custom category selection with placeholder
-  String _selectedCategory = 'Pilih Kategori';
+
+String _selectedCategory = 'Pilih Kategori';
   final List<String> _categories = [
     'Pilih Kategori',
     'Umum',
@@ -36,13 +35,11 @@ class _SavingTargetFormPageState extends ConsumerState<SavingTargetFormPage> {
     'Kurban'
   ];
 
-  // Validation state variables
-  bool _nameHasError = false;
+bool _nameHasError = false;
   bool _amountHasError = false;
   bool _categoryHasError = false;
 
-  // Focus tracking state variables
-  bool _categoryIsFocused = false;
+bool _categoryIsFocused = false;
   bool _dateIsFocused = false;
 
   @override
@@ -160,9 +157,8 @@ class _SavingTargetFormPageState extends ConsumerState<SavingTargetFormPage> {
             Theme.of(context).brightness == Brightness.dark);
 
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
-    
-    // Aesthetic Styling Configs
-    final surfaceColor = isDarkMode 
+
+final surfaceColor = isDarkMode 
         ? Colors.white.withValues(alpha: 0.03) 
         : Colors.grey.shade100;
 
@@ -221,7 +217,7 @@ class _SavingTargetFormPageState extends ConsumerState<SavingTargetFormPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Standout Top Premium Card
+
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(24),
@@ -324,8 +320,7 @@ class _SavingTargetFormPageState extends ConsumerState<SavingTargetFormPage> {
               ),
               const SizedBox(height: 24),
 
-              // Category Picker with focus & error outlines
-              Text(
+Text(
                 'Kategori Target',
                 style: GoogleFonts.quicksand(
                   fontSize: 11,
@@ -389,8 +384,7 @@ class _SavingTargetFormPageState extends ConsumerState<SavingTargetFormPage> {
               ),
               const SizedBox(height: 24),
 
-              // Date Picker with active outline
-              Text(
+Text(
                 'Target Tanggal Tercapai',
                 style: GoogleFonts.quicksand(
                   fontSize: 11,

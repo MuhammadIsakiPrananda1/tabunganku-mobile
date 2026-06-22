@@ -241,8 +241,7 @@ class _SavingPlansPageState extends ConsumerState<SavingPlansPage> {
                   ),
                   const SizedBox(height: 24),
 
-                  // Name Input
-                  HighVisInput(
+HighVisInput(
                     controller: nameController,
                     icon: Icons.edit_note_rounded,
                     label: 'Nama Rencana',
@@ -257,8 +256,7 @@ class _SavingPlansPageState extends ConsumerState<SavingPlansPage> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Amount Input
-                  HighVisInput(
+HighVisInput(
                     controller: amountController,
                     icon: Icons.account_balance_wallet_rounded,
                     label: 'Dana yang Dibutuhkan',
@@ -282,8 +280,7 @@ class _SavingPlansPageState extends ConsumerState<SavingPlansPage> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Due Date Picker (Using HighVisInput as readOnly button)
-                  HighVisInput(
+HighVisInput(
                     controller: dateController,
                     icon: Icons.calendar_today_rounded,
                     label: 'Target Terkumpul',
@@ -310,8 +307,7 @@ class _SavingPlansPageState extends ConsumerState<SavingPlansPage> {
                   ),
                   const SizedBox(height: 20),
 
-                  // Category Dropdown Selector
-                  Text(
+Text(
                     'Kategori Rencana',
                     style: GoogleFonts.quicksand(
                       fontSize: 11,
@@ -377,8 +373,7 @@ class _SavingPlansPageState extends ConsumerState<SavingPlansPage> {
                   ),
                   const SizedBox(height: 32),
 
-                  // Save button
-                  ElevatedButton(
+ElevatedButton(
                     onPressed: () async {
                       final nameVal = nameController.text.trim();
                       final rawAmount = amountController.text.replaceAll('.', '');
@@ -508,7 +503,7 @@ class _SavingPlansPageState extends ConsumerState<SavingPlansPage> {
       ),
       body: targetsAsync.when(
         data: (targets) {
-          // Filter only saving target categories to prevent conflict with Buying Targets (Pembelian/Umum)
+
           final planTargets = targets.where((t) => 
             t.category == 'Darurat' || 
             t.category == 'Pendidikan' || 
@@ -551,7 +546,7 @@ class _SavingPlansPageState extends ConsumerState<SavingPlansPage> {
 
   Widget _buildMetricsDashboard(
       List<SavingTargetModel> targets, List<TransactionModel> transactions, bool isDark) {
-    // Filter targets based on selected category filter
+
     final filteredTargets = _selectedFilter == 'Semua'
         ? targets
         : targets.where((t) => t.category == _selectedFilter).toList();
@@ -570,14 +565,12 @@ class _SavingPlansPageState extends ConsumerState<SavingPlansPage> {
     final remaining = totalTarget - totalSaved;
     final globalProgress = totalTarget > 0 ? (totalSaved / totalTarget).clamp(0.0, 1.0) : 0.0;
 
-    // Dynamically adjust title based on selected filter
-    String dashboardTitle = 'TOTAL DANA DIRENCANAKAN';
+String dashboardTitle = 'TOTAL DANA DIRENCANAKAN';
     if (_selectedFilter != 'Semua') {
       dashboardTitle = 'TOTAL ${_getCategoryTitle(_selectedFilter).toUpperCase()}';
     }
 
-    // Dynamic brand colors for gradient and indicator
-    final activeColor = _selectedFilter == 'Semua' ? AppColors.primary : _getCategoryColor(_selectedFilter);
+final activeColor = _selectedFilter == 'Semua' ? AppColors.primary : _getCategoryColor(_selectedFilter);
     final categoryLightColors = {
       'Darurat': Colors.redAccent.shade100,
       'Pendidikan': Colors.blueAccent.shade100,
@@ -948,7 +941,7 @@ class _SavingPlansPageState extends ConsumerState<SavingPlansPage> {
             children: [
               Row(
                 children: [
-                  // Category icon
+
                   Container(
                     width: 44,
                     height: 44,
@@ -967,7 +960,7 @@ class _SavingPlansPageState extends ConsumerState<SavingPlansPage> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  // Name and Category badge
+
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1026,7 +1019,7 @@ class _SavingPlansPageState extends ConsumerState<SavingPlansPage> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  // Action buttons
+
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [

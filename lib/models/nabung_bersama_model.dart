@@ -5,7 +5,7 @@ class NabungBersamaModel {
   final String name;
   final double contributionAmount;
   final double targetAmount;
-  final String period; // 'Weekly', 'Monthly'
+  final String period;
   final DateTime startDate;
   final List<NabungBersamaMemberModel> members;
   final bool isCompleted;
@@ -113,4 +113,3 @@ class NabungBersamaMemberModel {
     );
   }
 }
-

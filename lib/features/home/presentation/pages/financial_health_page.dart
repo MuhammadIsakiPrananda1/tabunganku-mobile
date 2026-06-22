@@ -13,7 +13,7 @@ class FinancialHealthPage extends ConsumerStatefulWidget {
 }
 
 class _FinancialHealthPageState extends ConsumerState<FinancialHealthPage> {
-  // Page State: 'intro', 'quiz', 'result'
+
   String _currentState = 'intro';
   int _currentQuestionIndex = 0;
   final List<int> _selectedScores = [];
@@ -261,7 +261,7 @@ class _FinancialHealthPageState extends ConsumerState<FinancialHealthPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Illustration Capsule
+
           Container(
             padding: const EdgeInsets.all(28),
             decoration: BoxDecoration(
@@ -295,7 +295,7 @@ class _FinancialHealthPageState extends ConsumerState<FinancialHealthPage> {
             ),
           ),
           const SizedBox(height: 40),
-          // Features Info Cards
+
           _buildInfoRow(
             isDarkMode,
             Icons.speed_rounded,
@@ -317,7 +317,7 @@ class _FinancialHealthPageState extends ConsumerState<FinancialHealthPage> {
             'Ambil tindakan menabung segera melalui tautan fitur aplikasi terintegrasi.',
           ),
           const SizedBox(height: 48),
-          // Start Button
+
           SizedBox(
             width: double.infinity,
             height: 52,
@@ -396,7 +396,7 @@ class _FinancialHealthPageState extends ConsumerState<FinancialHealthPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Progress Header
+
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -420,7 +420,7 @@ class _FinancialHealthPageState extends ConsumerState<FinancialHealthPage> {
             ],
           ),
           const SizedBox(height: 12),
-          // Custom linear progress bar
+
           ClipRRect(
             borderRadius: BorderRadius.circular(6),
             child: LinearProgressIndicator(
@@ -431,7 +431,7 @@ class _FinancialHealthPageState extends ConsumerState<FinancialHealthPage> {
             ),
           ),
           const SizedBox(height: 40),
-          // Question card
+
           Text(
             currentQuestion.question,
             style: GoogleFonts.quicksand(
@@ -442,7 +442,7 @@ class _FinancialHealthPageState extends ConsumerState<FinancialHealthPage> {
             ),
           ),
           const SizedBox(height: 32),
-          // Options
+
           ...List.generate(currentQuestion.options.length, (idx) {
             final option = currentQuestion.options[idx];
             return Container(
@@ -465,7 +465,7 @@ class _FinancialHealthPageState extends ConsumerState<FinancialHealthPage> {
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
                     child: Row(
                       children: [
-                        // Option bubble indicator
+
                         Container(
                           width: 24,
                           height: 24,
@@ -478,7 +478,7 @@ class _FinancialHealthPageState extends ConsumerState<FinancialHealthPage> {
                             ),
                           ),
                           child: Text(
-                            String.fromCharCode(65 + idx), // A, B, C, D
+                            String.fromCharCode(65 + idx),
                             style: GoogleFonts.quicksand(
                               fontSize: 11,
                               fontWeight: FontWeight.w800,
@@ -524,7 +524,7 @@ class _FinancialHealthPageState extends ConsumerState<FinancialHealthPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Gauge Ring Container
+
           Container(
             width: 150,
             height: 150,
@@ -572,7 +572,7 @@ class _FinancialHealthPageState extends ConsumerState<FinancialHealthPage> {
             ),
           ),
           const SizedBox(height: 24),
-          // Grade Badge
+
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
@@ -591,7 +591,7 @@ class _FinancialHealthPageState extends ConsumerState<FinancialHealthPage> {
             ),
           ),
           const SizedBox(height: 20),
-          // Description
+
           Text(
             grade.description,
             textAlign: TextAlign.center,
@@ -602,13 +602,13 @@ class _FinancialHealthPageState extends ConsumerState<FinancialHealthPage> {
             ),
           ),
           const SizedBox(height: 32),
-          // Divider Line
+
           Divider(
             height: 1,
             color: isDarkMode ? Colors.white10 : Colors.grey.shade100,
           ),
           const SizedBox(height: 24),
-          // Action Title
+
           Align(
             alignment: Alignment.centerLeft,
             child: Text(
@@ -621,7 +621,7 @@ class _FinancialHealthPageState extends ConsumerState<FinancialHealthPage> {
             ),
           ),
           const SizedBox(height: 16),
-          // Actions List
+
           ...List.generate(grade.recommendations.length, (idx) {
             final action = grade.recommendations[idx];
             return Container(
@@ -691,7 +691,7 @@ class _FinancialHealthPageState extends ConsumerState<FinancialHealthPage> {
             );
           }),
           const SizedBox(height: 24),
-          // Reset Button
+
           SizedBox(
             width: double.infinity,
             height: 52,

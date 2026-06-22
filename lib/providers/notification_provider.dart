@@ -13,7 +13,7 @@ final allNotificationsProvider = FutureProvider<List<NotificationModel>>((ref) a
 
 final unreadNotificationsCountProvider = FutureProvider<int>((ref) async {
   final service = ref.watch(notificationServiceProvider);
-  // Watch all notifications so this re-evaluates when they change
+
   ref.watch(allNotificationsProvider);
   return service.getUnreadCount();
 });

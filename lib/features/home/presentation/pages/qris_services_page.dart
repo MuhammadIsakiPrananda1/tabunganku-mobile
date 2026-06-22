@@ -16,7 +16,7 @@ class QrisServicesPage extends ConsumerStatefulWidget {
 }
 
 class _QrisServicesPageState extends ConsumerState<QrisServicesPage> {
-  int _activeTabIndex = 0; // 0: Toko Kelontong Zaky, 1: Toko Zaky Store
+  int _activeTabIndex = 0;
 
   final List<Map<String, String>> _qrisData = [
     {
@@ -49,7 +49,7 @@ class _QrisServicesPageState extends ConsumerState<QrisServicesPage> {
       ));
       await Share.shareXFiles([XFile(file.path)], text: text);
     } catch (e) {
-      // Fallback if writing fails
+
       await Share.share(text);
     }
   }
@@ -108,7 +108,7 @@ class _QrisServicesPageState extends ConsumerState<QrisServicesPage> {
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         child: Column(
           children: [
-            // Minimalist Tab Switcher
+
             Container(
               padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
@@ -204,8 +204,7 @@ class _QrisServicesPageState extends ConsumerState<QrisServicesPage> {
             ),
             const SizedBox(height: 32),
 
-            // Premium Minimalist QRIS Card
-            Container(
+Container(
               width: double.infinity,
               decoration: BoxDecoration(
                 color: cardBgColor,
@@ -226,7 +225,7 @@ class _QrisServicesPageState extends ConsumerState<QrisServicesPage> {
               ),
               child: Column(
                 children: [
-                  // Merchant Header Info
+
                   Padding(
                     padding: const EdgeInsets.all(20),
                     child: Column(
@@ -274,8 +273,7 @@ class _QrisServicesPageState extends ConsumerState<QrisServicesPage> {
                     ),
                   ),
 
-                  // QRIS Image Frame (Clean/White border inside)
-                  Container(
+Container(
                     margin: const EdgeInsets.symmetric(horizontal: 20),
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
@@ -295,8 +293,7 @@ class _QrisServicesPageState extends ConsumerState<QrisServicesPage> {
                     ),
                   ),
 
-                  // Card Footer Info
-                  Padding(
+Padding(
                     padding: const EdgeInsets.all(20),
                     child: Column(
                       children: [
@@ -325,8 +322,7 @@ class _QrisServicesPageState extends ConsumerState<QrisServicesPage> {
             ),
             const SizedBox(height: 36),
 
-            // Action Buttons
-            Row(
+Row(
               children: [
                 Expanded(
                   child: SizedBox(

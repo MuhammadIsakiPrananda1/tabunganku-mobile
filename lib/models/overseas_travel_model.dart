@@ -1,13 +1,12 @@
-
 class OverseasTravelGoalModel {
   final String id;
   final String destinationName;
-  final String currencyCode; // e.g., USD, JPY, KRW
+  final String currencyCode;
   final double targetForeignAmount;
   final double collectedIdrAmount;
   final DateTime createdAt;
   final DateTime? targetDate;
-  final String countryCode; // For showing flags, e.g., US, JP, KR
+  final String countryCode;
 
   OverseasTravelGoalModel({
     required this.id,

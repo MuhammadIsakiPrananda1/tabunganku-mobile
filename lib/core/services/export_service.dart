@@ -9,15 +9,14 @@ import 'package:share_plus/share_plus.dart';
 import 'package:tabunganku/models/transaction_model.dart';
 
 class ExportService {
-  /// Format rupiah
+
   static String _fmtRupiah(double v) {
     return NumberFormat.currency(
             locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0)
         .format(v);
   }
 
-  /// Generates a plain-text summary for sharing
-  static String buildTextSummary({
+static String buildTextSummary({
     required List<TransactionModel> transactions,
     required String monthLabel,
   }) {
@@ -42,8 +41,7 @@ class ExportService {
     buf.writeln('─── DETAIL TRANSAKSI (${transactions.length} item) ───');
     buf.writeln();
 
-    // Sort descending by date
-    final sorted = [...transactions]..sort((a, b) => b.date.compareTo(a.date));
+final sorted = [...transactions]..sort((a, b) => b.date.compareTo(a.date));
     for (final t in sorted) {
       final sign = t.type == TransactionType.income ? '+' : '-';
       final dateStr = DateFormat('dd/MM HH:mm').format(t.date);
@@ -60,8 +58,7 @@ class ExportService {
     return buf.toString();
   }
 
-  /// Generates PDF and returns the file path
-  static Future<String> buildPdf({
+static Future<String> buildPdf({
     required List<TransactionModel> transactions,
     required String monthLabel,
   }) async {
@@ -73,8 +70,7 @@ class ExportService {
         .fold(0.0, (s, t) => s + t.amount);
     final balance = income - expense;
 
-    // ── Load Assets (Fonts & Logo)
-    final poppinsRegular =
+final poppinsRegular =
         await rootBundle.load("assets/fonts/Poppins-Regular.ttf");
     final poppinsMedium =
         await rootBundle.load("assets/fonts/Poppins-Medium.ttf");
@@ -89,8 +85,7 @@ class ExportService {
     final doc = pw.Document();
     final sorted = [...transactions]..sort((a, b) => b.date.compareTo(a.date));
 
-    // ── Color palette
-    final primaryColor = PdfColor.fromHex('#009688');
+final primaryColor = PdfColor.fromHex('#009688');
     final secondaryColor = PdfColor.fromHex('#004D40');
     final lightBg = PdfColor.fromHex('#F1F8F7');
     final incomeColor = PdfColor.fromHex('#2E7D32');
@@ -99,8 +94,7 @@ class ExportService {
         ? PdfColor.fromHex('#00796B')
         : PdfColor.fromHex('#D32F2F');
 
-    // ── Styles
-    final headerStyle = pw.TextStyle(
+final headerStyle = pw.TextStyle(
         font: fontBold, fontSize: 11, color: PdfColor.fromHex('#009688'));
 
     doc.addPage(
@@ -196,7 +190,7 @@ class ExportService {
           ],
         ),
         build: (ctx) => [
-          // ── Summary Section
+
           pw.Text(
             'RINGKASAN KEUANGAN',
             style: pw.TextStyle(
@@ -238,8 +232,7 @@ class ExportService {
           ),
           pw.SizedBox(height: 30),
 
-          // ── Transaction Section
-          pw.Row(
+pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             crossAxisAlignment: pw.CrossAxisAlignment.end,
             children: [
@@ -260,18 +253,17 @@ class ExportService {
           ),
           pw.SizedBox(height: 10),
 
-          // ── Transaction Table
-          pw.Table(
+pw.Table(
             border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5),
             columnWidths: {
-              0: const pw.FixedColumnWidth(70), // Tanggal
-              1: const pw.FlexColumnWidth(3), // Keterangan
-              2: const pw.FlexColumnWidth(1.5), // Kategori
-              3: const pw.FlexColumnWidth(2), // Nominal
-              4: const pw.FixedColumnWidth(45), // Jenis
+              0: const pw.FixedColumnWidth(70),
+              1: const pw.FlexColumnWidth(3),
+              2: const pw.FlexColumnWidth(1.5),
+              3: const pw.FlexColumnWidth(2),
+              4: const pw.FixedColumnWidth(45),
             },
             children: [
-              // Header Row
+
               pw.TableRow(
                 decoration: pw.BoxDecoration(color: primaryColor),
                 children: [
@@ -282,7 +274,7 @@ class ExportService {
                   _tableHeader('TIPE', fontBold),
                 ],
               ),
-              // Data Rows
+
               ...sorted.map((t) {
                 final isIncome = t.type == TransactionType.income;
                 final amountColor = isIncome ? incomeColor : expenseColor;
@@ -393,8 +385,7 @@ class ExportService {
     );
   }
 
-  /// Main function called from UI
-  static Future<void> shareMonthlyReport({
+static Future<void> shareMonthlyReport({
     required BuildContext context,
     required List<TransactionModel> transactions,
     required String monthLabel,

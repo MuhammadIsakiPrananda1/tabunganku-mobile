@@ -40,4 +40,3 @@ class NabungBersamaService {
     await saveNabungBersamaList(list);
   }
 }
-

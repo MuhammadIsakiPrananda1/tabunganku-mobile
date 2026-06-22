@@ -33,14 +33,13 @@ class UserProfileNotifier extends StateNotifier<UserProfile> {
     final prefs = await SharedPreferences.getInstance();
     final name = prefs.getString('user_name') ?? '';
     final photoUrl = prefs.getString('user_photo_url');
-    
-    // Safety check: verify if the file still exists in persistent storage
-    if (photoUrl != null && photoUrl.isNotEmpty) {
+
+if (photoUrl != null && photoUrl.isNotEmpty) {
       if (await File(photoUrl).exists()) {
         state = UserProfile(name: name, photoUrl: photoUrl);
         return;
       } else {
-        // Clear broken path from preferences
+
         await prefs.remove('user_photo_url');
       }
     }
@@ -60,15 +59,14 @@ class UserProfileNotifier extends StateNotifier<UserProfile> {
       final fileName = 'profile_photo_${DateTime.now().millisecondsSinceEpoch}.png';
       final permanentFile = await file.copy('${appDir.path}/$fileName');
 
-      // Clean up old profile photo to prevent cluttering storage
-      final oldPath = state.photoUrl;
+final oldPath = state.photoUrl;
       if (oldPath != null && oldPath.isNotEmpty) {
         final oldFile = File(oldPath);
         if (await oldFile.exists()) {
           try {
             await oldFile.delete();
           } catch (e) {
-            // Ignore error
+
           }
         }
       }
@@ -78,7 +76,7 @@ class UserProfileNotifier extends StateNotifier<UserProfile> {
       state = state.copyWith(photoUrl: permanentFile.path);
       return permanentFile.path;
     } catch (e) {
-      // Fallback to original temp path if persistent directory copy fails
+
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('user_photo_url', file.path);
       state = state.copyWith(photoUrl: file.path);
@@ -95,7 +93,7 @@ class UserProfileNotifier extends StateNotifier<UserProfile> {
         try {
           await oldFile.delete();
         } catch (e) {
-          // Ignore
+
         }
       }
     }

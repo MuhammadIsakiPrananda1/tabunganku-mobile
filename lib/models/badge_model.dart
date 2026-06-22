@@ -1,22 +1,21 @@
 enum BadgeCategory {
-  streak, // Badge untuk streak achievement
-  challenge, // Badge untuk complete challenge tertentu
-  saving, // Badge untuk milestone tabungan
-  special, // Badge special event
+  streak,
+  challenge,
+  saving,
+  special,
 }
 
 class BadgeModel {
   final String id;
   final String name;
   final String description;
-  final String iconPath; // Path ke asset icon
+  final String iconPath;
   final BadgeCategory category;
-  final int requiredPoints; // Points needed to unlock (0 = no requirement)
-  final String? requiredChallengeId; // Specific challenge yang harus diselesaikan
-  final int? requiredStreak; // Streak days yang dibutuhkan
-  
-  // User-specific data
-  final bool isEarned;
+  final int requiredPoints;
+  final String? requiredChallengeId;
+  final int? requiredStreak;
+
+final bool isEarned;
   final DateTime? earnedDate;
 
   BadgeModel({
@@ -90,8 +89,7 @@ class BadgeModel {
     );
   }
 
-  // Helper method
-  String get categoryName {
+String get categoryName {
     switch (category) {
       case BadgeCategory.streak:
         return 'Streak';

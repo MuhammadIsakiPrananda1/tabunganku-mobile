@@ -61,7 +61,7 @@ class TransactionDetailSheet extends ConsumerWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Handle
+
           Container(
             width: 40,
             height: 4,
@@ -71,8 +71,7 @@ class TransactionDetailSheet extends ConsumerWidget {
           ),
           const SizedBox(height: 32),
 
-          // Receipt Header
-          Text(isExpense ? 'PENGELUARAN' : 'PEMASUKAN',
+Text(isExpense ? 'PENGELUARAN' : 'PEMASUKAN',
               style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
@@ -89,8 +88,7 @@ class TransactionDetailSheet extends ConsumerWidget {
                   letterSpacing: -1)),
           const SizedBox(height: 32),
 
-          // Punched paper line simulation
-          Row(
+Row(
             children: List.generate(
                 30,
                 (index) => Expanded(
@@ -105,8 +103,7 @@ class TransactionDetailSheet extends ConsumerWidget {
           ),
           const SizedBox(height: 32),
 
-          // Receipt Details
-          _buildReceiptRow(
+_buildReceiptRow(
             context,
             ref,
             'ID Transaksi',
@@ -141,8 +138,7 @@ class TransactionDetailSheet extends ConsumerWidget {
           ),
           const SizedBox(height: 48),
 
-          // Actions
-          if (onEdit != null || onDelete != null)
+if (onEdit != null || onDelete != null)
             Row(
               children: [
                 if (onEdit != null)

@@ -1,4 +1,3 @@
-
 class InsuranceModel {
   final String id;
   final String policyName;

@@ -18,15 +18,13 @@ class HutangJariyahPage extends ConsumerStatefulWidget {
 class _HutangJariyahPageState extends ConsumerState<HutangJariyahPage> {
   List<Map<String, dynamic>> _commitments = [];
 
-  // Controllers for Add Pledge
-  final TextEditingController _titleController = TextEditingController();
+final TextEditingController _titleController = TextEditingController();
   final TextEditingController _recipientController = TextEditingController();
   final TextEditingController _amountController = TextEditingController();
-  String _frequency = 'Bulanan'; // Bulanan, Mingguan, Tahunan, Sekali
+  String _frequency = 'Bulanan';
   final _pledgeFormKey = GlobalKey<FormState>();
-  
-  // Controllers for Log Donation
-  final TextEditingController _donationAmountController = TextEditingController();
+
+final TextEditingController _donationAmountController = TextEditingController();
   final _donationFormKey = GlobalKey<FormState>();
   bool _syncWithTransactions = true;
 
@@ -102,9 +100,8 @@ class _HutangJariyahPageState extends ConsumerState<HutangJariyahPage> {
       final payments = List<Map<String, dynamic>>.from(_commitments[index]['payments'] as List);
       payments.insert(0, paymentLog);
       _commitments[index]['payments'] = payments;
-      
-      // If Single frequency, check if target has been fulfilled to update status
-      if (_commitments[index]['frequency'] == 'Sekali') {
+
+if (_commitments[index]['frequency'] == 'Sekali') {
         double totalPaid = payments.fold(0.0, (sum, item) => sum + (item['amount'] as num).toDouble());
         double target = (_commitments[index]['amount'] as num).toDouble();
         if (totalPaid >= target) {
@@ -181,7 +178,7 @@ class _HutangJariyahPageState extends ConsumerState<HutangJariyahPage> {
         (ref.watch(themeProvider) == ThemeMode.system && theme.brightness == Brightness.dark);
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
     final pageBgColor = isDarkMode ? AppColors.backgroundDark : const Color(0xFFFBFDFB);
-    final accentColor = const Color(0xFF6B8E23); // Olive Green
+    final accentColor = const Color(0xFF6B8E23);
     final goldColor = const Color(0xFFC5A059);
 
     return Scaffold(
@@ -205,7 +202,7 @@ class _HutangJariyahPageState extends ConsumerState<HutangJariyahPage> {
       ),
       body: Column(
         children: [
-          // Dashboard Header Card
+
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             child: Container(
@@ -274,8 +271,7 @@ class _HutangJariyahPageState extends ConsumerState<HutangJariyahPage> {
             ),
           ),
 
-          // Header & Add Button
-          Padding(
+Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -299,8 +295,7 @@ class _HutangJariyahPageState extends ConsumerState<HutangJariyahPage> {
             ),
           ),
 
-          // List Pledges
-          Expanded(
+Expanded(
             child: _commitments.isEmpty
                 ? Center(
                     child: Column(
@@ -348,7 +343,7 @@ class _HutangJariyahPageState extends ConsumerState<HutangJariyahPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Top status row
+
                               Padding(
                                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
                                 child: Row(
@@ -398,8 +393,7 @@ class _HutangJariyahPageState extends ConsumerState<HutangJariyahPage> {
                                 ),
                               ),
 
-                              // Content details
-                              Padding(
+Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 16),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -422,9 +416,8 @@ class _HutangJariyahPageState extends ConsumerState<HutangJariyahPage> {
                                       ),
                                     ),
                                     const SizedBox(height: 12),
-                                    
-                                    // Target Pledge vs Total Paid
-                                    Row(
+
+Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
                                         Column(
@@ -476,8 +469,7 @@ class _HutangJariyahPageState extends ConsumerState<HutangJariyahPage> {
                               const SizedBox(height: 16),
                               Divider(height: 1, color: isDarkMode ? Colors.white.withOpacity(0.04) : Colors.grey.shade50),
 
-                              // Bottom action row / payments view
-                              Padding(
+Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -556,8 +548,7 @@ class _HutangJariyahPageState extends ConsumerState<HutangJariyahPage> {
                   ),
                   const SizedBox(height: 20),
 
-                  // Title input
-                  RichText(
+RichText(
                     text: TextSpan(
                       text: 'Nama Program Jariyah',
                       style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
@@ -598,8 +589,7 @@ class _HutangJariyahPageState extends ConsumerState<HutangJariyahPage> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Recipient
-                  RichText(
+RichText(
                     text: TextSpan(
                       text: 'Lembaga / Penerima Manfaat',
                       style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
@@ -642,7 +632,7 @@ class _HutangJariyahPageState extends ConsumerState<HutangJariyahPage> {
 
                   Row(
                     children: [
-                      // Target Amount
+
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -703,8 +693,7 @@ class _HutangJariyahPageState extends ConsumerState<HutangJariyahPage> {
                       ),
                       const SizedBox(width: 16),
 
-                      // Frequency Dropdown
-                      Expanded(
+Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [

@@ -9,8 +9,6 @@ import 'package:tabunganku/core/utils/currency_formatter.dart';
 import 'package:tabunganku/core/constants/transaction_categories.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-// ────────────────────────────────────────────────────────────────────────────
-
 class BudgetFormSheet extends ConsumerStatefulWidget {
   final BudgetModel? budget;
   final String? initialCategory;
@@ -49,15 +47,14 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
   @override
   void initState() {
     super.initState();
-    
-    // Group categories
-    for (var cat in AppCategories.expenseCategories) {
+
+for (var cat in AppCategories.expenseCategories) {
       groupedCategories.putIfAbsent(cat.group, () => []).add(cat);
     }
     
     if (widget.budget != null) {
       final rawAmount = widget.budget!.limitAmount.toInt().toString();
-      // Format dengan titik saat load existing
+
       final formatted = rawAmount.replaceAllMapped(
         RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
         (m) => '${m[1]}.',
@@ -71,7 +68,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
       if (isKnown) {
         _selectedCategory = existingCat;
         _isCustomCategory = false;
-        // Resolve group
+
         _selectedGroup = AppCategories.expenseCategories.firstWhere((c) => c.label == existingCat).group;
       } else {
         _selectedCategory = AppCategories.otherLabel;
@@ -88,7 +85,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
         _selectedGroup = AppCategories.expenseCategories.first.group;
       }
     } else {
-      // Default initial
+
       _selectedCategory = 'Makanan & Minuman';
       _selectedGroup = 'Kebutuhan Pokok';
     }
@@ -199,7 +196,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
           mainAxisSize: MainAxisSize.min,
           children: [
             const SizedBox(height: 12),
-            // Handle bar
+
             Container(
               width: 48,
               height: 5,
@@ -210,8 +207,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
             ),
             const SizedBox(height: 24),
 
-            // Header: judul + tombol hapus (jika edit)
-            Padding(
+Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Row(
                 children: [
@@ -270,8 +266,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
 
             const SizedBox(height: 32),
 
-            // ── Pilih Kategori (Searchable) ────────────────────────
-            Padding(
+Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -355,8 +350,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
               ),
             ),
 
-            // ── Custom kategori input ─────
-            if (_isCustomCategory) ...[
+if (_isCustomCategory) ...[
               const SizedBox(height: 20),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -386,8 +380,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
 
             const SizedBox(height: 32),
 
-            // ── Input Nominal ─────────────────────────────────────────────
-            Padding(
+Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -480,8 +473,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
 
             const SizedBox(height: 48),
 
-            // ── Tombol Simpan ─────────────────────────────────────────────
-            Padding(
+Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: SizedBox(
                 width: double.infinity,
@@ -522,7 +514,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
     required List<TransactionCategory> categoryObjects,
     required ValueChanged<TransactionCategory> onSelected,
   }) {
-    FocusScope.of(context).unfocus(); // Unfocus parent fields immediately!
+    FocusScope.of(context).unfocus();
     final searchController = TextEditingController();
     String searchQuery = '';
 
@@ -533,7 +525,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
       builder: (sheetContext) {
         return StatefulBuilder(
           builder: (context, setModalState) {
-            // Group filtered items dynamically
+
             final Map<String, List<TransactionCategory>> displayGrouped = {};
             for (var cat in categoryObjects) {
               final labelLower = cat.label.toLowerCase();
@@ -681,7 +673,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
                               return Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  // Group Header (Minimalist & Clear)
+
                                   Padding(
                                     padding: const EdgeInsets.only(
                                         top: 20, bottom: 10, left: 24, right: 24),
@@ -708,7 +700,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
                                       ],
                                     ),
                                   ),
-                                  // Group Items
+
                                   ...items.map((cat) {
                                     final isSelected = cat.label == currentSelected;
                                     return GestureDetector(

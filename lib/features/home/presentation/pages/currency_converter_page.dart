@@ -61,17 +61,16 @@ class _CurrencyConverterPageState extends ConsumerState<CurrencyConverterPage> {
     _amountController = TextEditingController(text: _amountStr);
     _amountFocusNode = FocusNode();
 
-    _fromCurrency = _currencies[1]; // USD
-    _toCurrency = _currencies[0];   // IDR
-    
-    // Check if rates are already available to avoid showing loading spinner
-    final initialRates = ref.read(currencyRatesProvider).value;
+    _fromCurrency = _currencies[1];
+    _toCurrency = _currencies[0];
+
+final initialRates = ref.read(currencyRatesProvider).value;
     if (initialRates != null) {
       _updateRatesFromMap(initialRates);
       _isLoading = false;
     } else {
       _isLoading = true;
-      // If not available, we can trigger a fetch if it hasn't started
+
       _fetchRates();
     }
 
@@ -251,9 +250,8 @@ class _CurrencyConverterPageState extends ConsumerState<CurrencyConverterPage> {
     final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
         (ref.watch(themeProvider) == ThemeMode.system && theme.brightness == Brightness.dark);
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
-    
-    // Page Theme: Electric Oceanic Blue & Pure Dark/Light backgrounds
-    final pageBgColor = isDarkMode ? AppColors.backgroundDark : const Color(0xFFF8FAF9);
+
+final pageBgColor = isDarkMode ? AppColors.backgroundDark : const Color(0xFFF8FAF9);
     final accentColor = isDarkMode ? const Color(0xFF3498DB) : const Color(0xFF2980B9);
 
     return GestureDetector(

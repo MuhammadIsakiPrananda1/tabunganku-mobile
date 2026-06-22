@@ -11,9 +11,9 @@ class ChallengeTemplateModel {
   final ChallengeTargetType targetType;
   final double? suggestedTargetAmount;
   final String? targetCategory;
-  final List<String> tips; // Tips untuk menyelesaikan challenge
-  final IconData? icon; // Ikon untuk visual representation
-  final int points; // Points yang didapat saat complete
+  final List<String> tips;
+  final IconData? icon;
+  final int points;
 
   ChallengeTemplateModel({
     required this.id,
@@ -68,8 +68,7 @@ class ChallengeTemplateModel {
     };
   }
 
-  // Convert template to actual challenge
-  ChallengeModel toChallenge({
+ChallengeModel toChallenge({
     String? customTitle,
     double? customTargetAmount,
     int? customDuration,

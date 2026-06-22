@@ -2,8 +2,8 @@ class ShoppingItem {
   final String id;
   final String name;
   final double estimatedPrice;
-  final double quantity; // Added
-  final String unit; // Added
+  final double quantity;
+  final String unit;
   final bool isBought;
   final DateTime createdAt;
   final String? url;

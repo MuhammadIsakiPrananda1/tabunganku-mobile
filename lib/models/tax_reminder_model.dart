@@ -4,7 +4,7 @@ class TaxReminderModel {
   final String id;
   final String title;
   final DateTime dueDate;
-  final String status; // 'Belum Bayar', 'Sudah Bayar'
+  final String status;
   final int iconCodePoint;
   final int colorValue;
 

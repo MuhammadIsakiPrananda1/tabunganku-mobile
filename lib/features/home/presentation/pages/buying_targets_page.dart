@@ -46,7 +46,7 @@ class _BuyingTargetsPageState extends ConsumerState<BuyingTargetsPage> {
       body: SafeArea(
         child: Column(
           children: [
-            // ── AppBar (Catatan Pinjaman style) ────────────────────────
+
             Padding(
               padding: const EdgeInsets.fromLTRB(4, 8, 16, 0),
               child: Row(
@@ -75,8 +75,7 @@ class _BuyingTargetsPageState extends ConsumerState<BuyingTargetsPage> {
             ),
             const SizedBox(height: 6),
 
-            // ── Body content ───────────────────────────────────────────
-            Expanded(
+Expanded(
               child: targetsAsync.when(
                 data: (targets) {
                   final buyingTargets = targets
@@ -221,7 +220,7 @@ class _BuyingTargetsPageState extends ConsumerState<BuyingTargetsPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Row 1: Title & Status Badge
+
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -300,8 +299,7 @@ class _BuyingTargetsPageState extends ConsumerState<BuyingTargetsPage> {
           ),
           const SizedBox(height: 18),
 
-          // Row 2: Progress Bar
-          Row(
+Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
@@ -336,15 +334,13 @@ class _BuyingTargetsPageState extends ConsumerState<BuyingTargetsPage> {
           ),
           const SizedBox(height: 20),
 
-          // Divider
-          Divider(
+Divider(
             height: 1,
             color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100,
           ),
           const SizedBox(height: 16),
 
-          // Row 3: Terkumpul & Sisa Target
-          Row(
+Row(
             children: [
               Expanded(
                 child: Column(
@@ -754,7 +750,7 @@ class _BuyingTargetsPageState extends ConsumerState<BuyingTargetsPage> {
             padding: const EdgeInsets.all(14),
             child: Row(
               children: [
-                // Icon placeholder
+
                 Container(
                   width: 50,
                   height: 50,
@@ -770,8 +766,7 @@ class _BuyingTargetsPageState extends ConsumerState<BuyingTargetsPage> {
                 ),
                 const SizedBox(width: 12),
 
-                // Name & meta
-                Expanded(
+Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -822,7 +817,7 @@ class _BuyingTargetsPageState extends ConsumerState<BuyingTargetsPage> {
                         ],
                       ),
                       const SizedBox(height: 8),
-                      // Thin progress bar
+
                       ClipRRect(
                         borderRadius: BorderRadius.circular(6),
                         child: LinearProgressIndicator(
@@ -839,8 +834,7 @@ class _BuyingTargetsPageState extends ConsumerState<BuyingTargetsPage> {
                 ),
                 const SizedBox(width: 12),
 
-                // Price & percentage on the right
-                Column(
+Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(

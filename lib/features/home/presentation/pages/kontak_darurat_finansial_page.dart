@@ -17,8 +17,7 @@ class _KontakDaruratFinansialPageState extends ConsumerState<KontakDaruratFinans
   List<Map<String, dynamic>> _customContacts = [];
   final _formKey = GlobalKey<FormState>();
 
-  // Controllers for Custom CS
-  final TextEditingController _instController = TextEditingController();
+final TextEditingController _instController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
@@ -197,7 +196,7 @@ class _KontakDaruratFinansialPageState extends ConsumerState<KontakDaruratFinans
         (ref.watch(themeProvider) == ThemeMode.system && theme.brightness == Brightness.dark);
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
     final pageBgColor = isDarkMode ? AppColors.backgroundDark : const Color(0xFFFFF9F9);
-    final accentColor = const Color(0xFFE53935); // Coral Red
+    final accentColor = const Color(0xFFE53935);
 
     return Scaffold(
       backgroundColor: pageBgColor,
@@ -221,7 +220,7 @@ class _KontakDaruratFinansialPageState extends ConsumerState<KontakDaruratFinans
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 48),
         children: [
-          // Security Alert Info Card
+
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -259,16 +258,14 @@ class _KontakDaruratFinansialPageState extends ConsumerState<KontakDaruratFinans
           ),
           const SizedBox(height: 24),
 
-          // Custom Contacts List Section
-          if (_customContacts.isNotEmpty) ...[
+if (_customContacts.isNotEmpty) ...[
             _buildSectionHeader('Kontak Darurat Pribadi Anda', isDarkMode),
             const SizedBox(height: 8),
             ..._customContacts.map((c) => _buildContactCard(c, isDarkMode, contentColor, accentColor, isCustom: true)),
             const SizedBox(height: 20),
           ],
 
-          // Prepopulated CS Section
-          _buildSectionHeader('Layanan Pengaduan Resmi Finansial', isDarkMode),
+_buildSectionHeader('Layanan Pengaduan Resmi Finansial', isDarkMode),
           const SizedBox(height: 8),
           ..._prepopulatedCS.map((c) => _buildContactCard(c, isDarkMode, contentColor, accentColor, isCustom: false)),
         ],
@@ -376,10 +373,9 @@ class _KontakDaruratFinansialPageState extends ConsumerState<KontakDaruratFinans
             Divider(height: 1, color: isDarkMode ? Colors.white.withOpacity(0.04) : Colors.grey.shade50),
             const SizedBox(height: 10),
 
-            // Call / Copy Row
-            Row(
+Row(
               children: [
-                // Call Phone Card Action
+
                 Expanded(
                   child: InkWell(
                     onTap: () => _makePhoneCall(phone),
@@ -410,7 +406,7 @@ class _KontakDaruratFinansialPageState extends ConsumerState<KontakDaruratFinans
                 ),
                 if (email.isNotEmpty) ...[
                   const SizedBox(width: 12),
-                  // Copy Email
+
                   Expanded(
                     child: InkWell(
                       onTap: () => _sendEmail(email),
@@ -494,8 +490,7 @@ class _KontakDaruratFinansialPageState extends ConsumerState<KontakDaruratFinans
                     ),
                     const SizedBox(height: 20),
 
-                    // Institution Name
-                    RichText(
+RichText(
                       text: TextSpan(
                         text: 'Nama Instansi / Kontak',
                         style: GoogleFonts.quicksand(
@@ -544,8 +539,7 @@ class _KontakDaruratFinansialPageState extends ConsumerState<KontakDaruratFinans
                     ),
                     const SizedBox(height: 16),
 
-                    // Phone Number
-                    RichText(
+RichText(
                       text: TextSpan(
                         text: 'Nomor Telepon CS',
                         style: GoogleFonts.quicksand(
@@ -595,8 +589,7 @@ class _KontakDaruratFinansialPageState extends ConsumerState<KontakDaruratFinans
                     ),
                     const SizedBox(height: 16),
 
-                    // Email
-                    Text(
+Text(
                       'Email CS (Opsional)',
                       style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
                     ),
@@ -620,8 +613,7 @@ class _KontakDaruratFinansialPageState extends ConsumerState<KontakDaruratFinans
                     ),
                     const SizedBox(height: 16),
 
-                    // Notes
-                    Text(
+Text(
                       'Catatan / Penjelasan Ringkas (Opsional)',
                       style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
                     ),

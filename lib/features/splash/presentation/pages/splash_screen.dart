@@ -64,22 +64,19 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     );
 
     _fadeSlideController.forward();
-    
-    // Start loading settings immediately
-    ref.read(securityProvider);
+
+ref.read(securityProvider);
 
     _startAppLogic();
   }
 
   Future<void> _startAppLogic() async {
-    // Wait for minimum splash time for animations
+
     final minimumWait = Future.delayed(const Duration(milliseconds: 3500));
-    
-    // Start pre-fetching currency rates early
-    ref.read(currencyRatesProvider);
-    
-    // Wait until security settings are loaded
-    bool isLoaded = false;
+
+ref.read(currencyRatesProvider);
+
+bool isLoaded = false;
     while (!isLoaded && mounted) {
       final security = ref.read(securityProvider);
       if (security.isInitialized) {
@@ -94,9 +91,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     if (!mounted) return;
 
     final security = ref.read(securityProvider);
-    
-    // Handle sequential startup flow for absolute privacy
-    if (security.isBiometricEnabled || security.hasPin) {
+
+if (security.isBiometricEnabled || security.hasPin) {
       context.go('/lock');
     } else {
       context.go('/dashboard');
@@ -132,7 +128,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       backgroundColor: bgColor,
       body: Stack(
         children: [
-          // Background Ornaments
+
           Positioned(
             top: -100,
             right: -50,
@@ -158,8 +154,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
             ),
           ),
 
-          // Main Content
-          Center(
+Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -243,8 +238,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
             ),
           ),
 
-          // Bottom Version
-          Positioned(
+Positioned(
             bottom: 40,
             left: 0,
             right: 0,

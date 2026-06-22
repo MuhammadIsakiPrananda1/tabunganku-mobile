@@ -44,15 +44,14 @@ class _NotificationObserverState extends ConsumerState<NotificationObserver> {
 
   Future<void> _markAsNotified(String key) async {
     await _prefs?.setBool('notified_$key', true);
-    if (mounted) setState(() {}); // Rebuild to ensure consistency if needed
+    if (mounted) setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
     final currencyFormatter = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp', decimalDigits: 0);
 
-    // ── Achievement Listener ───────────────────────────────────
-    ref.listen(achievementsProvider, (previous, next) {
+ref.listen(achievementsProvider, (previous, next) {
       if (previous == null) return;
       
       for (final achievement in next) {
@@ -72,8 +71,7 @@ class _NotificationObserverState extends ConsumerState<NotificationObserver> {
       }
     });
 
-    // ── Transaction & Target Achievement Listener ─────────────────────
-    ref.listen(transactionsStreamProvider, (previous, next) {
+ref.listen(transactionsStreamProvider, (previous, next) {
       final prevList = previous?.valueOrNull;
       final nextList = next.valueOrNull;
       final targets = ref.read(savingTargetsStreamProvider).valueOrNull;
@@ -81,8 +79,7 @@ class _NotificationObserverState extends ConsumerState<NotificationObserver> {
       if (nextList != null) {
         final personalTransactions = nextList.where((t) => t.groupId == null).toList();
 
-        // A. Check for new transactions
-        if (prevList != null) {
+if (prevList != null) {
           final prevIds = prevList.map((t) => t.id).toSet();
           final newTxs = nextList.where((t) => !prevIds.contains(t.id)).toList();
 
@@ -106,8 +103,7 @@ class _NotificationObserverState extends ConsumerState<NotificationObserver> {
           }
         }
 
-        // B. Check for target achievements
-        if (targets != null) {
+if (targets != null) {
           for (final target in targets) {
             final targetBalance = personalTransactions
                 .where((t) => !t.date.isBefore(target.createdAt))
@@ -129,8 +125,7 @@ class _NotificationObserverState extends ConsumerState<NotificationObserver> {
           }
         }
 
-        // C. Check for monthly budget warning notifications
-        if (_prefs != null) {
+if (_prefs != null) {
           final now = DateTime.now();
           final limit = _prefs!.getDouble('monthly_budget_${now.year}_${now.month}') ?? 0.0;
           if (limit > 0) {
@@ -178,8 +173,7 @@ class _NotificationObserverState extends ConsumerState<NotificationObserver> {
       }
     });
 
-    // ── Gold Transactions Listener ──────────────────────────────
-    ref.listen(goldTransactionsStreamProvider, (previous, next) {
+ref.listen(goldTransactionsStreamProvider, (previous, next) {
       final prevList = previous?.valueOrNull;
       final nextList = next.valueOrNull;
 
@@ -209,13 +203,12 @@ class _NotificationObserverState extends ConsumerState<NotificationObserver> {
       }
     });
 
-    // ── Bills Listener ──────────────────────────────────────────
-    ref.listen(billsStreamProvider, (previous, next) {
+ref.listen(billsStreamProvider, (previous, next) {
       final prevList = previous?.valueOrNull;
       final nextList = next.valueOrNull;
 
       if (prevList != null && nextList != null) {
-        // A. Check for new bills added
+
         if (nextList.length > prevList.length) {
           final prevIds = prevList.map((b) => b.id).toSet();
           final newBills = nextList.where((b) => !prevIds.contains(b.id)).toList();
@@ -237,8 +230,7 @@ class _NotificationObserverState extends ConsumerState<NotificationObserver> {
           }
         }
 
-        // B. Check for bills paid
-        for (final bill in nextList) {
+for (final bill in nextList) {
           final prevBill = prevList.firstWhere((b) => b.id == bill.id, orElse: () => bill);
           if (bill.isPaid && !prevBill.isPaid) {
             final notifyKey = 'bill_paid_${bill.id}_${bill.lastPaidDate?.millisecondsSinceEpoch}';
@@ -260,8 +252,7 @@ class _NotificationObserverState extends ConsumerState<NotificationObserver> {
       }
     });
 
-    // ── Investment Listener ──────────────────────────────────────
-    ref.listen(investmentStreamProvider, (previous, next) {
+ref.listen(investmentStreamProvider, (previous, next) {
       final prevList = previous?.valueOrNull;
       final nextList = next.valueOrNull;
 
@@ -287,8 +278,7 @@ class _NotificationObserverState extends ConsumerState<NotificationObserver> {
       }
     });
 
-    // ── Insurance Listener ───────────────────────────────────────
-    ref.listen(insuranceStreamProvider, (previous, next) {
+ref.listen(insuranceStreamProvider, (previous, next) {
       final prevList = previous?.valueOrNull;
       final nextList = next.valueOrNull;
 

@@ -16,9 +16,9 @@ class EmergencyFundCalculatorPage extends ConsumerStatefulWidget {
 class _EmergencyFundCalculatorPageState extends ConsumerState<EmergencyFundCalculatorPage> {
   final TextEditingController _expenseCtrl = TextEditingController();
   
-  String _maritalStatus = 'Lajang'; // Lajang, Menikah, Menikah & Anak
-  String _jobType = 'Karyawan'; // Karyawan, Freelancer/Pengusaha
-  int _targetMonths = 12; // 6, 12, 18, 24 months
+  String _maritalStatus = 'Lajang';
+  String _jobType = 'Karyawan';
+  int _targetMonths = 12;
 
   double _targetAmount = 0;
   double _monthlySavingNeeded = 0;
@@ -27,7 +27,7 @@ class _EmergencyFundCalculatorPageState extends ConsumerState<EmergencyFundCalcu
   @override
   void initState() {
     super.initState();
-    // Start with blank inputs to show placeholders
+
     _calculate();
   }
 
@@ -85,9 +85,8 @@ class _EmergencyFundCalculatorPageState extends ConsumerState<EmergencyFundCalcu
         (ref.watch(themeProvider) == ThemeMode.system && theme.brightness == Brightness.dark);
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
     final pageBgColor = isDarkMode ? AppColors.backgroundDark : const Color(0xFFF8FAF9);
-    
-    // Page Theme Accent: Red/Rose for Emergency/Darurat
-    const accentColor = Colors.redAccent;
+
+const accentColor = Colors.redAccent;
     final inputBgColor = isDarkMode ? Colors.white.withValues(alpha: 0.05) : AppColors.background;
 
     return Scaffold(
@@ -114,7 +113,7 @@ class _EmergencyFundCalculatorPageState extends ConsumerState<EmergencyFundCalcu
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Info Header Card
+
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -136,12 +135,10 @@ class _EmergencyFundCalculatorPageState extends ConsumerState<EmergencyFundCalcu
             ),
             const SizedBox(height: 24),
 
-            // Inputs
-            _buildInput('Pengeluaran Bulanan Anda', _expenseCtrl, Icons.shopping_bag_rounded, isDarkMode, accentColor, isCurrency: true, hintText: 'Masukkan Pengeluaran Bulanan'),
+_buildInput('Pengeluaran Bulanan Anda', _expenseCtrl, Icons.shopping_bag_rounded, isDarkMode, accentColor, isCurrency: true, hintText: 'Masukkan Pengeluaran Bulanan'),
             const SizedBox(height: 18),
 
-            // Dropdowns row 1 (Status & Pekerjaan)
-            Row(
+Row(
               children: [
                 Expanded(
                   child: _buildDropdown(
@@ -184,8 +181,7 @@ class _EmergencyFundCalculatorPageState extends ConsumerState<EmergencyFundCalcu
             ),
             const SizedBox(height: 18),
 
-            // Target Months Dropdown
-            _buildDropdown(
+_buildDropdown(
               'Target Waktu Pencapaian', 
               '$_targetMonths Bulan', 
               ['6 Bulan', '12 Bulan', '18 Bulan', '24 Bulan'], 
@@ -203,13 +199,11 @@ class _EmergencyFundCalculatorPageState extends ConsumerState<EmergencyFundCalcu
             ),
             const SizedBox(height: 28),
 
-            // Results Card
-            if (_targetAmount > 0) ...[
+if (_targetAmount > 0) ...[
               _buildResultCard(isDarkMode, accentColor),
               const SizedBox(height: 24),
 
-              // Dynamic Explanation Box
-              Container(
+Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: isDarkMode ? AppColors.surfaceDark : Colors.white,
@@ -244,8 +238,7 @@ class _EmergencyFundCalculatorPageState extends ConsumerState<EmergencyFundCalcu
               ),
               const SizedBox(height: 24),
 
-              // Quick Educational Guide
-              Text(
+Text(
                 '💡 Tips Membangun Dana Darurat',
                 style: GoogleFonts.quicksand(
                   fontSize: 12,
@@ -411,7 +404,7 @@ class _EmergencyFundCalculatorPageState extends ConsumerState<EmergencyFundCalcu
       ),
       child: Column(
         children: [
-          // Total target amount
+
           Text(
             'Target Total Dana Darurat', 
             style: GoogleFonts.quicksand(
@@ -440,8 +433,7 @@ class _EmergencyFundCalculatorPageState extends ConsumerState<EmergencyFundCalcu
           ),
           const SizedBox(height: 20),
 
-          // Detail Row
-          _buildDetailRow('Ideal Kelipatan Pengeluaran', '$_totalMonthsCovered Bulan', contentColor),
+_buildDetailRow('Ideal Kelipatan Pengeluaran', '$_totalMonthsCovered Bulan', contentColor),
           const SizedBox(height: 12),
           _buildDetailRow('Target Waktu Pengumpulan', '$_targetMonths Bulan', contentColor),
           
@@ -452,8 +444,7 @@ class _EmergencyFundCalculatorPageState extends ConsumerState<EmergencyFundCalcu
           ),
           const SizedBox(height: 20),
 
-          // Monthly Savings target info
-          Container(
+Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: Colors.green.withValues(alpha: 0.08),

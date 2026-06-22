@@ -23,8 +23,7 @@ class _NetSalaryCalculatorPageState extends ConsumerState<NetSalaryCalculatorPag
   bool _deductBpjsTk = true;
   bool _deductBpjsKes = true;
 
-  // PTKP Status Table
-  final Map<String, double> _ptkpTable = {
+final Map<String, double> _ptkpTable = {
     'TK/0': 54000000.0,
     'TK/1': 58500000.0,
     'TK/2': 63000000.0,
@@ -72,17 +71,13 @@ class _NetSalaryCalculatorPageState extends ConsumerState<NetSalaryCalculatorPag
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
     final pageBgColor = isDarkMode ? AppColors.backgroundDark : const Color(0xFFF4F7F6);
 
-    // Get input numbers
-    final basicSalary = double.tryParse(_basicSalaryController.text.replaceAll('.', '')) ?? 0.0;
+final basicSalary = double.tryParse(_basicSalaryController.text.replaceAll('.', '')) ?? 0.0;
     final allowance = double.tryParse(_allowanceController.text.replaceAll('.', '')) ?? 0.0;
     final bonus = double.tryParse(_bonusController.text.replaceAll('.', '')) ?? 0.0;
 
-    // 1. Gross Income (Penghasilan Bruto Bulanan)
-    final grossMonthly = basicSalary + allowance + bonus;
+final grossMonthly = basicSalary + allowance + bonus;
 
-    // 2. BPJS Calculations
-    // BPJS Ketenagakerjaan: JHT (2% of basic), JP (1% of basic, max base Rp 10.021.000 in 2024)
-    double jhtDeduction = 0.0;
+double jhtDeduction = 0.0;
     double jpDeduction = 0.0;
     if (_deductBpjsTk && basicSalary > 0) {
       jhtDeduction = basicSalary * 0.02;
@@ -92,8 +87,7 @@ class _NetSalaryCalculatorPageState extends ConsumerState<NetSalaryCalculatorPag
     }
     final totalBpjsTk = jhtDeduction + jpDeduction;
 
-    // BPJS Kesehatan: 1% of basic + fixed allowance, max base Rp 12.000.000
-    double bpjsKesDeduction = 0.0;
+double bpjsKesDeduction = 0.0;
     if (_deductBpjsKes && grossMonthly > 0) {
       final bpjsKesBase = (basicSalary + allowance) > 12000000.0
           ? 12000000.0
@@ -102,33 +96,25 @@ class _NetSalaryCalculatorPageState extends ConsumerState<NetSalaryCalculatorPag
     }
     final totalBpjs = totalBpjsTk + bpjsKesDeduction;
 
-    // 3. Position Fee (Biaya Jabatan): 5% of gross, max Rp 500.000 per month
-    final positionFee = (grossMonthly * 0.05) > 500000.0 ? 500000.0 : (grossMonthly * 0.05);
+final positionFee = (grossMonthly * 0.05) > 500000.0 ? 500000.0 : (grossMonthly * 0.05);
 
-    // 4. Net Monthly Income (Penghasilan Netto Bulanan)
-    // Note: Deductions for tax calculation are Biaya Jabatan + JHT + JP (BPJS Kesehatan is NOT a tax deduction under progressive method)
-    final netMonthly = grossMonthly - positionFee - totalBpjsTk;
+final netMonthly = grossMonthly - positionFee - totalBpjsTk;
 
-    // 5. Annualized Net Income
-    final netAnnual = netMonthly * 12;
+final netAnnual = netMonthly * 12;
 
-    // 6. PTKP (Penghasilan Tidak Kena Pajak)
-    final ptkpLimit = _ptkpTable[_ptkpStatus] ?? 54000000.0;
+final ptkpLimit = _ptkpTable[_ptkpStatus] ?? 54000000.0;
 
-    // 7. PKP (Penghasilan Kena Pajak Setahun)
-    final pkpAnnual = (netAnnual - ptkpLimit).clamp(0.0, double.infinity);
+final pkpAnnual = (netAnnual - ptkpLimit).clamp(0.0, double.infinity);
 
-    // 8. Progressive Tax (PPh 21 Setahun)
-    double taxAnnual = 0.0;
+double taxAnnual = 0.0;
     double remainingPkp = pkpAnnual;
 
-    // Tax Brackets (Tarif Progresif Pasal 17 UU HPP)
-    final List<Map<String, dynamic>> taxBrackets = [
+final List<Map<String, dynamic>> taxBrackets = [
       {'limit': 60000000.0, 'rate': 0.05},
-      {'limit': 190000000.0, 'rate': 0.15}, // 60jt to 250jt
-      {'limit': 250000000.0, 'rate': 0.25}, // 250jt to 500jt
-      {'limit': 450000000.0, 'rate': 0.30}, // 500jt to 5M
-      {'limit': double.infinity, 'rate': 0.35}, // above 5M
+      {'limit': 190000000.0, 'rate': 0.15},
+      {'limit': 250000000.0, 'rate': 0.25},
+      {'limit': 450000000.0, 'rate': 0.30},
+      {'limit': double.infinity, 'rate': 0.35},
     ];
 
     List<double> bracketTaxes = [];
@@ -147,19 +133,15 @@ class _NetSalaryCalculatorPageState extends ConsumerState<NetSalaryCalculatorPag
       }
     }
 
-    // 9. NPWP Penalty (+20% tax if no NPWP)
-    if (!_hasNpwp) {
+if (!_hasNpwp) {
       taxAnnual *= 1.2;
     }
 
-    // 10. Monthly PPh 21
-    final taxMonthly = taxAnnual / 12;
+final taxMonthly = taxAnnual / 12;
 
-    // 11. Take Home Pay (Gaji Bersih Diterima)
-    final takeHomePay = grossMonthly - totalBpjs - taxMonthly;
+final takeHomePay = grossMonthly - totalBpjs - taxMonthly;
 
-    // 12. Percentage calculations for the bar chart
-    double thpPercent = 0.0;
+double thpPercent = 0.0;
     double taxPercent = 0.0;
     double bpjsPercent = 0.0;
     if (grossMonthly > 0) {
@@ -195,8 +177,7 @@ class _NetSalaryCalculatorPageState extends ConsumerState<NetSalaryCalculatorPag
             _buildHeadingSection(isDarkMode),
             const SizedBox(height: 24),
 
-            // FORM SECTION CARD
-            Container(
+Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: isDarkMode ? AppColors.surfaceDark : Colors.white,
@@ -240,9 +221,8 @@ class _NetSalaryCalculatorPageState extends ConsumerState<NetSalaryCalculatorPag
                     iconColor: Colors.amber,
                   ),
                   const SizedBox(height: 20),
-                  
-                  // PTKP Dropdown
-                  Row(
+
+Row(
                     children: [
                       Expanded(
                         child: _buildDropdownField(
@@ -263,9 +243,8 @@ class _NetSalaryCalculatorPageState extends ConsumerState<NetSalaryCalculatorPag
                     ],
                   ),
                   const SizedBox(height: 16),
-                  
-                  // Switch Options
-                  _buildToggleRow(
+
+_buildToggleRow(
                     label: 'Memiliki NPWP',
                     subtitle: 'Pajak +20% lebih mahal jika tidak memiliki NPWP',
                     value: _hasNpwp,
@@ -293,8 +272,7 @@ class _NetSalaryCalculatorPageState extends ConsumerState<NetSalaryCalculatorPag
             ),
             const SizedBox(height: 24),
 
-            // RESULTS & SUMMARY SECTION
-            if (grossMonthly > 0) ...[
+if (grossMonthly > 0) ...[
               _buildResultsDashboard(
                 isDarkMode,
                 grossMonthly,
@@ -558,7 +536,7 @@ class _NetSalaryCalculatorPageState extends ConsumerState<NetSalaryCalculatorPag
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Take Home Pay Header
+
           Center(
             child: Column(
               children: [
@@ -596,12 +574,10 @@ class _NetSalaryCalculatorPageState extends ConsumerState<NetSalaryCalculatorPag
           ),
           const SizedBox(height: 24),
 
-          // Stacked Segment Bar Chart
-          _buildSegmentBarChart(thpPercent, taxPercent, bpjsPercent, isDarkMode),
+_buildSegmentBarChart(thpPercent, taxPercent, bpjsPercent, isDarkMode),
           const SizedBox(height: 24),
 
-          // Breakdown List
-          _buildBreakdownRow(
+_buildBreakdownRow(
             label: 'Penghasilan Bruto',
             value: _formatRupiah(grossMonthly),
             color: contentColor,
@@ -634,9 +610,8 @@ class _NetSalaryCalculatorPageState extends ConsumerState<NetSalaryCalculatorPag
           ),
 
           const SizedBox(height: 12),
-          
-          // Expansion Detail PPh 21
-          Theme(
+
+Theme(
             data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
             child: ExpansionTile(
               tilePadding: EdgeInsets.zero,
@@ -736,11 +711,10 @@ class _NetSalaryCalculatorPageState extends ConsumerState<NetSalaryCalculatorPag
   }
 
   Widget _buildSegmentBarChart(double thp, double tax, double bpjs, bool isDarkMode) {
-    // Prevent zero division layout crashes
+
     if (thp == 0 && tax == 0 && bpjs == 0) return const SizedBox.shrink();
-    
-    // Ensure small values are still slightly visible if they exist
-    double minVisibleWidth = 0.05;
+
+double minVisibleWidth = 0.05;
     double adjustedThp = thp;
     double adjustedTax = tax;
     double adjustedBpjs = bpjs;
@@ -757,7 +731,7 @@ class _NetSalaryCalculatorPageState extends ConsumerState<NetSalaryCalculatorPag
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // The Segmented Bar
+
         ClipRRect(
           borderRadius: BorderRadius.circular(8),
           child: Container(
@@ -786,9 +760,8 @@ class _NetSalaryCalculatorPageState extends ConsumerState<NetSalaryCalculatorPag
           ),
         ),
         const SizedBox(height: 10),
-        
-        // Legends
-        Row(
+
+Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             if (thp > 0)

@@ -62,7 +62,7 @@ class _HighVisInputState extends State<HighVisInput> {
 
   @override
   void dispose() {
-    // Only dispose if it was created locally
+
     if (widget.focusNode == null) {
       _focusNode.removeListener(_onFocusChange);
       _focusNode.dispose();

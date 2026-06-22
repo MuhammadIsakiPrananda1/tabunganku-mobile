@@ -20,8 +20,7 @@ class MockGoldService {
   static final StreamController<List<GoldTransactionModel>> _streamController =
       StreamController<List<GoldTransactionModel>>.broadcast();
 
-  // API Configuration
-  final String _primaryApiUrl = 'https://api.gold-api.com/price/XAU';
+final String _primaryApiUrl = 'https://api.gold-api.com/price/XAU';
   final String _secondaryApiUrl = 'https://www.gold-feed.com/prices/gold.json';
   final double _usdToIdr = 16350.0;
   final double _ozToGram = 31.1035;
@@ -137,17 +136,16 @@ class MockGoldService {
   }
 
   Stream<Map<String, double>> watchPrices() async* {
-    // Initial fetch
+
     yield await _fetchRealPrices();
 
-    // Periodic fetch every 1 minute to stay "real-time" without hitting limits
-    yield* Stream.periodic(
+yield* Stream.periodic(
             const Duration(minutes: 1), (_) => _fetchRealPrices())
         .asyncMap((event) => event);
   }
 
   Future<Map<String, double>> _fetchRealPrices() async {
-    // Try Primary API
+
     try {
       final response = await http
           .get(Uri.parse(_primaryApiUrl))
@@ -168,8 +166,7 @@ class MockGoldService {
       print('Primary Gold API failed: $e');
     }
 
-    // Try Secondary API
-    try {
+try {
       final response = await http
           .get(Uri.parse(_secondaryApiUrl))
           .timeout(const Duration(seconds: 15));
@@ -190,8 +187,7 @@ class MockGoldService {
       print('Secondary Gold API failed: $e');
     }
 
-    // Final Fallback (more realistic current price)
-    return {
+return {
       'buy': 1238500.0,
       'sell': 1176500.0,
       'change': 0.85,

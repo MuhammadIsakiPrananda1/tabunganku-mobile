@@ -140,8 +140,7 @@ class _MonthlyBudgetPageState extends ConsumerState<MonthlyBudgetPage> {
         child: Column(
           children: [
 
-            // ── AppBar ────────────────────────────────────────────────
-            Padding(
+Padding(
               padding: const EdgeInsets.fromLTRB(4, 8, 16, 0),
               child: Row(
                 children: [
@@ -171,8 +170,7 @@ class _MonthlyBudgetPageState extends ConsumerState<MonthlyBudgetPage> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
 
-                    // ── Month picker ────────────────────────────────────
-                    Container(
+Container(
                       height: 44,
                       decoration: BoxDecoration(
                         color: cardBg,
@@ -203,8 +201,7 @@ class _MonthlyBudgetPageState extends ConsumerState<MonthlyBudgetPage> {
                     ),
                     const SizedBox(height: 14),
 
-                    // ── Stats card ──────────────────────────────────────
-                    Container(
+Container(
                       decoration: BoxDecoration(
                         color: cardBg,
                         borderRadius: BorderRadius.circular(20),
@@ -221,15 +218,13 @@ class _MonthlyBudgetPageState extends ConsumerState<MonthlyBudgetPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
 
-                          // ── Top section ──
-                          Padding(
+Padding(
                             padding: const EdgeInsets.fromLTRB(18, 16, 18, 14),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
 
-                                // Row: label + status icon
-                                Text(
+Text(
                                   'PENGELUARAN BULAN INI',
                                   style: GoogleFonts.quicksand(
                                     fontSize: 10,
@@ -240,8 +235,7 @@ class _MonthlyBudgetPageState extends ConsumerState<MonthlyBudgetPage> {
                                 ),
                                 const SizedBox(height: 6),
 
-                                // Hero: amount spent
-                                Text(
+Text(
                                   fmt.format(spent),
                                   textAlign: TextAlign.center,
                                   style: GoogleFonts.quicksand(
@@ -253,8 +247,7 @@ class _MonthlyBudgetPageState extends ConsumerState<MonthlyBudgetPage> {
                                 ),
                                 const SizedBox(height: 3),
 
-                                // Limit caption
-                                Text(
+Text(
                                   _budgetLimit > 0
                                       ? 'dari ${fmt.format(_budgetLimit)}'
                                       : 'Belum ada limit budget',
@@ -267,8 +260,7 @@ class _MonthlyBudgetPageState extends ConsumerState<MonthlyBudgetPage> {
                                 ),
                                 const SizedBox(height: 14),
 
-                                // Progress bar + %
-                                Row(
+Row(
                                   children: [
                                     Expanded(
                                       child: ClipRRect(
@@ -300,8 +292,7 @@ class _MonthlyBudgetPageState extends ConsumerState<MonthlyBudgetPage> {
 
                           Divider(height: 1, color: divClr),
 
-                          // ── Bottom stat row ──
-                          IntrinsicHeight(
+IntrinsicHeight(
                             child: Row(
                               children: [
                                 Expanded(
@@ -335,16 +326,14 @@ class _MonthlyBudgetPageState extends ConsumerState<MonthlyBudgetPage> {
                     ),
                     const SizedBox(height: 10),
 
-                    // ── Status banner (only when budget is set) ─────────
-                    if (_budgetLimit > 0) ...[
+if (_budgetLimit > 0) ...[
                       _statusBanner(
                           isOver, isWarn, accent, progress, isDark, txtClr),
                       const SizedBox(height: 14),
                     ] else
                       const SizedBox(height: 4),
 
-                    // ── Set limit card ──────────────────────────────────
-                    Container(
+Container(
                       padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
                       decoration: BoxDecoration(
                         color: cardBg,
@@ -362,8 +351,7 @@ class _MonthlyBudgetPageState extends ConsumerState<MonthlyBudgetPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
 
-                          // Section label row
-                          Row(
+Row(
                             children: [
                               Container(
                                 padding: const EdgeInsets.all(6),
@@ -394,8 +382,7 @@ class _MonthlyBudgetPageState extends ConsumerState<MonthlyBudgetPage> {
                           ),
                           const SizedBox(height: 14),
 
-                          // Input field
-                          TextFormField(
+TextFormField(
                             controller: _ctrl,
                             keyboardType: const TextInputType.numberWithOptions(decimal: true),
                             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -486,8 +473,7 @@ class _MonthlyBudgetPageState extends ConsumerState<MonthlyBudgetPage> {
                           ],
                           const SizedBox(height: 12),
 
-                          // Save button
-                          SizedBox(
+SizedBox(
                             width: double.infinity,
                             height: 46,
                             child: ElevatedButton(
@@ -525,9 +511,7 @@ class _MonthlyBudgetPageState extends ConsumerState<MonthlyBudgetPage> {
     );
   }
 
-  // ── Helpers ──────────────────────────────────────────────────────────────
-
-  Widget _navBtn(IconData icon, VoidCallback onTap) => GestureDetector(
+Widget _navBtn(IconData icon, VoidCallback onTap) => GestureDetector(
         onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 14),

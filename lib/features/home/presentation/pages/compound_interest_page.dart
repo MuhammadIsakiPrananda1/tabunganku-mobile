@@ -67,9 +67,8 @@ class _CompoundInterestPageState extends ConsumerState<CompoundInterestPage> {
     final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
         (ref.watch(themeProvider) == ThemeMode.system && theme.brightness == Brightness.dark);
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
-    
-    // Page Theme: Mint Green Accent & Pure Dark/Light backgrounds
-    final pageBgColor = isDarkMode ? AppColors.backgroundDark : const Color(0xFFF8FAF9);
+
+final pageBgColor = isDarkMode ? AppColors.backgroundDark : const Color(0xFFF8FAF9);
     final accentColor = isDarkMode ? const Color(0xFF2ECC71) : const Color(0xFF27AE60);
 
     return Scaffold(

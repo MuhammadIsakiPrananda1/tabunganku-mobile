@@ -34,9 +34,8 @@ class TransactionModel {
     if (dateVal is String) {
       parsedDate = DateTime.parse(dateVal);
     } else if (dateVal is dynamic && dateVal.runtimeType.toString() == 'Timestamp') {
-      // Handle Firestore Timestamp without direct import if possible, 
-      // or just check for .toDate() presence
-      parsedDate = dateVal.toDate();
+
+parsedDate = dateVal.toDate();
     } else {
       parsedDate = DateTime.now();
     }

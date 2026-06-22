@@ -7,7 +7,6 @@ import 'package:tabunganku/models/badge_model.dart';
 import 'package:tabunganku/models/notification_model.dart';
 import 'package:tabunganku/services/notification_service.dart';
 
-/// Service untuk mengelola Badge System
 abstract class BadgeService {
   Future<List<BadgeModel>> getAllBadges();
   Future<List<BadgeModel>> getEarnedBadges();
@@ -19,7 +18,6 @@ abstract class BadgeService {
   Future<void> unlockFirstChallengeBadge();
 }
 
-/// Mock implementation dengan SharedPreferences
 class MockBadgeService implements BadgeService {
   final NotificationService _notificationService;
   
@@ -40,9 +38,8 @@ class MockBadgeService implements BadgeService {
     return (userId == null || userId.isEmpty) ? 'guest' : userId;
   }
 
-  // Predefined badges
-  static final List<BadgeModel> _allBadges = [
-    // Streak Badges
+static final List<BadgeModel> _allBadges = [
+
     BadgeModel(
       id: 'streak_3',
       name: 'Konsisten 3 Hari',
@@ -76,8 +73,7 @@ class MockBadgeService implements BadgeService {
       requiredStreak: 100,
     ),
 
-    // Points Badges
-    BadgeModel(
+BadgeModel(
       id: 'points_50',
       name: 'Pemula Hebat',
       description: 'Kumpulkan 50 poin challenge',
@@ -118,8 +114,7 @@ class MockBadgeService implements BadgeService {
       requiredPoints: 1000,
     ),
 
-    // Special Challenge Badges
-    BadgeModel(
+BadgeModel(
       id: 'first_challenge',
       name: 'Langkah Pertama',
       description: 'Selesaikan challenge pertamamu',
@@ -159,8 +154,7 @@ class MockBadgeService implements BadgeService {
       requiredChallengeId: 'save-500k-month',
     ),
 
-    // Special Badges
-    BadgeModel(
+BadgeModel(
       id: 'early_bird',
       name: 'Early Adopter',
       description: 'Pengguna awal fitur Challenge Menabung',
@@ -203,7 +197,7 @@ class MockBadgeService implements BadgeService {
       final isEarned = earnedIds.contains(badge.id);
       return badge.copyWith(
         isEarned: isEarned,
-        earnedDate: isEarned ? DateTime.now() : null, // TODO: Store actual earned date
+        earnedDate: isEarned ? DateTime.now() : null,
       );
     }).toList();
   }
@@ -238,8 +232,7 @@ class MockBadgeService implements BadgeService {
       earnedIds.add(badgeId);
       await _saveEarnedBadgeIds(earnedIds);
 
-      // Trigger notification
-      final badge = await getBadgeById(badgeId);
+final badge = await getBadgeById(badgeId);
       if (badge != null) {
         await _notificationService.addNotification(
           NotificationModel(
@@ -262,14 +255,12 @@ class MockBadgeService implements BadgeService {
     
     for (final badge in availableBadges) {
       bool shouldUnlock = false;
-      
-      // Check points requirement
-      if (badge.requiredPoints > 0 && currentPoints >= badge.requiredPoints) {
+
+if (badge.requiredPoints > 0 && currentPoints >= badge.requiredPoints) {
         shouldUnlock = true;
       }
-      
-      // Check streak requirement
-      if (badge.requiredStreak != null && currentStreak >= badge.requiredStreak!) {
+
+if (badge.requiredStreak != null && currentStreak >= badge.requiredStreak!) {
         shouldUnlock = true;
       }
       
@@ -282,11 +273,10 @@ class MockBadgeService implements BadgeService {
     return unlocked;
   }
 
-  // Helper method to unlock specific challenge badge
-  Future<void> unlockChallengeBadge(String challengeTemplateId) async {
+Future<void> unlockChallengeBadge(String challengeTemplateId) async {
     final badge = _allBadges.firstWhere(
       (b) => b.requiredChallengeId == challengeTemplateId,
-      orElse: () => _allBadges.first, // Dummy
+      orElse: () => _allBadges.first,
     );
     
     if (badge.requiredChallengeId == challengeTemplateId) {
@@ -294,13 +284,11 @@ class MockBadgeService implements BadgeService {
     }
   }
 
-  // Unlock first challenge badge
-  Future<void> unlockFirstChallengeBadge() async {
+Future<void> unlockFirstChallengeBadge() async {
     await unlockBadge('first_challenge');
   }
 
-  // Unlock early bird badge (call this for all users using the feature)
-  Future<void> unlockEarlyBirdBadge() async {
+Future<void> unlockEarlyBirdBadge() async {
     await unlockBadge('early_bird');
   }
 }

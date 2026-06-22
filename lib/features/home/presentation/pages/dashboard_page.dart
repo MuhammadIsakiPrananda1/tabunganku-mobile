@@ -138,10 +138,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
   ];
   final List<_DailyMission> _dailyMissions = [];
   final PageController _targetPageController = PageController();
-  // Timer removed for optimization - isolated in specialized widgets
 
-  // --- Fitur Simulasi Tabungan ---
-  void _showSavingSimulatorSheet() {
+void _showSavingSimulatorSheet() {
     context.push('/saving-simulator');
   }
 
@@ -189,7 +187,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Swipe handle
+
               Center(
                 child: Container(
                   width: 40,
@@ -201,7 +199,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   ),
                 ),
               ),
-              // Header title
+
               Row(
                 children: [
                   Container(
@@ -228,7 +226,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 ],
               ),
               const SizedBox(height: 24),
-              // Input field: Title
+
               Text(
                 'NAMA MISI',
                 style: GoogleFonts.quicksand(
@@ -277,7 +275,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 ),
               ),
               const SizedBox(height: 20),
-              // Input field: Subtitle
+
               Text(
                 'DESKRIPSI MISI',
                 style: GoogleFonts.quicksand(
@@ -326,7 +324,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 ),
               ),
               const SizedBox(height: 20),
-              // Input field: Emoji selection
+
               Text(
                 'PILIH IKON MISI',
                 style: GoogleFonts.quicksand(
@@ -381,7 +379,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 },
               ),
               const SizedBox(height: 28),
-              // Submit button
+
               SizedBox(
                 width: double.infinity,
                 height: 48,
@@ -427,13 +425,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     );
   }
 
-  // Pindahkan ke atas agar bisa direferensikan sebelum _buildProfileTab
-
-  // Pindahkan ke atas agar bisa direferensikan
-  // Primary Colors (Stellar Sky Edition)
-  // Gunakan instance global dari main.dart
-
-  int _currentIndex = 0;
+int _currentIndex = 0;
   String? _loadedUserId;
 
   @override
@@ -441,7 +433,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _loadLocalData();
-      // Proses transaksi rutin otomatis
+
       await ref.read(recurringServiceProvider).processRecurring();
     });
   }
@@ -461,13 +453,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       });
     }
 
-    // 1. Fetch personal transactions (groupId == null)
-    final personalTransactions = ref.watch(transactionsByGroupProvider(null));
+final personalTransactions = ref.watch(transactionsByGroupProvider(null));
 
-    // Note: Group transactions are handled via global familyBalanceSyncProvider
-
-    // 3. Main dashboard only shows personal transactions (Isolasi)
-    final transactionsAsync = AsyncValue.data(personalTransactions);
+final transactionsAsync = AsyncValue.data(personalTransactions);
     final transactions = List<TransactionModel>.from(personalTransactions)
       ..sort((a, b) => b.date.compareTo(a.date));
 
@@ -576,7 +564,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       bottomNavigationBar: SafeArea(
         top: false,
         child: SizedBox(
-          height: 100, // Slightly taller for more airy feel
+          height: 100,
           child: Stack(
             clipBehavior: Clip.none,
             alignment: Alignment.topCenter,
@@ -604,14 +592,14 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                     children: [
                       _buildNavItem(0),
                       _buildNavItem(1),
-                      const SizedBox(width: 72), // Space for center button
+                      const SizedBox(width: 72),
                       _buildNavItem(2),
                       _buildNavItem(3),
                     ],
                   ),
                 ),
               ),
-              // Floating Center Camera Button
+
               Positioned(
                 top: 0,
                 child: Column(
@@ -631,7 +619,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                           boxShadow: const [
                             BoxShadow(
                               color: Color(
-                                  0x4D00BFA5), // AppColors.primary with alpha 0.3
+                                  0x4D00BFA5),
                               blurRadius: 15,
                               offset: Offset(0, 6),
                             ),
@@ -663,15 +651,12 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     );
   }
 
-  // Notifikasi sudah diinisialisasi di main.dart
-
-  Future<void> _loadLocalData() async {
+Future<void> _loadLocalData() async {
     const userId = 'default_user';
     final prefs = await SharedPreferences.getInstance();
 
-    // Migration logic for old single-target data
-    const migrationKey =
-        'migration_saving_target_v3_done_$userId'; // Use v3 to be sure
+const migrationKey =
+        'migration_saving_target_v3_done_$userId';
     if (prefs.getBool(migrationKey) != true) {
       final oldAmount = prefs.getString('saving_target_amount_$userId');
       final oldItem = prefs.getString('saving_target_item_$userId');
@@ -680,7 +665,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       if (oldAmount != null && oldItem != null && oldDueRaw != null) {
         final oldDue = DateTime.tryParse(oldDueRaw);
         if (oldDue != null) {
-          // Add as a new target in the new service
+
           final target = SavingTargetModel(
             id: 'legacy_${DateTime.now().millisecondsSinceEpoch}',
             name: oldItem,
@@ -690,19 +675,17 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           );
           await ref.read(savingTargetServiceProvider).addTarget(target);
 
-          // Mark migration as done immediately
-          await prefs.setBool(migrationKey, true);
+await prefs.setBool(migrationKey, true);
 
-          // Remove old keys
-          await prefs.remove('saving_target_amount_$userId');
+await prefs.remove('saving_target_amount_$userId');
           await prefs.remove('saving_target_item_$userId');
           await prefs.remove('saving_target_due_$userId');
         } else {
           await prefs.setBool(
-              migrationKey, true); // Even if invalid, don't retry forever
+              migrationKey, true);
         }
       } else {
-        await prefs.setBool(migrationKey, true); // Nothing to migrate
+        await prefs.setBool(migrationKey, true);
       }
     }
 
@@ -779,25 +762,25 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
   Color _getChallengeIconColor(String emoji) {
     switch (emoji) {
       case '💧':
-        return const Color(0xFF2196F3); // Clean Blue
+        return const Color(0xFF2196F3);
       case '🍱':
-        return const Color(0xFFFF9800); // Clean Orange
+        return const Color(0xFFFF9800);
       case '☕':
-        return const Color(0xFF8D6E63); // Warm Coffee Brown
+        return const Color(0xFF8D6E63);
       case '🚶':
-        return const Color(0xFF4CAF50); // Clean Green
+        return const Color(0xFF4CAF50);
       case '🛒':
-        return const Color(0xFF9C27B0); // Deep Purple
+        return const Color(0xFF9C27B0);
       case '🎬':
-        return const Color(0xFFE91E63); // Hot Pink
+        return const Color(0xFFE91E63);
       case '🚫':
-        return const Color(0xFF607D8B); // Blue Grey
+        return const Color(0xFF607D8B);
       case '🗑️':
-        return const Color(0xFFFF5722); // Deep Orange
+        return const Color(0xFFFF5722);
       case '🍳':
-        return const Color(0xFF009688); // Teal Green
+        return const Color(0xFF009688);
       case '🔌':
-        return const Color(0xFFFFC107); // Power Yellow
+        return const Color(0xFFFFC107);
       default:
         return AppColors.primary;
     }
@@ -817,15 +800,13 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         (ref.read(themeProvider) == ThemeMode.system &&
             Theme.of(context).brightness == Brightness.dark);
 
-    // Editable savings amount controller — pre-formatted with thousands separator
-    final amountController = TextEditingController(
+final amountController = TextEditingController(
       text: NumberFormat.currency(locale: 'id_ID', symbol: '', decimalDigits: 0)
           .format(challenge.savingsAmount.toInt())
           .trim(),
     );
 
-    // Mutable state for the sheet — declared outside the builder to survive rebuilds
-    bool check1 = false;
+bool check1 = false;
     bool check2 = false;
     bool logToKas = true;
 
@@ -849,7 +830,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Drag handle
+
                         Center(
                           child: Container(
                             width: 40,
@@ -861,7 +842,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                             ),
                           ),
                         ),
-                        // Header row with emoji icon
+
                         Row(
                           children: [
                             Container(
@@ -910,7 +891,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                 ],
                               ),
                             ),
-                            // XP Badge
+
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                               decoration: BoxDecoration(
@@ -933,13 +914,13 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                           ],
                         ),
                         const SizedBox(height: 24),
-                        // Divider
+
                         Divider(
                           color: isDark ? Colors.white.withOpacity(0.06) : Colors.grey.shade100,
                           thickness: 1,
                         ),
                         const SizedBox(height: 20),
-                        // Section: Nominal Penghematan
+
                         Text(
                           'NOMINAL PENGHEMATAN',
                           style: GoogleFonts.quicksand(
@@ -958,7 +939,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                           ),
                         ),
                         const SizedBox(height: 10),
-                        // Editable amount input
+
                         TextField(
                           controller: amountController,
                           keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -996,7 +977,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                           ),
                         ),
                         const SizedBox(height: 24),
-                        // Section: Verifikasi Komitmen
+
                         Text(
                           'VERIFIKASI KOMITMEN',
                           style: GoogleFonts.quicksand(
@@ -1015,7 +996,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                           ),
                         ),
                         const SizedBox(height: 12),
-                        // Checkbox 1
+
                         InkWell(
                           onTap: () {
                             setFormState(() => check1 = !check1);
@@ -1082,7 +1063,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                           ),
                         ),
                         const SizedBox(height: 10),
-                        // Checkbox 2
+
                         InkWell(
                           onTap: () {
                             setFormState(() => check2 = !check2);
@@ -1149,7 +1130,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                           ),
                         ),
                         const SizedBox(height: 20),
-                        // Log to Kas toggle row
+
                         InkWell(
                           onTap: () {
                             setFormState(() => logToKas = !logToKas);
@@ -1198,7 +1179,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                           ),
                         ),
                         const SizedBox(height: 28),
-                        // Completion button
+
                         SizedBox(
                           width: double.infinity,
                           height: 52,
@@ -1211,14 +1192,12 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                     final actualAmount =
                                         double.tryParse(rawText) ?? challenge.savingsAmount;
 
-                                    // Mark completed & update XP
-                                    setState(() {
+setState(() {
                                       challenge.isCompleted = true;
                                     });
                                     await _updateSavingsXp(challenge.xpReward);
 
-                                    // Persist completed list
-                                    final prefs = await SharedPreferences.getInstance();
+final prefs = await SharedPreferences.getInstance();
                                     const userId = 'default_user';
                                     final completedTitles = _quickChallenges
                                         .where((c) => c.isCompleted)
@@ -1227,8 +1206,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                     await prefs.setStringList(
                                         'completed_challenges_list_$userId', completedTitles);
 
-                                    // Optionally log to cashbook
-                                    if (logToKas) {
+if (logToKas) {
                                       final tx = TransactionModel(
                                         id: DateTime.now().millisecondsSinceEpoch.toString(),
                                         title: 'Hemat: ${challenge.title} ${challenge.icon}',
@@ -1316,8 +1294,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     );
   }
 
-  // Kept for compatibility but no longer called directly
-  void _showChallengeSuccessSheet(_QuickChallenge challenge) {
+void _showChallengeSuccessSheet(_QuickChallenge challenge) {
     final isDark = ref.read(themeProvider) == ThemeMode.dark ||
         (ref.read(themeProvider) == ThemeMode.system &&
             Theme.of(context).brightness == Brightness.dark);
@@ -1335,7 +1312,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Swipe handle
+
             Container(
               width: 40,
               height: 4,
@@ -1345,7 +1322,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-            // Success Icon
+
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
@@ -1359,7 +1336,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
               ),
             ),
             const SizedBox(height: 20),
-            // Title
+
             Text(
               'TANTANGAN DISELESAIKAN!',
               style: GoogleFonts.quicksand(
@@ -1369,7 +1346,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
               ),
             ),
             const SizedBox(height: 12),
-            // Message
+
             Text(
               'Hebat! Kamu berhasil menyelesaikan tantangan "${challenge.title} ${challenge.icon}" hari ini dan berhak mengklaim +${challenge.xpReward} XP untuk mempercepat kenaikan Level Finansialmu! 🚀',
               textAlign: TextAlign.center,
@@ -1380,7 +1357,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
               ),
             ),
             const SizedBox(height: 24),
-            // Savings Card
+
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -1416,7 +1393,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
               ),
             ),
             const SizedBox(height: 28),
-            // Action Buttons
+
             Column(
               children: [
                 SizedBox(
@@ -1424,7 +1401,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   height: 50,
                   child: ElevatedButton(
                     onPressed: () async {
-                      // Log real transaction
+
                       final tx = TransactionModel(
                         id: DateTime.now().millisecondsSinceEpoch.toString(),
                         title: 'Hemat: ${challenge.title} ${challenge.icon}',
@@ -1539,7 +1516,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header: Level Finansial
+
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -1589,7 +1566,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             ],
           ),
           const SizedBox(height: 16),
-          // Progress Indicator
+
           ClipRRect(
             borderRadius: BorderRadius.circular(5),
             child: SizedBox(
@@ -1613,7 +1590,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             ),
           ),
           const SizedBox(height: 16),
-          // Road Map Level Finansial (Minimalist & Compact Roadmap)
+
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
@@ -1636,7 +1613,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   ),
                 ),
                 const SizedBox(height: 10),
-                // Milestones list
+
                 ...List.generate(6, (idx) {
                   final lvlIndex = idx + 1;
                   final lvlName = _getLevelName(lvlIndex);
@@ -1647,7 +1624,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                     padding: const EdgeInsets.symmetric(vertical: 3.5),
                     child: Row(
                       children: [
-                        // Dot Indicator
+
                         Container(
                           width: 12,
                           height: 12,
@@ -1669,7 +1646,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                               : null,
                         ),
                         const SizedBox(width: 10),
-                        // Level Name & Status
+
                         Expanded(
                           child: Text(
                             'Level $lvlIndex: $lvlName',
@@ -1716,7 +1693,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             ),
           ),
           const SizedBox(height: 12),
-          // Header: Tantangan Cepat Harian
+
           Text(
             'TANTANGAN CEPAT HARIAN',
             style: GoogleFonts.quicksand(
@@ -1736,9 +1713,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             ),
           ),
           const SizedBox(height: 18),
-          // List of Challenges
-          // Minimalist Dropdown Selector for Quick Challenges
-          Container(
+
+Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
             decoration: BoxDecoration(
               color: isDarkMode ? Colors.white.withOpacity(0.02) : Colors.grey.shade50,
@@ -1817,7 +1793,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             ),
           ),
           const SizedBox(height: 14),
-          // Render ONLY the currently selected challenge card!
+
           Builder(
             builder: (context) {
               final challenge = _quickChallenges[_selectedQuickChallengeIndex];
@@ -1856,7 +1832,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // Beautiful Vector Icon instead of Emoji
+
                     Container(
                       width: 44,
                       height: 44,
@@ -1874,7 +1850,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                       ),
                     ),
                     const SizedBox(width: 14),
-                    // Title, Subtitle, & Badges
+
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1903,7 +1879,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                             ),
                           ),
                           const SizedBox(height: 6),
-                          // Wrap badges dynamically to prevent overflow on small/narrow screens
+
                           Wrap(
                             spacing: 6,
                             runSpacing: 4,
@@ -1947,7 +1923,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    // Action Button
+
                     challenge.isCompleted
                         ? Container(
                             padding: const EdgeInsets.symmetric(
@@ -2184,7 +2160,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Pull Bar
+
               Container(
                 width: 36,
                 height: 4,
@@ -2195,8 +2171,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
               ),
               const SizedBox(height: 20),
 
-              // Compact Header
-              Row(
+Row(
                 children: [
                   Container(
                     width: 48,
@@ -2257,8 +2232,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
 
               const SizedBox(height: 24),
 
-              // Integrated Progress Section
-              Container(
+Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   color: isDarkMode
@@ -2324,8 +2298,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
 
               const SizedBox(height: 20),
 
-              // Detail Cards Grid
-              IntrinsicHeight(
+IntrinsicHeight(
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -2354,8 +2327,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
 
               const SizedBox(height: 24),
 
-              // Minimal Footer
-              Text(
+Text(
                 'Dibuat pada ${DateFormat('d MMM yyyy').format(target.createdAt)}',
                 style: GoogleFonts.quicksand(
                     fontSize: 10,
@@ -2365,8 +2337,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
 
               const SizedBox(height: 20),
 
-              // Action Buttons (Modern & Balanced)
-              Row(
+Row(
                 children: [
                   Expanded(
                     child: ElevatedButton(
@@ -2664,7 +2635,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         nameController.text = trimmed.isEmpty
             ? ''
             : 'Bunga Bank $trimmed ${now.day} $monthName ${now.year}';
-        // Also set category when applying
+
       });
     }
   }
@@ -2681,8 +2652,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             ? AppCategories.incomeCategories
             : AppCategories.expenseCategories;
 
-    // Grouping categories by their 'group' field
-    final Map<String, List<TransactionCategory>> groupedCategories = {};
+final Map<String, List<TransactionCategory>> groupedCategories = {};
     for (var cat in categoryObjects) {
       groupedCategories.putIfAbsent(cat.group, () => []).add(cat);
     }
@@ -2691,8 +2661,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         ? 'Makanan & Minuman Harian'
         : 'Gaji Pokok Bulanan';
 
-    // Ensure the default exists, otherwise pick the first one from the current list
-    if (categoryObjects.isNotEmpty &&
+if (categoryObjects.isNotEmpty &&
         !categoryObjects.any((cat) => cat.label == selectedCategory)) {
       selectedCategory = categoryObjects.first.label;
     }
@@ -2703,7 +2672,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 .firstWhere((cat) => cat.label == selectedCategory)
                 .group
             : (categoryObjects.isNotEmpty ? categoryObjects.first.group : '');
-    var categoryUserSelected = false; // tracks if user has manually picked a category
+    var categoryUserSelected = false;
     var noteText = '';
     final interestBankOptions = [
       {
@@ -2891,8 +2860,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     ];
     StateSetter? sheetSetter;
 
-    // Add listener for auto-category detection
-    nameController.addListener(() {
+nameController.addListener(() {
       if (type == TransactionType.expense) {
         final text = nameController.text.toLowerCase();
         final adminKeywords = [
@@ -2904,8 +2872,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           'biaya'
         ];
 
-        // Auto-select "Biaya Admin Bank" if keywords match and user hasn't deviated much from basics
-        if (adminKeywords.any((k) => text.contains(k))) {
+if (adminKeywords.any((k) => text.contains(k))) {
           const adminCat = 'Biaya Admin Bank';
           if (selectedCategory != adminCat) {
             sheetSetter?.call(() {
@@ -2933,7 +2900,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         'icon': Icons.account_balance_rounded,
         'color': Colors.blueGrey.shade600,
       },
-      // ── E-Wallet Indonesia ──────────────────────────────
+
       {
         'label': 'GoPay',
         'subtitle': 'GoPay – Ekosistem GoTo terintegrasi',
@@ -2970,7 +2937,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         'icon': Icons.star_rounded,
         'color': Colors.purple.shade400,
       },
-      // ── Bank Digital Indonesia ──────────────────────────
+
       {
         'label': 'SeaBank',
         'subtitle': 'SeaBank – Top-up & transfer digital',
@@ -3001,7 +2968,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         'icon': Icons.credit_card_rounded,
         'color': Colors.purple.shade500,
       },
-      // ── Bank Nasional Indonesia ─────────────────────────
+
       {
         'label': 'Bank BCA',
         'subtitle': 'BCA – Bank Swasta Nasional Terbesar',
@@ -3062,7 +3029,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         'icon': Icons.account_balance_rounded,
         'color': Colors.indigo.shade500,
       },
-      // ── Bank Internasional ──────────────────────────────
+
       {
         'label': 'DBS Bank',
         'subtitle': 'DBS – Bank Terbesar di Asia Tenggara',
@@ -3093,7 +3060,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         'icon': Icons.account_balance_rounded,
         'color': Colors.green.shade800,
       },
-      // ── Dompet Digital Global ───────────────────────────
+
       {
         'label': 'PayPal',
         'subtitle': 'PayPal – Pembayaran Global Internasional',
@@ -3137,8 +3104,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             }
             prevKeyboardVisible = isKeyboardVisible;
 
-            // Dynamic colors for high contrast and conditional branding
-            final formContrastColor = Colors.teal;
+final formContrastColor = Colors.teal;
             final formLabelColor = isDarkMode ? Colors.white70 : Colors.black87;
             final formSubTextColor =
                 isDarkMode ? Colors.white54 : Colors.black54;
@@ -3459,7 +3425,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                         }
                                         categoryUserSelected = false;
                                       } else if (val == 'Bank Lainnya') {
-                                        // Auto-fill keterangan langsung saat pilih Bank Lainnya
+
                                         if (nameController.text.isEmpty ||
                                             nameController.text
                                                 .startsWith('Bunga ')) {
@@ -3499,8 +3465,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                             .replaceAll(' (Premium)', '')
                                             .replaceAll(' (Standar)', '');
 
-                                        // Only auto-fill if current description is empty
-                                        if (nameController.text.isEmpty ||
+if (nameController.text.isEmpty ||
                                             nameController.text
                                                 .startsWith('Bunga ')) {
                                           nameController.text =
@@ -3513,7 +3478,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                         selectedGroup = 'Keuangan & Bank';
                                       }
                                     });
-                                    // Ensure focus stays "diam" (unfocused) after selection
+
                                     FocusScope.of(context).unfocus();
                                   },
                                 ),
@@ -4331,7 +4296,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                 ),
                               ),
                               const SizedBox(height: 8),
-                              // Premium Category Dropdown – all categories, grouped
+
                               InkWell(
                                 onTap: () {
                                   _showCategorySearchSheet(
@@ -4535,7 +4500,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                   final amount =
                                       _toAmount(amountController.text);
                                   if (amount == null) {
-                                    return; // Should be handled by validator
+                                    return;
                                   }
 
                                   final finalCategory = (selectedCategory ==
@@ -4614,7 +4579,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     required List<TransactionCategory> categoryObjects,
     required ValueChanged<TransactionCategory> onSelected,
   }) {
-    FocusScope.of(context).unfocus(); // Unfocus parent fields immediately!
+    FocusScope.of(context).unfocus();
     final searchController = TextEditingController();
     String searchQuery = '';
 
@@ -4625,7 +4590,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       builder: (sheetContext) {
         return StatefulBuilder(
           builder: (context, setModalState) {
-            // Group filtered items dynamically
+
             final Map<String, List<TransactionCategory>> displayGrouped = {};
             for (var cat in categoryObjects) {
               final labelLower = cat.label.toLowerCase();
@@ -4786,7 +4751,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                               return Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  // Group Header (Minimalist & Clear)
+
                                   Padding(
                                     padding: const EdgeInsets.only(
                                         top: 20,
@@ -4817,7 +4782,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                       ],
                                     ),
                                   ),
-                                  // Group Items
+
                                   ...items.map((cat) {
                                     final isSelected =
                                         cat.label == currentSelected;
@@ -4993,7 +4958,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                           : Colors.black54)),
                               onTap: () {
                                 Navigator.pop(
-                                    sheetContext); // Close the list sheet
+                                    sheetContext);
                                 _showTargetDetailSheet(t, totalBalance);
                               },
                             );
@@ -5128,7 +5093,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                           initialDate: selectedDate,
                           firstDate: DateTime.now(),
                           lastDate: DateTime.now()
-                              .add(const Duration(days: 3650)), // 10 years max
+                              .add(const Duration(days: 3650)),
                           builder: (context, child) {
                             return Theme(
                               data: Theme.of(context).copyWith(
@@ -5288,7 +5253,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                           if (isEdit && context.mounted) {
                             if (Navigator.canPop(context)) {
                               Navigator.pop(
-                                  context); // Close management sheet if edit
+                                  context);
                             }
                           }
                         },
@@ -5327,7 +5292,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
   }
 
   double? _toAmount(String raw) {
-    // Bersihkan dari karakter non-angka
+
     final digitsOnly = raw.replaceAll(RegExp(r'[^0-9]'), '');
     if (digitsOnly.isEmpty) return null;
     return double.tryParse(digitsOnly);
@@ -5417,9 +5382,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     );
   }
 
-
-
-  Widget _buildFinanceTab(
+Widget _buildFinanceTab(
     AsyncValue<List<TransactionModel>> transactionsAsync,
     List<TransactionModel> transactions,
   ) {
@@ -5434,21 +5397,18 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         .where((t) => t.type == TransactionType.income)
         .fold<double>(0, (s, a) => s + a.amount);
 
-    // NEW DATA LOGIC: Daily trend for the entire current month
-    final now = DateTime.now();
+final now = DateTime.now();
 
     final theme = Theme.of(context);
     final themeMode = ref.watch(themeProvider);
     final isDarkMode = themeMode == ThemeMode.dark ||
         (themeMode == ThemeMode.system && theme.brightness == Brightness.dark);
 
-    // CALCULATE MONTHLY HIGHLIGHTS
-    final currentMonthTx = transactions
+final currentMonthTx = transactions
         .where((t) => t.date.year == now.year && t.date.month == now.month)
         .toList();
 
-    // 1. Top Category
-    final categoryTotals = <String, double>{};
+final categoryTotals = <String, double>{};
     for (var t
         in currentMonthTx.where((t) => t.type == TransactionType.expense)) {
       categoryTotals[t.category] = (categoryTotals[t.category] ?? 0) + t.amount;
@@ -5457,26 +5417,20 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         ? null
         : categoryTotals.entries.reduce((a, b) => a.value > b.value ? a : b);
 
-    // 2. Largest Transaction
-    final largestTransaction = currentMonthTx.isEmpty
+final largestTransaction = currentMonthTx.isEmpty
         ? null
         : currentMonthTx.reduce((a, b) => a.amount > b.amount ? a : b);
 
-    // 3. Activity Count
-    final monthlyActivity = currentMonthTx.length;
+final monthlyActivity = currentMonthTx.length;
 
-    // 3b. Saving Targets
-    final targetsAsync = ref.watch(savingTargetsStreamProvider);
+final targetsAsync = ref.watch(savingTargetsStreamProvider);
     final targets = targetsAsync.valueOrNull ?? [];
 
-    // 4. NEW: Charity & Bill Logic
-
-    final billsAsync = ref.watch(billsStreamProvider);
+final billsAsync = ref.watch(billsStreamProvider);
     final bills =
         billsAsync.maybeWhen(data: (d) => d, orElse: () => <BillModel>[]);
 
-    // 5. Audit Data
-    final balance = totalIncome - totalExpense;
+final balance = totalIncome - totalExpense;
     final goldTxs =
         ref.watch(goldTransactionsStreamProvider).asData?.value ?? [];
     final totalGoldGrams = goldTxs.fold(0.0,
@@ -5513,7 +5467,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. FINANCE HERO: Unified Net Worth & Audit Status (Premium Compact Glassmorphic Hero)
+
           Container(
             width: double.infinity,
             decoration: BoxDecoration(
@@ -5547,7 +5501,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
                   child: Column(
                     children: [
-                      // Header Title & Interactive Eye Toggle
+
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -5590,7 +5544,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                         ],
                       ),
                       const SizedBox(height: 4),
-                      // Big Balance Display
+
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
@@ -5609,7 +5563,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                         ),
                       ),
                       const SizedBox(height: 18),
-                      // Audit Row (Compact & Premium with Icons)
+
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
@@ -5652,7 +5606,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                     ],
                   ),
                 ),
-                // Asset Breakdown (Minimalist Inline)
+
                 Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
@@ -5697,21 +5651,18 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
 
           const SizedBox(height: 24),
 
-          // 5. SPENDING CALENDAR (HEBAT & BOROS)
-          _buildSpendingCalendarCard(transactions, isDarkMode),
+_buildSpendingCalendarCard(transactions, isDarkMode),
 
           const SizedBox(height: 24),
 
-          // 7. DAILY SAVINGS MISSION CARD (NEW HABIT SYSTEM)
-          _buildDailyMissionsCard(isDarkMode),
+_buildDailyMissionsCard(isDarkMode),
 
           const SizedBox(height: 24),
 
-          // 8. LEVEL FINANSIAL & TANTANGAN CEPAT MENABUNG (NEW GAMIFICATION SYSTEM)
-          _buildLevelAndChallengesCard(isDarkMode),
+_buildLevelAndChallengesCard(isDarkMode),
 
           const SizedBox(height: 40),
-          const SizedBox(height: 24), // Final padding
+          const SizedBox(height: 24),
         ],
       ),
     );
@@ -5722,13 +5673,11 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     final year = now.year;
     final month = now.month;
 
-    // Days in current month
-    final daysInMonth = DateTime(year, month + 1, 0).day;
+final daysInMonth = DateTime(year, month + 1, 0).day;
     final firstDayOfMonth = DateTime(year, month, 1);
-    final firstDayOffset = firstDayOfMonth.weekday - 1; // 0-6 (0 is Monday)
+    final firstDayOffset = firstDayOfMonth.weekday - 1;
 
-    // Group transactions of the current month by day
-    final Map<int, List<TransactionModel>> dailyTx = {};
+final Map<int, List<TransactionModel>> dailyTx = {};
     for (final t in transactions) {
       if (t.date.year == year && t.date.month == month) {
         dailyTx.putIfAbsent(t.date.day, () => []).add(t);
@@ -5783,7 +5732,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header Row
+
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -5819,9 +5768,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             ],
           ),
           const SizedBox(height: 20),
-          
-          // Weekdays Row
-          Row(
+
+Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: weekdays.map((day) {
               return SizedBox(
@@ -5840,8 +5788,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           ),
           const SizedBox(height: 12),
 
-          // Days Grid
-          GridView.builder(
+GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -5859,8 +5806,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
               final isFuture = day > now.day;
               final isToday = day == now.day;
 
-              // Calculate status
-              Color dayColor = isDarkMode ? const Color(0xFF1B1D1F) : const Color(0xFFF8FAFC);
+Color dayColor = isDarkMode ? const Color(0xFF1B1D1F) : const Color(0xFFF8FAFC);
               Color textColor = isDarkMode ? Colors.white30 : Colors.black26;
               Border border = Border.all(color: Colors.transparent);
 
@@ -5870,7 +5816,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 final expense = txs.where((t) => t.type == TransactionType.expense).fold(0.0, (s, t) => s + t.amount);
 
                 if (income == 0 && expense == 0) {
-                  // Tidak Menabung (Abu-Abu Premium)
+
                   dayColor = isDarkMode ? const Color(0xFF222528) : const Color(0xFFF1F5F9);
                   textColor = isDarkMode ? Colors.white60 : Colors.black54;
                   border = Border.all(
@@ -5878,12 +5824,12 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                     width: 1,
                   );
                 } else if (expense > 0 && expense > income) {
-                  // Boros
+
                   dayColor = isDarkMode ? const Color(0xFF2C1515) : const Color(0xFFFDF0F0);
                   textColor = const Color(0xFFE74C3C);
                   border = Border.all(color: const Color(0xFFE74C3C).withOpacity(0.2), width: 1);
                 } else {
-                  // Hemat
+
                   dayColor = isDarkMode ? const Color(0xFF102A1F) : const Color(0xFFE8F8F0);
                   textColor = const Color(0xFF2ECC71);
                   border = Border.all(color: const Color(0xFF2ECC71).withOpacity(0.2), width: 1);
@@ -5918,9 +5864,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           ),
           
           const SizedBox(height: 20),
-          
-          // Discipline Score Ratio Bar
-          Column(
+
+Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
@@ -5946,7 +5891,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 ],
               ),
               const SizedBox(height: 8),
-              // Multi-Segmented Progress Bar
+
               ClipRRect(
                 borderRadius: BorderRadius.circular(10),
                 child: Container(
@@ -5985,7 +5930,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             ],
           ),
           const SizedBox(height: 16),
-          // Legend Row
+
           Wrap(
             spacing: 16,
             runSpacing: 8,
@@ -6063,8 +6008,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     );
   }
 
-
-  Widget _buildDailyMissionsCard(bool isDarkMode) {
+Widget _buildDailyMissionsCard(bool isDarkMode) {
     final completedCount = _dailyMissions.where((m) => m.isCompleted).length;
     final totalCount = _dailyMissions.length;
     final progress = totalCount > 0 ? completedCount / totalCount : 0.0;
@@ -6094,7 +6038,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header Row
+
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -6126,7 +6070,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 ),
               ),
               const SizedBox(width: 8),
-              // Add custom mission button
+
               Material(
                 color: Colors.transparent,
                 child: InkWell(
@@ -6169,8 +6113,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
 
           const SizedBox(height: 18),
 
-          // Progress Row with linear progress bar & stats label
-          Row(
+Row(
             children: [
               Expanded(
                 child: ClipRRect(
@@ -6204,8 +6147,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
 
           const SizedBox(height: 20),
 
-          // Dynamic Challenge Items list
-          totalCount == 0
+totalCount == 0
               ? Padding(
                   padding: const EdgeInsets.symmetric(vertical: 24),
                   child: Center(
@@ -6254,7 +6196,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                       ),
                       child: Row(
                         children: [
-                          // Interactive Checkbox & Description Area
+
                           Expanded(
                             child: InkWell(
                               onTap: () {
@@ -6268,7 +6210,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                 padding: const EdgeInsets.all(12),
                                 child: Row(
                                   children: [
-                                    // Animated Checkbox circle
+
                                     Container(
                                       width: 22,
                                       height: 22,
@@ -6293,7 +6235,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                           : null,
                                     ),
                                     const SizedBox(width: 14),
-                                    // Text Description
+
                                     Expanded(
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -6330,7 +6272,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                               ),
                             ),
                           ),
-                          // Deletion trash can button on the right
+
                           IconButton(
                             icon: Icon(
                               Icons.delete_outline_rounded,
@@ -6384,8 +6326,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     );
   }
 
-
-  Widget _buildHistoryTab(
+Widget _buildHistoryTab(
     AsyncValue<List<TransactionModel>> transactionsAsync,
     List<TransactionModel> transactions,
   ) {
@@ -6409,8 +6350,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     );
   }
 
-  /// Tampilkan bottom sheet ekspor untuk bulan tertentu
-  Future<void> _showExportSheetForMonth({
+Future<void> _showExportSheetForMonth({
     required List<TransactionModel> monthTx,
     required String monthLabel,
   }) async {
@@ -6451,7 +6391,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Handle
+
                 Center(
                   child: Container(
                     width: 40,
@@ -6462,7 +6402,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                         borderRadius: BorderRadius.circular(2)),
                   ),
                 ),
-                // Title
+
                 Row(
                   children: [
                     Container(
@@ -6497,7 +6437,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   ],
                 ),
                 const SizedBox(height: 24),
-                // Summary mini
+
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -6534,7 +6474,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   ),
                 ),
                 const SizedBox(height: 28),
-                // Export options
+
                 _exportOptionTile(
                   ctx2,
                   isDark: isDark,
@@ -6669,8 +6609,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             theme.brightness == Brightness.dark);
     final isExpense = t.type == TransactionType.expense;
 
-    // Simplified Icons for History
-    final IconData catIcon =
+final IconData catIcon =
         isExpense ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded;
     final Color catColor = isExpense
         ? (isDarkMode ? Colors.redAccent.shade100 : Colors.red)
@@ -6767,9 +6706,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     );
   }
 
-  // _buildReceiptRow has been moved to TransactionDetailSheet
-
-  Future<void> _confirmDeleteTransaction(TransactionModel t) async {
+Future<void> _confirmDeleteTransaction(TransactionModel t) async {
     final theme = Theme.of(context);
     final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
         (ref.watch(themeProvider) == ThemeMode.system &&
@@ -6934,8 +6871,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                       .withValues(alpha: 0.4))),
                       const SizedBox(height: 24),
 
-                      // Amount Input
-                      TextFormField(
+TextFormField(
                         controller: amountController,
                         autofocus: t.type == TransactionType.expense,
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -7119,19 +7055,19 @@ class _CalculatorSheetContentState
           _output = "0";
         } else if (_operand != null) {
           if (_output == "0") {
-            // User just changed their mind about the operator
+
             _operand = buttonText;
             _expression =
                 _expression.substring(0, _expression.length - 1) + buttonText;
           } else {
-            // Chaining: 10 + 20 + ... -> calculate 10+20 first
+
             _calculate();
             _operand = buttonText;
             _expression = "$_output $buttonText";
             _output = "0";
           }
         } else {
-          // Case where user just pressed = then immediately an operator
+
           _num1 = currentVal;
           _operand = buttonText;
           _expression = "$_output $buttonText";
@@ -7150,9 +7086,9 @@ class _CalculatorSheetContentState
         }
       } else if (buttonText == "=") {
         if (_num1 != null && _operand != null) {
-          _expression = ""; // Clear expression on final result
+          _expression = "";
           _calculate();
-          // After final calculate, we want to clear everything except _output
+
           _num1 = null;
           _operand = null;
         }
@@ -7217,7 +7153,7 @@ class _CalculatorSheetContentState
                   color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
                   borderRadius: BorderRadius.circular(2)),
             ),
-            // Display
+
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(20),
@@ -7255,7 +7191,7 @@ class _CalculatorSheetContentState
               ),
             ),
             const SizedBox(height: 16),
-            // Buttons Grid
+
             GridView.count(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
@@ -7348,9 +7284,6 @@ class _CalculatorSheetContentState
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Widget Riwayat 3-Tab (terpisah agar punya TabController sendiri)
-// ─────────────────────────────────────────────────────────────────────────────
 class _HistoryTabView extends StatefulWidget {
   final List<TransactionModel> allTransactions;
   final bool isDarkMode;
@@ -7382,12 +7315,11 @@ class _HistoryTabView extends StatefulWidget {
 class _HistoryTabViewState extends State<_HistoryTabView> {
   int _filterIndex = 0;
 
-  // ── Search & Filter state ──────────────────────────────────────────
-  final TextEditingController _searchCtrl = TextEditingController();
+final TextEditingController _searchCtrl = TextEditingController();
   String _searchQuery = '';
-  // 0 = Semua, 1 = Pemasukan, 2 = Pengeluaran
+
   int _typeFilter = 0;
-  // 0 = Semua, 1 = Hutang, 2 = Piutang
+
   int _debtTypeFilter = 0;
 
   @override
@@ -7425,14 +7357,12 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
 
     return Column(
       children: [
-        // ── Minimalist Filter Selektor ────────────────────────────────────
+
         _buildHistoryFilter(isDark, regularList, hutangList, belanjaList),
 
-        // ── Search Bar (tampil di semua tab) ───────────────────────────
-        _buildSearchBar(isDark, regularList),
+_buildSearchBar(isDark, regularList),
 
-        // ── Konten Filtered ───────────────────────────────────────────────
-        Expanded(
+Expanded(
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 300),
             child: _buildFilteredBody(
@@ -7443,12 +7373,11 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
     );
   }
 
-  // ── Search Bar + Type Filters ──────────────────────────────────────
-  Widget _buildSearchBar(bool isDark, List<TransactionModel> regularList) {
+Widget _buildSearchBar(bool isDark, List<TransactionModel> regularList) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Search TextField
+
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
           child: Builder(builder: (context) {
@@ -7504,7 +7433,7 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
           }),
         ),
         const SizedBox(height: 10),
-        // Type Filter Chips (hanya tampil di tab reguler & hutang)
+
         if (_filterIndex == 0 || _filterIndex == 1)
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
@@ -7594,7 +7523,7 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Filter Dropdown / Pill Minimalist
+
           Material(
             color: Colors.transparent,
             borderRadius: BorderRadius.circular(20),
@@ -7708,8 +7637,7 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
             ),
           ),
 
-          // Count Badge (Optional, added for minimalist premium feel)
-          Container(
+Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
               color: AppColors.primary.withValues(alpha: 0.1),
@@ -7750,11 +7678,9 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
     }
   }
 
-  // ── Tab 1: Pemasukan & Pengeluaran ───────────────────────────────────────
-  // List: hanya transaksi reguler, difilter search + tipe + kategori
-  Widget _buildRegularTab(List<TransactionModel> allSorted,
+Widget _buildRegularTab(List<TransactionModel> allSorted,
       List<TransactionModel> regularList, bool isDark) {
-    // Apply search + type filter
+
     final filtered = regularList.where((t) {
       if (_typeFilter == 1 && t.type != TransactionType.income) {
         return false;
@@ -7762,7 +7688,7 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
       if (_typeFilter == 2 && t.type != TransactionType.expense) {
         return false;
       }
-      // Search query
+
       if (_searchQuery.isNotEmpty) {
         final q = _searchQuery;
         if (!t.title.toLowerCase().contains(q) &&
@@ -7789,13 +7715,12 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
           subtitle: 'Coba ubah kata kunci atau hapus filter');
     }
 
-    // Group filtered by month
-    final Map<String, List<TransactionModel>> grouped = {};
+final Map<String, List<TransactionModel>> grouped = {};
     for (final t in filtered) {
       final k = DateFormat('MMMM yyyy', 'id_ID').format(t.date).toUpperCase();
       grouped.putIfAbsent(k, () => []).add(t);
     }
-    // Group ALL sorted by month (untuk summary header)
+
     final Map<String, List<TransactionModel>> allGrouped = {};
     for (final t in allSorted) {
       final k = DateFormat('MMMM yyyy', 'id_ID').format(t.date).toUpperCase();
@@ -7810,8 +7735,7 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
         final monthTx = grouped[monthKey]!;
         final allMonthTx = allGrouped[monthKey] ?? monthTx;
 
-        // Summary dari SEMUA (incl hutang & belanja)
-        final totalIn = allMonthTx
+final totalIn = allMonthTx
             .where((t) => t.type == TransactionType.income)
             .fold(0.0, (s, t) => s + t.amount);
         final totalOut = allMonthTx
@@ -7871,8 +7795,7 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
     );
   }
 
-  // ── Tab 2: Hutang/Piutang ────────────────────────────────────────────────
-  Widget _buildHutangTab(List<TransactionModel> list, bool isDark) {
+Widget _buildHutangTab(List<TransactionModel> list, bool isDark) {
     if (list.isEmpty) {
       return _emptyState(isDark,
           icon: Icons.account_balance_wallet_outlined,
@@ -7880,8 +7803,7 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
           subtitle: 'Muncul saat hutang/piutang ditandai lunas');
     }
 
-    // Apply search query
-    final filtered = list.where((t) {
+final filtered = list.where((t) {
       if (_searchQuery.isNotEmpty) {
         final q = _searchQuery.toLowerCase();
         if (!t.title.toLowerCase().contains(q) &&
@@ -7910,8 +7832,7 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
       children: [
         const SizedBox(height: 12),
 
-        // Summary Minimalist (Style Masuk/Keluar)
-        Container(
+Container(
           padding: const EdgeInsets.all(18),
           margin: const EdgeInsets.only(bottom: 24),
           decoration: BoxDecoration(
@@ -7997,8 +7918,7 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
     );
   }
 
-  // ── Tab 3: Belanja ───────────────────────────────────────────────────────
-  Widget _buildBelanjaTab(List<TransactionModel> list, bool isDark) {
+Widget _buildBelanjaTab(List<TransactionModel> list, bool isDark) {
     if (list.isEmpty) {
       return _emptyState(isDark,
           icon: Icons.shopping_bag_outlined,
@@ -8006,8 +7926,7 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
           subtitle: 'Muncul saat item belanja ditandai dibeli');
     }
 
-    // Apply search query
-    final filtered = list.where((t) {
+final filtered = list.where((t) {
       if (_searchQuery.isNotEmpty) {
         final q = _searchQuery.toLowerCase();
         if (!t.title.toLowerCase().contains(q) &&
@@ -8031,7 +7950,7 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 80),
       children: [
-        // Summary Minimalist (Style Masuk/Keluar)
+
         Container(
           padding: const EdgeInsets.all(18),
           margin: const EdgeInsets.only(bottom: 16),
@@ -8070,8 +7989,7 @@ class _HistoryTabViewState extends State<_HistoryTabView> {
     );
   }
 
-  // ── Shared Widgets ───────────────────────────────────────────────────────
-  Widget _debtCard(TransactionModel t, bool isDark) {
+Widget _debtCard(TransactionModel t, bool isDark) {
     final isHutang = t.category == 'Hutang';
     final color = isHutang ? Colors.red.shade400 : Colors.green.shade400;
     return Container(
@@ -8301,7 +8219,6 @@ class _RibuanFormatter extends TextInputFormatter {
         selection: TextSelection.collapsed(offset: newText.length));
   }
 }
-
 
 class _DailyMission {
   final String title;

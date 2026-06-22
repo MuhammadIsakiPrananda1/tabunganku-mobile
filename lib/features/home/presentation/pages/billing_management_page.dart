@@ -709,7 +709,7 @@ class _BillingManagementPageState extends ConsumerState<BillingManagementPage> {
         ),
         child: Column(
           children: [
-            // Header Section: Checkbox + Name + Amount + Menu
+
             Padding(
               padding: const EdgeInsets.all(12),
               child: Column(
@@ -819,8 +819,7 @@ class _BillingManagementPageState extends ConsumerState<BillingManagementPage> {
               ),
             ),
 
-            // Status Section
-            Container(
+Container(
               margin: const EdgeInsets.symmetric(horizontal: 12),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               decoration: BoxDecoration(

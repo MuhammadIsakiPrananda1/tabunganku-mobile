@@ -1,9 +1,9 @@
 import 'dart:convert';
 
 enum NotificationType {
-  badge,   // Notifikasi ketika mendapatkan badge/pencapaian
-  system,  // Notifikasi sistem (update, info)
-  savings, // Notifikasi pengingat target tabungan
+  badge,
+  system,
+  savings,
   bills,
   investment,
   tax,
@@ -19,7 +19,7 @@ class NotificationModel {
   final DateTime timestamp;
   final bool isRead;
   final NotificationType type;
-  final String? actionData; // Data opsional untuk navigasi (misal: badgeId)
+  final String? actionData;
 
   NotificationModel({
     required this.id,

@@ -18,11 +18,8 @@ class AppCategories {
   static const String otherLabel = 'Kategori Lain';
 
   static const List<TransactionCategory> expenseCategories = [
-    // ══════════════════════════════════════════════════════════════
-    // 🏫 SEKOLAH
-    // Pendidikan SD/SMP/SMA, Bimbingan Belajar & Les
-    // ══════════════════════════════════════════════════════════════
-    TransactionCategory(label: 'Iuran Kelas, Kas & OSIS', icon: Icons.groups_rounded, group: 'Sekolah', color: Color(0xFF1E88E5)),
+
+TransactionCategory(label: 'Iuran Kelas, Kas & OSIS', icon: Icons.groups_rounded, group: 'Sekolah', color: Color(0xFF1E88E5)),
     TransactionCategory(label: 'Buku Paket, LKS & Modul', icon: Icons.menu_book_rounded, group: 'Sekolah', color: Color(0xFF3F51B5)),
     TransactionCategory(label: 'Alat Tulis & Buku Tulis', icon: Icons.edit_rounded, group: 'Sekolah', color: Color(0xFF00ACC1)),
     TransactionCategory(label: 'Seragam, Sepatu & Atribut Sekolah', icon: Icons.checkroom_rounded, group: 'Sekolah', color: Color(0xFF0288D1)),
@@ -56,11 +53,7 @@ class AppCategories {
     TransactionCategory(label: 'Beli Buku LKS (Lembar Kerja Siswa) Eceran', icon: Icons.menu_book_rounded, group: 'Sekolah', color: Color(0xFF3F51B5)),
     TransactionCategory(label: 'Iuran Patungan Beli Kado Kelompok untuk Teman', icon: Icons.card_giftcard_rounded, group: 'Sekolah', color: Color(0xFF1E88E5)),
 
-    // ══════════════════════════════════════════════════════════════
-    // 🎓 KULIAH / PERGURUAN TINGGI
-    // UKT, Kos, Tugas Akhir, Organisasi
-    // ══════════════════════════════════════════════════════════════
-    TransactionCategory(label: 'UKT & SPP Semesteran', icon: Icons.school_rounded, group: 'Kuliah', color: Color(0xFF5E35B1)),
+TransactionCategory(label: 'UKT & SPP Semesteran', icon: Icons.school_rounded, group: 'Kuliah', color: Color(0xFF5E35B1)),
     TransactionCategory(label: 'Buku Referensi, Jurnal & Fotokopi', icon: Icons.book_rounded, group: 'Kuliah', color: Color(0xFF673AB7)),
     TransactionCategory(label: 'Uang Kas Himpunan, BEM & UKM', icon: Icons.groups_rounded, group: 'Kuliah', color: Color(0xFFAB47BC)),
     TransactionCategory(label: 'Sertifikasi, Seminar & Workshop', icon: Icons.workspace_premium_rounded, group: 'Kuliah', color: Color(0xFF0288D1)),
@@ -97,11 +90,7 @@ class AppCategories {
     TransactionCategory(label: 'Sewa Laboratorium & Alat Riset Penelitian', icon: Icons.science_rounded, group: 'Kuliah', color: Color(0xFFE91E63)),
     TransactionCategory(label: 'Iuran Kunjungan Industri Kampus', icon: Icons.directions_bus_rounded, group: 'Kuliah', color: Color(0xFF5E35B1)),
 
-    // ══════════════════════════════════════════════════════════════
-    // 💼 KERJA & KARIR
-    // Ongkos Kerja, Pakaian Kerja, Lemburan
-    // ══════════════════════════════════════════════════════════════
-    TransactionCategory(label: 'Ongkos Commute (Bensin/MRT/KRL/Ojol)', icon: Icons.commute_rounded, group: 'Kerja', color: Color(0xFF00796B)),
+TransactionCategory(label: 'Ongkos Commute (Bensin/MRT/KRL/Ojol)', icon: Icons.commute_rounded, group: 'Kerja', color: Color(0xFF00796B)),
     TransactionCategory(label: 'Makan Siang Kantor & Kopi Sore', icon: Icons.local_cafe_rounded, group: 'Kerja', color: Color(0xFF2E7D32)),
     TransactionCategory(label: 'Baju Kerja, Blazer, Batik & Sepatu', icon: Icons.checkroom_rounded, group: 'Kerja', color: Color(0xFF43A047)),
     TransactionCategory(label: 'Iuran Sosial, Uang Duka & Kas Divisi', icon: Icons.volunteer_activism_rounded, group: 'Kerja', color: Color(0xFFAD1457)),
@@ -139,11 +128,7 @@ class AppCategories {
     TransactionCategory(label: 'Langganan Lisensi Software Desain & Dev Kantor', icon: Icons.laptop_mac_rounded, group: 'Kerja', color: Color(0xFF607D8B)),
     TransactionCategory(label: 'Biaya Seminar Upgrade Skill Mandiri', icon: Icons.school_rounded, group: 'Kerja', color: Color(0xFF43A047)),
 
-    // ══════════════════════════════════════════════════════════════
-    // 🏪 USAHA & BISNIS
-    // Bahan Baku, Sewa Toko, Pemasaran, Gaji Karyawan
-    // ══════════════════════════════════════════════════════════════
-    TransactionCategory(label: 'Pembelian Stok, Bahan Baku & Barang', icon: Icons.inventory_2_rounded, group: 'Usaha', color: Color(0xFF0097A7)),
+TransactionCategory(label: 'Pembelian Stok, Bahan Baku & Barang', icon: Icons.inventory_2_rounded, group: 'Usaha', color: Color(0xFF0097A7)),
     TransactionCategory(label: 'Sewa Tempat Usaha & Gudang', icon: Icons.warehouse_rounded, group: 'Usaha', color: Color(0xFF455A64)),
     TransactionCategory(label: 'Operasional Toko (Listrik/Wifi/Air)', icon: Icons.business_center_rounded, group: 'Usaha', color: Color(0xFF546E7A)),
     TransactionCategory(label: 'Marketing, Iklan Sosmed & Ads', icon: Icons.campaign_rounded, group: 'Usaha', color: Color(0xFFC2185B)),
@@ -178,11 +163,7 @@ class AppCategories {
     TransactionCategory(label: 'Biaya Maintenance AC / Kulkas Display Toko', icon: Icons.handyman_rounded, group: 'Usaha', color: Color(0xFF546E7A)),
     TransactionCategory(label: 'Biaya Cetak Spanduk, Banner & Baliho Promo', icon: Icons.campaign_rounded, group: 'Usaha', color: Color(0xFFC2185B)),
 
-    // ══════════════════════════════════════════════════════════════
-    // 💻 PENGELUARAN DIGITAL
-    // Game, Streaming, AI Tools, Cloud Storage, Kuota & Pulsa
-    // ══════════════════════════════════════════════════════════════
-    TransactionCategory(label: 'Langganan Netflix, Disney+, Spotify', icon: Icons.subscriptions_rounded, group: 'Pengeluaran Digital', color: Color(0xFFE50914)),
+TransactionCategory(label: 'Langganan Netflix, Disney+, Spotify', icon: Icons.subscriptions_rounded, group: 'Pengeluaran Digital', color: Color(0xFFE50914)),
     TransactionCategory(label: 'Top Up Game, Voucher & Diamond', icon: Icons.sports_esports_rounded, group: 'Pengeluaran Digital', color: Color(0xFFAB47BC)),
     TransactionCategory(label: 'Cloud Storage (Google One/iCloud)', icon: Icons.cloud_rounded, group: 'Pengeluaran Digital', color: Color(0xFF0288D1)),
     TransactionCategory(label: 'Domain, Hosting, Server & VPS', icon: Icons.dns_rounded, group: 'Pengeluaran Digital', color: Color(0xFF5C6BC0)),
@@ -221,12 +202,7 @@ class AppCategories {
     TransactionCategory(label: 'Langganan Google Play Pass / Apple Arcade', icon: Icons.sports_esports_rounded, group: 'Pengeluaran Digital', color: Color(0xFFAB47BC)),
     TransactionCategory(label: 'Biaya Admin Transfer Antar Bank (BI-Fast)', icon: Icons.wallet_rounded, group: 'Pengeluaran Digital', color: Color(0xFF00BCD4)),
 
-    // ══════════════════════════════════════════════════════════════
-    // 🏠 PENGELUARAN REAL LIFE
-    // Kebutuhan Pokok, Makanan, Jajanan, Transit, Fashion & Hobi
-    // ══════════════════════════════════════════════════════════════
-    // 🍕 MAKANAN & MINUMAN
-    TransactionCategory(label: 'Makanan & Minuman Harian', icon: Icons.restaurant_rounded, group: 'Makanan & Minuman', color: Color(0xFF1E88E5)),
+TransactionCategory(label: 'Makanan & Minuman Harian', icon: Icons.restaurant_rounded, group: 'Makanan & Minuman', color: Color(0xFF1E88E5)),
     TransactionCategory(label: 'Nongkrong, Cafe & Kuliner', icon: Icons.local_cafe_rounded, group: 'Makanan & Minuman', color: Color(0xFF795548)),
     TransactionCategory(label: 'Cemilan, Gorengan & Jajanan Pasar', icon: Icons.cookie_rounded, group: 'Makanan & Minuman', color: Color(0xFF8D6E63)),
     TransactionCategory(label: 'Boba, Es Teh & Minuman Kekinian', icon: Icons.local_drink_rounded, group: 'Makanan & Minuman', color: Color(0xFF00ACC1)),
@@ -254,8 +230,7 @@ class AppCategories {
     TransactionCategory(label: 'Beli Roti Bakar Bandung & Martabak Manis', icon: Icons.bakery_dining_rounded, group: 'Makanan & Minuman', color: Color(0xFFFF7043)),
     TransactionCategory(label: 'Beli Siomay, Batagor & Cilok Pinggir Jalan', icon: Icons.cookie_rounded, group: 'Makanan & Minuman', color: Color(0xFF8D6E63)),
 
-    // 🛒 BELANJA & SEMBAKO
-    TransactionCategory(label: 'Belanja Sembako & Bahan Pangan', icon: Icons.shopping_cart_rounded, group: 'Belanja & Sembako', color: Color(0xFF00ACC1)),
+TransactionCategory(label: 'Belanja Sembako & Bahan Pangan', icon: Icons.shopping_cart_rounded, group: 'Belanja & Sembako', color: Color(0xFF00ACC1)),
     TransactionCategory(label: 'Laundry & Kebersihan Rumah', icon: Icons.dry_cleaning_rounded, group: 'Belanja & Sembako', color: Color(0xFF42A5F5)),
     TransactionCategory(label: 'Belanja Bulanan Supermarket / Hypermarket', icon: Icons.local_grocery_store_rounded, group: 'Belanja & Sembako', color: Color(0xFF2E7D32)),
     TransactionCategory(label: 'Belanja Mingguan Sayur & Lauk Pasar Tradisional', icon: Icons.shopping_basket_rounded, group: 'Belanja & Sembako', color: Color(0xFF43A047)),
@@ -278,8 +253,7 @@ class AppCategories {
     TransactionCategory(label: 'Beli Tissue Basah Antiseptik & Hand Sanitizer', icon: Icons.clean_hands_rounded, group: 'Belanja & Sembako', color: Color(0xFFEC407A)),
     TransactionCategory(label: 'Beli Kapur Barus Wangi & Kamper Anti Kecoak', icon: Icons.clean_hands_rounded, group: 'Belanja & Sembako', color: Color(0xFFEC407A)),
 
-    // 💡 TAGIHAN & UTILITAS
-    TransactionCategory(label: 'Listrik, Air & Gas LPG', icon: Icons.electric_bolt_rounded, group: 'Tagihan & Utilitas', color: Color(0xFFFFB300)),
+TransactionCategory(label: 'Listrik, Air & Gas LPG', icon: Icons.electric_bolt_rounded, group: 'Tagihan & Utilitas', color: Color(0xFFFFB300)),
     TransactionCategory(label: 'Sewa / Kos / KPR', icon: Icons.house_rounded, group: 'Tagihan & Utilitas', color: Color(0xFF43A047)),
     TransactionCategory(label: 'Peralatan & Perbaikan Rumah', icon: Icons.handyman_rounded, group: 'Tagihan & Utilitas', color: Color(0xFF795548)),
     TransactionCategory(label: 'Internet & TV Kabel Rumah', icon: Icons.live_tv_rounded, group: 'Tagihan & Utilitas', color: Color(0xFF1976D2)),
@@ -299,8 +273,7 @@ class AppCategories {
     TransactionCategory(label: 'Biaya Perbaikan Genteng Bocor / Waterproofing', icon: Icons.handyman_rounded, group: 'Tagihan & Utilitas', color: Color(0xFF795548)),
     TransactionCategory(label: 'Iuran Kas Keamanan Malam Kompleks (Siskamling)', icon: Icons.security_rounded, group: 'Tagihan & Utilitas', color: Color(0xFF455A64)),
 
-    // 👗 GAYA HIDUP & HIBURAN
-    TransactionCategory(label: 'Belanja Fashion & Aksesoris', icon: Icons.shopping_bag_rounded, group: 'Gaya Hidup & Hiburan', color: Color(0xFFE91E63)),
+TransactionCategory(label: 'Belanja Fashion & Aksesoris', icon: Icons.shopping_bag_rounded, group: 'Gaya Hidup & Hiburan', color: Color(0xFFE91E63)),
     TransactionCategory(label: 'Hobi, Koleksi & Action Figure', icon: Icons.palette_rounded, group: 'Gaya Hidup & Hiburan', color: Color(0xFF673AB7)),
     TransactionCategory(label: 'Traveling, Liburan & Camping', icon: Icons.luggage_rounded, group: 'Gaya Hidup & Hiburan', color: Color(0xFF0277BD)),
     TransactionCategory(label: 'Gym, Fitness & Olahraga', icon: Icons.fitness_center_rounded, group: 'Gaya Hidup & Hiburan', color: Color(0xFF43A047)),
@@ -333,8 +306,7 @@ class AppCategories {
     TransactionCategory(label: 'Beli Action Figure, Gundam & Mainan Koleksi', icon: Icons.toys_rounded, group: 'Gaya Hidup & Hiburan', color: Color(0xFF673AB7)),
     TransactionCategory(label: 'Tiket Nonton Konser Musik Indie & Standup Comedy', icon: Icons.confirmation_number_rounded, group: 'Gaya Hidup & Hiburan', color: Color(0xFF9C27B0)),
 
-    // 🚗 TRANSPORTASI
-    TransactionCategory(label: 'Bahan Bakar (BBM)', icon: Icons.local_gas_station_rounded, group: 'Transportasi', color: Color(0xFFE53935)),
+TransactionCategory(label: 'Bahan Bakar (BBM)', icon: Icons.local_gas_station_rounded, group: 'Transportasi', color: Color(0xFFE53935)),
     TransactionCategory(label: 'Ojek Online & Taksi', icon: Icons.moped_rounded, group: 'Transportasi', color: Color(0xFF43A047)),
     TransactionCategory(label: 'Servis, Cuci & Oli Kendaraan', icon: Icons.build_rounded, group: 'Transportasi', color: Color(0xFF455A64)),
     TransactionCategory(label: 'Tiket Kereta, Pesawat & Bus', icon: Icons.train_rounded, group: 'Transportasi', color: Color(0xFF1A237E)),
@@ -359,8 +331,7 @@ class AppCategories {
     TransactionCategory(label: 'Biaya Tambal Ban Tubeless & Isi Nitrogen Ban', icon: Icons.build_rounded, group: 'Transportasi', color: Color(0xFF455A64)),
     TransactionCategory(label: 'Biaya Cuci Steam Salju Motor / Mobil', icon: Icons.build_rounded, group: 'Transportasi', color: Color(0xFF455A64)),
 
-    // 🐱 HEWAN PELIHARAAN
-    TransactionCategory(label: 'Hewan Peliharaan', icon: Icons.pets_rounded, group: 'Hewan Peliharaan', color: Color(0xFFFF8F00)),
+TransactionCategory(label: 'Hewan Peliharaan', icon: Icons.pets_rounded, group: 'Hewan Peliharaan', color: Color(0xFFFF8F00)),
     TransactionCategory(label: 'Makanan Kucing / Anjing & Pasir Pet Grooming', icon: Icons.pets_rounded, group: 'Hewan Peliharaan', color: Color(0xFFFF8F00)),
     TransactionCategory(label: 'Obat Kutu, Obat Cacing & Salep Jamur Hewan', icon: Icons.medication_rounded, group: 'Hewan Peliharaan', color: Color(0xFFFF8F00)),
     TransactionCategory(label: 'Beli Serokan Pasir & Tempat Buang Air Kucing', icon: Icons.pets_rounded, group: 'Hewan Peliharaan', color: Color(0xFFFF8F00)),
@@ -376,8 +347,7 @@ class AppCategories {
     TransactionCategory(label: 'Pembelian Obat Cacing & Obat Kutu Hewan Berkala', icon: Icons.medication_rounded, group: 'Hewan Peliharaan', color: Color(0xFFFF8F00)),
     TransactionCategory(label: 'Beli Pasir Kucing Wangi / Cat Litter Refill', icon: Icons.pets_rounded, group: 'Hewan Peliharaan', color: Color(0xFFFF8F00)),
 
-    // 👶 ANAK & KELUARGA (DIPINDAHKAN KE GRUP KELUARGA)
-    TransactionCategory(label: 'Kebutuhan Bayi & Susu Formula', icon: Icons.child_friendly_rounded, group: 'Anak & Keluarga', color: Color(0xFFEC407A)),
+TransactionCategory(label: 'Kebutuhan Bayi & Susu Formula', icon: Icons.child_friendly_rounded, group: 'Anak & Keluarga', color: Color(0xFFEC407A)),
     TransactionCategory(label: 'Hadiah Ulang Tahun / Kado untuk Teman', icon: Icons.card_giftcard_rounded, group: 'Anak & Keluarga', color: Color(0xFFFF5722)),
     TransactionCategory(label: 'Uang Saku Mingguan / Bulanan Anak Sekolah', icon: Icons.child_care_rounded, group: 'Anak & Keluarga', color: Color(0xFFFBC02D)),
     TransactionCategory(label: 'Uang Belanja Bulanan Istri & Rumah Tangga', icon: Icons.savings_rounded, group: 'Anak & Keluarga', color: Color(0xFF2E7D32)),
@@ -396,8 +366,7 @@ class AppCategories {
     TransactionCategory(label: 'Biaya Kursus Menggambar & Mewarnai Anak', icon: Icons.brush_rounded, group: 'Anak & Keluarga', color: Color(0xFFAFB42B)),
     TransactionCategory(label: 'Beli Kaos Kaki, Sepatu Lucu & Sandal Bayi', icon: Icons.checkroom_rounded, group: 'Anak & Keluarga', color: Color(0xFFEC407A)),
 
-    // 🕌 SOSIAL, DONASI & IBADAH (DIPINDAHKAN KE GRUP SOSIAL & IBADAH)
-    TransactionCategory(label: 'Kondangan / Amplop Nikahan Teman & Saudara', icon: Icons.celebration_rounded, group: 'Sosial & Ibadah', color: Color(0xFFE91E63)),
+TransactionCategory(label: 'Kondangan / Amplop Nikahan Teman & Saudara', icon: Icons.celebration_rounded, group: 'Sosial & Ibadah', color: Color(0xFFE91E63)),
     TransactionCategory(label: 'Kotak Amal, Sedekah & Zakat Masjid', icon: Icons.volunteer_activism_rounded, group: 'Sosial & Ibadah', color: Color(0xFF388E3C)),
     TransactionCategory(label: 'Kas Karang Taruna & Kegiatan Pemuda Komplek', icon: Icons.groups_rounded, group: 'Sosial & Ibadah', color: Color(0xFF455A64)),
     TransactionCategory(label: 'Sewa Perlengkapan Hajatan (Tenda, Sound & Kursi)', icon: Icons.groups_rounded, group: 'Sosial & Ibadah', color: Color(0xFF455A64)),
@@ -411,8 +380,7 @@ class AppCategories {
     TransactionCategory(label: 'Donasi Sosial Panti Asuhan & Yayasan Lansia', icon: Icons.volunteer_activism_rounded, group: 'Sosial & Ibadah', color: Color(0xFFFF7043)),
     TransactionCategory(label: 'Iuran Bulanan Arisan Keluarga / Arisan RT', icon: Icons.groups_rounded, group: 'Sosial & Ibadah', color: Color(0xFF455A64)),
 
-    // 🏥 KESEHATAN & ASURANSI
-    TransactionCategory(label: 'Dokter, Klinik & Rumah Sakit', icon: Icons.local_hospital_rounded, group: 'Kesehatan', color: Color(0xFFD32F2F)),
+TransactionCategory(label: 'Dokter, Klinik & Rumah Sakit', icon: Icons.local_hospital_rounded, group: 'Kesehatan', color: Color(0xFFD32F2F)),
     TransactionCategory(label: 'Obat, Vitamin & Suplemen', icon: Icons.medication_rounded, group: 'Kesehatan', color: Color(0xFFEC407A)),
     TransactionCategory(label: 'BPJS & Asuransi Kesehatan', icon: Icons.admin_panel_settings_rounded, group: 'Kesehatan', color: Color(0xFF43A047)),
     TransactionCategory(label: 'Optik & Kacamata', icon: Icons.visibility_rounded, group: 'Kesehatan', color: Color(0xFF1E88E5)),
@@ -444,8 +412,7 @@ class AppCategories {
     TransactionCategory(label: 'Biaya Konsultasi Dokter Umum Klinik Swasta', icon: Icons.favorite_rounded, group: 'Kesehatan', color: Color(0xFFFF7043)),
     TransactionCategory(label: 'Biaya Pembelian Masker Medis 3-Ply & KN95', icon: Icons.clean_hands_rounded, group: 'Kesehatan', color: Color(0xFFEC407A)),
 
-    // 💸 KEUANGAN, INVESTASI & PAJAK
-    TransactionCategory(label: 'Biaya Admin Bank & Transfer', icon: Icons.account_balance_rounded, group: 'Keuangan', color: Color(0xFF607D8B)),
+TransactionCategory(label: 'Biaya Admin Bank & Transfer', icon: Icons.account_balance_rounded, group: 'Keuangan', color: Color(0xFF607D8B)),
     TransactionCategory(label: 'Cicilan & Alokasi Investasi', icon: Icons.trending_up_rounded, group: 'Keuangan', color: Color(0xFF388E3C)),
     TransactionCategory(label: 'Asuransi Jiwa & Unit Link', icon: Icons.verified_user_rounded, group: 'Keuangan', color: Color(0xFF1565C0)),
     TransactionCategory(label: 'Pajak Pribadi & KPR', icon: Icons.request_quote_rounded, group: 'Keuangan', color: Color(0xFF455A64)),
@@ -467,8 +434,7 @@ class AppCategories {
     TransactionCategory(label: 'Cicilan Layanan SPayLater / GoPayLater Bulanan', icon: Icons.wallet_rounded, group: 'Keuangan', color: Color(0xFF00BCD4)),
     TransactionCategory(label: 'Biaya Admin Penarikan Tunai E-Wallet di ATM', icon: Icons.wallet_rounded, group: 'Keuangan', color: Color(0xFF388E3C)),
 
-    // 👶 ANAK & KELUARGA
-    TransactionCategory(label: 'Pendidikan & Mainan Anak', icon: Icons.toys_rounded, group: 'Anak & Keluarga', color: Color(0xFFAFB42B)),
+TransactionCategory(label: 'Pendidikan & Mainan Anak', icon: Icons.toys_rounded, group: 'Anak & Keluarga', color: Color(0xFFAFB42B)),
     TransactionCategory(label: 'Uang Saku Anak', icon: Icons.savings_rounded, group: 'Anak & Keluarga', color: Color(0xFFFBC02D)),
     TransactionCategory(label: 'Kirim Orang Tua & Keluarga', icon: Icons.volunteer_activism_rounded, group: 'Anak & Keluarga', color: Color(0xFFE91E63)),
     TransactionCategory(label: 'Kado & Hadiah Keluarga', icon: Icons.card_giftcard_rounded, group: 'Anak & Keluarga', color: Color(0xFFFF7043)),
@@ -489,8 +455,7 @@ class AppCategories {
     TransactionCategory(label: 'Pembelian Minyak Telon & Bedak Bayi Rutin', icon: Icons.clean_hands_rounded, group: 'Anak & Keluarga', color: Color(0xFFAD1457)),
     TransactionCategory(label: 'Biaya Kado Syukuran Khitanan Anak Saudara', icon: Icons.card_giftcard_rounded, group: 'Anak & Keluarga', color: Color(0xFFFF7043)),
 
-    // 🕌 SOSIAL, DONASI & IBADAH
-    TransactionCategory(label: 'Zakat, Infak & Sedekah', icon: Icons.spa_rounded, group: 'Sosial & Ibadah', color: Color(0xFF388E3C)),
+TransactionCategory(label: 'Zakat, Infak & Sedekah', icon: Icons.spa_rounded, group: 'Sosial & Ibadah', color: Color(0xFF388E3C)),
     TransactionCategory(label: 'Iuran RT/RW & Kebersihan', icon: Icons.groups_rounded, group: 'Sosial & Ibadah', color: Color(0xFF455A64)),
     TransactionCategory(label: 'Qurban & Aqiqah', icon: Icons.mosque_rounded, group: 'Sosial & Ibadah', color: Color(0xFF388E3C)),
     TransactionCategory(label: 'Iuran Pemakaman Komplek / Rukun Kematian', icon: Icons.domain_rounded, group: 'Sosial & Ibadah', color: Color(0xFFD32F2F)),
@@ -520,8 +485,7 @@ class AppCategories {
     TransactionCategory(label: 'Biaya Bunga & Admin Cicilan Paylater Shopee/Kredivo', icon: Icons.credit_card_rounded, group: 'Keuangan', color: Color(0xFF00BCD4)),
     TransactionCategory(label: 'Biaya Pembelian Meterai Fisik Tempel (Rp 10.000)', icon: Icons.assignment_turned_in_rounded, group: 'Keuangan', color: Color(0xFF607D8B)),
 
-    // ✨ LAINNYA & DANA DARURAT
-    TransactionCategory(label: 'Belanja Online / Minimarket', icon: Icons.shopping_bag_rounded, group: 'Lainnya', color: Color(0xFFFF6D00)),
+TransactionCategory(label: 'Belanja Online / Minimarket', icon: Icons.shopping_bag_rounded, group: 'Lainnya', color: Color(0xFFFF6D00)),
     TransactionCategory(label: 'Dana Darurat & Tak Terduga', icon: Icons.warning_amber_rounded, group: 'Lainnya', color: Color(0xFFF57C00)),
     TransactionCategory(label: 'Kehilangan & Musibah', icon: Icons.heart_broken_rounded, group: 'Lainnya', color: Color(0xFFD32F2F)),
     TransactionCategory(label: 'Biaya Pindahan & Pemakaman', icon: Icons.local_shipping_rounded, group: 'Lainnya', color: Color(0xFF8D6E63)),
@@ -531,14 +495,11 @@ class AppCategories {
     TransactionCategory(label: 'Biaya Tips Driver / Kurir / Juru Parkir', icon: Icons.moped_rounded, group: 'Lainnya', color: Color(0xFF8D6E63)),
     TransactionCategory(label: 'Kategori Lain', icon: Icons.more_horiz_rounded, group: 'Lainnya', color: Color(0xFF9E9E9E)),
 
-    // ══════════════════════════════════════════════════════════════
-    // 🤝 HUTANG & PIUTANG
-    // ══════════════════════════════════════════════════════════════
-    TransactionCategory(label: 'Hutang', icon: Icons.call_made_rounded, group: 'Hutang & Piutang', color: Color(0xFFD32F2F)),
+TransactionCategory(label: 'Hutang', icon: Icons.call_made_rounded, group: 'Hutang & Piutang', color: Color(0xFFD32F2F)),
   ];
 
   static const List<TransactionCategory> incomeCategories = [
-    // --- PEKERJAAN & GAJI ---
+
     TransactionCategory(label: 'Gaji Pokok', icon: Icons.payments_rounded, group: 'Pekerjaan & Gaji', color: Color(0xFF2E7D32)),
     TransactionCategory(label: 'Bonus, Insentif & Komisi', icon: Icons.stars_rounded, group: 'Pekerjaan & Gaji', color: Color(0xFFFFA000)),
     TransactionCategory(label: 'Uang Lembur / Overtime', icon: Icons.more_time_rounded, group: 'Pekerjaan & Gaji', color: Color(0xFF1976D2)),
@@ -584,8 +545,7 @@ class AppCategories {
     TransactionCategory(label: 'Insentif Lembur Akhir Pekan (Weekend Overtime)', icon: Icons.more_time_rounded, group: 'Pekerjaan & Gaji', color: Color(0xFF1976D2)),
     TransactionCategory(label: 'Gaji Pokok Karyawan Paruh Waktu (Part-Time)', icon: Icons.payments_rounded, group: 'Pekerjaan & Gaji', color: Color(0xFF2E7D32)),
 
-    // --- BISNIS & PENJUALAN ---
-    TransactionCategory(label: 'Penjualan Produk (Toko/E-Commerce)', icon: Icons.storefront_rounded, group: 'Bisnis & Penjualan', color: Color(0xFF00796B)),
+TransactionCategory(label: 'Penjualan Produk (Toko/E-Commerce)', icon: Icons.storefront_rounded, group: 'Bisnis & Penjualan', color: Color(0xFF00796B)),
     TransactionCategory(label: 'Penjualan Jasa / Servis / Konsultasi', icon: Icons.support_agent_rounded, group: 'Bisnis & Penjualan', color: Color(0xFF00695C)),
     TransactionCategory(label: 'Omzet Jasa Titip (Jastip)', icon: Icons.shopping_bag_rounded, group: 'Bisnis & Penjualan', color: Color(0xFFE91E63)),
     TransactionCategory(label: 'Hasil Penjualan Franchise', icon: Icons.storefront_rounded, group: 'Bisnis & Penjualan', color: Color(0xFF00897B)),
@@ -629,8 +589,7 @@ class AppCategories {
     TransactionCategory(label: 'Hasil Jual Minyak Wangi / Parfum Refill', icon: Icons.science_rounded, group: 'Bisnis & Penjualan', color: Color(0xFFEC407A)),
     TransactionCategory(label: 'Penjualan Alat Olahraga & Jersey Bola', icon: Icons.fitness_center_rounded, group: 'Bisnis & Penjualan', color: Color(0xFF43A047)),
 
-    // --- KERJA LEPAS & SAMPINGAN ---
-    TransactionCategory(label: 'Proyek Freelance (Desain/IT/Konten)', icon: Icons.laptop_mac_rounded, group: 'Kerja Lepas & Sampingan', color: Color(0xFF5E35B1)),
+TransactionCategory(label: 'Proyek Freelance (Desain/IT/Konten)', icon: Icons.laptop_mac_rounded, group: 'Kerja Lepas & Sampingan', color: Color(0xFF5E35B1)),
     TransactionCategory(label: 'Freelance Internet / Online Global (Upwork/Fiverr/dll)', icon: Icons.public_rounded, group: 'Kerja Lepas & Sampingan', color: Color(0xFF0277BD)),
     TransactionCategory(label: 'Jasa Desain Grafis & Ilustrasi', icon: Icons.brush_rounded, group: 'Kerja Lepas & Sampingan', color: Color(0xFFE040FB)),
     TransactionCategory(label: 'Jasa Video Editing & Motion Graphics', icon: Icons.video_library_rounded, group: 'Kerja Lepas & Sampingan', color: Color(0xFFFF5722)),
@@ -696,8 +655,7 @@ class AppCategories {
     TransactionCategory(label: 'Jasa Bersih Rumah Panggilan (Cleaning Service)', icon: Icons.clean_hands_rounded, group: 'Kerja Lepas & Sampingan', color: Color(0xFF4CAF50)),
     TransactionCategory(label: 'Jasa Kebun & Pangkas Pohon Halaman', icon: Icons.yard_rounded, group: 'Kerja Lepas & Sampingan', color: Color(0xFF558B2F)),
 
-    // --- JOKI TUGAS SMK ---
-    TransactionCategory(label: 'Joki Pemrograman & Coding (RPL)', icon: Icons.code_rounded, group: 'Joki Tugas SMK', color: Color(0xFFE53935)),
+TransactionCategory(label: 'Joki Pemrograman & Coding (RPL)', icon: Icons.code_rounded, group: 'Joki Tugas SMK', color: Color(0xFFE53935)),
     TransactionCategory(label: 'Joki Pembuatan Web & Mobile App (RPL)', icon: Icons.web_rounded, group: 'Joki Tugas SMK', color: Color(0xFFD32F2F)),
     TransactionCategory(label: 'Joki Database & Query SQL (RPL)', icon: Icons.storage_rounded, group: 'Joki Tugas SMK', color: Color(0xFFC2185B)),
     TransactionCategory(label: 'Joki Konfigurasi Mikrotik & Cisco (TKJ)', icon: Icons.settings_ethernet_rounded, group: 'Joki Tugas SMK', color: Color(0xFF1976D2)),
@@ -748,8 +706,7 @@ class AppCategories {
     TransactionCategory(label: 'Joki Laporan Praktikum Kimia / Fisika Kuliah', icon: Icons.science_rounded, group: 'Joki Tugas SMK', color: Color(0xFF00ACC1)),
     TransactionCategory(label: 'Joki Tugas Akuntansi Excel (Jurnal Penyesuaian)', icon: Icons.calculate_rounded, group: 'Joki Tugas SMK', color: Color(0xFF2E7D32)),
 
-    // --- JOKI GAME & PUSH RANK ---
-    TransactionCategory(label: 'Joki Game Roblox (Adopt Me / Blox Fruits / Pet Sim)', icon: Icons.sports_esports_rounded, group: 'Joki Game & Push Rank', color: Color(0xFFBF360C)),
+TransactionCategory(label: 'Joki Game Roblox (Adopt Me / Blox Fruits / Pet Sim)', icon: Icons.sports_esports_rounded, group: 'Joki Game & Push Rank', color: Color(0xFFBF360C)),
     TransactionCategory(label: 'Joki Push Rank PUBG Mobile (Conqueror / Ace / KD)', icon: Icons.military_tech_rounded, group: 'Joki Game & Push Rank', color: Color(0xFF1B5E20)),
     TransactionCategory(label: 'Joki Push Rank Mobile Legends (Mythic / Glory / Immortal)', icon: Icons.stars_rounded, group: 'Joki Game & Push Rank', color: Color(0xFFFF8F00)),
     TransactionCategory(label: 'Joki Push Rank Free Fire (Grandmaster / Heroic)', icon: Icons.local_fire_department_rounded, group: 'Joki Game & Push Rank', color: Color(0xFFE65100)),
@@ -798,8 +755,7 @@ class AppCategories {
     TransactionCategory(label: 'Joki Push Rank Arena Breakout Looting Master', icon: Icons.warning_rounded, group: 'Joki Game & Push Rank', color: Color(0xFFB71C1C)),
     TransactionCategory(label: 'Joki Reroll Akun Starter Gacha Baru (WuWa/StarRail)', icon: Icons.manage_accounts_rounded, group: 'Joki Game & Push Rank', color: Color(0xFFFF7043)),
 
-    // --- KREATOR KONTEN & DIGITAL ---
-    TransactionCategory(label: 'AdSense & Monetisasi Platform', icon: Icons.ads_click_rounded, group: 'Kreator Konten & Digital', color: Color(0xFF388E3C)),
+TransactionCategory(label: 'AdSense & Monetisasi Platform', icon: Icons.ads_click_rounded, group: 'Kreator Konten & Digital', color: Color(0xFF388E3C)),
     TransactionCategory(label: 'Sponsorship & Endorsement', icon: Icons.recommend_rounded, group: 'Kreator Konten & Digital', color: Color(0xFFC2185B)),
     TransactionCategory(label: 'Afiliasi & Referral (Shopee/Tiktok Affiliate)', icon: Icons.hub_rounded, group: 'Kreator Konten & Digital', color: Color(0xFFFF8F00)),
     TransactionCategory(label: 'Donasi Live Streaming (Saweria/Trakteer/Tiktok)', icon: Icons.video_camera_back_rounded, group: 'Kreator Konten & Digital', color: Color(0xFFEC407A)),
@@ -841,8 +797,7 @@ class AppCategories {
     TransactionCategory(label: 'Penjualan Template Notion Produktivitas', icon: Icons.task_alt_rounded, group: 'Kreator Konten & Digital', color: Color(0xFF3F51B5)),
     TransactionCategory(label: 'Penjualan Preset Foto Lightroom / LUTS Video', icon: Icons.filter_rounded, group: 'Kreator Konten & Digital', color: Color(0xFF00897B)),
 
-    // --- INVESTASI & ASET ---
-    TransactionCategory(label: 'Profit Saham & Reksa Dana', icon: Icons.trending_up_rounded, group: 'Investasi & Aset', color: Color(0xFF2E7D32)),
+TransactionCategory(label: 'Profit Saham & Reksa Dana', icon: Icons.trending_up_rounded, group: 'Investasi & Aset', color: Color(0xFF2E7D32)),
     TransactionCategory(label: 'Profit Obligasi & Sukuk (SBN)', icon: Icons.payment_rounded, group: 'Investasi & Aset', color: Color(0xFF00ACC1)),
     TransactionCategory(label: 'Profit Crypto, Staking & Web3', icon: Icons.currency_bitcoin_rounded, group: 'Investasi & Aset', color: Color(0xFFFBC02D)),
     TransactionCategory(label: 'Airdrop Crypto Diterima', icon: Icons.toll_rounded, group: 'Investasi & Aset', color: Color(0xFFFF9800)),
@@ -865,8 +820,7 @@ class AppCategories {
     TransactionCategory(label: 'Profit Arbitrase Aset Kripto & USDT', icon: Icons.currency_exchange_rounded, group: 'Investasi & Aset', color: Color(0xFFFFA000)),
     TransactionCategory(label: 'Dividen Saham Emiten LQ45 Pilihan', icon: Icons.stars_rounded, group: 'Investasi & Aset', color: Color(0xFF4CAF50)),
 
-    // --- PENDAPATAN PASIF & SEWA ---
-    TransactionCategory(label: 'Sewa Properti (Kost/Rumah/Ruko)', icon: Icons.home_work_rounded, group: 'Pendapatan Pasif & Sewa', color: Color(0xFF00796B)),
+TransactionCategory(label: 'Sewa Properti (Kost/Rumah/Ruko)', icon: Icons.home_work_rounded, group: 'Pendapatan Pasif & Sewa', color: Color(0xFF00796B)),
     TransactionCategory(label: 'Sewa Kendaraan & Peralatan', icon: Icons.car_rental_rounded, group: 'Pendapatan Pasif & Sewa', color: Color(0xFF00695C)),
     TransactionCategory(label: 'Sewa Pasang Iklan (Baliho/Website)', icon: Icons.visibility_rounded, group: 'Pendapatan Pasif & Sewa', color: Color(0xFF1E88E5)),
     TransactionCategory(label: 'Hasil Mesin Otomatis (Vending/Laundromat)', icon: Icons.point_of_sale_rounded, group: 'Pendapatan Pasif & Sewa', color: Color(0xFF546E7A)),
@@ -888,8 +842,7 @@ class AppCategories {
     TransactionCategory(label: 'Sewa Mobil Lepas Kunci Harian', icon: Icons.directions_car_rounded, group: 'Pendapatan Pasif & Sewa', color: Color(0xFF00796B)),
     TransactionCategory(label: 'Sewa Motor Harian untuk Wisatawan', icon: Icons.moped_rounded, group: 'Pendapatan Pasif & Sewa', color: Color(0xFF2E7D32)),
 
-    // --- PERTANIAN & PETERNAKAN ---
-    TransactionCategory(label: 'Hasil Penjualan Padi / Beras', icon: Icons.grass_rounded, group: 'Pertanian & Peternakan', color: Color(0xFF4CAF50)),
+TransactionCategory(label: 'Hasil Penjualan Padi / Beras', icon: Icons.grass_rounded, group: 'Pertanian & Peternakan', color: Color(0xFF4CAF50)),
     TransactionCategory(label: 'Hasil Panen Sayur Harian', icon: Icons.yard_rounded, group: 'Pertanian & Peternakan', color: Color(0xFF2E7D32)),
     TransactionCategory(label: 'Hasil Penjualan Buah-buahan Kebun', icon: Icons.apple_rounded, group: 'Pertanian & Peternakan', color: Color(0xFFFFB300)),
     TransactionCategory(label: 'Hasil Ternak Sapi Potong / Perah', icon: Icons.pets_rounded, group: 'Pertanian & Peternakan', color: Color(0xFF795548)),
@@ -904,8 +857,7 @@ class AppCategories {
     TransactionCategory(label: 'Hasil Kebun Kelapa Sawit', icon: Icons.forest_rounded, group: 'Pertanian & Peternakan', color: Color(0xFF2E7D32)),
     TransactionCategory(label: 'Hasil Kebun Kopi / Cengkeh / Karet', icon: Icons.local_cafe_rounded, group: 'Pertanian & Peternakan', color: Color(0xFF795548)),
 
-    // --- TRANSPORTASI & LOGISTIK ---
-    TransactionCategory(label: 'Pendapatan Ojek Online (GoRide/GrabRide)', icon: Icons.moped_rounded, group: 'Transportasi & Logistik', color: Color(0xFF43A047)),
+TransactionCategory(label: 'Pendapatan Ojek Online (GoRide/GrabRide)', icon: Icons.moped_rounded, group: 'Transportasi & Logistik', color: Color(0xFF43A047)),
     TransactionCategory(label: 'Pendapatan Taksi Online (GoCar/GrabCar)', icon: Icons.local_taxi_rounded, group: 'Transportasi & Logistik', color: Color(0xFF0288D1)),
     TransactionCategory(label: 'Pendapatan Driver Delivery Makanan (GoFood/GrabFood)', icon: Icons.delivery_dining_rounded, group: 'Transportasi & Logistik', color: Color(0xFFFF7043)),
     TransactionCategory(label: 'Pendapatan Kurir Ekspedisi (J&T/JNE/Sicepat)', icon: Icons.local_shipping_rounded, group: 'Transportasi & Logistik', color: Color(0xFFE53935)),
@@ -915,8 +867,7 @@ class AppCategories {
     TransactionCategory(label: 'Jasa Antar Jemput Karyawan Kantor', icon: Icons.directions_car_rounded, group: 'Transportasi & Logistik', color: Color(0xFF1E88E5)),
     TransactionCategory(label: 'Hasil Tarik Angkot / Minibus Umum', icon: Icons.directions_bus_rounded, group: 'Transportasi & Logistik', color: Color(0xFFE65100)),
 
-    // --- JASA & PERTUKANGAN ---
-    TransactionCategory(label: 'Jasa Tukang Bangunan / Renovasi', icon: Icons.handyman_rounded, group: 'Jasa & Pertukangan', color: Color(0xFF795548)),
+TransactionCategory(label: 'Jasa Tukang Bangunan / Renovasi', icon: Icons.handyman_rounded, group: 'Jasa & Pertukangan', color: Color(0xFF795548)),
     TransactionCategory(label: 'Jasa Kelistrikan & Pasang Lampu Rumah', icon: Icons.bolt_rounded, group: 'Jasa & Pertukangan', color: Color(0xFFFFB300)),
     TransactionCategory(label: 'Jasa Tukang Kayu / Pembuatan Mebel', icon: Icons.construction_rounded, group: 'Jasa & Pertukangan', color: Color(0xFF8D6E63)),
     TransactionCategory(label: 'Jasa Tukang Las / Pagar / Kanopi', icon: Icons.hardware_rounded, group: 'Jasa & Pertukangan', color: Color(0xFF607D8B)),
@@ -929,8 +880,7 @@ class AppCategories {
     TransactionCategory(label: 'Jasa Sol Sepatu Keliling', icon: Icons.construction_rounded, group: 'Jasa & Pertukangan', color: Color(0xFF5D4037)),
     TransactionCategory(label: 'Jasa Asah Pisau / Gunting Panggilan', icon: Icons.build_rounded, group: 'Jasa & Pertukangan', color: Color(0xFF78909C)),
 
-    // --- KULINER & MAKANAN ---
-    TransactionCategory(label: 'Penjualan Bubur Ayam / Nasi Uduk Sarapan', icon: Icons.restaurant_rounded, group: 'Kuliner & Makanan', color: Color(0xFF00ACC1)),
+TransactionCategory(label: 'Penjualan Bubur Ayam / Nasi Uduk Sarapan', icon: Icons.restaurant_rounded, group: 'Kuliner & Makanan', color: Color(0xFF00ACC1)),
     TransactionCategory(label: 'Penjualan Bakso / Mie Ayam Keliling', icon: Icons.dinner_dining_rounded, group: 'Kuliner & Makanan', color: Color(0xFFE53935)),
     TransactionCategory(label: 'Penjualan Gorengan & Jajanan Pasar Sore', icon: Icons.cookie_rounded, group: 'Kuliner & Makanan', color: Color(0xFF8D6E63)),
     TransactionCategory(label: 'Penjualan Es Teh Solo / Boba Kekinian', icon: Icons.local_drink_rounded, group: 'Kuliner & Makanan', color: Color(0xFF00ACC1)),
@@ -941,8 +891,7 @@ class AppCategories {
     TransactionCategory(label: 'Penjualan Martabak Manis & Telur Malam', icon: Icons.cake_rounded, group: 'Kuliner & Makanan', color: Color(0xFFFF9800)),
     TransactionCategory(label: 'Penjualan Keripik & Camilan Kiloan', icon: Icons.bakery_dining_rounded, group: 'Kuliner & Makanan', color: Color(0xFFFFB300)),
 
-    // --- KEUANGAN & BANK ---
-    TransactionCategory(label: 'Bunga Bank & Deposito', icon: Icons.account_balance_rounded, group: 'Keuangan & Bank', color: Color(0xFF1976D2)),
+TransactionCategory(label: 'Bunga Bank & Deposito', icon: Icons.account_balance_rounded, group: 'Keuangan & Bank', color: Color(0xFF1976D2)),
     TransactionCategory(label: 'Cashback, Diskon & Reward', icon: Icons.credit_score_rounded, group: 'Keuangan & Bank', color: Color(0xFF009688)),
     TransactionCategory(label: 'Refund / Pengembalian Dana', icon: Icons.replay_rounded, group: 'Keuangan & Bank', color: Color(0xFF546E7A)),
     TransactionCategory(label: 'Klaim Asuransi', icon: Icons.health_and_safety_rounded, group: 'Keuangan & Bank', color: Color(0xFF43A047)),
@@ -969,8 +918,7 @@ class AppCategories {
     TransactionCategory(label: 'Hadiah Referral Pembukaan Akun Broker Saham', icon: Icons.card_giftcard_rounded, group: 'Keuangan & Bank', color: Color(0xFFFFB300)),
     TransactionCategory(label: 'Pencairan Dana JHT (Jaminan Hari Tua) BPJS', icon: Icons.savings_rounded, group: 'Keuangan & Bank', color: Color(0xFF2E7D32)),
 
-    // --- SOSIAL, HIBAH & UANG SAKU ---
-    TransactionCategory(label: 'Kiriman Keluarga / Pasangan', icon: Icons.family_restroom_rounded, group: 'Sosial, Hibah & Uang Saku', color: Color(0xFFEC407A)),
+TransactionCategory(label: 'Kiriman Keluarga / Pasangan', icon: Icons.family_restroom_rounded, group: 'Sosial, Hibah & Uang Saku', color: Color(0xFFEC407A)),
     TransactionCategory(label: 'Uang Saku Sekolah / Kuliah', icon: Icons.backpack_rounded, group: 'Sosial, Hibah & Uang Saku', color: Color(0xFF1976D2)),
     TransactionCategory(label: 'Beasiswa Pendidikan & Hibah Riset', icon: Icons.workspace_premium_rounded, group: 'Sosial, Hibah & Uang Saku', color: Color(0xFF1A237E)),
     TransactionCategory(label: 'Angpao & Uang Lebaran / Hari Raya', icon: Icons.celebration_rounded, group: 'Sosial, Hibah & Uang Saku', color: Color(0xFFE91E63)),
@@ -987,8 +935,7 @@ class AppCategories {
     TransactionCategory(label: 'Uang Jajan dari Kakek / Nenek / Paman', icon: Icons.family_restroom_rounded, group: 'Sosial, Hibah & Uang Saku', color: Color(0xFF0288D1)),
     TransactionCategory(label: 'Dana Hibah Program Kreativitas Mahasiswa (PKM)', icon: Icons.school_rounded, group: 'Sosial, Hibah & Uang Saku', color: Color(0xFF1E88E5)),
 
-    // --- PINJAMAN & TALANGAN ---
-    TransactionCategory(label: 'Pengembalian Piutang (Tagihan)', icon: Icons.account_balance_wallet_rounded, group: 'Pinjaman & Talangan', color: Color(0xFF2E7D32)),
+TransactionCategory(label: 'Pengembalian Piutang (Tagihan)', icon: Icons.account_balance_wallet_rounded, group: 'Pinjaman & Talangan', color: Color(0xFF2E7D32)),
     TransactionCategory(label: 'Pencairan Pinjaman (Bank/KTA)', icon: Icons.account_balance_rounded, group: 'Pinjaman & Talangan', color: Color(0xFF5E35B1)),
     TransactionCategory(label: 'Dana Talangan & Arisan', icon: Icons.diversity_3_rounded, group: 'Pinjaman & Talangan', color: Color(0xFFC2185B)),
     TransactionCategory(label: 'Pengembalian Uang DP (Down Payment)', icon: Icons.replay_rounded, group: 'Pinjaman & Talangan', color: Color(0xFF546E7A)),
@@ -998,8 +945,7 @@ class AppCategories {
     TransactionCategory(label: 'Pencairan Kredit Usaha Rakyat (KUR) Mikro', icon: Icons.account_balance_rounded, group: 'Pinjaman & Talangan', color: Color(0xFF2E7D32)),
     TransactionCategory(label: 'Talangan Pembelian Barang Rekan Kerja', icon: Icons.shopping_cart_checkout_rounded, group: 'Pinjaman & Talangan', color: Color(0xFF78909C)),
 
-    // --- LAIN-LAIN ---
-    TransactionCategory(label: 'Temuan Uang & Rezeki Nomplok', icon: Icons.savings_rounded, group: 'Lain-lain', color: Color(0xFFFBC02D)),
+TransactionCategory(label: 'Temuan Uang & Rezeki Nomplok', icon: Icons.savings_rounded, group: 'Lain-lain', color: Color(0xFFFBC02D)),
     TransactionCategory(label: 'Hadiah Kompetisi & Turnamen', icon: Icons.emoji_events_rounded, group: 'Lain-lain', color: Color(0xFFFFB300)),
     TransactionCategory(label: 'Hasil Daur Ulang & Jual Sampah', icon: Icons.recycling_rounded, group: 'Lain-lain', color: Color(0xFF43A047)),
     TransactionCategory(label: 'Hasil Lelang Barang Koleksi', icon: Icons.gavel_rounded, group: 'Lain-lain', color: Color(0xFF546E7A)),

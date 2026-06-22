@@ -10,12 +10,6 @@ import 'package:tabunganku/providers/debt_provider.dart';
 import 'package:tabunganku/providers/transaction_provider.dart';
 import 'package:tabunganku/features/transaction/presentation/widgets/debt_form_sheet.dart';
 
-// ── Type scale ──────────────────────────────────────────────────────────────
-// label   : 10  w800  letterSpacing 1.0   (badge, section header)
-// caption : 11  w500                      (subtitle, hint)
-// body    : 13  w600                      (main text, amount)
-// title   : 15  w700                      (page title)
-
 class DebtListPage extends ConsumerStatefulWidget {
   const DebtListPage({super.key});
 
@@ -56,8 +50,7 @@ class _DebtListPageState extends ConsumerState<DebtListPage> {
         child: Column(
           children: [
 
-            // ── AppBar ─────────────────────────────────────────────────
-            Padding(
+Padding(
               padding: const EdgeInsets.fromLTRB(4, 8, 16, 0),
               child: Row(
                 children: [
@@ -83,8 +76,7 @@ class _DebtListPageState extends ConsumerState<DebtListPage> {
             ),
             const SizedBox(height: 10),
 
-            // ── Search bar ─────────────────────────────────────────────
-            Padding(
+Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: TextField(
                 controller: _searchCtrl,
@@ -127,8 +119,7 @@ class _DebtListPageState extends ConsumerState<DebtListPage> {
             ),
             const SizedBox(height: 10),
 
-            // ── Filter chips ────────────────────────────────────────────
-            Padding(
+Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
                 children: [
@@ -154,8 +145,7 @@ class _DebtListPageState extends ConsumerState<DebtListPage> {
             ),
             const SizedBox(height: 10),
 
-            // ── List ────────────────────────────────────────────────────
-            Expanded(
+Expanded(
               child: debtsAsync.when(
                 data: (debts) {
                   final filtered = debts.where((d) {
@@ -204,8 +194,7 @@ class _DebtListPageState extends ConsumerState<DebtListPage> {
         ),
       ),
 
-      // ── FAB ──────────────────────────────────────────────────────────
-      floatingActionButton: FloatingActionButton.extended(
+floatingActionButton: FloatingActionButton.extended(
         onPressed: () => DebtFormSheet.show(
           context,
           initialType:
@@ -223,9 +212,7 @@ class _DebtListPageState extends ConsumerState<DebtListPage> {
     );
   }
 
-  // ── Widgets ───────────────────────────────────────────────────────────────
-
-  Widget _filterChip({
+Widget _filterChip({
     required String label,
     required IconData icon,
     required Color color,
@@ -332,7 +319,7 @@ class _DebtListPageState extends ConsumerState<DebtListPage> {
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             child: Row(
               children: [
-                // Icon
+
                 Container(
                   width: 40,
                   height: 40,
@@ -351,8 +338,7 @@ class _DebtListPageState extends ConsumerState<DebtListPage> {
                 ),
                 const SizedBox(width: 12),
 
-                // Content
-                Expanded(
+Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -403,8 +389,7 @@ class _DebtListPageState extends ConsumerState<DebtListPage> {
                   ),
                 ),
 
-                // Amount + badge
-                Column(
+Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
@@ -475,9 +460,7 @@ class _DebtListPageState extends ConsumerState<DebtListPage> {
     );
   }
 
-  // ── Bottom Sheet Options ──────────────────────────────────────────────────
-
-  void _showOptions(
+void _showOptions(
       BuildContext context, WidgetRef ref, DebtModel debt, bool isDark) {
     showModalBottomSheet(
       context: context,
@@ -491,7 +474,7 @@ class _DebtListPageState extends ConsumerState<DebtListPage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Pull bar
+
             Container(
               width: 36,
               height: 4,
@@ -502,8 +485,7 @@ class _DebtListPageState extends ConsumerState<DebtListPage> {
             ),
             const SizedBox(height: 20),
 
-            // Debt info summary
-            Container(
+Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
                 color: (debt.type == DebtType.hutang
@@ -612,9 +594,7 @@ class _DebtListPageState extends ConsumerState<DebtListPage> {
     );
   }
 
-  // ── Actions ───────────────────────────────────────────────────────────────
-
-  Future<void> _markAsPaid(
+Future<void> _markAsPaid(
       BuildContext context, WidgetRef ref, DebtModel debt) async {
     await ref.read(debtServiceProvider).updateDebt(debt.copyWith(isPaid: true));
 

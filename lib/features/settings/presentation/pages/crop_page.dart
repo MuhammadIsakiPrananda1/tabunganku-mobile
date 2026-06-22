@@ -48,7 +48,7 @@ class _CropPageState extends State<CropPage> {
   void _rotateImage() {
     setState(() {
       _quarterTurns = (_quarterTurns + 1) % 4;
-      _transformationController.value = Matrix4.identity(); // Reset zoom/pan on rotate
+      _transformationController.value = Matrix4.identity();
     });
   }
 
@@ -62,15 +62,13 @@ class _CropPageState extends State<CropPage> {
       final boundary = _boundaryKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
       if (boundary == null) throw Exception('Boundary not found');
 
-      // Capture the exact layout area inside the boundary
-      final image = await boundary.toImage(pixelRatio: 3.0);
+final image = await boundary.toImage(pixelRatio: 3.0);
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
       if (byteData == null) throw Exception('ByteData conversion failed');
 
       final bytes = byteData.buffer.asUint8List();
 
-      // Save to a temporary file
-      final tempDir = await getTemporaryDirectory();
+final tempDir = await getTemporaryDirectory();
       final tempFile = File(
           '${tempDir.path}/cropped_profile_${DateTime.now().millisecondsSinceEpoch}.png');
       await tempFile.writeAsBytes(bytes);
@@ -123,20 +121,19 @@ class _CropPageState extends State<CropPage> {
       ),
       body: Stack(
         children: [
-          // ── Centered Interactive Viewport ───────────────────────
+
           Center(
             child: Stack(
               alignment: Alignment.center,
               children: [
-                // Background dark overlay
+
                 Container(
                   width: double.infinity,
                   height: double.infinity,
                   color: Colors.black.withOpacity(0.5),
                 ),
 
-                // Cropping Box boundary
-                Container(
+Container(
                   width: 300,
                   height: 300,
                   decoration: BoxDecoration(
@@ -167,9 +164,8 @@ class _CropPageState extends State<CropPage> {
                                   final aspectRatio = _imageWidth! / _imageHeight!;
                                   double childWidth;
                                   double childHeight;
-                                  
-                                  // Determine size so the image always covers the 300x300 viewport
-                                  if (aspectRatio >= 1.0) {
+
+if (aspectRatio >= 1.0) {
                                     childHeight = 300;
                                     childWidth = 300 * aspectRatio;
                                   } else {
@@ -202,8 +198,7 @@ class _CropPageState extends State<CropPage> {
                   ),
                 ),
 
-                // Thin elegant crop frame overlays
-                IgnorePointer(
+IgnorePointer(
                   child: Container(
                     width: 300,
                     height: 300,
@@ -214,14 +209,13 @@ class _CropPageState extends State<CropPage> {
                   ),
                 ),
 
-                // Thin elegant outer square boundary touching the circle for alignment guides!
-                IgnorePointer(
+IgnorePointer(
                   child: Container(
                     width: 300,
                     height: 300,
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.white.withOpacity(0.25), width: 1.0),
-                      borderRadius: BorderRadius.circular(8), // Modern subtle roundness for the outer box
+                      borderRadius: BorderRadius.circular(8),
                     ),
                   ),
                 ),
@@ -229,8 +223,7 @@ class _CropPageState extends State<CropPage> {
             ),
           ),
 
-          // ── Bottom Panel with Exactly 3 Minimalist Buttons ──────
-          Positioned(
+Positioned(
             bottom: MediaQuery.of(context).padding.bottom + 24,
             left: 0,
             right: 0,
@@ -239,7 +232,7 @@ class _CropPageState extends State<CropPage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // 1. Cancel Button
+
                   _buildCropActionButton(
                     icon: Icons.close_rounded,
                     color: Colors.white.withOpacity(0.08),
@@ -248,8 +241,7 @@ class _CropPageState extends State<CropPage> {
                     onTap: () => Navigator.pop(context),
                   ),
 
-                  // 2. Rotate Button
-                  _buildCropActionButton(
+_buildCropActionButton(
                     icon: Icons.rotate_right_rounded,
                     color: Colors.white.withOpacity(0.08),
                     borderColor: Colors.white.withOpacity(0.12),
@@ -257,8 +249,7 @@ class _CropPageState extends State<CropPage> {
                     onTap: _rotateImage,
                   ),
 
-                  // 3. Confirm Crop Button
-                  _isCropping
+_isCropping
                       ? Container(
                           width: 60,
                           height: 60,

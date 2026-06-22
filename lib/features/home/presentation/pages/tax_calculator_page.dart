@@ -15,7 +15,7 @@ class TaxCalculatorPage extends ConsumerStatefulWidget {
 class _TaxCalculatorPageState extends ConsumerState<TaxCalculatorPage> {
   final TextEditingController _valController = TextEditingController();
   double _taxResult = 0;
-  String _taxType = 'PBB'; // PBB, PKB, PPh, PPN, BPHTB, PB1
+  String _taxType = 'PBB';
 
   final List<Map<String, dynamic>> _taxTypes = [
     {'code': 'PBB', 'label': 'Pajak Bumi & Bangunan', 'icon': Icons.home_rounded},
@@ -87,9 +87,8 @@ class _TaxCalculatorPageState extends ConsumerState<TaxCalculatorPage> {
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
-    
-    // Page Theme: Mint Green Accent & Classic Black/Light background
-    final pageBgColor = isDarkMode ? AppColors.backgroundDark : const Color(0xFFF8FAF9);
+
+final pageBgColor = isDarkMode ? AppColors.backgroundDark : const Color(0xFFF8FAF9);
     final accentColor = isDarkMode ? const Color(0xFF2ECC71) : const Color(0xFF27AE60);
     final inputBgColor = isDarkMode ? Colors.white.withOpacity(0.05) : AppColors.background;
 
@@ -119,9 +118,8 @@ class _TaxCalculatorPageState extends ConsumerState<TaxCalculatorPage> {
           children: [
             _buildInfoCard(isDarkMode),
             const SizedBox(height: 24),
-            
-            // Tipe Pajak - Title
-            Padding(
+
+Padding(
               padding: const EdgeInsets.only(left: 4, bottom: 4),
               child: Text(
                 'Tipe Pajak',
@@ -132,9 +130,8 @@ class _TaxCalculatorPageState extends ConsumerState<TaxCalculatorPage> {
                 ),
               ),
             ),
-            
-            // Minimalist Custom Dropdown
-            Container(
+
+Container(
               height: 48,
               padding: const EdgeInsets.symmetric(horizontal: 12),
               decoration: BoxDecoration(

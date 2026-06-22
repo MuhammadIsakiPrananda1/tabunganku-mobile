@@ -11,12 +11,12 @@ enum ChallengeDifficulty {
 }
 
 enum ChallengeTargetType {
-  saveAmount, // Tabung sejumlah uang tertentu
-  limitExpense, // Batasi pengeluaran total
-  zeroExpense, // Tidak boleh ada pengeluaran sama sekali
-  categoryLimit, // Batasi pengeluaran kategori tertentu
-  noTransactionType, // Tidak boleh ada transaksi tipe tertentu (misal: no online shopping)
-  custom, // Tantangan kustom (misal: input semua pengeluaran)
+  saveAmount,
+  limitExpense,
+  zeroExpense,
+  categoryLimit,
+  noTransactionType,
+  custom,
 }
 
 enum ChallengeStatus {
@@ -36,22 +36,19 @@ class ChallengeModel {
   final ChallengeTargetType targetType;
   final double? targetAmount;
   final String? targetCategory;
-  
-  // Progress tracking
-  final DateTime startDate;
+
+final DateTime startDate;
   final DateTime endDate;
   final double currentProgress;
   final ChallengeStatus status;
   final DateTime? completedDate;
-  
-  // Gamification
-  final int points;
+
+final int points;
   final String? badgeId;
-  
-  // Group challenge
-  final bool isGroupChallenge;
+
+final bool isGroupChallenge;
   final String? groupId;
-  final Map<String, double>? participantProgress; // userId -> progress
+  final Map<String, double>? participantProgress;
 
   ChallengeModel({
     required this.id,
@@ -169,8 +166,7 @@ class ChallengeModel {
     );
   }
 
-  // Helper methods
-  double get progressPercentage {
+double get progressPercentage {
     if (targetAmount == null || targetAmount == 0) return 0.0;
     return (currentProgress / targetAmount!) * 100;
   }
@@ -184,7 +180,7 @@ class ChallengeModel {
     final now = DateTime.now();
     if (now.isAfter(endDate)) return 0;
     final diff = endDate.difference(now);
-    // Use ceil to ensure that even 1 second remaining counts as 1 day
+
     return (diff.inSeconds / 86400).ceil();
   }
 

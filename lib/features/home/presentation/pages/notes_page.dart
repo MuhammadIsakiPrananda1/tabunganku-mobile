@@ -21,8 +21,7 @@ class _NotesPageState extends ConsumerState<NotesPage> {
   String _searchQuery = '';
   bool _filterFavoritesOnly = false;
 
-  // A premium palette of 6 pastel colors
-  final List<Map<String, dynamic>> _pastelColors = [
+final List<Map<String, dynamic>> _pastelColors = [
     {'name': 'Sky Blue', 'value': 0xFFE3F2FD, 'darkVariant': 0xFF0D47A1},
     {'name': 'Mint', 'value': 0xFFE8F5E9, 'darkVariant': 0xFF1B5E20},
     {'name': 'Peach', 'value': 0xFFFFE0B2, 'darkVariant': 0xFFE65100},
@@ -41,7 +40,7 @@ class _NotesPageState extends ConsumerState<NotesPage> {
     if (!isDarkMode) {
       return Color(colorValue);
     }
-    // For Dark Mode, match the original pastel value to its premium dark variant
+
     final colorMap = _pastelColors.firstWhere(
       (c) => c['value'] == colorValue,
       orElse: () => {'darkVariant': 0xFF1E1E1E},
@@ -53,7 +52,7 @@ class _NotesPageState extends ConsumerState<NotesPage> {
     if (isDarkMode) {
       return Colors.white;
     }
-    // High contrast dark text for light pastel backgrounds
+
     return Colors.blueGrey.shade900;
   }
 
@@ -64,8 +63,7 @@ class _NotesPageState extends ConsumerState<NotesPage> {
     return Colors.blueGrey.shade700;
   }
 
-
-  void _confirmDelete(String id) {
+void _confirmDelete(String id) {
     showDialog(
       context: context,
       builder: (context) {
@@ -160,7 +158,7 @@ class _NotesPageState extends ConsumerState<NotesPage> {
       ),
       body: notesAsync.when(
         data: (allNotes) {
-          // 1. Filter by Search Query & Favorites
+
           var filteredNotes = allNotes.where((note) {
             final matchesSearch = note.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
                 note.content.toLowerCase().contains(_searchQuery.toLowerCase());
@@ -168,8 +166,7 @@ class _NotesPageState extends ConsumerState<NotesPage> {
             return matchesSearch && matchesFavorite;
           }).toList();
 
-          // Sort by Pinned status, then by creation date (newest first)
-          filteredNotes.sort((a, b) {
+filteredNotes.sort((a, b) {
             if (a.isPinned && !b.isPinned) return -1;
             if (!a.isPinned && b.isPinned) return 1;
             return b.createdAt.compareTo(a.createdAt);
@@ -184,7 +181,7 @@ class _NotesPageState extends ConsumerState<NotesPage> {
 
           return Column(
             children: [
-              // Search Bar
+
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
                 child: TextFormField(

@@ -1,21 +1,17 @@
 import 'package:flutter/services.dart';
 
-/// Formatter untuk menambahkan titik (.) sebagai pemisah ribuan secara dinamis
-/// saat pengguna mengetik nominal uang.
 class RibuanFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
       TextEditingValue oldValue, TextEditingValue newValue) {
     if (newValue.text.isEmpty) return newValue;
 
-    // Bersihkan teks dari karakter non-digit
-    String digitsOnly = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
+String digitsOnly = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
     if (digitsOnly.isEmpty) return const TextEditingValue(text: '');
 
     final formatted = formatNumber(digitsOnly);
 
-    // Hitung posisi kursor agar tetap di belakang angka yang baru diketik
-    int numDigitsBefore = newValue.selection.end -
+int numDigitsBefore = newValue.selection.end -
         newValue.text
             .substring(0, newValue.selection.end)
             .replaceAll(RegExp(r'[0-9]'), '')
@@ -37,8 +33,7 @@ class RibuanFormatter extends TextInputFormatter {
     );
   }
 
-  /// Memformat angka (String atau int) menjadi pemisah ribuan
-  static String formatNumber(dynamic value) {
+static String formatNumber(dynamic value) {
     if (value == null) return '0';
     String digitsOnly = value.toString().replaceAll(RegExp(r'[^0-9]'), '');
     if (digitsOnly.isEmpty) return '0';

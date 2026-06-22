@@ -33,8 +33,7 @@ class _AllServicesPageState extends ConsumerState<AllServicesPage> {
     super.dispose();
   }
 
-
-  List<_ServiceCategory> _getCategories() {
+List<_ServiceCategory> _getCategories() {
     return [
       _ServiceCategory(
         title: 'MANAJEMEN KEUANGAN',
@@ -309,14 +308,13 @@ class _AllServicesPageState extends ConsumerState<AllServicesPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Watch theme for dark mode
+
     final theme = Theme.of(context);
     final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
         (ref.watch(themeProvider) == ThemeMode.system &&
             theme.brightness == Brightness.dark);
 
-    // Filter logic
-    final filteredCategories = _getCategories().map((category) {
+final filteredCategories = _getCategories().map((category) {
       final matchingServices = category.services.where((service) {
         final titleMatch = service.title.toLowerCase().contains(_searchQuery);
         final subtitleMatch = service.subtitle.toLowerCase().contains(_searchQuery);
@@ -351,7 +349,7 @@ class _AllServicesPageState extends ConsumerState<AllServicesPage> {
       ),
       body: Column(
         children: [
-          // Search Bar
+
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
             child: TextField(

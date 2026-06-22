@@ -167,7 +167,7 @@ class _ShoppingListPageState extends ConsumerState<ShoppingListPage> {
     final txId = 'shopping_${item.id}';
 
     if (nowBought) {
-      // Buat transaksi pengeluaran otomatis
+
       final transaction = TransactionModel(
         id: txId,
         title: item.name,
@@ -181,7 +181,7 @@ class _ShoppingListPageState extends ConsumerState<ShoppingListPage> {
       );
       await ref.read(transactionServiceProvider).addTransaction(transaction);
     } else {
-      // Hapus transaksi terkait jika di-uncheck
+
       try {
         await ref.read(transactionServiceProvider).deleteTransaction(txId);
       } catch (_) {}
@@ -227,7 +227,7 @@ class _ShoppingListPageState extends ConsumerState<ShoppingListPage> {
       body: SafeArea(
         child: Column(
           children: [
-            // ── AppBar (Catatan Pinjaman style) ────────────────────────
+
             Padding(
               padding: const EdgeInsets.fromLTRB(4, 8, 16, 0),
               child: Row(
@@ -259,8 +259,7 @@ class _ShoppingListPageState extends ConsumerState<ShoppingListPage> {
             ),
             const SizedBox(height: 10),
 
-            // ── Body content ───────────────────────────────────────────
-            Expanded(
+Expanded(
               child: shoppingItemsAsync.when(
                 data: (items) {
                   final filteredItems = items.where((item) {
@@ -343,7 +342,7 @@ class _ShoppingListPageState extends ConsumerState<ShoppingListPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Row 1: Title & Status Badge
+
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -419,9 +418,8 @@ class _ShoppingListPageState extends ConsumerState<ShoppingListPage> {
             ],
           ),
           const SizedBox(height: 18),
-          
-          // Row 2: Progress Text & Sleek Progress Bar
-          Row(
+
+Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
@@ -453,16 +451,14 @@ class _ShoppingListPageState extends ConsumerState<ShoppingListPage> {
             ),
           ),
           const SizedBox(height: 20),
-          
-          // Divider
-          Divider(
+
+Divider(
             height: 1, 
             color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100,
           ),
           const SizedBox(height: 16),
 
-          // Row 3: Terbelanja & Sisa Anggaran (Minimalist Columns)
-          Row(
+Row(
             children: [
               Expanded(
                 child: Column(
@@ -556,7 +552,7 @@ class _ShoppingListPageState extends ConsumerState<ShoppingListPage> {
   Widget _buildSearchAndFilters(bool isDarkMode) {
     return Column(
       children: [
-        // Search Bar minimalis
+
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Container(
@@ -696,12 +692,12 @@ class _ShoppingListPageState extends ConsumerState<ShoppingListPage> {
             padding: const EdgeInsets.all(12),
             child: Row(
               children: [
-                // 1. Direct Checkbox (Tactile Interactive Tap Area)
+
                 GestureDetector(
                   onTap: () => _toggleBoughtStatus(item),
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
-                    color: Colors.transparent, // Expand tap target
+                    color: Colors.transparent,
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 200),
                       width: 22,
@@ -726,8 +722,7 @@ class _ShoppingListPageState extends ConsumerState<ShoppingListPage> {
                 ),
                 const SizedBox(width: 8),
 
-                // 2. Photo / Image preview
-                Stack(
+Stack(
                   alignment: Alignment.bottomRight,
                   children: [
                     Container(
@@ -769,7 +764,7 @@ class _ShoppingListPageState extends ConsumerState<ShoppingListPage> {
                                 )
                               : const Icon(Icons.shopping_bag_rounded, color: AppColors.primary, size: 20),
                     ),
-                    // Small storage indicator (Cloud / Phone)
+
                     if (item.url != null && item.url!.isNotEmpty)
                       Positioned(
                         bottom: 0,
@@ -800,8 +795,7 @@ class _ShoppingListPageState extends ConsumerState<ShoppingListPage> {
                 ),
                 const SizedBox(width: 12),
 
-                // 3. Name & Meta Info
-                Expanded(
+Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -856,8 +850,7 @@ class _ShoppingListPageState extends ConsumerState<ShoppingListPage> {
                 ),
                 const SizedBox(width: 12),
 
-                // 4. Prices & Stats
-                Column(
+Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
@@ -938,7 +931,7 @@ class _ShoppingListPageState extends ConsumerState<ShoppingListPage> {
               isDarkMode: isDarkMode,
               onTap: () async {
                 Navigator.pop(context);
-                // Hapus transaksi terkait di Riwayat jika ada
+
                 try {
                   await ref.read(transactionServiceProvider).deleteTransaction('shopping_${item.id}');
                 } catch (_) {}

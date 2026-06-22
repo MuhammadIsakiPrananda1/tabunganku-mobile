@@ -105,13 +105,11 @@ class _PiggyBankPageState extends ConsumerState<PiggyBankPage> {
             children: [
               const SizedBox(height: 24),
 
-              // Compact Balance Card
-              _buildCompactBalanceCard(balance, isDarkMode),
+_buildCompactBalanceCard(balance, isDarkMode),
 
               const SizedBox(height: 32),
 
-              // Input Card Container
-              Card(
+Card(
                 elevation: isDarkMode ? 1 : 2,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 child: Container(
@@ -126,7 +124,7 @@ class _PiggyBankPageState extends ConsumerState<PiggyBankPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Input Label
+
                       Text(
                         'NOMINAL MASUKKAN RECEH',
                         style: GoogleFonts.quicksand(
@@ -138,8 +136,7 @@ class _PiggyBankPageState extends ConsumerState<PiggyBankPage> {
                       ),
                       const SizedBox(height: 12),
 
-                      // Input Field
-                      TextFormField(
+TextFormField(
                         controller: _amountController,
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
                         style: GoogleFonts.quicksand(
@@ -224,8 +221,7 @@ class _PiggyBankPageState extends ConsumerState<PiggyBankPage> {
 
                       const SizedBox(height: 16),
 
-                      // Submit Button
-                      SizedBox(
+SizedBox(
                         width: double.infinity,
                         height: 48,
                         child: ElevatedButton(
@@ -250,8 +246,7 @@ class _PiggyBankPageState extends ConsumerState<PiggyBankPage> {
 
                       const SizedBox(height: 12),
 
-                      // Break Jar Button
-                      SizedBox(
+SizedBox(
                         width: double.infinity,
                         height: 48,
                         child: ElevatedButton.icon(
@@ -366,7 +361,7 @@ class _PiggyBankPageState extends ConsumerState<PiggyBankPage> {
             child: Text('Batal', style: GoogleFonts.quicksand(color: Colors.grey, fontSize: 13))),
           ElevatedButton(
             onPressed: () async {
-              // Create transaction record
+
               final transaction = TransactionModel(
                 id: DateTime.now().millisecondsSinceEpoch.toString(),
                 title: 'Hasil Pecahkan Celengan',
@@ -376,12 +371,10 @@ class _PiggyBankPageState extends ConsumerState<PiggyBankPage> {
                 date: DateTime.now(),
                 category: 'Lainnya',
               );
-              
-              // Add to transaction history
-              await ref.read(addTransactionProvider)(transaction);
-              
-              // Reset piggy bank balance
-              await ref.read(piggyBankProvider.notifier).reset();
+
+await ref.read(addTransactionProvider)(transaction);
+
+await ref.read(piggyBankProvider.notifier).reset();
               
               if (mounted) {
                 Navigator.pop(context);

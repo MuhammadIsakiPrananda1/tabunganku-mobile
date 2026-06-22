@@ -45,9 +45,8 @@ class _BudgetRulePageState extends ConsumerState<BudgetRulePage> {
         (ref.watch(themeProvider) == ThemeMode.system && theme.brightness == Brightness.dark);
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
     final pageBgColor = isDarkMode ? AppColors.backgroundDark : const Color(0xFFF8FAF9);
-    
-    // Theme Colors
-    final needsColor = isDarkMode ? const Color(0xFF3498DB) : const Color(0xFF2980B9);
+
+final needsColor = isDarkMode ? const Color(0xFF3498DB) : const Color(0xFF2980B9);
     final wantsColor = isDarkMode ? const Color(0xFFE74C3C) : const Color(0xFFC0392B);
     final savingsColor = isDarkMode ? const Color(0xFF2ECC71) : const Color(0xFF27AE60);
 
@@ -79,7 +78,7 @@ class _BudgetRulePageState extends ConsumerState<BudgetRulePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Info Header Card
+
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -105,8 +104,7 @@ class _BudgetRulePageState extends ConsumerState<BudgetRulePage> {
             ),
             const SizedBox(height: 24),
 
-            // Pendapatan Input
-            Column(
+Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
@@ -158,8 +156,7 @@ class _BudgetRulePageState extends ConsumerState<BudgetRulePage> {
             ),
             const SizedBox(height: 16),
 
-            // Segmented Allocation Chart Bar
-            if (_income > 0) ...[
+if (_income > 0) ...[
               Text(
                 'Alokasi Anggaran Anda',
                 style: GoogleFonts.quicksand(
@@ -214,8 +211,7 @@ class _BudgetRulePageState extends ConsumerState<BudgetRulePage> {
               ),
               const SizedBox(height: 28),
 
-              // Detail Cards
-              _buildAllocationCard(
+_buildAllocationCard(
                 title: 'Needs / Kebutuhan Pokok (50%)',
                 amount: needsVal,
                 color: needsColor,

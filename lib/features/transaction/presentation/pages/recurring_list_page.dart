@@ -179,8 +179,7 @@ class _RecurringListPageState extends ConsumerState<RecurringListPage> {
     }
   }
 
-
-  void _showAddSheet() {
+void _showAddSheet() {
     final amountController = TextEditingController();
     final titleController = TextEditingController();
     TransactionType selectedType = TransactionType.expense;
@@ -231,8 +230,7 @@ class _RecurringListPageState extends ConsumerState<RecurringListPage> {
                 ),
                 const SizedBox(height: 24),
 
-                // Unified Capsule Input for Title
-                HighVisInput(
+HighVisInput(
                   controller: titleController,
                   icon: Icons.branding_watermark_rounded,
                   label: 'Nama Tagihan / Langganan',
@@ -247,8 +245,7 @@ class _RecurringListPageState extends ConsumerState<RecurringListPage> {
                 ),
                 const SizedBox(height: 16),
 
-                // Unified Capsule Input for Amount
-                HighVisInput(
+HighVisInput(
                   controller: amountController,
                   icon: Icons.payments_rounded,
                   label: 'Nominal',
@@ -269,8 +266,7 @@ class _RecurringListPageState extends ConsumerState<RecurringListPage> {
                 ),
                 const SizedBox(height: 24),
 
-                // ── Jenis Transaksi Dropdown ────────────────────────────
-                Text(
+Text(
                   'Jenis Transaksi',
                   style: GoogleFonts.quicksand(
                     fontSize: 11,
@@ -346,8 +342,7 @@ class _RecurringListPageState extends ConsumerState<RecurringListPage> {
                 ),
                 const SizedBox(height: 20),
 
-
-                Text(
+Text(
                   'Kategori',
                   style: GoogleFonts.quicksand(
                     fontSize: 11,
@@ -435,8 +430,7 @@ class _RecurringListPageState extends ConsumerState<RecurringListPage> {
                 ),
                 const SizedBox(height: 24),
 
-                // ── Frekuensi Penagihan Dropdown ────────────────────────
-                Text(
+Text(
                   'Frekuensi Penagihan',
                   style: GoogleFonts.quicksand(
                     fontSize: 11,
@@ -500,8 +494,7 @@ class _RecurringListPageState extends ConsumerState<RecurringListPage> {
                 ),
                 const SizedBox(height: 12),
 
-                // Info banner frekuensi
-                Container(
+Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
@@ -625,7 +618,7 @@ class _RecurringListPageState extends ConsumerState<RecurringListPage> {
       body: SafeArea(
         child: Column(
           children: [
-            // ── AppBar (Catatan Pinjaman style) ────────────────────────
+
             Padding(
               padding: const EdgeInsets.fromLTRB(4, 8, 16, 0),
               child: Row(
@@ -654,8 +647,7 @@ class _RecurringListPageState extends ConsumerState<RecurringListPage> {
             ),
             const SizedBox(height: 6),
 
-            // ── Body ───────────────────────────────────────────────────
-            if (_isLoading)
+if (_isLoading)
               const Expanded(child: Center(child: CircularProgressIndicator()))
             else ...[  
               _buildMetricsDashboard(isDark),
@@ -744,7 +736,7 @@ class _RecurringListPageState extends ConsumerState<RecurringListPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Row 1: Label + Amount
+
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -801,15 +793,13 @@ class _RecurringListPageState extends ConsumerState<RecurringListPage> {
           ),
           const SizedBox(height: 24),
 
-          // Divider
-          Divider(
+Divider(
             height: 1,
             color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100,
           ),
           const SizedBox(height: 20),
 
-          // Row 2: Two stat columns
-          Row(
+Row(
             children: [
               Expanded(
                 child: Column(
@@ -1007,7 +997,7 @@ class _RecurringListPageState extends ConsumerState<RecurringListPage> {
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
             child: Row(
               children: [
-                // Category icon
+
                 Container(
                   width: 52,
                   height: 52,
@@ -1019,8 +1009,7 @@ class _RecurringListPageState extends ConsumerState<RecurringListPage> {
                 ),
                 const SizedBox(width: 16),
 
-                // Details
-                Expanded(
+Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -1069,8 +1058,7 @@ class _RecurringListPageState extends ConsumerState<RecurringListPage> {
                 ),
                 const SizedBox(width: 16),
 
-                // Amount on the right
-                Text(
+Text(
                   '${isExpense ? "-" : "+"} ${_formatRupiah(item.amount)}',
                   style: GoogleFonts.quicksand(
                     fontWeight: FontWeight.w800,
@@ -1093,7 +1081,7 @@ class _RecurringListPageState extends ConsumerState<RecurringListPage> {
     required List<TransactionCategory> categoryObjects,
     required ValueChanged<TransactionCategory> onSelected,
   }) {
-    FocusScope.of(context).unfocus(); // Unfocus parent fields immediately!
+    FocusScope.of(context).unfocus();
     final searchController = TextEditingController();
     String searchQuery = '';
 
@@ -1104,7 +1092,7 @@ class _RecurringListPageState extends ConsumerState<RecurringListPage> {
       builder: (sheetContext) {
         return StatefulBuilder(
           builder: (context, setModalState) {
-            // Group filtered items dynamically
+
             final Map<String, List<TransactionCategory>> displayGrouped = {};
             for (var cat in categoryObjects) {
               final labelLower = cat.label.toLowerCase();
@@ -1264,7 +1252,7 @@ class _RecurringListPageState extends ConsumerState<RecurringListPage> {
                               return Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  // Group Header (Minimalist & Clear)
+
                                   Padding(
                                     padding: const EdgeInsets.only(
                                         top: 20,
@@ -1295,7 +1283,7 @@ class _RecurringListPageState extends ConsumerState<RecurringListPage> {
                                       ],
                                     ),
                                   ),
-                                  // Group Items
+
                                   ...items.map((cat) {
                                     final isSelected =
                                         cat.label == currentSelected;

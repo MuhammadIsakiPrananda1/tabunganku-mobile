@@ -52,8 +52,7 @@ class _DebtPayoffPlannerPageState extends ConsumerState<DebtPayoffPlannerPage> {
 
     final double r = (annualRate / 100) / 12;
 
-    // Check if the payment can cover at least the monthly interest
-    if (r > 0 && monthlyPmt <= principal * r) {
+if (r > 0 && monthlyPmt <= principal * r) {
       setState(() {
         _errorMessage = 'Pembayaran bulanan terlalu kecil! Harus lebih besar dari bunga bulanan (${_formatRupiah(principal * r)}).';
         _monthsToPay = 0;
@@ -124,9 +123,8 @@ class _DebtPayoffPlannerPageState extends ConsumerState<DebtPayoffPlannerPage> {
         (ref.watch(themeProvider) == ThemeMode.system && theme.brightness == Brightness.dark);
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
     final pageBgColor = isDarkMode ? AppColors.backgroundDark : const Color(0xFFF8FAF9);
-    
-    // Accent Color: Coral Red (representing debt / payment attention)
-    final accentColor = isDarkMode ? const Color(0xFFE74C3C) : const Color(0xFFC0392B);
+
+final accentColor = isDarkMode ? const Color(0xFFE74C3C) : const Color(0xFFC0392B);
 
     final double principal = double.tryParse(_debtController.text.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
 
@@ -154,7 +152,7 @@ class _DebtPayoffPlannerPageState extends ConsumerState<DebtPayoffPlannerPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Info Header Card
+
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -176,8 +174,7 @@ class _DebtPayoffPlannerPageState extends ConsumerState<DebtPayoffPlannerPage> {
             ),
             const SizedBox(height: 24),
 
-            // Total Hutang Input
-            _buildInput(
+_buildInput(
               'Jumlah Hutang / Pinjaman', 
               _debtController, 
               Icons.money_off_rounded, 
@@ -187,8 +184,7 @@ class _DebtPayoffPlannerPageState extends ConsumerState<DebtPayoffPlannerPage> {
             ),
             const SizedBox(height: 20),
 
-            // Suku Bunga & Cicilan Bulanan Inputs
-            Row(
+Row(
               children: [
                 Expanded(
                   child: _buildInput(
@@ -214,8 +210,7 @@ class _DebtPayoffPlannerPageState extends ConsumerState<DebtPayoffPlannerPage> {
             ),
             const SizedBox(height: 28),
 
-            // Error Message
-            if (_errorMessage != null) ...[
+if (_errorMessage != null) ...[
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(12),
@@ -231,13 +226,11 @@ class _DebtPayoffPlannerPageState extends ConsumerState<DebtPayoffPlannerPage> {
               const SizedBox(height: 28),
             ],
 
-            // Results Card
-            if (_monthsToPay > 0 && _errorMessage == null) ...[
+if (_monthsToPay > 0 && _errorMessage == null) ...[
               _buildResultCard(isDarkMode, accentColor, principal),
               const SizedBox(height: 28),
 
-              // Payment Schedule
-              Text(
+Text(
                 'Jadwal Pembayaran Bulanan',
                 style: GoogleFonts.quicksand(
                   fontSize: 12,
@@ -257,7 +250,7 @@ class _DebtPayoffPlannerPageState extends ConsumerState<DebtPayoffPlannerPage> {
                 child: ListView.separated(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  itemCount: min(_schedule.length, 12), // Display first 12 months for brevity
+                  itemCount: min(_schedule.length, 12),
                   separatorBuilder: (_, __) => Divider(
                     height: 1,
                     color: isDarkMode ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.03),
@@ -397,8 +390,7 @@ class _DebtPayoffPlannerPageState extends ConsumerState<DebtPayoffPlannerPage> {
         ? '$years Tahun $remainingMonths Bulan' 
         : '$remainingMonths Bulan';
 
-    // Calculate percentages for Pokok vs Bunga
-    final double total = _totalAmountPaid;
+final double total = _totalAmountPaid;
     final double principalPct = total > 0 ? (principal / total) * 100 : 100;
     final double interestPct = total > 0 ? (_totalInterestPaid / total) * 100 : 0;
 
@@ -433,8 +425,7 @@ class _DebtPayoffPlannerPageState extends ConsumerState<DebtPayoffPlannerPage> {
           ),
           const SizedBox(height: 24),
 
-          // Stacked Pokok vs Bunga Bar
-          Column(
+Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(

@@ -50,9 +50,7 @@ class _FIRECalculatorPageState extends ConsumerState<FIRECalculatorPage> {
       return;
     }
 
-    // Target FIRE = Annual Expenses / SWR (as fraction)
-    // SWR of 4% = expenses * 12 / 0.04 = expenses * 12 * 25
-    final double targetFIRE = (monthlyExpenses * 12) / (swr / 100);
+final double targetFIRE = (monthlyExpenses * 12) / (swr / 100);
     _targetFIRENumber = targetFIRE;
 
     if (currentNetWorth >= targetFIRE) {
@@ -66,8 +64,7 @@ class _FIRECalculatorPageState extends ConsumerState<FIRECalculatorPage> {
     final double r = (annualReturn / 100) / 12;
     final double pmt = monthlySavings;
 
-    // If return is 0 and savings is 0, we can't reach it
-    if (r <= 0 && pmt <= 0) {
+if (r <= 0 && pmt <= 0) {
       setState(() {
         _yearsToFIRE = 0;
         _isReachable = false;
@@ -78,13 +75,11 @@ class _FIRECalculatorPageState extends ConsumerState<FIRECalculatorPage> {
     double balance = currentNetWorth;
     int months = 0;
 
-    // Simulate up to 50 years (600 months)
-    while (balance < targetFIRE && months < 600) {
+while (balance < targetFIRE && months < 600) {
       months++;
       balance = balance * (1 + r) + pmt;
 
-      // Save yearly milestones
-      if (months % 12 == 0) {
+if (months % 12 == 0) {
         final year = months ~/ 12;
         final passiveIncome = (balance * (swr / 100)) / 12;
         _projections.add({
@@ -126,9 +121,8 @@ class _FIRECalculatorPageState extends ConsumerState<FIRECalculatorPage> {
         (ref.watch(themeProvider) == ThemeMode.system && theme.brightness == Brightness.dark);
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
     final pageBgColor = isDarkMode ? AppColors.backgroundDark : const Color(0xFFF8FAF9);
-    
-    // Page Theme Accent: Indigo / Deep Purple
-    final accentColor = isDarkMode ? const Color(0xFF9B59B6) : const Color(0xFF8E44AD);
+
+final accentColor = isDarkMode ? const Color(0xFF9B59B6) : const Color(0xFF8E44AD);
 
     final double currentNetWorth = double.tryParse(_netWorthController.text.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
     double progress = _targetFIRENumber > 0 ? (currentNetWorth / _targetFIRENumber) : 0;
@@ -158,7 +152,7 @@ class _FIRECalculatorPageState extends ConsumerState<FIRECalculatorPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Info Header Card
+
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -180,8 +174,7 @@ class _FIRECalculatorPageState extends ConsumerState<FIRECalculatorPage> {
             ),
             const SizedBox(height: 24),
 
-            // Inputs
-            _buildInput('Pengeluaran Bulanan Saat Ini', _expensesController, Icons.shopping_bag_rounded, isDarkMode, accentColor, isCurrency: true),
+_buildInput('Pengeluaran Bulanan Saat Ini', _expensesController, Icons.shopping_bag_rounded, isDarkMode, accentColor, isCurrency: true),
             const SizedBox(height: 18),
             _buildInput('Tabungan Bulanan Baru', _savingsController, Icons.add_circle_rounded, isDarkMode, accentColor, isCurrency: true),
             const SizedBox(height: 18),
@@ -201,13 +194,11 @@ class _FIRECalculatorPageState extends ConsumerState<FIRECalculatorPage> {
             ),
             const SizedBox(height: 28),
 
-            // Results Card
-            if (_targetFIRENumber > 0) ...[
+if (_targetFIRENumber > 0) ...[
               _buildResultCard(isDarkMode, accentColor, currentNetWorth, progress),
               const SizedBox(height: 28),
 
-              // Projection Milestones
-              if (_isReachable && _projections.isNotEmpty) ...[
+if (_isReachable && _projections.isNotEmpty) ...[
                 Text(
                   'Proyeksi 5 Tahun Pertama',
                   style: GoogleFonts.quicksand(
@@ -390,7 +381,7 @@ class _FIRECalculatorPageState extends ConsumerState<FIRECalculatorPage> {
       ),
       child: Column(
         children: [
-          // Target FIRE Number
+
           Text(
             'Target Kekayaan Bersih (FIRE Number)', 
             style: GoogleFonts.quicksand(
@@ -419,8 +410,7 @@ class _FIRECalculatorPageState extends ConsumerState<FIRECalculatorPage> {
           ),
           const SizedBox(height: 20),
 
-          // Time to FIRE
-          Text(
+Text(
             'Estimasi Waktu Pencapaian', 
             style: GoogleFonts.quicksand(
               color: contentColor.withOpacity(0.4), 
@@ -440,8 +430,7 @@ class _FIRECalculatorPageState extends ConsumerState<FIRECalculatorPage> {
           ),
           const SizedBox(height: 24),
 
-          // Progress bar
-          Column(
+Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(

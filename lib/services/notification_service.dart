@@ -55,33 +55,31 @@ class MockNotificationService implements NotificationService {
   @override
   Future<void> addNotification(NotificationModel notification) async {
     final notifications = await getNotifications();
-    
-    // Hindari duplikasi logik jika diperlukan (misal untuk badge yang sama)
-    notifications.add(notification);
+
+notifications.add(notification);
     
     await _saveNotifications(notifications);
 
-    // Show system tray notification
-    await _showSystemNotification(notification);
+await _showSystemNotification(notification);
   }
 
   Future<void> _showSystemNotification(NotificationModel notification) async {
-    // Channel ID WAJIB sama persis dengan yang didaftarkan di main.dart
+
     const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
       'tabunganku_activity',
       'Aktivitas TabunganKu',
       channelDescription: 'Notifikasi untuk pencapaian dan aktivitas menabung',
       importance: Importance.high,
       priority: Priority.high,
-      // Suara & getar eksplisit — wajib untuk Android < 8 dan sebagai sinyal tambahan
+
       playSound: true,
       enableVibration: true,
       enableLights: true,
-      // Heads-up notification (muncul di layar meski HP aktif)
+
       fullScreenIntent: false,
-      // Agar notifikasi tidak saling menimpa untuk ID yang berbeda
+
       ticker: 'TabunganKu',
-      // Tampilkan timestamp
+
       when: null,
       showWhen: true,
     );
@@ -98,7 +96,7 @@ class MockNotificationService implements NotificationService {
     );
 
     await flutterLocalNotificationsPlugin.show(
-      notification.id.hashCode.abs() % 2147483647, // ID positif & dalam batas int32
+      notification.id.hashCode.abs() % 2147483647,
       notification.title,
       notification.message,
       platformDetails,

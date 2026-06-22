@@ -57,75 +57,69 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> {
   Future<void> _loadData() async {
     final prefs = await SharedPreferences.getInstance();
 
-    // Load Tarawih Rakaat
-    final tarawihRakaatRaw = prefs.getString(_prefKeyTarawihRakaat);
+final tarawihRakaatRaw = prefs.getString(_prefKeyTarawihRakaat);
     if (tarawihRakaatRaw != null) {
       final decoded = jsonDecode(tarawihRakaatRaw) as List;
       _tarawihRakaat = decoded.map((e) => e as int).toList();
     } else {
-      // Migrate from old _tarawihDays
+
       final tarawihRaw = prefs.getString(_prefKeyTarawih);
       if (tarawihRaw != null) {
         final decoded = jsonDecode(tarawihRaw) as List;
         final oldTarawihDays = decoded.map((e) => e as bool).toList();
         for (int i = 0; i < 30; i++) {
           if (i < oldTarawihDays.length && oldTarawihDays[i]) {
-            _tarawihRakaat[i] = 8; // default migration value
+            _tarawihRakaat[i] = 8;
           }
         }
       }
     }
 
-    // Load Witir Rakaat
-    final witirRakaatRaw = prefs.getString(_prefKeyWitirRakaat);
+final witirRakaatRaw = prefs.getString(_prefKeyWitirRakaat);
     if (witirRakaatRaw != null) {
       final decoded = jsonDecode(witirRakaatRaw) as List;
       _witirRakaat = decoded.map((e) => e as int).toList();
     } else {
-      // Migrate from old _tarawihDays
+
       final tarawihRaw = prefs.getString(_prefKeyTarawih);
       if (tarawihRaw != null) {
         final decoded = jsonDecode(tarawihRaw) as List;
         final oldTarawihDays = decoded.map((e) => e as bool).toList();
         for (int i = 0; i < 30; i++) {
           if (i < oldTarawihDays.length && oldTarawihDays[i]) {
-            _witirRakaat[i] = 3; // default migration value
+            _witirRakaat[i] = 3;
           }
         }
       }
     }
 
-    // Load Prayer Notes
-    final prayerNotesRaw = prefs.getString(_prefKeyPrayerNotes);
+final prayerNotesRaw = prefs.getString(_prefKeyPrayerNotes);
     if (prayerNotesRaw != null) {
       final decoded = jsonDecode(prayerNotesRaw) as List;
       _prayerNotes = decoded.map((e) => e as String).toList();
     }
 
-    // Load Sedekah
-    final sedekahAmountsRaw = prefs.getString(_prefKeySedekahAmounts);
+final sedekahAmountsRaw = prefs.getString(_prefKeySedekahAmounts);
     if (sedekahAmountsRaw != null) {
       final decoded = jsonDecode(sedekahAmountsRaw) as List;
       _sedekahAmounts = decoded.map((e) => (e as num).toDouble()).toList();
     } else {
-      // Fallback/migration from older boolean list
+
       final sedekahRaw = prefs.getString(_prefKeySedekah);
       if (sedekahRaw != null) {
         final decoded = jsonDecode(sedekahRaw) as List;
         final oldSedekahDays = decoded.map((e) => e as bool).toList();
         for (int i = 0; i < 30; i++) {
           if (i < oldSedekahDays.length && oldSedekahDays[i]) {
-            _sedekahAmounts[i] = 10000.0; // default migration amount
+            _sedekahAmounts[i] = 10000.0;
           }
         }
       }
     }
 
-    // Load Quran Juz
-    _currentJuz = prefs.getInt(_prefKeyQuran) ?? 0;
+_currentJuz = prefs.getInt(_prefKeyQuran) ?? 0;
 
-    // Load Expenses
-    final expensesRaw = prefs.getString(_prefKeyExpenses);
+final expensesRaw = prefs.getString(_prefKeyExpenses);
     if (expensesRaw != null) {
       final decoded = jsonDecode(expensesRaw) as List;
       _expenses = decoded.map((e) => Map<String, dynamic>.from(e)).toList();
@@ -238,8 +232,8 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> {
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
     final pageBgColor =
         isDarkMode ? AppColors.backgroundDark : const Color(0xFFF4F9F8);
-    final accentColor = const Color(0xFF009688); // Serene Emerald Green
-    final goldColor = const Color(0xFFD4AF37); // Rich gold accent
+    final accentColor = const Color(0xFF009688);
+    final goldColor = const Color(0xFFD4AF37);
 
     return Scaffold(
       backgroundColor: pageBgColor,
@@ -263,7 +257,7 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> {
       ),
       body: Column(
         children: [
-          // Elegant Header Card
+
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             child: Container(
@@ -320,8 +314,7 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> {
             ),
           ),
 
-          // Custom Premium Dropdown Selector
-          Padding(
+Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -386,8 +379,7 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> {
 
           const SizedBox(height: 16),
 
-          // Content area based on selected dropdown value
-          Expanded(
+Expanded(
             child: _selectedTab == 'Target Amal'
                 ? _buildTargetAmalTab(
                     isDarkMode, accentColor, goldColor, contentColor)
@@ -408,7 +400,7 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Stats Row
+
           Row(
             children: [
               Expanded(
@@ -438,8 +430,7 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> {
           ),
           const SizedBox(height: 24),
 
-          // Unified Grid Header
-          Row(
+Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
@@ -600,9 +591,8 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> {
   void _showDayAmalDialog(int index, bool isDarkMode, Color accentColor, Color goldColor) {
     final theme = Theme.of(context);
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
-    
-    // Set initial local state values
-    int localTarawihRakaat = _tarawihRakaat[index];
+
+int localTarawihRakaat = _tarawihRakaat[index];
     int localWitirRakaat = _witirRakaat[index];
     double localSedekahAmt = _sedekahAmounts[index];
     
@@ -670,8 +660,7 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> {
                     ),
                     const SizedBox(height: 20),
 
-                    // Tarawih & Witir Section Card
-                    Container(
+Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: isDarkMode ? Colors.white.withOpacity(0.02) : Colors.grey.shade50,
@@ -723,8 +712,7 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> {
                           ),
                           const SizedBox(height: 16),
 
-                          // Tarawih Rakaat Selection
-                          Text(
+Text(
                             'Sholat Tarawih',
                             style: GoogleFonts.quicksand(
                               fontSize: 11,
@@ -770,8 +758,7 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> {
                           ),
                           const SizedBox(height: 12),
 
-                          // Witir Rakaat Selection
-                          Text(
+Text(
                             'Sholat Witir',
                             style: GoogleFonts.quicksand(
                               fontSize: 11,
@@ -820,8 +807,7 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> {
                     ),
                     const SizedBox(height: 16),
 
-                    // Sedekah Section Card
-                    Container(
+Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: isDarkMode ? Colors.white.withOpacity(0.02) : Colors.grey.shade50,
@@ -951,8 +937,7 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> {
                     ),
                     const SizedBox(height: 16),
 
-                    // Catatan Jurnal Card
-                    Container(
+Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: isDarkMode ? Colors.white.withOpacity(0.02) : Colors.grey.shade50,
@@ -1381,7 +1366,7 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> {
       bool isDarkMode, Color accentColor, Color contentColor) {
     return Column(
       children: [
-        // Total Ramadan spend
+
         Padding(
           padding: const EdgeInsets.only(left: 20, right: 20, bottom: 16),
           child: Container(
@@ -1455,8 +1440,7 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> {
           ),
         ),
 
-        // Expense List
-        Expanded(
+Expanded(
           child: _expenses.isEmpty
               ? Center(
                   child: Column(
@@ -1626,8 +1610,7 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Label & input nama pengeluaran
-                  RichText(
+RichText(
                     text: TextSpan(
                       text: 'Nama Pengeluaran',
                       style: GoogleFonts.quicksand(
@@ -1689,8 +1672,7 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Label & input nominal
-                  RichText(
+RichText(
                     text: TextSpan(
                       text: 'Nominal Belanja',
                       style: GoogleFonts.quicksand(
@@ -1768,8 +1750,7 @@ class _RamadanModePageState extends ConsumerState<RamadanModePage> {
 
                   const SizedBox(height: 16),
 
-                  // Sync with core transactions
-                  CheckboxListTile(
+CheckboxListTile(
                     value: _syncWithMainTransactions,
                     activeColor: accentColor,
                     contentPadding: EdgeInsets.zero,

@@ -26,18 +26,16 @@ class _ScanReceiptPageState extends ConsumerState<ScanReceiptPage> {
   File? _image;
   bool _isScanning = false;
   bool _titleHasError = false;
-  
-  // Scanned Data
-  double _amount = 0.0;
+
+double _amount = 0.0;
   TransactionType _type = TransactionType.expense;
   String _detectedTitle = '';
   
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
-  
-  // Tips for scanning
-  final List<Map<String, dynamic>> _scanTips = [
+
+final List<Map<String, dynamic>> _scanTips = [
     {'icon': Icons.wb_sunny_rounded, 'title': 'Cahaya Terang', 'subtitle': 'Hindari bayangan'},
     {'icon': Icons.center_focus_strong_rounded, 'title': 'Fokus & Jelas', 'subtitle': 'Pastikan teks terbaca'},
     {'icon': Icons.crop_free_rounded, 'title': 'Seluruh Bukti', 'subtitle': 'Potret hingga tepi'},
@@ -54,11 +52,10 @@ class _ScanReceiptPageState extends ConsumerState<ScanReceiptPage> {
 
   Future<void> _pickImage(ImageSource source) async {
     try {
-      // SET external operation to true to prevent appraisal lockout
+
       ref.read(securityProvider.notifier).setExternalOperation(true);
 
-      // Request native permission directly
-      bool hasPermission = false;
+bool hasPermission = false;
       if (source == ImageSource.camera) {
         hasPermission = await Permission.camera.request().isGranted;
       } else {
@@ -88,7 +85,7 @@ class _ScanReceiptPageState extends ConsumerState<ScanReceiptPage> {
         });
       }
     } finally {
-      // UNSET external operation after image picking is done
+
       ref.read(securityProvider.notifier).setExternalOperation(false);
     }
   }
@@ -134,7 +131,7 @@ class _ScanReceiptPageState extends ConsumerState<ScanReceiptPage> {
       type: _type,
       date: DateTime.now(),
       category: _type == TransactionType.income ? 'Pemasukan' : 'Lainnya',
-      groupId: null, // Personal history only
+      groupId: null,
     );
 
     await ref.read(transactionServiceProvider).addTransaction(transaction);
@@ -177,7 +174,7 @@ class _ScanReceiptPageState extends ConsumerState<ScanReceiptPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Image Preview Area
+
               GestureDetector(
                 onTap: () => _isScanning ? null : _showPickerOptions(),
                 child: Container(
@@ -211,7 +208,7 @@ class _ScanReceiptPageState extends ConsumerState<ScanReceiptPage> {
               const SizedBox(height: 20),
               
               if (_image != null && !_isScanning) ...[
-                // Extraction Result Form
+
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
@@ -261,9 +258,8 @@ class _ScanReceiptPageState extends ConsumerState<ScanReceiptPage> {
                         ],
                       ),
                       const SizedBox(height: 16),
-                      
-                      // Title Input (Auto-filled)
-                      _buildHighVisInput(
+
+_buildHighVisInput(
                         controller: _titleController,
                         icon: Icons.storefront_rounded,
                         label: 'Keterangan / Toko',
@@ -278,8 +274,7 @@ class _ScanReceiptPageState extends ConsumerState<ScanReceiptPage> {
                       ),
                       const SizedBox(height: 16),
 
-                      // Type Selector
-                      Row(
+Row(
                         children: [
                           Expanded(
                             child: _typeButton(
@@ -303,9 +298,8 @@ class _ScanReceiptPageState extends ConsumerState<ScanReceiptPage> {
                         ],
                       ),
                       const SizedBox(height: 16),
-                      
-                      // Amount Input
-                      _buildHighVisInput(
+
+_buildHighVisInput(
                         controller: _amountController,
                         icon: Icons.payments_rounded,
                         label: 'Nominal Transaksi',
@@ -326,9 +320,8 @@ class _ScanReceiptPageState extends ConsumerState<ScanReceiptPage> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                
-                // Action Buttons
-                SizedBox(
+
+SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: _saveTransaction,

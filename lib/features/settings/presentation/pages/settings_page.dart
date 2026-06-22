@@ -33,11 +33,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   bool _isUploadingPhoto = false;
   String? _uploadError;
 
-
-
-
-
-  @override
+@override
   void dispose() {
     super.dispose();
   }
@@ -49,8 +45,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       return true;
     }).toList();
 
-    // Group transactions by month
-    final Map<String, List<TransactionModel>> grouped = {};
+final Map<String, List<TransactionModel>> grouped = {};
     for (final t in regular) {
       final k = DateFormat('MMMM yyyy', 'id_ID').format(t.date).toUpperCase();
       grouped.putIfAbsent(k, () => []).add(t);
@@ -73,7 +68,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Handle
+
               Center(
                 child: Container(
                   width: 40,
@@ -85,7 +80,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   ),
                 ),
               ),
-              // Header
+
               Row(
                 children: [
                   Container(
@@ -124,7 +119,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 ],
               ),
               const SizedBox(height: 24),
-              // Month List
+
               if (monthKeys.isEmpty)
                 Center(
                   child: Padding(
@@ -246,11 +241,10 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
     XFile? pickedFile;
     try {
-      // SET external operation to true to prevent appraisal lockout
+
       ref.read(securityProvider.notifier).setExternalOperation(true);
 
-      // Request native permission directly
-      bool hasPermission = false;
+bool hasPermission = false;
       if (source == ImageSource.camera) {
         hasPermission = await Permission.camera.request().isGranted;
       } else {
@@ -266,15 +260,14 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         imageQuality: 80,
       );
     } finally {
-      // UNSET external operation after image picking is done
+
       ref.read(securityProvider.notifier).setExternalOperation(false);
     }
 
     if (pickedFile == null) return;
     if (!mounted) return;
 
-    // ── Crop Image (Custom Minimalist 3-Button Screen!) ──────────
-    if (!mounted) return;
+if (!mounted) return;
     final croppedFilePath = await Navigator.push<String>(
       context,
       MaterialPageRoute(
@@ -416,9 +409,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     final achievements = ref.watch(achievementsProvider);
     final unlockedCount = achievements.where((a) => a.isUnlocked).length;
 
-
-    // ── Hitung Statistik Dasar ──────────────────────────────────────
-    final transactions = (transactionsAsync.value ?? [])
+final transactions = (transactionsAsync.value ?? [])
         .where((t) => t.groupId == null)
         .toList();
 
@@ -432,40 +423,35 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
     final currentBalance = totalIncome - totalExpense;
 
-
-
-    final String rankName = _getRankName(totalIncome);
+final String rankName = _getRankName(totalIncome);
     final IconData rankIcon = _getRankIcon(totalIncome);
     final Color rankColor = _getRankColor(totalIncome);
 
-    // Ambil Streak Menabung resmi secara mandiri dari transaksi
-    final streak = ref.watch(savingStreakProvider);
+final streak = ref.watch(savingStreakProvider);
 
     final currencyFormatter =
         NumberFormat.currency(locale: 'id_ID', symbol: 'Rp', decimalDigits: 0);
 
     return Scaffold(
       backgroundColor:
-          Colors.transparent, // Let DashboardPage handle the bg color
-      // Removed redundant appBar as it caused double title issues
+          Colors.transparent,
+
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-            // ── Kartu Profil ──────────────────────────────────────
+
             _buildProfileCard(
                 profile, isDarkMode, rankName, rankIcon, rankColor),
             const SizedBox(height: 24),
 
-            // ── Statistik Baris ───────────────────────────────────
-            _buildStatsRow(streak, currentBalance, unlockedCount,
+_buildStatsRow(streak, currentBalance, unlockedCount,
                 achievements.length, currencyFormatter, isDarkMode),
             const SizedBox(height: 16),
 
-            // ── Lencana Pencapaian ─────────────────────────────────
-            _buildSectionHeader('Pencapaian'),
+_buildSectionHeader('Pencapaian'),
             _buildAchievementList(achievements, isDarkMode),
-            const SizedBox(height: 8), // Reduced from 16 to 8
+            const SizedBox(height: 8),
 
             _buildSectionHeader('Preferensi'),
             _buildSettingGroup([
@@ -502,10 +488,10 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               _buildSettingTile(
                 Icons.fingerprint_rounded,
                 'Kunci Biometrik',
-                () {}, // Empty now as logic is in Switch
+                () {},
                 trailing: Opacity(
                   opacity:
-                      1.0, // Making it always appear active to encourage setup
+                      1.0,
                   child: Switch(
                     value:
                         securityState.isBiometricEnabled && securityState.hasPin,
@@ -562,7 +548,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                       mode: LaunchMode.externalApplication,
                     );
                   } catch (e) {
-                    // Fallback to in-app browser if external fails
+
                     await launchUrl(
                       url,
                       mode: LaunchMode.platformDefault,
@@ -700,12 +686,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       ),
       child: Row(
         children: [
-          // ── Avatar dengan tombol ganti ─────────────────────────
+
           GestureDetector(
             onTap: _isUploadingPhoto ? null : _pickAndUploadPhoto,
             child: Stack(
               children: [
-                // Foto profil
+
                 Container(
                   width: 80,
                   height: 80,
@@ -757,7 +743,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                             : _buildDefaultAvatar(profile.name, isDarkMode),
                   ),
                 ),
-                // Error indicator if upload failed
+
                 if (_uploadError != null)
                   Positioned(
                     bottom: -15,
@@ -781,7 +767,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                       ),
                     ),
                   ),
-                // Badge kamera
+
                 Positioned(
                   bottom: 0,
                   right: 0,
@@ -804,7 +790,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             ),
           ),
           const SizedBox(width: 20),
-          // ── Info profil ────────────────────────────────────────
+
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -850,7 +836,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   ),
                 ),
                 const SizedBox(height: 6),
-                // Rank Badge
+
                 Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -909,7 +895,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Row 1: Streak
+
           _buildTableRow(
             'Streak',
             '$streak Hari',
@@ -918,7 +904,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             isDarkMode,
           ),
           _buildTableHorizontalDivider(isDarkMode),
-          // Row 2: Total Saldo
+
           _buildTableRow(
             'Total Saldo',
             formatter.format(currentBalance),
@@ -927,7 +913,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             isDarkMode,
           ),
           _buildTableHorizontalDivider(isDarkMode),
-          // Row 3: Lencana
+
           _buildTableRow(
             'Lencana',
             '$unlockedCount/$totalAchievements',
@@ -1005,7 +991,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   Widget _buildAchievementList(
       List<Achievement> achievements, bool isDarkMode) {
     return SizedBox(
-      height: 125, // Height updated to fit the new card design perfectly
+      height: 125,
       child: ListView.separated(
         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
         scrollDirection: Axis.horizontal,
@@ -1016,7 +1002,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           final bool unlocked = item.isUnlocked;
 
           return Container(
-            width: 180, // Symmetrical, compact, and extremely neat card width
+            width: 180,
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: Theme.of(context).cardColor,
@@ -1039,7 +1025,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Top Row: Icon & Title & Status
+
                 Row(
                   children: [
                     Container(
@@ -1097,9 +1083,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     ),
                   ],
                 ),
-                
-                // Middle Description Text
-                Padding(
+
+Padding(
                   padding: const EdgeInsets.symmetric(vertical: 2),
                   child: Text(
                     item.description,
@@ -1114,8 +1099,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   ),
                 ),
 
-                // Bottom Progress Tracker
-                Column(
+Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
@@ -1255,8 +1239,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         'Ayo raih target finansialmu lebih mudah dengan TabunganKu! Download aplikasi resmi di sini: https://tabunganku.neverlandstudio.my.id/ 🎉');
   }
 
-  // ── Kebijakan Privasi ────────────────────────────────────────────
-  void _showPrivacyPolicyDialog(bool isDarkMode) {
+void _showPrivacyPolicyDialog(bool isDarkMode) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -1287,8 +1270,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     );
   }
 
-  // ── Syarat & Ketentuan ────────────────────────────────────────────
-  void _showTermsDialog(bool isDarkMode) {
+void _showTermsDialog(bool isDarkMode) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -1319,9 +1301,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     );
   }
 
-  // ── Beri Rating ────────────────────────────────────────────────────
-  Future<void> _openRateApp() async {
-    // Pesan rating yang sudah diisi otomatis
+Future<void> _openRateApp() async {
+
     final message = Uri.encodeComponent(
       'Halo kak! 👋\n\n'
       'Aku mau kasih penilaian untuk aplikasi TabunganKu nih 💰\n\n'
@@ -1354,8 +1335,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     }
   }
 
-  // ── Kirim Masukan / Feedback ────────────────────────────────────────
-  void _showFeedbackDialog(bool isDarkMode) {
+void _showFeedbackDialog(bool isDarkMode) {
     final controller = TextEditingController();
     final formKey = GlobalKey<FormState>();
     String selectedType = 'Saran';
@@ -1690,10 +1670,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     );
   }
 
-
-
-  // ── Reset Data Transaksi ──────────────────────────────────────────
-  void _showResetDataDialog(bool isDarkMode) {
+void _showResetDataDialog(bool isDarkMode) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -1793,8 +1770,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     );
   }
 
-  // ── Helper: Info Bottom Sheet (Privacy & Terms) ───────────────────
-  Widget _buildInfoBottomSheet({
+Widget _buildInfoBottomSheet({
     required bool isDarkMode,
     required IconData icon,
     required Color iconColor,
@@ -1903,9 +1879,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     );
   }
 
-  
-
-  Widget _buildSettingTile(IconData icon, String title, VoidCallback onTap,
+Widget _buildSettingTile(IconData icon, String title, VoidCallback onTap,
       {Widget? trailing, String? subtitle, Color? color, bool isDarkMode = false}) {
     return Material(
       color: Colors.transparent,
@@ -1973,7 +1947,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(22.8), // Perfectly seals inner content including the borders!
+        borderRadius: BorderRadius.circular(22.8),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: List.generate(children.length, (index) {
@@ -1987,7 +1961,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 Divider(
                   height: 1,
                   thickness: 1,
-                  indent: 52, // Beautifully indented past the icon capsule!
+                  indent: 52,
                   endIndent: 16,
                   color: isDarkMode
                       ? Colors.white.withValues(alpha: 0.06)

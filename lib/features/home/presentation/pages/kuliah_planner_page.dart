@@ -15,17 +15,16 @@ class BiayaKuliahPlannerPage extends ConsumerStatefulWidget {
 }
 
 class _BiayaKuliahPlannerPageState extends ConsumerState<BiayaKuliahPlannerPage> {
-  // Config variables - All starting from 0 / clean defaults
+
   String _childName = '';
   String _academicLevel = 'S1 PTN Favorit';
   int _currentAge = 0;
   int _targetAge = 18;
-  double _costToday = 0.0; // Starts from 0
-  final double _inflationRate = 10.0; // Fixed 10% annual education inflation
-  double _currentSaved = 0.0; // Starts from 0
+  double _costToday = 0.0;
+  final double _inflationRate = 10.0;
+  double _currentSaved = 0.0;
 
-  // College Cost Presets
-  final Map<String, double> _costPresets = {
+final Map<String, double> _costPresets = {
     'S1 PTN Favorit': 60000000.0,
     'S1 PTS Premium': 150000000.0,
     'S1 Kedokteran': 300000000.0,
@@ -40,8 +39,7 @@ class _BiayaKuliahPlannerPageState extends ConsumerState<BiayaKuliahPlannerPage>
     'Custom',
   ];
 
-  // Controllers
-  final TextEditingController _childNameController = TextEditingController();
+final TextEditingController _childNameController = TextEditingController();
   final TextEditingController _costTodayController = TextEditingController();
   final TextEditingController _currentSavedController = TextEditingController();
 
@@ -53,14 +51,13 @@ class _BiayaKuliahPlannerPageState extends ConsumerState<BiayaKuliahPlannerPage>
     super.dispose();
   }
 
-  // Calculated getters
-  int get _yearsToStudy {
+int get _yearsToStudy {
     final diff = _targetAge - _currentAge;
     return diff <= 0 ? 1 : diff;
   }
 
   double get _futureCost {
-    // Compound interest: CostToday * (1 + inflation/100)^YearsToStudy
+
     return _costToday * pow((1 + _inflationRate / 100.0), _yearsToStudy);
   }
 
@@ -70,8 +67,7 @@ class _BiayaKuliahPlannerPageState extends ConsumerState<BiayaKuliahPlannerPage>
     return gap / (_yearsToStudy * 12);
   }
 
-  // Smart helper to display preset name matching the cost
-  String get _displayAcademicLevel {
+String get _displayAcademicLevel {
     if (_academicLevel == 'Custom') {
       for (final entry in _costPresets.entries) {
         if ((_costToday - entry.value).abs() < 1) {
@@ -124,7 +120,7 @@ class _BiayaKuliahPlannerPageState extends ConsumerState<BiayaKuliahPlannerPage>
         (ref.watch(themeProvider) == ThemeMode.system && theme.brightness == Brightness.dark);
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
     final pageBgColor = isDarkMode ? AppColors.backgroundDark : const Color(0xFFF2F8FD);
-    final accentColor = const Color(0xFF2196F3); // Ocean Blue
+    final accentColor = const Color(0xFF2196F3);
 
     return Scaffold(
       backgroundColor: pageBgColor,
@@ -148,7 +144,7 @@ class _BiayaKuliahPlannerPageState extends ConsumerState<BiayaKuliahPlannerPage>
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 48),
         children: [
-          // Premium Minimalist Dashboard Card
+
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
@@ -158,11 +154,11 @@ class _BiayaKuliahPlannerPageState extends ConsumerState<BiayaKuliahPlannerPage>
                 end: Alignment.bottomRight,
                 colors: isDarkMode
                     ? [
-                        const Color(0xFF0F3A5F), // Deep sky/ocean blue
+                        const Color(0xFF0F3A5F),
                         const Color(0xFF0B253F),
                       ]
                     : [
-                        const Color(0xFFE3F2FD), // Soft baby blue light
+                        const Color(0xFFE3F2FD),
                         const Color(0xFFF2F8FD),
                       ],
               ),
@@ -253,9 +249,8 @@ class _BiayaKuliahPlannerPageState extends ConsumerState<BiayaKuliahPlannerPage>
                 const SizedBox(height: 20),
                 Divider(height: 1, color: isDarkMode ? Colors.white.withOpacity(0.04) : Colors.grey.shade200),
                 const SizedBox(height: 16),
-                
-                // Savings summary row
-                Row(
+
+Row(
                   children: [
                     Expanded(
                       child: Column(
@@ -322,8 +317,7 @@ class _BiayaKuliahPlannerPageState extends ConsumerState<BiayaKuliahPlannerPage>
           
           const SizedBox(height: 20),
 
-          // Parameter Perencanaan Card (Premium, Rapi & Aesthetic)
-          Container(
+Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
@@ -605,9 +599,8 @@ class _BiayaKuliahPlannerPageState extends ConsumerState<BiayaKuliahPlannerPage>
                       style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 15, color: contentColor),
                     ),
                     const SizedBox(height: 20),
-       
-                    // Child Name
-                    Text(
+
+Text(
                       'Nama Anak',
                       style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
                     ),
@@ -631,8 +624,7 @@ class _BiayaKuliahPlannerPageState extends ConsumerState<BiayaKuliahPlannerPage>
                     ),
                     const SizedBox(height: 16),
 
-                    // Counter Umur Anak Sekarang
-                    _buildCounterRow(
+_buildCounterRow(
                       label: 'Umur Anak Sekarang',
                       valueText: '$_currentAge Tahun',
                       onDecrement: () {
@@ -663,8 +655,7 @@ class _BiayaKuliahPlannerPageState extends ConsumerState<BiayaKuliahPlannerPage>
                     ),
                     const SizedBox(height: 8),
 
-                    // Counter Target Mulai Kuliah
-                    _buildCounterRow(
+_buildCounterRow(
                       label: 'Target Mulai Kuliah',
                       valueText: '$_targetAge Tahun',
                       onDecrement: () {
@@ -689,8 +680,7 @@ class _BiayaKuliahPlannerPageState extends ConsumerState<BiayaKuliahPlannerPage>
                     ),
                     const SizedBox(height: 18),
 
-                    // Dropdown Pilihan Universitas
-                    _buildDropdownField(
+_buildDropdownField(
                       label: 'Pilihan Universitas & Jenjang',
                       value: _academicLevel,
                       items: _dropdownOptions,
@@ -711,8 +701,7 @@ class _BiayaKuliahPlannerPageState extends ConsumerState<BiayaKuliahPlannerPage>
                     ),
                     const SizedBox(height: 18),
 
-                    // Conditionally show custom cost input
-                    if (showCustomCost) ...[
+if (showCustomCost) ...[
                       Text(
                         'Biaya Kuliah Hari Ini',
                         style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
@@ -747,9 +736,8 @@ class _BiayaKuliahPlannerPageState extends ConsumerState<BiayaKuliahPlannerPage>
                       ),
                       const SizedBox(height: 16),
                     ],
-       
-                    // Savings
-                    Text(
+
+Text(
                       'Tabungan Terkumpul',
                       style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
                     ),

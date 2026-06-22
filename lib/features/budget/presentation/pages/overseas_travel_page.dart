@@ -130,7 +130,7 @@ class _OverseasTravelPageState extends ConsumerState<OverseasTravelPage> {
               ),
               error: (err, stack) => Center(child: Text('Error: $err')),
             ),
-            const SizedBox(height: 80), // Space for FAB
+            const SizedBox(height: 80),
           ],
         ),
       ),
@@ -342,14 +342,12 @@ class _OverseasTravelPageState extends ConsumerState<OverseasTravelPage> {
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
     final customNameController = TextEditingController();
     final amountController = TextEditingController();
-    
-    // Default to the first preset (Singapura)
-    DestinationPreset? selectedPreset = _presets.first;
+
+DestinationPreset? selectedPreset = _presets.first;
     String selectedCurrency = selectedPreset.currencyCode;
     String selectedCountry = selectedPreset.countryCode;
-    
-    // Initialize amount for the default preset
-    amountController.text = NumberFormat.decimalPattern('id_ID').format(selectedPreset.cost2026.round());
+
+amountController.text = NumberFormat.decimalPattern('id_ID').format(selectedPreset.cost2026.round());
 
     showModalBottomSheet(
       context: context,
@@ -402,9 +400,8 @@ class _OverseasTravelPageState extends ConsumerState<OverseasTravelPage> {
                   ),
                 ),
                 const SizedBox(height: 24),
-                
-                // Dropdown untuk Nama Tujuan
-                Column(
+
+Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Padding(

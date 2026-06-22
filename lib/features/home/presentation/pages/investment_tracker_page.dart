@@ -85,7 +85,7 @@ class _InvestmentTrackerPageState extends ConsumerState<InvestmentTrackerPage> {
                   _buildEmptyState(isDarkMode)
                 else
                   ...items.map((i) => _buildInvestmentItem(i, isDarkMode)),
-                const SizedBox(height: 80), // Extra space for FAB
+                const SizedBox(height: 80),
               ],
             ),
           );
@@ -234,8 +234,7 @@ class _InvestmentTrackerPageState extends ConsumerState<InvestmentTrackerPage> {
     final isProfit = item.profitLoss >= 0;
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
 
-    // Premium dynamic coloring for contrast
-    final accentColor = isProfit 
+final accentColor = isProfit 
         ? (isDarkMode ? Colors.greenAccent : Colors.green.shade700)
         : (isDarkMode ? Colors.redAccent : Colors.red.shade700);
 

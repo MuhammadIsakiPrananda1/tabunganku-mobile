@@ -39,7 +39,7 @@ class _SavingSimulatorPageState extends ConsumerState<SavingSimulatorPage> {
       context: context,
       initialDate: _targetDate ?? DateTime.now().add(const Duration(days: 30)),
       firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 365 * 20)), // Max 20 years
+      lastDate: DateTime.now().add(const Duration(days: 365 * 20)),
       builder: (context, child) {
         final isDark = Theme.of(context).brightness == Brightness.dark;
         return Theme(
@@ -76,9 +76,8 @@ class _SavingSimulatorPageState extends ConsumerState<SavingSimulatorPage> {
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final transactions = ref.watch(transactionsByGroupProvider(null));
-    
-    // Calculate current personal balance (non-manual)
-    final currentBalance = transactions
+
+final currentBalance = transactions
         .fold<double>(0, (s, t) => s + (t.type == TransactionType.income ? t.amount : 0));
 
     final remaining = (_targetAmount - currentBalance).clamp(0.0, double.infinity);
@@ -97,7 +96,7 @@ class _SavingSimulatorPageState extends ConsumerState<SavingSimulatorPage> {
         weekly = totalDays >= 7 ? remaining / (totalDays / 7) : 0;
         monthly = totalDays >= 30 ? remaining / (totalDays / 30) : 0;
       } else {
-        // If target is today
+
         daily = remaining;
       }
     }
@@ -132,8 +131,7 @@ class _SavingSimulatorPageState extends ConsumerState<SavingSimulatorPage> {
             _buildHeadingSection(isDarkMode),
             const SizedBox(height: 32),
 
-            // FORM SECTION
-            _buildInputField(
+_buildInputField(
               label: 'Target Dana Impian',
               controller: _amountController,
               icon: Icons.account_balance_wallet_rounded,
@@ -149,8 +147,7 @@ class _SavingSimulatorPageState extends ConsumerState<SavingSimulatorPage> {
 
             const SizedBox(height: 32),
 
-            // RESULTS DASHBOARD
-            if (_targetAmount > 0 && _targetDate != null) ...[
+if (_targetAmount > 0 && _targetDate != null) ...[
               _buildProgressCard(progress, currentBalance, remaining, isDarkMode),
               const SizedBox(height: 24),
               _buildSavingsPlanSection(daily, weekly, monthly, totalDays, isDarkMode),

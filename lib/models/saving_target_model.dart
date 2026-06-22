@@ -1,11 +1,10 @@
-
 class SavingTargetModel {
   final String id;
   final String name;
   final double targetAmount;
   final DateTime dueDate;
   final DateTime createdAt;
-  final String category; // Added category
+  final String category;
 
   SavingTargetModel({
     required this.id,
@@ -13,7 +12,7 @@ class SavingTargetModel {
     required this.targetAmount,
     required this.dueDate,
     required this.createdAt,
-    this.category = 'Umum', // Default category
+    this.category = 'Umum',
   });
 
   Map<String, dynamic> toJson() {
@@ -60,4 +59,3 @@ class SavingTargetModel {
     );
   }
 }
-

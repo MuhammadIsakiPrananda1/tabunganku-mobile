@@ -1,9 +1,8 @@
-
 class BillModel {
   final String id;
   final String name;
   final double amount;
-  final int dueDay; // 1-31
+  final int dueDay;
   final bool isPaid;
   final DateTime? lastPaidDate;
 

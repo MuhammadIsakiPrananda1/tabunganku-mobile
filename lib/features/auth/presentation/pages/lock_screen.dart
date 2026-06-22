@@ -31,9 +31,8 @@ class _LockScreenState extends ConsumerState<LockScreen> with TickerProviderStat
   Future<void> _authenticateBiometric() async {
     final authenticated = await ref.read(securityProvider.notifier).authenticate();
     if (authenticated && mounted) {
-      // If we are currently on the full lock route (initial startup flow),
-      // we need to manually navigate to dashboard.
-      if (GoRouter.of(context).routerDelegate.currentConfiguration.fullPath == '/lock') {
+
+if (GoRouter.of(context).routerDelegate.currentConfiguration.fullPath == '/lock') {
         context.go('/dashboard');
       }
     }
@@ -65,14 +64,12 @@ class _LockScreenState extends ConsumerState<LockScreen> with TickerProviderStat
     final success = await ref.read(securityProvider.notifier).verifyPin(_inputPin);
     if (success) {
       ref.read(securityProvider.notifier).recordSuccessAuth();
-      // If we are currently on the full lock route (initial startup flow),
-      // we need to manually navigate to dashboard.
-      if (mounted && GoRouter.of(context).routerDelegate.currentConfiguration.fullPath == '/lock') {
+
+if (mounted && GoRouter.of(context).routerDelegate.currentConfiguration.fullPath == '/lock') {
         context.go('/dashboard');
       }
-      // If used as an overlay, the securityProvider state change will trigger 
-      // the overlay removal in main.dart automatically.
-    } else {
+
+} else {
       setState(() {
         _isError = true;
         _inputPin = '';
@@ -108,12 +105,11 @@ class _LockScreenState extends ConsumerState<LockScreen> with TickerProviderStat
                   child: Column(
                     children: [
                       const Spacer(flex: 2),
-                      // Profile / Logo Section
+
                       _buildProfileHeader(profile, colorScheme),
                       const SizedBox(height: 32),
-                      
-                      // PIN Dots
-                      _buildPinDots(colorScheme),
+
+_buildPinDots(colorScheme),
                       const SizedBox(height: 16),
                       
                       if (_isError)
@@ -123,9 +119,8 @@ class _LockScreenState extends ConsumerState<LockScreen> with TickerProviderStat
                         ),
                         
                       const Spacer(flex: 1),
-                      
-                      // Numeric Keypad
-                      _buildKeypad(security.isBiometricEnabled),
+
+_buildKeypad(security.isBiometricEnabled),
                       const SizedBox(height: 48),
                     ],
                   ),
@@ -229,7 +224,7 @@ class _LockScreenState extends ConsumerState<LockScreen> with TickerProviderStat
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              // Biometric or empty
+
               if (showBiometric)
                 _buildKeypadIconButton(Icons.fingerprint_rounded, _authenticateBiometric)
               else

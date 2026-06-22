@@ -42,15 +42,14 @@ class _ConnectivityGuardState extends ConsumerState<ConnectivityGuard>
 
     return Stack(
       children: [
-        // Base Content
+
         AbsorbPointer(
           absorbing: isOffline,
           child: widget.child,
         ),
 
-        // Blur & Card Overlay
-        if (isOffline) ...[
-          // Backdrop Blur
+if (isOffline) ...[
+
           Positioned.fill(
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 8.0, sigmaY: 8.0),
@@ -59,9 +58,8 @@ class _ConnectivityGuardState extends ConsumerState<ConnectivityGuard>
               ),
             ),
           ),
-          
-          // Centered Card
-          Center(
+
+Center(
             child: Material(
               type: MaterialType.transparency,
               child: Container(

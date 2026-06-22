@@ -41,7 +41,7 @@ class HomeTabView extends ConsumerStatefulWidget {
 
 class _HomeTabViewState extends ConsumerState<HomeTabView> {
   int _currentTargetIndex = 0;
-  int _selectedAllocationTab = 2; // 0: Pemasukan, 1: Pengeluaran, 2: Semua
+  int _selectedAllocationTab = 2;
 
   String _formatRupiah(double amount) {
     final isNegative = amount < 0;
@@ -56,7 +56,7 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
 
   @override
   Widget build(BuildContext context) {
-    // 1. Fetch personal transactions
+
     final personalTransactions = ref.watch(transactionsByGroupProvider(null));
     final transactions = List<TransactionModel>.from(personalTransactions)
       ..sort((a, b) => b.date.compareTo(a.date));
@@ -84,8 +84,7 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
     final targetsAsync = ref.watch(savingTargetsStreamProvider);
     final targets = targetsAsync.valueOrNull ?? [];
 
-    // Fetch feature balances
-    final goldTxs = ref.watch(goldTransactionsStreamProvider).valueOrNull ?? [];
+final goldTxs = ref.watch(goldTransactionsStreamProvider).valueOrNull ?? [];
     final goldGramBalance = goldTxs.fold<double>(
         0,
         (sum, t) =>
@@ -115,13 +114,12 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
         children: [
           const SizedBox(height: 12),
 
-          // Main Finance Card (Consolidated)
-          Container(
+Container(
             width: double.infinity,
             decoration: BoxDecoration(
               color: theme.cardColor,
               borderRadius: BorderRadius.circular(32),
-              // Simplified shadow for low-spec
+
               boxShadow: isDarkMode
                   ? []
                   : [
@@ -135,7 +133,7 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
             clipBehavior: Clip.antiAlias,
             child: Stack(
               children: [
-                // Decoration Circles (Simplified for performance)
+
                 Positioned(
                   top: -40,
                   right: -30,
@@ -149,7 +147,7 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                     ),
                   ),
                 ),
-                // Content Utama
+
                 Padding(
                   padding: const EdgeInsets.all(20),
                   child: Column(
@@ -209,13 +207,12 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                         ],
                       ),
                       const SizedBox(height: 12),
-                      // Estimasi Akhir Bulan
+
                       _buildEstimationCard(
                           totalBalance, totalIncome, totalExpense, isDarkMode),
                       const SizedBox(height: 20),
 
-                      // Stats Row Divider
-                      Container(
+Container(
                         height: 1,
                         width: double.infinity,
                         color: isDarkMode
@@ -224,8 +221,7 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                       ),
                       const SizedBox(height: 20),
 
-                      // Stats Row within Card
-                      Row(
+Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Expanded(
@@ -256,10 +252,9 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
             ),
           ),
 
-          const SizedBox(height: 32), // Lega (tidak mepet atas)
+          const SizedBox(height: 32),
 
-          // Primary Navigation grid (GoPay Style)
-          _buildActionGrid(
+_buildActionGrid(
             isDarkMode,
             goldGramBalance: goldGramBalance,
             unpaidBillsTotal: unpaidBillsTotal,
@@ -268,7 +263,7 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
             targets: targets,
           ),
 
-          const SizedBox(height: 24), // Seimbang (tidak terlalu rapat)
+          const SizedBox(height: 24),
           _buildSavingTargetSection(transactions, targets, isDarkMode),
 
           const SizedBox(height: 12),
@@ -297,11 +292,8 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
 
     final rawRemainingNet =
         (estIncome - totalIncome) - (estExpense - totalExpense);
-    
-    // Asymmetric Damping:
-    // Jika proyeksi positif (user menabung), gunakan proyeksi penuh (1.0) agar akurat dan motivatif bagi penabung harian.
-    // Jika proyeksi negatif (ada pengeluaran besar), redam di awal bulan karena biasanya itu tagihan bulanan satu kali, bukan pengeluaran harian.
-    final double dampingFactor = rawRemainingNet >= 0
+
+final double dampingFactor = rawRemainingNet >= 0
         ? 1.0
         : (currentDay / 10.0).clamp(0.1, 1.0);
     final remainingNet = rawRemainingNet * dampingFactor;
@@ -412,7 +404,7 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
           ? '${_formatRupiah(totalMonthlyInsurance)}/bln'
           : '',
       QuickActionType.savingPlans: _getPlansTotal(targets),
-      QuickActionType.buyingTarget: '', // Removed total nominal
+      QuickActionType.buyingTarget: '',
     };
 
     final primaryActions = _allActions.take(7).toList();
@@ -435,11 +427,11 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
             color: action.baseColor,
             subLabel: balances[action.type],
           ),
-        // More button
+
         _buildToolAction(
           Icons.apps_rounded,
           'Lainnya',
-          null, // Special case for "More"
+          null,
           isDarkMode,
           color: Colors.blueGrey,
           onTap: () => context.push('/all-services'),
@@ -633,7 +625,7 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
 
   Widget _buildSavingTargetSection(List<TransactionModel> transactions,
       List<SavingTargetModel> targets, bool isDarkMode) {
-    // Filter out specialized plans from the general target section
+
     final buyingTargets = targets
         .where((t) => t.category == 'Pembelian' || t.category == 'Umum')
         .toList();
@@ -705,7 +697,7 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
             ),
           ),
         const SizedBox(height: 12),
-        // Custom Page Indicator
+
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: List.generate(buyingTargets.length, (index) {
@@ -729,7 +721,7 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
 
   Widget _targetCardMinimalist(SavingTargetModel target,
       List<TransactionModel> transactions, bool isDarkMode, int index) {
-    // Only count transactions AFTER target creation
+
     final targetBalance = transactions
         .where((t) => !t.date.isBefore(target.createdAt))
         .fold<double>(
@@ -825,7 +817,7 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                       ),
                     ),
                     const Spacer(),
-                    // Progress Bar
+
                     Container(
                       height: 5,
                       width: double.infinity,
@@ -852,7 +844,7 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    // Structured Details (3 columns for pro look)
+
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -940,7 +932,7 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
           _selectedAllocationTab = newValue;
         });
       },
-      offset: const Offset(0, 34), // Displays the menu right below the button
+      offset: const Offset(0, 34),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
@@ -1043,13 +1035,13 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
           Column(
             children: [
               if (_selectedAllocationTab == 0) ...[
-                // PEMASUKAN TAB
+
                 _buildIncomeChartAndData(transactions, isDarkMode),
               ] else if (_selectedAllocationTab == 1) ...[
-                // PENGELUARAN TAB
+
                 _buildExpenseChartAndData(transactions, isDarkMode),
               ] else ...[
-                // ALOKASI SEMUA TAB
+
                 _buildAllAllocationChartAndData(totalIncome, totalExpense,
                     transactions, isDarkMode, isEmptyAll),
               ],
@@ -1272,7 +1264,7 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                       : [
                           if (totalIncome > 0)
                             PieChartSectionData(
-                              color: const Color(0xFF2ECC71), // flat green
+                              color: const Color(0xFF2ECC71),
                               value: totalIncome,
                               radius: 14,
                               title: incomePercent != '0' ? '$incomePercent%' : '',
@@ -1286,7 +1278,7 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
                             ),
                           if (totalExpense > 0)
                             PieChartSectionData(
-                              color: const Color(0xFFE74C3C), // flat red
+                              color: const Color(0xFFE74C3C),
                               value: totalExpense,
                               radius: 14,
                               title: expensePercent != '0' ? '$expensePercent%' : '',
@@ -1547,8 +1539,7 @@ class _HomeTabViewState extends ConsumerState<HomeTabView> {
     );
   }
 
-
-  Widget _buildRecentActivitySection(
+Widget _buildRecentActivitySection(
       List<TransactionModel> transactions, bool isDarkMode) {
     final displayTxs = transactions.take(3).toList();
 

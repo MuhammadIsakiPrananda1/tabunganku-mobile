@@ -3,7 +3,7 @@ import '../models/challenge_model.dart';
 import 'package:flutter/material.dart';
 
 class ChallengeTemplates {
-  // Daily Challenges
+
   static final List<ChallengeTemplateModel> dailyChallenges = [
     ChallengeTemplateModel(
       id: 'no-jajan',
@@ -195,8 +195,7 @@ class ChallengeTemplates {
     ),
   ];
 
-  // Weekly Challenges
-  static final List<ChallengeTemplateModel> weeklyChallenges = [
+static final List<ChallengeTemplateModel> weeklyChallenges = [
     ChallengeTemplateModel(
       id: '52-week-mini',
       title: '52 Week Challenge (Mini)',
@@ -406,8 +405,7 @@ class ChallengeTemplates {
     ),
   ];
 
-  // Monthly Challenges
-  static final List<ChallengeTemplateModel> monthlyChallenges = [
+static final List<ChallengeTemplateModel> monthlyChallenges = [
     ChallengeTemplateModel(
       id: 'save-10-percent',
       title: '10% Saving Challenge',
@@ -614,13 +612,11 @@ class ChallengeTemplates {
     ),
   ];
 
-  // Get all templates
-  static List<ChallengeTemplateModel> getAllTemplates() {
+static List<ChallengeTemplateModel> getAllTemplates() {
     return [...dailyChallenges, ...weeklyChallenges, ...monthlyChallenges];
   }
 
-  // Get templates by type
-  static List<ChallengeTemplateModel> getTemplatesByType(ChallengeType type) {
+static List<ChallengeTemplateModel> getTemplatesByType(ChallengeType type) {
     switch (type) {
       case ChallengeType.daily:
         return dailyChallenges;
@@ -631,13 +627,11 @@ class ChallengeTemplates {
     }
   }
 
-  // Get templates by difficulty
-  static List<ChallengeTemplateModel> getTemplatesByDifficulty(ChallengeDifficulty difficulty) {
+static List<ChallengeTemplateModel> getTemplatesByDifficulty(ChallengeDifficulty difficulty) {
     return getAllTemplates().where((t) => t.difficulty == difficulty).toList();
   }
 
-  // Get template by id
-  static ChallengeTemplateModel? getTemplateById(String id) {
+static ChallengeTemplateModel? getTemplateById(String id) {
     try {
       return getAllTemplates().firstWhere((t) => t.id == id);
     } catch (e) {
@@ -645,8 +639,7 @@ class ChallengeTemplates {
     }
   }
 
-  // Get recommended templates for beginners
-  static List<ChallengeTemplateModel> getRecommendedForBeginners() {
+static List<ChallengeTemplateModel> getRecommendedForBeginners() {
     return [
       getTemplateById('no-jajan')!,
       getTemplateById('save-20k')!,

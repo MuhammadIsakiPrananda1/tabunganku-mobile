@@ -18,7 +18,7 @@ class HajjUmrahPlannerPage extends ConsumerStatefulWidget {
 }
 
 class _HajjUmrahPlannerPageState extends ConsumerState<HajjUmrahPlannerPage> {
-  String _activeType = 'Haji'; // Haji, Umrah
+  String _activeType = 'Haji';
   
   final _amountController = TextEditingController();
   final _nameController = TextEditingController();
@@ -50,9 +50,8 @@ class _HajjUmrahPlannerPageState extends ConsumerState<HajjUmrahPlannerPage> {
     final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
         (ref.watch(themeProvider) == ThemeMode.system && theme.brightness == Brightness.dark);
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
-    
-    // Page Theme: Mint Green Accent & Pure Dark/Light backgrounds
-    final pageBgColor = isDarkMode ? AppColors.backgroundDark : const Color(0xFFF8FAF9);
+
+final pageBgColor = isDarkMode ? AppColors.backgroundDark : const Color(0xFFF8FAF9);
     final accentColor = isDarkMode ? const Color(0xFF2ECC71) : const Color(0xFF27AE60);
     final inputBgColor = isDarkMode ? Colors.white.withOpacity(0.05) : AppColors.background;
 
@@ -99,8 +98,7 @@ class _HajjUmrahPlannerPageState extends ConsumerState<HajjUmrahPlannerPage> {
                 ),
                 const SizedBox(height: 8),
 
-                // Premium Dropdown like Tax & Zakat & Mosque
-                Container(
+Container(
                   height: 48,
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   decoration: BoxDecoration(

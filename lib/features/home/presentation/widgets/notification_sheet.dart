@@ -217,7 +217,7 @@ class NotificationSheet extends ConsumerWidget {
         if (!n.isRead) {
           ref.read(notificationNotifierProvider.notifier).markAsRead(n.id);
         }
-        // TODO: Handle navigation based on type?
+
       },
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),

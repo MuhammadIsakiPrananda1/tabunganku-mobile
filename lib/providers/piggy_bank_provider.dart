@@ -61,13 +61,12 @@ class PiggyBankHistoryNotifier extends StateNotifier<List<PiggyBankLog>> {
   Future<void> _loadHistory() async {
     final prefs = await SharedPreferences.getInstance();
     final list = prefs.getStringList(_key) ?? [];
-    // state = list.map((e) => PiggyBankLog.fromJson(Map<String, dynamic>.from(jsonDecode(e)))).toList();
-    // Simplified for now, let's just use a simple list of strings if JSON is complex
-  }
+
+}
 
   Future<void> addLog(double amount) async {
     final log = PiggyBankLog(date: DateTime.now(), amount: amount);
     state = [log, ...state];
-    // Save to prefs...
+
   }
 }

@@ -1,4 +1,3 @@
-
 class InvestmentModel {
   final String id;
   final String assetName;

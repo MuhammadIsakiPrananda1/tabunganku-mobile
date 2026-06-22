@@ -16,16 +16,15 @@ class BrankasFinansialPage extends ConsumerStatefulWidget {
 
 class _BrankasFinansialPageState extends ConsumerState<BrankasFinansialPage> {
   List<Map<String, dynamic>> _vaultItems = [];
-  bool _isObscured = true; // Security obscure toggle
+  bool _isObscured = true;
   final _brankasFormKey = GlobalKey<FormState>();
   final SecureStorageService _secureStorage = SecureStorageService();
 
-  // Dialogue controllers
-  final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _value1Controller = TextEditingController(); // e.g. Acc Number / Policy ID
-  final TextEditingController _value2Controller = TextEditingController(); // e.g. Owner name / CS phone
+final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _value1Controller = TextEditingController();
+  final TextEditingController _value2Controller = TextEditingController();
   final TextEditingController _notesController = TextEditingController();
-  String _selectedCategory = 'Rekening'; // Rekening, Polis, Dokumen, Investasi
+  String _selectedCategory = 'Rekening';
 
   @override
   void initState() {
@@ -146,10 +145,9 @@ class _BrankasFinansialPageState extends ConsumerState<BrankasFinansialPage> {
         (ref.watch(themeProvider) == ThemeMode.system && theme.brightness == Brightness.dark);
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
     final pageBgColor = isDarkMode ? AppColors.backgroundDark : const Color(0xFFF7F8FC);
-    final accentColor = const Color(0xFF3F51B5); // Deep Indigo
+    final accentColor = const Color(0xFF3F51B5);
 
-    // Separate categories
-    final bankItems = _vaultItems.where((i) => i['category'] == 'Rekening').toList();
+final bankItems = _vaultItems.where((i) => i['category'] == 'Rekening').toList();
     final polisItems = _vaultItems.where((i) => i['category'] == 'Polis').toList();
     final docItems = _vaultItems.where((i) => i['category'] == 'Dokumen').toList();
     final investItems = _vaultItems.where((i) => i['category'] == 'Investasi').toList();
@@ -190,7 +188,7 @@ class _BrankasFinansialPageState extends ConsumerState<BrankasFinansialPage> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 48),
         children: [
-          // Security Alert Info Card
+
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -228,8 +226,7 @@ class _BrankasFinansialPageState extends ConsumerState<BrankasFinansialPage> {
           ),
           const SizedBox(height: 24),
 
-          // Categories Sections
-          _buildCategoryGroup('Rekening Bank', bankItems, isDarkMode, contentColor, accentColor, 'Nomor Rekening', 'Atas Nama'),
+_buildCategoryGroup('Rekening Bank', bankItems, isDarkMode, contentColor, accentColor, 'Nomor Rekening', 'Atas Nama'),
           _buildCategoryGroup('Polis Asuransi', polisItems, isDarkMode, contentColor, accentColor, 'Nomor Polis', 'Info Detail'),
           _buildCategoryGroup('Portofolio & Broker', investItems, isDarkMode, contentColor, accentColor, 'ID Investasi', 'Detail Akun'),
           _buildCategoryGroup('Dokumen & Lainnya', docItems, isDarkMode, contentColor, accentColor, 'Kode / Kunci', 'Keterangan'),
@@ -314,19 +311,16 @@ class _BrankasFinansialPageState extends ConsumerState<BrankasFinansialPage> {
                     ],
                   ),
                   const SizedBox(height: 10),
-                  
-                  // Value 1
-                  _buildVaultRow(val1Label, _formatObscured(val1), () => _copyToClipboard(val1Label, val1), isDarkMode),
+
+_buildVaultRow(val1Label, _formatObscured(val1), () => _copyToClipboard(val1Label, val1), isDarkMode),
                   const SizedBox(height: 8),
 
-                  // Value 2 (if present)
-                  if (val2.isNotEmpty) ...[
+if (val2.isNotEmpty) ...[
                     _buildVaultRow(val2Label, _formatObscured(val2), () => _copyToClipboard(val2Label, val2), isDarkMode),
                     const SizedBox(height: 8),
                   ],
 
-                  // Notes (if present)
-                  if (notes.isNotEmpty) ...[
+if (notes.isNotEmpty) ...[
                     const SizedBox(height: 4),
                     Text(
                       'Catatan: $notes',
@@ -434,8 +428,7 @@ class _BrankasFinansialPageState extends ConsumerState<BrankasFinansialPage> {
                     ),
                     const SizedBox(height: 20),
 
-                    // Category selector
-                    Text(
+Text(
                       'Kategori',
                       style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
                     ),
@@ -495,8 +488,7 @@ class _BrankasFinansialPageState extends ConsumerState<BrankasFinansialPage> {
                     ),
                     const SizedBox(height: 16),
 
-                    // Title
-                    RichText(
+RichText(
                       text: TextSpan(
                         text: 'Nama Layanan / Judul',
                         style: GoogleFonts.quicksand(
@@ -545,8 +537,7 @@ class _BrankasFinansialPageState extends ConsumerState<BrankasFinansialPage> {
                     ),
                     const SizedBox(height: 16),
 
-                    // Value 1 (required)
-                    RichText(
+RichText(
                       text: TextSpan(
                         text: _selectedCategory == 'Rekening' ? 'Nomor Rekening' :
                         _selectedCategory == 'Polis' ? 'Nomor Polis' :
@@ -605,8 +596,7 @@ class _BrankasFinansialPageState extends ConsumerState<BrankasFinansialPage> {
                     ),
                     const SizedBox(height: 16),
 
-                    // Value 2
-                    Text(
+Text(
                       _selectedCategory == 'Rekening' ? 'Atas Nama Rekening (Opsional)' :
                       _selectedCategory == 'Polis' ? 'Info Manfaat / Tertanggung (Opsional)' :
                       _selectedCategory == 'Investasi' ? 'User ID Lainnya (Opsional)' : 'Detail / Keterangan Tambahan',
@@ -631,8 +621,7 @@ class _BrankasFinansialPageState extends ConsumerState<BrankasFinansialPage> {
                     ),
                     const SizedBox(height: 16),
 
-                    // Notes
-                    Text(
+Text(
                       'Catatan Ringkas (Opsional)',
                       style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
                     ),

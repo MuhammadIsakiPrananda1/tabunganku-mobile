@@ -150,8 +150,7 @@ class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
     }
   }
 
-  // Real-time prices from provider
-  double buyPrice = 1250000;
+double buyPrice = 1250000;
   double sellPrice = 1185000;
   double priceChange = 1.25;
 
@@ -200,7 +199,7 @@ class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
           final txs = snapshot.data ?? [];
           final totalGrams = ref.read(goldServiceProvider).calculateTotalGrams(txs);
           final avgPrice = ref.read(goldServiceProvider).calculateAveragePrice(txs);
-          final currentValue = totalGrams * buyPrice; // Valuation always based on current buy price
+          final currentValue = totalGrams * buyPrice;
           final totalInvestment = totalGrams * avgPrice;
           final profitLoss = currentValue - totalInvestment;
 
@@ -237,7 +236,7 @@ class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
                   _buildEmptyState(isDarkMode)
                 else
                   ...txs.reversed.map((tx) => _buildTransactionItem(tx, isDarkMode)),
-                const SizedBox(height: 80), // Extra space for FAB
+                const SizedBox(height: 80),
               ],
             ),
           );
@@ -385,7 +384,7 @@ class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header Row: LIVE status & Percentage
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -436,10 +435,10 @@ class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
                 ],
               ),
               const SizedBox(height: 14),
-              // Dual side-by-side price blocks
+
               Row(
                 children: [
-                  // HARGA BELI
+
                   Expanded(
                     child: Container(
                       padding: const EdgeInsets.all(12),
@@ -490,7 +489,7 @@ class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  // HARGA JUAL
+
                   Expanded(
                     child: Container(
                       padding: const EdgeInsets.all(12),
@@ -860,9 +859,8 @@ class _GoldSavingsPageState extends ConsumerState<GoldSavingsPage> {
   Widget _buildTransactionItem(GoldTransactionModel tx, bool isDarkMode) {
     final isBuy = tx.type == GoldTransactionType.buy;
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
-    
-    // Premium contrasting colors: greenAccent/redAccent in dark mode, shade700 in light mode
-    final accentColor = isBuy 
+
+final accentColor = isBuy 
         ? (isDarkMode ? Colors.greenAccent : Colors.green.shade700)
         : (isDarkMode ? Colors.redAccent : Colors.red.shade700);
 

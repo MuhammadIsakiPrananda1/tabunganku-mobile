@@ -54,22 +54,20 @@ final appRouterProvider = Provider((ref) {
   return GoRouter(
     initialLocation: '/splash',
     routes: [
-      // Splash Screen
+
       GoRoute(
         path: '/splash',
         name: 'splash',
         builder: (context, state) => const SplashScreen(),
       ),
 
-      // Main Routes
-      GoRoute(
+GoRoute(
         path: '/dashboard',
         name: 'dashboard',
         builder: (context, state) => const DashboardPage(),
       ),
 
-      // Security Lock
-      GoRoute(
+GoRoute(
         path: '/lock',
         name: 'lock',
         builder: (context, state) {
@@ -77,15 +75,13 @@ final appRouterProvider = Provider((ref) {
         },
       ),
 
-      // Nabung Bersama Page
-      GoRoute(
+GoRoute(
         path: '/nabung-bersama',
         name: 'nabung-bersama',
         builder: (context, state) => const NabungBersamaPage(),
       ),
 
-      // PIN Setup
-      GoRoute(
+GoRoute(
         path: '/pin-setup',
         name: 'pin-setup',
         builder: (context, state) => const PinSetupPage(),
@@ -97,43 +93,37 @@ final appRouterProvider = Provider((ref) {
         builder: (context, state) => const SavingSimulatorPage(),
       ),
 
-      // Scan Receipt
-      GoRoute(
+GoRoute(
         path: '/scan-receipt',
         name: 'scan-receipt',
         builder: (context, state) => const ScanReceiptPage(),
       ),
 
-      // Challenge Page
-      GoRoute(
+GoRoute(
         path: '/challenge',
         name: 'challenge',
         builder: (context, state) => const ChallengePage(),
       ),
 
-      // Monthly Budget Page
-      GoRoute(
+GoRoute(
         path: '/monthly-budget',
         name: 'monthly-budget',
         builder: (context, state) => const MonthlyBudgetPage(),
       ),
 
-      // Zakat & Infaq Page
-      GoRoute(
+GoRoute(
         path: '/zakat',
         name: 'zakat',
         builder: (context, state) => const ZakatPage(),
       ),
 
-      // Gold Savings Page
-      GoRoute(
+GoRoute(
         path: '/gold',
         name: 'gold',
         builder: (context, state) => const GoldSavingsPage(),
       ),
 
-      // Specialized Savings Pages
-      GoRoute(
+GoRoute(
         path: '/emergency-fund',
         name: 'emergency-fund',
         builder: (context, state) => const SpecializedSavingPage(
@@ -185,29 +175,25 @@ final appRouterProvider = Provider((ref) {
         builder: (context, state) => const BuyingTargetsPage(),
       ),
 
-      // Billing Management Page
-      GoRoute(
+GoRoute(
         path: '/bills',
         name: 'bills',
         builder: (context, state) => const BillingManagementPage(),
       ),
 
-      // Tax Calculator Page
-      GoRoute(
+GoRoute(
         path: '/tax',
         name: 'tax',
         builder: (context, state) => const TaxCalculatorPage(),
       ),
 
-      // Investment Tracker Page
-      GoRoute(
+GoRoute(
         path: '/investment',
         name: 'investment',
         builder: (context, state) => const InvestmentTrackerPage(),
       ),
 
-      // Insurance Tracker Page
-      GoRoute(
+GoRoute(
         path: '/insurance',
         name: 'insurance',
         builder: (context, state) => const InsuranceTrackerPage(),
@@ -356,16 +342,14 @@ final appRouterProvider = Provider((ref) {
         builder: (context, state) => const EmergencyFundCalculatorPage(),
       ),
 
-      // Catch-all redirect to splash
-      GoRoute(
+GoRoute(
         path: '/',
         name: 'home',
         redirect: (context, state) => '/splash',
       ),
     ],
 
-    // Error page
-    errorBuilder: (context, state) => Scaffold(
+errorBuilder: (context, state) => Scaffold(
       appBar: AppBar(title: const Text('Error')),
       body: Center(
         child: Column(

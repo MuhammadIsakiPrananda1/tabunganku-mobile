@@ -129,7 +129,7 @@ class _NabungBersamaPageState extends ConsumerState<NabungBersamaPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Top row info
+
           Padding(
             padding: const EdgeInsets.all(16),
             child: Row(
@@ -200,9 +200,8 @@ class _NabungBersamaPageState extends ConsumerState<NabungBersamaPage> {
               ],
             ),
           ),
-          
-          // Progress bar and details
-          Padding(
+
+Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -254,8 +253,7 @@ class _NabungBersamaPageState extends ConsumerState<NabungBersamaPage> {
 
           Container(height: 1, color: borderClr),
 
-          // Bottom card actions
-          Padding(
+Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -693,7 +691,7 @@ class _NabungBersamaPageState extends ConsumerState<NabungBersamaPage> {
               ),
               child: Column(
                 children: [
-                  // Pull Handle
+
                   Container(
                     width: 36,
                     height: 4,
@@ -748,10 +746,10 @@ class _NabungBersamaPageState extends ConsumerState<NabungBersamaPage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // Top row: Avatar + Name/Status + Delete
+
                                 Row(
                                   children: [
-                                    // Letter avatar
+
                                     Container(
                                       width: 40,
                                       height: 40,
@@ -786,7 +784,7 @@ class _NabungBersamaPageState extends ConsumerState<NabungBersamaPage> {
                                       ),
                                     ),
                                     const SizedBox(width: 12),
-                                    // Member info and status pill
+
                                     Expanded(
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -800,7 +798,7 @@ class _NabungBersamaPageState extends ConsumerState<NabungBersamaPage> {
                                             ),
                                           ),
                                           const SizedBox(height: 4),
-                                          // Status Pill Badge (with Flexible protection)
+
                                           Container(
                                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                                             decoration: BoxDecoration(
@@ -844,7 +842,7 @@ class _NabungBersamaPageState extends ConsumerState<NabungBersamaPage> {
                                       ),
                                     ),
                                     const SizedBox(width: 8),
-                                    // Sleek Trash Button
+
                                     Material(
                                       color: Colors.transparent,
                                       child: InkWell(
@@ -893,7 +891,7 @@ class _NabungBersamaPageState extends ConsumerState<NabungBersamaPage> {
                                 const SizedBox(height: 12),
                                 Divider(height: 1, color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : const Color(0xFFEDEFF2)),
                                 const SizedBox(height: 10),
-                                // Bottom row: Quantity Picker & Title
+
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
@@ -905,7 +903,7 @@ class _NabungBersamaPageState extends ConsumerState<NabungBersamaPage> {
                                         color: isDarkMode ? Colors.white38 : Colors.grey.shade500,
                                       ),
                                     ),
-                                    // Controls: Decrement, Count, Increment
+
                                     Container(
                                       decoration: BoxDecoration(
                                         color: isDarkMode ? Colors.white.withValues(alpha: 0.03) : const Color(0xFFF4F6F8),
@@ -919,7 +917,7 @@ class _NabungBersamaPageState extends ConsumerState<NabungBersamaPage> {
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          // Decrement Button
+
                                           _buildCircleActionButton(
                                             icon: Icons.remove_rounded,
                                             onPressed: !hasSaved ? null : () {
@@ -933,7 +931,7 @@ class _NabungBersamaPageState extends ConsumerState<NabungBersamaPage> {
                                             color: Colors.redAccent,
                                           ),
                                           const SizedBox(width: 10),
-                                          // Count Display
+
                                           Text(
                                             '${contribCount}x',
                                             style: GoogleFonts.quicksand(
@@ -943,7 +941,7 @@ class _NabungBersamaPageState extends ConsumerState<NabungBersamaPage> {
                                             ),
                                           ),
                                           const SizedBox(width: 10),
-                                          // Increment Button
+
                                           _buildCircleActionButton(
                                             icon: Icons.add_rounded,
                                             onPressed: () {

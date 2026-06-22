@@ -25,7 +25,7 @@ class MockSavingTargetService implements SavingTargetService {
   }
 
   Future<String> _getCurrentUserId() async {
-    // For now use default_user as in dashboard_page.dart
+
     return 'default_user';
   }
 

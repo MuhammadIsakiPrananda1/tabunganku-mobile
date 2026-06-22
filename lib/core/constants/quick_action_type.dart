@@ -26,4 +26,3 @@ enum QuickActionType {
   buyingTarget,
   nabungBersama,
 }
-

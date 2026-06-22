@@ -19,9 +19,8 @@ class _TaxReminderPageState extends ConsumerState<TaxReminderPage> {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final remindersAsync = ref.watch(taxRemindersStreamProvider);
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
-    
-    // Page Theme: Mint Green Accent & Classic Black/Light background
-    final pageBgColor = isDarkMode ? AppColors.backgroundDark : const Color(0xFFF8FAF9);
+
+final pageBgColor = isDarkMode ? AppColors.backgroundDark : const Color(0xFFF8FAF9);
     final accentColor = isDarkMode ? const Color(0xFF2ECC71) : const Color(0xFF27AE60);
 
     return Scaffold(

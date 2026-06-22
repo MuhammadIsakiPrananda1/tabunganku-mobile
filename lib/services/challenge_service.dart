@@ -13,7 +13,6 @@ import 'package:tabunganku/services/challenge_templates.dart';
 import 'package:tabunganku/services/badge_service.dart';
 import 'package:tabunganku/core/constants/transaction_categories.dart';
 
-/// Service untuk mengelola Challenge
 abstract class ChallengeService {
   Future<List<ChallengeModel>> getChallenges();
   Future<List<ChallengeModel>> getActiveChallenges();
@@ -41,7 +40,6 @@ abstract class ChallengeService {
   ChallengeTemplateModel? getTemplateById(String id);
 }
 
-/// Mock implementation dengan SharedPreferences
 class MockChallengeService implements ChallengeService {
   final BadgeService? badgeService;
 
@@ -231,8 +229,7 @@ class MockChallengeService implements ChallengeService {
       String challengeId, double progress) async {
     final challenge = await getChallenge(challengeId);
 
-    // Check if challenge should be completed
-    ChallengeStatus newStatus = challenge.status;
+ChallengeStatus newStatus = challenge.status;
     DateTime? completedDate;
 
     if (challenge.status != ChallengeStatus.completed &&
@@ -240,31 +237,26 @@ class MockChallengeService implements ChallengeService {
       newStatus = ChallengeStatus.completed;
       completedDate = DateTime.now();
 
-      // Update streak and points
-      await _updateStreakOnCompletion();
+await _updateStreakOnCompletion();
       await _addPoints(challenge.points);
 
-      // Unlock badges
-      if (badgeService != null) {
+if (badgeService != null) {
         final currentStreakVal = await getCurrentStreak();
         final currentPointsVal = await getTotalPoints();
         await badgeService!.checkAndUnlockBadges(currentPointsVal, currentStreakVal);
 
-        // First challenge completion badge
-        final completedList = await getCompletedChallenges();
+final completedList = await getCompletedChallenges();
         if (completedList.isEmpty) {
           await badgeService!.unlockFirstChallengeBadge();
         }
 
-        // Specific badge from template
-        if (challenge.badgeId != null) {
+if (challenge.badgeId != null) {
           await badgeService!.unlockChallengeBadge(challenge.badgeId!);
         }
       }
     }
 
-    // Check if challenge expired
-    if (DateTime.now().isAfter(challenge.endDate) &&
+if (DateTime.now().isAfter(challenge.endDate) &&
         newStatus != ChallengeStatus.completed) {
       newStatus = ChallengeStatus.failed;
     }
@@ -283,11 +275,9 @@ class MockChallengeService implements ChallengeService {
     final txCatLower = txCatLabel.toLowerCase().trim();
     final targetCatLower = targetCat.toLowerCase().trim();
 
-    // 1. Direct label match (case insensitive)
-    if (txCatLower == targetCatLower) return true;
+if (txCatLower == targetCatLower) return true;
 
-    // 2. Find the TransactionCategory in AppCategories to get its group
-    TransactionCategory? foundCategory;
+TransactionCategory? foundCategory;
     for (final cat in AppCategories.expenseCategories) {
       if (cat.label.toLowerCase().trim() == txCatLower) {
         foundCategory = cat;
@@ -305,35 +295,29 @@ class MockChallengeService implements ChallengeService {
 
     if (foundCategory != null) {
       final groupLower = foundCategory.group.toLowerCase().trim();
-      // Match group name
+
       if (groupLower == targetCatLower) return true;
 
-      // Handle mappings/compatibility for older target categories
-      // e.g. target 'transportasi & bensin' matches group 'transportasi'
-      if (targetCatLower == 'transportasi & bensin' && groupLower == 'transportasi') return true;
+if (targetCatLower == 'transportasi & bensin' && groupLower == 'transportasi') return true;
       if (targetCatLower == 'transportasi' && groupLower == 'transportasi & bensin') return true;
 
-      // target 'belanja / lifestyle' matches group 'belanja & sembako' or 'gaya hidup & hiburan'
-      if (targetCatLower == 'belanja / lifestyle' &&
+if (targetCatLower == 'belanja / lifestyle' &&
           (groupLower == 'belanja & sembako' || groupLower == 'gaya hidup & hiburan')) {
         return true;
       }
 
-      // target 'hiburan & langganan' matches group 'gaya hidup & hiburan' or 'pengeluaran digital'
-      if (targetCatLower == 'hiburan & langganan' &&
+if (targetCatLower == 'hiburan & langganan' &&
           (groupLower == 'gaya hidup & hiburan' || groupLower == 'pengeluaran digital')) {
         return true;
       }
 
-      // target 'biaya admin & lainnya' matches group 'lainnya' or 'keuangan'
-      if (targetCatLower == 'biaya admin & lainnya' &&
+if (targetCatLower == 'biaya admin & lainnya' &&
           (groupLower == 'lainnya' || groupLower == 'keuangan')) {
         return true;
       }
     }
 
-    // 3. Fallback: partial match
-    if (txCatLower.contains(targetCatLower) || targetCatLower.contains(txCatLower)) return true;
+if (txCatLower.contains(targetCatLower) || targetCatLower.contains(txCatLower)) return true;
 
     return false;
   }
@@ -419,23 +403,19 @@ class MockChallengeService implements ChallengeService {
           }
           break;
         case ChallengeTargetType.custom:
-          // For custom challenges, we might just track activity
-          // e.g., 'Input All Expense' simply increments progress by 1 for each transaction
-          await updateChallengeProgress(
+
+await updateChallengeProgress(
               challenge.id, challenge.currentProgress + 1);
           break;
       }
     }
   }
 
-  // ── Secure storage backup keys ─────────────────────────────────────────
-  static const String _secureStreakPrefix = 'secure_streak_';
+static const String _secureStreakPrefix = 'secure_streak_';
   static const String _securePointsPrefix = 'secure_points_';
   static const String _secureLastCompletionPrefix = 'secure_last_completion_';
 
-  /// Restore streak & points from secure storage into SharedPreferences
-  /// jika SharedPreferences kosong (misal setelah update/reinstall).
-  Future<void> _restoreFromSecureStorageIfNeeded(
+Future<void> _restoreFromSecureStorageIfNeeded(
       SharedPreferences prefs, String userId) async {
     _logToFile('_restoreFromSecureStorageIfNeeded() called');
     try {
@@ -448,8 +428,7 @@ class MockChallengeService implements ChallengeService {
       final prefLastCompletion = prefs.getString(lastCompletionKey);
       _logToFile('_restoreFromSecureStorageIfNeeded: prefStreak=$prefStreak, prefPoints=$prefPoints, prefLastCompletion=$prefLastCompletion');
 
-      // Pulihkan streak jika null atau 0
-      if (prefStreak == null || prefStreak == 0) {
+if (prefStreak == null || prefStreak == 0) {
         try {
           final secStreak =
               await _secureStorage.readSecureData('$_secureStreakPrefix$userId');
@@ -467,8 +446,7 @@ class MockChallengeService implements ChallengeService {
         }
       }
 
-      // Pulihkan points jika null atau 0
-      if (prefPoints == null || prefPoints == 0) {
+if (prefPoints == null || prefPoints == 0) {
         try {
           final secPoints =
               await _secureStorage.readSecureData('$_securePointsPrefix$userId');
@@ -486,8 +464,7 @@ class MockChallengeService implements ChallengeService {
         }
       }
 
-      // Pulihkan last completion jika null atau kosong
-      if (prefLastCompletion == null || prefLastCompletion.isEmpty) {
+if (prefLastCompletion == null || prefLastCompletion.isEmpty) {
         try {
           final secLastCompletion = await _secureStorage
               .readSecureData('$_secureLastCompletionPrefix$userId');
@@ -505,8 +482,7 @@ class MockChallengeService implements ChallengeService {
       final lastVersionKey = 'challenge_last_version_$userId';
       final prefLastVersion = prefs.getString(lastVersionKey);
 
-      // Pulihkan last completed version jika null atau kosong
-      if (prefLastVersion == null || prefLastVersion.isEmpty) {
+if (prefLastVersion == null || prefLastVersion.isEmpty) {
         try {
           final secLastVersion = await _secureStorage
               .readSecureData('secure_last_completed_version_$userId');
@@ -554,13 +530,13 @@ class MockChallengeService implements ChallengeService {
           switch (challenge.targetType) {
             case ChallengeTargetType.zeroExpense:
             case ChallengeTargetType.noTransactionType:
-              // Passive challenges succeed if no violation happened
+
               newStatus = ChallengeStatus.completed;
               completedDate = challenge.endDate;
               break;
             case ChallengeTargetType.limitExpense:
             case ChallengeTargetType.categoryLimit:
-              // Succeeds if currentProgress has not exceeded the limit
+
               if (challenge.targetAmount != null && challenge.currentProgress <= challenge.targetAmount!) {
                 newStatus = ChallengeStatus.completed;
                 completedDate = challenge.endDate;
@@ -569,7 +545,7 @@ class MockChallengeService implements ChallengeService {
               }
               break;
             case ChallengeTargetType.saveAmount:
-              // Succeeds if currentProgress reached target
+
               if (challenge.targetAmount != null && challenge.currentProgress >= challenge.targetAmount!) {
                 newStatus = ChallengeStatus.completed;
                 completedDate = challenge.endDate;
@@ -578,7 +554,7 @@ class MockChallengeService implements ChallengeService {
               }
               break;
             case ChallengeTargetType.custom:
-              // Custom challenges: check if they met the target amount (if any) or assume success
+
               if (challenge.targetAmount == null || challenge.currentProgress >= challenge.targetAmount!) {
                 newStatus = ChallengeStatus.completed;
                 completedDate = challenge.endDate;
@@ -652,8 +628,7 @@ class MockChallengeService implements ChallengeService {
       final lastCompletionKey = '$_lastCompletionKey$userId';
       final lastVersionKey = 'challenge_last_version_$userId';
 
-      // Pulihkan dulu jika SharedPreferences kosong atau parsial
-      await _restoreFromSecureStorageIfNeeded(prefs, userId);
+await _restoreFromSecureStorageIfNeeded(prefs, userId);
 
       final currentStreak = prefs.getInt(streakKey) ?? 0;
       final lastCompletionStr = prefs.getString(lastCompletionKey);
@@ -676,7 +651,7 @@ class MockChallengeService implements ChallengeService {
           } else if (daysDiff > 1) {
             newStreak = 1;
           } else {
-            // Same day, keep current streak (or set to 1 if it was 0)
+
             newStreak = currentStreak > 0 ? currentStreak : 1;
           }
         } else {
@@ -691,8 +666,7 @@ class MockChallengeService implements ChallengeService {
       await prefs.setString(lastCompletionKey, now.toIso8601String());
       await prefs.setString(lastVersionKey, AppVersion.version);
 
-      // Backup ke secure storage
-      try {
+try {
         await _secureStorage.writeSecureData(
             '$_secureStreakPrefix$userId', newStreak.toString());
         await _secureStorage.writeSecureData(
@@ -720,8 +694,7 @@ class MockChallengeService implements ChallengeService {
       final lastCompletionKey = '$_lastCompletionKey$userId';
       final lastVersionKey = 'challenge_last_version_$userId';
 
-      // Pulihkan dulu jika SharedPreferences kosong atau parsial
-      await _restoreFromSecureStorageIfNeeded(prefs, userId);
+await _restoreFromSecureStorageIfNeeded(prefs, userId);
 
       final currentStreak = prefs.getInt(streakKey) ?? 0;
       final lastCompletionStr = prefs.getString(lastCompletionKey);
@@ -733,7 +706,7 @@ class MockChallengeService implements ChallengeService {
       final today = DateTime(now.year, now.month, now.day);
 
       int newStreak;
-      // Deteksi jika aplikasi baru di-update (versi berbeda, atau versi null tapi streak > 0)
+
       final isAppUpdated = (lastCompletedVersion == null && currentStreak > 0) ||
           (lastCompletedVersion != null && lastCompletedVersion != AppVersion.version);
       _logToFile('_updateStreakOnCompletion: isAppUpdated=$isAppUpdated');
@@ -768,8 +741,7 @@ class MockChallengeService implements ChallengeService {
       await prefs.setString(lastCompletionKey, now.toIso8601String());
       await prefs.setString(lastVersionKey, AppVersion.version);
 
-      // Backup ke secure storage
-      try {
+try {
         await _secureStorage.writeSecureData(
             '$_secureStreakPrefix$userId', newStreak.toString());
         await _secureStorage.writeSecureData(
@@ -788,21 +760,18 @@ class MockChallengeService implements ChallengeService {
     }
   }
 
-
-  Future<void> _addPoints(int points) async {
+Future<void> _addPoints(int points) async {
     final prefs = await _getPrefs();
     final userId = await _getCurrentUserId();
     final pointsKey = '$_pointsKey$userId';
 
-    // Pulihkan dulu jika SharedPreferences kosong
-    await _restoreFromSecureStorageIfNeeded(prefs, userId);
+await _restoreFromSecureStorageIfNeeded(prefs, userId);
 
     final currentPoints = prefs.getInt(pointsKey) ?? 0;
     final newPoints = currentPoints + points;
     await prefs.setInt(pointsKey, newPoints);
 
-    // Backup ke secure storage
-    await _secureStorage.writeSecureData(
+await _secureStorage.writeSecureData(
         '$_securePointsPrefix$userId', newPoints.toString());
 
     _notifyListeners();
@@ -816,8 +785,7 @@ class MockChallengeService implements ChallengeService {
       final userId = await _getCurrentUserId();
       _logToFile('getCurrentStreak: userId=$userId');
 
-      // Pulihkan dulu jika SharedPreferences kosong
-      await _restoreFromSecureStorageIfNeeded(prefs, userId);
+await _restoreFromSecureStorageIfNeeded(prefs, userId);
       await _ensureUserLoaded(userId);
       await _evaluateExpiredChallenges(userId);
 
@@ -861,8 +829,7 @@ class MockChallengeService implements ChallengeService {
       final userId = await _getCurrentUserId();
       _logToFile('getTotalPoints: userId=$userId');
 
-      // Pulihkan dulu jika SharedPreferences kosong
-      await _restoreFromSecureStorageIfNeeded(prefs, userId);
+await _restoreFromSecureStorageIfNeeded(prefs, userId);
       await _ensureUserLoaded(userId);
       await _evaluateExpiredChallenges(userId);
 

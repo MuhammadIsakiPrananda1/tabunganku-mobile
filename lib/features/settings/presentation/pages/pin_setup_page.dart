@@ -55,7 +55,7 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage> with TickerProvider
       if (_currentPin.length < 4) {
         setState(() => _currentPin += value);
         if (_currentPin.length == 4) {
-          // Add a minor delay for completion visual feedback
+
           Future.delayed(const Duration(milliseconds: 150), () {
             if (mounted) _handlePinCompletion();
           });
@@ -66,7 +66,7 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage> with TickerProvider
 
   Future<void> _handlePinCompletion() async {
     if (_isOldPinStage) {
-      // Verify old PIN
+
       final isValid = await ref.read(securityProvider.notifier).verifyPin(_currentPin);
       if (isValid) {
         setState(() {
@@ -83,16 +83,16 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage> with TickerProvider
         HapticFeedback.vibrate();
       }
     } else if (!_isConfirmStage) {
-      // Move to confirmation stage
+
       _firstPin = _currentPin;
       setState(() {
         _isConfirmStage = true;
         _currentPin = "";
       });
     } else {
-      // Verify confirmation
+
       if (_currentPin == _firstPin) {
-        // Success
+
         ref.read(securityProvider.notifier).setPin(_currentPin);
         context.pop();
         ScaffoldMessenger.of(context).showSnackBar(
@@ -107,7 +107,7 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage> with TickerProvider
           ),
         );
       } else {
-        // Mismatch
+
         setState(() {
           _isError = true;
           _errorMessage = 'PIN tidak cocok, silakan coba lagi.';
@@ -147,9 +147,8 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage> with TickerProvider
                   child: Column(
                     children: [
                       const Spacer(flex: 1),
-                      
-                      // Top Header Illustration Icon
-                      Container(
+
+Container(
                         width: 80,
                         height: 80,
                         decoration: BoxDecoration(
@@ -169,9 +168,8 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage> with TickerProvider
                         ),
                       ),
                       const SizedBox(height: 24),
-                      
-                      // Title Text
-                      Text(
+
+Text(
                         _isOldPinStage 
                           ? 'PIN Lama' 
                           : (_isConfirmStage ? 'Konfirmasi PIN Baru' : 'Atur PIN Baru'),
@@ -182,9 +180,8 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage> with TickerProvider
                         ),
                       ),
                       const SizedBox(height: 8),
-                      
-                      // Subtitle Instructions
-                      Text(
+
+Text(
                         _isOldPinStage
                           ? 'Masukkan PIN lama kamu untuk verifikasi'
                           : (_isConfirmStage 
@@ -198,9 +195,8 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage> with TickerProvider
                         ),
                       ),
                       const SizedBox(height: 36),
-                      
-                      // PIN Indicators with Shake Animation
-                      AnimatedBuilder(
+
+AnimatedBuilder(
                         animation: _shakeController,
                         builder: (context, child) {
                           final offset = Curves.elasticIn.transform(_shakeController.value) * 10;
@@ -238,9 +234,8 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage> with TickerProvider
                       ),
                       
                       const SizedBox(height: 20),
-                      
-                      // Error Message if Mismatch or Wrong
-                      if (_isError)
+
+if (_isError)
                         Container(
                           padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
                           decoration: BoxDecoration(
@@ -258,9 +253,8 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage> with TickerProvider
                         ),
                         
                       const Spacer(flex: 2),
-                      
-                      // Numeric Keypad
-                      _buildKeypad(isDarkMode),
+
+_buildKeypad(isDarkMode),
                       const SizedBox(height: 32),
                     ],
                   ),
@@ -291,7 +285,7 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage> with TickerProvider
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              // Empty left space to match Lock Screen symmetry
+
               const SizedBox(width: 72),
               _buildKeypadButton('0', isDarkMode),
               _buildKeypadIconButton(Icons.backspace_outlined, _onBackspace, isDarkMode),

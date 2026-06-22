@@ -64,8 +64,7 @@ class RecurringService {
     await saveRecurringTransactions(items);
   }
 
-  /// Prosedur untuk mengecek dan mengeksekusi transaksi otomatis
-  Future<int> processRecurring() async {
+Future<int> processRecurring() async {
     final items = await getRecurringTransactions();
     final now = DateTime.now();
     int processedCount = 0;
@@ -116,9 +115,8 @@ class RecurringService {
             break;
         }
 
-        // Jika nextDate sudah lewat atau hari ini
-        if (nextDate.isBefore(now) || (nextDate.year == now.year && nextDate.month == now.month && nextDate.day == now.day)) {
-          // Buat transaksi asli
+if (nextDate.isBefore(now) || (nextDate.year == now.year && nextDate.month == now.month && nextDate.day == now.day)) {
+
           final tx = TransactionModel(
             id: 'auto_${currentItem.id}_${nextDate.millisecondsSinceEpoch}',
             title: currentItem.title,

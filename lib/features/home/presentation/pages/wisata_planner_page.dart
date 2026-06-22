@@ -16,17 +16,16 @@ class TabunganWisataPage extends ConsumerStatefulWidget {
 }
 
 class _TabunganWisataPageState extends ConsumerState<TabunganWisataPage> {
-  // Config variables - Persisted local state
+
   final String _prefKeyWisata = 'wisata_planner_data_v1';
   String _destination = '';
   double _savedAmount = 0.0;
   double _targetBudget = 0.0;
-  DateTime? _targetDate; // Nullable target date
+  DateTime? _targetDate;
   List<Map<String, dynamic>> _budgetItems = [];
   List<Map<String, dynamic>> _checklistItems = [];
 
-  // Controllers
-  final TextEditingController _destinationController = TextEditingController();
+final TextEditingController _destinationController = TextEditingController();
   final TextEditingController _savedAmountController = TextEditingController();
   final TextEditingController _budgetItemNameController = TextEditingController();
   final TextEditingController _budgetItemCostController = TextEditingController();
@@ -191,8 +190,7 @@ class _TabunganWisataPageState extends ConsumerState<TabunganWisataPage> {
     await _savePlannerData();
   }
 
-  // Dynamic travel category icon generator based on title matching
-  IconData _getCategoryIcon(String title) {
+IconData _getCategoryIcon(String title) {
     final lower = title.toLowerCase();
     if (lower.contains('pesawat') || lower.contains('tiket') || lower.contains('flight') || lower.contains('trans') || lower.contains('tiket')) {
       return Icons.flight_takeoff_rounded;
@@ -218,8 +216,8 @@ class _TabunganWisataPageState extends ConsumerState<TabunganWisataPage> {
     final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
         (ref.watch(themeProvider) == ThemeMode.system && theme.brightness == Brightness.dark);
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
-    final pageBgColor = isDarkMode ? AppColors.backgroundDark : const Color(0xFFFFFDFB); // Cozy ultra-soft tint
-    final accentColor = const Color(0xFFFF9800); // Sunset Orange
+    final pageBgColor = isDarkMode ? AppColors.backgroundDark : const Color(0xFFFFFDFB);
+    final accentColor = const Color(0xFFFF9800);
     final progress = _effectiveTargetBudget > 0 ? (_savedAmount / _effectiveTargetBudget).clamp(0.0, 1.0) : 0.0;
 
     return Scaffold(
@@ -244,7 +242,7 @@ class _TabunganWisataPageState extends ConsumerState<TabunganWisataPage> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 48),
         children: [
-          // Destination Progress Card with Sunset gradient
+
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
@@ -254,11 +252,11 @@ class _TabunganWisataPageState extends ConsumerState<TabunganWisataPage> {
                 end: Alignment.bottomRight,
                 colors: isDarkMode
                     ? [
-                        const Color(0xFF2E1A0F), // Warm sunset-tinted charcoal
+                        const Color(0xFF2E1A0F),
                         const Color(0xFF1E1E1E),
                       ]
                     : [
-                        const Color(0xFFFFF3E0), // Sunset pastel light orange gradient
+                        const Color(0xFFFFF3E0),
                         const Color(0xFFFFFDFB),
                       ],
               ),
@@ -401,8 +399,7 @@ class _TabunganWisataPageState extends ConsumerState<TabunganWisataPage> {
                 ),
                 const SizedBox(height: 16),
 
-                // Sleek, customized linear progress bar
-                ClipRRect(
+ClipRRect(
                   borderRadius: BorderRadius.circular(100),
                   child: LinearProgressIndicator(
                     value: progress,
@@ -412,9 +409,8 @@ class _TabunganWisataPageState extends ConsumerState<TabunganWisataPage> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                
-                // Saving Target Advisory card inside dashboard
-                Container(
+
+Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
                     color: isDarkMode ? Colors.black.withOpacity(0.15) : Colors.white.withOpacity(0.6),
@@ -549,8 +545,7 @@ class _TabunganWisataPageState extends ConsumerState<TabunganWisataPage> {
           ),
           const SizedBox(height: 28),
 
-          // Budget items panel
-          Row(
+Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
@@ -588,8 +583,7 @@ class _TabunganWisataPageState extends ConsumerState<TabunganWisataPage> {
           ),
           const SizedBox(height: 12),
 
-          // Budget cards list
-          if (_budgetItems.isEmpty)
+if (_budgetItems.isEmpty)
             Container(
               padding: const EdgeInsets.symmetric(vertical: 40),
               decoration: BoxDecoration(
@@ -640,7 +634,7 @@ class _TabunganWisataPageState extends ConsumerState<TabunganWisataPage> {
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                     child: Row(
                       children: [
-                        // Colored Left indicator bar
+
                         Container(
                           width: 4,
                           height: 36,
@@ -650,9 +644,8 @@ class _TabunganWisataPageState extends ConsumerState<TabunganWisataPage> {
                           ),
                         ),
                         const SizedBox(width: 12),
-                        
-                        // Category Icon Badge
-                        Container(
+
+Container(
                           width: 36,
                           height: 36,
                           decoration: BoxDecoration(
@@ -666,9 +659,8 @@ class _TabunganWisataPageState extends ConsumerState<TabunganWisataPage> {
                           ),
                         ),
                         const SizedBox(width: 14),
-                        
-                        // Info Text Area
-                        Expanded(
+
+Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -692,9 +684,8 @@ class _TabunganWisataPageState extends ConsumerState<TabunganWisataPage> {
                             ],
                           ),
                         ),
-                        
-                        // Delete Button
-                        IconButton(
+
+IconButton(
                           onPressed: () => _deleteBudgetItem(id),
                           icon: Icon(
                             Icons.close_rounded,
@@ -714,8 +705,7 @@ class _TabunganWisataPageState extends ConsumerState<TabunganWisataPage> {
 
           const SizedBox(height: 28),
 
-          // Itinerary checklist panel
-          Row(
+Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
@@ -753,8 +743,7 @@ class _TabunganWisataPageState extends ConsumerState<TabunganWisataPage> {
           ),
           const SizedBox(height: 12),
 
-          // Todo list
-          if (_checklistItems.isEmpty)
+if (_checklistItems.isEmpty)
             Container(
               padding: const EdgeInsets.symmetric(vertical: 40),
               decoration: BoxDecoration(
@@ -813,7 +802,7 @@ class _TabunganWisataPageState extends ConsumerState<TabunganWisataPage> {
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                       child: Row(
                         children: [
-                          // Custom circle checkbox
+
                           Container(
                             width: 22,
                             height: 22,
@@ -838,9 +827,8 @@ class _TabunganWisataPageState extends ConsumerState<TabunganWisataPage> {
                                 : null,
                           ),
                           const SizedBox(width: 14),
-                          
-                          // Checklist Title
-                          Expanded(
+
+Expanded(
                             child: Text(
                               title,
                               style: GoogleFonts.quicksand(
@@ -853,9 +841,8 @@ class _TabunganWisataPageState extends ConsumerState<TabunganWisataPage> {
                               ),
                             ),
                           ),
-                          
-                          // Delete Checklist Button
-                          IconButton(
+
+IconButton(
                             onPressed: () => _deleteChecklistItem(id),
                             icon: Icon(
                               Icons.delete_outline_rounded,
@@ -923,9 +910,8 @@ class _TabunganWisataPageState extends ConsumerState<TabunganWisataPage> {
                         style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 15, color: contentColor),
                       ),
                       const SizedBox(height: 20),
- 
-                      // Destinasi Liburan
-                      RichText(
+
+RichText(
                         text: TextSpan(
                           text: 'Destinasi Liburan',
                           style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
@@ -966,8 +952,7 @@ class _TabunganWisataPageState extends ConsumerState<TabunganWisataPage> {
                       ),
                       const SizedBox(height: 20),
 
-                      // Target Anggaran Wisata
-                      Text(
+Text(
                         'Target Anggaran Wisata (Rp)',
                         style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
                       ),
@@ -999,9 +984,8 @@ class _TabunganWisataPageState extends ConsumerState<TabunganWisataPage> {
                         ),
                       ),
                       const SizedBox(height: 20),
- 
-                      // Tanggal Target
-                      Text(
+
+Text(
                         'Rencana Tanggal Keberangkatan',
                         style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
                       ),
@@ -1116,8 +1100,7 @@ class _TabunganWisataPageState extends ConsumerState<TabunganWisataPage> {
     );
   }
 
-
-  void _showUpdateSavedDialog(bool isDarkMode, Color accentColor) {
+void _showUpdateSavedDialog(bool isDarkMode, Color accentColor) {
     _savedAmountController.text = _savedAmount > 0 ? NumberFormat.decimalPattern('id_ID').format(_savedAmount.round()) : '';
     showModalBottomSheet(
       context: context,
@@ -1278,8 +1261,7 @@ class _TabunganWisataPageState extends ConsumerState<TabunganWisataPage> {
                     ),
                     const SizedBox(height: 20),
 
-                    // Item Name
-                    RichText(
+RichText(
                       text: TextSpan(
                         text: 'Nama Kebutuhan',
                         style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
@@ -1320,8 +1302,7 @@ class _TabunganWisataPageState extends ConsumerState<TabunganWisataPage> {
                     ),
                     const SizedBox(height: 16),
 
-                    // Item Cost
-                    RichText(
+RichText(
                       text: TextSpan(
                         text: 'Estimasi Biaya',
                         style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
@@ -1444,8 +1425,7 @@ class _TabunganWisataPageState extends ConsumerState<TabunganWisataPage> {
                     ),
                     const SizedBox(height: 20),
 
-                    // Todo Name
-                    RichText(
+RichText(
                       text: TextSpan(
                         text: 'Nama Persiapan / Kegiatan',
                         style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),

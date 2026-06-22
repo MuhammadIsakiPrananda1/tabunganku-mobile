@@ -20,15 +20,11 @@ class _BiayaNikahPlannerPageState extends ConsumerState<BiayaNikahPlannerPage> {
 
   double _targetBudget = 0.0;
 
-
-
-  // State fields
-  double _savedAmount = 0.0;
+double _savedAmount = 0.0;
   DateTime? _targetDate;
   List<Map<String, dynamic>> _checklistItems = [];
 
-  // Controllers
-  final TextEditingController _savedAmountController = TextEditingController();
+final TextEditingController _savedAmountController = TextEditingController();
   final TextEditingController _itemNameController = TextEditingController();
   final TextEditingController _itemCostController = TextEditingController();
   
@@ -67,18 +63,18 @@ class _BiayaNikahPlannerPageState extends ConsumerState<BiayaNikahPlannerPage> {
   };
 
   final Map<String, Color> _categoryColors = {
-    'Gedung & Katering': const Color(0xFFEC407A), // Romantic Pink
-    'Busana & MUA': const Color(0xFFAB47BC), // Purple
-    'Dekorasi & Hiburan': const Color(0xFFFF7043), // Orange/Coral
-    'Undangan & Souvenir': const Color(0xFF42A5F5), // Blue
-    'Foto & Video': const Color(0xFF26A69A), // Teal
-    'Mahar & Hantaran': const Color(0xFFFFCA28), // Amber
-    'Cincin & Perhiasan': const Color(0xFFE91E63), // Pink Accent
-    'Dokumen & KUA': const Color(0xFF4CAF50), // Green
-    'Transportasi & Hotel': const Color(0xFF00BCD4), // Cyan
-    'Seragam Keluarga': const Color(0xFF3F51B5), // Indigo
-    'Bulan Madu': const Color(0xFF9C27B0), // Purple Accent
-    'Lain-lain': const Color(0xFF78909C), // Blue Grey
+    'Gedung & Katering': const Color(0xFFEC407A),
+    'Busana & MUA': const Color(0xFFAB47BC),
+    'Dekorasi & Hiburan': const Color(0xFFFF7043),
+    'Undangan & Souvenir': const Color(0xFF42A5F5),
+    'Foto & Video': const Color(0xFF26A69A),
+    'Mahar & Hantaran': const Color(0xFFFFCA28),
+    'Cincin & Perhiasan': const Color(0xFFE91E63),
+    'Dokumen & KUA': const Color(0xFF4CAF50),
+    'Transportasi & Hotel': const Color(0xFF00BCD4),
+    'Seragam Keluarga': const Color(0xFF3F51B5),
+    'Bulan Madu': const Color(0xFF9C27B0),
+    'Lain-lain': const Color(0xFF78909C),
   };
 
   @override
@@ -186,8 +182,7 @@ class _BiayaNikahPlannerPageState extends ConsumerState<BiayaNikahPlannerPage> {
     if (mounted) Navigator.pop(context);
   }
 
-
-  void _toggleChecklistItem(String id) async {
+void _toggleChecklistItem(String id) async {
     final index = _checklistItems.indexWhere((item) => item['id'] == id);
     if (index == -1) return;
 
@@ -234,7 +229,7 @@ class _BiayaNikahPlannerPageState extends ConsumerState<BiayaNikahPlannerPage> {
         (ref.watch(themeProvider) == ThemeMode.system && theme.brightness == Brightness.dark);
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
     final pageBgColor = isDarkMode ? AppColors.backgroundDark : const Color(0xFFFFF9FA);
-    final accentColor = const Color(0xFFEC407A); // Romantic Pink Accent
+    final accentColor = const Color(0xFFEC407A);
     final progress = _effectiveTargetBudget > 0 ? (_savedAmount / _effectiveTargetBudget).clamp(0.0, 1.0) : 0.0;
 
     return Scaffold(
@@ -260,7 +255,7 @@ class _BiayaNikahPlannerPageState extends ConsumerState<BiayaNikahPlannerPage> {
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 48),
         children: [
           _buildTipCard(isDarkMode, accentColor),
-          // Premium Minimalist Dashboard Card
+
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
@@ -270,11 +265,11 @@ class _BiayaNikahPlannerPageState extends ConsumerState<BiayaNikahPlannerPage> {
                 end: Alignment.bottomRight,
                 colors: isDarkMode
                     ? [
-                        const Color(0xFF2A1E24), // Very deep romantic dark plum
+                        const Color(0xFF2A1E24),
                         const Color(0xFF1F1F1F),
                       ]
                     : [
-                        const Color(0xFFFFF0F3), // Ultra soft romantic pink/rose light
+                        const Color(0xFFFFF0F3),
                         const Color(0xFFFFF9FA),
                       ],
               ),
@@ -400,9 +395,8 @@ class _BiayaNikahPlannerPageState extends ConsumerState<BiayaNikahPlannerPage> {
                   ],
                 ),
                 const SizedBox(height: 18),
-                
-                // Mulus Linear Progress Bar
-                ClipRRect(
+
+ClipRRect(
                   borderRadius: BorderRadius.circular(100),
                   child: LinearProgressIndicator(
                     value: progress,
@@ -412,9 +406,8 @@ class _BiayaNikahPlannerPageState extends ConsumerState<BiayaNikahPlannerPage> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                
-                // Target Row
-                Container(
+
+Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
                     color: isDarkMode ? Colors.black.withOpacity(0.15) : Colors.white.withOpacity(0.6),
@@ -463,9 +456,8 @@ class _BiayaNikahPlannerPageState extends ConsumerState<BiayaNikahPlannerPage> {
                   ),
                 ),
                 const SizedBox(height: 18),
-                
-                // Buttons Row
-                Row(
+
+Row(
                   children: [
                     Expanded(
                       child: SizedBox(
@@ -550,8 +542,7 @@ class _BiayaNikahPlannerPageState extends ConsumerState<BiayaNikahPlannerPage> {
           ),
           const SizedBox(height: 28),
 
-          // Header Rencana Anggaran
-          Row(
+Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
@@ -593,8 +584,7 @@ class _BiayaNikahPlannerPageState extends ConsumerState<BiayaNikahPlannerPage> {
             ],
           ),
 
-          // Group by category and build lists
-          if (_checklistItems.isEmpty)
+if (_checklistItems.isEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 24),
               child: Container(
@@ -691,7 +681,7 @@ class _BiayaNikahPlannerPageState extends ConsumerState<BiayaNikahPlannerPage> {
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                           child: Row(
                             children: [
-                              // Checkbox Area
+
                               GestureDetector(
                                 onTap: () => _toggleChecklistItem(id),
                                 child: Container(
@@ -719,9 +709,8 @@ class _BiayaNikahPlannerPageState extends ConsumerState<BiayaNikahPlannerPage> {
                                 ),
                               ),
                               const SizedBox(width: 14),
-                              
-                              // Category Icon Badge
-                              Container(
+
+Container(
                                 width: 36,
                                 height: 36,
                                 decoration: BoxDecoration(
@@ -739,9 +728,8 @@ class _BiayaNikahPlannerPageState extends ConsumerState<BiayaNikahPlannerPage> {
                                 ),
                               ),
                               const SizedBox(width: 14),
-                              
-                              // Info Text Area
-                              Expanded(
+
+Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -770,9 +758,8 @@ class _BiayaNikahPlannerPageState extends ConsumerState<BiayaNikahPlannerPage> {
                                   ],
                                 ),
                               ),
-                              
-                              // Tap Indicator / Arrow Edit
-                              Icon(
+
+Icon(
                                 Icons.chevron_right_rounded,
                                 size: 18,
                                 color: isDarkMode ? Colors.white12 : Colors.grey.shade300,
@@ -792,8 +779,7 @@ class _BiayaNikahPlannerPageState extends ConsumerState<BiayaNikahPlannerPage> {
     );
   }
 
-
-  void _showUpdateSavedDialog(bool isDarkMode, Color accentColor) {
+void _showUpdateSavedDialog(bool isDarkMode, Color accentColor) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -985,16 +971,14 @@ class _BiayaNikahPlannerPageState extends ConsumerState<BiayaNikahPlannerPage> {
                         ],
                       ),
                       const SizedBox(height: 20),
-    
-                      // Category Selector
-                      Text(
+
+Text(
                         'Kategori Kebutuhan',
                         style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
                       ),
                       const SizedBox(height: 8),
-                      
-                      // Dropdown Kategori Lengkap & Premium (Natively styled to match other form fields perfectly)
-                      DropdownButtonFormField<String>(
+
+DropdownButtonFormField<String>(
                         value: _selectedCategory,
                         dropdownColor: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
                         icon: Icon(Icons.keyboard_arrow_down_rounded, color: contentColor.withOpacity(0.5)),
@@ -1057,9 +1041,8 @@ class _BiayaNikahPlannerPageState extends ConsumerState<BiayaNikahPlannerPage> {
                         }).toList(),
                       ),
                       const SizedBox(height: 20),
-    
-                      // Item Name
-                      RichText(
+
+RichText(
                         text: TextSpan(
                           text: 'Nama Kebutuhan',
                           style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
@@ -1100,9 +1083,8 @@ class _BiayaNikahPlannerPageState extends ConsumerState<BiayaNikahPlannerPage> {
                         ),
                       ),
                       const SizedBox(height: 16),
-    
-                      // Item Cost
-                      RichText(
+
+RichText(
                         text: TextSpan(
                           text: 'Estimasi Biaya',
                           style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
@@ -1192,9 +1174,7 @@ class _BiayaNikahPlannerPageState extends ConsumerState<BiayaNikahPlannerPage> {
     );
   }
 
-
-
-  void _showAdjustPlanSheet(bool isDarkMode, Color accentColor) {
+void _showAdjustPlanSheet(bool isDarkMode, Color accentColor) {
     final targetBudgetController = TextEditingController(
       text: _targetBudget > 0 ? NumberFormat.decimalPattern('id_ID').format(_targetBudget.round()) : ''
     );
@@ -1235,8 +1215,7 @@ class _BiayaNikahPlannerPageState extends ConsumerState<BiayaNikahPlannerPage> {
                     ),
                     const SizedBox(height: 20),
 
-                    // Target Anggaran
-                    Text(
+Text(
                       'Target Anggaran Pernikahan (Rp)',
                       style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
                     ),
@@ -1267,9 +1246,7 @@ class _BiayaNikahPlannerPageState extends ConsumerState<BiayaNikahPlannerPage> {
                     ),
                     const SizedBox(height: 8),
 
-
-                    // Tanggal Target
-                    Text(
+Text(
                       'Tanggal Pernikahan',
                       style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 10, color: contentColor.withOpacity(0.4)),
                     ),
@@ -1375,8 +1352,7 @@ class _BiayaNikahPlannerPageState extends ConsumerState<BiayaNikahPlannerPage> {
     );
   }
 
-
-  Widget _buildTipCard(bool isDarkMode, Color accentColor) {
+Widget _buildTipCard(bool isDarkMode, Color accentColor) {
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
       padding: const EdgeInsets.all(16),
@@ -1421,7 +1397,6 @@ class _BiayaNikahPlannerPageState extends ConsumerState<BiayaNikahPlannerPage> {
       ),
     );
   }
-
 
 }
 

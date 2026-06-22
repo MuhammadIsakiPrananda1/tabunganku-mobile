@@ -62,8 +62,7 @@ class OcrService {
       allLines.addAll(block.lines);
     }
 
-    // Sort lines by vertical position
-    allLines.sort((a, b) => a.boundingBox.top.compareTo(b.boundingBox.top));
+allLines.sort((a, b) => a.boundingBox.top.compareTo(b.boundingBox.top));
 
     final Map<ReceiptBrand, List<String>> brandKeywords = {
       ReceiptBrand.bca: ['nominal', 'jumlah', 'pembayaran'],
@@ -77,9 +76,8 @@ class OcrService {
       ReceiptBrand.unknown: ['total', 'jumlah', 'rp', 'nominal', 'bayar', 'berhasil'],
     };
 
-    // Words that should NEVER be associated with a transaction amount (including common OCR misreads)
-    final List<String> negativeKeywords = [
-      'biaya', 'blaya', 'blaya', // common misreads of biaya
+final List<String> negativeKeywords = [
+      'biaya', 'blaya', 'blaya',
       'admin', 'admln', 'adm',
       'pajak', 'pjk',
       'fee',
@@ -95,26 +93,22 @@ class OcrService {
 
     List<String> targetKeywords = brandKeywords[brand] ?? brandKeywords[ReceiptBrand.unknown]!;
     
-    Map<double, int> candidates = {}; // Amount : Score
+    Map<double, int> candidates = {};
 
     for (int i = 0; i < allLines.length; i++) {
        String lineText = allLines[i].text.toLowerCase();
-       
-       // Skip if looks like a date or time
-       if (_isLikelyDateOrTime(lineText)) continue;
 
-       // 1. HARD SKIP: If line contains negative keywords (Biaya, Admin, etc.)
-       if (negativeKeywords.any((nk) => lineText.contains(nk))) {
-          continue; // ABSOLUTELY IGNORE ANY NUMBER ON THIS LINE
+if (_isLikelyDateOrTime(lineText)) continue;
+
+if (negativeKeywords.any((nk) => lineText.contains(nk))) {
+          continue;
        }
 
-       // Filter Metadata: Phone Numbers
-       if (lineText.contains(RegExp(r'\b08\d{8,11}\b')) || lineText.contains(RegExp(r'\b628\d{8,11}\b'))) {
+if (lineText.contains(RegExp(r'\b08\d{8,11}\b')) || lineText.contains(RegExp(r'\b628\d{8,11}\b'))) {
           continue; 
        }
 
-       // Filter Metadata: Transaction IDs
-       if (lineText.contains('id transaksi') || lineText.contains('id order') || lineText.contains('akun')) {
+if (lineText.contains('id transaksi') || lineText.contains('id order') || lineText.contains('akun')) {
           continue;
        }
 
@@ -122,23 +116,20 @@ class OcrService {
        if (val == null || val < 1 || val > 9999999999) continue;
 
        int score = 0;
-       
-       // 2. Currency Match Bonus
-       if (lineText.contains('rp') || lineText.contains('idr')) {
+
+if (lineText.contains('rp') || lineText.contains('idr')) {
           score += 250; 
           if (RegExp(r'(?:rp|idr)\s?\d+').hasMatch(lineText)) {
              score += 200;
           }
        }
-       
-       // 3. Positive Keyword Bonus
-       if (targetKeywords.any((kw) => lineText.contains(kw))) score += 400;
 
-       // 4. Spatial Bonus (Next to or below keyword)
-       if (i > 0) {
+if (targetKeywords.any((kw) => lineText.contains(kw))) score += 400;
+
+if (i > 0) {
          String prevText = allLines[i-1].text.toLowerCase();
          if (targetKeywords.any((kw) => prevText.contains(kw))) {
-            // Check vertical gap
+
             double gap = allLines[i].boundingBox.top - allLines[i-1].boundingBox.bottom;
             if (gap < allLines[i].boundingBox.height * 2.5) {
               score += 250;
@@ -146,24 +137,20 @@ class OcrService {
          }
        }
 
-       // 5. Metadata Penalty (Long numbers)
-       if (val.toStringAsFixed(0).length > 10) score -= 500;
+if (val.toStringAsFixed(0).length > 10) score -= 500;
 
-       // Line length bias
-       if (lineText.length < 25) score += 100;
+if (lineText.length < 25) score += 100;
 
        candidates[val] = (candidates[val] ?? 0) + score;
     }
 
     if (candidates.isEmpty) return null;
 
-    // Pick candidate:
-    // Sort by Score DESC, then by Value DESC (Tie-breaker for OVO/Transfers)
-    var sortedEntries = candidates.entries.toList()
+var sortedEntries = candidates.entries.toList()
       ..sort((a, b) {
         int scoreComp = b.value.compareTo(a.value);
         if (scoreComp != 0) return scoreComp;
-        // Tie-breaker: Prefer larger amount (usually the Total)
+
         return b.key.compareTo(a.key);
       });
 

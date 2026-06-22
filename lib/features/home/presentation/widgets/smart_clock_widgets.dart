@@ -68,7 +68,7 @@ class _SmartDateDisplayState extends State<SmartDateDisplay> {
   @override
   void initState() {
     super.initState();
-    // Update every minute is enough for date, or even every 1 hour
+
     _timer = Timer.periodic(const Duration(minutes: 1), (timer) {
       if (mounted && _currentDate.day != DateTime.now().day) {
         setState(() {

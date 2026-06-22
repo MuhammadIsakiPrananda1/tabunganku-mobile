@@ -1,4 +1,3 @@
-
 enum GoldTransactionType { buy, sell }
 
 class GoldTransactionModel {
@@ -52,4 +51,3 @@ class GoldTransactionModel {
     );
   }
 }
-

@@ -42,11 +42,9 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
   late TextEditingController _contactController;
   late TextEditingController _descriptionController;
   late DebtType _type;
-  DateTime? _debtDate; // Tanggal Hutang – wajib
+  DateTime? _debtDate;
 
-
-
-  @override
+@override
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.debt?.title ?? '');
@@ -65,8 +63,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
         TextEditingController(text: widget.debt?.description ?? '');
     _type = widget.debt?.type ?? widget.initialType ?? DebtType.hutang;
 
-    // Tanggal hutang: pakai dueDate yang sudah ada, atau hari ini untuk entry baru
-    _debtDate = widget.debt?.dueDate ?? DateTime.now();
+_debtDate = widget.debt?.dueDate ?? DateTime.now();
   }
 
   @override
@@ -161,7 +158,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ── Pull bar ──────────────────────────────────────────────
+
               const SizedBox(height: 12),
               Center(
                 child: Container(
@@ -175,8 +172,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
               ),
               const SizedBox(height: 20),
 
-              // ── Title ─────────────────────────────────────────────────
-              Center(
+Center(
                 child: Text(
                   widget.debt != null
                       ? 'Edit Catatan'
@@ -198,7 +194,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // ── Type Selector ─────────────────────────────────
+
                     if (widget.initialType == null || widget.debt != null) ...[
                       _buildLabel('Jenis Catatan', labelColor),
                       const SizedBox(height: 4),
@@ -210,8 +206,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                       const SizedBox(height: 16),
                     ],
 
-                    // ── Nama Kontak ───────────────────────────────────
-                    _buildLabel('Nama Kontak', labelColor, required: true),
+_buildLabel('Nama Kontak', labelColor, required: true),
                     const SizedBox(height: 4),
                     TextFormField(
                       controller: _contactController,
@@ -255,8 +250,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                     ),
                     const SizedBox(height: 16),
 
-                    // ── Nominal ───────────────────────────────────────
-                    _buildLabel('Nominal', labelColor, required: true),
+_buildLabel('Nominal', labelColor, required: true),
                     const SizedBox(height: 4),
                     TextFormField(
                       controller: _amountController,
@@ -318,8 +312,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                     ),
                     const SizedBox(height: 16),
 
-                    // ── Keterangan ────────────────────────────────────
-                    _buildLabel('Keterangan', labelColor, required: true),
+_buildLabel('Keterangan', labelColor, required: true),
                     const SizedBox(height: 4),
                     TextFormField(
                       controller: _titleController,
@@ -362,8 +355,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                     ),
                     const SizedBox(height: 16),
 
-                    // ── Tanggal Hutang (WAJIB) ────────────────────────
-                    _buildLabel('Tanggal Hutang', labelColor, required: true),
+_buildLabel('Tanggal Hutang', labelColor, required: true),
                     const SizedBox(height: 4),
                     FormField<DateTime>(
                       initialValue: _debtDate,
@@ -461,8 +453,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                     ),
                     const SizedBox(height: 24),
 
-                    // ── Submit Button ─────────────────────────────────
-                    SizedBox(
+SizedBox(
                       width: double.infinity,
                       height: 50,
                       child: ElevatedButton(
@@ -533,8 +524,6 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
     );
   }
 }
-
-// ── Type Toggle ──────────────────────────────────────────────────────────────
 
 class _TypeToggle extends StatelessWidget {
   final DebtType selected;
@@ -638,8 +627,6 @@ class _Pill extends StatelessWidget {
     );
   }
 }
-
-// ── Ribuan Separator ─────────────────────────────────────────────────────────
 
 class _RibuanSeparatorInputFormatter extends TextInputFormatter {
   @override

@@ -43,7 +43,7 @@ class ShoppingFormSheet extends ConsumerStatefulWidget {
 class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _nameController;
-  late TextEditingController _priceController; // Total Price
+  late TextEditingController _priceController;
   late TextEditingController _pricePerUnitController;
   late TextEditingController _quantityController;
   late TextEditingController _unitController;
@@ -66,9 +66,8 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
         text: widget.item != null ? widget.item!.quantity.toString().replaceAll(RegExp(r'\.0$'), '') : '');
     _unitController = TextEditingController(
         text: widget.item?.unit ?? '');
-    
-    // Hitung harga per unit jika sedang mengedit
-    String initialPriceStr = '';
+
+String initialPriceStr = '';
     if (widget.item != null) {
       final pricePerUnit = (widget.item!.estimatedPrice / widget.item!.quantity).toInt();
       initialPriceStr = pricePerUnit.toString().replaceAllMapped(
@@ -88,12 +87,10 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
     _imageUrl = widget.item?.url;
     _isOnline = widget.item?.isOnline ?? false;
 
-    // Tambah listener untuk kalkulasi total otomatis
-    _pricePerUnitController.addListener(_calculateTotalPrice);
+_pricePerUnitController.addListener(_calculateTotalPrice);
     _quantityController.addListener(_calculateTotalPrice);
 
-    // Format harga jika ada saat edit
-    if (_priceController.text.isNotEmpty) {
+if (_priceController.text.isNotEmpty) {
       final val = _priceController.text;
       _priceController.value =
           _RibuanSeparatorInputFormatter().formatEditUpdate(
@@ -169,8 +166,7 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
           _isUploading = true;
         });
 
-        // Coba unggah ke Awan kustom
-        try {
+try {
           final uploadService = ref.read(imageUploadServiceProvider);
           final uploadedUrl = await uploadService.uploadImage(File(permanentPath));
           if (uploadedUrl != null) {
@@ -179,7 +175,7 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
               _isOnline = true;
             });
           } else {
-            // Gagal atau tidak diset, gunakan penyimpanan lokal
+
             setState(() {
               _imageUrl = null;
               _isOnline = false;
@@ -427,7 +423,7 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Photo Picker (Compact & Smart)
+
                     GestureDetector(
                       onTap: _isUploading ? null : _showImageSourceSheet,
                       child: Container(
@@ -495,7 +491,7 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
                                                 fit: BoxFit.cover,
                                               ),
                                       ),
-                                      // Status Badge Cloud/Local
+
                                       Positioned(
                                         bottom: 8,
                                         left: 8,
@@ -623,8 +619,7 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
                     ),
                     const SizedBox(height: 24),
 
-                    // Estimasi Tampilan Total
-                    if (_priceController.text.isNotEmpty) ...[
+if (_priceController.text.isNotEmpty) ...[
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),

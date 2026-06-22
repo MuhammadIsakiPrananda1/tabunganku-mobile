@@ -17,12 +17,11 @@ class ActiveChallengeWidget extends ConsumerWidget {
     return activeChallenges.when(
       data: (challenges) {
         if (challenges.isEmpty) {
-          // Show CTA to start a challenge
+
           return _buildEmptyState(context);
         }
 
-        // Show first active challenge
-        return _buildChallengeCard(context, challenges.first);
+return _buildChallengeCard(context, challenges.first);
       },
       loading: () => _buildLoadingState(),
       error: (_, __) => const SizedBox.shrink(),
@@ -125,7 +124,7 @@ class ActiveChallengeWidget extends ConsumerWidget {
             padding: const EdgeInsets.fromLTRB(16, 16, 20, 16),
             child: Row(
               children: [
-                // Leading: Circular Progress
+
                 Stack(
                   alignment: Alignment.center,
                   children: [
@@ -144,7 +143,7 @@ class ActiveChallengeWidget extends ConsumerWidget {
                   ],
                 ),
                 const SizedBox(width: 16),
-                // Title and Info
+
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -189,7 +188,7 @@ class ActiveChallengeWidget extends ConsumerWidget {
                     ],
                   ),
                 ),
-                // Trailing: Percentage
+
                 Text(
                   '${(progressPercent * 100).toInt()}%',
                   style: GoogleFonts.quicksand(

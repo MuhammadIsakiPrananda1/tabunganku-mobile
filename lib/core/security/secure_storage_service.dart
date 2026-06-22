@@ -13,8 +13,7 @@ class SecureStorageService {
   SecureStorageService({FlutterSecureStorage? storage})
       : _storage = storage ?? const FlutterSecureStorage();
 
-  // Token Management
-  Future<void> saveToken(String token) async {
+Future<void> saveToken(String token) async {
     await _storage.write(key: _tokenKey, value: token);
   }
 
@@ -38,8 +37,7 @@ class SecureStorageService {
     await _storage.delete(key: _refreshTokenKey);
   }
 
-  // PIN Management (Encrypted)
-  Future<void> savePinHash(String pinHash) async {
+Future<void> savePinHash(String pinHash) async {
     await _storage.write(key: _pinKey, value: pinHash);
   }
 
@@ -51,8 +49,7 @@ class SecureStorageService {
     await _storage.delete(key: _pinKey);
   }
 
-  // Session Management
-  Future<void> saveSessionId(String sessionId) async {
+Future<void> saveSessionId(String sessionId) async {
     await _storage.write(key: _sessionIdKey, value: sessionId);
   }
 
@@ -64,8 +61,7 @@ class SecureStorageService {
     await _storage.delete(key: _sessionIdKey);
   }
 
-  // User ID Storage
-  Future<void> saveUserId(String userId) async {
+Future<void> saveUserId(String userId) async {
     await _storage.write(key: _userIdKey, value: userId);
   }
 
@@ -77,8 +73,7 @@ class SecureStorageService {
     await _storage.delete(key: _userIdKey);
   }
 
-  // Token Expiry
-  Future<void> saveTokenExpiry(String expiry) async {
+Future<void> saveTokenExpiry(String expiry) async {
     await _storage.write(key: _tokenExpiryKey, value: expiry);
   }
 
@@ -86,8 +81,7 @@ class SecureStorageService {
     return await _storage.read(key: _tokenExpiryKey);
   }
 
-  // General Secure Storage Methods
-  Future<void> writeSecureData(String key, String value) async {
+Future<void> writeSecureData(String key, String value) async {
     await _storage.write(key: key, value: value);
   }
 
@@ -99,8 +93,7 @@ class SecureStorageService {
     await _storage.delete(key: key);
   }
 
-  // Clear all secure data
-  Future<void> clearAll() async {
+Future<void> clearAll() async {
     await Future.wait([
       _storage.delete(key: _tokenKey),
       _storage.delete(key: _refreshTokenKey),
@@ -110,8 +103,7 @@ class SecureStorageService {
     ]);
   }
 
-  // Clear auth data (but keep PIN for quick login)
-  Future<void> clearAuthData() async {
+Future<void> clearAuthData() async {
     await Future.wait([
       _storage.delete(key: _tokenKey),
       _storage.delete(key: _refreshTokenKey),
@@ -121,8 +113,7 @@ class SecureStorageService {
     ]);
   }
 
-  // Hard logout - clear everything including PIN
-  Future<void> hardLogout() async {
+Future<void> hardLogout() async {
     await clearAll();
     await _storage.delete(key: _pinKey);
   }

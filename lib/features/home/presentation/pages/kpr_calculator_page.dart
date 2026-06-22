@@ -30,7 +30,7 @@ class _KPRCalculatorPageState extends ConsumerState<KPRCalculatorPage> {
   @override
   void initState() {
     super.initState();
-    // Default values are left empty to show placeholders
+
     _calculate();
   }
 
@@ -71,10 +71,9 @@ class _KPRCalculatorPageState extends ConsumerState<KPRCalculatorPage> {
     _monthlyInstallment = monthlyPayment;
     _totalPayment = monthlyPayment * totalMonths;
     _totalInterest = max(0.0, _totalPayment - loan);
-    _recommendedSalary = monthlyPayment / 0.3; // Recommended installment is max 30% of income
+    _recommendedSalary = monthlyPayment / 0.3;
 
-    // Generate projections for first 5 years (or maximum tenor years)
-    for (int year = 1; year <= min(tenorYears, 5); year++) {
+for (int year = 1; year <= min(tenorYears, 5); year++) {
       int monthsElapsed = year * 12;
       double remainingBalance = loan;
       if (loan > 0) {
@@ -119,9 +118,8 @@ class _KPRCalculatorPageState extends ConsumerState<KPRCalculatorPage> {
         (ref.watch(themeProvider) == ThemeMode.system && theme.brightness == Brightness.dark);
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
     final pageBgColor = isDarkMode ? AppColors.backgroundDark : const Color(0xFFF8FAF9);
-    
-    // Page Theme Accent: Deep Orange for KPR / Property feel
-    const accentColor = Colors.deepOrange;
+
+const accentColor = Colors.deepOrange;
 
     return Scaffold(
       backgroundColor: pageBgColor,
@@ -147,7 +145,7 @@ class _KPRCalculatorPageState extends ConsumerState<KPRCalculatorPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Info Header Card
+
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -169,8 +167,7 @@ class _KPRCalculatorPageState extends ConsumerState<KPRCalculatorPage> {
             ),
             const SizedBox(height: 24),
 
-            // Inputs
-            _buildInput('Harga Properti', _propertyPriceCtrl, Icons.home_rounded, isDarkMode, accentColor, isCurrency: true, hintText: 'Masukkan Harga Properti'),
+_buildInput('Harga Properti', _propertyPriceCtrl, Icons.home_rounded, isDarkMode, accentColor, isCurrency: true, hintText: 'Masukkan Harga Properti'),
             const SizedBox(height: 18),
             _buildInput('Uang Muka / DP', _dpCtrl, Icons.payments_rounded, isDarkMode, accentColor, isCurrency: true, hintText: 'Masukkan Uang Muka'),
             const SizedBox(height: 18),
@@ -188,13 +185,11 @@ class _KPRCalculatorPageState extends ConsumerState<KPRCalculatorPage> {
             ),
             const SizedBox(height: 28),
 
-            // Results Card
-            if (_loanAmount > 0) ...[
+if (_loanAmount > 0) ...[
               _buildResultCard(isDarkMode, accentColor),
               const SizedBox(height: 28),
 
-              // Projection Milestones
-              if (_projections.isNotEmpty) ...[
+if (_projections.isNotEmpty) ...[
                 Text(
                   'Proyeksi Sisa Pinjaman (5 Tahun Pertama)',
                   style: GoogleFonts.quicksand(
@@ -356,7 +351,7 @@ class _KPRCalculatorPageState extends ConsumerState<KPRCalculatorPage> {
       ),
       child: Column(
         children: [
-          // Monthly Installment
+
           Text(
             'Estimasi Angsuran Bulanan', 
             style: GoogleFonts.quicksand(
@@ -385,8 +380,7 @@ class _KPRCalculatorPageState extends ConsumerState<KPRCalculatorPage> {
           ),
           const SizedBox(height: 20),
 
-          // Detail Row
-          _buildDetailRow('Pokok Pinjaman (Plafon KPR)', _formatRupiah(_loanAmount), contentColor),
+_buildDetailRow('Pokok Pinjaman (Plafon KPR)', _formatRupiah(_loanAmount), contentColor),
           const SizedBox(height: 12),
           _buildDetailRow('Total Bunga Selama Tenor', _formatRupiah(_totalInterest), contentColor),
           const SizedBox(height: 12),
@@ -399,8 +393,7 @@ class _KPRCalculatorPageState extends ConsumerState<KPRCalculatorPage> {
           ),
           const SizedBox(height: 20),
 
-          // Recommended salary info
-          Container(
+Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: Colors.green.withOpacity(0.08),

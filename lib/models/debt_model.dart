@@ -1,6 +1,6 @@
 enum DebtType {
-  hutang, // Money I owe others
-  piutang, // Money others owe me
+  hutang,
+  piutang,
 }
 
 class DebtModel {

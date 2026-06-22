@@ -43,4 +43,3 @@ final nabungBersamaProvider = StateNotifierProvider<NabungBersamaNotifier, Async
   final service = ref.watch(nabungBersamaServiceProvider);
   return NabungBersamaNotifier(service);
 });
-

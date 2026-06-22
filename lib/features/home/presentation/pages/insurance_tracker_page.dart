@@ -82,7 +82,7 @@ class _InsuranceTrackerPageState extends ConsumerState<InsuranceTrackerPage> {
                   _buildEmptyState(isDarkMode)
                 else
                   ...items.map((i) => _buildInsuranceItem(i, isDarkMode)),
-                const SizedBox(height: 80), // Extra space for FAB
+                const SizedBox(height: 80),
               ],
             ),
           );
@@ -202,8 +202,7 @@ class _InsuranceTrackerPageState extends ConsumerState<InsuranceTrackerPage> {
     final remainingDays = item.expiryDate.difference(DateTime.now()).inDays;
     final isNearExpiry = remainingDays < 30;
 
-    // Premium dynamic coloring
-    final tagAccentColor = isNearExpiry 
+final tagAccentColor = isNearExpiry 
         ? (isDarkMode ? Colors.orangeAccent : Colors.orange.shade700)
         : (isDarkMode ? Colors.greenAccent : Colors.green.shade700);
 

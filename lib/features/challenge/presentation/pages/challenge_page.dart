@@ -42,9 +42,8 @@ class _ChallengePageState extends ConsumerState<ChallengePage>
     final points = ref.watch(totalPointsProvider);
 
     final contentColor = isDark ? Colors.white : AppColors.primaryDark;
-    
-    // Page Theme: Mint Green Accent & Pure Dark/Light backgrounds
-    final pageBgColor = isDark ? AppColors.backgroundDark : const Color(0xFFF8FAF9);
+
+final pageBgColor = isDark ? AppColors.backgroundDark : const Color(0xFFF8FAF9);
     final accentColor = isDark ? const Color(0xFF2ECC71) : const Color(0xFF27AE60);
 
     return Scaffold(

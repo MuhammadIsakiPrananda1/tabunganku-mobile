@@ -668,6 +668,7 @@ Padding(
                             itemBuilder: (context, groupIndex) {
                               final groupName = displayGrouped.keys.elementAt(groupIndex);
                               final items = displayGrouped[groupName]!;
+                              final totalItemsInGroup = categoryObjects.where((c) => c.group == groupName).length;
                               final groupColor = items.isNotEmpty ? items.first.color : AppColors.primary;
 
                               return Column(
@@ -689,7 +690,7 @@ Padding(
                                         ),
                                         const SizedBox(width: 10),
                                         Text(
-                                          groupName.toUpperCase(),
+                                          '${groupName.toUpperCase()} ($totalItemsInGroup)',
                                           style: GoogleFonts.quicksand(
                                             fontSize: 11,
                                             fontWeight: FontWeight.w800,

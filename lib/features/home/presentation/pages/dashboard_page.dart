@@ -4744,6 +4744,7 @@ if (nameController.text.isEmpty ||
                               final groupName =
                                   displayGrouped.keys.elementAt(groupIndex);
                               final items = displayGrouped[groupName]!;
+                              final totalItemsInGroup = categoryObjects.where((c) => c.group == groupName).length;
                               final groupColor = items.isNotEmpty
                                   ? items.first.color
                                   : AppColors.primary;
@@ -4771,7 +4772,7 @@ if (nameController.text.isEmpty ||
                                         ),
                                         const SizedBox(width: 10),
                                         Text(
-                                          groupName.toUpperCase(),
+                                          '${groupName.toUpperCase()} ($totalItemsInGroup)',
                                           style: GoogleFonts.quicksand(
                                             fontSize: 11,
                                             fontWeight: FontWeight.w800,

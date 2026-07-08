@@ -807,8 +807,7 @@ await _restoreFromSecureStorageIfNeeded(prefs, userId);
           _logToFile('getCurrentStreak: daysDiff=$daysDiff');
 
           if (daysDiff > 1) {
-            _logToFile('getCurrentStreak: Streak is broken, returning 0 dynamically');
-            return 0;
+            _logToFile('getCurrentStreak: Streak is broken, returning last saved streak ($currentStreak) instead of 0 dynamically');
           }
         }
       }

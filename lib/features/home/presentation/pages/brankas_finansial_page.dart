@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:tabunganku/core/widgets/top_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -96,16 +97,7 @@ final TextEditingController _titleController = TextEditingController();
 
     if (mounted) {
       Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Informasi berhasil disimpan di Brankas Finansial!',
-            style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.white),
-          ),
-          backgroundColor: const Color(0xFF3F51B5),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      showTopToast(context, 'Informasi berhasil disimpan di Brankas Finansial!');
     }
   }
 
@@ -118,18 +110,7 @@ final TextEditingController _titleController = TextEditingController();
 
   void _copyToClipboard(String label, String value) {
     Clipboard.setData(ClipboardData(text: value));
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          '$label berhasil disalin ke clipboard!',
-          style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 12),
-        ),
-        duration: const Duration(seconds: 2),
-        backgroundColor: const Color(0xFF3F51B5),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      ),
-    );
+    showTopToast(context, '$label berhasil disalin ke clipboard!');
   }
 
   String _formatObscured(String value) {

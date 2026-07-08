@@ -481,6 +481,418 @@ class _BillingManagementPageState extends ConsumerState<BillingManagementPage> {
     }
   }
 
+  void _showBillDetailSheet(BillModel bill) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            return FutureBuilder<List<BillModel>>(
+              future: ref.read(billsServiceProvider).getBills(),
+              builder: (context, snapshot) {
+                final list = snapshot.data ?? [];
+                final currentBill = list.firstWhere((b) => b.id == bill.id, orElse: () => bill);
+                
+                final daysUntilDue = _getDaysUntilDue(currentBill.dueDay);
+                final isOverdue = daysUntilDue < 0 && !currentBill.isPaid;
+                final statusColor = isOverdue ? Colors.redAccent : (currentBill.isPaid ? Colors.green : AppColors.primary);
+                
+                final today = DateTime.now();
+                final totalDaysInMonth = DateTime(today.year, today.month + 1, 0).day;
+                final elapsed = (totalDaysInMonth - daysUntilDue.clamp(0, totalDaysInMonth)).toDouble();
+                final progress = currentBill.isPaid ? 1.0 : (elapsed / totalDaysInMonth).clamp(0.0, 1.0);
+
+                final sheetBg = isDark ? const Color(0xFF151515) : Colors.white;
+                final cardBg = isDark ? AppColors.surfaceDark : const Color(0xFFF9FAFB);
+                final borderCol = isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade200;
+                final txtClr = isDark ? Colors.white : AppColors.primaryDark;
+
+                return Container(
+                  decoration: BoxDecoration(
+                    color: sheetBg,
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+                  ),
+                  padding: EdgeInsets.only(
+                    bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+                    top: 16,
+                    left: 24,
+                    right: 24,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Center(
+                        child: Container(
+                          width: 36,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: isDark ? Colors.white24 : Colors.grey.shade300,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      
+                      Row(
+                        children: [
+                          Container(
+                            width: 50,
+                            height: 50,
+                            decoration: BoxDecoration(
+                              color: statusColor.withValues(alpha: isDark ? 0.15 : 0.08),
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            child: Icon(
+                              Icons.receipt_long_rounded,
+                              color: statusColor,
+                              size: 24,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  currentBill.name,
+                                  style: GoogleFonts.quicksand(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: txtClr,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  'Tagihan Bulanan',
+                                  style: GoogleFonts.quicksand(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          InkWell(
+                            onTap: () async {
+                              final updated = currentBill.copyWith(
+                                isPaid: !currentBill.isPaid,
+                                lastPaidDate: !currentBill.isPaid ? DateTime.now() : null,
+                              );
+                              await ref.read(billsServiceProvider).updateBill(updated);
+                              setSheetState(() {});
+                            },
+                            borderRadius: BorderRadius.circular(20),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                              decoration: BoxDecoration(
+                                color: statusColor.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: statusColor.withValues(alpha: 0.2),
+                                ),
+                              ),
+                              child: Text(
+                                currentBill.isPaid ? 'LUNAS' : (isOverdue ? 'TERLEWAT' : 'BELUM BAYAR'),
+                                style: GoogleFonts.quicksand(
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.bold,
+                                  color: statusColor,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: cardBg,
+                          borderRadius: BorderRadius.circular(24),
+                          border: Border.all(color: borderCol, width: 1.2),
+                        ),
+                        child: Row(
+                          children: [
+                            SizedBox(
+                              width: 90,
+                              height: 90,
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  SizedBox(
+                                    width: 90,
+                                    height: 90,
+                                    child: CircularProgressIndicator(
+                                      value: progress,
+                                      strokeWidth: 9,
+                                      backgroundColor: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100,
+                                      valueColor: AlwaysStoppedAnimation<Color>(statusColor),
+                                    ),
+                                  ),
+                                  Text(
+                                    currentBill.isPaid ? '100%' : '${(progress * 100).toInt()}%',
+                                    style: GoogleFonts.quicksand(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w900,
+                                      color: txtClr,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 24),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'STATUS PEMBAYARAN',
+                                    style: GoogleFonts.quicksand(
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.w800,
+                                      color: Colors.grey,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    currentBill.isPaid ? 'Sudah Dibayar' : (isOverdue ? 'Jatuh Tempo!' : 'Menunggu Pembayaran'),
+                                    style: GoogleFonts.quicksand(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold,
+                                      color: statusColor,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    'NOMINAL TAGIHAN',
+                                    style: GoogleFonts.quicksand(
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.w800,
+                                      color: Colors.grey,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    _formatRupiah(currentBill.amount),
+                                    style: GoogleFonts.quicksand(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: txtClr,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                              decoration: BoxDecoration(
+                                color: cardBg,
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(color: borderCol, width: 1.2),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.calendar_month_rounded,
+                                        color: statusColor,
+                                        size: 14,
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Expanded(
+                                        child: Text(
+                                          'JATUH TEMPO',
+                                          style: GoogleFonts.quicksand(
+                                            fontSize: 9,
+                                            fontWeight: FontWeight.w800,
+                                            color: Colors.grey,
+                                            letterSpacing: 0.5,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Text(
+                                      'Tanggal ${currentBill.dueDay}',
+                                      style: GoogleFonts.quicksand(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        color: txtClr,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Tiap bulan',
+                                    style: GoogleFonts.quicksand(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                              decoration: BoxDecoration(
+                                color: cardBg,
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(color: borderCol, width: 1.2),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.info_outline_rounded,
+                                        color: isDark ? Colors.white60 : Colors.grey,
+                                        size: 14,
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Expanded(
+                                        child: Text(
+                                          'STATUS TERKINI',
+                                          style: GoogleFonts.quicksand(
+                                            fontSize: 9,
+                                            fontWeight: FontWeight.w800,
+                                            color: Colors.grey,
+                                            letterSpacing: 0.5,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Text(
+                                      currentBill.isPaid ? 'Lunas' : 'Belum Bayar',
+                                      style: GoogleFonts.quicksand(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        color: txtClr,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Text(
+                                      currentBill.isPaid
+                                          ? 'Dibayar: ${DateFormat('d MMM yyyy').format(currentBill.lastPaidDate!)}'
+                                          : (daysUntilDue >= 0 ? '$daysUntilDue Hari lagi' : 'Terlewat'),
+                                      style: GoogleFonts.quicksand(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                        color: currentBill.isPaid
+                                            ? Colors.green
+                                            : (isOverdue ? Colors.redAccent : Colors.orange),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 32),
+                      
+                      Row(
+                        children: [
+                          Expanded(
+                            child: SizedBox(
+                              height: 50,
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  _editBill(currentBill, isDark);
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.primary,
+                                  foregroundColor: Colors.white,
+                                  elevation: 0,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                ),
+                                child: Text(
+                                  'Ubah Tagihan',
+                                  style: GoogleFonts.quicksand(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Container(
+                            height: 50,
+                            width: 50,
+                            decoration: BoxDecoration(
+                              color: isDark ? const Color(0xFF2C1C1C) : Colors.red.shade50,
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: IconButton(
+                              onPressed: () {
+                                Navigator.pop(context); // Close detail sheet
+                                _deleteBill(currentBill.id);
+                              },
+                              icon: const Icon(
+                                Icons.delete_outline_rounded,
+                                color: Colors.redAccent,
+                                size: 24,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              },
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final billsAsync = ref.watch(billsServiceProvider).watchBills();
@@ -707,152 +1119,158 @@ class _BillingManagementPageState extends ConsumerState<BillingManagementPage> {
             color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100,
           ),
         ),
-        child: Column(
-          children: [
-
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(14),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: () => _showBillDetailSheet(bill),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
                     children: [
-                      Transform.scale(
-                        scale: 0.85,
-                        child: Checkbox(
-                          value: bill.isPaid,
-                          onChanged: (val) {
-                            ref.read(billsServiceProvider).updateBill(
-                              bill.copyWith(
-                                isPaid: val ?? false,
-                                lastPaidDate: val == true ? DateTime.now() : null,
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Transform.scale(
+                            scale: 0.85,
+                            child: Checkbox(
+                              value: bill.isPaid,
+                              onChanged: (val) {
+                                ref.read(billsServiceProvider).updateBill(
+                                  bill.copyWith(
+                                    isPaid: val ?? false,
+                                    lastPaidDate: val == true ? DateTime.now() : null,
+                                  ),
+                                );
+                              },
+                              activeColor: AppColors.primary,
+                            ),
+                          ),
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 4),
+                              child: Text(
+                                bill.name,
+                                style: GoogleFonts.quicksand(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 13,
+                                  color: bill.isPaid ? contentColor.withValues(alpha: 0.5) : contentColor,
+                                  decoration: bill.isPaid ? TextDecoration.lineThrough : null,
+                                ),
                               ),
-                            );
-                          },
-                          activeColor: AppColors.primary,
-                        ),
-                      ),
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 4),
-                          child: Text(
-                            bill.name,
-                            style: GoogleFonts.quicksand(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 13,
-                              color: bill.isPaid ? contentColor.withValues(alpha: 0.5) : contentColor,
-                              decoration: bill.isPaid ? TextDecoration.lineThrough : null,
                             ),
                           ),
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          color: statusColor.withValues(alpha: isDarkMode ? 0.1 : 0.08),
-                        ),
-                        child: Text(
-                          _formatRupiah(bill.amount),
-                          style: GoogleFonts.quicksand(
-                            fontWeight: FontWeight.w800,
-                            fontSize: 12,
-                            color: bill.isPaid ? contentColor.withValues(alpha: 0.4) : statusColor,
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              color: statusColor.withValues(alpha: isDarkMode ? 0.1 : 0.08),
+                            ),
+                            child: Text(
+                              _formatRupiah(bill.amount),
+                              style: GoogleFonts.quicksand(
+                                fontWeight: FontWeight.w800,
+                                fontSize: 12,
+                                color: bill.isPaid ? contentColor.withValues(alpha: 0.4) : statusColor,
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                      PopupMenuButton<String>(
-                        padding: EdgeInsets.zero,
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 8),
-                          child: Icon(
-                            Icons.more_vert_rounded,
-                            size: 20,
-                            color: contentColor.withValues(alpha: 0.6),
-                          ),
-                        ),
-                        onSelected: (value) {
-                          if (value == 'edit') _editBill(bill, isDarkMode);
-                          if (value == 'delete') _deleteBill(bill.id);
-                        },
-                        itemBuilder: (context) => [
-                          PopupMenuItem(
-                            value: 'edit',
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(Icons.edit_rounded, size: 16, color: Colors.blue),
-                                const SizedBox(width: 10),
-                                Text(
-                                  'Edit',
-                                  style: GoogleFonts.quicksand(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 12,
-                                  ),
+                          PopupMenuButton<String>(
+                            padding: EdgeInsets.zero,
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 8),
+                              child: Icon(
+                                Icons.more_vert_rounded,
+                                size: 20,
+                                color: contentColor.withValues(alpha: 0.6),
+                              ),
+                            ),
+                            onSelected: (value) {
+                              if (value == 'edit') _editBill(bill, isDarkMode);
+                              if (value == 'delete') _deleteBill(bill.id);
+                            },
+                            itemBuilder: (context) => [
+                              PopupMenuItem(
+                                value: 'edit',
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.edit_rounded, size: 16, color: Colors.blue),
+                                    const SizedBox(width: 10),
+                                    Text(
+                                      'Edit',
+                                      style: GoogleFonts.quicksand(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                          ),
-                          PopupMenuItem(
-                            value: 'delete',
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(Icons.delete_rounded, size: 16, color: Colors.red),
-                                const SizedBox(width: 10),
-                                Text(
-                                  'Hapus',
-                                  style: GoogleFonts.quicksand(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 12,
-                                    color: Colors.red,
-                                  ),
+                              ),
+                              PopupMenuItem(
+                                value: 'delete',
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.delete_rounded, size: 16, color: Colors.red),
+                                    const SizedBox(width: 10),
+                                    Text(
+                                      'Hapus',
+                                      style: GoogleFonts.quicksand(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 12,
+                                        color: Colors.red,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
                     ],
                   ),
-                ],
-              ),
-            ),
-
-Container(
-              margin: const EdgeInsets.symmetric(horizontal: 12),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: statusColor.withValues(alpha: isDarkMode ? 0.08 : 0.06),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.calendar_today_rounded,
-                    size: 13,
-                    color: statusColor,
+                ),
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: statusColor.withValues(alpha: isDarkMode ? 0.08 : 0.06),
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      bill.isPaid
-                          ? 'Dibayar ${DateFormat('d MMM yyyy').format(bill.lastPaidDate!)}'
-                          : 'Jatuh tempo tgl ${bill.dueDay}${isOverdue ? ' • Jatuh Tempo' : daysUntilDue >= 0 ? ' • ${daysUntilDue}h lagi' : ''}',
-                      style: GoogleFonts.quicksand(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.calendar_today_rounded,
+                        size: 13,
                         color: statusColor,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          bill.isPaid
+                              ? 'Dibayar ${DateFormat('d MMM yyyy').format(bill.lastPaidDate!)}'
+                              : 'Jatuh tempo tgl ${bill.dueDay}${isOverdue ? ' • Jatuh Tempo' : daysUntilDue >= 0 ? ' • ${daysUntilDue}h lagi' : ''}',
+                          style: GoogleFonts.quicksand(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: statusColor,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(height: 12),
+              ],
             ),
-            const SizedBox(height: 12),
-          ],
+          ),
         ),
       ),
     );
@@ -878,3 +1296,5 @@ class _RibuanFormatter extends TextInputFormatter {
     );
   }
 }
+
+

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
+import 'package:tabunganku/core/widgets/top_toast.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/services.dart';
@@ -813,7 +815,7 @@ double buyPrice = 1250000;
                           await ref.read(goldServiceProvider).updateTransaction(updatedTx);
                         } else {
                           final newTx = GoldTransactionModel(
-                            id: DateTime.now().millisecondsSinceEpoch.toString(),
+                            id: const Uuid().v4(),
                             grams: grams,
                             pricePerGram: priceForCalculation,
                             date: DateTime.now(),
@@ -824,15 +826,7 @@ double buyPrice = 1250000;
                         
                         if (context.mounted) {
                           Navigator.pop(context);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                isEdit ? 'Transaksi Berhasil Diubah' : 'Transaksi Berhasil Disimpan',
-                                style: GoogleFonts.quicksand(fontWeight: FontWeight.bold),
-                              ),
-                              backgroundColor: const Color(0xFFDAA520),
-                            ),
-                          );
+                          showTopToast(context, isEdit ? 'Transaksi Berhasil Diubah' : 'Transaksi Berhasil Disimpan');
                         }
                       }
                     },

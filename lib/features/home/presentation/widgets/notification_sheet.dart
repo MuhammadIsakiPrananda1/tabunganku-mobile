@@ -20,7 +20,14 @@ class NotificationSheet extends ConsumerWidget {
             theme.brightness == Brightness.dark);
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
+      padding: EdgeInsets.fromLTRB(
+        24,
+        12,
+        24,
+        32 + (MediaQuery.of(context).padding.bottom > 0
+            ? MediaQuery.of(context).padding.bottom
+            : 16.0),
+      ),
       decoration: BoxDecoration(
         color: isDarkMode ? AppColors.surfaceDark : Colors.white,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
@@ -306,3 +313,5 @@ class NotificationSheet extends ConsumerWidget {
     );
   }
 }
+
+

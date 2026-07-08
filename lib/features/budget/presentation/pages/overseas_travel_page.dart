@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tabunganku/core/widgets/top_toast.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -601,22 +602,12 @@ Column(
                     onPressed: () {
                       final String destinationName = isCustom ? customNameController.text.trim() : selectedPreset!.name;
                       if (destinationName.isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Nama Tujuan tidak boleh kosong!', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold)),
-                            backgroundColor: AppColors.error,
-                          ),
-                        );
+                        showTopToast(context, 'Nama Tujuan tidak boleh kosong!', isError: true);
                         return;
                       }
                       final targetVal = double.tryParse(amountController.text.replaceAll('.', '')) ?? 0;
                       if (targetVal <= 0) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Nominal Target harus diisi!', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold)),
-                            backgroundColor: AppColors.error,
-                          ),
-                        );
+                        showTopToast(context, 'Nominal Target harus diisi!', isError: true);
                         return;
                       }
 
@@ -633,12 +624,7 @@ Column(
                       ref.read(overseasTravelServiceProvider).addGoal(goal);
                       Navigator.pop(context);
 
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Target liburan berhasil dibuat!', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold)),
-                          backgroundColor: const Color(0xFF2E3D49),
-                        ),
-                      );
+                      showTopToast(context, 'Target liburan berhasil dibuat!');
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF2E3D49),

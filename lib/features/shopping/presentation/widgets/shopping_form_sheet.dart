@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:tabunganku/core/widgets/top_toast.dart';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -336,18 +337,9 @@ try {
 
       if (mounted) {
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              widget.item == null
+        showTopToast(context, widget.item == null
                   ? 'Rencana belanja ditambahkan!'
-                  : 'Rencana belanja diperbarui!',
-              style: GoogleFonts.quicksand(fontWeight: FontWeight.bold),
-            ),
-            backgroundColor: AppColors.primary,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+                  : 'Rencana belanja diperbarui!');
       }
     }
   }
@@ -717,19 +709,20 @@ if (_priceController.text.isNotEmpty) ...[
         text: TextSpan(
           children: [
             TextSpan(
-              text: text,
+              text: text.toUpperCase(),
               style: GoogleFonts.quicksand(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: isDarkMode ? Colors.white70 : Colors.black87,
+                fontSize: 10,
+                fontWeight: FontWeight.w800,
+                color: Colors.grey,
+                letterSpacing: 1.0,
               ),
             ),
             if (isRequired)
               const TextSpan(
                 text: ' *',
                 style: TextStyle(
-                  color: Colors.red,
-                  fontSize: 13,
+                  color: Colors.redAccent,
+                  fontSize: 12,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -750,11 +743,11 @@ if (_priceController.text.isNotEmpty) ...[
     String? Function(String?)? validator,
     bool readOnly = false,
   }) {
-    final fillColor = isDarkMode ? Colors.white.withOpacity(0.04) : Colors.grey.shade50;
+    final fillColor = isDarkMode ? Colors.white.withOpacity(0.05) : Colors.grey.shade100;
     final borderColor = isDarkMode ? Colors.white10 : Colors.grey.shade200;
 
     final borderStyle = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(16),
       borderSide: BorderSide(color: borderColor, width: 1.2),
     );
 
@@ -766,26 +759,24 @@ if (_priceController.text.isNotEmpty) ...[
       readOnly: readOnly,
       style: GoogleFonts.quicksand(
         fontWeight: FontWeight.bold, 
-        fontSize: 13, 
+        fontSize: 14, 
         color: isDarkMode ? Colors.white : Colors.black87,
       ),
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: GoogleFonts.quicksand(
-          fontSize: 12, 
-          fontWeight: FontWeight.w600,
-          color: isDarkMode ? Colors.white30 : Colors.black38,
+          fontSize: 13, 
+          fontWeight: FontWeight.w500,
+          color: isDarkMode ? Colors.white10 : Colors.black26,
         ),
         prefixIcon: Padding(
-          padding: const EdgeInsets.only(left: 12, right: 6),
+          padding: const EdgeInsets.only(left: 16, right: 8),
           child: Row(
             mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Icon(icon, color: AppColors.primary, size: 18),
+              Icon(icon, color: AppColors.primary, size: 20),
               if (prefixText != null) ...[
-                const SizedBox(width: 6),
+                const SizedBox(width: 8),
                 Text(
                   prefixText,
                   style: GoogleFonts.quicksand(
@@ -798,15 +789,28 @@ if (_priceController.text.isNotEmpty) ...[
             ],
           ),
         ),
-        prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 46),
+        prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 48),
         filled: true,
         fillColor: fillColor,
-        contentPadding: const EdgeInsets.only(left: 0, right: 14, top: 12, bottom: 12),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         border: borderStyle,
         enabledBorder: borderStyle,
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
           borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: Colors.redAccent, width: 1.2),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: Colors.redAccent, width: 1.5),
+        ),
+        errorStyle: GoogleFonts.quicksand(
+          color: Colors.redAccent,
+          fontSize: 11,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );

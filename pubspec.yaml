@@ -1,7 +1,7 @@
 name: tabunganku
 description: A new Flutter project for saving money online.
 publish_to: 'none'
-version: 1.5.1
+version: 1.5.2
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -43,7 +43,6 @@ dependencies:
   image_picker: ^1.0.7
   share_plus: ^12.0.2
   path: ^1.9.1
-  google_mlkit_text_recognition: ^0.13.0
   url_launcher: ^6.3.2
   flutter_native_contact_picker: ^0.0.11
   connectivity_plus: ^7.1.1
@@ -74,3 +73,16 @@ flutter:
   assets:
     - assets/
     - assets/fonts/
+  fonts:
+    - family: Quicksand
+      fonts:
+        - asset: assets/fonts/Quicksand-Light.ttf
+          weight: 300
+        - asset: assets/fonts/Quicksand-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Quicksand-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Quicksand-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Quicksand-Bold.ttf
+          weight: 700

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tabunganku/core/widgets/top_toast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -615,17 +616,7 @@ Future<void> _markAsPaid(
     await ref.read(transactionServiceProvider).addTransaction(tx);
 
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(
-            '${isHutang ? 'Hutang' : 'Piutang'} lunas & tercatat di Riwayat',
-            style: GoogleFonts.quicksand(
-                fontSize: 13, fontWeight: FontWeight.bold)),
-        backgroundColor: AppColors.primary,
-        behavior: SnackBarBehavior.floating,
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        margin: const EdgeInsets.all(12),
-      ));
+      showTopToast(context, '${isHutang ? 'Hutang' : 'Piutang'} lunas & tercatat di Riwayat');
     }
   }
 
@@ -636,15 +627,7 @@ Future<void> _markAsPaid(
     } catch (_) {}
     await ref.read(debtServiceProvider).deleteDebt(debt.id);
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Catatan dihapus',
-            style: GoogleFonts.quicksand(
-                fontSize: 13, fontWeight: FontWeight.bold)),
-        behavior: SnackBarBehavior.floating,
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        margin: const EdgeInsets.all(12),
-      ));
+      showTopToast(context, 'Catatan dihapus');
     }
   }
 }

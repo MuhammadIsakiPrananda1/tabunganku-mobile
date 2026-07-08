@@ -7,7 +7,6 @@ import 'package:tabunganku/features/auth/presentation/pages/lock_screen.dart';
 import 'package:tabunganku/features/nabung_bersama/presentation/pages/nabung_bersama_page.dart';
 import 'package:tabunganku/features/settings/presentation/pages/pin_setup_page.dart';
 import 'package:tabunganku/features/home/presentation/pages/saving_simulator_page.dart';
-import 'package:tabunganku/features/transaction/presentation/pages/scan_receipt_page.dart';
 import 'package:tabunganku/features/challenge/presentation/pages/challenge_page.dart';
 import 'package:tabunganku/features/budget/presentation/pages/monthly_budget_page.dart';
 import 'package:tabunganku/features/home/presentation/pages/zakat_page.dart';
@@ -49,6 +48,9 @@ import 'package:tabunganku/features/home/presentation/pages/fire_calculator_page
 import 'package:tabunganku/features/home/presentation/pages/financial_health_page.dart';
 import 'package:tabunganku/features/home/presentation/pages/kpr_calculator_page.dart';
 import 'package:tabunganku/features/home/presentation/pages/emergency_fund_calculator_page.dart';
+import 'package:tabunganku/features/home/presentation/pages/inflation_calculator_page.dart';
+import 'package:tabunganku/features/home/presentation/pages/lifestyle_saving_page.dart';
+import 'package:tabunganku/features/home/presentation/pages/rule_of_72_page.dart';
 
 final appRouterProvider = Provider((ref) {
   return GoRouter(
@@ -91,12 +93,6 @@ GoRoute(
         path: '/saving-simulator',
         name: 'saving-simulator',
         builder: (context, state) => const SavingSimulatorPage(),
-      ),
-
-GoRoute(
-        path: '/scan-receipt',
-        name: 'scan-receipt',
-        builder: (context, state) => const ScanReceiptPage(),
       ),
 
 GoRoute(
@@ -340,6 +336,21 @@ GoRoute(
         path: '/emergency-fund-calculator',
         name: 'emergency-fund-calculator',
         builder: (context, state) => const EmergencyFundCalculatorPage(),
+      ),
+      GoRoute(
+        path: '/inflation-calculator',
+        name: 'inflation-calculator',
+        builder: (context, state) => const InflationCalculatorPage(),
+      ),
+      GoRoute(
+        path: '/lifestyle-saving',
+        name: 'lifestyle-saving',
+        builder: (context, state) => const LifestyleSavingPage(),
+      ),
+      GoRoute(
+        path: '/rule-of-72',
+        name: 'rule-of-72',
+        builder: (context, state) => const RuleOf72Page(),
       ),
 
 GoRoute(

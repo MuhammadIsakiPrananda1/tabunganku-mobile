@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
+import 'package:tabunganku/core/widgets/top_toast.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -70,16 +72,7 @@ final TextEditingController _donationAmountController = TextEditingController();
     
     if (mounted) {
       Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Komitmen Jariyah baru berhasil didaftarkan!',
-            style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.white),
-          ),
-          backgroundColor: const Color(0xFF6B8E23),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      showTopToast(context, 'Komitmen Jariyah baru berhasil didaftarkan!');
     }
   }
 
@@ -113,7 +106,7 @@ if (_commitments[index]['frequency'] == 'Sekali') {
     if (_syncWithTransactions) {
       final title = _commitments[index]['title'] as String;
       final transaction = TransactionModel(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        id: const Uuid().v4(),
         title: '[Jariyah] $title',
         description: 'Sedekah/wakaf berkelanjutan untuk ${_commitments[index]['recipient']}',
         amount: amount,
@@ -127,16 +120,7 @@ if (_commitments[index]['frequency'] == 'Sekali') {
     _donationAmountController.clear();
     if (mounted) {
       Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Sedekah jariyah berhasil dicatat!',
-            style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.white),
-          ),
-          backgroundColor: const Color(0xFF8FBC8F),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      showTopToast(context, 'Sedekah jariyah berhasil dicatat!');
     }
   }
 

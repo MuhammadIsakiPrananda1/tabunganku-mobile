@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tabunganku/core/widgets/top_toast.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tabunganku/models/challenge_model.dart';
@@ -500,16 +501,7 @@ class _ActiveChallengesTab extends ConsumerWidget {
 
                 if (context.mounted) {
                   Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Challenge berhasil dihapus',
-                          style: GoogleFonts.quicksand(fontWeight: FontWeight.bold)),
-                      backgroundColor: Colors.redAccent,
-                      behavior: SnackBarBehavior.floating,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                    ),
-                  );
+                  showTopToast(context, 'Challenge berhasil dihapus', isError: true);
                 }
               } catch (e) {
                 if (context.mounted) {
@@ -894,18 +886,7 @@ class _TemplateCard extends ConsumerWidget {
                           customDuration: duration);
 
                       if (parentContext.mounted) {
-                        ScaffoldMessenger.of(parentContext).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              'Challenge "${template.title}" dimulai selama $duration hari!',
-                              style: GoogleFonts.quicksand(fontWeight: FontWeight.bold),
-                            ),
-                            backgroundColor: accentColor,
-                            behavior: SnackBarBehavior.floating,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12)),
-                          ),
-                        );
+                        showTopToast(parentContext, 'Challenge "${template.title}" dimulai selama $duration hari!');
                         ref.invalidate(activeChallengesProvider);
                         tabController.animateTo(0);
                       }

@@ -260,7 +260,7 @@ Positioned(
                   const SizedBox(height: 32),
                   Text(
                     'NEVERLAND STUDIO',
-                    style: GoogleFonts.poppins(
+                    style: GoogleFonts.quicksand(
                       color: AppColors.primary,
                       fontSize: 11,
                       fontWeight: FontWeight.w800,
@@ -286,3 +286,4 @@ Positioned(
     );
   }
 }
+

@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'package:tabunganku/core/widgets/top_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -100,22 +101,9 @@ _debtDate = widget.debt?.dueDate ?? DateTime.now();
 
       if (mounted) {
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              widget.debt == null
+        showTopToast(context, widget.debt == null
                   ? 'Catatan berhasil ditambahkan'
-                  : 'Catatan berhasil diperbarui',
-              style: GoogleFonts.quicksand(
-                  fontSize: 13, fontWeight: FontWeight.bold),
-            ),
-            backgroundColor: AppColors.primary,
-            behavior: SnackBarBehavior.floating,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            margin: const EdgeInsets.all(12),
-          ),
-        );
+                  : 'Catatan berhasil diperbarui');
       }
     }
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tabunganku/core/widgets/top_toast.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -536,33 +537,11 @@ Container(
                     });
 
                     if (titleHasError || amountHasError || categoryHasError) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Row(
-                            children: [
-                              const Icon(Icons.error_outline_rounded,
-                                  color: Colors.white, size: 18),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  titleHasError
+                      showTopToast(context, titleHasError
                                       ? 'Nama tagihan tidak boleh kosong!'
                                       : (amountHasError
                                           ? 'Nominal harus lebih dari 0!'
-                                          : 'Silakan pilih kategori terlebih dahulu!'),
-                                  style: GoogleFonts.quicksand(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 12),
-                                ),
-                              ),
-                            ],
-                          ),
-                          backgroundColor: Colors.red.shade700,
-                          behavior: SnackBarBehavior.floating,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
-                        ),
-                      );
+                                          : 'Silakan pilih kategori terlebih dahulu!'), isError: true);
                       return;
                     }
 
@@ -593,6 +572,886 @@ Container(
                   ),
                   child: Text(
                     'Simpan Transaksi Rutin',
+                    style: GoogleFonts.quicksand(
+                        fontWeight: FontWeight.bold, fontSize: 14),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }),
+    );
+  }
+
+  void _showRecurringDetailSheet(RecurringTransactionModel item) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            final currentItem = _items.firstWhere((i) => i.id == item.id, orElse: () => item);
+            final nextBilling = _getNextBillingDate(currentItem);
+            final elapsedDays = DateTime.now().difference(currentItem.lastProcessedDate).inDays;
+            final totalDays = nextBilling.difference(currentItem.lastProcessedDate).inDays;
+            final progress = totalDays > 0 ? (elapsedDays / totalDays).clamp(0.0, 1.0) : 0.0;
+            final daysLeft = nextBilling.difference(DateTime.now()).inDays;
+            final categoryColor = AppCategories.getColorForCategory(currentItem.category);
+            final categoryIcon = AppCategories.getIconForCategory(currentItem.category);
+            final isExpense = currentItem.type == TransactionType.expense;
+
+            double monthlyEquivalent = 0.0;
+            switch (currentItem.frequency) {
+              case RecurringFrequency.daily:
+                monthlyEquivalent = currentItem.amount * 30;
+                break;
+              case RecurringFrequency.weekly:
+                monthlyEquivalent = currentItem.amount * 4.33;
+                break;
+              case RecurringFrequency.monthly:
+                monthlyEquivalent = currentItem.amount;
+                break;
+              case RecurringFrequency.quarterly:
+                monthlyEquivalent = currentItem.amount / 3;
+                break;
+              case RecurringFrequency.semiAnnually:
+                monthlyEquivalent = currentItem.amount / 6;
+                break;
+              case RecurringFrequency.yearly:
+                monthlyEquivalent = currentItem.amount / 12;
+                break;
+            }
+
+            final sheetBg = isDark ? const Color(0xFF151515) : Colors.white;
+            final cardBg = isDark ? AppColors.surfaceDark : const Color(0xFFF9FAFB);
+            final borderCol = isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade200;
+            final txtClr = isDark ? Colors.white : AppColors.primaryDark;
+
+            return Container(
+              decoration: BoxDecoration(
+                color: sheetBg,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+              ),
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+                top: 16,
+                left: 24,
+                right: 24,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 36,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: isDark ? Colors.white24 : Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  
+                  Row(
+                    children: [
+                      Container(
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          color: categoryColor.withValues(alpha: isDark ? 0.15 : 0.08),
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: Icon(
+                          categoryIcon,
+                          color: categoryColor,
+                          size: 24,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              currentItem.title,
+                              style: GoogleFonts.quicksand(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: txtClr,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              currentItem.category,
+                              style: GoogleFonts.quicksand(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      InkWell(
+                        onTap: () async {
+                          final updated = currentItem.copyWith(isActive: !currentItem.isActive);
+                          final service = ref.read(recurringServiceProvider);
+                          final items = await service.getRecurringTransactions();
+                          final idx = items.indexWhere((i) => i.id == currentItem.id);
+                          if (idx != -1) {
+                            items[idx] = updated;
+                            await service.saveRecurringTransactions(items);
+                          }
+                          await _loadData();
+                          setSheetState(() {});
+                        },
+                        borderRadius: BorderRadius.circular(20),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                          decoration: BoxDecoration(
+                            color: (currentItem.isActive ? AppColors.primary : Colors.grey).withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: (currentItem.isActive ? AppColors.primary : Colors.grey).withValues(alpha: 0.2),
+                            ),
+                          ),
+                          child: Text(
+                            currentItem.isActive ? 'AKTIF' : 'NON-AKTIF',
+                            style: GoogleFonts.quicksand(
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold,
+                              color: currentItem.isActive ? AppColors.primary : Colors.grey,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: cardBg,
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(color: borderCol, width: 1.2),
+                    ),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: 90,
+                          height: 90,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              SizedBox(
+                                width: 90,
+                                height: 90,
+                                child: CircularProgressIndicator(
+                                  value: currentItem.isActive ? progress : 0.0,
+                                  strokeWidth: 9,
+                                  backgroundColor: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100,
+                                  valueColor: AlwaysStoppedAnimation<Color>(categoryColor),
+                                ),
+                              ),
+                              Text(
+                                currentItem.isActive ? '${(progress * 100).toInt()}%' : '0%',
+                                style: GoogleFonts.quicksand(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w900,
+                                  color: txtClr,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 24),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                isExpense ? 'ESTIMASI BULANAN' : 'ESTIMASI MASUKAN BULAN',
+                                style: GoogleFonts.quicksand(
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.grey,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                _formatRupiah(monthlyEquivalent),
+                                style: GoogleFonts.quicksand(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: isExpense ? Colors.redAccent : Colors.green,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                'NOMINAL TRANSAKSI',
+                                style: GoogleFonts.quicksand(
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.grey,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                '${isExpense ? "-" : "+"} ${_formatRupiah(currentItem.amount)}',
+                                style: GoogleFonts.quicksand(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: txtClr,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                          decoration: BoxDecoration(
+                            color: cardBg,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: borderCol, width: 1.2),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.event_available_rounded,
+                                    color: categoryColor,
+                                    size: 14,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Expanded(
+                                    child: Text(
+                                      'TANGGAL MULAI',
+                                      style: GoogleFonts.quicksand(
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.w800,
+                                        color: Colors.grey,
+                                        letterSpacing: 0.5,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  DateFormat('d MMM yyyy', 'id_ID').format(currentItem.startDate),
+                                  style: GoogleFonts.quicksand(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: txtClr,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                          decoration: BoxDecoration(
+                            color: cardBg,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: borderCol, width: 1.2),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.alarm_rounded,
+                                    color: isDark ? Colors.white60 : Colors.grey,
+                                    size: 13,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Expanded(
+                                    child: Text(
+                                      'BERIKUTNYA',
+                                      style: GoogleFonts.quicksand(
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.w800,
+                                        color: Colors.grey,
+                                        letterSpacing: 0.5,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  DateFormat('d MMM yyyy', 'id_ID').format(nextBilling),
+                                  style: GoogleFonts.quicksand(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: txtClr,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                currentItem.isActive
+                                    ? (daysLeft > 0 ? '$daysLeft Hari lagi' : 'Hari ini')
+                                    : 'Transaksi Non-aktif',
+                                style: GoogleFonts.quicksand(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  color: currentItem.isActive
+                                      ? (daysLeft > 0 ? AppColors.primary : Colors.orange)
+                                      : Colors.grey,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  
+                  Center(
+                    child: Text(
+                      'Jenis Transaksi: ${currentItem.type == TransactionType.expense ? "Pengeluaran" : "Pemasukan"} (${_getFreqLabel(currentItem.frequency)})',
+                      style: GoogleFonts.quicksand(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  
+                  Row(
+                    children: [
+                      Expanded(
+                        child: SizedBox(
+                          height: 50,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              _showEditSheet(currentItem);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                            ),
+                            child: Text(
+                              'Ubah Transaksi',
+                              style: GoogleFonts.quicksand(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Container(
+                        height: 50,
+                        width: 50,
+                        decoration: BoxDecoration(
+                          color: isDark ? const Color(0xFF2C1C1C) : Colors.red.shade50,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: IconButton(
+                          onPressed: () async {
+                            final confirm = await showDialog<bool>(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                                backgroundColor: isDark ? AppColors.surfaceDark : Colors.white,
+                                title: Text(
+                                  'Hapus Transaksi?',
+                                  style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 16),
+                                ),
+                                content: Text(
+                                  'Apakah kamu yakin ingin menghapus tagihan rutin "${currentItem.title}"?',
+                                  style: GoogleFonts.quicksand(
+                                      fontSize: 13,
+                                      color: isDark ? Colors.white70 : Colors.black54),
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context, false),
+                                    child: Text('Batal',
+                                        style: GoogleFonts.quicksand(
+                                            fontWeight: FontWeight.bold,
+                                            color: isDark ? Colors.white38 : Colors.grey)),
+                                  ),
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context, true),
+                                    child: Text('Hapus',
+                                        style: GoogleFonts.quicksand(
+                                            fontWeight: FontWeight.bold, color: Colors.redAccent)),
+                                  ),
+                                ],
+                              ),
+                            );
+                            if (confirm == true && context.mounted) {
+                              Navigator.pop(context); // Close detail sheet
+                              await ref.read(recurringServiceProvider).deleteRecurring(currentItem.id);
+                              _loadData();
+                            }
+                          },
+                          icon: const Icon(
+                            Icons.delete_outline_rounded,
+                            color: Colors.redAccent,
+                            size: 24,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showEditSheet(RecurringTransactionModel item) {
+    final amountController = TextEditingController(
+      text: item.amount.toInt().toString().replaceAllMapped(
+        RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
+        (match) => '${match[1]}.',
+      ),
+    );
+    final titleController = TextEditingController(text: item.title);
+    TransactionType selectedType = item.type;
+    RecurringFrequency selectedFreq = item.frequency;
+    String? selectedCategory = item.category;
+    bool titleHasError = false;
+    bool amountHasError = false;
+    bool categoryHasError = false;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => StatefulBuilder(builder: (context, setSheetState) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        final inset = MediaQuery.of(context).viewInsets.bottom;
+
+        return Container(
+          padding: EdgeInsets.only(bottom: inset),
+          decoration: BoxDecoration(
+            color: isDark ? AppColors.surfaceDark : Colors.white,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+          ),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(28),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.white10 : Colors.grey.shade200,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  'Ubah Transaksi Rutin',
+                  style: GoogleFonts.quicksand(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white : Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                HighVisInput(
+                  controller: titleController,
+                  icon: Icons.branding_watermark_rounded,
+                  label: 'Nama Tagihan / Langganan',
+                  isDarkMode: isDark,
+                  hintText: 'Masukkan Nama Tagihan / Langganan',
+                  hasError: titleHasError,
+                  onChanged: (val) {
+                    if (titleHasError) {
+                      setSheetState(() => titleHasError = false);
+                    }
+                  },
+                ),
+                const SizedBox(height: 16),
+
+                HighVisInput(
+                  controller: amountController,
+                  icon: Icons.payments_rounded,
+                  label: 'Nominal',
+                  isDarkMode: isDark,
+                  hintText: 'Masukkan Nominal Transaksi',
+                  prefixText: 'Rp',
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    RibuanFormatter(),
+                  ],
+                  hasError: amountHasError,
+                  onChanged: (val) {
+                    if (amountHasError) {
+                      setSheetState(() => amountHasError = false);
+                    }
+                  },
+                ),
+                const SizedBox(height: 24),
+
+                Text(
+                  'Jenis Transaksi',
+                  style: GoogleFonts.quicksand(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white70 : Colors.black54,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  height: 52,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.05)
+                        : Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: isDark ? Colors.white10 : Colors.grey.shade200,
+                      width: 1.2,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        selectedType == TransactionType.expense
+                            ? Icons.call_made_rounded
+                            : Icons.call_received_rounded,
+                        size: 18,
+                        color: selectedType == TransactionType.expense
+                            ? Colors.redAccent
+                            : Colors.green,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<TransactionType>(
+                            value: selectedType,
+                            isExpanded: true,
+                            dropdownColor: isDark ? AppColors.surfaceDark : Colors.white,
+                            style: GoogleFonts.quicksand(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                              color: isDark ? Colors.white : Colors.black87,
+                            ),
+                            icon: Icon(
+                              Icons.arrow_drop_down_rounded,
+                              color: isDark ? Colors.white38 : Colors.grey,
+                            ),
+                            items: const [
+                              DropdownMenuItem(
+                                value: TransactionType.expense,
+                                child: Text('Pengeluaran'),
+                              ),
+                              DropdownMenuItem(
+                                value: TransactionType.income,
+                                child: Text('Pemasukan'),
+                              ),
+                            ],
+                            onChanged: (val) {
+                              if (val != null) {
+                                setSheetState(() {
+                                  selectedType = val;
+                                  selectedCategory = null;
+                                  categoryHasError = false;
+                                });
+                              }
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                Text(
+                  'Kategori',
+                  style: GoogleFonts.quicksand(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white70 : Colors.black54,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                InkWell(
+                  onTap: () {
+                    _showCategorySearchSheet(
+                      context: context,
+                      isDarkMode: isDark,
+                      currentSelected: selectedCategory ?? '',
+                      categoryObjects: selectedType == TransactionType.expense
+                          ? AppCategories.expenseCategories
+                          : AppCategories.incomeCategories,
+                      onSelected: (cat) {
+                        setSheetState(() {
+                          selectedCategory = cat.label;
+                          categoryHasError = false;
+                        });
+                      },
+                    );
+                  },
+                  borderRadius: BorderRadius.circular(16),
+                  child: Container(
+                    height: 52,
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.05)
+                          : Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: categoryHasError
+                            ? Colors.red.shade400
+                            : (isDark ? Colors.white10 : Colors.grey.shade200),
+                        width: 1.2,
+                      ),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
+                      children: [
+                        Icon(
+                          selectedCategory != null &&
+                                  (selectedType == TransactionType.expense
+                                          ? AppCategories.expenseCategories
+                                          : AppCategories.incomeCategories)
+                                      .any((c) => c.label == selectedCategory)
+                              ? (selectedType == TransactionType.expense
+                                      ? AppCategories.expenseCategories
+                                      : AppCategories.incomeCategories)
+                                  .firstWhere(
+                                      (c) => c.label == selectedCategory)
+                                  .icon
+                              : Icons.category_rounded,
+                          size: 20,
+                          color: selectedCategory != null
+                              ? AppColors.primary
+                              : (isDark ? Colors.white30 : Colors.black38),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            selectedCategory ?? 'Pilih Kategori',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.quicksand(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                              color: selectedCategory != null
+                                  ? (isDark ? Colors.white : Colors.black87)
+                                  : (isDark ? Colors.white30 : Colors.black38),
+                            ),
+                          ),
+                        ),
+                        Icon(
+                          Icons.arrow_drop_down_rounded,
+                          size: 24,
+                          color: isDark ? Colors.white38 : Colors.grey,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                Text(
+                  'Frekuensi Penagihan',
+                  style: GoogleFonts.quicksand(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white70 : Colors.black54,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  height: 52,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.05)
+                        : Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: isDark ? Colors.white10 : Colors.grey.shade200,
+                      width: 1.2,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.repeat_rounded,
+                        size: 18,
+                        color: AppColors.primary,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<RecurringFrequency>(
+                            value: selectedFreq,
+                            isExpanded: true,
+                            dropdownColor: isDark ? AppColors.surfaceDark : Colors.white,
+                            style: GoogleFonts.quicksand(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                              color: isDark ? Colors.white : Colors.black87,
+                            ),
+                            icon: Icon(
+                              Icons.arrow_drop_down_rounded,
+                              color: isDark ? Colors.white38 : Colors.grey,
+                            ),
+                            items: RecurringFrequency.values.map((f) {
+                              return DropdownMenuItem(
+                                value: f,
+                                child: Text(_getFreqLabel(f)),
+                              );
+                            }).toList(),
+                            onChanged: (val) {
+                              if (val != null) {
+                                setSheetState(() => selectedFreq = val);
+                              }
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.05),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                        color: AppColors.primary.withValues(alpha: 0.1)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.info_outline_rounded,
+                          size: 16, color: AppColors.primary),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          _getFreqDesc(selectedFreq),
+                          style: GoogleFonts.quicksand(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? Colors.white60 : Colors.black54,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 32),
+
+                ElevatedButton(
+                  onPressed: () async {
+                    final titleVal = titleController.text.trim();
+                    final rawAmount = amountController.text.replaceAll('.', '');
+                    final amountVal = double.tryParse(rawAmount) ?? 0.0;
+
+                    setSheetState(() {
+                      titleHasError = titleVal.isEmpty;
+                      amountHasError = amountVal <= 0;
+                      categoryHasError = selectedCategory == null;
+                    });
+
+                    if (titleHasError || amountHasError || categoryHasError) {
+                      showTopToast(context, titleHasError
+                                      ? 'Nama tagihan tidak boleh kosong!'
+                                      : (amountHasError
+                                          ? 'Nominal harus lebih dari 0!'
+                                          : 'Silakan pilih kategori terlebih dahulu!'), isError: true);
+                      return;
+                    }
+
+                    final updatedModel = item.copyWith(
+                      title: titleVal,
+                      amount: amountVal,
+                      type: selectedType,
+                      category: selectedCategory!,
+                      frequency: selectedFreq,
+                    );
+                    
+                    final service = ref.read(recurringServiceProvider);
+                    final items = await service.getRecurringTransactions();
+                    final index = items.indexWhere((i) => i.id == item.id);
+                    if (index != -1) {
+                      items[index] = updatedModel;
+                      await service.saveRecurringTransactions(items);
+                    }
+                    
+                    if (context.mounted) {
+                      Navigator.pop(context);
+                      showTopToast(context, 'Transaksi Rutin Berhasil Diperbarui!');
+                    }
+                    _loadData();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(double.infinity, 54),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
+                    elevation: 0,
+                  ),
+                  child: Text(
+                    'Simpan Perubahan',
                     style: GoogleFonts.quicksand(
                         fontWeight: FontWeight.bold, fontSize: 14),
                   ),
@@ -955,6 +1814,7 @@ Row(
         borderRadius: BorderRadius.circular(22),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
+          onTap: () => _showRecurringDetailSheet(item),
           onLongPress: () async {
             final confirm = await showDialog<bool>(
               context: context,

@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:tabunganku/core/widgets/top_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -100,16 +101,7 @@ String get _displayAcademicLevel {
 
     if (mounted) {
       Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Rencana Pendidikan Anak berhasil diperbarui!',
-            style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.white),
-          ),
-          backgroundColor: const Color(0xFF2196F3),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      showTopToast(context, 'Rencana Pendidikan Anak berhasil diperbarui!');
     }
   }
 
@@ -119,11 +111,13 @@ String get _displayAcademicLevel {
     final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
         (ref.watch(themeProvider) == ThemeMode.system && theme.brightness == Brightness.dark);
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
-    final pageBgColor = isDarkMode ? AppColors.backgroundDark : const Color(0xFFF2F8FD);
+    final pageBg = isDarkMode ? AppColors.backgroundDark : const Color(0xFFF9FAFB);
+    final cardBg = isDarkMode ? AppColors.surfaceDark : Colors.white;
+    final borderCol = isDarkMode ? Colors.white10 : Colors.grey.shade200;
     final accentColor = const Color(0xFF2196F3);
 
     return Scaffold(
-      backgroundColor: pageBgColor,
+      backgroundColor: pageBg,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -136,44 +130,29 @@ String get _displayAcademicLevel {
           'Rencana Kuliah Anak',
           style: GoogleFonts.quicksand(
             fontWeight: FontWeight.bold,
-            fontSize: 16,
+            fontSize: 15,
             color: contentColor,
           ),
         ),
       ),
       body: ListView(
+        physics: const BouncingScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 48),
         children: [
 
           Container(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(28),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: isDarkMode
-                    ? [
-                        const Color(0xFF0F3A5F),
-                        const Color(0xFF0B253F),
-                      ]
-                    : [
-                        const Color(0xFFE3F2FD),
-                        const Color(0xFFF2F8FD),
-                      ],
-              ),
+              color: cardBg,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: borderCol),
               boxShadow: [
                 BoxShadow(
-                  color: accentColor.withOpacity(isDarkMode ? 0.05 : 0.08),
-                  blurRadius: 20,
-                  offset: const Offset(0, 8),
+                  color: Colors.black.withValues(alpha: isDarkMode ? 0.08 : 0.02),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
                 ),
               ],
-              border: Border.all(
-                color: isDarkMode
-                    ? accentColor.withOpacity(0.1)
-                    : accentColor.withOpacity(0.15),
-              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -186,128 +165,92 @@ String get _displayAcademicLevel {
                       style: GoogleFonts.quicksand(
                         fontSize: 10,
                         fontWeight: FontWeight.w900,
-                        color: isDarkMode ? Colors.white70 : Colors.blue.shade900,
-                        letterSpacing: 1.2,
+                        color: Colors.grey,
+                        letterSpacing: 1.0,
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: (isDarkMode ? Colors.white : accentColor).withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(100),
+                        color: accentColor.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
                         _displayAcademicLevel,
                         style: GoogleFonts.quicksand(
-                          fontSize: 10,
+                          fontSize: 9,
                           fontWeight: FontWeight.bold,
-                          color: isDarkMode ? Colors.white : Colors.blue.shade900,
+                          color: accentColor,
                         ),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 18),
+                const SizedBox(height: 12),
                 Text(
                   _childName.isEmpty ? 'Target Kuliah Anak' : 'Target Kuliah: $_childName',
                   style: GoogleFonts.quicksand(
-                    fontSize: 14.5,
+                    fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: contentColor,
                   ),
                 ),
-                const SizedBox(height: 12),
-                Text(
-                  'Estimasi Biaya Masa Depan (${_yearsToStudy} Thn Lagi):',
-                  style: GoogleFonts.quicksand(
-                    fontSize: 10.5,
-                    fontWeight: FontWeight.bold,
-                    color: isDarkMode ? Colors.white30 : Colors.grey.shade600,
-                  ),
-                ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 8),
                 FittedBox(
                   fit: BoxFit.scaleDown,
                   child: Text(
                     NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(_futureCost),
                     style: GoogleFonts.quicksand(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w800,
-                      color: isDarkMode ? Colors.white : Colors.blue.shade900,
+                      fontSize: 26,
+                      fontWeight: FontWeight.w900,
+                      color: isDarkMode ? Colors.white : AppColors.primaryDark,
+                      letterSpacing: -0.5,
                     ),
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 4),
                 Text(
-                  'Uang Kuliah Sekarang: Rp ${NumberFormat.decimalPattern('id_ID').format(_costToday)} (Inflasi $_inflationRate%/thn)',
+                  'Estimasi Biaya Masa Depan (${_yearsToStudy} Thn Lagi)',
                   style: GoogleFonts.quicksand(
-                    fontSize: 10,
+                    fontSize: 11,
                     fontWeight: FontWeight.bold,
-                    color: isDarkMode ? Colors.white38 : Colors.grey.shade600,
+                    color: Colors.grey,
                   ),
                 ),
                 const SizedBox(height: 20),
-                Divider(height: 1, color: isDarkMode ? Colors.white.withOpacity(0.04) : Colors.grey.shade200),
-                const SizedBox(height: 16),
-
-Row(
+                Container(
+                  height: 1,
+                  color: borderCol,
+                ),
+                 const SizedBox(height: 16),
+                Row(
                   children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Tabungan Terkumpul',
-                            style: GoogleFonts.quicksand(
-                              fontSize: 10.5,
-                              fontWeight: FontWeight.bold,
-                              color: isDarkMode ? Colors.white38 : Colors.grey.shade500,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          FittedBox(
-                            fit: BoxFit.scaleDown,
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(_currentSaved),
-                              style: GoogleFonts.quicksand(
-                                fontSize: 13.5,
-                                fontWeight: FontWeight.bold,
-                                color: contentColor,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                    _StatCell(
+                      label: 'SEKARANG',
+                      value: 'Rp ${NumberFormat.decimalPattern('id_ID').format(_costToday)}',
+                      color: isDarkMode ? Colors.white70 : Colors.black87,
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            'Nabung / Bulan',
-                            style: GoogleFonts.quicksand(
-                              fontSize: 10.5,
-                              fontWeight: FontWeight.bold,
-                              color: isDarkMode ? Colors.white38 : Colors.grey.shade500,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          FittedBox(
-                            fit: BoxFit.scaleDown,
-                            alignment: Alignment.centerRight,
-                            child: Text(
-                              NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(_recommendedMonthlySavings),
-                              style: GoogleFonts.quicksand(
-                                fontSize: 14.5,
-                                fontWeight: FontWeight.bold,
-                                color: accentColor,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                    Container(
+                      width: 1,
+                      height: 32,
+                      color: borderCol,
+                      margin: const EdgeInsets.symmetric(horizontal: 6),
+                    ),
+                    _StatCell(
+                      label: 'TERKUMPUL',
+                      value: 'Rp ${NumberFormat.decimalPattern('id_ID').format(_currentSaved)}',
+                      color: Colors.teal,
+                    ),
+                    Container(
+                      width: 1,
+                      height: 32,
+                      color: borderCol,
+                      margin: const EdgeInsets.symmetric(horizontal: 6),
+                    ),
+                    _StatCell(
+                      label: 'PER BULAN',
+                      value: 'Rp ${NumberFormat.decimalPattern('id_ID').format(_recommendedMonthlySavings.round())}',
+                      color: accentColor,
                     ),
                   ],
                 ),
@@ -811,3 +754,45 @@ class _RibuanFormatter extends TextInputFormatter {
     );
   }
 }
+
+class _StatCell extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color color;
+
+  const _StatCell({required this.label, required this.value, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: GoogleFonts.quicksand(
+              fontSize: 8,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(height: 4),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              value,
+              style: GoogleFonts.quicksand(
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+

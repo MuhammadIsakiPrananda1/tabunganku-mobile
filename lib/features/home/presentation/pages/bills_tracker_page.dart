@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tabunganku/core/widgets/top_toast.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -176,25 +177,9 @@ class _BillsTrackerPageState extends ConsumerState<BillsTrackerPage> {
                     });
 
                     if (_nameHasError || _amountHasError) {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Row(
-                          children: [
-                            const Icon(Icons.error_outline_rounded, color: Colors.white, size: 18),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                _nameHasError
+                      showTopToast(context, _nameHasError
                                     ? 'Nama tagihan tidak boleh kosong!'
-                                    : 'Nominal harus lebih dari 0!',
-                                style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 12),
-                              ),
-                            ),
-                          ],
-                        ),
-                        backgroundColor: Colors.red.shade700,
-                        behavior: SnackBarBehavior.floating,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ));
+                                    : 'Nominal harus lebih dari 0!', isError: true);
                       return;
                     }
 
@@ -425,27 +410,9 @@ class _BillsTrackerPageState extends ConsumerState<BillsTrackerPage> {
                     });
 
                     if (nameHasError || amountHasError) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Row(
-                            children: [
-                              const Icon(Icons.error_outline_rounded, color: Colors.white, size: 18),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  nameHasError
+                      showTopToast(context, nameHasError
                                       ? 'Nama tagihan tidak boleh kosong!'
-                                      : 'Nominal harus lebih dari 0!',
-                                  style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 12),
-                                ),
-                              ),
-                            ],
-                          ),
-                          backgroundColor: Colors.red.shade700,
-                          behavior: SnackBarBehavior.floating,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        ),
-                      );
+                                      : 'Nominal harus lebih dari 0!', isError: true);
                       return;
                     }
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tabunganku/core/widgets/top_toast.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -350,17 +351,7 @@ Container(
   Future<void> _saveTarget(Color accentColor) async {
     final amount = double.tryParse(_amountController.text.replaceAll('.', '')) ?? 0;
     if (amount <= 0 || _nameController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Lengkapi nama dan nominal rencana.',
-            style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.white),
-          ),
-          backgroundColor: AppColors.error,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-      );
+      showTopToast(context, 'Lengkapi nama dan nominal rencana.', isError: true);
       return;
     }
 
@@ -375,15 +366,7 @@ Container(
 
     await ref.read(savingTargetServiceProvider).addTarget(target);
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(
-          'Rencana $_activeType Berhasil Dibuat',
-          style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.white),
-        ),
-        backgroundColor: accentColor,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ));
+      showTopToast(context, 'Rencana $_activeType Berhasil Dibuat');
       _nameController.clear();
       _amountController.clear();
     }

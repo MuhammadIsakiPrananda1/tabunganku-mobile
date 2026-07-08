@@ -555,12 +555,7 @@ final double dampingFactor = rawRemainingNet >= 0
       type: QuickActionType.buyingTarget,
       baseColor: AppColors.primary,
     ),
-    _QuickActionItem(
-      icon: Icons.document_scanner_rounded,
-      label: 'Scan Bukti',
-      type: QuickActionType.scanReceipt,
-      baseColor: Colors.teal,
-    ),
+
     _QuickActionItem(
       icon: Icons.emoji_events_rounded,
       label: 'Challenge',
@@ -1755,3 +1750,5 @@ class _QuickActionItem {
     required this.baseColor,
   });
 }
+
+

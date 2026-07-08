@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
+import 'package:tabunganku/core/widgets/top_toast.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -65,7 +67,7 @@ class _ZakatPageState extends ConsumerState<ZakatPage> {
   void _recordTransaction(String title, double amount, String category, Color accentColor) async {
     if (amount <= 0) return;
     final transaction = TransactionModel(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: const Uuid().v4(),
       title: title,
       description: 'Pembayaran $title melaui Zakat Calculator',
       amount: amount,
@@ -75,17 +77,7 @@ class _ZakatPageState extends ConsumerState<ZakatPage> {
     );
     await ref.read(transactionServiceProvider).addTransaction(transaction);
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            '$title berhasil dicatat!',
-            style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 13),
-          ),
-          backgroundColor: accentColor,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-      );
+      showTopToast(context, '$title berhasil dicatat!');
       Navigator.pop(context);
     }
   }

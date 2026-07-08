@@ -4,7 +4,6 @@ enum QuickActionType {
   budget,
   debt,
   shoppingList,
-  scanReceipt,
   challenge,
   savingTarget,
   recurring,

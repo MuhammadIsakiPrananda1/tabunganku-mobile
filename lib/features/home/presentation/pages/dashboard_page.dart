@@ -1,4 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
+import 'package:tabunganku/core/widgets/top_toast.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -147,8 +149,7 @@ void _showSavingSimulatorSheet() {
     if (targetId == null) return;
     await ref.read(savingTargetServiceProvider).deleteTarget(targetId);
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Target tabungan dihapus.')));
+      showTopToast(context, 'Target tabungan dihapus.');
     }
   }
 
@@ -1208,7 +1209,7 @@ final prefs = await SharedPreferences.getInstance();
 
 if (logToKas) {
                                       final tx = TransactionModel(
-                                        id: DateTime.now().millisecondsSinceEpoch.toString(),
+                                        id: const Uuid().v4(),
                                         title: 'Hemat: ${challenge.title} ${challenge.icon}',
                                         description: 'Tabungan nyata dari tantangan harian.',
                                         amount: actualAmount,
@@ -1225,17 +1226,9 @@ if (logToKas) {
                                     HapticFeedback.heavyImpact();
                                     if (ctx.mounted) Navigator.pop(ctx);
                                     if (mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                            logToKas
+                                      showTopToast(context, logToKas
                                                 ? 'Luar biasa! +${challenge.xpReward} XP & ${_formatRupiah(actualAmount)} tercatat di tabungan! 💰'
-                                                : 'Keren! +${challenge.xpReward} XP dikreditkan ke level kamu! 🚀',
-                                            style: GoogleFonts.quicksand(fontWeight: FontWeight.bold),
-                                          ),
-                                          backgroundColor: Colors.teal.shade700,
-                                        ),
-                                      );
+                                                : 'Keren! +${challenge.xpReward} XP dikreditkan ke level kamu! 🚀', isError: true);
                                     }
                                   }
                                 : null,
@@ -1403,7 +1396,7 @@ void _showChallengeSuccessSheet(_QuickChallenge challenge) {
                     onPressed: () async {
 
                       final tx = TransactionModel(
-                        id: DateTime.now().millisecondsSinceEpoch.toString(),
+                        id: const Uuid().v4(),
                         title: 'Hemat: ${challenge.title} ${challenge.icon}',
                         description: 'Tabungan hasil penyelesaian tantangan cepat.',
                         amount: challenge.savingsAmount,
@@ -1419,15 +1412,7 @@ void _showChallengeSuccessSheet(_QuickChallenge challenge) {
                         Navigator.pop(ctx);
                       }
                       if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              'Dana hemat ${_formatRupiah(challenge.savingsAmount)} berhasil dimasukkan ke tabungan! 💰✨',
-                              style: GoogleFonts.quicksand(fontWeight: FontWeight.bold),
-                            ),
-                            backgroundColor: Colors.teal.shade700,
-                          ),
-                        );
+                        showTopToast(context, 'Dana hemat ${_formatRupiah(challenge.savingsAmount)} berhasil dimasukkan ke tabungan! 💰✨');
                       }
                     },
                     style: ElevatedButton.styleFrom(
@@ -1455,14 +1440,7 @@ void _showChallengeSuccessSheet(_QuickChallenge challenge) {
                     onPressed: () {
                       HapticFeedback.lightImpact();
                       Navigator.pop(ctx);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            'Klaim berhasil! +${challenge.xpReward} XP dikreditkan. 🚀',
-                            style: GoogleFonts.quicksand(fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      );
+                      showTopToast(context, 'Klaim berhasil! +${challenge.xpReward} XP dikreditkan. 🚀', isError: true);
                     },
                     style: OutlinedButton.styleFrom(
                       side: BorderSide(
@@ -2076,9 +2054,7 @@ Container(
           ),
         );
         break;
-      case QuickActionType.scanReceipt:
-        context.push('/scan-receipt');
-        break;
+
       case QuickActionType.challenge:
         context.push('/challenge');
         break;
@@ -2674,6 +2650,8 @@ if (categoryObjects.isNotEmpty &&
             : (categoryObjects.isNotEmpty ? categoryObjects.first.group : '');
     var categoryUserSelected = false;
     var noteText = '';
+    DateTime selectedDateTime = DateTime.now();
+    bool isSaving = false;
     final interestBankOptions = [
       {
         'value': 'SeaBank (Standar)',
@@ -4472,6 +4450,193 @@ if (nameController.text.isEmpty ||
                                   },
                                 ),
                               ],
+                              const SizedBox(height: 20),
+                              RichText(
+                                text: TextSpan(
+                                  style: GoogleFonts.quicksand(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
+                                      color: isDarkMode
+                                          ? Colors.white70
+                                          : Colors.black87),
+                                  children: const [
+                                    TextSpan(text: 'Tanggal & Waktu Transaksi '),
+                                    TextSpan(
+                                      text: '*',
+                                      style: TextStyle(color: Colors.redAccent),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  // Date Picker Button
+                                  Expanded(
+                                    flex: 3,
+                                    child: InkWell(
+                                      onTap: () async {
+                                        final DateTime? pickedDate = await showDatePicker(
+                                          context: context,
+                                          initialDate: selectedDateTime,
+                                          firstDate: DateTime.now().subtract(const Duration(days: 365)),
+                                          lastDate: DateTime.now().add(const Duration(days: 365)),
+                                          builder: (context, child) {
+                                            return Theme(
+                                              data: Theme.of(context).copyWith(
+                                                colorScheme: isDarkMode
+                                                    ? ColorScheme.dark(
+                                                        primary: AppColors.primary,
+                                                        onPrimary: Colors.white,
+                                                        surface: AppColors.surfaceDark,
+                                                        onSurface: Colors.white,
+                                                      )
+                                                    : ColorScheme.light(
+                                                        primary: AppColors.primary,
+                                                        onPrimary: Colors.white,
+                                                        onSurface: Colors.teal.shade900,
+                                                      ),
+                                              ),
+                                              child: child!,
+                                            );
+                                          },
+                                        );
+                                        if (pickedDate != null) {
+                                          setSheetState(() {
+                                            selectedDateTime = DateTime(
+                                              pickedDate.year,
+                                              pickedDate.month,
+                                              pickedDate.day,
+                                              selectedDateTime.hour,
+                                              selectedDateTime.minute,
+                                            );
+                                          });
+                                        }
+                                      },
+                                      borderRadius: BorderRadius.circular(12),
+                                      child: Container(
+                                        height: 48,
+                                        decoration: BoxDecoration(
+                                          color: isDarkMode
+                                              ? Colors.white.withValues(alpha: 0.05)
+                                              : Colors.grey.shade50,
+                                          borderRadius: BorderRadius.circular(12),
+                                          border: Border.all(
+                                            color: formBorderColor,
+                                            width: 1.2,
+                                          ),
+                                        ),
+                                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                                        child: Row(
+                                          children: [
+                                            Icon(
+                                              Icons.calendar_month_rounded,
+                                              size: 18,
+                                              color: AppColors.primary,
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Expanded(
+                                              child: Text(
+                                                DateFormat('dd MMM yyyy', 'id_ID').format(selectedDateTime),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: GoogleFonts.quicksand(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 13,
+                                                  color: isDarkMode ? Colors.white : Colors.black87,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  // Time Picker Button
+                                  Expanded(
+                                    flex: 2,
+                                    child: InkWell(
+                                      onTap: () async {
+                                        final TimeOfDay? pickedTime = await showTimePicker(
+                                          context: context,
+                                          initialTime: TimeOfDay.fromDateTime(selectedDateTime),
+                                          builder: (context, child) {
+                                            return Theme(
+                                              data: Theme.of(context).copyWith(
+                                                colorScheme: isDarkMode
+                                                    ? ColorScheme.dark(
+                                                        primary: AppColors.primary,
+                                                        onPrimary: Colors.white,
+                                                        surface: AppColors.surfaceDark,
+                                                        onSurface: Colors.white,
+                                                      )
+                                                    : ColorScheme.light(
+                                                        primary: AppColors.primary,
+                                                        onPrimary: Colors.white,
+                                                        onSurface: Colors.teal.shade900,
+                                                      ),
+                                              ),
+                                              child: MediaQuery(
+                                                data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+                                                child: child!,
+                                              ),
+                                            );
+                                          },
+                                        );
+                                        if (pickedTime != null) {
+                                          setSheetState(() {
+                                            selectedDateTime = DateTime(
+                                              selectedDateTime.year,
+                                              selectedDateTime.month,
+                                              selectedDateTime.day,
+                                              pickedTime.hour,
+                                              pickedTime.minute,
+                                            );
+                                          });
+                                        }
+                                      },
+                                      borderRadius: BorderRadius.circular(12),
+                                      child: Container(
+                                        height: 48,
+                                        decoration: BoxDecoration(
+                                          color: isDarkMode
+                                              ? Colors.white.withValues(alpha: 0.05)
+                                              : Colors.grey.shade50,
+                                          borderRadius: BorderRadius.circular(12),
+                                          border: Border.all(
+                                            color: formBorderColor,
+                                            width: 1.2,
+                                          ),
+                                        ),
+                                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                                        child: Row(
+                                          children: [
+                                            Icon(
+                                              Icons.access_time_filled_rounded,
+                                              size: 18,
+                                              color: AppColors.primary,
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Expanded(
+                                              child: Text(
+                                                DateFormat('HH:mm', 'id_ID').format(selectedDateTime),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: GoogleFonts.quicksand(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 13,
+                                                  color: isDarkMode ? Colors.white : Colors.black87,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                               if (type == TransactionType.income)
                                 _buildSmartAllocationPlanner(
                                     _toAmount(amountController.text) ?? 0,
@@ -4479,21 +4644,13 @@ if (nameController.text.isEmpty ||
                               const SizedBox(height: 24),
                               ElevatedButton(
                                 onPressed: () async {
+                                  if (isSaving) return;
                                   if (!formKey.currentState!.validate()) {
                                     return;
                                   }
                                   if (!categoryUserSelected) {
                                     setSheetState(() {});
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(
-                                          backgroundColor: Colors.redAccent,
-                                          content: Text(
-                                            'Pilih kategori terlebih dahulu!',
-                                            style: GoogleFonts.quicksand(
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.white),
-                                          ),
-                                        ));
+                                    showTopToast(context, 'Pilih kategori terlebih dahulu!', isError: true);
                                     return;
                                   }
 
@@ -4502,6 +4659,10 @@ if (nameController.text.isEmpty ||
                                   if (amount == null) {
                                     return;
                                   }
+
+                                  setSheetState(() {
+                                    isSaving = true;
+                                  });
 
                                   final finalCategory = (selectedCategory ==
                                               AppCategories.otherLabel &&
@@ -4512,31 +4673,35 @@ if (nameController.text.isEmpty ||
                                       : selectedCategory;
 
                                   final tx = TransactionModel(
-                                    id: DateTime.now()
-                                        .millisecondsSinceEpoch
-                                        .toString(),
+                                    id: const Uuid().v4(),
                                     title: nameController.text.trim().isEmpty
                                         ? finalCategory
                                         : nameController.text.trim(),
                                     description: noteText.trim(),
                                     amount: amount,
                                     type: type,
-                                    date: DateTime.now(),
+                                    date: selectedDateTime,
                                     category: finalCategory,
                                     creatorName: ref.read(userNameProvider),
                                   );
 
-                                  await ref
-                                      .read(transactionServiceProvider)
-                                      .addTransaction(tx);
-                                  if (sheetContext.mounted) {
-                                    Navigator.pop(sheetContext);
-                                  }
-                                  if (sheetContext.mounted && mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(
-                                            content: Text(
-                                                'Berhasil mencatat transaksi! ✨')));
+                                  try {
+                                    await ref
+                                        .read(transactionServiceProvider)
+                                        .addTransaction(tx);
+                                    if (sheetContext.mounted) {
+                                      Navigator.pop(sheetContext);
+                                    }
+                                    if (sheetContext.mounted && mounted) {
+                                      showTopToast(context, 'Berhasil mencatat transaksi! ✨');
+                                    }
+                                  } catch (e) {
+                                    setSheetState(() {
+                                      isSaving = false;
+                                    });
+                                    if (sheetContext.mounted && mounted) {
+                                      showTopToast(context, 'Gagal menyimpan transaksi: $e', isError: true);
+                                    }
                                   }
                                 },
                                 style: ElevatedButton.styleFrom(
@@ -5200,25 +5365,7 @@ if (nameController.text.isEmpty ||
                             if (amountHasError) {
                               errorMessage = 'Nominal target harus lebih dari 0!';
                             }
-                            ScaffoldMessenger.of(dialogContext).showSnackBar(
-                              SnackBar(
-                                content: Row(
-                                  children: [
-                                    const Icon(Icons.error_outline_rounded, color: Colors.white, size: 18),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: Text(
-                                        errorMessage,
-                                        style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 12),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                backgroundColor: Colors.red.shade700,
-                                behavior: SnackBarBehavior.floating,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                              ),
-                            );
+                            showTopToast(dialogContext, errorMessage, isError: true);
                             return;
                           }
 
@@ -6491,6 +6638,7 @@ Future<void> _showExportSheetForMonth({
                         transactions: regular,
                         monthLabel: monthLabel,
                         asPdf: true,
+                        userName: ref.read(userNameProvider),
                       );
                     } catch (_) {}
                   },
@@ -6945,10 +7093,7 @@ TextFormField(
                                 Navigator.pop(sheetContext);
                               }
                               setState(() {});
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content: Text(
-                                          'Nominal berhasil diperbarui!')));
+                              showTopToast(context, 'Nominal berhasil diperbarui!');
                             }
                           },
                           style: ElevatedButton.styleFrom(

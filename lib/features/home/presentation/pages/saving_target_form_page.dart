@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tabunganku/core/widgets/top_toast.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -91,25 +92,7 @@ bool _categoryIsFocused = false;
         errorMessage = 'Pilih kategori target terlebih dahulu!';
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              const Icon(Icons.error_outline_rounded, color: Colors.white, size: 18),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  errorMessage,
-                  style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 12),
-                ),
-              ),
-            ],
-          ),
-          backgroundColor: Colors.red.shade700,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-      );
+      showTopToast(context, errorMessage, isError: true);
       return;
     }
 
@@ -130,23 +113,7 @@ bool _categoryIsFocused = false;
 
     if (mounted) {
       Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              const Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 18),
-              const SizedBox(width: 8),
-              Text(
-                widget.target != null ? 'Target berhasil diperbarui!' : 'Target baru berhasil ditambahkan!',
-                style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 12),
-              ),
-            ],
-          ),
-          backgroundColor: AppColors.primary,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-      );
+      showTopToast(context, widget.target != null ? 'Target berhasil diperbarui!' : 'Target baru berhasil ditambahkan!');
     }
   }
 

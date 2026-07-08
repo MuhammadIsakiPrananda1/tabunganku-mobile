@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:tabunganku/core/widgets/top_toast.dart';
+import 'package:uuid/uuid.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -165,7 +167,7 @@ final expensesRaw = prefs.getString(_prefKeyExpenses);
     final amount = double.tryParse(amountText) ?? 0.0;
 
     final newExpense = {
-      'id': DateTime.now().millisecondsSinceEpoch.toString(),
+      'id': const Uuid().v4(),
       'title': title,
       'amount': amount,
       'date': DateTime.now().toIso8601String(),
@@ -193,17 +195,7 @@ final expensesRaw = prefs.getString(_prefKeyExpenses);
     _expenseAmountController.clear();
     if (mounted) {
       Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Pengeluaran Ramadan berhasil ditambahkan!',
-            style: GoogleFonts.quicksand(
-                fontWeight: FontWeight.bold, color: Colors.white),
-          ),
-          backgroundColor: const Color(0xFF009688),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      showTopToast(context, 'Pengeluaran Ramadan berhasil ditambahkan!');
     }
   }
 
@@ -1039,7 +1031,7 @@ Container(
 
                                 if (finalSedekah > 0 && shouldSync && localSedekahAmt != finalSedekah) {
                                   final transaction = TransactionModel(
-                                    id: 'ramadan_sedekah_${index + 1}_${DateTime.now().millisecondsSinceEpoch}',
+                                    id: 'ramadan_sedekah_${index + 1}_${const Uuid().v4()}',
                                     title: 'Sedekah Ramadan Hari Ke-${index + 1}',
                                     description: 'Sedekah harian tercatat dari Jurnal Ramadan',
                                     amount: finalSedekah,
@@ -1052,17 +1044,7 @@ Container(
 
                                 if (context.mounted) {
                                   Navigator.pop(context);
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        'Jurnal Ramadan Hari ke-${index + 1} disimpan!',
-                                        style: GoogleFonts.quicksand(fontWeight: FontWeight.bold),
-                                      ),
-                                      backgroundColor: accentColor,
-                                      behavior: SnackBarBehavior.floating,
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                    ),
-                                  );
+                                  showTopToast(context, 'Jurnal Ramadan Hari ke-${index + 1} disimpan!');
                                 }
                               },
                               style: ElevatedButton.styleFrom(
@@ -1125,17 +1107,7 @@ Container(
               await _saveSedekahAmounts();
               if (context.mounted) {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      'Jurnal Ramadan berhasil di-reset!',
-                      style: GoogleFonts.quicksand(fontWeight: FontWeight.bold),
-                    ),
-                    backgroundColor: Colors.redAccent,
-                    behavior: SnackBarBehavior.floating,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                );
+                showTopToast(context, 'Jurnal Ramadan berhasil di-reset!', isError: true);
               }
             },
             style: ElevatedButton.styleFrom(

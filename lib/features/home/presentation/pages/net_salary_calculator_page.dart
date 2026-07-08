@@ -835,14 +835,17 @@ Row(
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                label,
-                style: GoogleFonts.quicksand(
-                  fontSize: 12,
-                  fontWeight: isBold ? FontWeight.bold : FontWeight.w600,
-                  color: isBold ? color : color.withOpacity(0.7),
+              Expanded(
+                child: Text(
+                  label,
+                  style: GoogleFonts.quicksand(
+                    fontSize: 12,
+                    fontWeight: isBold ? FontWeight.bold : FontWeight.w600,
+                    color: isBold ? color : color.withOpacity(0.7),
+                  ),
                 ),
               ),
+              const SizedBox(width: 8),
               Text(
                 value,
                 style: GoogleFonts.quicksand(
@@ -879,14 +882,17 @@ Row(
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                label,
-                style: GoogleFonts.quicksand(
-                  fontSize: 10,
-                  fontWeight: isBold ? FontWeight.bold : FontWeight.w600,
-                  color: isDarkMode ? Colors.white38 : Colors.grey.shade600,
+              Expanded(
+                child: Text(
+                  label,
+                  style: GoogleFonts.quicksand(
+                    fontSize: 10,
+                    fontWeight: isBold ? FontWeight.bold : FontWeight.w600,
+                    color: isDarkMode ? Colors.white38 : Colors.grey.shade600,
+                  ),
                 ),
               ),
+              const SizedBox(width: 8),
               Text(
                 value,
                 style: GoogleFonts.quicksand(
@@ -1023,3 +1029,5 @@ class _RibuanFormatter extends TextInputFormatter {
     );
   }
 }
+
+

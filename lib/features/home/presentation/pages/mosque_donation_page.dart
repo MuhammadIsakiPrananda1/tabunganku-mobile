@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
+import 'package:tabunganku/core/widgets/top_toast.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -44,37 +46,17 @@ class _MosqueDonationPageState extends ConsumerState<MosqueDonationPage> {
     final customType = _customTypeController.text.trim();
 
     if (amount <= 0 || mosqueName.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Mohon isi nama masjid dan nominal sedekah',
-            style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.white),
-          ),
-          backgroundColor: AppColors.error,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-      );
+      showTopToast(context, 'Mohon isi nama masjid dan nominal sedekah', isError: true);
       return;
     }
 
     if (_selectedType == 'Lainnya' && customType.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Mohon isi jenis sedekah kustom Anda',
-            style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.white),
-          ),
-          backgroundColor: AppColors.error,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-      );
+      showTopToast(context, 'Mohon isi jenis sedekah kustom Anda', isError: true);
       return;
     }
 
     final transaction = TransactionModel(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: const Uuid().v4(),
       title: 'Sedekah: $mosqueName',
       description: 'Sedekah ${_selectedType == 'Lainnya' ? customType : _selectedType} untuk $mosqueName',
       amount: amount,
@@ -86,17 +68,7 @@ class _MosqueDonationPageState extends ConsumerState<MosqueDonationPage> {
     await ref.read(transactionServiceProvider).addTransaction(transaction);
 
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Sedekah berhasil dicatat! ✨',
-            style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.white),
-          ),
-          backgroundColor: accentColor,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-      );
+      showTopToast(context, 'Sedekah berhasil dicatat! ✨');
       Navigator.pop(context);
     }
   }

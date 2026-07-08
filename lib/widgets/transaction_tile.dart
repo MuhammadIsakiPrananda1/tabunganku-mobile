@@ -86,6 +86,13 @@ class TransactionTile extends ConsumerWidget {
                   fontSize: 12,
                 ),
               ),
+              Text(
+                DateFormat('HH:mm').format(transaction.date),
+                style: TextStyle(
+                  color: isDarkMode ? Colors.white38 : AppColors.textSecondary.withValues(alpha: 0.7),
+                  fontSize: 11,
+                ),
+              ),
             ],
           ),
         ],

@@ -506,3 +506,5 @@ final pageBgColor = isDarkMode ? AppColors.backgroundDark : const Color(0xFFF8FA
     );
   }
 }
+
+

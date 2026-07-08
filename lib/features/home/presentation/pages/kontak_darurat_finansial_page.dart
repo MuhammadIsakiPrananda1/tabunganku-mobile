@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tabunganku/core/widgets/top_toast.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -130,16 +131,7 @@ final TextEditingController _instController = TextEditingController();
 
     if (mounted) {
       Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Kontak darurat baru berhasil didaftarkan!',
-            style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.white),
-          ),
-          backgroundColor: const Color(0xFFE53935),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      showTopToast(context, 'Kontak darurat baru berhasil didaftarkan!');
     }
   }
 
@@ -151,18 +143,7 @@ final TextEditingController _instController = TextEditingController();
 
   void _performCopy(String label, String value) {
     Clipboard.setData(ClipboardData(text: value));
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          '$label berhasil disalin ke clipboard!',
-          style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 12),
-        ),
-        backgroundColor: const Color(0xFFE53935),
-        duration: const Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      ),
-    );
+    showTopToast(context, '$label berhasil disalin ke clipboard!');
   }
 
   Future<void> _makePhoneCall(String phone) async {

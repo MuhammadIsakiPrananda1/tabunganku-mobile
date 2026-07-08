@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:tabunganku/core/widgets/top_toast.dart';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -79,15 +80,7 @@ final tempDir = await getTemporaryDirectory();
     } catch (e) {
       debugPrint('Error cropping image: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Gagal memotong gambar. Coba lagi.',
-              style: GoogleFonts.quicksand(fontWeight: FontWeight.bold),
-            ),
-            backgroundColor: Colors.redAccent,
-          ),
-        );
+        showTopToast(context, 'Gagal memotong gambar. Coba lagi.', isError: true);
       }
     } finally {
       if (mounted) {

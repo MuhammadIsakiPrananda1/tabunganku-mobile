@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tabunganku/core/widgets/top_toast.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -95,17 +96,7 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage> with TickerProvider
 
         ref.read(securityProvider.notifier).setPin(_currentPin);
         context.pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'PIN Keamanan Berhasil Diatur! ✓',
-              style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: Colors.white),
-            ),
-            backgroundColor: Colors.green.shade600,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          ),
-        );
+        showTopToast(context, 'PIN Keamanan Berhasil Diatur! ✓');
       } else {
 
         setState(() {

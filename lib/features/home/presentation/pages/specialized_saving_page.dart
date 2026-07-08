@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tabunganku/core/widgets/top_toast.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -213,25 +214,7 @@ class _SpecializedSavingPageState extends ConsumerState<SpecializedSavingPage> {
                       if (_amountHasError) {
                         errorMessage = 'Nominal target harus lebih dari 0!';
                       }
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Row(
-                            children: [
-                              const Icon(Icons.error_outline_rounded, color: Colors.white, size: 18),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  errorMessage,
-                                  style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 12),
-                                ),
-                              ),
-                            ],
-                          ),
-                          backgroundColor: Colors.red.shade700,
-                          behavior: SnackBarBehavior.floating,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        ),
-                      );
+                      showTopToast(context, errorMessage, isError: true);
                       return;
                     }
 
@@ -249,23 +232,7 @@ class _SpecializedSavingPageState extends ConsumerState<SpecializedSavingPage> {
                       _amountHasError = false;
                     });
                     if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Row(
-                            children: [
-                              const Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 18),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Rencana Berhasil Dibuat',
-                                style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 12),
-                              ),
-                            ],
-                          ),
-                          backgroundColor: AppColors.primary,
-                          behavior: SnackBarBehavior.floating,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        ),
-                      );
+                      showTopToast(context, 'Rencana Berhasil Dibuat');
                     }
                   },
                   style: ElevatedButton.styleFrom(
@@ -562,25 +529,7 @@ class _SpecializedSavingPageState extends ConsumerState<SpecializedSavingPage> {
                       if (amountHasError) {
                         errorMessage = 'Nominal target harus lebih dari 0!';
                       }
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Row(
-                            children: [
-                              const Icon(Icons.error_outline_rounded, color: Colors.white, size: 18),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  errorMessage,
-                                  style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 12),
-                                ),
-                              ),
-                            ],
-                          ),
-                          backgroundColor: Colors.red.shade700,
-                          behavior: SnackBarBehavior.floating,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        ),
-                      );
+                      showTopToast(context, errorMessage, isError: true);
                       return;
                     }
 
@@ -594,23 +543,7 @@ class _SpecializedSavingPageState extends ConsumerState<SpecializedSavingPage> {
                     await ref.read(savingTargetServiceProvider).addTarget(target);
                     if (context.mounted) {
                       Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Row(
-                            children: [
-                              const Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 18),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Rencana Berhasil Dibuat',
-                                style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 12),
-                              ),
-                            ],
-                          ),
-                          backgroundColor: AppColors.primary,
-                          behavior: SnackBarBehavior.floating,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        ),
-                      );
+                      showTopToast(context, 'Rencana Berhasil Dibuat');
                     }
                   },
                   style: ElevatedButton.styleFrom(

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:tabunganku/core/widgets/top_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -216,12 +217,14 @@ IconData _getCategoryIcon(String title) {
     final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
         (ref.watch(themeProvider) == ThemeMode.system && theme.brightness == Brightness.dark);
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
-    final pageBgColor = isDarkMode ? AppColors.backgroundDark : const Color(0xFFFFFDFB);
+    final pageBg = isDarkMode ? AppColors.backgroundDark : const Color(0xFFF9FAFB);
+    final cardBg = isDarkMode ? AppColors.surfaceDark : Colors.white;
+    final borderCol = isDarkMode ? Colors.white10 : Colors.grey.shade200;
     final accentColor = const Color(0xFFFF9800);
     final progress = _effectiveTargetBudget > 0 ? (_savedAmount / _effectiveTargetBudget).clamp(0.0, 1.0) : 0.0;
 
     return Scaffold(
-      backgroundColor: pageBgColor,
+      backgroundColor: pageBg,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -234,44 +237,29 @@ IconData _getCategoryIcon(String title) {
           'Tabungan Wisata',
           style: GoogleFonts.quicksand(
             fontWeight: FontWeight.bold,
-            fontSize: 16,
+            fontSize: 15,
             color: contentColor,
           ),
         ),
       ),
       body: ListView(
+        physics: const BouncingScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 48),
         children: [
 
           Container(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(28),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: isDarkMode
-                    ? [
-                        const Color(0xFF2E1A0F),
-                        const Color(0xFF1E1E1E),
-                      ]
-                    : [
-                        const Color(0xFFFFF3E0),
-                        const Color(0xFFFFFDFB),
-                      ],
-              ),
+              color: cardBg,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: borderCol),
               boxShadow: [
                 BoxShadow(
-                  color: accentColor.withOpacity(isDarkMode ? 0.05 : 0.08),
-                  blurRadius: 20,
-                  offset: const Offset(0, 8),
+                  color: Colors.black.withValues(alpha: isDarkMode ? 0.08 : 0.02),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
                 ),
               ],
-              border: Border.all(
-                color: isDarkMode
-                    ? accentColor.withOpacity(0.1)
-                    : accentColor.withOpacity(0.15),
-              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -288,8 +276,8 @@ IconData _getCategoryIcon(String title) {
                             style: GoogleFonts.quicksand(
                               fontSize: 10,
                               fontWeight: FontWeight.w900,
-                              color: accentColor,
-                              letterSpacing: 1.2,
+                              color: Colors.grey,
+                              letterSpacing: 1.0,
                             ),
                           ),
                           const SizedBox(height: 6),
@@ -305,15 +293,15 @@ IconData _getCategoryIcon(String title) {
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: accentColor.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(100),
+                        color: accentColor.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
                         '${(progress * 100).toStringAsFixed(0)}% Terkumpul',
                         style: GoogleFonts.quicksand(
-                          fontSize: 10,
+                          fontSize: 9,
                           fontWeight: FontWeight.bold,
                           color: accentColor,
                         ),
@@ -321,220 +309,129 @@ IconData _getCategoryIcon(String title) {
                     ),
                   ],
                 ),
-                const SizedBox(height: 18),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.baseline,
-                  textBaseline: TextBaseline.alphabetic,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            _targetBudget > 0 ? 'Target Anggaran' : 'Estimasi Total Biaya',
-                            style: GoogleFonts.quicksand(
-                              fontSize: 10.5,
-                              fontWeight: FontWeight.bold,
-                              color: isDarkMode ? Colors.white38 : Colors.grey.shade500,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          FittedBox(
-                            fit: BoxFit.scaleDown,
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(_effectiveTargetBudget),
-                              style: GoogleFonts.quicksand(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w800,
-                                color: contentColor,
-                              ),
-                            ),
-                          ),
-                          if (_targetBudget > 0 && _totalEstimatedCost > 0) ...[
-                            const SizedBox(height: 2),
-                            Text(
-                              'Detail Kebutuhan: Rp ${NumberFormat.decimalPattern('id_ID').format(_totalEstimatedCost.round())}',
-                              style: GoogleFonts.quicksand(
-                                fontSize: 9.5,
-                                fontWeight: FontWeight.bold,
-                                color: isDarkMode ? Colors.white30 : Colors.grey.shade600,
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
+                const SizedBox(height: 12),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(_effectiveTargetBudget),
+                    style: GoogleFonts.quicksand(
+                      fontSize: 26,
+                      fontWeight: FontWeight.w900,
+                      color: isDarkMode ? Colors.white : AppColors.primaryDark,
+                      letterSpacing: -0.5,
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            'Dana Terkumpul',
-                            style: GoogleFonts.quicksand(
-                              fontSize: 10.5,
-                              fontWeight: FontWeight.bold,
-                              color: isDarkMode ? Colors.white38 : Colors.grey.shade500,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          FittedBox(
-                            fit: BoxFit.scaleDown,
-                            alignment: Alignment.centerRight,
-                            child: Text(
-                              NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(_savedAmount),
-                              style: GoogleFonts.quicksand(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: accentColor,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  _targetBudget > 0
+                      ? 'Target Anggaran (Kebutuhan: Rp ${NumberFormat.decimalPattern('id_ID').format(_totalEstimatedCost.round())})'
+                      : 'Estimasi Total Kebutuhan',
+                  style: GoogleFonts.quicksand(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey,
+                  ),
                 ),
                 const SizedBox(height: 16),
-
-ClipRRect(
+                ClipRRect(
                   borderRadius: BorderRadius.circular(100),
                   child: LinearProgressIndicator(
                     value: progress,
-                    minHeight: 8,
-                    backgroundColor: isDarkMode ? Colors.white.withOpacity(0.04) : Colors.grey.shade200,
+                    minHeight: 6,
+                    backgroundColor: isDarkMode ? Colors.white10 : Colors.grey.shade100,
                     valueColor: AlwaysStoppedAnimation<Color>(accentColor),
                   ),
                 ),
                 const SizedBox(height: 20),
-
-Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: isDarkMode ? Colors.black.withOpacity(0.15) : Colors.white.withOpacity(0.6),
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Icon(Icons.calendar_month_rounded, color: accentColor.withOpacity(0.8), size: 16),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              _targetDate != null
-                                  ? 'Rencana Berangkat: ${DateFormat('MMMM yyyy', 'id_ID').format(_targetDate!)} ($_monthsRemaining Bulan Lagi)'
-                                  : 'Rencana Berangkat: Belum Diatur',
-                              style: GoogleFonts.quicksand(
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                                color: isDarkMode ? Colors.white70 : Colors.grey.shade700,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Icon(Icons.savings_rounded, color: accentColor.withOpacity(0.8), size: 16),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              _targetDate != null
-                                  ? 'Nabung per Bulan: Rp ${NumberFormat.decimalPattern('id_ID').format(_monthlySavingsTarget.round())}'
-                                  : 'Nabung per Bulan: - (Sesuaikan Rencana)',
-                              style: GoogleFonts.quicksand(
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                                color: isDarkMode ? Colors.white70 : Colors.grey.shade700,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+                Container(
+                  height: 1,
+                  color: borderCol,
                 ),
-
-                const SizedBox(height: 18),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    _StatCell(
+                      label: 'TERKUMPUL',
+                      value: NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(_savedAmount),
+                      color: Colors.teal,
+                    ),
+                    Container(
+                      width: 1,
+                      height: 32,
+                      color: borderCol,
+                      margin: const EdgeInsets.symmetric(horizontal: 6),
+                    ),
+                    _StatCell(
+                      label: 'PER BULAN',
+                      value: _targetDate != null
+                          ? 'Rp ${NumberFormat.decimalPattern('id_ID').format(_monthlySavingsTarget.round())}'
+                          : '-',
+                      color: isDarkMode ? Colors.white70 : Colors.black87,
+                    ),
+                    Container(
+                      width: 1,
+                      height: 32,
+                      color: borderCol,
+                      margin: const EdgeInsets.symmetric(horizontal: 6),
+                    ),
+                    _StatCell(
+                      label: 'SISA WAKTU',
+                      value: _targetDate != null ? '$_monthsRemaining Bln' : '-',
+                      color: isDarkMode ? Colors.white70 : Colors.black87,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
                 Row(
                   children: [
                     Expanded(
-                      child: SizedBox(
-                        height: 42,
-                        child: OutlinedButton(
-                          onPressed: () => _showAdjustPlanSheet(isDarkMode, accentColor),
-                          style: OutlinedButton.styleFrom(
-                            padding: EdgeInsets.zero,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                            side: BorderSide(
-                              color: isDarkMode
-                                  ? Colors.white.withOpacity(0.1)
-                                  : accentColor.withOpacity(0.2),
-                            ),
-                          ),
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            alignment: Alignment.center,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.tune_rounded, size: 14, color: contentColor),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    'Sesuaikan Rencana',
-                                    style: GoogleFonts.quicksand(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 11.5,
-                                      color: contentColor,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                      child: OutlinedButton(
+                        onPressed: () => _showAdjustPlanSheet(isDarkMode, accentColor),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                          side: BorderSide(color: borderCol, width: 1.2),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        ),
+                        child: Text(
+                          'Sesuaikan Rencana',
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.quicksand(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 11.5,
+                            color: isDarkMode ? Colors.white70 : Colors.black87,
                           ),
                         ),
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: SizedBox(
-                        height: 42,
-                        child: ElevatedButton(
-                          onPressed: () => _showUpdateSavedDialog(isDarkMode, accentColor),
-                          style: ElevatedButton.styleFrom(
-                            padding: EdgeInsets.zero,
-                            backgroundColor: accentColor,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                            elevation: 0,
-                          ),
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            alignment: Alignment.center,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(Icons.add_card_rounded, size: 14, color: Colors.white),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    'Update Tabungan',
-                                    style: GoogleFonts.quicksand(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 11.5,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ],
+                      child: ElevatedButton(
+                        onPressed: () => _showUpdateSavedDialog(isDarkMode, accentColor),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                          backgroundColor: accentColor,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                          elevation: 0,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.add_card_rounded, size: 14),
+                            const SizedBox(width: 4),
+                            Flexible(
+                              child: Text(
+                                'Update Tabungan',
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.quicksand(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 11.5,
+                                ),
                               ),
                             ),
-                          ),
+                          ],
                         ),
                       ),
                     ),
@@ -1069,12 +966,7 @@ Text(
                               _destinationController.clear();
                               if (context.mounted) {
                                 Navigator.pop(context);
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('Rencana wisata berhasil disimpan!', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold)),
-                                    backgroundColor: accentColor,
-                                  ),
-                                );
+                                showTopToast(context, 'Rencana wisata berhasil disimpan!');
                               }
                             }
                           },
@@ -1511,3 +1403,45 @@ class _RibuanFormatter extends TextInputFormatter {
     );
   }
 }
+
+class _StatCell extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color color;
+
+  const _StatCell({required this.label, required this.value, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: GoogleFonts.quicksand(
+              fontSize: 8,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(height: 4),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              value,
+              style: GoogleFonts.quicksand(
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+

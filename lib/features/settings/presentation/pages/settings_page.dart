@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:tabunganku/core/widgets/top_toast.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -200,6 +201,7 @@ final Map<String, List<TransactionModel>> grouped = {};
                                   transactions: monthTx,
                                   monthLabel: monthKey,
                                   asPdf: true,
+                                  userName: ref.read(userNameProvider),
                                 );
                               },
                               icon: const Icon(Icons.share_rounded, size: 12),
@@ -1318,19 +1320,7 @@ Future<void> _openRateApp() async {
       await launchUrl(whatsappUrl, mode: LaunchMode.externalApplication);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Tidak dapat membuka WhatsApp. Pastikan WhatsApp sudah terpasang.',
-              style: GoogleFonts.quicksand(
-                  fontWeight: FontWeight.bold, color: Colors.white),
-            ),
-            backgroundColor: Colors.grey.shade700,
-            behavior: SnackBarBehavior.floating,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          ),
-        );
+        showTopToast(context, 'Tidak dapat membuka WhatsApp. Pastikan WhatsApp sudah terpasang.');
       }
     }
   }
@@ -1604,45 +1594,11 @@ void _showFeedbackDialog(bool isDarkMode) {
                             text: 'Subject: [TabunganKu Feedback] $selectedType\n\nPesan:\n${controller.text.trim()}'
                           ));
                           if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  'Gagal membuka email. Pesan disalin ke clipboard untuk dikirim manual.',
-                                  style: GoogleFonts.quicksand(
-                                      fontWeight: FontWeight.bold, color: Colors.white, fontSize: 11),
-                                ),
-                                backgroundColor: Colors.grey.shade800,
-                                behavior: SnackBarBehavior.floating,
-                                margin: const EdgeInsets.all(16),
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12)),
-                              ),
-                            );
+                            showTopToast(context, 'Gagal membuka email. Pesan disalin ke clipboard untuk dikirim manual.', isError: true);
                           }
                         } else {
                           if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Row(
-                                  children: [
-                                    const Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 18),
-                                    const SizedBox(width: 10),
-                                    Expanded(
-                                      child: Text(
-                                        'Membuka Gmail. Terima kasih atas masukan Anda.',
-                                        style: GoogleFonts.quicksand(
-                                            fontWeight: FontWeight.bold, color: Colors.white, fontSize: 11.5),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                backgroundColor: AppColors.primary,
-                                behavior: SnackBarBehavior.floating,
-                                margin: const EdgeInsets.all(16),
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12)),
-                              ),
-                            );
+                            showTopToast(context, 'Membuka Gmail. Terima kasih atas masukan Anda.');
                           }
                         }
                       }
@@ -1737,19 +1693,7 @@ void _showResetDataDialog(bool isDarkMode) {
                   .clearAllTransactions();
               ref.invalidate(transactionsStreamProvider);
               if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      'Semua data transaksi telah dihapus.',
-                      style: GoogleFonts.quicksand(
-                          fontWeight: FontWeight.bold, color: Colors.white),
-                    ),
-                    backgroundColor: Colors.red.shade700,
-                    behavior: SnackBarBehavior.floating,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16)),
-                  ),
-                );
+                showTopToast(context, 'Semua data transaksi telah dihapus.', isError: true);
               }
             },
             style: ElevatedButton.styleFrom(
@@ -1995,12 +1939,7 @@ Widget _buildSettingTile(IconData icon, String title, VoidCallback onTap,
             onPressed: () {
               ref.read(securityProvider.notifier).clearPin();
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Keamanan telah dinonaktifkan'),
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
+              showTopToast(context, 'Keamanan telah dinonaktifkan');
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,

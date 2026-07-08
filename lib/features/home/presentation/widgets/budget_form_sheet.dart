@@ -194,92 +194,81 @@ for (var cat in AppCategories.expenseCategories) {
       child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 12),
 
-            Container(
-              width: 48,
-              height: 5,
-              decoration: BoxDecoration(
-                color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
-                borderRadius: BorderRadius.circular(10),
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: isDarkMode ? Colors.white10 : Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
 
-Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Row(
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 28),
+              child: Stack(
+                alignment: Alignment.center,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      isEditing ? Icons.edit_calendar_rounded : Icons.add_chart_rounded,
-                      color: AppColors.primary,
-                      size: 24,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          isEditing ? 'Perbarui Budget' : 'Budget Baru',
-                          style: TextStyle(
-                            fontSize: 19, 
-                            fontWeight: FontWeight.bold,
-                            color: isDarkMode ? Colors.white : Colors.black87,
-                            letterSpacing: -0.5,
-                          ),
-                        ),
-                        Text(
-                          'Atur batas pengeluaran bulanan Anda',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: isDarkMode ? Colors.white38 : Colors.grey.shade600,
-                          ),
-                        ),
-                      ],
+                  Center(
+                    child: Text(
+                      isEditing ? 'Perbarui Anggaran' : 'Anggaran Baru',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.quicksand(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 19,
+                        color: isDarkMode ? Colors.white : Colors.black87,
+                        letterSpacing: -0.5,
+                      ),
                     ),
                   ),
                   if (isEditing)
-                    IconButton(
-                      onPressed: _deleteBudget,
-                      icon: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.red.withValues(alpha: 0.1),
-                          shape: BoxShape.circle,
+                    Positioned(
+                      right: 0,
+                      child: IconButton(
+                        onPressed: _deleteBudget,
+                        icon: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: Colors.red.withValues(alpha: 0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.delete_outline_rounded, color: Colors.red, size: 18),
                         ),
-                        child: const Icon(Icons.delete_outline_rounded, color: Colors.red, size: 20),
+                        tooltip: 'Hapus budget ini',
                       ),
-                      tooltip: 'Hapus budget ini',
                     ),
                 ],
               ),
             ),
+            const SizedBox(height: 20),
 
-            const SizedBox(height: 32),
-
-Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 28),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Kategori Budget',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      color: isDarkMode ? Colors.white70 : Colors.black87,
+                  RichText(
+                    text: TextSpan(
+                      style: GoogleFonts.quicksand(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: isDarkMode ? Colors.white70 : Colors.black87),
+                      children: const [
+                        TextSpan(text: 'Kategori Anggaran '),
+                        TextSpan(
+                          text: '*',
+                          style: TextStyle(color: Colors.redAccent),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 8),
                   InkWell(
                     onTap: () {
                       _showCategorySearchSheet(
@@ -296,22 +285,22 @@ Padding(
                         },
                       );
                     },
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(16),
                     child: Container(
-                      height: 58,
+                      height: 48,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
                       decoration: BoxDecoration(
                         color: isDarkMode
-                            ? Colors.white.withValues(alpha: 0.03)
-                            : Colors.grey.shade50,
-                        borderRadius: BorderRadius.circular(20),
+                            ? Colors.white.withValues(alpha: 0.05)
+                            : Colors.white,
+                        borderRadius: BorderRadius.circular(16),
                         border: Border.all(
                           color: isDarkMode
-                              ? Colors.white.withValues(alpha: 0.05)
-                              : Colors.grey.shade200,
-                          width: 1.5,
+                              ? Colors.white24
+                              : Colors.black26,
+                          width: 1.2,
                         ),
                       ),
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Row(
                         children: [
                           Icon(
@@ -324,133 +313,177 @@ Padding(
                             size: 20,
                             color: AppColors.primary,
                           ),
-                          const SizedBox(width: 16),
+                          const SizedBox(width: 12),
                           Expanded(
                             child: Text(
                               _selectedCategory ?? 'Pilih Kategori',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
+                              style: GoogleFonts.quicksand(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 13,
-                                color: isDarkMode ? Colors.white : Colors.black87,
+                                color: isDarkMode ? Colors.white70 : Colors.black87,
                               ),
                             ),
                           ),
                           Icon(
                             Icons.arrow_drop_down_rounded,
-                            size: 28,
+                            size: 24,
                             color: isDarkMode ? Colors.white38 : Colors.grey,
                           ),
                         ],
                       ),
                     ),
                   ),
-                ],
-              ),
-            ),
-
-if (_isCustomCategory) ...[
-              const SizedBox(height: 20),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: TextField(
-                  controller: _customCategoryController,
-                  textCapitalization: TextCapitalization.words,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 11,
-                    color: isDarkMode ? Colors.white : Colors.black87,
-                  ),
-                  decoration: InputDecoration(
-                    labelText: 'Nama Kategori Kustom',
-                    hintText: 'Misal: Gym, Netflix, Skincare...',
-                    prefixIcon: const Icon(Icons.label_outline_rounded, color: AppColors.primary),
-                    filled: true,
-                    fillColor: isDarkMode ? Colors.white.withValues(alpha: 0.03) : Colors.grey.shade50,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      borderSide: BorderSide.none,
-                    ),
-                    labelStyle: TextStyle(color: isDarkMode ? Colors.white38 : Colors.grey),
-                  ),
-                ),
-              ),
-            ],
-
-            const SizedBox(height: 32),
-
-Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Limit Anggaran',
-                    style: TextStyle(
-                      fontSize: 11, 
-                      fontWeight: FontWeight.bold,
-                      color: isDarkMode ? Colors.white70 : Colors.black87,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: isDarkMode ? Colors.white.withValues(alpha: 0.03) : Colors.grey.shade50,
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(
-                        color: _amountHasError 
-                            ? Colors.redAccent 
-                            : (isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade200),
-                        width: _amountHasError ? 1.5 : 1.0,
+                  
+                  if (_isCustomCategory) ...[
+                    const SizedBox(height: 16),
+                    RichText(
+                      text: TextSpan(
+                        style: GoogleFonts.quicksand(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: isDarkMode ? Colors.white70 : Colors.black87),
+                        children: const [
+                          TextSpan(text: 'Nama Kategori Kustom '),
+                          TextSpan(
+                            text: '*',
+                            style: TextStyle(color: Colors.redAccent),
+                          ),
+                        ],
                       ),
                     ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        const Text(
-                          'Rp',
-                          style: TextStyle(
-                            fontSize: 21,
-                            fontWeight: FontWeight.w900,
-                            color: AppColors.primary,
-                          ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: _customCategoryController,
+                      textCapitalization: TextCapitalization.words,
+                      style: GoogleFonts.quicksand(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                        color: isDarkMode ? Colors.white : Colors.black87,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: 'Misal: Gym, Netflix, Skincare...',
+                        hintStyle: GoogleFonts.quicksand(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: isDarkMode ? Colors.white10 : Colors.grey.shade400,
                         ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: TextField(
-                            controller: _amountController,
-                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly,
-                              RibuanFormatter(),
-                            ],
-                            onChanged: (val) {
-                              final amountRaw = val.replaceAll('.', '').replaceAll(',', '');
-                              final amount = double.tryParse(amountRaw) ?? 0;
-                              if (amount > 0 && _amountHasError) {
-                                setState(() {
-                                  _amountHasError = false;
-                                });
-                              }
-                            },
-                            style: TextStyle(
-                              fontSize: 21,
-                              fontWeight: FontWeight.w900,
-                              color: isDarkMode ? Colors.white : Colors.black87,
-                              letterSpacing: -0.5,
-                            ),
-                            decoration: InputDecoration(
-                              border: InputBorder.none,
-                              hintText: 'Masukkan Nominal',
-                              hintStyle: TextStyle(
-                                color: isDarkMode ? Colors.white12 : Colors.grey.shade300,
-                              ),
-                            ),
-                          ),
+                        prefixIcon: const Icon(Icons.label_outline_rounded, color: AppColors.primary, size: 20),
+                        filled: true,
+                        fillColor: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.white,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(
+                              color: isDarkMode ? Colors.white24 : Colors.black26,
+                              width: 1.2),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(
+                              color: isDarkMode ? Colors.white24 : Colors.black26,
+                              width: 1.2),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      ),
+                    ),
+                  ],
+
+                  const SizedBox(height: 20),
+
+                  RichText(
+                    text: TextSpan(
+                      style: GoogleFonts.quicksand(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: isDarkMode ? Colors.white70 : Colors.black87),
+                      children: const [
+                        TextSpan(text: 'Limit Anggaran '),
+                        TextSpan(
+                          text: '*',
+                          style: TextStyle(color: Colors.redAccent),
                         ),
                       ],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    controller: _amountController,
+                    autofocus: false,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    textAlign: TextAlign.left,
+                    style: GoogleFonts.quicksand(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: isDarkMode ? Colors.white : Colors.black87,
+                    ),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      RibuanFormatter(),
+                    ],
+                    onChanged: (val) {
+                      final amountRaw = val.replaceAll('.', '').replaceAll(',', '');
+                      final amount = double.tryParse(amountRaw) ?? 0;
+                      if (amount > 0 && _amountHasError) {
+                        setState(() {
+                          _amountHasError = false;
+                        });
+                      }
+                    },
+                    decoration: InputDecoration(
+                      hintText: 'Masukkan Nominal',
+                      hintStyle: GoogleFonts.quicksand(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: isDarkMode ? Colors.white10 : Colors.grey.shade400,
+                      ),
+                      prefixIcon: Container(
+                        padding: const EdgeInsets.only(left: 16, right: 8),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.payments_rounded,
+                              color: AppColors.primary,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Rp',
+                              style: GoogleFonts.quicksand(
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.primary,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
+                      filled: true,
+                      fillColor: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.white,
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(
+                              color: isDarkMode ? Colors.white24 : Colors.black26,
+                              width: 1.2)),
+                      enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(
+                              color: _amountHasError 
+                                  ? Colors.redAccent 
+                                  : (isDarkMode ? Colors.white24 : Colors.black26),
+                              width: 1.2)),
+                      focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(
+                              color: _amountHasError ? Colors.redAccent : AppColors.primary,
+                              width: 1.5)),
+                      errorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: const BorderSide(color: Colors.redAccent, width: 1.5)),
+                      focusedErrorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: const BorderSide(color: Colors.redAccent, width: 1.5)),
+                      contentPadding: const EdgeInsets.only(left: 0, right: 16, top: 14, bottom: 14),
                     ),
                   ),
                   if (_amountHasError) ...[
@@ -467,38 +500,30 @@ Padding(
                       ),
                     ),
                   ],
-                ],
-              ),
-            ),
 
-            const SizedBox(height: 48),
+                  const SizedBox(height: 32),
 
-Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: SizedBox(
-                width: double.infinity,
-                height: 64,
-                child: ElevatedButton(
-                  onPressed: _saveBudget,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-                    elevation: 10,
-                    shadowColor: AppColors.primary.withValues(alpha: 0.4),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(isEditing ? Icons.update_rounded : Icons.check_circle_rounded, size: 22),
-                      const SizedBox(width: 12),
-                      Text(
-                        isEditing ? 'Perbarui Anggaran' : 'Simpan Anggaran',
-                        style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: ElevatedButton(
+                      onPressed: _saveBudget,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        elevation: 0,
                       ),
-                    ],
+                      child: Text(
+                        isEditing ? 'Perbarui Anggaran' : 'Simpan Anggaran',
+                        style: GoogleFonts.quicksand(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13.5,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
             ),
           ],
@@ -782,3 +807,5 @@ Padding(
     );
   }
 }
+
+

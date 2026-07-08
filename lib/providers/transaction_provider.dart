@@ -21,12 +21,13 @@ final addTransactionProvider = Provider((ref) {
     ref.invalidate(activeChallengesProvider);
     ref.invalidate(currentStreakProvider);
     ref.invalidate(totalPointsProvider);
-    
+
     return result;
   };
 });
 
-final transactionsProvider = FutureProvider.autoDispose<List<TransactionModel>>((ref) async {
+final transactionsProvider =
+    FutureProvider.autoDispose<List<TransactionModel>>((ref) async {
   final service = ref.watch(transactionServiceProvider);
   return service.getTransactions();
 });
@@ -37,8 +38,8 @@ final transactionsStreamProvider =
   return service.watchTransactions();
 });
 
-final transactionsByGroupProvider =
-    Provider.autoDispose.family<List<TransactionModel>, String?>((ref, groupId) {
+final transactionsByGroupProvider = Provider.autoDispose
+    .family<List<TransactionModel>, String?>((ref, groupId) {
   final transactionsAsync = ref.watch(transactionsStreamProvider);
   return transactionsAsync.maybeWhen(
     data: (data) => data.toList(),
@@ -46,15 +47,15 @@ final transactionsByGroupProvider =
   );
 });
 
-final transactionProvider =
-    FutureProvider.autoDispose.family<TransactionModel, String>((ref, id) async {
+final transactionProvider = FutureProvider.autoDispose
+    .family<TransactionModel, String>((ref, id) async {
   final service = ref.watch(transactionServiceProvider);
   return service.getTransaction(id);
 });
 
-/// Hitung streak harian berdasarkan semua transaksi (pemasukan & pengeluaran).
-/// Streak dianggap aktif jika transaksi terakhir adalah hari ini atau kemarin.
-/// Jika tidak ada transaksi dalam dua hari terakhir, streak = 0.
+/// Hitung streak harian berdasarkan total hari unik aktivitas transaksi (pemasukan & pengeluaran).
+/// Streak tidak di-reset ketika tidak ada aktivitas (hari berikutnya tanpa transaksi)
+/// atau saat memasukkan transaksi baru setelah beberapa hari/bulan tanpa aktivitas.
 final savingStreakProvider = Provider.autoDispose<int>((ref) {
   final transactionsAsync = ref.watch(transactionsStreamProvider);
   return transactionsAsync.maybeWhen(
@@ -62,36 +63,13 @@ final savingStreakProvider = Provider.autoDispose<int>((ref) {
       if (transactions.isEmpty) return 0;
 
       // Ambil semua hari unik di mana ada transaksi (semua tipe)
-      final today = DateTime.now();
-      final todayDate = DateTime(today.year, today.month, today.day);
-      final yesterdayDate = todayDate.subtract(const Duration(days: 1));
-
       final dates = transactions
           .map((t) => DateTime(t.date.year, t.date.month, t.date.day))
           .toSet()
-          .toList()
-        ..sort((a, b) => b.compareTo(a)); // desc: terbaru dulu
+          .toList();
 
-      if (dates.isEmpty) return 0;
-
-      // Cek apakah streak masih aktif (ada transaksi hari ini atau kemarin)
-      final mostRecent = dates.first;
-      final isActive = mostRecent == todayDate || mostRecent == yesterdayDate;
-      if (!isActive) return 0;
-
-      // Hitung berapa hari berturutan dari tanggal terbaru ke belakang
-      int streakCount = 1;
-      for (int i = 0; i < dates.length - 1; i++) {
-        final diff = dates[i].difference(dates[i + 1]).inDays;
-        if (diff == 1) {
-          streakCount++;
-        } else {
-          break;
-        }
-      }
-      return streakCount;
+      return dates.length;
     },
     orElse: () => 0,
   );
 });
-

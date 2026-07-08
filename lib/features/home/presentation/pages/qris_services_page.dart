@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:tabunganku/core/widgets/top_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -56,21 +57,7 @@ class _QrisServicesPageState extends ConsumerState<QrisServicesPage> {
 
   void _saveQrisToGallery(String title) {
     HapticFeedback.mediumImpact();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'QRIS $title berhasil disimpan ke galeri!',
-          style: GoogleFonts.quicksand(
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-            fontSize: 13,
-          ),
-        ),
-        backgroundColor: AppColors.primary,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-    );
+    showTopToast(context, 'QRIS $title berhasil disimpan ke galeri!');
   }
 
   @override

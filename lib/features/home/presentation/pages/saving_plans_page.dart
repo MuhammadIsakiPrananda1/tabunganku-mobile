@@ -5,10 +5,13 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:tabunganku/core/theme/app_colors.dart';
 import 'package:tabunganku/core/widgets/high_vis_input.dart';
+import 'package:tabunganku/core/theme/theme_provider.dart';
+import 'package:tabunganku/core/widgets/top_toast.dart';
 import 'package:tabunganku/providers/saving_target_provider.dart';
 import 'package:tabunganku/providers/transaction_provider.dart';
 import 'package:tabunganku/models/saving_target_model.dart';
 import 'package:tabunganku/models/transaction_model.dart';
+import 'package:tabunganku/features/home/presentation/widgets/target_detail_sheet.dart';
 
 class SavingPlansPage extends ConsumerStatefulWidget {
   const SavingPlansPage({super.key});
@@ -163,23 +166,7 @@ class _SavingPlansPageState extends ConsumerState<SavingPlansPage> {
     if (confirmed == true) {
       await ref.read(savingTargetServiceProvider).deleteTarget(targetId);
       if (mounted && context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 18),
-                const SizedBox(width: 8),
-                Text(
-                  'Rencana berhasil dihapus.',
-                  style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 12),
-                ),
-              ],
-            ),
-            backgroundColor: AppColors.primary,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          ),
-        );
+        showTopToast(context, 'Rencana berhasil dihapus.');
       }
     }
   }
@@ -214,7 +201,10 @@ class _SavingPlansPageState extends ConsumerState<SavingPlansPage> {
               color: isDark ? AppColors.surfaceDark : Colors.white,
               borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
             ),
-            child: SingleChildScrollView(
+            child: SafeArea(
+              top: false,
+              minimum: const EdgeInsets.only(bottom: 16),
+              child: SingleChildScrollView(
               padding: const EdgeInsets.all(28),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -385,26 +375,12 @@ ElevatedButton(
                       });
 
                       if (nameHasError || amountHasError) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Row(
-                              children: [
-                                const Icon(Icons.error_outline_rounded, color: Colors.white, size: 18),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    nameHasError
-                                        ? 'Nama rencana tidak boleh kosong!'
-                                        : 'Nominal target harus lebih dari 0!',
-                                    style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 12),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            backgroundColor: Colors.red.shade700,
-                            behavior: SnackBarBehavior.floating,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          ),
+                        showTopToast(
+                          context,
+                          nameHasError
+                              ? 'Nama rencana tidak boleh kosong!'
+                              : 'Nominal target harus lebih dari 0!',
+                          isError: true,
                         );
                         return;
                       }
@@ -431,26 +407,14 @@ ElevatedButton(
                       }
 
                       navigator.pop();
-
                       if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Row(
-                              children: [
-                                const Icon(Icons.check_circle_outline_rounded, color: Colors.white, size: 18),
-                                const SizedBox(width: 8),
-                                Text(
-                                  isEdit ? 'Rencana diperbarui!' : 'Rencana berhasil dibuat!',
-                                  style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 12),
-                                ),
-                              ],
-                            ),
-                            backgroundColor: AppColors.primary,
-                            behavior: SnackBarBehavior.floating,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          ),
+                        showTopToast(
+                          context,
+                          isEdit ? 'Rencana diperbarui! ✨' : 'Rencana berhasil dibuat! ✨',
                         );
                       }
+
+
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
@@ -466,6 +430,7 @@ ElevatedButton(
                   ),
                 ],
               ),
+            ),
             ),
           );
         },
@@ -544,7 +509,7 @@ ElevatedButton(
     );
   }
 
-  Widget _buildMetricsDashboard(
+   Widget _buildMetricsDashboard(
       List<SavingTargetModel> targets, List<TransactionModel> transactions, bool isDark) {
 
     final filteredTargets = _selectedFilter == 'Semua'
@@ -553,187 +518,171 @@ ElevatedButton(
 
     double totalTarget = 0.0;
     double totalSaved = 0.0;
+    double totalMonthlyNeeded = 0.0;
 
     for (var target in filteredTargets) {
       totalTarget += target.targetAmount;
       final targetBalance = transactions
           .where((t) => !t.date.isBefore(target.createdAt))
           .fold<double>(0, (s, t) => s + (t.type == TransactionType.income ? t.amount : -t.amount));
-      totalSaved += targetBalance > target.targetAmount ? target.targetAmount : targetBalance;
+      final savedAmount = targetBalance > target.targetAmount ? target.targetAmount : targetBalance;
+      totalSaved += savedAmount;
+
+      final remaining = (target.targetAmount - targetBalance).clamp(0.0, double.infinity);
+      final days = target.dueDate.difference(DateTime.now()).inDays;
+      if (remaining > 0) {
+        final months = (days / 30.0).clamp(1.0, 365.0);
+        totalMonthlyNeeded += remaining / months;
+      }
     }
 
-    final remaining = totalTarget - totalSaved;
     final globalProgress = totalTarget > 0 ? (totalSaved / totalTarget).clamp(0.0, 1.0) : 0.0;
 
-String dashboardTitle = 'TOTAL DANA DIRENCANAKAN';
+    final activeColor = _selectedFilter == 'Semua' ? AppColors.primary : _getCategoryColor(_selectedFilter);
+
+    final cardBg = isDark ? const Color(0xFF1A1A1A) : Colors.white;
+    final borderColor = isDark
+        ? Colors.white.withValues(alpha: 0.08)
+        : Colors.black.withValues(alpha: 0.05);
+    final subClr = isDark ? Colors.white38 : Colors.grey.shade500;
+    final txtClr = isDark ? Colors.white : AppColors.primaryDark;
+
+    String dashboardTitle = 'TOTAL TARGET BULANAN';
     if (_selectedFilter != 'Semua') {
-      dashboardTitle = 'TOTAL ${_getCategoryTitle(_selectedFilter).toUpperCase()}';
+      dashboardTitle = 'TARGET ${_getCategoryTitle(_selectedFilter).toUpperCase()} BULANAN';
     }
 
-final activeColor = _selectedFilter == 'Semua' ? AppColors.primary : _getCategoryColor(_selectedFilter);
-    final categoryLightColors = {
-      'Darurat': Colors.redAccent.shade100,
-      'Pendidikan': Colors.blueAccent.shade100,
-      'Pensiun': Colors.orangeAccent.shade100,
-      'Kurban': Colors.greenAccent.shade200,
-    };
-    final lightColor = _selectedFilter == 'Semua' 
-        ? Colors.teal.shade300 
-        : (categoryLightColors[_selectedFilter] ?? Colors.teal.shade300);
-
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      margin: const EdgeInsets.fromLTRB(16, 6, 16, 8),
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: isDark
-              ? [
-                  activeColor.withOpacity(0.15),
-                  Colors.teal.shade900.withOpacity(0.3)
-                ]
-              : [activeColor, activeColor.withOpacity(0.85)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: cardBg,
         borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: borderColor, width: 1.2),
         boxShadow: isDark
             ? []
             : [
                 BoxShadow(
-                  color: activeColor.withOpacity(0.25),
-                  blurRadius: 20,
-                  offset: const Offset(0, 10),
-                )
+                  color: Colors.black.withValues(alpha: 0.02),
+                  blurRadius: 16,
+                  offset: const Offset(0, 8),
+                ),
               ],
-        border: Border.all(
-          color: isDark
-              ? activeColor.withOpacity(0.3)
-              : Colors.transparent,
-          width: 1.5,
-        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            dashboardTitle,
-            style: GoogleFonts.quicksand(
-              fontSize: 10,
-              fontWeight: FontWeight.w800,
-              color: isDark ? lightColor : Colors.white70,
-              letterSpacing: 1.2,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    dashboardTitle,
+                    style: GoogleFonts.quicksand(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: subClr,
+                      letterSpacing: 1.0,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    _formatRupiah(totalMonthlyNeeded),
+                    style: GoogleFonts.quicksand(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      color: txtClr,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: activeColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(30),
+                  border: Border.all(
+                    color: activeColor.withValues(alpha: 0.2),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.loop_rounded, color: activeColor, size: 11),
+                    const SizedBox(width: 5),
+                    Text(
+                      'Estimasi',
+                      style: GoogleFonts.quicksand(
+                        fontSize: 9.5,
+                        fontWeight: FontWeight.bold,
+                        color: activeColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 8),
-          Text(
-            _formatRupiah(totalTarget),
-            style: GoogleFonts.quicksand(
-              fontSize: 26,
-              fontWeight: FontWeight.w900,
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Terpenuhi',
+                'Progres Pencapaian',
                 style: GoogleFonts.quicksand(
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                  color: isDark ? lightColor : Colors.white70,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: subClr,
                 ),
               ),
               Text(
-                '${(globalProgress * 100).toInt()}%',
+                '${(globalProgress * 100).toInt()}% Selesai',
                 style: GoogleFonts.quicksand(
                   fontSize: 11,
-                  fontWeight: FontWeight.w900,
-                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white70 : Colors.black87,
                 ),
               ),
             ],
           ),
           const SizedBox(height: 6),
           ClipRRect(
-            borderRadius: BorderRadius.circular(4),
+            borderRadius: BorderRadius.circular(6),
             child: LinearProgressIndicator(
               value: globalProgress,
-              minHeight: 6,
-              backgroundColor: Colors.white.withOpacity(0.15),
-              color: isDark ? lightColor : Colors.white,
+              minHeight: 5,
+              backgroundColor: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100,
+              color: activeColor,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           
-          Container(
+          Divider(
             height: 1,
-            color: isDark
-                ? Colors.white.withOpacity(0.06)
-                : Colors.white.withOpacity(0.2),
+            color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade200,
           ),
           const SizedBox(height: 16),
           Row(
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'TOTAL TERKUMPUL',
-                      style: GoogleFonts.quicksand(
-                        fontSize: 9,
-                        fontWeight: FontWeight.w800,
-                        color: isDark ? Colors.white30 : Colors.white70,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      _formatRupiah(totalSaved),
-                      style: GoogleFonts.quicksand(
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
+              _StatCell(
+                label: 'TOTAL GOAL',
+                value: _formatRupiah(totalTarget),
+                color: activeColor,
               ),
               Container(
                 width: 1,
                 height: 32,
-                color: isDark
-                    ? Colors.white.withOpacity(0.06)
-                    : Colors.white.withOpacity(0.2),
+                color: borderColor,
+                margin: const EdgeInsets.symmetric(horizontal: 16),
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'KEBUTUHAN SISA',
-                      style: GoogleFonts.quicksand(
-                        fontSize: 9,
-                        fontWeight: FontWeight.w800,
-                        color: isDark ? Colors.white30 : Colors.white70,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      _formatRupiah(remaining > 0 ? remaining : 0.0),
-                      style: GoogleFonts.quicksand(
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? lightColor : Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
+              _StatCell(
+                label: 'TOTAL TERKUMPUL',
+                value: _formatRupiah(totalSaved),
+                color: Colors.green,
               ),
             ],
           ),
@@ -923,174 +872,177 @@ final activeColor = _selectedFilter == 'Semua' ? AppColors.primary : _getCategor
             ? (targetBalance / target.targetAmount).clamp(0.0, 1.0)
             : 0.0;
 
-        return Container(
-          margin: const EdgeInsets.only(bottom: 16),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: isDark ? Colors.white.withOpacity(0.04) : Colors.white,
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(
-              color: isDark
-                  ? Colors.white.withOpacity(0.05)
-                  : Colors.grey.shade100,
-              width: 1.2,
+        final remainingAmount = (target.targetAmount - targetBalance).clamp(0.0, double.infinity);
+        final daysLeft = target.dueDate.difference(DateTime.now()).inDays;
+        final monthsLeft = (daysLeft / 30.0).clamp(1.0, 365.0);
+        final monthlyNeeded = remainingAmount > 0 ? (remainingAmount / monthsLeft) : 0.0;
+        final deadlineColor = daysLeft <= 7
+            ? Colors.redAccent
+            : daysLeft <= 30
+                ? Colors.orange
+                : catColor;
+
+        return GestureDetector(
+          onTap: () {
+            TargetDetailSheet.show(
+              context: context,
+              target: target,
+              ref: ref,
+              onEdit: () => _showAddSheet(target: target),
+              onDelete: () => _deleteTarget(target.id),
+            );
+          },
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 16),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: isDark ? Colors.white.withOpacity(0.04) : Colors.white,
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(
+                color: isDark
+                    ? Colors.white.withOpacity(0.05)
+                    : Colors.grey.shade100,
+                width: 1.2,
+              ),
             ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: catColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                        color: catColor.withOpacity(0.15),
-                        width: 1.5,
-                      ),
-                    ),
-                    child: Icon(
-                      catIcon,
-                      color: catColor,
-                      size: 20,
-                    ),
+            child: Row(
+              children: [
+                // Left Icon
+                Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: catColor.withValues(alpha: isDark ? 0.15 : 0.08),
+                    borderRadius: BorderRadius.circular(15),
                   ),
-                  const SizedBox(width: 12),
+                  child: Icon(
+                    catIcon,
+                    color: catColor,
+                    size: 22,
+                  ),
+                ),
+                const SizedBox(width: 12),
 
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          target.name,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.quicksand(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13,
-                            color: isDark ? Colors.white : Colors.black87,
-                          ),
+                // Middle Column
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        target.name,
+                        style: GoogleFonts.quicksand(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white : Colors.black87,
                         ),
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: catColor.withOpacity(0.08),
-                                borderRadius: BorderRadius.circular(6),
-                                border: Border.all(
-                                  color: catColor.withOpacity(0.15),
-                                  width: 1,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 5),
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: deadlineColor.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.alarm_rounded, size: 9, color: deadlineColor),
+                                const SizedBox(width: 3),
+                                Text(
+                                  daysLeft > 0 ? '$daysLeft hari lagi' : 'Tenggat lewat',
+                                  style: GoogleFonts.quicksand(
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.bold,
+                                    color: deadlineColor,
+                                  ),
                                 ),
-                              ),
-                              child: Text(
-                                _getCategoryTitle(target.category),
-                                style: GoogleFonts.quicksand(
-                                  fontSize: 8.5,
-                                  fontWeight: FontWeight.w800,
-                                  color: catColor,
-                                  letterSpacing: 0.3,
-                                ),
-                              ),
+                              ],
                             ),
-                            const SizedBox(width: 8),
-                            Icon(
-                              Icons.calendar_today_rounded,
-                              size: 10,
-                              color: isDark ? Colors.white30 : Colors.black38,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            DateFormat('dd MMM yyyy', 'id_ID').format(target.dueDate),
+                            style: GoogleFonts.quicksand(
+                              fontSize: 9,
+                              color: isDark ? Colors.white30 : Colors.grey.shade400,
+                              fontWeight: FontWeight.bold,
                             ),
-                            const SizedBox(width: 4),
-                            Text(
-                              DateFormat('d MMM yyyy', 'id_ID').format(target.dueDate),
-                              style: GoogleFonts.quicksand(
-                                color: isDark ? Colors.white38 : Colors.grey.shade500,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 9.5,
-                              ),
-                            ),
-                          ],
+                          ),
+                        ],
+                      ),
+                      if (remainingAmount > 0) ...[
+                        const SizedBox(height: 6),
+                        Text(
+                          'Alokasi: ${_formatRupiah(monthlyNeeded)} / bln',
+                          style: GoogleFonts.quicksand(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
+                            color: catColor,
+                          ),
                         ),
                       ],
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      GestureDetector(
-                        onTap: () => _showAddSheet(target: target),
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: Colors.blue.withOpacity(0.05),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.edit_rounded,
-                            color: Colors.blue.shade400,
-                            size: 15,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      GestureDetector(
-                        onTap: () => _deleteTarget(target.id),
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: Colors.red.withOpacity(0.05),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.delete_outline_rounded,
-                            color: Colors.red.shade400,
-                            size: 15,
-                          ),
+                      const SizedBox(height: 8),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(6),
+                        child: LinearProgressIndicator(
+                          value: progress,
+                          minHeight: 4,
+                          backgroundColor: isDark
+                              ? Colors.white.withValues(alpha: 0.06)
+                              : Colors.grey.shade100,
+                          color: catColor,
                         ),
                       ),
                     ],
                   ),
-                ],
-              ),
-              const SizedBox(height: 14),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: LinearProgressIndicator(
-                  value: progress,
-                  minHeight: 5,
-                  backgroundColor: catColor.withOpacity(0.1),
-                  color: catColor,
                 ),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    '${_formatRupiah(targetBalance)} / ${_formatRupiah(target.targetAmount)}',
-                    style: GoogleFonts.quicksand(
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      color: isDark ? Colors.white54 : Colors.black54,
+                const SizedBox(width: 12),
+
+                // Right Column
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      _formatRupiah(target.targetAmount),
+                      style: GoogleFonts.quicksand(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: catColor,
+                      ),
                     ),
-                  ),
-                  Text(
-                    '${(progress * 100).toInt()}%',
-                    style: GoogleFonts.quicksand(
-                      fontSize: 10.5,
-                      fontWeight: FontWeight.w900,
-                      color: catColor,
+                    const SizedBox(height: 2),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: catColor.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        '${(progress * 100).toInt()}%',
+                        style: GoogleFonts.quicksand(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w900,
+                          color: catColor,
+                        ),
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                    const SizedBox(height: 4),
+                    Text(
+                      remainingAmount <= 0 ? 'Lunas' : 'Sisa ${_formatRupiah(remainingAmount)}',
+                      style: GoogleFonts.quicksand(
+                        fontSize: 9,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white30 : Colors.grey.shade400,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -1112,3 +1064,50 @@ class _RibuanFormatter extends TextInputFormatter {
     );
   }
 }
+
+class _StatCell extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color color;
+
+  const _StatCell({
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final subClr = isDark ? Colors.white38 : Colors.grey.shade500;
+    final txtClr = isDark ? Colors.white : AppColors.primaryDark;
+
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: GoogleFonts.quicksand(
+              fontSize: 9,
+              fontWeight: FontWeight.bold,
+              color: subClr,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: GoogleFonts.quicksand(
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+              color: txtClr,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+

@@ -39,13 +39,6 @@ List<_ServiceCategory> _getCategories() {
         title: 'MANAJEMEN KEUANGAN',
         services: [
           _ServiceData(
-            icon: Icons.document_scanner_rounded,
-            title: 'Smart Receipt',
-            subtitle: 'Scan struk belanja otomatis',
-            color: Colors.teal,
-            route: '/scan-receipt',
-          ),
-          _ServiceData(
             icon: Icons.loop_rounded,
             title: 'Kelola Langganan',
             subtitle: 'Tagihan rutin & hiburan',
@@ -202,6 +195,20 @@ List<_ServiceCategory> _getCategories() {
             color: Colors.redAccent,
             route: '/emergency-fund-calculator',
           ),
+          _ServiceData(
+            icon: Icons.trending_down_rounded,
+            title: 'Kalkulator Inflasi',
+            subtitle: 'Hitung penyusutan daya beli uangmu',
+            color: Colors.deepOrange,
+            route: '/inflation-calculator',
+          ),
+          _ServiceData(
+            icon: Icons.coffee_rounded,
+            title: 'Detektor Pemborosan Receh',
+            subtitle: 'Proyeksi jajan kopi & boba ke tabungan',
+            color: Colors.orange,
+            route: '/lifestyle-saving',
+          ),
         ],
       ),
       _ServiceCategory(
@@ -227,6 +234,13 @@ List<_ServiceCategory> _getCategories() {
             subtitle: 'Dana Bisnis & Order Kuota',
             color: Colors.redAccent,
             route: '/qris-payment',
+          ),
+          _ServiceData(
+            icon: Icons.speed_rounded,
+            title: 'Kalkulator Aturan 72',
+            subtitle: 'Estimasi waktu melipatgandakan dana',
+            color: Colors.indigo,
+            route: '/rule-of-72',
           ),
         ],
       ),
@@ -597,3 +611,5 @@ class _ServiceData {
     required this.route,
   });
 }
+
+

@@ -11,9 +11,9 @@
 
 ---
 
-# 💎 TabunganKu Versi 1.5.2: Stellar Sky & Financial Empowerment
+# 💎 TabunganKu Versi 1.5.2
 
-Rilis v1.5.2 (Edisi Stellar Sky) membawa lompatan besar dalam perencanaan keuangan mandiri, optimalisasi performa tinggi, dan pengalaman antarmuka visual yang memukau. Kami memperkenalkan modul Brankas Payday, Alokasi THR & Bonus, Split Bill & Patungan, Anggaran Belanja, Simulasi Pensiun Dini (FIRE Plus), Time Value of Money (TVM), serta evaluasi kesehatan finansial terpadu.
+Rilis v1.5.2 membawa lompatan besar dalam perencanaan keuangan mandiri, optimalisasi performa tinggi, dan pengalaman antarmuka visual yang memukau. Kami memperkenalkan modul Brankas Payday, Alokasi THR & Bonus, Split Bill & Patungan, Anggaran Belanja, Simulasi Pensiun Dini (FIRE Plus), Time Value of Money (TVM), serta evaluasi kesehatan finansial terpadu.
 
 ---
 
@@ -43,7 +43,7 @@ Evaluasi komprehensif kesehatan finansial pribadi dengan metrik rasio likuiditas
 #### 💬 Kritik & Saran (Feedback Page)
 Halaman umpan balik terintegrasi bagi pengguna untuk mengirim saran fitur, laporan bug, atau apresiasi langsung dari dalam aplikasi.
 
-#### 🎨 Tipografi & Visual Baru (Stellar Sky Edition)
+#### 🎨 Tipografi & Visual Baru
 *   Integrasi font modern Google Inter dan Plus Jakarta Sans.
 *   Widget ilustrasi ikon vektor kartun ekspresif.
 *   Komponen teks berjalan (*Marquee*) untuk informasi dinamis.
@@ -66,7 +66,7 @@ Halaman umpan balik terintegrasi bagi pengguna untuk mengirim saran fitur, lapor
 *   Penyelarasan badge pencapaian (*Achievement Provider*) dan layanan notifikasi.
 
 #### 🎭 Theme & Color System Refinement
-*   Penyesuaian skema warna Stellar Sky yang lebih harmonis pada seluruh komponen tombol, bottom sheet, dan dialog.
+*   Penyesuaian skema warna yang lebih harmonis pada seluruh komponen tombol, bottom sheet, dan dialog.
 
 ---
 

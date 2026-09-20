@@ -328,6 +328,7 @@ class _InsuranceTrackerPageState extends ConsumerState<InsuranceTrackerPage> {
                         width: 1,
                       ),
                     ),
+                    clipBehavior: Clip.antiAlias,
                     color: cardBg,
                     elevation: 4,
                     onSelected: (value) {
@@ -500,7 +501,7 @@ class _InsuranceTrackerPageState extends ConsumerState<InsuranceTrackerPage> {
       builder: (context) => StatefulBuilder(
         builder: (context, setSheetState) => Container(
           padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+            bottom: MediaQuery.of(context).viewInsets.bottom > 0 ? MediaQuery.of(context).viewInsets.bottom : MediaQuery.of(context).padding.bottom + 24,
             top: 16,
             left: 24,
             right: 24,
@@ -611,7 +612,7 @@ class _InsuranceTrackerPageState extends ConsumerState<InsuranceTrackerPage> {
       builder: (context) => StatefulBuilder(
         builder: (context, setSheetState) => Container(
           padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+            bottom: MediaQuery.of(context).viewInsets.bottom > 0 ? MediaQuery.of(context).viewInsets.bottom : MediaQuery.of(context).padding.bottom + 24,
             top: 16,
             left: 24,
             right: 24,

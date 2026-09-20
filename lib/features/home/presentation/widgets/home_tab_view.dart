@@ -12,12 +12,12 @@ import 'package:tabunganku/providers/transaction_provider.dart';
 import 'package:tabunganku/providers/saving_target_provider.dart';
 import 'package:tabunganku/core/constants/quick_action_type.dart';
 import '../../../../core/constants/app_version.dart';
-import 'package:tabunganku/core/constants/transaction_categories.dart';
 import 'package:tabunganku/models/gold_investment_model.dart';
 import 'package:tabunganku/providers/gold_provider.dart';
 import 'package:tabunganku/providers/bills_provider.dart';
 import 'package:tabunganku/providers/investment_provider.dart';
 import 'package:tabunganku/providers/insurance_provider.dart';
+import 'cartoon_action_icon.dart';
 
 class HomeTabView extends ConsumerStatefulWidget {
   final bool showBalance;
@@ -108,153 +108,312 @@ final goldTxs = ref.watch(goldTransactionsStreamProvider).valueOrNull ?? [];
             theme.brightness == Brightness.dark);
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 110),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 110),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
 
-Container(
+          // === SALDO CARD — BRIMO STYLE (CLEAN & NON-CARTOON DENGAN GARIS PEMBATAS) ===
+          Container(
             width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
             decoration: BoxDecoration(
-              color: theme.cardColor,
-              borderRadius: BorderRadius.circular(32),
-
-              boxShadow: isDarkMode
-                  ? []
-                  : [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.02),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
+              borderRadius: BorderRadius.circular(20),
+              color: isDarkMode ? const Color(0xFF13201D) : Colors.white,
+              border: Border.all(
+                color: isDarkMode
+                    ? const Color(0xFF10B981).withValues(alpha: 0.22)
+                    : const Color(0xFFE2E8F0),
+                width: 1.0,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: isDarkMode
+                      ? Colors.black.withValues(alpha: 0.30)
+                      : const Color(0xFF0F172A).withValues(alpha: 0.05),
+                  offset: const Offset(0, 4),
+                  blurRadius: 16,
+                ),
+              ],
             ),
-            clipBehavior: Clip.antiAlias,
-            child: Stack(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
+                // ── Baris Atas: Badge TabunganKu + Tombol Toggle Saldo ──
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF10B981)
+                                .withValues(alpha: isDarkMode ? 0.20 : 0.12),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(
+                            Icons.account_balance_wallet_rounded,
+                            size: 16,
+                            color: Color(0xFF10B981),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'TabunganKu',
+                          style: GoogleFonts.quicksand(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: isDarkMode
+                                ? Colors.white
+                                : const Color(0xFF0F172A),
+                          ),
+                        ),
+                      ],
+                    ),
 
-                Positioned(
-                  top: -40,
-                  right: -30,
-                  child: Container(
-                    width: 140,
-                    height: 140,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.amber
-                          .withValues(alpha: isDarkMode ? 0.05 : 0.08),
+                    // Tombol Toggle Saldo Compact
+                    GestureDetector(
+                      onTap: widget.onToggleBalance,
+                      behavior: HitTestBehavior.opaque,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: isDarkMode
+                              ? Colors.white.withValues(alpha: 0.06)
+                              : const Color(0xFFF1F5F9),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: isDarkMode
+                                ? Colors.white12
+                                : const Color(0xFFE2E8F0),
+                            width: 1.0,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              widget.showBalance
+                                  ? Icons.visibility_rounded
+                                  : Icons.visibility_off_rounded,
+                              size: 13,
+                              color: isDarkMode
+                                  ? const Color(0xFF34D399)
+                                  : const Color(0xFF0D9488),
+                            ),
+                            const SizedBox(width: 5),
+                            Text(
+                              widget.showBalance ? 'Sembunyikan' : 'Lihat Saldo',
+                              style: GoogleFonts.quicksand(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: isDarkMode
+                                    ? const Color(0xFF94A3B8)
+                                    : const Color(0xFF64748B),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 14),
+
+                // ── Bagian Saldo: Total Saldo ──
+                Text(
+                  'TOTAL SALDO',
+                  style: GoogleFonts.quicksand(
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.8,
+                    color: isDarkMode
+                        ? const Color(0xFF94A3B8)
+                        : const Color(0xFF64748B),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    widget.showBalance
+                        ? _formatRupiah(totalBalance)
+                        : 'Rp ••••••••',
+                    style: GoogleFonts.quicksand(
+                      fontSize: 28,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.5,
+                      color: isDarkMode
+                          ? Colors.white
+                          : const Color(0xFF0F172A),
                     ),
                   ),
                 ),
 
-                Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        'TOTAL SALDO TERKUMPUL',
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.quicksand(
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 0.2,
-                          color: isDarkMode
-                              ? Colors.white30
-                              : Colors.teal.shade800.withValues(alpha: 0.4),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
+                const SizedBox(height: 8),
+
+                // ── Di Bawah Saldo: Chip Estimasi Akhir Bulan ──
+                _buildCompactEstChip(
+                  totalBalance: totalBalance,
+                  totalIncome: totalIncome,
+                  totalExpense: totalExpense,
+                  isDarkMode: isDarkMode,
+                ),
+
+                // ── Garis Pembatas Horizontal (BRImo style) ──
+                Container(
+                  margin: const EdgeInsets.only(top: 14, bottom: 12),
+                  height: 1,
+                  color: isDarkMode
+                      ? Colors.white.withValues(alpha: 0.08)
+                      : const Color(0xFF0F172A).withValues(alpha: 0.06),
+                ),
+
+                // ── Baris Bawah: Pemasukan & Pengeluaran dengan Garis Pembatas Vertikal (BRImo Style) ──
+                Row(
+                  children: [
+                    // Kolom Pemasukan
+                    Expanded(
+                      child: Row(
                         children: [
-                          const SizedBox(width: 40),
-                          Flexible(
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Text(
-                                widget.showBalance
-                                    ? _formatRupiah(totalBalance)
-                                    : '••••••',
-                                style: GoogleFonts.quicksand(
-                                  color: isDarkMode
-                                      ? Colors.white
-                                      : Colors.teal.shade900,
-                                  fontSize: 28,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 1.5,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          IconButton(
-                            constraints: const BoxConstraints(),
-                            padding: EdgeInsets.zero,
-                            icon: Icon(
-                              widget.showBalance
-                                  ? Icons.visibility_outlined
-                                  : Icons.visibility_off_outlined,
-                              color: isDarkMode
-                                  ? Colors.white24
-                                  : Colors.teal.shade700.withValues(alpha: 0.3),
-                              size: 22,
-                            ),
-                            onPressed: widget.onToggleBalance,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-
-                      _buildEstimationCard(
-                          totalBalance, totalIncome, totalExpense, isDarkMode),
-                      const SizedBox(height: 20),
-
-Container(
-                        height: 1,
-                        width: double.infinity,
-                        color: isDarkMode
-                            ? Colors.white.withValues(alpha: 0.05)
-                            : Colors.teal.shade50.withValues(alpha: 0.5),
-                      ),
-                      const SizedBox(height: 20),
-
-Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Expanded(
-                              child: _miniStat('Pemasukan', totalIncome,
-                                  Colors.green.shade600, isDarkMode,
-                                  center: true)),
-                          const SizedBox(width: 20),
                           Container(
-                              width: 1.2,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(1),
-                                color: isDarkMode
-                                    ? Colors.white.withValues(alpha: 0.05)
-                                    : Colors.teal.shade50,
-                              )),
-                          const SizedBox(width: 20),
+                            width: 28,
+                            height: 28,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF10B981)
+                                  .withValues(alpha: isDarkMode ? 0.18 : 0.10),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.arrow_downward_rounded,
+                              size: 15,
+                              color: Color(0xFF10B981),
+                            ),
+                          ),
+                          const SizedBox(width: 9),
                           Expanded(
-                              child: _miniStat('Pengeluaran', totalExpense,
-                                  Colors.red.shade600, isDarkMode,
-                                  center: true)),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'Pemasukan',
+                                  style: GoogleFonts.quicksand(
+                                    fontSize: 10.5,
+                                    fontWeight: FontWeight.w600,
+                                    color: isDarkMode
+                                        ? const Color(0xFF94A3B8)
+                                        : const Color(0xFF64748B),
+                                  ),
+                                ),
+                                const SizedBox(height: 1),
+                                FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    widget.showBalance
+                                        ? _formatRupiah(totalIncome)
+                                        : 'Rp •••••',
+                                    style: GoogleFonts.quicksand(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: -0.2,
+                                      color: isDarkMode
+                                          ? const Color(0xFF34D399)
+                                          : const Color(0xFF059669),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ],
                       ),
-                    ],
-                  ),
+                    ),
+
+                    // Garis Pembatas Vertikal
+                    Container(
+                      width: 1,
+                      height: 30,
+                      margin: const EdgeInsets.symmetric(horizontal: 10),
+                      color: isDarkMode
+                          ? Colors.white.withValues(alpha: 0.08)
+                          : const Color(0xFF0F172A).withValues(alpha: 0.06),
+                    ),
+
+                    // Kolom Pengeluaran
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 28,
+                            height: 28,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF43F5E)
+                                  .withValues(alpha: isDarkMode ? 0.18 : 0.10),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.arrow_upward_rounded,
+                              size: 15,
+                              color: Color(0xFFF43F5E),
+                            ),
+                          ),
+                          const SizedBox(width: 9),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'Pengeluaran',
+                                  style: GoogleFonts.quicksand(
+                                    fontSize: 10.5,
+                                    fontWeight: FontWeight.w600,
+                                    color: isDarkMode
+                                        ? const Color(0xFF94A3B8)
+                                        : const Color(0xFF64748B),
+                                  ),
+                                ),
+                                const SizedBox(height: 1),
+                                FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    widget.showBalance
+                                        ? _formatRupiah(totalExpense)
+                                        : 'Rp •••••',
+                                    style: GoogleFonts.quicksand(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: -0.2,
+                                      color: isDarkMode
+                                          ? const Color(0xFFFB7185)
+                                          : const Color(0xFFE11D48),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
 
-          const SizedBox(height: 32),
+          const SizedBox(height: 24),
 
-_buildActionGrid(
+          _buildActionGrid(
             isDarkMode,
             goldGramBalance: goldGramBalance,
             unpaidBillsTotal: unpaidBillsTotal,
@@ -281,73 +440,90 @@ _buildActionGrid(
     );
   }
 
-  Widget _buildEstimationCard(double totalBalance, double totalIncome,
-      double totalExpense, bool isDarkMode) {
+  Widget _buildCompactEstChip({
+    required double totalBalance,
+    required double totalIncome,
+    required double totalExpense,
+    required bool isDarkMode,
+  }) {
     final now = DateTime.now();
     final totalDays = DateTime(now.year, now.month + 1, 0).day;
     final day = now.day;
     final currentDay = day > 0 ? day : 1;
     final estIncome = (totalIncome / currentDay) * totalDays;
     final estExpense = (totalExpense / currentDay) * totalDays;
-
     final rawRemainingNet =
         (estIncome - totalIncome) - (estExpense - totalExpense);
-
-final double dampingFactor = rawRemainingNet >= 0
+    final double dampingFactor = rawRemainingNet >= 0
         ? 1.0
         : (currentDay / 10.0).clamp(0.1, 1.0);
     final remainingNet = rawRemainingNet * dampingFactor;
-    
     final projectedBalance = totalBalance + remainingNet;
-
     final isDanger = projectedBalance < totalBalance;
+    final baseColor =
+        isDanger ? const Color(0xFFF43F5E) : const Color(0xFF10B981);
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: isDanger
-            ? Colors.red.withValues(alpha: isDarkMode ? 0.08 : 0.04)
-            : (isDarkMode
-                ? Colors.white.withValues(alpha: 0.02)
-                : Colors.teal.shade50.withValues(alpha: 0.25)),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isDanger
-              ? Colors.red.withValues(alpha: 0.1)
-              : (isDarkMode ? Colors.white10 : Colors.teal.shade100.withValues(alpha: 0.15)),
-          width: 0.5,
-        ),
+    return GestureDetector(
+      onTap: () => _showEstimationInfoModal(
+        context,
+        isDarkMode,
+        currentDay,
+        totalDays,
+        projectedBalance,
       ),
-      child: FittedBox(
-        fit: BoxFit.scaleDown,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5.5),
+        decoration: BoxDecoration(
+          color: baseColor.withValues(alpha: isDarkMode ? 0.14 : 0.08),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: baseColor.withValues(alpha: isDarkMode ? 0.40 : 0.30),
+            width: 1.1,
+          ),
+        ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              isDanger ? Icons.trending_down_rounded : Icons.trending_up_rounded,
+              isDanger
+                  ? Icons.trending_down_rounded
+                  : Icons.trending_up_rounded,
+              size: 14,
+              color: baseColor,
+            ),
+            const SizedBox(width: 4.5),
+            Text(
+              widget.showBalance
+                  ? (isDanger ? '-' : '+') +
+                      _formatRupiah(projectedBalance.abs())
+                  : 'Rp •••••',
+              style: GoogleFonts.quicksand(
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                color: isDarkMode
+                    ? (isDanger
+                        ? const Color(0xFFFB7185)
+                        : const Color(0xFF34D399))
+                    : baseColor,
+              ),
+            ),
+            const SizedBox(width: 3.5),
+            Text(
+              'Est.',
+              style: GoogleFonts.quicksand(
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+                color: isDarkMode
+                    ? const Color(0xFF94A3B8)
+                    : const Color(0xFF64748B),
+              ),
+            ),
+            const SizedBox(width: 2.5),
+            Icon(
+              Icons.info_outline_rounded,
               size: 11,
-              color: isDanger ? Colors.red : Colors.teal,
-            ),
-            const SizedBox(width: 6),
-            Text(
-              'Saldo Akhir Bulan:',
-              style: GoogleFonts.quicksand(
-                fontSize: 9,
-                fontWeight: FontWeight.bold,
-                color: isDarkMode ? Colors.white30 : Colors.teal.shade700,
-              ),
-            ),
-            const SizedBox(width: 4),
-            Text(
-              _formatRupiah(projectedBalance),
-              style: GoogleFonts.quicksand(
-                fontSize: 9,
-                fontWeight: FontWeight.bold,
-                color: isDanger
-                    ? Colors.redAccent.shade100
-                    : (isDarkMode ? Colors.tealAccent : Colors.teal.shade900),
-              ),
+              color: isDarkMode ? Colors.white38 : const Color(0xFF94A3B8),
             ),
           ],
         ),
@@ -355,32 +531,117 @@ final double dampingFactor = rawRemainingNet >= 0
     );
   }
 
-  Widget _miniStat(String label, double amount, Color color, bool isDarkMode,
-      {bool center = false}) {
-    return Column(
-      crossAxisAlignment:
-          center ? CrossAxisAlignment.center : CrossAxisAlignment.start,
-      children: [
-        Text(label.toUpperCase(),
-            textAlign: center ? TextAlign.center : TextAlign.start,
-            style: GoogleFonts.quicksand(
-                fontSize: 9,
-                fontWeight: FontWeight.bold,
-                color: isDarkMode ? Colors.white54 : Colors.grey.shade500,
-                letterSpacing: 1.0)),
-        const SizedBox(height: 2),
-        FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Text(
-            widget.showBalance ? _formatRupiah(amount) : '••••',
-            textAlign: center ? TextAlign.center : TextAlign.start,
-            style: GoogleFonts.quicksand(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: color.withValues(alpha: isDarkMode ? 0.9 : 0.8)),
+  void _showEstimationInfoModal(
+    BuildContext context,
+    bool isDarkMode,
+    int currentDay,
+    int totalDays,
+    double projectedBalance,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: isDarkMode ? const Color(0xFF1E2632) : Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 36,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: isDarkMode ? Colors.white24 : Colors.black12,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 18),
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.15),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.auto_graph_rounded,
+                      color: AppColors.primary,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Tentang Estimasi Saldo',
+                    style: GoogleFonts.quicksand(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color:
+                          isDarkMode ? Colors.white : const Color(0xFF0F172A),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Text(
+                'Estimasi dihitung berdasarkan tren rata-rata pengeluaran dan pemasukan harian Anda hingga hari ke-$currentDay dari total $totalDays hari di bulan ini.',
+                style: GoogleFonts.quicksand(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  height: 1.5,
+                  color: isDarkMode
+                      ? const Color(0xFF94A3B8)
+                      : const Color(0xFF64748B),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: isDarkMode
+                      ? Colors.white.withValues(alpha: 0.04)
+                      : const Color(0xFFF8FAFC),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isDarkMode
+                        ? Colors.white.withValues(alpha: 0.06)
+                        : const Color(0xFFE2E8F0),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Perkiraan Saldo Akhir Bulan:',
+                      style: GoogleFonts.quicksand(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w500,
+                        color: isDarkMode
+                            ? Colors.white70
+                            : const Color(0xFF334155),
+                      ),
+                    ),
+                    Text(
+                      _formatRupiah(projectedBalance),
+                      style: GoogleFonts.quicksand(
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ),
-      ],
+        );
+      },
     );
   }
 
@@ -404,7 +665,7 @@ final double dampingFactor = rawRemainingNet >= 0
           ? '${_formatRupiah(totalMonthlyInsurance)}/bln'
           : '',
       QuickActionType.savingPlans: _getPlansTotal(targets),
-      QuickActionType.buyingTarget: '',
+      QuickActionType.buyingTarget: _getBuyingTotal(targets),
     };
 
     final primaryActions = _allActions.take(7).toList();
@@ -412,11 +673,11 @@ final double dampingFactor = rawRemainingNet >= 0
     return GridView.count(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 4),
       crossAxisCount: 4,
-      mainAxisSpacing: 8,
-      crossAxisSpacing: 12,
-      childAspectRatio: 0.85,
+      mainAxisSpacing: 10,
+      crossAxisSpacing: 8,
+      childAspectRatio: 0.80,
       children: [
         for (var action in primaryActions)
           _buildToolAction(
@@ -464,51 +725,12 @@ final double dampingFactor = rawRemainingNet >= 0
     VoidCallback? onTap,
     String? subLabel,
   }) {
-    return GestureDetector(
+    return CartoonActionButton(
+      config: CartoonActionConfig.fromType(type, isDarkMode),
+      label: label,
+      subLabel: subLabel,
       onTap: onTap ?? () => widget.onActionTap(type!),
-      behavior: HitTestBehavior.opaque,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: isDarkMode ? 0.15 : 0.08),
-              borderRadius: BorderRadius.circular(18),
-            ),
-            child: Icon(
-              icon,
-              color: isDarkMode ? color.withValues(alpha: 0.9) : color,
-              size: 28,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.quicksand(
-              fontSize: 10.2,
-              fontWeight: FontWeight.bold,
-              height: 1.0,
-              color: isDarkMode ? Colors.white70 : Colors.black87,
-            ),
-          ),
-          if (subLabel != null && subLabel.isNotEmpty)
-            Text(
-              subLabel,
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: GoogleFonts.quicksand(
-                fontSize: 8,
-                fontWeight: FontWeight.bold,
-                color: isDarkMode ? Colors.white30 : Colors.black38,
-              ),
-            ),
-        ],
-      ),
+      isDarkMode: isDarkMode,
     );
   }
 

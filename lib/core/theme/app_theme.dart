@@ -1,8 +1,28 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
 
+// Helper untuk membuat TextStyle berbasis font Quicksand lokal
+TextStyle _qs({
+  required double fontSize,
+  required FontWeight fontWeight,
+  required Color color,
+  double? letterSpacing,
+  double? height,
+}) {
+  return TextStyle(
+    fontFamily: 'Quicksand',
+    fontSize: fontSize,
+    fontWeight: fontWeight,
+    color: color,
+    letterSpacing: letterSpacing,
+    height: height,
+  );
+}
+
 class AppTheme {
+  // ─────────────────────────────────────────────
+  // LIGHT THEME
+  // ─────────────────────────────────────────────
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
@@ -19,86 +39,92 @@ class AppTheme {
       scaffoldBackgroundColor: AppColors.background,
       cardColor: AppColors.surface,
       dividerColor: AppColors.divider,
+
+      // ── Text Theme ───────────────────────────
       textTheme: TextTheme(
-        displayLarge: GoogleFonts.quicksand(
+        displayLarge: _qs(
           fontSize: 30,
-          fontWeight: FontWeight.bold,
-          letterSpacing: -0.5,
+          fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
+          letterSpacing: -0.5,
         ),
-        displayMedium: GoogleFonts.quicksand(
+        displayMedium: _qs(
           fontSize: 26,
-          fontWeight: FontWeight.bold,
-          letterSpacing: -0.5,
+          fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
+          letterSpacing: -0.5,
         ),
-        displaySmall: GoogleFonts.quicksand(
+        displaySmall: _qs(
           fontSize: 22,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w700,
+          color: AppColors.textPrimary,
           letterSpacing: -0.5,
-          color: AppColors.textPrimary,
         ),
-        headlineMedium: GoogleFonts.quicksand(
+        headlineMedium: _qs(
           fontSize: 20,
-          fontWeight: FontWeight.bold,
-          letterSpacing: 0.2,
+          fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
+          letterSpacing: 0.2,
         ),
-        headlineSmall: GoogleFonts.quicksand(
+        headlineSmall: _qs(
           fontSize: 18,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w700,
+          color: AppColors.textPrimary,
           letterSpacing: 0.2,
-          color: AppColors.textPrimary,
         ),
-        titleLarge: GoogleFonts.quicksand(
+        titleLarge: _qs(
           fontSize: 16,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w700,
+          color: AppColors.textPrimary,
           letterSpacing: 0.1,
-          color: AppColors.textPrimary,
         ),
-        titleMedium: GoogleFonts.quicksand(
+        titleMedium: _qs(
           fontSize: 13,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
         ),
-        titleSmall: GoogleFonts.quicksand(
+        titleSmall: _qs(
           fontSize: 11,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w700,
           color: AppColors.textSecondary,
         ),
-        bodyLarge: GoogleFonts.quicksand(
+        bodyLarge: _qs(
           fontSize: 14,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w600,
           color: AppColors.textPrimary,
         ),
-        bodyMedium: GoogleFonts.quicksand(
+        bodyMedium: _qs(
           fontSize: 12,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w600,
           color: AppColors.textSecondary,
         ),
-        bodySmall: GoogleFonts.quicksand(
+        bodySmall: _qs(
           fontSize: 10,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w600,
           color: AppColors.textSecondary,
         ),
-        labelLarge: GoogleFonts.quicksand(
+        labelLarge: _qs(
           fontSize: 12,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
         ),
       ),
+
+      // ── AppBar ───────────────────────────────
       appBarTheme: AppBarTheme(
         backgroundColor: AppColors.surface,
         elevation: 0,
         centerTitle: false,
         iconTheme: const IconThemeData(color: AppColors.textPrimary),
-        titleTextStyle: GoogleFonts.quicksand(
+        titleTextStyle: _qs(
           fontSize: 19,
-          fontWeight: FontWeight.bold,
-          letterSpacing: 0.2,
+          fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
+          letterSpacing: 0.2,
         ),
       ),
+
+      // ── Elevated Button ──────────────────────
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
@@ -108,12 +134,15 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
-          textStyle: GoogleFonts.quicksand(
+          textStyle: _qs(
             fontSize: 14,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
           ),
         ),
       ),
+
+      // ── Outlined Button ──────────────────────
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.primary,
@@ -122,12 +151,15 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
-          textStyle: GoogleFonts.quicksand(
+          textStyle: _qs(
             fontSize: 14,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w700,
+            color: AppColors.primary,
           ),
         ),
       ),
+
+      // ── Input Decoration ─────────────────────
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: Colors.white,
@@ -152,22 +184,24 @@ class AppTheme {
           borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(color: AppColors.error, width: 2),
         ),
-        hintStyle: GoogleFonts.quicksand(
+        hintStyle: _qs(
           fontSize: 14,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w600,
           color: AppColors.textSecondary,
         ),
-        labelStyle: GoogleFonts.quicksand(
+        labelStyle: _qs(
           fontSize: 14,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
         ),
-        errorStyle: GoogleFonts.quicksand(
+        errorStyle: _qs(
           fontSize: 12,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w600,
           color: AppColors.error,
         ),
       ),
+
+      // ── Bottom Nav Bar ───────────────────────
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: Colors.white,
         selectedItemColor: AppColors.primary,
@@ -175,9 +209,17 @@ class AppTheme {
         type: BottomNavigationBarType.fixed,
         elevation: 20,
       ),
+
+      // ── Popup Menu ───────────────────────────
+      popupMenuTheme: const PopupMenuThemeData(
+        menuPadding: EdgeInsets.zero,
+      ),
     );
   }
 
+  // ─────────────────────────────────────────────
+  // DARK THEME
+  // ─────────────────────────────────────────────
   static ThemeData get darkTheme {
     return ThemeData(
       useMaterial3: true,
@@ -194,86 +236,92 @@ class AppTheme {
       scaffoldBackgroundColor: AppColors.backgroundDark,
       cardColor: AppColors.surfaceDark,
       dividerColor: AppColors.dividerDark,
+
+      // ── Text Theme ───────────────────────────
       textTheme: TextTheme(
-        displayLarge: GoogleFonts.quicksand(
+        displayLarge: _qs(
           fontSize: 30,
-          fontWeight: FontWeight.bold,
-          letterSpacing: -0.5,
+          fontWeight: FontWeight.w700,
           color: AppColors.textPrimaryDark,
+          letterSpacing: -0.5,
         ),
-        displayMedium: GoogleFonts.quicksand(
+        displayMedium: _qs(
           fontSize: 26,
-          fontWeight: FontWeight.bold,
-          letterSpacing: -0.5,
+          fontWeight: FontWeight.w700,
           color: AppColors.textPrimaryDark,
+          letterSpacing: -0.5,
         ),
-        displaySmall: GoogleFonts.quicksand(
+        displaySmall: _qs(
           fontSize: 22,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w700,
+          color: AppColors.textPrimaryDark,
           letterSpacing: -0.5,
-          color: AppColors.textPrimaryDark,
         ),
-        headlineMedium: GoogleFonts.quicksand(
+        headlineMedium: _qs(
           fontSize: 20,
-          fontWeight: FontWeight.bold,
-          letterSpacing: 0.2,
+          fontWeight: FontWeight.w700,
           color: AppColors.textPrimaryDark,
+          letterSpacing: 0.2,
         ),
-        headlineSmall: GoogleFonts.quicksand(
+        headlineSmall: _qs(
           fontSize: 18,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w700,
+          color: AppColors.textPrimaryDark,
           letterSpacing: 0.2,
-          color: AppColors.textPrimaryDark,
         ),
-        titleLarge: GoogleFonts.quicksand(
+        titleLarge: _qs(
           fontSize: 16,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w700,
+          color: AppColors.textPrimaryDark,
           letterSpacing: 0.1,
-          color: AppColors.textPrimaryDark,
         ),
-        titleMedium: GoogleFonts.quicksand(
+        titleMedium: _qs(
           fontSize: 13,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w700,
           color: AppColors.textPrimaryDark,
         ),
-        titleSmall: GoogleFonts.quicksand(
+        titleSmall: _qs(
           fontSize: 11,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w700,
           color: AppColors.textSecondaryDark,
         ),
-        bodyLarge: GoogleFonts.quicksand(
+        bodyLarge: _qs(
           fontSize: 14,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w600,
           color: AppColors.textPrimaryDark,
         ),
-        bodyMedium: GoogleFonts.quicksand(
+        bodyMedium: _qs(
           fontSize: 12,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w600,
           color: AppColors.textSecondaryDark,
         ),
-        bodySmall: GoogleFonts.quicksand(
+        bodySmall: _qs(
           fontSize: 10,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w600,
           color: AppColors.textSecondaryDark,
         ),
-        labelLarge: GoogleFonts.quicksand(
+        labelLarge: _qs(
           fontSize: 12,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w700,
           color: AppColors.textPrimaryDark,
         ),
       ),
+
+      // ── AppBar ───────────────────────────────
       appBarTheme: AppBarTheme(
         backgroundColor: AppColors.surfaceDark,
         elevation: 0,
         centerTitle: false,
         iconTheme: const IconThemeData(color: AppColors.textPrimaryDark),
-        titleTextStyle: GoogleFonts.quicksand(
+        titleTextStyle: _qs(
           fontSize: 19,
-          fontWeight: FontWeight.bold,
-          letterSpacing: 0.2,
+          fontWeight: FontWeight.w700,
           color: AppColors.textPrimaryDark,
+          letterSpacing: 0.2,
         ),
       ),
+
+      // ── Elevated Button ──────────────────────
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
@@ -283,12 +331,15 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
-          textStyle: GoogleFonts.quicksand(
+          textStyle: _qs(
             fontSize: 14,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
           ),
         ),
       ),
+
+      // ── Outlined Button ──────────────────────
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.primary,
@@ -297,12 +348,15 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
-          textStyle: GoogleFonts.quicksand(
+          textStyle: _qs(
             fontSize: 14,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w700,
+            color: AppColors.primary,
           ),
         ),
       ),
+
+      // ── Input Decoration ─────────────────────
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: const Color(0xFF2C2C2C),
@@ -327,22 +381,24 @@ class AppTheme {
           borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(color: AppColors.error, width: 2),
         ),
-        hintStyle: GoogleFonts.quicksand(
+        hintStyle: _qs(
           fontSize: 14,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w600,
           color: AppColors.textSecondaryDark,
         ),
-        labelStyle: GoogleFonts.quicksand(
+        labelStyle: _qs(
           fontSize: 14,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w700,
           color: AppColors.textPrimaryDark,
         ),
-        errorStyle: GoogleFonts.quicksand(
+        errorStyle: _qs(
           fontSize: 12,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w600,
           color: AppColors.error,
         ),
       ),
+
+      // ── Bottom Nav Bar ───────────────────────
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: AppColors.surfaceDark,
         selectedItemColor: AppColors.primary,
@@ -350,8 +406,11 @@ class AppTheme {
         type: BottomNavigationBarType.fixed,
         elevation: 20,
       ),
+
+      // ── Popup Menu ───────────────────────────
+      popupMenuTheme: const PopupMenuThemeData(
+        menuPadding: EdgeInsets.zero,
+      ),
     );
   }
 }
-
-

@@ -83,9 +83,9 @@ class _TopToastWidgetState extends State<_TopToastWidget> with SingleTickerProvi
   Widget build(BuildContext context) {
     final statusColor = widget.isError ? Colors.redAccent : AppColors.primary;
     final bgColor = widget.isDark 
-        ? const Color(0xFF1E293B).withOpacity(0.95) // Sleek dark slate
-        : Colors.white.withOpacity(0.95);
-    final borderCol = widget.isDark ? Colors.white.withOpacity(0.08) : Colors.grey.shade200;
+        ? const Color(0xFF1E293B).withValues(alpha: 0.95) // Sleek dark slate
+        : Colors.white.withValues(alpha: 0.95);
+    final borderCol = widget.isDark ? Colors.white.withValues(alpha: 0.08) : Colors.grey.shade200;
 
     return SafeArea(
       child: Align(
@@ -112,7 +112,7 @@ class _TopToastWidgetState extends State<_TopToastWidget> with SingleTickerProvi
                 border: Border.all(color: borderCol, width: 1.2),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(widget.isDark ? 0.3 : 0.06),
+                    color: Colors.black.withValues(alpha: widget.isDark ? 0.3 : 0.06),
                     blurRadius: 16,
                     offset: const Offset(0, 4),
                   ),

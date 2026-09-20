@@ -7,7 +7,6 @@ import 'package:tabunganku/models/transaction_model.dart';
 import 'package:tabunganku/services/challenge_service.dart';
 
 abstract class TransactionService {
-
   Future<void> clearAllTransactions();
   Future<List<TransactionModel>> getTransactions();
   Future<TransactionModel> getTransaction(String id);
@@ -15,7 +14,7 @@ abstract class TransactionService {
   Future<void> updateTransaction(TransactionModel transaction);
   Future<void> deleteTransaction(String id);
 
-Stream<List<TransactionModel>> watchTransactions();
+  Stream<List<TransactionModel>> watchTransactions();
 }
 
 class MockTransactionService implements TransactionService {
@@ -24,13 +23,14 @@ class MockTransactionService implements TransactionService {
   MockTransactionService({this.challengeService});
 
   @override
-    Future<void> clearAllTransactions() async {
-      final userId = await _getCurrentUserId();
-      await _ensureUserLoaded(userId);
-      _userTransactions[userId] = [];
-      await _saveUserTransactions(userId);
-      await _emitTransactions(userId);
-    }
+  Future<void> clearAllTransactions() async {
+    final userId = await _getCurrentUserId();
+    await _ensureUserLoaded(userId);
+    _userTransactions[userId] = [];
+    await _saveUserTransactions(userId);
+    await _emitTransactions(userId);
+  }
+
   static const String _storagePrefix = 'transactions_user_';
   static final SecureStorageService _secureStorage = SecureStorageService();
   static Future<SharedPreferences>? _prefsFuture;
@@ -55,6 +55,7 @@ class MockTransactionService implements TransactionService {
 
     final prefs = await _getPrefs();
     final raw = prefs.getString('$_storagePrefix$userId');
+
     if (raw == null || raw.isEmpty) {
       _userTransactions[userId] = [];
       return;
@@ -65,7 +66,8 @@ class MockTransactionService implements TransactionService {
       if (decoded is List) {
         _userTransactions[userId] = decoded
             .whereType<Map>()
-            .map((item) => TransactionModel.fromJson(Map<String, dynamic>.from(item)))
+            .map((item) =>
+                TransactionModel.fromJson(Map<String, dynamic>.from(item)))
             .toList();
       } else {
         _userTransactions[userId] = [];
@@ -90,7 +92,8 @@ class MockTransactionService implements TransactionService {
 
   Future<void> _emitTransactions(String userId) async {
     await _ensureUserLoaded(userId);
-    final ordered = _ordered(_userTransactions[userId] ?? const <TransactionModel>[]);
+    final ordered =
+        _ordered(_userTransactions[userId] ?? const <TransactionModel>[]);
     _streamController.add(List.unmodifiable(ordered));
   }
 
@@ -98,7 +101,8 @@ class MockTransactionService implements TransactionService {
   Future<List<TransactionModel>> getTransactions() async {
     final userId = await _getCurrentUserId();
     await _ensureUserLoaded(userId);
-    final ordered = _ordered(_userTransactions[userId] ?? const <TransactionModel>[]);
+    final ordered =
+        _ordered(_userTransactions[userId] ?? const <TransactionModel>[]);
     return List.unmodifiable(ordered);
   }
 
@@ -106,23 +110,24 @@ class MockTransactionService implements TransactionService {
   Future<TransactionModel> getTransaction(String id) async {
     final userId = await _getCurrentUserId();
     await _ensureUserLoaded(userId);
-    final transactions = _userTransactions[userId] ?? const <TransactionModel>[];
+    final transactions =
+        _userTransactions[userId] ?? const <TransactionModel>[];
     return transactions.firstWhere((t) => t.id == id);
   }
 
   @override
   Future<TransactionModel> addTransaction(TransactionModel transaction) async {
     final userId = await _getCurrentUserId();
-    
+
     await _ensureUserLoaded(userId);
     _userTransactions[userId]!.add(transaction);
     await _saveUserTransactions(userId);
     await _emitTransactions(userId);
 
-if (challengeService != null) {
-      await challengeService!.checkAndUpdateChallengeFromTransaction(transaction);
-
-}
+    if (challengeService != null) {
+      await challengeService!
+          .checkAndUpdateChallengeFromTransaction(transaction);
+    }
 
     return transaction;
   }
@@ -144,7 +149,7 @@ if (challengeService != null) {
   Future<void> deleteTransaction(String id) async {
     final userId = await _getCurrentUserId();
     await _ensureUserLoaded(userId);
-    
+
     _userTransactions[userId]!.removeWhere((t) => t.id == id);
     await _saveUserTransactions(userId);
     await _emitTransactions(userId);
@@ -152,18 +157,17 @@ if (challengeService != null) {
 
   @override
   Stream<List<TransactionModel>> watchTransactions() {
-
     final controller = StreamController<List<TransactionModel>>.broadcast();
 
     StreamSubscription<List<TransactionModel>>? localSub;
 
-Future<void> init() async {
+    Future<void> init() async {
       final userId = await _getCurrentUserId();
       await _ensureUserLoaded(userId);
       final initialData = _userTransactions[userId] ?? [];
       controller.add(_ordered(initialData));
 
-localSub = _streamController.stream.listen((newList) {
+      localSub = _streamController.stream.listen((newList) {
         if (!controller.isClosed) {
           controller.add(_ordered(newList));
         }

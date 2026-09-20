@@ -44,11 +44,24 @@ class ChallengeTemplateModel {
           : null,
       targetCategory: json['targetCategory'] as String?,
       tips: (json['tips'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
-      icon: json['iconCodePoint'] != null 
-          ? IconData(json['iconCodePoint'] as int, fontFamily: 'MaterialIcons') 
-          : null,
+      icon: _resolveIcon(json['iconCodePoint'] as int?),
       points: json['points'] as int,
     );
+  }
+
+  static IconData? _resolveIcon(int? codePoint) {
+    if (codePoint == null) return null;
+    if (codePoint == Icons.no_meals_rounded.codePoint) return Icons.no_meals_rounded;
+    if (codePoint == Icons.savings_rounded.codePoint) return Icons.savings_rounded;
+    if (codePoint == Icons.lock_outline_rounded.codePoint) return Icons.lock_outline_rounded;
+    if (codePoint == Icons.coffee_rounded.codePoint) return Icons.coffee_rounded;
+    if (codePoint == Icons.directions_walk_rounded.codePoint) return Icons.directions_walk_rounded;
+    if (codePoint == Icons.fastfood_rounded.codePoint) return Icons.fastfood_rounded;
+    if (codePoint == Icons.shopping_cart_rounded.codePoint) return Icons.shopping_cart_rounded;
+    if (codePoint == Icons.receipt_long_rounded.codePoint) return Icons.receipt_long_rounded;
+    if (codePoint == Icons.electric_bolt_rounded.codePoint) return Icons.electric_bolt_rounded;
+    if (codePoint == Icons.emoji_events_rounded.codePoint) return Icons.emoji_events_rounded;
+    return Icons.emoji_events_rounded;
   }
 
   Map<String, dynamic> toJson() {

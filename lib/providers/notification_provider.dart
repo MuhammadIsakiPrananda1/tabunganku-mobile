@@ -42,6 +42,12 @@ class NotificationNotifier extends StateNotifier<AsyncValue<List<NotificationMod
     _ref.invalidate(unreadNotificationsCountProvider);
   }
 
+  Future<void> addNotifications(List<NotificationModel> notifications) async {
+    await _service.addNotifications(notifications);
+    await loadNotifications();
+    _ref.invalidate(unreadNotificationsCountProvider);
+  }
+
   Future<void> markAsRead(String id) async {
     await _service.markAsRead(id);
     await loadNotifications();
@@ -50,6 +56,12 @@ class NotificationNotifier extends StateNotifier<AsyncValue<List<NotificationMod
 
   Future<void> markAllAsRead() async {
     await _service.markAllAsRead();
+    await loadNotifications();
+    _ref.invalidate(unreadNotificationsCountProvider);
+  }
+
+  Future<void> deleteNotification(String id) async {
+    await _service.deleteNotification(id);
     await loadNotifications();
     _ref.invalidate(unreadNotificationsCountProvider);
   }

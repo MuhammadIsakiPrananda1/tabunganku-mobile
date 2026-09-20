@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 
 class TaxReminderModel {
   final String id;
@@ -7,6 +6,7 @@ class TaxReminderModel {
   final String status;
   final int iconCodePoint;
   final int colorValue;
+  final double amount;
 
   TaxReminderModel({
     required this.id,
@@ -15,6 +15,7 @@ class TaxReminderModel {
     required this.status,
     required this.iconCodePoint,
     required this.colorValue,
+    required this.amount,
   });
 
   TaxReminderModel copyWith({
@@ -24,6 +25,7 @@ class TaxReminderModel {
     String? status,
     int? iconCodePoint,
     int? colorValue,
+    double? amount,
   }) {
     return TaxReminderModel(
       id: id ?? this.id,
@@ -32,6 +34,7 @@ class TaxReminderModel {
       status: status ?? this.status,
       iconCodePoint: iconCodePoint ?? this.iconCodePoint,
       colorValue: colorValue ?? this.colorValue,
+      amount: amount ?? this.amount,
     );
   }
 
@@ -43,6 +46,7 @@ class TaxReminderModel {
       'status': status,
       'iconCodePoint': iconCodePoint,
       'colorValue': colorValue,
+      'amount': amount,
     };
   }
 
@@ -54,6 +58,7 @@ class TaxReminderModel {
       status: json['status'] as String,
       iconCodePoint: json['iconCodePoint'] as int,
       colorValue: json['colorValue'] as int,
+      amount: (json['amount'] as num?)?.toDouble() ?? 0.0,
     );
   }
 }

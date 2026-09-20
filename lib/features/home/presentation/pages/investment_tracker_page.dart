@@ -311,6 +311,7 @@ class _InvestmentTrackerPageState extends ConsumerState<InvestmentTrackerPage> {
                         width: 1,
                       ),
                     ),
+                    clipBehavior: Clip.antiAlias,
                     color: cardBg,
                     elevation: 4,
                     onSelected: (value) {
@@ -527,7 +528,7 @@ class _InvestmentTrackerPageState extends ConsumerState<InvestmentTrackerPage> {
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
         padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+          bottom: MediaQuery.of(context).viewInsets.bottom > 0 ? MediaQuery.of(context).viewInsets.bottom : MediaQuery.of(context).padding.bottom + 24,
           top: 16,
           left: 24,
           right: 24,
@@ -615,7 +616,7 @@ class _InvestmentTrackerPageState extends ConsumerState<InvestmentTrackerPage> {
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
         padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+          bottom: MediaQuery.of(context).viewInsets.bottom > 0 ? MediaQuery.of(context).viewInsets.bottom : MediaQuery.of(context).padding.bottom + 24,
           top: 16,
           left: 24,
           right: 24,

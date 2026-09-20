@@ -52,7 +52,7 @@ class _BillingManagementPageState extends ConsumerState<BillingManagementPage> {
       builder: (context) => StatefulBuilder(
         builder: (context, setSheetState) => Container(
           padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom + 32,
+            bottom: MediaQuery.of(context).viewInsets.bottom > 0 ? MediaQuery.of(context).viewInsets.bottom : MediaQuery.of(context).padding.bottom + 32,
             top: 24,
             left: 28,
             right: 28,
@@ -308,7 +308,7 @@ class _BillingManagementPageState extends ConsumerState<BillingManagementPage> {
       builder: (context) => StatefulBuilder(
         builder: (context, setSheetState) => Container(
           padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom + 32,
+            bottom: MediaQuery.of(context).viewInsets.bottom > 0 ? MediaQuery.of(context).viewInsets.bottom : MediaQuery.of(context).padding.bottom + 32,
             top: 24,
             left: 28,
             right: 28,
@@ -517,7 +517,7 @@ class _BillingManagementPageState extends ConsumerState<BillingManagementPage> {
                     borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
                   ),
                   padding: EdgeInsets.only(
-                    bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+                    bottom: MediaQuery.of(context).viewInsets.bottom > 0 ? MediaQuery.of(context).viewInsets.bottom : MediaQuery.of(context).padding.bottom + 24,
                     top: 16,
                     left: 24,
                     right: 24,
@@ -1180,6 +1180,9 @@ class _BillingManagementPageState extends ConsumerState<BillingManagementPage> {
                           ),
                           PopupMenuButton<String>(
                             padding: EdgeInsets.zero,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            clipBehavior: Clip.antiAlias,
+                            color: isDarkMode ? AppColors.surfaceDark : Colors.white,
                             child: Padding(
                               padding: const EdgeInsets.only(left: 8),
                               child: Icon(

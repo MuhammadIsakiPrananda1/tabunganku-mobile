@@ -382,7 +382,7 @@ Padding(
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
         padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+          bottom: MediaQuery.of(context).viewInsets.bottom > 0 ? MediaQuery.of(context).viewInsets.bottom : MediaQuery.of(context).padding.bottom + 24,
           top: 12, left: 24, right: 24
         ),
         decoration: BoxDecoration(
@@ -952,7 +952,7 @@ Padding(
                                               if (member.name.toLowerCase() == userName.toLowerCase() ||
                                                   member.name.toLowerCase() == 'saya') {
                                                 final tx = TransactionModel(
-                                                  id: DateTime.now().millisecondsSinceEpoch.toString(),
+                                                  id: const Uuid().v4(),
                                                   title: 'Iuran Nabung Bersama: ${item.name}',
                                                   description: 'Pembayaran iuran nabung bersama ${item.name}',
                                                   amount: item.contributionAmount,

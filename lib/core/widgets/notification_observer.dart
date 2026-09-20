@@ -10,11 +10,8 @@ import 'package:tabunganku/models/transaction_model.dart';
 import 'package:tabunganku/providers/gold_provider.dart';
 import 'package:tabunganku/models/gold_investment_model.dart';
 import 'package:tabunganku/providers/bills_provider.dart';
-import 'package:tabunganku/models/bill_model.dart';
 import 'package:tabunganku/providers/investment_provider.dart';
-import 'package:tabunganku/models/investment_model.dart';
 import 'package:tabunganku/providers/insurance_provider.dart';
-import 'package:tabunganku/models/insurance_model.dart';
 import 'package:intl/intl.dart';
 
 class NotificationObserver extends ConsumerStatefulWidget {
@@ -51,23 +48,30 @@ class _NotificationObserverState extends ConsumerState<NotificationObserver> {
   Widget build(BuildContext context) {
     final currencyFormatter = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp', decimalDigits: 0);
 
-ref.listen(achievementsProvider, (previous, next) {
+    ref.listen(achievementsProvider, (previous, next) {
       if (previous == null) return;
       
+      final toAdd = <NotificationModel>[];
+      final now = DateTime.now();
+      int offset = 0;
       for (final achievement in next) {
         if (achievement.isUnlocked && !_isNotified('achievement_${achievement.id}')) {
-          ref.read(notificationNotifierProvider.notifier).addNotification(
+          toAdd.add(
             NotificationModel(
-              id: 'achievement_${achievement.id}_${DateTime.now().millisecondsSinceEpoch}',
+              id: 'achievement_${achievement.id}_${now.millisecondsSinceEpoch}_$offset',
               title: 'Pencapaian Baru! 🏅',
               message: '${achievement.title}: ${achievement.description}',
-              timestamp: DateTime.now(),
+              timestamp: now.add(Duration(milliseconds: offset)),
               type: NotificationType.badge,
               actionData: achievement.id,
             ),
           );
           _markAsNotified('achievement_${achievement.id}');
+          offset++;
         }
+      }
+      if (toAdd.isNotEmpty) {
+        ref.read(notificationNotifierProvider.notifier).addNotifications(toAdd);
       }
     });
 
@@ -103,11 +107,9 @@ if (prevList != null) {
           }
         }
 
-if (targets != null) {
+        if (targets != null) {
           for (final target in targets) {
-            final targetBalance = personalTransactions
-                .where((t) => !t.date.isBefore(target.createdAt))
-                .fold<double>(0, (s, t) => s + (t.type == TransactionType.income ? t.amount : -t.amount));
+            final targetBalance = target.savedAmount;
 
             if (targetBalance >= target.targetAmount && target.targetAmount > 0 && !_isNotified('target_reached_${target.id}')) {
               ref.read(notificationNotifierProvider.notifier).addNotification(
@@ -133,7 +135,7 @@ if (_prefs != null) {
                 .where((t) => t.date.year == now.year && t.date.month == now.month)
                 .toList();
             final totalExpense = monthlyTransactions
-                .where((t) => t.type == TransactionType.expense)
+                .where((t) => t.type == TransactionType.expense && t.category != 'Tabungan')
                 .fold<double>(0, (sum, t) => sum + t.amount);
 
             final progress = totalExpense / limit;

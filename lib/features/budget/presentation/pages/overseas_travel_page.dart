@@ -11,20 +11,6 @@ import 'package:tabunganku/providers/overseas_travel_provider.dart';
 import 'package:tabunganku/services/currency_service.dart';
 import 'package:uuid/uuid.dart';
 
-class DestinationPreset {
-  final String name;
-  final String currencyCode;
-  final String countryCode;
-  final double cost2026;
-
-  const DestinationPreset({
-    required this.name,
-    required this.currencyCode,
-    required this.countryCode,
-    required this.cost2026,
-  });
-}
-
 class OverseasTravelPage extends ConsumerStatefulWidget {
   const OverseasTravelPage({super.key});
 
@@ -33,17 +19,6 @@ class OverseasTravelPage extends ConsumerStatefulWidget {
 }
 
 class _OverseasTravelPageState extends ConsumerState<OverseasTravelPage> {
-  final List<DestinationPreset> _presets = const [
-    DestinationPreset(name: 'Singapura', currencyCode: 'SGD', countryCode: 'SG', cost2026: 1500),
-    DestinationPreset(name: 'Tokyo, Jepang', currencyCode: 'JPY', countryCode: 'JP', cost2026: 250000),
-    DestinationPreset(name: 'Seoul, Korea Selatan', currencyCode: 'KRW', countryCode: 'KR', cost2026: 2000000),
-    DestinationPreset(name: 'Makkah, Arab Saudi', currencyCode: 'SAR', countryCode: 'SA', cost2026: 8500),
-    DestinationPreset(name: 'Kuala Lumpur, Malaysia', currencyCode: 'MYR', countryCode: 'MY', cost2026: 3000),
-    DestinationPreset(name: 'Bangkok, Thailand', currencyCode: 'THB', countryCode: 'TH', cost2026: 25000),
-    DestinationPreset(name: 'Paris, Prancis (Eropa)', currencyCode: 'EUR', countryCode: 'EU', cost2026: 3500),
-    DestinationPreset(name: 'New York, Amerika Serikat', currencyCode: 'USD', countryCode: 'US', cost2026: 4000),
-  ];
-
   final List<Map<String, String>> _currencies = [
     {'code': 'USD', 'name': 'United States Dollar', 'country': 'US'},
     {'code': 'JPY', 'name': 'Japanese Yen', 'country': 'JP'},
@@ -56,20 +31,24 @@ class _OverseasTravelPageState extends ConsumerState<OverseasTravelPage> {
   ];
 
   String _formatRupiah(double amount) {
-    return NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(amount);
+    return NumberFormat.currency(
+            locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0)
+        .format(amount);
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
-        (ref.watch(themeProvider) == ThemeMode.system && theme.brightness == Brightness.dark);
+        (ref.watch(themeProvider) == ThemeMode.system &&
+            theme.brightness == Brightness.dark);
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
 
     final goalsAsync = ref.watch(overseasTravelStreamProvider);
     final ratesAsync = ref.watch(currencyRatesProvider);
 
-    final pageBgColor = isDarkMode ? AppColors.backgroundDark : const Color(0xFFF8FAF9);
+    final pageBgColor =
+        isDarkMode ? AppColors.backgroundDark : const Color(0xFFF8FAF9);
 
     return Scaffold(
       backgroundColor: pageBgColor,
@@ -79,7 +58,8 @@ class _OverseasTravelPageState extends ConsumerState<OverseasTravelPage> {
         centerTitle: true,
         leading: IconButton(
           onPressed: () => Navigator.pop(context),
-          icon: Icon(Icons.arrow_back_ios_new_rounded, color: contentColor, size: 20),
+          icon: Icon(Icons.arrow_back_ios_new_rounded,
+              color: contentColor, size: 20),
         ),
         title: Text(
           'Target Luar Negeri',
@@ -103,7 +83,7 @@ class _OverseasTravelPageState extends ConsumerState<OverseasTravelPage> {
                 fontSize: 10,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1.5,
-                color: contentColor.withOpacity(0.35),
+                color: contentColor.withValues(alpha: 0.35),
               ),
             ),
             const SizedBox(height: 12),
@@ -125,7 +105,8 @@ class _OverseasTravelPageState extends ConsumerState<OverseasTravelPage> {
                   padding: EdgeInsets.all(40.0),
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2E3D49)),
+                    valueColor:
+                        AlwaysStoppedAnimation<Color>(Color(0xFF2E3D49)),
                   ),
                 ),
               ),
@@ -157,10 +138,14 @@ class _OverseasTravelPageState extends ConsumerState<OverseasTravelPage> {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: isDarkMode ? Colors.white.withOpacity(0.02) : AppColors.primary.withOpacity(0.06),
+        color: isDarkMode
+            ? Colors.white.withValues(alpha: 0.02)
+            : AppColors.primary.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isDarkMode ? Colors.white.withOpacity(0.05) : AppColors.primary.withOpacity(0.1),
+          color: isDarkMode
+              ? Colors.white.withValues(alpha: 0.05)
+              : AppColors.primary.withValues(alpha: 0.1),
         ),
       ),
       child: Row(
@@ -191,26 +176,38 @@ class _OverseasTravelPageState extends ConsumerState<OverseasTravelPage> {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
       decoration: BoxDecoration(
-        color: isDarkMode ? Colors.white.withOpacity(0.02) : Colors.white,
+        color: isDarkMode ? Colors.white.withValues(alpha: 0.02) : Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: isDarkMode ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.04)),
+        border: Border.all(
+            color: isDarkMode
+                ? Colors.white.withValues(alpha: 0.05)
+                : Colors.black.withValues(alpha: 0.04)),
       ),
       child: Column(
         children: [
-          Icon(Icons.flight_takeoff_rounded, size: 48, color: isDarkMode ? Colors.white10 : Colors.black.withOpacity(0.05)),
+          Icon(Icons.flight_takeoff_rounded,
+              size: 48,
+              color: isDarkMode
+                  ? Colors.white10
+                  : Colors.black.withValues(alpha: 0.05)),
           const SizedBox(height: 16),
           Text(
             'Belum ada target liburan',
-            style: GoogleFonts.quicksand(fontSize: 12, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white30 : Colors.grey),
+            style: GoogleFonts.quicksand(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: isDarkMode ? Colors.white30 : Colors.grey),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildGoalResultCard(OverseasTravelGoalModel goal, double rate, bool isDarkMode) {
+  Widget _buildGoalResultCard(
+      OverseasTravelGoalModel goal, double rate, bool isDarkMode) {
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
-    final idrFormat = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+    final idrFormat =
+        NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
     final foreignFormat = NumberFormat.simpleCurrency(name: goal.currencyCode);
 
     final targetIdr = goal.targetForeignAmount * rate;
@@ -222,10 +219,12 @@ class _OverseasTravelPageState extends ConsumerState<OverseasTravelPage> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: isDarkMode ? Colors.white.withOpacity(0.02) : Colors.white,
+        color: isDarkMode ? Colors.white.withValues(alpha: 0.02) : Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: isDarkMode ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.04),
+          color: isDarkMode
+              ? Colors.white.withValues(alpha: 0.05)
+              : Colors.black.withValues(alpha: 0.04),
           width: 1.2,
         ),
       ),
@@ -238,7 +237,8 @@ class _OverseasTravelPageState extends ConsumerState<OverseasTravelPage> {
               Expanded(
                 child: Row(
                   children: [
-                    Text(_getFlag(goal.countryCode), style: const TextStyle(fontSize: 14)),
+                    Text(_getFlag(goal.countryCode),
+                        style: const TextStyle(fontSize: 14)),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -257,7 +257,8 @@ class _OverseasTravelPageState extends ConsumerState<OverseasTravelPage> {
               ),
               IconButton(
                 onPressed: () => _showDeleteConfirmation(goal),
-                icon: Icon(Icons.delete_outline_rounded, color: Colors.redAccent.withOpacity(0.6), size: 18),
+                icon: Icon(Icons.delete_outline_rounded,
+                    color: Colors.redAccent.withValues(alpha: 0.6), size: 18),
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
               ),
@@ -293,13 +294,15 @@ class _OverseasTravelPageState extends ConsumerState<OverseasTravelPage> {
                 style: GoogleFonts.quicksand(
                   fontSize: 10,
                   fontWeight: FontWeight.bold,
-                  color: isDarkMode ? Colors.tealAccent : const Color(0xFF2E3D49),
+                  color:
+                      isDarkMode ? Colors.tealAccent : const Color(0xFF2E3D49),
                 ),
               ),
               Flexible(
                 child: Text(
                   'Kurs: 1 ${goal.currencyCode} = ${idrFormat.format(rate)}',
-                  style: GoogleFonts.quicksand(fontSize: 9, color: contentColor.withOpacity(0.3)),
+                  style: GoogleFonts.quicksand(
+                      fontSize: 9, color: contentColor.withValues(alpha: 0.3)),
                   textAlign: TextAlign.right,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -312,8 +315,11 @@ class _OverseasTravelPageState extends ConsumerState<OverseasTravelPage> {
             child: LinearProgressIndicator(
               value: progress,
               minHeight: 6,
-              backgroundColor: isDarkMode ? Colors.white.withOpacity(0.05) : Colors.grey.shade100,
-              valueColor: AlwaysStoppedAnimation<Color>(isDarkMode ? Colors.tealAccent : AppColors.primary),
+              backgroundColor: isDarkMode
+                  ? Colors.white.withValues(alpha: 0.05)
+                  : Colors.grey.shade100,
+              valueColor: AlwaysStoppedAnimation<Color>(
+                  isDarkMode ? Colors.tealAccent : AppColors.primary),
             ),
           ),
           const SizedBox(height: 16),
@@ -323,14 +329,18 @@ class _OverseasTravelPageState extends ConsumerState<OverseasTravelPage> {
             child: ElevatedButton(
               onPressed: () => _showAddSavingDialog(goal),
               style: ElevatedButton.styleFrom(
-                backgroundColor: isDarkMode ? Colors.white.withOpacity(0.08) : const Color(0xFF2E3D49),
+                backgroundColor: isDarkMode
+                    ? Colors.white.withValues(alpha: 0.08)
+                    : const Color(0xFF2E3D49),
                 foregroundColor: isDarkMode ? Colors.white : Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
                 elevation: 0,
               ),
               child: Text(
                 'Tambah Tabungan',
-                style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 12),
+                style: GoogleFonts.quicksand(
+                    fontWeight: FontWeight.bold, fontSize: 12),
               ),
             ),
           ),
@@ -341,14 +351,11 @@ class _OverseasTravelPageState extends ConsumerState<OverseasTravelPage> {
 
   void _showAddGoalSheet(bool isDarkMode) {
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
-    final customNameController = TextEditingController();
+    final nameController = TextEditingController();
     final amountController = TextEditingController();
 
-DestinationPreset? selectedPreset = _presets.first;
-    String selectedCurrency = selectedPreset.currencyCode;
-    String selectedCountry = selectedPreset.countryCode;
-
-amountController.text = NumberFormat.decimalPattern('id_ID').format(selectedPreset.cost2026.round());
+    String selectedCurrency = 'USD';
+    String selectedCountry = 'US';
 
     showModalBottomSheet(
       context: context,
@@ -356,26 +363,33 @@ amountController.text = NumberFormat.decimalPattern('id_ID').format(selectedPres
       backgroundColor: Colors.transparent,
       builder: (context) => StatefulBuilder(
         builder: (context, setSheetState) {
-          final iconColor = isDarkMode ? Colors.white.withOpacity(0.7) : const Color(0xFF2E3D49);
-          final bool isCustom = selectedPreset == null;
-          
+          final iconColor = isDarkMode
+              ? Colors.white.withValues(alpha: 0.7)
+              : const Color(0xFF2E3D49);
+
           final rates = ref.read(currencyRatesProvider).valueOrNull ?? {};
           final currentRate = rates[selectedCurrency] ?? 1.0;
-          final double currentAmount = double.tryParse(amountController.text.replaceAll('.', '')) ?? 0.0;
+          final double currentAmount =
+              double.tryParse(amountController.text.replaceAll('.', '')) ?? 0.0;
           final double idrEquivalent = currentAmount * currentRate;
 
           return Container(
             padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+              bottom: MediaQuery.of(context).viewInsets.bottom > 0
+                  ? MediaQuery.of(context).viewInsets.bottom
+                  : MediaQuery.of(context).padding.bottom + 24,
               top: 16,
               left: 24,
               right: 24,
             ),
             decoration: BoxDecoration(
               color: isDarkMode ? AppColors.surfaceDark : Colors.white,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(24)),
               border: Border.all(
-                color: isDarkMode ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.03),
+                color: isDarkMode
+                    ? Colors.white.withValues(alpha: 0.05)
+                    : Colors.black.withValues(alpha: 0.03),
                 width: 1,
               ),
             ),
@@ -385,8 +399,12 @@ amountController.text = NumberFormat.decimalPattern('id_ID').format(selectedPres
               children: [
                 Center(
                   child: Container(
-                    width: 36, height: 4,
-                    decoration: BoxDecoration(color: isDarkMode ? Colors.white10 : Colors.grey.shade300, borderRadius: BorderRadius.circular(2)),
+                    width: 36,
+                    height: 4,
+                    decoration: BoxDecoration(
+                        color:
+                            isDarkMode ? Colors.white10 : Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(2)),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -401,92 +419,14 @@ amountController.text = NumberFormat.decimalPattern('id_ID').format(selectedPres
                   ),
                 ),
                 const SizedBox(height: 24),
-
-Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 4, bottom: 4),
-                      child: Text(
-                        'Pilih Tujuan Wisata',
-                        style: GoogleFonts.quicksand(
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          color: isDarkMode ? Colors.white.withOpacity(0.6) : Colors.black54,
-                        ),
-                      ),
-                    ),
-                    Container(
-                      height: 48,
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      decoration: BoxDecoration(
-                        color: isDarkMode ? Colors.white.withOpacity(0.05) : AppColors.background,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(Icons.map_rounded, color: iconColor, size: 18),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: DropdownButtonHideUnderline(
-                              child: DropdownButton<DestinationPreset?>(
-                                value: selectedPreset,
-                                isExpanded: true,
-                                dropdownColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
-                                icon: Icon(Icons.arrow_drop_down_rounded, color: contentColor.withOpacity(0.4), size: 20),
-                                style: GoogleFonts.quicksand(
-                                  fontWeight: FontWeight.bold, 
-                                  color: isDarkMode ? Colors.white : AppColors.primaryDark, 
-                                  fontSize: 13,
-                                ),
-                                items: [
-                                  ..._presets.map((preset) {
-                                    return DropdownMenuItem<DestinationPreset?>(
-                                      value: preset,
-                                      child: Text('${_getFlag(preset.countryCode)} ${preset.name}'),
-                                    );
-                                  }),
-                                  const DropdownMenuItem<DestinationPreset?>(
-                                    value: null,
-                                    child: Text('➕ Kustom (Input Manual)'),
-                                  ),
-                                ],
-                                onChanged: (val) {
-                                  setSheetState(() {
-                                    selectedPreset = val;
-                                    if (val != null) {
-                                      selectedCurrency = val.currencyCode;
-                                      selectedCountry = val.countryCode;
-                                      amountController.text = NumberFormat.decimalPattern('id_ID').format(val.cost2026.round());
-                                    } else {
-                                      selectedCurrency = 'USD';
-                                      selectedCountry = 'US';
-                                      amountController.clear();
-                                      customNameController.clear();
-                                    }
-                                  });
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                _buildCompactInput(
+                  'Nama Tujuan Wisata',
+                  nameController,
+                  Icons.edit_location_alt_rounded,
+                  isDarkMode,
+                  isText: true,
+                  hint: 'Masukkan Nama Tujuan (misal: Singapura)',
                 ),
-                
-                if (isCustom) ...[
-                  const SizedBox(height: 16),
-                  _buildCompactInput(
-                    'Nama Tujuan Kustom',
-                    customNameController,
-                    Icons.edit_location_alt_rounded,
-                    isDarkMode,
-                    isText: true,
-                    hint: 'Masukkan Nama Tujuan',
-                  ),
-                ],
-                
                 const SizedBox(height: 16),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -503,7 +443,9 @@ Column(
                               style: GoogleFonts.quicksand(
                                 fontSize: 10,
                                 fontWeight: FontWeight.bold,
-                                color: isDarkMode ? Colors.white.withOpacity(0.6) : Colors.black54,
+                                color: isDarkMode
+                                    ? Colors.white.withValues(alpha: 0.6)
+                                    : Colors.black54,
                               ),
                             ),
                           ),
@@ -511,16 +453,16 @@ Column(
                             height: 48,
                             padding: const EdgeInsets.symmetric(horizontal: 12),
                             decoration: BoxDecoration(
-                              color: isDarkMode 
-                                  ? (isCustom ? Colors.white.withOpacity(0.05) : Colors.white.withOpacity(0.02))
-                                  : (isCustom ? AppColors.background : Colors.grey.shade100),
+                              color: isDarkMode
+                                  ? Colors.white.withValues(alpha: 0.05)
+                                  : AppColors.background,
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Row(
                               children: [
                                 Icon(
-                                  Icons.currency_exchange_rounded, 
-                                  color: isCustom ? iconColor : iconColor.withOpacity(0.5), 
+                                  Icons.currency_exchange_rounded,
+                                  color: iconColor,
                                   size: 18,
                                 ),
                                 const SizedBox(width: 8),
@@ -529,29 +471,35 @@ Column(
                                     child: DropdownButton<String>(
                                       value: selectedCurrency,
                                       isExpanded: true,
-                                      dropdownColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
-                                      icon: Icon(Icons.arrow_drop_down_rounded, color: contentColor.withOpacity(0.4), size: 20),
+                                      dropdownColor: isDarkMode
+                                          ? AppColors.surfaceDark
+                                          : Colors.white,
+                                      icon: Icon(Icons.arrow_drop_down_rounded,
+                                          color: contentColor.withValues(
+                                              alpha: 0.4),
+                                          size: 20),
                                       style: GoogleFonts.quicksand(
-                                        fontWeight: FontWeight.bold, 
-                                        color: isCustom
-                                            ? (isDarkMode ? Colors.white : AppColors.primaryDark)
-                                            : (isDarkMode ? Colors.white60 : Colors.grey.shade600), 
+                                        fontWeight: FontWeight.bold,
+                                        color: isDarkMode
+                                            ? Colors.white
+                                            : AppColors.primaryDark,
                                         fontSize: 13,
                                       ),
                                       items: _currencies.map((c) {
                                         return DropdownMenuItem(
                                           value: c['code'],
-                                          child: Text('${_getFlag(c['country']!)} ${c['code']}'),
+                                          child: Text(
+                                              '${_getFlag(c['country']!)} ${c['code']}'),
                                         );
                                       }).toList(),
-                                      onChanged: isCustom 
-                                          ? (val) {
-                                              setSheetState(() {
-                                                selectedCurrency = val!;
-                                                selectedCountry = _currencies.firstWhere((c) => c['code'] == val)['country']!;
-                                              });
-                                            }
-                                          : null,
+                                      onChanged: (val) {
+                                        setSheetState(() {
+                                          selectedCurrency = val!;
+                                          selectedCountry =
+                                              _currencies.firstWhere((c) =>
+                                                  c['code'] == val)['country']!;
+                                        });
+                                      },
                                     ),
                                   ),
                                 ),
@@ -565,49 +513,51 @@ Column(
                     Expanded(
                       flex: 3,
                       child: _buildCompactInput(
-                        isCustom ? 'Nominal Target' : 'Nominal Target (Otomatis 2026)',
+                        'Nominal Target',
                         amountController,
                         Icons.ads_click_rounded,
                         isDarkMode,
                         isText: false,
                         hint: 'Nominal Target',
-                        readOnly: !isCustom,
+                        readOnly: false,
                       ),
                     ),
                   ],
                 ),
-                
                 if (currentAmount > 0) ...[
                   const SizedBox(height: 12),
                   Padding(
                     padding: const EdgeInsets.only(left: 4),
                     child: Text(
-                      isCustom
-                          ? '* Setara dengan: ${_formatRupiah(idrEquivalent)}'
-                          : '* Estimasi biaya otomatis tahun 2026: ${_formatRupiah(idrEquivalent)} (kurs real-time)',
+                      '* Setara dengan: ${_formatRupiah(idrEquivalent)}',
                       style: GoogleFonts.quicksand(
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
-                        color: isDarkMode ? Colors.tealAccent : const Color(0xFF2E3D49),
+                        color: isDarkMode
+                            ? Colors.tealAccent
+                            : const Color(0xFF2E3D49),
                       ),
                     ),
                   ),
                 ],
-                
                 const SizedBox(height: 24),
                 SizedBox(
                   width: double.infinity,
                   height: 48,
                   child: ElevatedButton(
                     onPressed: () {
-                      final String destinationName = isCustom ? customNameController.text.trim() : selectedPreset!.name;
+                      final String destinationName = nameController.text.trim();
                       if (destinationName.isEmpty) {
-                        showTopToast(context, 'Nama Tujuan tidak boleh kosong!', isError: true);
+                        showTopToast(context, 'Nama Tujuan tidak boleh kosong!',
+                            isError: true);
                         return;
                       }
-                      final targetVal = double.tryParse(amountController.text.replaceAll('.', '')) ?? 0;
+                      final targetVal = double.tryParse(
+                              amountController.text.replaceAll('.', '')) ??
+                          0;
                       if (targetVal <= 0) {
-                        showTopToast(context, 'Nominal Target harus diisi!', isError: true);
+                        showTopToast(context, 'Nominal Target harus diisi!',
+                            isError: true);
                         return;
                       }
 
@@ -629,12 +579,14 @@ Column(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF2E3D49),
                       foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16)),
                       elevation: 0,
                     ),
                     child: Text(
                       'Simpan Target',
-                      style: GoogleFonts.quicksand(fontWeight: FontWeight.w800, fontSize: 13),
+                      style: GoogleFonts.quicksand(
+                          fontWeight: FontWeight.w800, fontSize: 13),
                     ),
                   ),
                 ),
@@ -647,16 +599,18 @@ Column(
   }
 
   Widget _buildCompactInput(
-    String label, 
-    TextEditingController controller, 
-    IconData icon, 
+    String label,
+    TextEditingController controller,
+    IconData icon,
     bool isDarkMode, {
-    required bool isText, 
+    required bool isText,
     String? hint,
     bool readOnly = false,
   }) {
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
-    final iconColor = isDarkMode ? Colors.white.withOpacity(0.7) : const Color(0xFF2E3D49);
+    final iconColor = isDarkMode
+        ? Colors.white.withValues(alpha: 0.7)
+        : const Color(0xFF2E3D49);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -667,36 +621,51 @@ Column(
             style: GoogleFonts.quicksand(
               fontSize: 10,
               fontWeight: FontWeight.bold,
-              color: isDarkMode ? Colors.white.withOpacity(0.6) : Colors.black54,
+              color: isDarkMode
+                  ? Colors.white.withValues(alpha: 0.6)
+                  : Colors.black54,
             ),
           ),
         ),
         TextFormField(
           controller: controller,
           readOnly: readOnly,
-          keyboardType: isText ? TextInputType.text : const TextInputType.numberWithOptions(decimal: true),
+          keyboardType: isText
+              ? TextInputType.text
+              : const TextInputType.numberWithOptions(decimal: true),
           inputFormatters: isText ? [] : [_RibuanFormatter()],
           style: GoogleFonts.quicksand(
-            fontWeight: FontWeight.bold, 
-            fontSize: 13, 
-            color: readOnly ? contentColor.withOpacity(0.6) : contentColor,
+            fontWeight: FontWeight.bold,
+            fontSize: 13,
+            color:
+                readOnly ? contentColor.withValues(alpha: 0.6) : contentColor,
           ),
           decoration: InputDecoration(
             hintText: hint ?? label,
             hintStyle: GoogleFonts.quicksand(
               fontSize: 13,
-              color: isDarkMode ? Colors.white.withOpacity(0.3) : Colors.black.withOpacity(0.25),
+              color: isDarkMode
+                  ? Colors.white.withValues(alpha: 0.3)
+                  : Colors.black.withValues(alpha: 0.25),
             ),
             prefixIcon: Container(
               padding: const EdgeInsets.only(left: 16, right: 8),
-              child: Icon(icon, color: readOnly ? iconColor.withOpacity(0.5) : iconColor, size: 18),
+              child: Icon(icon,
+                  color:
+                      readOnly ? iconColor.withValues(alpha: 0.5) : iconColor,
+                  size: 18),
             ),
             filled: true,
-            fillColor: isDarkMode 
-                ? (readOnly ? Colors.white.withOpacity(0.02) : Colors.white.withOpacity(0.05))
+            fillColor: isDarkMode
+                ? (readOnly
+                    ? Colors.white.withValues(alpha: 0.02)
+                    : Colors.white.withValues(alpha: 0.05))
                 : (readOnly ? Colors.grey.shade100 : AppColors.background),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-            contentPadding: const EdgeInsets.only(left: 0, right: 16, top: 14, bottom: 14),
+            border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none),
+            contentPadding:
+                const EdgeInsets.only(left: 0, right: 16, top: 14, bottom: 14),
           ),
         ),
       ],
@@ -707,75 +676,224 @@ Column(
     final controller = TextEditingController();
     final theme = Theme.of(context);
     final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
-        (ref.watch(themeProvider) == ThemeMode.system && theme.brightness == Brightness.dark);
+        (ref.watch(themeProvider) == ThemeMode.system &&
+            theme.brightness == Brightness.dark);
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
 
-    showDialog(
+    showModalBottomSheet<void>(
+      useSafeArea: true,
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: Text('Tambah Tabungan', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: contentColor)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('Masukkan nominal dalam Rupiah untuk tujuan ${goal.destinationName}', style: GoogleFonts.quicksand(fontSize: 13, color: contentColor.withOpacity(0.7))),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: controller,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              inputFormatters: [_RibuanFormatter()],
-              autofocus: true,
-              style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: contentColor),
-              decoration: InputDecoration(
-                prefixText: 'Rp ',
-                prefixStyle: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white.withOpacity(0.8) : const Color(0xFF2E3D49)),
-                hintText: 'Masukkan Nominal',
-                hintStyle: GoogleFonts.quicksand(
-                  fontSize: 13,
-                  color: isDarkMode ? Colors.white.withOpacity(0.3) : Colors.black.withOpacity(0.25),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            final inset = MediaQuery.of(context).viewInsets.bottom;
+            return Container(
+              clipBehavior: Clip.antiAlias,
+              decoration: BoxDecoration(
+                color: isDarkMode ? AppColors.surfaceDark : Colors.white,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(32),
+                  topRight: Radius.circular(32),
                 ),
-                filled: true,
-                fillColor: isDarkMode ? Colors.white.withOpacity(0.05) : Colors.grey.shade50,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
               ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Batal', style: GoogleFonts.quicksand(color: isDarkMode ? Colors.white38 : Colors.grey)),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              final text = controller.text.replaceAll('.', '');
-              final amount = double.tryParse(text) ?? 0;
-              if (amount > 0) {
-                final updatedGoal = goal.copyWith(
-                  collectedIdrAmount: goal.collectedIdrAmount + amount,
-                );
-                ref.read(overseasTravelServiceProvider).updateGoal(updatedGoal);
-                Navigator.pop(context);
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: isDarkMode ? Colors.white.withOpacity(0.08) : const Color(0xFF2E3D49),
-              foregroundColor: isDarkMode ? Colors.white : Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              elevation: 0,
-            ),
-            child: Text('Simpan', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold)),
-          ),
-        ],
-      ),
+              child: AnimatedPadding(
+                duration: const Duration(milliseconds: 180),
+                curve: Curves.easeOut,
+                padding: EdgeInsets.only(
+                  bottom: inset > 0
+                      ? inset
+                      : MediaQuery.of(context).padding.bottom + 20,
+                ),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 12),
+                      Center(
+                        child: Container(
+                          width: 40,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: isDarkMode
+                                ? Colors.white10
+                                : Colors.grey.shade300,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Center(
+                        child: Text(
+                          'Tambah Tabungan',
+                          style: GoogleFonts.quicksand(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 19,
+                            color: contentColor,
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 28),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            RichText(
+                              text: TextSpan(
+                                style: GoogleFonts.quicksand(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: isDarkMode
+                                      ? Colors.white70
+                                      : Colors.black87,
+                                ),
+                                children: const [
+                                  TextSpan(text: 'Nominal Tabungan '),
+                                  TextSpan(
+                                    text: '*',
+                                    style: TextStyle(color: Colors.redAccent),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            TextFormField(
+                              controller: controller,
+                              autofocus: true,
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                      decimal: true),
+                              inputFormatters: [_RibuanFormatter()],
+                              style: GoogleFonts.quicksand(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: contentColor,
+                              ),
+                              decoration: InputDecoration(
+                                hintText: 'Masukkan Nominal',
+                                hintStyle: GoogleFonts.quicksand(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: isDarkMode
+                                      ? Colors.white10
+                                      : Colors.black26,
+                                ),
+                                prefixIcon: Container(
+                                  padding:
+                                      const EdgeInsets.only(left: 16, right: 8),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(
+                                        Icons.account_balance_wallet_rounded,
+                                        color: Colors.teal,
+                                        size: 20,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        'Rp',
+                                        style: GoogleFonts.quicksand(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.teal,
+                                          fontSize: 13,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                filled: true,
+                                fillColor: isDarkMode
+                                    ? Colors.white.withValues(alpha: 0.05)
+                                    : Colors.grey.shade50,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: isDarkMode
+                                        ? Colors.white10
+                                        : Colors.grey.shade300,
+                                    width: 1.2,
+                                  ),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: isDarkMode
+                                        ? Colors.white10
+                                        : Colors.grey.shade300,
+                                    width: 1.2,
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(
+                                    color: Colors.teal,
+                                    width: 1.5,
+                                  ),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 12),
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                            ElevatedButton(
+                              onPressed: () {
+                                final text =
+                                    controller.text.replaceAll('.', '');
+                                final amount = double.tryParse(text) ?? 0;
+                                if (amount > 0) {
+                                  final updatedGoal = goal.copyWith(
+                                    collectedIdrAmount:
+                                        goal.collectedIdrAmount + amount,
+                                  );
+                                  ref
+                                      .read(overseasTravelServiceProvider)
+                                      .updateGoal(updatedGoal);
+                                  Navigator.pop(sheetContext);
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.teal,
+                                foregroundColor: Colors.white,
+                                minimumSize: const Size(double.infinity, 50),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                elevation: 4,
+                                shadowColor: Colors.teal.withValues(alpha: 0.3),
+                              ),
+                              child: Text(
+                                'Simpan Tabungan',
+                                style: GoogleFonts.quicksand(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
   void _showDeleteConfirmation(OverseasTravelGoalModel goal) {
     final theme = Theme.of(context);
     final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
-        (ref.watch(themeProvider) == ThemeMode.system && theme.brightness == Brightness.dark);
+        (ref.watch(themeProvider) == ThemeMode.system &&
+            theme.brightness == Brightness.dark);
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
 
     showDialog(
@@ -783,22 +901,29 @@ Column(
       builder: (context) => AlertDialog(
         backgroundColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: Text('Hapus Target?', style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: contentColor)),
+        title: Text('Hapus Target?',
+            style: GoogleFonts.quicksand(
+                fontWeight: FontWeight.bold, color: contentColor)),
         content: Text(
           'Apakah kamu yakin ingin menghapus target liburan ke ${goal.destinationName}?',
-          style: GoogleFonts.quicksand(color: contentColor.withOpacity(0.7)),
+          style:
+              GoogleFonts.quicksand(color: contentColor.withValues(alpha: 0.7)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Batal', style: GoogleFonts.quicksand(color: isDarkMode ? Colors.white38 : Colors.grey)),
+            child: Text('Batal',
+                style: GoogleFonts.quicksand(
+                    color: isDarkMode ? Colors.white38 : Colors.grey)),
           ),
           TextButton(
             onPressed: () {
               ref.read(overseasTravelServiceProvider).deleteGoal(goal.id);
               Navigator.pop(context);
             },
-            child: const Text('Hapus', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+            child: const Text('Hapus',
+                style: TextStyle(
+                    color: Colors.redAccent, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -809,18 +934,21 @@ Column(
     if (countryCode == 'EU') return '🇪🇺';
     return countryCode.toUpperCase().replaceAllMapped(
           RegExp(r'[A-Z]'),
-          (match) => String.fromCharCode(match.group(0)!.codeUnitAt(0) + 127397),
+          (match) =>
+              String.fromCharCode(match.group(0)!.codeUnitAt(0) + 127397),
         );
   }
 }
 
 class _RibuanFormatter extends TextInputFormatter {
   @override
-  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
     if (newValue.text.isEmpty) return newValue;
     String digits = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
     if (digits.isEmpty) return const TextEditingValue(text: '');
-    final formatted = digits.replaceAllMapped(RegExp(r'(\d)(?=(\d{3})+(?!\d))'), (match) => '${match[1]}.');
+    final formatted = digits.replaceAllMapped(
+        RegExp(r'(\d)(?=(\d{3})+(?!\d))'), (match) => '${match[1]}.');
     return TextEditingValue(
       text: formatted,
       selection: TextSelection.collapsed(offset: formatted.length),

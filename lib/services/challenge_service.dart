@@ -51,12 +51,7 @@ class MockChallengeService implements ChallengeService {
   static Stream<int> get updateStream => _updateController.stream;
 
   static void _logToFile(String message) {
-    try {
-      final file = File('c:/Users/Neverland Studio/Documents/Folder Semua Aplikasi/Aplikasi TabunganKu/debug_log.txt');
-      file.writeAsStringSync('${DateTime.now().toIso8601String()}: $message\n', mode: FileMode.append);
-    } catch (e) {
-      debugPrint('Failed to log to file: $e');
-    }
+    debugPrint('[ChallengeService] $message');
   }
 
   void _notifyListeners() {

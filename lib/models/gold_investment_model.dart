@@ -6,6 +6,7 @@ class GoldTransactionModel {
   final double pricePerGram;
   final DateTime date;
   final GoldTransactionType type;
+  final String? note;
 
   GoldTransactionModel({
     required this.id,
@@ -13,6 +14,7 @@ class GoldTransactionModel {
     required this.pricePerGram,
     required this.date,
     required this.type,
+    this.note,
   });
 
   Map<String, dynamic> toJson() {
@@ -22,6 +24,7 @@ class GoldTransactionModel {
       'pricePerGram': pricePerGram,
       'date': date.toIso8601String(),
       'type': type.name,
+      'note': note,
     };
   }
 
@@ -32,6 +35,7 @@ class GoldTransactionModel {
       pricePerGram: (json['pricePerGram'] as num).toDouble(),
       date: DateTime.parse(json['date'] as String),
       type: GoldTransactionType.values.byName(json['type'] as String),
+      note: json['note'] as String?,
     );
   }
 
@@ -41,6 +45,7 @@ class GoldTransactionModel {
     double? pricePerGram,
     DateTime? date,
     GoldTransactionType? type,
+    String? note,
   }) {
     return GoldTransactionModel(
       id: id ?? this.id,
@@ -48,6 +53,7 @@ class GoldTransactionModel {
       pricePerGram: pricePerGram ?? this.pricePerGram,
       date: date ?? this.date,
       type: type ?? this.type,
+      note: note ?? this.note,
     );
   }
 }

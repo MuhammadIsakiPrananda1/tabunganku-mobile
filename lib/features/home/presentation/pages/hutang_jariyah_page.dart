@@ -162,8 +162,8 @@ if (_commitments[index]['frequency'] == 'Sekali') {
         (ref.watch(themeProvider) == ThemeMode.system && theme.brightness == Brightness.dark);
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
     final pageBgColor = isDarkMode ? AppColors.backgroundDark : const Color(0xFFFBFDFB);
-    final accentColor = const Color(0xFF6B8E23);
-    final goldColor = const Color(0xFFC5A059);
+    final accentColor = AppColors.primary;
+    final goldColor = AppColors.primaryLight;
 
     return Scaffold(
       backgroundColor: pageBgColor,
@@ -194,8 +194,8 @@ if (_commitments[index]['frequency'] == 'Sekali') {
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: isDarkMode
-                      ? [const Color(0xFF3B4F1A), const Color(0xFF233010)]
-                      : [const Color(0xFFF1F7E8), const Color(0xFFD4E6BC)],
+                      ? [const Color(0xFF004D40), const Color(0xFF00251A)]
+                      : [const Color(0xFFE0F2F1), const Color(0xFFB2DFDB)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -212,7 +212,7 @@ if (_commitments[index]['frequency'] == 'Sekali') {
                           style: GoogleFonts.quicksand(
                             fontSize: 10.5,
                             fontWeight: FontWeight.bold,
-                            color: isDarkMode ? goldColor : accentColor,
+                            color: isDarkMode ? Colors.white70 : AppColors.primaryDark,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -232,10 +232,9 @@ if (_commitments[index]['frequency'] == 'Sekali') {
                             Text(
                               '$_activeCount Program Aktif Sedang Berlangsung',
                               style: GoogleFonts.quicksand(
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                                color: isDarkMode ? Colors.white60 : Colors.black54,
-                              ),
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  color: isDarkMode ? Colors.white60 : Colors.black54),
                             ),
                           ],
                         ),
@@ -248,7 +247,7 @@ if (_commitments[index]['frequency'] == 'Sekali') {
                       color: isDarkMode ? Colors.white.withOpacity(0.05) : Colors.white70,
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(Icons.favorite_rounded, color: isDarkMode ? goldColor : accentColor, size: 36),
+                    child: Icon(Icons.volunteer_activism_rounded, color: accentColor, size: 36),
                   ),
                 ],
               ),

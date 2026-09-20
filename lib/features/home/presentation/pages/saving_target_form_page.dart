@@ -185,262 +185,254 @@ final surfaceColor = isDarkMode
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
 
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(24),
-                margin: const EdgeInsets.only(bottom: 24),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [AppColors.primary, AppColors.primaryLight],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primary.withValues(alpha: isDarkMode ? 0.3 : 0.15),
-                      blurRadius: 16,
-                      offset: const Offset(0, 8),
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.15),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.track_changes_rounded,
-                        color: Colors.white,
-                        size: 32,
-                      ),
-                    ),
-                    const SizedBox(width: 20),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Wujudkan Impianmu!',
-                            style: GoogleFonts.quicksand(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Tulis target impianmu dan mulailah menabung secara konsisten.',
-                            style: GoogleFonts.quicksand(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.white.withValues(alpha: 0.85),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              HighVisInput(
-                controller: _nameController,
-                icon: Icons.stars_rounded,
-                label: 'Nama Barang / Impian',
-                isDarkMode: isDarkMode,
-                hintText: 'Misal: Laptop Baru, Motor, HP...',
-                hasError: _nameHasError,
-                onChanged: (val) {
-                  if (_nameHasError && val.trim().isNotEmpty) {
-                    setState(() => _nameHasError = false);
-                  }
-                },
-              ),
-              const SizedBox(height: 24),
-
-              HighVisInput(
-                controller: _amountController,
-                icon: Icons.payments_rounded,
-                label: 'Nominal Target',
-                prefixText: 'Rp',
-                isDarkMode: isDarkMode,
-                hintText: 'Masukkan Nominal',
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                  _RibuanFormatter(),
-                ],
-                style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 18),
-                hasError: _amountHasError,
-                onChanged: (val) {
-                  if (_amountHasError) {
-                    final amount = double.tryParse(val.replaceAll('.', '')) ?? 0.0;
-                    if (amount > 0) {
-                      setState(() => _amountHasError = false);
-                    }
-                  }
-                },
-              ),
-              const SizedBox(height: 24),
-
-Text(
-                'Kategori Target',
-                style: GoogleFonts.quicksand(
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  color: isDarkMode ? Colors.white70 : Colors.black87,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Focus(
-                onFocusChange: (hasFocus) {
-                  setState(() => _categoryIsFocused = hasFocus);
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  decoration: BoxDecoration(
-                    color: surfaceColor,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: categoryBorderColor,
-                      width: categoryBorderWidth,
+                    child: const Icon(
+                      Icons.track_changes_rounded,
+                      color: AppColors.primary,
+                      size: 20,
                     ),
                   ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.category_rounded, color: AppColors.primary, size: 20),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton<String>(
-                            value: _selectedCategory,
-                            isExpanded: true,
-                            dropdownColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
-                            icon: Icon(Icons.arrow_drop_down_rounded, color: isDarkMode ? Colors.white24 : Colors.grey.shade400),
-                            style: GoogleFonts.quicksand(
-                              fontWeight: FontWeight.bold, 
-                              color: _selectedCategory == 'Pilih Kategori'
-                                  ? (isDarkMode ? Colors.white30 : Colors.black38)
-                                  : contentColor, 
-                              fontSize: 12
-                            ),
-                            onChanged: (val) {
-                              if (val != null) {
-                                setState(() {
-                                  _selectedCategory = val;
-                                  if (val != 'Pilih Kategori') {
-                                    _categoryHasError = false;
-                                  }
-                                });
-                              }
-                            },
-                            items: _categories.map((c) => DropdownMenuItem(
-                              value: c, 
-                              child: Text(c, overflow: TextOverflow.ellipsis)
-                            )).toList(),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
-
-Text(
-                'Target Tanggal Tercapai',
-                style: GoogleFonts.quicksand(
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  color: isDarkMode ? Colors.white70 : Colors.black87,
-                ),
-              ),
-              const SizedBox(height: 4),
-              InkWell(
-                onTap: () async {
-                  setState(() => _dateIsFocused = true);
-                  final picked = await showDatePicker(
-                    context: context,
-                    initialDate: _selectedDate,
-                    firstDate: DateTime.now(),
-                    lastDate: DateTime(2100),
-                    builder: (context, child) {
-                      return Theme(
-                        data: Theme.of(context).copyWith(
-                          colorScheme: isDarkMode
-                              ? ColorScheme.dark(
-                                  primary: AppColors.primary,
-                                  onPrimary: Colors.white,
-                                  surface: AppColors.surfaceDark,
-                                  onSurface: Colors.white,
-                                )
-                              : ColorScheme.light(
-                                  primary: AppColors.primary,
-                                  onPrimary: Colors.white,
-                                  onSurface: Colors.teal.shade900,
-                                ),
-                        ),
-                        child: child!,
-                      );
-                    },
-                  );
-                  setState(() => _dateIsFocused = false);
-                  if (picked != null) {
-                    setState(() => _selectedDate = picked);
-                  }
-                },
-                borderRadius: BorderRadius.circular(16),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                  decoration: BoxDecoration(
-                    color: surfaceColor,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: dateBorderColor,
-                      width: dateBorderWidth,
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.calendar_month_rounded, color: AppColors.primary, size: 20),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          DateFormat('EEEE, dd MMMM yyyy', 'id_ID').format(_selectedDate),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Wujudkan Impianmu!',
                           style: GoogleFonts.quicksand(
-                            fontWeight: FontWeight.bold, 
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
                             color: contentColor,
-                            fontSize: 12,
                           ),
                         ),
-                      ),
-                      Icon(Icons.arrow_drop_down_rounded, color: isDarkMode ? Colors.white24 : Colors.grey.shade400),
-                    ],
+                        const SizedBox(height: 2),
+                        Text(
+                          'Tulis target impianmu dan mulailah menabung secara konsisten.',
+                          style: GoogleFonts.quicksand(
+                            fontSize: 11,
+                            color: isDarkMode ? Colors.white30 : Colors.grey,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 28),
+
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: isDarkMode ? AppColors.surfaceDark : Colors.white,
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(
+                    color: isDarkMode ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.03),
                   ),
                 ),
-              ),
-              const SizedBox(height: 48),
-
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton.icon(
-                  onPressed: _saveTarget,
-                  icon: const Icon(Icons.add_task_rounded, size: 20),
-                  label: Text(
-                    widget.target != null ? 'Simpan Perubahan' : 'Mulai Menabung Sekarang',
-                    style: GoogleFonts.quicksand(fontSize: 13, fontWeight: FontWeight.bold),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    HighVisInput(
+                      controller: _nameController,
+                      icon: Icons.stars_rounded,
+                      label: 'Nama Barang / Impian',
+                      isDarkMode: isDarkMode,
+                      hintText: 'Misal: Laptop Baru, Motor, HP...',
+                      hasError: _nameHasError,
+                      onChanged: (val) {
+                        if (_nameHasError && val.trim().isNotEmpty) {
+                          setState(() => _nameHasError = false);
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    HighVisInput(
+                      controller: _amountController,
+                      icon: Icons.payments_rounded,
+                      label: 'Nominal Target',
+                      prefixText: 'Rp',
+                      isDarkMode: isDarkMode,
+                      hintText: 'Masukkan Nominal',
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        _RibuanFormatter(),
+                      ],
+                      style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 18),
+                      hasError: _amountHasError,
+                      onChanged: (val) {
+                        if (_amountHasError) {
+                          final amount = double.tryParse(val.replaceAll('.', '')) ?? 0.0;
+                          if (amount > 0) {
+                            setState(() => _amountHasError = false);
+                          }
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      'Kategori Target',
+                      style: GoogleFonts.quicksand(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: isDarkMode ? Colors.white70 : Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Focus(
+                      onFocusChange: (hasFocus) {
+                        setState(() => _categoryIsFocused = hasFocus);
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        decoration: BoxDecoration(
+                          color: surfaceColor,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: categoryBorderColor,
+                            width: categoryBorderWidth,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.category_rounded, color: AppColors.primary, size: 20),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: DropdownButtonHideUnderline(
+                                child: DropdownButton<String>(
+                                  value: _selectedCategory,
+                                  isExpanded: true,
+                                  dropdownColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
+                                  icon: Icon(Icons.arrow_drop_down_rounded, color: isDarkMode ? Colors.white24 : Colors.grey.shade400),
+                                  style: GoogleFonts.quicksand(
+                                    fontWeight: FontWeight.bold, 
+                                    color: _selectedCategory == 'Pilih Kategori'
+                                        ? (isDarkMode ? Colors.white30 : Colors.black38)
+                                        : contentColor, 
+                                    fontSize: 12
+                                  ),
+                                  onChanged: (val) {
+                                    if (val != null) {
+                                      setState(() {
+                                        _selectedCategory = val;
+                                        if (val != 'Pilih Kategori') {
+                                          _categoryHasError = false;
+                                        }
+                                      });
+                                    }
+                                  },
+                                  items: _categories.map((c) => DropdownMenuItem(
+                                    value: c, 
+                                    child: Text(c, overflow: TextOverflow.ellipsis)
+                                  )).toList(),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      'Target Tanggal Tercapai',
+                      style: GoogleFonts.quicksand(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: isDarkMode ? Colors.white70 : Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    InkWell(
+                      onTap: () async {
+                        setState(() => _dateIsFocused = true);
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: _selectedDate,
+                          firstDate: DateTime.now(),
+                          lastDate: DateTime(2100),
+                          builder: (context, child) {
+                            return Theme(
+                              data: Theme.of(context).copyWith(
+                                colorScheme: isDarkMode
+                                    ? ColorScheme.dark(
+                                        primary: AppColors.primary,
+                                        onPrimary: Colors.white,
+                                        surface: AppColors.surfaceDark,
+                                        onSurface: Colors.white,
+                                      )
+                                    : ColorScheme.light(
+                                        primary: AppColors.primary,
+                                        onPrimary: Colors.white,
+                                        onSurface: Colors.teal.shade900,
+                                      ),
+                              ),
+                              child: child!,
+                            );
+                          },
+                        );
+                        setState(() => _dateIsFocused = false);
+                        if (picked != null) {
+                          setState(() => _selectedDate = picked);
+                        }
+                      },
+                      borderRadius: BorderRadius.circular(16),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                        decoration: BoxDecoration(
+                          color: surfaceColor,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: dateBorderColor,
+                            width: dateBorderWidth,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.calendar_month_rounded, color: AppColors.primary, size: 20),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                DateFormat('EEEE, dd MMMM yyyy', 'id_ID').format(_selectedDate),
+                                style: GoogleFonts.quicksand(
+                                  fontWeight: FontWeight.bold, 
+                                  color: contentColor,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                            Icon(Icons.arrow_drop_down_rounded, color: isDarkMode ? Colors.white24 : Colors.grey.shade400),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 56,
+                      child: ElevatedButton.icon(
+                        onPressed: _saveTarget,
+                        icon: const Icon(Icons.add_task_rounded, size: 20),
+                        label: Text(
+                          widget.target != null ? 'Simpan Perubahan' : 'Mulai Menabung Sekarang',
+                          style: GoogleFonts.quicksand(fontSize: 13, fontWeight: FontWeight.bold),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],

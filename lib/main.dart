@@ -1,19 +1,23 @@
 import 'dart:ui';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:flutter_timezone/flutter_timezone.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'core/theme/app_theme.dart';
+import 'core/theme/app_colors.dart';
 import 'core/theme/theme_provider.dart';
 import 'core/routing/app_router.dart';
 import 'features/settings/presentation/providers/security_provider.dart';
 import 'features/auth/presentation/pages/lock_screen.dart';
 import 'core/widgets/notification_observer.dart';
+import 'providers/balance_visibility_provider.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
@@ -33,15 +37,14 @@ Future<void> _initNotifications() async {
 
   await flutterLocalNotificationsPlugin.initialize(initSettings);
 
-final androidPlugin =
+  final androidPlugin =
       flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin>();
 
   if (androidPlugin != null) {
-
     await androidPlugin.requestNotificationsPermission();
 
-const channel = AndroidNotificationChannel(
+    const channel = AndroidNotificationChannel(
       'tabunganku_activity',
       'Aktivitas TabunganKu',
       description: 'Notifikasi untuk pencapaian dan aktivitas menabung',
@@ -51,7 +54,7 @@ const channel = AndroidNotificationChannel(
       showBadge: true,
     );
 
-await androidPlugin.deleteNotificationChannel(channel.id);
+    await androidPlugin.deleteNotificationChannel(channel.id);
 
     await androidPlugin.createNotificationChannel(channel);
     debugPrint('NotificationChannel re-created: ${channel.id}');
@@ -61,7 +64,12 @@ await androidPlugin.deleteNotificationChannel(channel.id);
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-try {
+  // Disable Google Fonts runtime fetching — gunakan font lokal dari assets
+  GoogleFonts.config.allowRuntimeFetching = false;
+
+  await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+
+  try {
     tz_data.initializeTimeZones();
     final dynamic location = await FlutterTimezone.getLocalTimezone();
 
@@ -80,23 +88,31 @@ try {
     }
   }
 
-await _initNotifications();
+  await _initNotifications();
 
-await initializeDateFormatting('id_ID', null);
+  await initializeDateFormatting('id_ID', null);
 
-FlutterError.onError = (FlutterErrorDetails details) {
+  FlutterError.onError = (FlutterErrorDetails details) {
     FlutterError.presentError(details);
     debugPrint('FlutterError: ${details.exceptionAsString()}');
   };
 
-PlatformDispatcher.instance.onError = (error, stack) {
+  PlatformDispatcher.instance.onError = (error, stack) {
     debugPrint('Unhandled error: $error\n$stack');
     return true;
   };
 
+  final prefs = await SharedPreferences.getInstance();
+  final initialShowBalance = prefs.getBool('pref_show_balance') ?? true;
+
   runApp(
-    const ProviderScope(
-      child: TabunganKuApp(),
+    ProviderScope(
+      overrides: [
+        balanceVisibilityProvider.overrideWith(
+          (ref) => BalanceVisibilityNotifier(initialShowBalance),
+        ),
+      ],
+      child: const TabunganKuApp(),
     ),
   );
 }
@@ -129,6 +145,23 @@ class _TabunganKuAppState extends ConsumerState<TabunganKuApp>
   Widget build(BuildContext context) {
     final appRouter = ref.watch(appRouterProvider);
     final themeMode = ref.watch(themeProvider);
+    final isDark = themeMode == ThemeMode.dark ||
+        (themeMode == ThemeMode.system &&
+            MediaQuery.platformBrightnessOf(context) == Brightness.dark);
+
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        systemNavigationBarColor:
+            isDark ? AppColors.backgroundDark : AppColors.background,
+        systemNavigationBarDividerColor: Colors.transparent,
+        systemNavigationBarIconBrightness:
+            isDark ? Brightness.light : Brightness.dark,
+        systemNavigationBarContrastEnforced: false,
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness:
+            isDark ? Brightness.light : Brightness.dark,
+      ),
+    );
 
     return NotificationObserver(
       child: MaterialApp.router(
@@ -139,40 +172,51 @@ class _TabunganKuAppState extends ConsumerState<TabunganKuApp>
         themeMode: themeMode,
         routerConfig: appRouter,
         builder: (context, child) {
-          return GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-            child: Consumer(
-              builder: (context, ref, _) {
-                final security = ref.watch(securityProvider);
-                final router = ref.watch(appRouterProvider);
+          final isDark = themeMode == ThemeMode.dark ||
+              (themeMode == ThemeMode.system &&
+                  MediaQuery.platformBrightnessOf(context) == Brightness.dark);
+          
+          return Container(
+            color: isDark ? AppColors.backgroundDark : AppColors.background,
+            child: SafeArea(
+              top: false,
+              bottom: true,
+              child: GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+                child: Consumer(
+                  builder: (context, ref, _) {
+                    final security = ref.watch(securityProvider);
+                    final router = ref.watch(appRouterProvider);
 
-String location = '/';
-                try {
-                  location =
-                      router.routerDelegate.currentConfiguration.fullPath;
-                } catch (_) {}
+                    String location = '/';
+                    try {
+                      location =
+                          router.routerDelegate.currentConfiguration.fullPath;
+                    } catch (_) {}
 
-                final isLockableRoute = location != '/' &&
-                    location != '/splash' &&
-                    location != '/pin-setup' &&
-                    location != '/lock';
+                    final isLockableRoute = location != '/' &&
+                        location != '/splash' &&
+                        location != '/pin-setup' &&
+                        location != '/lock';
 
-                final isSecurityEnabled =
-                    security.hasPin || security.isBiometricEnabled;
+                    final isSecurityEnabled =
+                        security.hasPin || security.isBiometricEnabled;
 
-                if (isSecurityEnabled &&
-                    !security.isAuthorized &&
-                    isLockableRoute) {
-                  return Stack(
-                    children: [
-                      if (child != null) child,
-                      const LockScreen(),
-                    ],
-                  );
-                }
-                return child ?? const SizedBox();
-              },
+                    if (isSecurityEnabled &&
+                        !security.isAuthorized &&
+                        isLockableRoute) {
+                      return Stack(
+                        children: [
+                          if (child != null) child,
+                          const LockScreen(),
+                        ],
+                      );
+                    }
+                    return child ?? const SizedBox();
+                  },
+                ),
+              ),
             ),
           );
         },

@@ -6,6 +6,7 @@ import 'package:tabunganku/features/home/presentation/pages/dashboard_page.dart'
 import 'package:tabunganku/features/auth/presentation/pages/lock_screen.dart';
 import 'package:tabunganku/features/nabung_bersama/presentation/pages/nabung_bersama_page.dart';
 import 'package:tabunganku/features/settings/presentation/pages/pin_setup_page.dart';
+import 'package:tabunganku/features/settings/presentation/pages/feedback_page.dart';
 import 'package:tabunganku/features/home/presentation/pages/saving_simulator_page.dart';
 import 'package:tabunganku/features/challenge/presentation/pages/challenge_page.dart';
 import 'package:tabunganku/features/budget/presentation/pages/monthly_budget_page.dart';
@@ -41,16 +42,23 @@ import 'package:tabunganku/features/home/presentation/pages/wisata_planner_page.
 import 'package:tabunganku/features/home/presentation/pages/notes_page.dart';
 import 'package:tabunganku/features/home/presentation/pages/note_detail_page.dart';
 import 'package:tabunganku/models/note_model.dart';
-import 'package:tabunganku/features/home/presentation/pages/qris_services_page.dart';
+
 import 'package:tabunganku/features/home/presentation/pages/budget_rule_page.dart';
 import 'package:tabunganku/features/home/presentation/pages/debt_payoff_planner_page.dart';
 import 'package:tabunganku/features/home/presentation/pages/fire_calculator_page.dart';
-import 'package:tabunganku/features/home/presentation/pages/financial_health_page.dart';
+
 import 'package:tabunganku/features/home/presentation/pages/kpr_calculator_page.dart';
 import 'package:tabunganku/features/home/presentation/pages/emergency_fund_calculator_page.dart';
 import 'package:tabunganku/features/home/presentation/pages/inflation_calculator_page.dart';
-import 'package:tabunganku/features/home/presentation/pages/lifestyle_saving_page.dart';
 import 'package:tabunganku/features/home/presentation/pages/rule_of_72_page.dart';
+import 'package:tabunganku/features/home/presentation/pages/split_bill_page.dart';
+import 'package:tabunganku/features/home/presentation/pages/early_retirement_page.dart';
+import 'package:tabunganku/features/home/presentation/pages/time_value_money_page.dart';
+import 'package:tabunganku/features/home/presentation/pages/shopping_budget_page.dart';
+import 'package:tabunganku/features/home/presentation/pages/bills_tracker_page.dart';
+import 'package:tabunganku/features/home/presentation/pages/financial_health_checkup_page.dart';
+import 'package:tabunganku/features/home/presentation/pages/payday_vault_page.dart';
+import 'package:tabunganku/features/home/presentation/pages/thr_bonus_page.dart';
 
 final appRouterProvider = Provider((ref) {
   return GoRouter(
@@ -87,6 +95,11 @@ GoRoute(
         path: '/pin-setup',
         name: 'pin-setup',
         builder: (context, state) => const PinSetupPage(),
+      ),
+      GoRoute(
+        path: '/feedback',
+        name: 'feedback',
+        builder: (context, state) => const FeedbackPage(),
       ),
 
       GoRoute(
@@ -205,11 +218,7 @@ GoRoute(
         name: 'net-salary',
         builder: (context, state) => const NetSalaryCalculatorPage(),
       ),
-      GoRoute(
-        path: '/qris-payment',
-        name: 'qris-payment',
-        builder: (context, state) => const QrisServicesPage(),
-      ),
+
       GoRoute(
         path: '/recurring',
         name: 'recurring',
@@ -322,11 +331,7 @@ GoRoute(
         name: 'fire-calculator',
         builder: (context, state) => const FIRECalculatorPage(),
       ),
-      GoRoute(
-        path: '/financial-health',
-        name: 'financial-health',
-        builder: (context, state) => const FinancialHealthPage(),
-      ),
+
       GoRoute(
         path: '/kpr-calculator',
         name: 'kpr-calculator',
@@ -342,15 +347,51 @@ GoRoute(
         name: 'inflation-calculator',
         builder: (context, state) => const InflationCalculatorPage(),
       ),
-      GoRoute(
-        path: '/lifestyle-saving',
-        name: 'lifestyle-saving',
-        builder: (context, state) => const LifestyleSavingPage(),
-      ),
+
       GoRoute(
         path: '/rule-of-72',
         name: 'rule-of-72',
         builder: (context, state) => const RuleOf72Page(),
+      ),
+      GoRoute(
+        path: '/split-bill',
+        name: 'split-bill',
+        builder: (context, state) => const SplitBillPage(),
+      ),
+      GoRoute(
+        path: '/early-retirement',
+        name: 'early-retirement',
+        builder: (context, state) => const EarlyRetirementPage(),
+      ),
+      GoRoute(
+        path: '/time-value-money',
+        name: 'time-value-money',
+        builder: (context, state) => const TimeValueMoneyPage(),
+      ),
+      GoRoute(
+        path: '/shopping-budget',
+        name: 'shopping-budget',
+        builder: (context, state) => const ShoppingBudgetPage(),
+      ),
+      GoRoute(
+        path: '/bills-tracker',
+        name: 'bills-tracker',
+        builder: (context, state) => const BillsTrackerPage(),
+      ),
+      GoRoute(
+        path: '/financial-health',
+        name: 'financial-health',
+        builder: (context, state) => const FinancialHealthCheckupPage(),
+      ),
+      GoRoute(
+        path: '/payday-vault',
+        name: 'payday-vault',
+        builder: (context, state) => const PaydayVaultPage(),
+      ),
+      GoRoute(
+        path: '/thr-bonus',
+        name: 'thr-bonus',
+        builder: (context, state) => const ThrBonusPage(),
       ),
 
 GoRoute(

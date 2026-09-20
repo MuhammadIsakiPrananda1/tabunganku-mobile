@@ -190,7 +190,7 @@ for (var cat in AppCategories.expenseCategories) {
           ),
         ],
       ),
-      padding: EdgeInsets.only(bottom: inset + 24),
+      padding: EdgeInsets.only(bottom: inset > 0 ? inset : MediaQuery.of(context).padding.bottom > 0 ? inset + 24 : 24 + MediaQuery.of(context).padding.bottom),
       child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -542,6 +542,7 @@ for (var cat in AppCategories.expenseCategories) {
     FocusScope.of(context).unfocus();
     final searchController = TextEditingController();
     String searchQuery = '';
+    String selectedGroupFilter = 'Semua';
 
     showModalBottomSheet(
       context: context,
@@ -551,6 +552,7 @@ for (var cat in AppCategories.expenseCategories) {
         return StatefulBuilder(
           builder: (context, setModalState) {
 
+            final allGroups = ['Semua', ...categoryObjects.map((c) => c.group).toSet()];
             final Map<String, List<TransactionCategory>> displayGrouped = {};
             for (var cat in categoryObjects) {
               final labelLower = cat.label.toLowerCase();
@@ -558,7 +560,9 @@ for (var cat in AppCategories.expenseCategories) {
               final queryLower = searchQuery.toLowerCase();
               if (labelLower.contains(queryLower) ||
                   groupLower.contains(queryLower)) {
-                displayGrouped.putIfAbsent(cat.group, () => []).add(cat);
+                if (selectedGroupFilter == 'Semua' || cat.group == selectedGroupFilter) {
+                  displayGrouped.putIfAbsent(cat.group, () => []).add(cat);
+                }
               }
             }
 
@@ -656,7 +660,7 @@ for (var cat in AppCategories.expenseCategories) {
                         ),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                       ),
-                      onChanged: (val) {
+                     onChanged: (val) {
                          setModalState(() {
                            searchQuery = val;
                          });
@@ -664,6 +668,49 @@ for (var cat in AppCategories.expenseCategories) {
                     ),
                   ),
                   const SizedBox(height: 8),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      decoration: BoxDecoration(
+                        color: isDarkMode
+                            ? Colors.white.withValues(alpha: 0.05)
+                            : Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          value: selectedGroupFilter,
+                          isExpanded: true,
+                          dropdownColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          icon: Icon(
+                            Icons.arrow_drop_down_rounded,
+                            color: isDarkMode ? Colors.white54 : Colors.black54,
+                          ),
+                          style: GoogleFonts.quicksand(
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.bold,
+                            color: isDarkMode ? Colors.white : Colors.black87,
+                          ),
+                          items: allGroups.map((group) {
+                            return DropdownMenuItem<String>(
+                              value: group,
+                              child: Text(group),
+                            );
+                          }).toList(),
+                          onChanged: (val) {
+                            if (val != null) {
+                              setModalState(() {
+                                selectedGroupFilter = val;
+                              });
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
                   Expanded(
                     child: displayGrouped.isEmpty
                         ? Center(

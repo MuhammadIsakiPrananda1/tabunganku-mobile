@@ -28,7 +28,7 @@ class ShoppingFormSheet extends ConsumerStatefulWidget {
       isScrollControlled: true,
       builder: (context) => Padding(
         padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
+          bottom: MediaQuery.of(context).viewInsets.bottom > 0 ? MediaQuery.of(context).viewInsets.bottom : MediaQuery.of(context).padding.bottom,
         ),
         child: SingleChildScrollView(
           child: ShoppingFormSheet(item: item),

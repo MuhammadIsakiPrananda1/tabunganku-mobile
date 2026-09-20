@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -33,31 +34,34 @@ class _AllServicesPageState extends ConsumerState<AllServicesPage> {
     super.dispose();
   }
 
-List<_ServiceCategory> _getCategories() {
+  List<_ServiceCategory> _getCategories() {
     return [
       _ServiceCategory(
         title: 'MANAJEMEN KEUANGAN',
         services: [
           _ServiceData(
-            icon: Icons.loop_rounded,
+            icon: Icons.autorenew_rounded,
             title: 'Kelola Langganan',
-            subtitle: 'Tagihan rutin & hiburan',
+            subtitle: 'Catat dan kelola biaya langganan bulanan',
             color: Colors.blue,
             route: '/recurring',
+            badgeIcon: Icons.calendar_today_rounded,
           ),
           _ServiceData(
             icon: Icons.receipt_long_rounded,
             title: 'Manajemen Tagihan',
-            subtitle: 'List tagihan bulanan wajib',
+            subtitle: 'Daftar tagihan dan cicilan rutin bulanan',
             color: Colors.lightBlue,
             route: '/bills',
+            badgeIcon: Icons.notifications_active_rounded,
           ),
           _ServiceData(
-            icon: Icons.money_off_rounded,
+            icon: Icons.handshake_rounded,
             title: 'Kalkulator Pelunas Hutang',
-            subtitle: 'Rencana bebas hutang lebih cepat',
+            subtitle: 'Strategi pelunasan hutang secara terstruktur',
             color: Colors.redAccent,
             route: '/debt-payoff',
+            badgeIcon: Icons.check_circle_rounded,
           ),
         ],
       ),
@@ -65,67 +69,92 @@ List<_ServiceCategory> _getCategories() {
         title: 'TABUNGAN & INVESTASI',
         services: [
           _ServiceData(
+            icon: Icons.card_giftcard_rounded,
+            title: 'Alokasi THR & Bonus',
+            subtitle: 'Rencanakan pembagian THR untuk keluarga, mudik & tabungan',
+            color: Colors.teal,
+            route: '/thr-bonus',
+            badgeIcon: Icons.star_rounded,
+          ),
+          _ServiceData(
+            icon: Icons.lock_rounded,
+            title: 'Gembok Tabungan Gaji',
+            subtitle: 'Auto-split 50/30/20 & gembok tabungan gaji bulanan',
+            color: Colors.amber.shade800,
+            route: '/payday-vault',
+            badgeIcon: Icons.key_rounded,
+          ),
+          _ServiceData(
             icon: Icons.savings_rounded,
             title: 'Tabungan Receh',
-            subtitle: 'Kumpulkan uang kecilmu',
+            subtitle: 'Kumpulkan uang recehan jadi tabungan harian',
             color: Colors.pinkAccent,
             route: '/piggy-bank',
+            badgeIcon: Icons.add_rounded,
           ),
           _ServiceData(
             icon: Icons.assignment_turned_in_rounded,
             title: 'Dana Rencana',
-            subtitle: 'Masa depan cerah terencana',
+            subtitle: 'Tabungan khusus untuk tujuan tertentu',
             color: AppColors.primary,
             route: '/saving-plans',
+            badgeIcon: Icons.check_rounded,
           ),
           _ServiceData(
             icon: Icons.monetization_on_rounded,
             title: 'Simpanan Emas',
-            subtitle: 'Tabungan nilai aset stabil',
+            subtitle: 'Catat dan pantau tabungan emas kamu',
             color: Colors.amber,
             route: '/gold',
+            badgeIcon: Icons.auto_awesome_rounded,
           ),
           _ServiceData(
             icon: Icons.trending_up_rounded,
             title: 'Portofolio Investasi',
-            subtitle: 'Pantau aset investasimu',
+            subtitle: 'Pantau saham, reksa dana, dan aset lainnya',
             color: Colors.indigo,
             route: '/investment',
+            badgeIcon: Icons.show_chart_rounded,
           ),
           _ServiceData(
             icon: Icons.shield_rounded,
             title: 'Proteksi Asuransi',
-            subtitle: 'Keamanan jangka panjang',
+            subtitle: 'Catat data polis dan premi asuransimu',
             color: Colors.blueGrey,
             route: '/insurance',
+            badgeIcon: Icons.favorite_rounded,
           ),
           _ServiceData(
             icon: Icons.flight_takeoff_rounded,
             title: 'Target Luar Negeri',
-            subtitle: 'Nabung dengan kurs real-time',
+            subtitle: 'Nabung barang/liburan luar negeri dengan kurs terkini',
             color: Colors.deepPurple,
             route: '/overseas-travel',
+            badgeIcon: Icons.explore_rounded,
           ),
           _ServiceData(
             icon: Icons.favorite_rounded,
             title: 'Biaya Nikah Planner',
-            subtitle: 'Estimasi & nabung biaya pernikahan',
+            subtitle: 'Rencanakan dan siapkan dana biaya pernikahan',
             color: Colors.pinkAccent,
             route: '/nikah-planner',
+            badgeIcon: Icons.auto_awesome_rounded,
           ),
           _ServiceData(
             icon: Icons.school_rounded,
             title: 'Biaya Kuliah Planner',
-            subtitle: 'Rencanakan biaya S1/S2 anak',
+            subtitle: 'Hitung dan siapkan dana kuliah anak',
             color: Colors.blue,
             route: '/kuliah-planner',
+            badgeIcon: Icons.star_rounded,
           ),
           _ServiceData(
             icon: Icons.beach_access_rounded,
             title: 'Tabungan Wisata',
-            subtitle: 'Planner liburan & Muscle/estimasi biaya',
+            subtitle: 'Rencanakan liburan dan estimasi total biaya perjalanan',
             color: Colors.orange,
             route: '/wisata-planner',
+            badgeIcon: Icons.sunny_snowing,
           ),
         ],
       ),
@@ -135,79 +164,82 @@ List<_ServiceCategory> _getCategories() {
           _ServiceData(
             icon: Icons.calculate_rounded,
             title: 'Simulasi Tabungan',
-            subtitle: 'Hitung pertumbuhan bungamu',
+            subtitle: 'Simulasi hasil tabungan berdasarkan bunga dan waktu',
             color: Colors.cyan,
             route: '/saving-simulator',
+            badgeIcon: Icons.trending_up_rounded,
           ),
           _ServiceData(
-            icon: Icons.calculate_rounded,
+            icon: Icons.request_quote_rounded,
             title: 'Kalkulator Pajak',
-            subtitle: 'Hitung estimasi PBB & PKB',
+            subtitle: 'Hitung estimasi pajak bumi, bangunan, dan kendaraan',
             color: Colors.deepPurpleAccent,
             route: '/tax',
+            badgeIcon: Icons.percent_rounded,
           ),
           _ServiceData(
-            icon: Icons.wallet_membership_rounded,
+            icon: Icons.account_balance_wallet_rounded,
             title: 'Gaji Bersih & PPh 21',
-            subtitle: 'Hitung Take Home Pay dipotong pajak & BPJS',
+            subtitle: 'Hitung gaji bersih setelah potongan pajak dan BPJS',
             color: Colors.teal,
             route: '/net-salary',
+            badgeIcon: Icons.paid_rounded,
           ),
           _ServiceData(
             icon: Icons.notification_important_rounded,
             title: 'Pengingat Pajak',
-            subtitle: 'Jangan lewatkan jatuh tempo',
+            subtitle: 'Pengingat batas waktu pembayaran pajak',
             color: Colors.orange,
             route: '/tax-reminder',
+            badgeIcon: Icons.schedule_rounded,
           ),
           _ServiceData(
             icon: Icons.pie_chart_rounded,
             title: 'Aturan Budget 50/30/20',
-            subtitle: 'Bagi pendapatanmu secara ideal',
+            subtitle: 'Bagi gaji ke kebutuhan, keinginan, dan tabungan',
             color: Colors.teal,
             route: '/budget-rule',
+            badgeIcon: Icons.tune_rounded,
           ),
           _ServiceData(
-            icon: Icons.insights_rounded,
+            icon: Icons.local_fire_department_rounded,
             title: 'Kebebasan Finansial (FIRE)',
-            subtitle: 'Hitung kapan kamu bisa bebas bekerja',
-            color: Colors.deepPurple,
+            subtitle: 'Hitung target dana untuk pensiun lebih awal',
+            color: Colors.deepOrange,
             route: '/fire-calculator',
+            badgeIcon: Icons.star_rounded,
+          ),
+          _ServiceData(
+            icon: Icons.home_rounded,
+            title: 'Kalkulator KPR & Cicilan',
+            subtitle: 'Hitung cicilan dan total bunga KPR rumah',
+            color: Colors.deepOrange,
+            route: '/kpr-calculator',
+            badgeIcon: Icons.key_rounded,
           ),
           _ServiceData(
             icon: Icons.health_and_safety_rounded,
-            title: 'Cek Kesehatan Finansial',
-            subtitle: 'Analisis skor & tips menabungmu',
-            color: Colors.green,
-            route: '/financial-health',
-          ),
-          _ServiceData(
-            icon: Icons.home_work_rounded,
-            title: 'Kalkulator KPR & Cicilan',
-            subtitle: 'Simulasi angsuran rumah & kredit',
-            color: Colors.deepOrange,
-            route: '/kpr-calculator',
-          ),
-          _ServiceData(
-            icon: Icons.security_rounded,
             title: 'Kalkulator Dana Darurat',
-            subtitle: 'Hitung kebutuhan dana cadangan darurat',
+            subtitle: 'Hitung berapa dana darurat yang kamu butuhkan',
             color: Colors.redAccent,
             route: '/emergency-fund-calculator',
+            badgeIcon: Icons.shield_rounded,
           ),
           _ServiceData(
             icon: Icons.trending_down_rounded,
             title: 'Kalkulator Inflasi',
-            subtitle: 'Hitung penyusutan daya beli uangmu',
+            subtitle: 'Lihat dampak inflasi terhadap nilai uangmu',
             color: Colors.deepOrange,
             route: '/inflation-calculator',
+            badgeIcon: Icons.warning_amber_rounded,
           ),
           _ServiceData(
-            icon: Icons.coffee_rounded,
-            title: 'Detektor Pemborosan Receh',
-            subtitle: 'Proyeksi jajan kopi & boba ke tabungan',
-            color: Colors.orange,
-            route: '/lifestyle-saving',
+            icon: Icons.medical_services_rounded,
+            title: 'Checkup Kesehatan Keuangan',
+            subtitle: 'Diagnosis kesehatan finansial & rasio keuangan pribadimu',
+            color: Colors.teal,
+            route: '/financial-health',
+            badgeIcon: Icons.favorite_rounded,
           ),
         ],
       ),
@@ -215,32 +247,36 @@ List<_ServiceCategory> _getCategories() {
         title: 'UTILITAS FINANSIAL',
         services: [
           _ServiceData(
-            icon: Icons.trending_up_rounded,
+            icon: Icons.stacked_line_chart_rounded,
             title: 'Bunga Majemuk',
-            subtitle: 'Simulasi pertumbuhan aset',
+            subtitle: 'Hitung bunga berbunga dari investasi atau tabungan',
             color: AppColors.primary,
             route: '/compound-interest',
+            badgeIcon: Icons.auto_awesome_rounded,
           ),
           _ServiceData(
             icon: Icons.currency_exchange_rounded,
             title: 'Konverter Valas',
-            subtitle: 'Cek nilai tukar mata uang',
+            subtitle: 'Konversi mata uang asing ke rupiah secara real-time',
             color: Colors.blue,
             route: '/currency-converter',
-          ),
-          _ServiceData(
-            icon: Icons.qr_code_2_rounded,
-            title: 'QRIS Pembayaran Zaky',
-            subtitle: 'Dana Bisnis & Order Kuota',
-            color: Colors.redAccent,
-            route: '/qris-payment',
+            badgeIcon: Icons.swap_horiz_rounded,
           ),
           _ServiceData(
             icon: Icons.speed_rounded,
             title: 'Kalkulator Aturan 72',
-            subtitle: 'Estimasi waktu melipatgandakan dana',
+            subtitle: 'Perkirakan waktu uang berkembang 2x lipat',
             color: Colors.indigo,
             route: '/rule-of-72',
+            badgeIcon: Icons.timer_rounded,
+          ),
+          _ServiceData(
+            icon: Icons.call_split_rounded,
+            title: 'Split Bill',
+            subtitle: 'Bagi rata tagihan dengan teman atau keluarga',
+            color: Colors.orangeAccent,
+            route: '/split-bill',
+            badgeIcon: Icons.people_rounded,
           ),
         ],
       ),
@@ -250,44 +286,50 @@ List<_ServiceCategory> _getCategories() {
           _ServiceData(
             icon: Icons.volunteer_activism_rounded,
             title: 'Zakat & Infaq',
-            subtitle: 'Donasi & ibadah harta',
+            subtitle: 'Hitung dan catat zakat serta infaq kamu',
             color: Colors.teal,
             route: '/zakat',
+            badgeIcon: Icons.favorite_rounded,
           ),
           _ServiceData(
             icon: Icons.mosque_rounded,
             title: 'Sedekah Masjid',
-            subtitle: 'Catat sedekah untuk rumah ibadah',
+            subtitle: 'Catat donasi ke masjid atau musholla',
             color: Colors.lightGreen,
             route: '/mosque-donation',
+            badgeIcon: Icons.favorite_rounded,
           ),
           _ServiceData(
             icon: Icons.mosque_rounded,
             title: 'Haji & Umrah',
-            subtitle: 'Rencanakan ibadah suci',
+            subtitle: 'Rencanakan dan tabung biaya haji atau umrah',
             color: Colors.amber.shade800,
             route: '/hajj-umrah',
+            badgeIcon: Icons.flight_takeoff_rounded,
           ),
           _ServiceData(
             icon: Icons.emoji_events_rounded,
             title: 'Misi & Challenge',
-            subtitle: 'Mainkan misi, raih reward',
+            subtitle: 'Selesaikan tantangan finansial dan kumpulkan poin',
             color: Colors.amber,
             route: '/challenge',
+            badgeIcon: Icons.star_rounded,
           ),
           _ServiceData(
             icon: Icons.nightlight_round_rounded,
             title: 'Mode Ramadan',
-            subtitle: 'Tracker pengeluaran & target amal',
+            subtitle: 'Pantau pengeluaran dan pencapaian amal di bulan Ramadan',
             color: Colors.teal,
             route: '/ramadan-mode',
+            badgeIcon: Icons.auto_awesome_rounded,
           ),
           _ServiceData(
-            icon: Icons.volunteer_activism_rounded,
+            icon: Icons.handshake_rounded,
             title: 'Hutang Jariyah',
-            subtitle: 'Catatan sedekah/jariyah berlangsung',
-            color: Colors.lightGreen,
+            subtitle: 'Catat dan pantau sedekah jariyah yang masih berjalan',
+            color: AppColors.primary,
             route: '/hutang-jariyah',
+            badgeIcon: Icons.favorite_rounded,
           ),
         ],
       ),
@@ -297,23 +339,26 @@ List<_ServiceCategory> _getCategories() {
           _ServiceData(
             icon: Icons.lock_outline_rounded,
             title: 'Brankas Finansial',
-            subtitle: 'Simpan nomor rekening, polis & data penting',
+            subtitle: 'Simpan data rekening, polis, dan dokumen keuangan penting',
             color: Colors.indigo,
             route: '/brankas-finansial',
+            badgeIcon: Icons.shield_rounded,
           ),
           _ServiceData(
             icon: Icons.contact_phone_rounded,
             title: 'Kontak Darurat Finansial',
-            subtitle: 'Daftar kontak cs bank, broker, asuransi',
+            subtitle: 'Kontak darurat CS bank, asuransi, dan broker investasi',
             color: Colors.redAccent,
             route: '/kontak-darurat',
+            badgeIcon: Icons.phone_in_talk_rounded,
           ),
           _ServiceData(
             icon: Icons.note_alt_rounded,
             title: 'Catatan Harian (Notes)',
-            subtitle: 'Tulis memo, pin & favoritkan catatanmu',
+            subtitle: 'Tulis dan simpan catatan keuangan harian kamu',
             color: Colors.amber.shade700,
             route: '/notes',
+            badgeIcon: Icons.edit_rounded,
           ),
         ],
       ),
@@ -322,13 +367,12 @@ List<_ServiceCategory> _getCategories() {
 
   @override
   Widget build(BuildContext context) {
-
     final theme = Theme.of(context);
     final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
         (ref.watch(themeProvider) == ThemeMode.system &&
             theme.brightness == Brightness.dark);
 
-final filteredCategories = _getCategories().map((category) {
+    final filteredCategories = _getCategories().map((category) {
       final matchingServices = category.services.where((service) {
         final titleMatch = service.title.toLowerCase().contains(_searchQuery);
         final subtitleMatch = service.subtitle.toLowerCase().contains(_searchQuery);
@@ -341,59 +385,61 @@ final filteredCategories = _getCategories().map((category) {
     }).where((category) => category.services.isNotEmpty).toList();
 
     return Scaffold(
-      backgroundColor: isDarkMode ? Colors.black : const Color(0xFFF8FAFC),
+      backgroundColor: isDarkMode
+          ? const Color(0xFF0F172A)
+          : const Color(0xFFF8FAFC),
       appBar: AppBar(
-        backgroundColor: isDarkMode ? Colors.black : const Color(0xFFF8FAFC),
-        elevation: 0,
-        centerTitle: true,
-        leading: IconButton(
-          onPressed: () => context.pop(),
-          icon: Icon(Icons.arrow_back_ios_new_rounded,
-              color: isDarkMode ? Colors.white : AppColors.primaryDark,
-              size: 18),
-        ),
         title: Text(
           'Semua Layanan',
           style: GoogleFonts.quicksand(
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w800,
             fontSize: 18,
             color: isDarkMode ? Colors.white : AppColors.primaryDark,
           ),
         ),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: isDarkMode ? Colors.white : AppColors.primaryDark,
+            size: 20,
+          ),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
       body: Column(
         children: [
-
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
             child: TextField(
               controller: _searchCtrl,
               style: GoogleFonts.quicksand(
-                  fontSize: 14,
-                  color: isDarkMode ? Colors.white : Colors.black87,
-                  fontWeight: FontWeight.bold),
+                fontSize: 14,
+                color: isDarkMode ? Colors.white : Colors.black87,
+              ),
               decoration: InputDecoration(
-                hintText: 'Cari layanan...',
+                hintText: 'Cari layanan atau fitur...',
                 hintStyle: GoogleFonts.quicksand(
-                    fontSize: 14,
-                    color: isDarkMode ? Colors.white24 : Colors.black26,
-                    fontWeight: FontWeight.bold),
-                prefixIcon: Icon(Icons.search_rounded,
-                    color: isDarkMode ? Colors.white38 : Colors.black38, size: 20),
+                  color: isDarkMode ? Colors.white30 : Colors.grey.shade400,
+                  fontSize: 14,
+                ),
+                prefixIcon: Icon(
+                  Icons.search_rounded,
+                  color: isDarkMode ? Colors.white38 : Colors.grey.shade400,
+                ),
                 suffixIcon: _searchQuery.isNotEmpty
                     ? IconButton(
-                        icon: Icon(Icons.clear_rounded,
-                            size: 18,
-                            color: isDarkMode ? Colors.white38 : Colors.black38),
-                        onPressed: () {
-                          _searchCtrl.clear();
-                        },
+                        icon: const Icon(Icons.clear_rounded, size: 18),
+                        color:
+                            isDarkMode ? Colors.white38 : Colors.grey.shade400,
+                        onPressed: () => _searchCtrl.clear(),
                       )
                     : null,
                 filled: true,
                 fillColor: isDarkMode
                     ? Colors.white.withValues(alpha: 0.05)
-                    : Colors.grey.shade100,
+                    : Colors.white,
                 contentPadding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 border: OutlineInputBorder(
@@ -480,14 +526,14 @@ final filteredCategories = _getCategories().map((category) {
 
   Widget _buildCategoryHeader(bool isDarkMode, String title) {
     return Padding(
-      padding: const EdgeInsets.only(left: 4, top: 24, bottom: 12),
+      padding: const EdgeInsets.only(left: 4, top: 22, bottom: 10),
       child: Text(
         title,
         style: GoogleFonts.quicksand(
-          fontSize: 10,
+          fontSize: 11,
           fontWeight: FontWeight.w800,
-          letterSpacing: 1.2,
-          color: isDarkMode ? Colors.white24 : Colors.grey.shade400,
+          letterSpacing: 1.1,
+          color: isDarkMode ? Colors.white38 : const Color(0xFF64748B),
         ),
       ),
     );
@@ -497,13 +543,21 @@ final filteredCategories = _getCategories().map((category) {
       BuildContext context, bool isDarkMode, List<_ServiceData> items) {
     return Container(
       decoration: BoxDecoration(
-        color: isDarkMode ? const Color(0xFF111111) : Colors.white,
+        color: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: isDarkMode
-              ? Colors.white.withValues(alpha: 0.05)
-              : Colors.grey.shade100,
+              ? Colors.white.withValues(alpha: 0.08)
+              : const Color(0xFFE2E8F0),
+          width: 1.2,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDarkMode ? 0.25 : 0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         children: List.generate(items.length, (index) {
@@ -514,11 +568,11 @@ final filteredCategories = _getCategories().map((category) {
               if (index != items.length - 1)
                 Divider(
                   height: 1,
-                  indent: 64,
+                  indent: 72,
                   endIndent: 16,
                   color: isDarkMode
-                      ? Colors.white.withValues(alpha: 0.03)
-                      : Colors.grey.shade50,
+                      ? Colors.white.withValues(alpha: 0.05)
+                      : const Color(0xFFF1F5F9),
                 ),
             ],
           );
@@ -530,20 +584,16 @@ final filteredCategories = _getCategories().map((category) {
   Widget _buildCompactListItem(
       BuildContext context, _ServiceData item, bool isDarkMode) {
     return InkWell(
-      onTap: () => context.push(item.route),
+      onTap: () {
+        HapticFeedback.lightImpact();
+        context.push(item.route);
+      },
       borderRadius: BorderRadius.circular(20),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         child: Row(
           children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: item.color.withValues(alpha: isDarkMode ? 0.12 : 0.06),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Icon(item.icon, color: item.color, size: 20),
-            ),
+            _buildServiceCartoonIcon(item, isDarkMode),
             const SizedBox(width: 14),
             Expanded(
               child: Column(
@@ -555,8 +605,8 @@ final filteredCategories = _getCategories().map((category) {
                         child: Text(
                           item.title,
                           style: GoogleFonts.quicksand(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w800,
                             color: isDarkMode ? Colors.white : AppColors.primaryDark,
                           ),
                         ),
@@ -570,7 +620,7 @@ final filteredCategories = _getCategories().map((category) {
                     overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.quicksand(
                       fontSize: 10.5,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w600,
                       color: isDarkMode ? Colors.white38 : Colors.grey.shade500,
                     ),
                   ),
@@ -579,11 +629,98 @@ final filteredCategories = _getCategories().map((category) {
             ),
             Icon(
               Icons.chevron_right_rounded,
-              size: 18,
-              color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
+              size: 20,
+              color: isDarkMode ? Colors.white24 : Colors.grey.shade300,
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildServiceCartoonIcon(_ServiceData item, bool isDarkMode) {
+    final color = item.color;
+    final bgColor = isDarkMode
+        ? color.withValues(alpha: 0.18)
+        : HSLColor.fromColor(color).withLightness(0.95).withSaturation(0.65).toColor();
+
+    final borderColor = isDarkMode
+        ? color.withValues(alpha: 0.45)
+        : HSLColor.fromColor(color).withLightness(0.75).withSaturation(0.60).toColor();
+
+    final shadowColor = isDarkMode
+        ? Colors.black.withValues(alpha: 0.40)
+        : HSLColor.fromColor(color).withLightness(0.68).withSaturation(0.55).toColor();
+
+    final iconColor = isDarkMode
+        ? HSLColor.fromColor(color).withLightness(0.78).toColor()
+        : HSLColor.fromColor(color).withLightness(0.40).toColor();
+
+    final badgeIcon = item.badgeIcon ?? Icons.star_rounded;
+    final badgeBgColor = color;
+
+    return Container(
+      width: 48,
+      height: 48,
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: borderColor,
+          width: 2.0,
+        ),
+        boxShadow: [
+          // 2D Comic bottom shadow (flat cartoon pop)
+          BoxShadow(
+            color: shadowColor,
+            offset: const Offset(0, 2.5),
+            blurRadius: 0,
+          ),
+        ],
+      ),
+      child: Stack(
+        clipBehavior: Clip.none,
+        alignment: Alignment.center,
+        children: [
+          // Razor-sharp, 100% crystal clear primary icon
+          Icon(
+            item.icon,
+            size: 24,
+            color: iconColor,
+          ),
+
+          // Cute 2D cartoon sticker badge on corner
+          Positioned(
+            right: -3,
+            top: -3,
+            child: Container(
+              width: 16,
+              height: 16,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: badgeBgColor,
+                border: Border.all(
+                  color: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
+                  width: 1.8,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.15),
+                    offset: const Offset(0, 1.2),
+                    blurRadius: 2,
+                  ),
+                ],
+              ),
+              child: Center(
+                child: Icon(
+                  badgeIcon,
+                  size: 9,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -602,6 +739,7 @@ class _ServiceData {
   final String subtitle;
   final Color color;
   final String route;
+  final IconData? badgeIcon;
 
   _ServiceData({
     required this.icon,
@@ -609,7 +747,6 @@ class _ServiceData {
     required this.subtitle,
     required this.color,
     required this.route,
+    this.badgeIcon,
   });
 }
-
-

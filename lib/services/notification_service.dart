@@ -9,16 +9,19 @@ import 'package:tabunganku/models/notification_model.dart';
 abstract class NotificationService {
   Future<List<NotificationModel>> getNotifications();
   Future<void> addNotification(NotificationModel notification);
+  Future<void> addNotifications(List<NotificationModel> notifications);
   Future<void> markAsRead(String notificationId);
   Future<void> markAllAsRead();
   Future<void> clearAll();
   Future<int> getUnreadCount();
+  Future<void> deleteNotification(String notificationId);
 }
 
 class MockNotificationService implements NotificationService {
   static const String _notificationsKey = 'user_notifications_';
   static final SecureStorageService _secureStorage = SecureStorageService();
   static Future<SharedPreferences>? _prefsFuture;
+  Future<void> _lock = Future.value();
 
   Future<SharedPreferences> _getPrefs() {
     _prefsFuture ??= SharedPreferences.getInstance();
@@ -53,14 +56,31 @@ class MockNotificationService implements NotificationService {
   }
 
   @override
-  Future<void> addNotification(NotificationModel notification) async {
-    final notifications = await getNotifications();
+  Future<void> addNotification(NotificationModel notification) {
+    return _lock = _lock.then((_) async {
+      final notifications = await getNotifications();
+      if (!notifications.any((n) => n.id == notification.id)) {
+        notifications.insert(0, notification);
+        await _saveNotifications(notifications);
+      }
+      await _showSystemNotification(notification);
+    });
+  }
 
-notifications.add(notification);
-    
-    await _saveNotifications(notifications);
-
-await _showSystemNotification(notification);
+  @override
+  Future<void> addNotifications(List<NotificationModel> newNotifications) {
+    return _lock = _lock.then((_) async {
+      final notifications = await getNotifications();
+      for (final n in newNotifications) {
+        if (!notifications.any((item) => item.id == n.id)) {
+          notifications.insert(0, n);
+        }
+      }
+      await _saveNotifications(notifications);
+      for (final n in newNotifications) {
+        await _showSystemNotification(n);
+      }
+    });
   }
 
   Future<void> _showSystemNotification(NotificationModel notification) async {
@@ -131,6 +151,13 @@ await _showSystemNotification(notification);
   Future<int> getUnreadCount() async {
     final notifications = await getNotifications();
     return notifications.where((n) => !n.isRead).length;
+  }
+
+  @override
+  Future<void> deleteNotification(String notificationId) async {
+    final notifications = await getNotifications();
+    notifications.removeWhere((n) => n.id == notificationId);
+    await _saveNotifications(notifications);
   }
 
   Future<void> _saveNotifications(List<NotificationModel> notifications) async {

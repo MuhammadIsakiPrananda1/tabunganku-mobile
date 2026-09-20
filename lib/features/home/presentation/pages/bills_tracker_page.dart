@@ -331,7 +331,7 @@ class _BillsTrackerPageState extends ConsumerState<BillsTrackerPage> {
       builder: (context) => StatefulBuilder(
         builder: (context, setSheetState) => Container(
           padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom + 32,
+            bottom: MediaQuery.of(context).viewInsets.bottom > 0 ? MediaQuery.of(context).viewInsets.bottom : MediaQuery.of(context).padding.bottom + 32,
             top: 24,
             left: 28,
             right: 28,
@@ -500,6 +500,7 @@ class _BillsTrackerPageState extends ConsumerState<BillsTrackerPage> {
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            clipBehavior: Clip.antiAlias,
             onSelected: (value) {
               if (value == 'edit') _showEditBillSheet(bill, isDarkMode);
               if (value == 'delete') _deleteBill(bill.id);

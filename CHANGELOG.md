@@ -4,6 +4,31 @@ Seluruh evolusi, fitur, dan perbaikan aplikasi **TabunganKu** terdokumentasi sec
 
 ---
 
+## 💎 [1.5.2] — 20 September 2026: Stellar Sky & Financial Empowerment
+*Rilis v1.5.2 (Edisi Stellar Sky) membawa lompatan besar dalam perencanaan keuangan mandiri, optimalisasi performa tinggi, dan pengalaman antarmuka visual yang memukau.*
+
+### 🆕 Fitur Yang Ditambah
+*   **Brankas Payday (Payday Vault)**: Alokasi gaji otomatis terpusat saat tanggal gajian tiba dengan fitur penguncian saldo pos darurat, investasi, dan tabungan terencana.
+*   **Alokasi THR & Bonus**: Modul cerdas untuk membagi dan mengalokasikan Tunjangan Hari Raya (THR) dan bonus kerja ke pos prioritas tanpa khawatir konsumtif.
+*   **Split Bill & Patungan**: Kalkulator patungan makan dan belanja bersama yang fleksibel dengan pembagian otomatis pajak restoran, biaya servis, dan diskon.
+*   **Anggaran Belanja (Shopping Budget Planner)**: Rencana belanja kebutuhan harian dan mingguan dengan batas pagu anggaran serta pelacakan realisasi pengeluaran.
+*   **Simulasi Pensiun Dini (Early Retirement / FIRE Plus)**: Kalkulator pensiun dini komprehensif yang memperhitungkan rasio tabungan, proyeksi inflasi, target usia, dan perkiraan dana FIRE yang dibutuhkan.
+*   **Time Value of Money (TVM) Calculator**: Modul edukasi dan perhitungan nilai waktu dari uang (Present Value, Future Value, dan tingkat inflasi) untuk analisis investasi jangka panjang.
+*   **Financial Health Checkup Terpadu**: Evaluasi komprehensif kesehatan finansial pengguna dengan metrik rasio likuiditas, rasio utang terhadap aset, rasio tabungan bulanan, dan skor kesehatan finansial.
+*   **Kritik & Saran (Feedback Page)**: Halaman umpan balik terintegrasi bagi pengguna untuk mengirim saran fitur, laporan bug, atau apresiasi langsung dari aplikasi.
+*   **Tipografi & Visual Baru**: Integrasi font modern Google Inter dan Plus Jakarta Sans, ilustrasi ikon vektor kartun ekspresif, teks berjalan (Marquee), serta dialog loading offline interaktif.
+
+### 🛠️ Fitur Yang Diubah
+*   **Dashboard & Tab Navigation Overhaul**: Optimalisasi rendering kartu dashboard, penyempurnaan visibilitas saldo (sembunyikan/tampilkan saldo), dan tata letak tab navigasi yang lebih responsif.
+*   **Transaction Categories Optimization**: Pembaruan menyeluruh struktur kategori transaksi dengan klasifikasi mendalam untuk kebutuhan keluarga, pendidikan, dan bisnis.
+*   **Settings & Security Enhancements**: Penguatan alur pengaturan PIN, preferensi tampilan, dan sinkronisasi badge pencapaian (Achievement Provider).
+*   **Theme & Color System Refinement**: Penyesuaian skema warna Stellar Sky yang lebih harmonis pada seluruh komponen tombol, sheet, dan dialog.
+
+### 🗑️ Fitur Yang Dihapus
+*   **Legacy Pages & Redundant Assets**: Penghapusan modul halaman lama yang sudah terintegrasi ke modul baru (`financial_health_page.dart`, `lifestyle_saving_page.dart`, `qris_services_page.dart`) serta pembersihan gambar QRIS lama.
+
+---
+
 ## 💎 [1.5.1] — 15 Juni 2026: New Horizons & Advanced Financial Tools
 *Rilis v1.5.1 menghadirkan lompatan besar bagi ekosistem TabunganKu dengan integrasi sistem pencatatan terpadu, perombakan total fitur Arisan menjadi Nabung Bersama yang lebih andal, serta serangkaian kalkulator finansial tingkat lanjut.*
 

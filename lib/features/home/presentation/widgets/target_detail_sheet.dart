@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -7,6 +8,9 @@ import 'package:tabunganku/core/theme/theme_provider.dart';
 import 'package:tabunganku/models/saving_target_model.dart';
 import 'package:tabunganku/models/transaction_model.dart';
 import 'package:tabunganku/providers/transaction_provider.dart';
+import 'package:tabunganku/providers/saving_target_provider.dart';
+import 'package:tabunganku/core/widgets/top_toast.dart';
+import 'package:tabunganku/features/home/presentation/widgets/savings_adjustment_dialog.dart';
 
 class TargetDetailSheet extends ConsumerWidget {
   final SavingTargetModel target;
@@ -62,17 +66,19 @@ class TargetDetailSheet extends ConsumerWidget {
     final cardBg = isDarkMode ? Colors.white.withValues(alpha: 0.01) : Colors.grey.shade50;
     final borderColor = isDarkMode ? Colors.white10 : Colors.grey.shade100;
 
-    // Reactively watch transactions to compute target savings progress
-    final transactions = ref.watch(transactionsByGroupProvider(null));
-    final targetBalance = transactions
-        .where((t) => !t.date.isBefore(target.createdAt))
-        .fold<double>(0, (s, t) => s + (t.type == TransactionType.income ? t.amount : -t.amount));
+    final targetsAsync = ref.watch(savingTargetsStreamProvider);
+    final currentTarget = targetsAsync.value?.firstWhere(
+      (t) => t.id == target.id,
+      orElse: () => target,
+    ) ?? target;
 
-    final progress = (target.targetAmount > 0)
-        ? (targetBalance / target.targetAmount).clamp(0.0, 1.0)
+    final targetBalance = currentTarget.savedAmount;
+
+    final progress = (currentTarget.targetAmount > 0)
+        ? (targetBalance / currentTarget.targetAmount).clamp(0.0, 1.0)
         : 0.0;
-    final remainingDays = target.dueDate.difference(DateTime.now()).inDays;
-    final remainingAmount = (target.targetAmount - targetBalance).clamp(0.0, double.infinity);
+    final remainingDays = currentTarget.dueDate.difference(DateTime.now()).inDays;
+    final remainingAmount = (currentTarget.targetAmount - targetBalance).clamp(0.0, double.infinity);
     final isCompleted = progress >= 1.0;
 
     final targetIconColor = isDarkMode ? Colors.tealAccent : Colors.teal.shade600;
@@ -82,7 +88,7 @@ class TargetDetailSheet extends ConsumerWidget {
         left: 20,
         right: 20,
         top: 12,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+        bottom: MediaQuery.of(context).viewInsets.bottom > 0 ? MediaQuery.of(context).viewInsets.bottom : MediaQuery.of(context).padding.bottom + 24,
       ),
       decoration: BoxDecoration(
         color: surfaceColor,
@@ -129,7 +135,7 @@ class TargetDetailSheet extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        target.name,
+                        currentTarget.name,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.quicksand(
@@ -172,10 +178,10 @@ class TargetDetailSheet extends ConsumerWidget {
 
             // Progress Card
             Container(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: cardBg,
-                borderRadius: BorderRadius.circular(24),
+                borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: borderColor),
               ),
               child: Row(
@@ -184,14 +190,15 @@ class TargetDetailSheet extends ConsumerWidget {
                     alignment: Alignment.center,
                     children: [
                       SizedBox(
-                        width: 86,
-                        height: 86,
+                        width: 76,
+                        height: 76,
                         child: CircularProgressIndicator(
                           value: progress,
-                          strokeWidth: 9,
+                          strokeWidth: 8,
+                          strokeCap: StrokeCap.round,
                           backgroundColor: isDarkMode
                               ? Colors.white.withValues(alpha: 0.05)
-                              : Colors.white,
+                              : Colors.grey.shade100,
                           valueColor: AlwaysStoppedAnimation<Color>(
                             isCompleted ? Colors.green.shade400 : targetIconColor,
                           ),
@@ -200,14 +207,14 @@ class TargetDetailSheet extends ConsumerWidget {
                       Text(
                         '${(progress * 100).toInt()}%',
                         style: GoogleFonts.quicksand(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
                           color: contentColor,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(width: 24),
+                  const SizedBox(width: 20),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -218,10 +225,10 @@ class TargetDetailSheet extends ConsumerWidget {
                           isDarkMode,
                           contentColor,
                         ),
-                        const SizedBox(height: 14),
+                        const SizedBox(height: 10),
                         _statPill(
                           'GOAL',
-                          _formatRupiah(target.targetAmount),
+                          _formatRupiah(currentTarget.targetAmount),
                           isDarkMode,
                           contentColor,
                         ),
@@ -231,7 +238,7 @@ class TargetDetailSheet extends ConsumerWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 12),
 
             // Info Cards Row
             IntrinsicHeight(
@@ -253,7 +260,7 @@ class TargetDetailSheet extends ConsumerWidget {
                   Expanded(
                     child: _infoCard(
                       'JATUH TEMPO',
-                      DateFormat('d MMM yyyy', 'id_ID').format(target.dueDate),
+                      DateFormat('d MMM yyyy', 'id_ID').format(currentTarget.dueDate),
                       Icons.calendar_today_rounded,
                       isDarkMode,
                       subLabel: remainingDays > 0 ? '$remainingDays Hari lagi' : 'Lewat tenggat',
@@ -264,65 +271,154 @@ class TargetDetailSheet extends ConsumerWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
 
             // Date Created
             Text(
-              'Dibuat pada ${DateFormat('d MMM yyyy', 'id_ID').format(target.createdAt)}',
+              'Dibuat pada ${DateFormat('d MMM yyyy', 'id_ID').format(currentTarget.createdAt)}',
               style: GoogleFonts.quicksand(
                 fontSize: 10,
-                color: isDarkMode ? Colors.white10 : Colors.black12,
+                color: Colors.grey,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
 
-            // Actions
+            Container(
+              height: 50,
+              decoration: BoxDecoration(
+                color: isDarkMode
+                    ? Colors.white.withValues(alpha: 0.05)
+                    : Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: isDarkMode ? Colors.white.withValues(alpha: 0.08) : Colors.grey.shade200,
+                  width: 1.2,
+                ),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12.8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: InkWell(
+                        onTap: () => _showSavingsAdjustmentDialog(context, ref, currentTarget, isAdd: true),
+                        child: Center(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.add_rounded,
+                                color: Colors.teal,
+                                size: 18,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Tambah',
+                                style: GoogleFonts.quicksand(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                  color: Colors.teal,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    Container(
+                      width: 1.2,
+                      height: 22,
+                      color: isDarkMode ? Colors.white.withValues(alpha: 0.08) : Colors.grey.shade300,
+                    ),
+                    Expanded(
+                      child: InkWell(
+                        onTap: () => _showSavingsAdjustmentDialog(context, ref, currentTarget, isAdd: false),
+                        child: Center(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.remove_rounded,
+                                color: Colors.redAccent,
+                                size: 18,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Tarik',
+                                style: GoogleFonts.quicksand(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                  color: Colors.redAccent,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
             Row(
               children: [
                 Expanded(
-                  child: ElevatedButton(
+                  child: OutlinedButton.icon(
                     onPressed: () {
                       Navigator.pop(context);
                       onEdit();
                     },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.teal.shade500, // teal/green
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      minimumSize: const Size(0, 52),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                    child: Text(
+                    icon: const Icon(Icons.edit_rounded, size: 14),
+                    label: Text(
                       'Ubah Target',
                       style: GoogleFonts.quicksand(
                         fontWeight: FontWeight.bold,
-                        fontSize: 13,
+                        fontSize: 12,
+                      ),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(
+                        color: isDarkMode
+                            ? Colors.white.withValues(alpha: 0.1)
+                            : Colors.grey.shade300,
+                      ),
+                      foregroundColor: isDarkMode ? Colors.white70 : Colors.black87,
+                      minimumSize: const Size(double.infinity, 48),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
-                Container(
-                  height: 52,
-                  width: 52,
-                  decoration: BoxDecoration(
-                    color: isDarkMode
-                        ? Colors.red.shade900.withValues(alpha: 0.1)
-                        : Colors.red.shade50,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: IconButton(
+                const SizedBox(width: 10),
+                Expanded(
+                  child: OutlinedButton.icon(
                     onPressed: () {
                       Navigator.pop(context);
                       onDelete();
                     },
-                    icon: Icon(
-                      Icons.delete_outline_rounded,
-                      color: isDarkMode ? Colors.red.shade300 : Colors.red,
-                      size: 20,
+                    icon: const Icon(Icons.delete_outline_rounded, size: 14),
+                    label: Text(
+                      'Hapus Target',
+                      style: GoogleFonts.quicksand(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                        color: Colors.redAccent,
+                      ),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(
+                        color: isDarkMode
+                            ? Colors.red.withValues(alpha: 0.2)
+                            : Colors.red.shade100,
+                      ),
+                      foregroundColor: Colors.redAccent,
+                      minimumSize: const Size(double.infinity, 48),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
                     ),
                   ),
                 ),
@@ -420,6 +516,10 @@ class TargetDetailSheet extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  void _showSavingsAdjustmentDialog(BuildContext context, WidgetRef ref, SavingTargetModel currentTarget, {required bool isAdd}) {
+    SavingsAdjustmentDialog.show(context, ref, currentTarget, isAdd: isAdd);
   }
 }
 

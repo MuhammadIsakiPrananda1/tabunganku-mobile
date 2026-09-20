@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:tabunganku/core/widgets/top_toast.dart';
+import 'package:tabunganku/core/widgets/marquee_text.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,6 +11,7 @@ import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tabunganku/core/theme/app_colors.dart';
 import 'package:tabunganku/core/theme/theme_provider.dart';
 import 'package:tabunganku/providers/user_provider.dart';
@@ -34,25 +36,37 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   bool _isUploadingPhoto = false;
   String? _uploadError;
 
-@override
+  @override
   void dispose() {
     super.dispose();
   }
 
-  void _showMonthlyExportBottomSheet(bool isDarkMode, List<TransactionModel> transactions) {
+  void _showMonthlyExportBottomSheet(
+      bool isDarkMode, List<TransactionModel> transactions) {
     final regular = transactions.where((t) {
       if (t.category == 'Hutang' || t.category == 'Piutang') return false;
       if (t.id.startsWith('shopping_')) return false;
       return true;
     }).toList();
 
-final Map<String, List<TransactionModel>> grouped = {};
+    final Map<String, List<TransactionModel>> grouped = {};
     for (final t in regular) {
       final k = DateFormat('MMMM yyyy', 'id_ID').format(t.date).toUpperCase();
       grouped.putIfAbsent(k, () => []).add(t);
     }
 
-    final monthKeys = grouped.keys.toList();
+    final now = DateTime.now();
+    final currentMonthKey =
+        DateFormat('MMMM yyyy', 'id_ID').format(now).toUpperCase();
+    final lastDay = DateTime(now.year, now.month + 1, 0).day;
+    final isEndOfMonth = now.day == lastDay;
+
+    final monthKeys = grouped.keys.where((k) {
+      if (k == currentMonthKey) {
+        return isEndOfMonth;
+      }
+      return true;
+    }).toList();
 
     showModalBottomSheet(
       context: context,
@@ -69,7 +83,6 @@ final Map<String, List<TransactionModel>> grouped = {};
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
               Center(
                 child: Container(
                   width: 40,
@@ -81,7 +94,6 @@ final Map<String, List<TransactionModel>> grouped = {};
                   ),
                 ),
               ),
-
               Row(
                 children: [
                   Container(
@@ -120,7 +132,6 @@ final Map<String, List<TransactionModel>> grouped = {};
                 ],
               ),
               const SizedBox(height: 24),
-
               if (monthKeys.isEmpty)
                 Center(
                   child: Padding(
@@ -129,7 +140,9 @@ final Map<String, List<TransactionModel>> grouped = {};
                       children: [
                         Icon(Icons.description_outlined,
                             size: 40,
-                            color: isDarkMode ? Colors.white10 : Colors.grey.shade300),
+                            color: isDarkMode
+                                ? Colors.white10
+                                : Colors.grey.shade300),
                         const SizedBox(height: 12),
                         Text(
                           'Belum ada transaksi reguler',
@@ -156,7 +169,8 @@ final Map<String, List<TransactionModel>> grouped = {};
                       final monthKey = monthKeys[index];
                       final monthTx = grouped[monthKey]!;
                       return Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 12),
                         decoration: BoxDecoration(
                           color: isDarkMode
                               ? Colors.white.withOpacity(0.02)
@@ -179,7 +193,9 @@ final Map<String, List<TransactionModel>> grouped = {};
                                   style: GoogleFonts.quicksand(
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
-                                    color: isDarkMode ? Colors.white70 : Colors.teal.shade900,
+                                    color: isDarkMode
+                                        ? Colors.white70
+                                        : Colors.teal.shade900,
                                   ),
                                 ),
                                 const SizedBox(height: 2),
@@ -188,7 +204,9 @@ final Map<String, List<TransactionModel>> grouped = {};
                                   style: GoogleFonts.quicksand(
                                     fontSize: 10,
                                     fontWeight: FontWeight.w600,
-                                    color: isDarkMode ? Colors.white38 : Colors.grey,
+                                    color: isDarkMode
+                                        ? Colors.white38
+                                        : Colors.grey,
                                   ),
                                 ),
                               ],
@@ -213,11 +231,13 @@ final Map<String, List<TransactionModel>> grouped = {};
                                 ),
                               ),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.primary.withOpacity(0.12),
+                                backgroundColor:
+                                    AppColors.primary.withOpacity(0.12),
                                 foregroundColor: AppColors.primary,
                                 elevation: 0,
                                 shadowColor: Colors.transparent,
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 8),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
@@ -243,10 +263,9 @@ final Map<String, List<TransactionModel>> grouped = {};
 
     XFile? pickedFile;
     try {
-
       ref.read(securityProvider.notifier).setExternalOperation(true);
 
-bool hasPermission = false;
+      bool hasPermission = false;
       if (source == ImageSource.camera) {
         hasPermission = await Permission.camera.request().isGranted;
       } else {
@@ -262,14 +281,13 @@ bool hasPermission = false;
         imageQuality: 80,
       );
     } finally {
-
       ref.read(securityProvider.notifier).setExternalOperation(false);
     }
 
     if (pickedFile == null) return;
     if (!mounted) return;
 
-if (!mounted) return;
+    if (!mounted) return;
     final croppedFilePath = await Navigator.push<String>(
       context,
       MaterialPageRoute(
@@ -411,7 +429,7 @@ if (!mounted) return;
     final achievements = ref.watch(achievementsProvider);
     final unlockedCount = achievements.where((a) => a.isUnlocked).length;
 
-final transactions = (transactionsAsync.value ?? [])
+    final transactions = (transactionsAsync.value ?? [])
         .where((t) => t.groupId == null)
         .toList();
 
@@ -425,36 +443,32 @@ final transactions = (transactionsAsync.value ?? [])
 
     final currentBalance = totalIncome - totalExpense;
 
-final String rankName = _getRankName(totalIncome);
+    final String rankName = _getRankName(totalIncome);
     final IconData rankIcon = _getRankIcon(totalIncome);
     final Color rankColor = _getRankColor(totalIncome);
 
-final streak = ref.watch(savingStreakProvider);
+    final streak = ref.watch(savingStreakProvider);
 
     final currencyFormatter =
         NumberFormat.currency(locale: 'id_ID', symbol: 'Rp', decimalDigits: 0);
 
     return Scaffold(
-      backgroundColor:
-          Colors.transparent,
-
+      backgroundColor: Colors.transparent,
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-
             _buildProfileCard(
                 profile, isDarkMode, rankName, rankIcon, rankColor),
             const SizedBox(height: 24),
-
-_buildStatsRow(streak, currentBalance, unlockedCount,
+            _buildStatsRow(streak, currentBalance, unlockedCount,
                 achievements.length, currencyFormatter, isDarkMode),
             const SizedBox(height: 16),
-
-_buildSectionHeader('Pencapaian'),
+            _buildSectionHeader(
+                'Pencapaian ($unlockedCount/${achievements.length})'),
+            const SizedBox(height: 8),
             _buildAchievementList(achievements, isDarkMode),
             const SizedBox(height: 8),
-
             _buildSectionHeader('Preferensi'),
             _buildSettingGroup([
               _buildSettingTile(
@@ -467,13 +481,16 @@ _buildSectionHeader('Pencapaian'),
                       ref.read(themeProvider.notifier).toggleTheme(),
                   activeColor: AppColors.primary,
                   activeTrackColor: AppColors.primary.withValues(alpha: 0.3),
-                  inactiveThumbColor: isDarkMode ? Colors.white30 : Colors.grey.shade400,
-                  inactiveTrackColor: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
-                  trackOutlineColor: WidgetStateProperty.resolveWith<Color?>((states) => Colors.transparent),
+                  inactiveThumbColor:
+                      isDarkMode ? Colors.white30 : Colors.grey.shade400,
+                  inactiveTrackColor: isDarkMode
+                      ? Colors.white.withValues(alpha: 0.05)
+                      : Colors.black.withValues(alpha: 0.05),
+                  trackOutlineColor: WidgetStateProperty.resolveWith<Color?>(
+                      (states) => Colors.transparent),
                 ),
                 isDarkMode: isDarkMode,
               ),
-
               _buildSettingTile(
                 Icons.picture_as_pdf_outlined,
                 'Ekspor Laporan Bulanan (PDF)',
@@ -484,7 +501,6 @@ _buildSectionHeader('Pencapaian'),
               ),
             ], isDarkMode),
             const SizedBox(height: 16),
-
             _buildSectionHeader('Keamanan'),
             _buildSettingGroup([
               _buildSettingTile(
@@ -492,23 +508,28 @@ _buildSectionHeader('Pencapaian'),
                 'Kunci Biometrik',
                 () {},
                 trailing: Opacity(
-                  opacity:
-                      1.0,
+                  opacity: 1.0,
                   child: Switch(
-                    value:
-                        securityState.isBiometricEnabled && securityState.hasPin,
+                    value: securityState.isBiometricEnabled &&
+                        securityState.hasPin,
                     onChanged: (val) {
                       if (!securityState.hasPin) {
                         context.push('/pin-setup');
                       } else {
-                        ref.read(securityProvider.notifier).toggleBiometric(val);
+                        ref
+                            .read(securityProvider.notifier)
+                            .toggleBiometric(val);
                       }
                     },
                     activeColor: AppColors.primary,
                     activeTrackColor: AppColors.primary.withValues(alpha: 0.3),
-                    inactiveThumbColor: isDarkMode ? Colors.white30 : Colors.grey.shade400,
-                    inactiveTrackColor: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
-                    trackOutlineColor: WidgetStateProperty.resolveWith<Color?>((states) => Colors.transparent),
+                    inactiveThumbColor:
+                        isDarkMode ? Colors.white30 : Colors.grey.shade400,
+                    inactiveTrackColor: isDarkMode
+                        ? Colors.white.withValues(alpha: 0.05)
+                        : Colors.black.withValues(alpha: 0.05),
+                    trackOutlineColor: WidgetStateProperty.resolveWith<Color?>(
+                        (states) => Colors.transparent),
                   ),
                 ),
                 subtitle: securityState.hasPin
@@ -535,46 +556,8 @@ _buildSectionHeader('Pencapaian'),
                 ),
             ], isDarkMode),
             const SizedBox(height: 16),
-
             _buildSectionHeader('Sosial & Komunitas'),
             _buildSettingGroup([
-              _buildSettingTile(
-                Icons.campaign_outlined,
-                'Saluran WhatsApp',
-                () async {
-                  final url = Uri.parse(
-                      'https://whatsapp.com/channel/0029Vb7hUrM23n3a6dSem72v');
-                  try {
-                    await launchUrl(
-                      url,
-                      mode: LaunchMode.externalApplication,
-                    );
-                  } catch (e) {
-
-                    await launchUrl(
-                      url,
-                      mode: LaunchMode.platformDefault,
-                    );
-                  }
-                },
-                subtitle: 'Join untuk update aplikasi terbaru',
-                color: Colors.green,
-                isDarkMode: isDarkMode,
-              ),
-              _buildSettingTile(
-                Icons.camera_alt_outlined,
-                'Instagram',
-                () async {
-                  final url =
-                      Uri.parse('https://www.instagram.com/tuanmudazaky_/');
-                  if (await canLaunchUrl(url)) {
-                    await launchUrl(url, mode: LaunchMode.externalApplication);
-                  }
-                },
-                subtitle: 'Follow untuk update visual',
-                color: Colors.purple,
-                isDarkMode: isDarkMode,
-              ),
               _buildSettingTile(
                 Icons.code_rounded,
                 'GitHub Developer',
@@ -598,7 +581,6 @@ _buildSectionHeader('Pencapaian'),
               ),
             ], isDarkMode),
             const SizedBox(height: 16),
-
             _buildSectionHeader('Bantuan & Informasi'),
             _buildSettingGroup([
               _buildSettingTile(
@@ -622,19 +604,25 @@ _buildSectionHeader('Pencapaian'),
                 isDarkMode: isDarkMode,
               ),
               _buildSettingTile(
-                Icons.star_outline_rounded,
-                'Beri Rating Aplikasi',
-                () => _openRateApp(),
-                subtitle: 'Bantu kami dengan penilaianmu ⭐',
-                color: Colors.amber,
+                Icons.feedback_outlined,
+                'Kirim Masukan / Feedback',
+                () => context.push('/feedback'),
+                subtitle: 'Beri rating & saran untuk aplikasi ⭐',
+                color: Colors.orange,
                 isDarkMode: isDarkMode,
               ),
               _buildSettingTile(
-                Icons.feedback_outlined,
-                'Kirim Masukan / Feedback',
-                () => _showFeedbackDialog(isDarkMode),
-                subtitle: 'Saran & kritik sangat kami hargai',
-                color: Colors.orange,
+                Icons.auto_stories_outlined,
+                'Panduan & Pengenalan Aplikasi',
+                () async {
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.setBool('has_seen_onboarding_intro', false);
+                  if (context.mounted) {
+                    context.go('/splash');
+                  }
+                },
+                subtitle: 'Lihat kembali slide pengenalan TabunganKu',
+                color: Colors.teal,
                 isDarkMode: isDarkMode,
               ),
               _buildSettingTile(
@@ -644,25 +632,12 @@ _buildSectionHeader('Pencapaian'),
                 isDarkMode: isDarkMode,
               ),
             ], isDarkMode),
-            const SizedBox(height: 16),
-
-            _buildSectionHeader('Data & Privasi'),
-            _buildSettingGroup([
-              _buildSettingTile(
-                Icons.delete_sweep_rounded,
-                'Reset Data Transaksi',
-                () => _showResetDataDialog(isDarkMode),
-                subtitle: 'Hapus semua data transaksi secara permanen',
-                color: Colors.red,
-                isDarkMode: isDarkMode,
-              ),
-            ], isDarkMode),
             const SizedBox(height: 24),
-
-            Center(
+            const Center(
               child: Text(
                 'Versi ${AppVersion.version}',
-                style: const TextStyle(color: AppColors.textSecondary, fontSize: 11),
+                style: TextStyle(
+                    color: AppColors.textSecondary, fontSize: 11),
               ),
             ),
           ],
@@ -674,35 +649,50 @@ _buildSectionHeader('Pencapaian'),
   Widget _buildProfileCard(UserProfile profile, bool isDarkMode, String rank,
       IconData rankIcon, Color rankColor) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: isDarkMode
+              ? Colors.white.withValues(alpha: 0.07)
+              : Colors.black.withValues(alpha: 0.05),
+          width: 1,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDarkMode ? 0.3 : 0.06),
-            blurRadius: 16,
+            color: Colors.black.withValues(alpha: isDarkMode ? 0.28 : 0.05),
+            blurRadius: 18,
             offset: const Offset(0, 6),
           ),
         ],
       ),
       child: Row(
         children: [
-
           GestureDetector(
             onTap: _isUploadingPhoto ? null : _pickAndUploadPhoto,
             child: Stack(
+              clipBehavior: Clip.none,
               children: [
-
                 Container(
-                  width: 80,
-                  height: 80,
+                  width: 76,
+                  height: 76,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: AppColors.primary.withValues(alpha: 0.3),
-                      width: 2.5,
+                      color: AppColors.primary
+                          .withValues(alpha: isDarkMode ? 0.4 : 0.25),
+                      width: 2.0,
                     ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primary
+                            .withValues(alpha: isDarkMode ? 0.15 : 0.08),
+                        blurRadius: 10,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
                   child: ClipOval(
                     child: _isUploadingPhoto
@@ -710,8 +700,8 @@ _buildSectionHeader('Pencapaian'),
                             color: AppColors.primary.withValues(alpha: 0.1),
                             child: const Center(
                               child: SizedBox(
-                                width: 28,
-                                height: 28,
+                                width: 24,
+                                height: 24,
                                 child: CircularProgressIndicator(
                                   color: AppColors.primary,
                                   strokeWidth: 2.5,
@@ -745,7 +735,6 @@ _buildSectionHeader('Pencapaian'),
                             : _buildDefaultAvatar(profile.name, isDarkMode),
                   ),
                 ),
-
                 if (_uploadError != null)
                   Positioned(
                     bottom: -15,
@@ -756,12 +745,12 @@ _buildSectionHeader('Pencapaian'),
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
-                          color: Colors.red.withValues(alpha: 0.8),
-                          borderRadius: BorderRadius.circular(4),
+                          color: Colors.red.withValues(alpha: 0.85),
+                          borderRadius: BorderRadius.circular(6),
                         ),
-                        child: Text(
+                        child: const Text(
                           'Gagal!',
-                          style: const TextStyle(
+                          style: TextStyle(
                               color: Colors.white,
                               fontSize: 10,
                               fontWeight: FontWeight.bold),
@@ -769,13 +758,12 @@ _buildSectionHeader('Pencapaian'),
                       ),
                     ),
                   ),
-
                 Positioned(
                   bottom: 0,
                   right: 0,
                   child: Container(
-                    width: 26,
-                    height: 26,
+                    width: 25,
+                    height: 25,
                     decoration: BoxDecoration(
                       color: AppColors.primary,
                       shape: BoxShape.circle,
@@ -783,16 +771,25 @@ _buildSectionHeader('Pencapaian'),
                         color: Theme.of(context).cardColor,
                         width: 2,
                       ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.15),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
-                    child: const Icon(Icons.camera_alt_rounded,
-                        color: Colors.white, size: 13),
+                    child: const Icon(
+                      Icons.camera_alt_rounded,
+                      color: Colors.white,
+                      size: 12,
+                    ),
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 20),
-
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -801,63 +798,70 @@ _buildSectionHeader('Pencapaian'),
                 Row(
                   children: [
                     Expanded(
-                      child: Text(
-                        profile.name.isNotEmpty
+                      child: MarqueeText(
+                        text: (profile.name.isNotEmpty &&
+                                profile.name != 'user-xxxx' &&
+                                profile.name != 'Pengguna TabunganKu')
                             ? profile.name
-                            : 'Pengguna TabunganKu',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
+                            : UserProfileNotifier.generateDefaultUsername(),
+                        style: GoogleFonts.quicksand(
                           fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                          height: 1.1,
+                          fontSize: 16,
                           color: isDarkMode ? Colors.white : Colors.black87,
                         ),
                       ),
                     ),
-                    SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: IconButton(
-                        icon: const Icon(Icons.edit_outlined, size: 16),
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                        onPressed: () => _showEditNameDialog(profile.name),
-                        color: AppColors.primary,
+                    const SizedBox(width: 6),
+                    GestureDetector(
+                      onTap: () => _showEditNameDialog(profile.name),
+                      behavior: HitTestBehavior.opaque,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: 0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.edit_rounded,
+                          size: 13,
+                          color: AppColors.primary,
+                        ),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 3),
                 Text(
                   'Ketuk foto untuk menggantinya',
-                  style: TextStyle(
+                  style: GoogleFonts.quicksand(
                     fontSize: 11,
-                    height: 1.1,
+                    fontWeight: FontWeight.w500,
                     color: isDarkMode ? Colors.white38 : Colors.black38,
                   ),
                 ),
-                const SizedBox(height: 6),
-
+                const SizedBox(height: 8),
                 Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: rankColor.withValues(alpha: 0.1),
+                    color:
+                        rankColor.withValues(alpha: isDarkMode ? 0.15 : 0.08),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                        color: rankColor.withValues(alpha: 0.3), width: 1),
+                      color: rankColor.withValues(alpha: 0.3),
+                      width: 1,
+                    ),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(rankIcon, color: rankColor, size: 14),
-                      const SizedBox(width: 6),
+                      Icon(rankIcon, color: rankColor, size: 13),
+                      const SizedBox(width: 5),
                       Flexible(
                         child: Text(
                           rank,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
+                          style: GoogleFonts.quicksand(
                             fontSize: 11,
                             fontWeight: FontWeight.bold,
                             color: rankColor,
@@ -883,7 +887,9 @@ _buildSectionHeader('Pencapaian'),
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.03),
+          color: isDarkMode
+              ? Colors.white.withValues(alpha: 0.05)
+              : Colors.black.withValues(alpha: 0.03),
           width: 1.2,
         ),
         boxShadow: [
@@ -897,7 +903,6 @@ _buildSectionHeader('Pencapaian'),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-
           _buildTableRow(
             'Streak',
             '$streak Hari',
@@ -906,7 +911,6 @@ _buildSectionHeader('Pencapaian'),
             isDarkMode,
           ),
           _buildTableHorizontalDivider(isDarkMode),
-
           _buildTableRow(
             'Total Saldo',
             formatter.format(currentBalance),
@@ -915,7 +919,6 @@ _buildSectionHeader('Pencapaian'),
             isDarkMode,
           ),
           _buildTableHorizontalDivider(isDarkMode),
-
           _buildTableRow(
             'Lencana',
             '$unlockedCount/$totalAchievements',
@@ -992,15 +995,71 @@ _buildSectionHeader('Pencapaian'),
 
   Widget _buildAchievementList(
       List<Achievement> achievements, bool isDarkMode) {
+    final displayedItems = achievements.take(10).toList();
+    final bool showSeeAllCard = achievements.length > 10;
+    final int totalCardCount = displayedItems.length + (showSeeAllCard ? 1 : 0);
+
     return SizedBox(
       height: 125,
       child: ListView.separated(
         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
         scrollDirection: Axis.horizontal,
-        itemCount: achievements.length,
+        itemCount: totalCardCount,
         separatorBuilder: (_, __) => const SizedBox(width: 12),
         itemBuilder: (context, index) {
-          final item = achievements[index];
+          if (index == displayedItems.length && showSeeAllCard) {
+            return InkWell(
+              onTap: () =>
+                  _showAllAchievementsModal(context, achievements, isDarkMode),
+              borderRadius: BorderRadius.circular(20),
+              child: Container(
+                width: 140,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.transparent,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 38,
+                      height: 38,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primary.withValues(alpha: 0.3),
+                            blurRadius: 6,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.arrow_forward_rounded,
+                        color: Colors.white,
+                        size: 18,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Lihat Semua\nPencapaian',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.quicksand(
+                        fontSize: 10.5,
+                        height: 1.2,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+
+          final item = displayedItems[index];
           final bool unlocked = item.isUnlocked;
 
           return Container(
@@ -1012,12 +1071,15 @@ _buildSectionHeader('Pencapaian'),
               border: Border.all(
                 color: unlocked
                     ? AppColors.primary.withValues(alpha: 0.15)
-                    : (isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.03)),
+                    : (isDarkMode
+                        ? Colors.white.withValues(alpha: 0.05)
+                        : Colors.black.withValues(alpha: 0.03)),
                 width: 1.2,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: isDarkMode ? 0.2 : 0.02),
+                  color:
+                      Colors.black.withValues(alpha: isDarkMode ? 0.2 : 0.02),
                   blurRadius: 8,
                   offset: const Offset(0, 4),
                 ),
@@ -1027,7 +1089,6 @@ _buildSectionHeader('Pencapaian'),
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-
                 Row(
                   children: [
                     Container(
@@ -1036,11 +1097,14 @@ _buildSectionHeader('Pencapaian'),
                       decoration: BoxDecoration(
                         color: unlocked
                             ? AppColors.primary.withValues(alpha: 0.1)
-                            : (isDarkMode ? Colors.white.withValues(alpha: 0.04) : Colors.grey.shade100),
+                            : (isDarkMode
+                                ? Colors.white.withValues(alpha: 0.04)
+                                : Colors.grey.shade100),
                         shape: BoxShape.circle,
                         border: unlocked
                             ? Border.all(
-                                color: AppColors.primary.withValues(alpha: 0.25),
+                                color:
+                                    AppColors.primary.withValues(alpha: 0.25),
                                 width: 1.2,
                               )
                             : null,
@@ -1050,7 +1114,9 @@ _buildSectionHeader('Pencapaian'),
                         size: 15,
                         color: unlocked
                             ? AppColors.primary
-                            : (isDarkMode ? Colors.white24 : Colors.grey.shade400),
+                            : (isDarkMode
+                                ? Colors.white24
+                                : Colors.grey.shade400),
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -1067,7 +1133,9 @@ _buildSectionHeader('Pencapaian'),
                               fontWeight: FontWeight.w900,
                               color: unlocked
                                   ? (isDarkMode ? Colors.white : Colors.black87)
-                                  : (isDarkMode ? Colors.white38 : Colors.grey.shade500),
+                                  : (isDarkMode
+                                      ? Colors.white38
+                                      : Colors.grey.shade500),
                             ),
                           ),
                           Text(
@@ -1085,8 +1153,7 @@ _buildSectionHeader('Pencapaian'),
                     ),
                   ],
                 ),
-
-Padding(
+                Padding(
                   padding: const EdgeInsets.symmetric(vertical: 2),
                   child: Text(
                     item.description,
@@ -1100,8 +1167,7 @@ Padding(
                     ),
                   ),
                 ),
-
-Column(
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
@@ -1120,9 +1186,11 @@ Column(
                           style: GoogleFonts.quicksand(
                             fontSize: 8,
                             fontWeight: FontWeight.w900,
-                            color: unlocked 
-                                ? AppColors.primary 
-                                : (isDarkMode ? Colors.white.withValues(alpha: 0.5) : Colors.grey.shade600),
+                            color: unlocked
+                                ? AppColors.primary
+                                : (isDarkMode
+                                    ? Colors.white.withValues(alpha: 0.5)
+                                    : Colors.grey.shade600),
                           ),
                         ),
                       ],
@@ -1133,7 +1201,9 @@ Column(
                       child: LinearProgressIndicator(
                         value: item.progress,
                         minHeight: 2.5,
-                        backgroundColor: isDarkMode ? Colors.white.withValues(alpha: 0.04) : Colors.grey.shade200,
+                        backgroundColor: isDarkMode
+                            ? Colors.white.withValues(alpha: 0.04)
+                            : Colors.grey.shade200,
                         valueColor: AlwaysStoppedAnimation<Color>(
                           unlocked ? AppColors.primary : Colors.grey.shade400,
                         ),
@@ -1209,13 +1279,15 @@ Column(
   Widget _buildDefaultAvatar(String name, bool isDark) {
     return Container(
       color: isDark
-          ? Colors.white.withValues(alpha: 0.05)
-          : const Color(0xFFE9EDEF),
+          ? AppColors.primary.withValues(alpha: 0.12)
+          : AppColors.primary.withValues(alpha: 0.08),
       child: Center(
         child: Icon(
-          Icons.person,
-          size: 48,
-          color: isDark ? Colors.white24 : const Color(0xFF919191),
+          Icons.person_rounded,
+          size: 44,
+          color: isDark
+              ? AppColors.primary.withValues(alpha: 0.85)
+              : AppColors.primary,
         ),
       ),
     );
@@ -1236,12 +1308,298 @@ Column(
     );
   }
 
+  void _showAllAchievementsModal(
+      BuildContext context, List<Achievement> achievements, bool isDarkMode) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        String filter = 'Semua';
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            final unlocked = achievements.where((a) => a.isUnlocked).toList();
+            final locked = achievements.where((a) => !a.isUnlocked).toList();
+
+            final filteredList = filter == 'Terbuka'
+                ? unlocked
+                : filter == 'Terkunci'
+                    ? locked
+                    : achievements;
+
+            final contentColor =
+                isDarkMode ? Colors.white : AppColors.primaryDark;
+            final cardBg = isDarkMode ? const Color(0xFF1E1E1E) : Colors.white;
+
+            return Container(
+              height: MediaQuery.of(context).size.height * 0.82,
+              decoration: BoxDecoration(
+                color: isDarkMode ? AppColors.surfaceDark : Colors.white,
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+              child: Column(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: isDarkMode ? Colors.white10 : Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Daftar 50 Pencapaian',
+                            style: GoogleFonts.quicksand(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: contentColor,
+                            ),
+                          ),
+                          Text(
+                            'Terbuka ${unlocked.length} dari ${achievements.length} pencapaian',
+                            style: GoogleFonts.quicksand(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: isDarkMode
+                                  ? Colors.white38
+                                  : Colors.grey.shade600,
+                            ),
+                          ),
+                        ],
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: const Icon(Icons.close_rounded),
+                        color: contentColor,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+
+                  // Filter chips
+                  Row(
+                    children: [
+                      _buildModalFilterChip(
+                          'Semua (${achievements.length})',
+                          filter == 'Semua',
+                          () => setModalState(() => filter = 'Semua'),
+                          isDarkMode),
+                      const SizedBox(width: 8),
+                      _buildModalFilterChip(
+                          'Terbuka (${unlocked.length})',
+                          filter == 'Terbuka',
+                          () => setModalState(() => filter = 'Terbuka'),
+                          isDarkMode),
+                      const SizedBox(width: 8),
+                      _buildModalFilterChip(
+                          'Terkunci (${locked.length})',
+                          filter == 'Terkunci',
+                          () => setModalState(() => filter = 'Terkunci'),
+                          isDarkMode),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  Expanded(
+                    child: ListView.separated(
+                      itemCount: filteredList.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 10),
+                      itemBuilder: (context, index) {
+                        final item = filteredList[index];
+                        final isItemUnlocked = item.isUnlocked;
+
+                        return Container(
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: cardBg,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: isItemUnlocked
+                                  ? AppColors.primary.withValues(alpha: 0.2)
+                                  : (isDarkMode
+                                      ? Colors.white.withValues(alpha: 0.05)
+                                      : Colors.grey.shade200),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 44,
+                                height: 44,
+                                decoration: BoxDecoration(
+                                  color: isItemUnlocked
+                                      ? AppColors.primary
+                                          .withValues(alpha: 0.12)
+                                      : (isDarkMode
+                                          ? Colors.white.withValues(alpha: 0.05)
+                                          : Colors.grey.shade100),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  isItemUnlocked
+                                      ? item.icon
+                                      : Icons.lock_outline_rounded,
+                                  color: isItemUnlocked
+                                      ? AppColors.primary
+                                      : (isDarkMode
+                                          ? Colors.white24
+                                          : Colors.grey.shade400),
+                                  size: 20,
+                                ),
+                              ),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            item.title,
+                                            style: GoogleFonts.quicksand(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 13,
+                                              color: contentColor,
+                                            ),
+                                          ),
+                                        ),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 8, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            color: isItemUnlocked
+                                                ? AppColors.primary
+                                                    .withValues(alpha: 0.12)
+                                                : (isDarkMode
+                                                    ? Colors.white
+                                                        .withValues(alpha: 0.05)
+                                                    : Colors.grey.shade100),
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                          ),
+                                          child: Text(
+                                            isItemUnlocked
+                                                ? 'TERBUKA'
+                                                : 'TERKUNCI',
+                                            style: GoogleFonts.quicksand(
+                                              fontSize: 9,
+                                              fontWeight: FontWeight.w800,
+                                              color: isItemUnlocked
+                                                  ? AppColors.primary
+                                                  : Colors.grey,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 3),
+                                    Text(
+                                      item.description,
+                                      style: GoogleFonts.quicksand(
+                                        fontSize: 10.5,
+                                        color: isDarkMode
+                                            ? Colors.white54
+                                            : Colors.grey.shade600,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(3),
+                                            child: LinearProgressIndicator(
+                                              value: item.progress,
+                                              minHeight: 4,
+                                              backgroundColor: isDarkMode
+                                                  ? Colors.white
+                                                      .withValues(alpha: 0.06)
+                                                  : Colors.grey.shade200,
+                                              valueColor:
+                                                  AlwaysStoppedAnimation<Color>(
+                                                isItemUnlocked
+                                                    ? AppColors.primary
+                                                    : Colors.grey.shade400,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          '${(item.progress * 100).toInt()}%',
+                                          style: GoogleFonts.quicksand(
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.bold,
+                                            color: isItemUnlocked
+                                                ? AppColors.primary
+                                                : Colors.grey,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildModalFilterChip(
+      String label, bool isSelected, VoidCallback onTap, bool isDarkMode) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColors.primary
+              : (isDarkMode
+                  ? Colors.white.withValues(alpha: 0.05)
+                  : Colors.grey.shade100),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.quicksand(
+            fontSize: 11,
+            fontWeight: FontWeight.bold,
+            color: isSelected
+                ? Colors.white
+                : (isDarkMode ? Colors.white70 : Colors.black87),
+          ),
+        ),
+      ),
+    );
+  }
+
   void _shareApp() {
     Share.share(
         'Ayo raih target finansialmu lebih mudah dengan TabunganKu! Download aplikasi resmi di sini: https://tabunganku.neverlandstudio.my.id/ 🎉');
   }
 
-void _showPrivacyPolicyDialog(bool isDarkMode) {
+  void _showPrivacyPolicyDialog(bool isDarkMode) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -1264,7 +1622,7 @@ void _showPrivacyPolicyDialog(bool isDarkMode) {
           _infoSection('🔔 Notifikasi Pengingat',
               'Jika kamu mengaktifkan pengingat menabung harian, TabunganKu menjadwalkan notifikasi lokal di HP kamu. Notifikasi ini tidak melewati server manapun — sepenuhnya diproses oleh sistem Android/iOS di perangkatmu.'),
           _infoSection('🗑️ Menghapus Data',
-              'Kamu bisa menghapus seluruh data transaksi kapan saja melalui menu Data & Privasi → Reset Data Transaksi. Untuk menghapus semua data aplikasi sekaligus, cukup hapus (uninstall) TabunganKu dari HP kamu.'),
+              'Untuk menghapus semua data aplikasi sekaligus, kamu dapat membersihkan data aplikasi atau menghapus (uninstall) TabunganKu dari HP kamu.'),
           _infoSection('📬 Ada Pertanyaan?',
               'Hubungi tim Neverland Studio di Arlianto032@gmail.com. Kami dengan senang hati menjawab pertanyaan seputar privasi dan keamanan datamu.'),
         ],
@@ -1272,7 +1630,7 @@ void _showPrivacyPolicyDialog(bool isDarkMode) {
     );
   }
 
-void _showTermsDialog(bool isDarkMode) {
+  void _showTermsDialog(bool isDarkMode) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -1303,418 +1661,8 @@ void _showTermsDialog(bool isDarkMode) {
     );
   }
 
-Future<void> _openRateApp() async {
 
-    final message = Uri.encodeComponent(
-      'Halo kak! 👋\n\n'
-      'Aku mau kasih penilaian untuk aplikasi TabunganKu nih 💰\n\n'
-      '⭐ Rating: ___/5\n\n'
-      '💬 Komentar:\n'
-      '___(tulis komentar kamu di sini)___\n\n'
-      '— Dikirim dari TabunganKu v${AppVersion.version}',
-    );
-
-    final whatsappUrl = Uri.parse('https://wa.me/6281252254886?text=$message');
-
-    try {
-      await launchUrl(whatsappUrl, mode: LaunchMode.externalApplication);
-    } catch (e) {
-      if (mounted) {
-        showTopToast(context, 'Tidak dapat membuka WhatsApp. Pastikan WhatsApp sudah terpasang.');
-      }
-    }
-  }
-
-void _showFeedbackDialog(bool isDarkMode) {
-    final controller = TextEditingController();
-    final formKey = GlobalKey<FormState>();
-    String selectedType = 'Saran';
-    int textLength = 0;
-    
-    final types = ['Saran', 'Bug / Masalah', 'Pertanyaan', 'Lainnya'];
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => StatefulBuilder(
-        builder: (context, setModalState) => Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-          ),
-          child: Container(
-            padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
-            decoration: BoxDecoration(
-              color: isDarkMode ? AppColors.surfaceDark : Colors.white,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(isDarkMode ? 0.2 : 0.05),
-                  blurRadius: 15,
-                  offset: const Offset(0, -4),
-                )
-              ]
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    width: 36,
-                    height: 4,
-                    margin: const EdgeInsets.only(bottom: 20),
-                    decoration: BoxDecoration(
-                      color: isDarkMode ? Colors.white.withOpacity(0.1) : Colors.grey.shade300,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.mail_outline_rounded,
-                      color: AppColors.primary,
-                      size: 22,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Kirim Masukan',
-                            style: GoogleFonts.quicksand(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                              color: isDarkMode ? Colors.white : Colors.black87,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            'Kritik atau saran Anda akan terkirim langsung ke Gmail kami.',
-                            style: GoogleFonts.quicksand(
-                              fontSize: 11,
-                              color: isDarkMode ? Colors.white38 : Colors.black54,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  'Jenis Masukan',
-                  style: GoogleFonts.quicksand(
-                    fontSize: 11.5,
-                    fontWeight: FontWeight.bold,
-                    color: isDarkMode ? Colors.white60 : Colors.black54,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  physics: const BouncingScrollPhysics(),
-                  child: Row(
-                    children: types.map((type) {
-                      final isSelected = selectedType == type;
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 8.0),
-                        child: GestureDetector(
-                          onTap: () => setModalState(() => selectedType = type),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 150),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 8),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? AppColors.primary
-                                  : (isDarkMode
-                                      ? Colors.white.withOpacity(0.04)
-                                      : Colors.grey.shade100),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: isSelected
-                                    ? AppColors.primary
-                                    : (isDarkMode ? Colors.white10 : Colors.grey.shade200),
-                                width: 1,
-                              ),
-                            ),
-                            child: Text(
-                              type,
-                              style: GoogleFonts.quicksand(
-                                fontSize: 11.5,
-                                fontWeight: FontWeight.bold,
-                                color: isSelected
-                                    ? Colors.white
-                                    : (isDarkMode ? Colors.white60 : Colors.black54),
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Form(
-                  key: formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      TextFormField(
-                        controller: controller,
-                        maxLines: 5,
-                        maxLength: 500,
-                        onChanged: (val) {
-                          setModalState(() {
-                            textLength = val.length;
-                          });
-                        },
-                        style: GoogleFonts.quicksand(
-                          fontSize: 12.5,
-                          color: isDarkMode ? Colors.white : Colors.black87,
-                        ),
-                        buildCounter: (context, {required currentLength, required isFocused, maxLength}) => null,
-                        decoration: InputDecoration(
-                          hintText: 'Tulis pesan Anda di sini secara lengkap...',
-                          hintStyle: GoogleFonts.quicksand(
-                            fontSize: 12,
-                            color: isDarkMode ? Colors.white24 : Colors.black26,
-                          ),
-                          fillColor: isDarkMode
-                              ? Colors.white.withOpacity(0.03)
-                              : Colors.grey.shade50,
-                          filled: true,
-                          contentPadding: const EdgeInsets.all(16),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(14),
-                            borderSide: BorderSide(
-                              color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
-                              width: 1,
-                            ),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(14),
-                            borderSide: BorderSide(
-                              color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
-                              width: 1,
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(14),
-                            borderSide: BorderSide(
-                              color: AppColors.primary,
-                              width: 1.2,
-                            ),
-                          ),
-                          errorStyle: GoogleFonts.quicksand(
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.redAccent,
-                          ),
-                        ),
-                        validator: (val) {
-                          if (val == null || val.trim().isEmpty) {
-                            return 'Pesan tidak boleh kosong';
-                          }
-                          if (val.trim().length < 5) {
-                            return 'Pesan minimal 5 karakter';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 6),
-                      Padding(
-                        padding: const EdgeInsets.only(right: 4),
-                        child: Text(
-                          '$textLength / 500',
-                          style: GoogleFonts.quicksand(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
-                            color: textLength >= 450
-                                ? Colors.redAccent
-                                : (isDarkMode ? Colors.white38 : Colors.grey.shade500),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20),
-                SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      if (formKey.currentState!.validate()) {
-                        Navigator.pop(ctx);
-                        
-                        final subject = Uri.encodeComponent('[TabunganKu Feedback] $selectedType');
-                        final body = Uri.encodeComponent(
-                          'Jenis: $selectedType\n\n'
-                          'Pesan:\n${controller.text.trim()}\n\n'
-                          '---\n'
-                          'Informasi Aplikasi:\n'
-                          '- Nama: TabunganKu\n'
-                          '- Versi: v${AppVersion.version}\n'
-                          '- Waktu: ${DateFormat('dd MMMM yyyy, HH:mm').format(DateTime.now())}\n'
-                        );
-
-                        final gmailAppUri = Uri.parse('googlegmail:///co?to=Arlianto032@gmail.com&subject=$subject&body=$body');
-                        final mailtoUri = Uri.parse('mailto:Arlianto032@gmail.com?subject=$subject&body=$body');
-                        final gmailWebUri = Uri.parse('https://mail.google.com/mail/?view=cm&fs=1&to=Arlianto032@gmail.com&su=$subject&body=$body');
-
-                        bool launched = false;
-
-                        try {
-                          if (await canLaunchUrl(gmailAppUri)) {
-                            launched = await launchUrl(gmailAppUri, mode: LaunchMode.externalApplication);
-                          }
-                        } catch (_) {}
-
-                        if (!launched) {
-                          try {
-                            if (await canLaunchUrl(mailtoUri)) {
-                              launched = await launchUrl(mailtoUri, mode: LaunchMode.externalApplication);
-                            }
-                          } catch (_) {}
-                        }
-
-                        if (!launched) {
-                          try {
-                            launched = await launchUrl(gmailWebUri, mode: LaunchMode.externalApplication);
-                          } catch (_) {}
-                        }
-
-                        if (!launched) {
-                          await Clipboard.setData(ClipboardData(
-                            text: 'Subject: [TabunganKu Feedback] $selectedType\n\nPesan:\n${controller.text.trim()}'
-                          ));
-                          if (mounted) {
-                            showTopToast(context, 'Gagal membuka email. Pesan disalin ke clipboard untuk dikirim manual.', isError: true);
-                          }
-                        } else {
-                          if (mounted) {
-                            showTopToast(context, 'Membuka Gmail. Terima kasih atas masukan Anda.');
-                          }
-                        }
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.orange,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16)),
-                      elevation: 0,
-                    ),
-                    child: Text(
-                      'Kirim Masukan',
-                      style: GoogleFonts.quicksand(
-                          fontWeight: FontWeight.bold, fontSize: 13),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-void _showResetDataDialog(bool isDarkMode) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: Theme.of(context).canvasColor,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Icon(Icons.delete_sweep_rounded,
-                  color: Colors.red, size: 20),
-            ),
-            const SizedBox(width: 12),
-            Text(
-              'Reset Data?',
-              style: GoogleFonts.quicksand(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-                color: Colors.red,
-              ),
-            ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.06),
-                borderRadius: BorderRadius.circular(16),
-                border:
-                    Border.all(color: Colors.red.withOpacity(0.15), width: 1),
-              ),
-              child: Text(
-                '⚠️ Tindakan ini akan menghapus SEMUA riwayat transaksi secara permanen dan tidak dapat dibatalkan. Sebaiknya ekspor data terlebih dahulu sebelum melanjutkan.',
-                style: GoogleFonts.quicksand(
-                  fontSize: 11,
-                  height: 1.6,
-                  fontWeight: FontWeight.w600,
-                  color: isDarkMode ? Colors.white70 : Colors.black54,
-                ),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Batal',
-              style: GoogleFonts.quicksand(fontWeight: FontWeight.bold),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              await ref
-                  .read(transactionServiceProvider)
-                  .clearAllTransactions();
-              ref.invalidate(transactionsStreamProvider);
-              if (mounted) {
-                showTopToast(context, 'Semua data transaksi telah dihapus.', isError: true);
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
-              elevation: 0,
-            ),
-            child: Text(
-              'Hapus Semua',
-              style:
-                  GoogleFonts.quicksand(fontWeight: FontWeight.bold),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-Widget _buildInfoBottomSheet({
+  Widget _buildInfoBottomSheet({
     required bool isDarkMode,
     required IconData icon,
     required Color iconColor,
@@ -1823,8 +1771,11 @@ Widget _buildInfoBottomSheet({
     );
   }
 
-Widget _buildSettingTile(IconData icon, String title, VoidCallback onTap,
-      {Widget? trailing, String? subtitle, Color? color, bool isDarkMode = false}) {
+  Widget _buildSettingTile(IconData icon, String title, VoidCallback onTap,
+      {Widget? trailing,
+      String? subtitle,
+      Color? color,
+      bool isDarkMode = false}) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -1844,8 +1795,8 @@ Widget _buildSettingTile(IconData icon, String title, VoidCallback onTap,
               title,
               style: GoogleFonts.quicksand(
                 fontSize: 12,
-                color: color == Colors.red 
-                    ? Colors.red.shade600 
+                color: color == Colors.red
+                    ? Colors.red.shade600
                     : Theme.of(context).textTheme.bodyLarge?.color,
                 fontWeight: FontWeight.bold,
               ),
@@ -1862,7 +1813,11 @@ Widget _buildSettingTile(IconData icon, String title, VoidCallback onTap,
             trailing: trailing ??
                 Icon(
                   Icons.chevron_right_rounded,
-                  color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.4),
+                  color: Theme.of(context)
+                      .textTheme
+                      .bodySmall
+                      ?.color
+                      ?.withValues(alpha: 0.4),
                   size: 16,
                 ),
           ),
@@ -1982,11 +1937,21 @@ Widget _buildSettingTile(IconData icon, String title, VoidCallback onTap,
             const SizedBox(height: 16),
             ClipRRect(
               borderRadius: BorderRadius.circular(16),
-              child: Image.asset('assets/icon.png',
+              child: Image.asset(
+                'assets/icon.webp',
+                width: 72,
+                height: 72,
+                errorBuilder: (_, __, ___) => Image.asset(
+                  'assets/icon.png',
                   width: 72,
                   height: 72,
-                  errorBuilder: (_, __, ___) => const Icon(Icons.wallet,
-                      size: 72, color: AppColors.primary)),
+                  errorBuilder: (_, __, ___) => const Icon(
+                    Icons.wallet,
+                    size: 72,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ),
             ),
             const SizedBox(height: 24),
             const Text('TabunganKu',

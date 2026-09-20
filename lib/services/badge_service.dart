@@ -38,8 +38,8 @@ class MockBadgeService implements BadgeService {
     return (userId == null || userId.isEmpty) ? 'guest' : userId;
   }
 
-static final List<BadgeModel> _allBadges = [
-
+  static final List<BadgeModel> _allBadges = [
+    // Streak Badges (1-9)
     BadgeModel(
       id: 'streak_3',
       name: 'Konsisten 3 Hari',
@@ -57,6 +57,14 @@ static final List<BadgeModel> _allBadges = [
       requiredStreak: 7,
     ),
     BadgeModel(
+      id: 'streak_14',
+      name: 'Dua Minggu Disiplin',
+      description: 'Selesaikan challenge 14 hari berturut-turut',
+      iconPath: 'assets/badges/streak_14.png',
+      category: BadgeCategory.streak,
+      requiredStreak: 14,
+    ),
+    BadgeModel(
       id: 'streak_30',
       name: 'Disiplin Sejati',
       description: 'Selesaikan challenge 30 hari berturut-turut!',
@@ -65,15 +73,64 @@ static final List<BadgeModel> _allBadges = [
       requiredStreak: 30,
     ),
     BadgeModel(
+      id: 'streak_60',
+      name: 'Pahlawan Konsistensi',
+      description: 'Selesaikan challenge 60 hari berturut-turut!',
+      iconPath: 'assets/badges/streak_60.png',
+      category: BadgeCategory.streak,
+      requiredStreak: 60,
+    ),
+    BadgeModel(
+      id: 'streak_90',
+      name: 'Satria Tabungan',
+      description: 'Selesaikan challenge 90 hari berturut-turut!',
+      iconPath: 'assets/badges/streak_90.png',
+      category: BadgeCategory.streak,
+      requiredStreak: 90,
+    ),
+    BadgeModel(
       id: 'streak_100',
       name: 'Legenda Menabung',
-      description: 'Selesaikan challenge 100 hari berturut-turut! Luar biasa!',
+      description: 'Selesaikan challenge 100 hari berturut-turut!',
       iconPath: 'assets/badges/streak_100.png',
       category: BadgeCategory.streak,
       requiredStreak: 100,
     ),
+    BadgeModel(
+      id: 'streak_180',
+      name: 'Setengah Tahun Rajin',
+      description: 'Selesaikan challenge 180 hari berturut-turut!',
+      iconPath: 'assets/badges/streak_180.png',
+      category: BadgeCategory.streak,
+      requiredStreak: 180,
+    ),
+    BadgeModel(
+      id: 'streak_365',
+      name: 'Suhu Sepanjang Tahun',
+      description: 'Selesaikan challenge 365 hari berturut-turut!',
+      iconPath: 'assets/badges/streak_365.png',
+      category: BadgeCategory.streak,
+      requiredStreak: 365,
+    ),
 
-BadgeModel(
+    // Points Badges (10-21)
+    BadgeModel(
+      id: 'points_10',
+      name: 'Pemula Berbakat',
+      description: 'Kumpulkan 10 poin challenge',
+      iconPath: 'assets/badges/points_10.png',
+      category: BadgeCategory.challenge,
+      requiredPoints: 10,
+    ),
+    BadgeModel(
+      id: 'points_25',
+      name: 'Pemanasan Poin',
+      description: 'Kumpulkan 25 poin challenge',
+      iconPath: 'assets/badges/points_25.png',
+      category: BadgeCategory.challenge,
+      requiredPoints: 25,
+    ),
+    BadgeModel(
       id: 'points_50',
       name: 'Pemula Hebat',
       description: 'Kumpulkan 50 poin challenge',
@@ -90,12 +147,28 @@ BadgeModel(
       requiredPoints: 100,
     ),
     BadgeModel(
+      id: 'points_200',
+      name: 'Bintang Challenge',
+      description: 'Kumpulkan 200 poin challenge',
+      iconPath: 'assets/badges/points_200.png',
+      category: BadgeCategory.challenge,
+      requiredPoints: 200,
+    ),
+    BadgeModel(
       id: 'points_250',
       name: 'Master Hemat',
       description: 'Kumpulkan 250 poin challenge',
       iconPath: 'assets/badges/points_250.png',
       category: BadgeCategory.challenge,
       requiredPoints: 250,
+    ),
+    BadgeModel(
+      id: 'points_350',
+      name: 'Pejuang Poin',
+      description: 'Kumpulkan 350 poin challenge',
+      iconPath: 'assets/badges/points_350.png',
+      category: BadgeCategory.challenge,
+      requiredPoints: 350,
     ),
     BadgeModel(
       id: 'points_500',
@@ -106,15 +179,40 @@ BadgeModel(
       requiredPoints: 500,
     ),
     BadgeModel(
+      id: 'points_750',
+      name: 'Taipan Challenge',
+      description: 'Kumpulkan 750 poin challenge',
+      iconPath: 'assets/badges/points_750.png',
+      category: BadgeCategory.challenge,
+      requiredPoints: 750,
+    ),
+    BadgeModel(
       id: 'points_1000',
       name: 'Dewa Penabung',
-      description: 'Kumpulkan 1000 poin challenge - Achievement tertinggi!',
+      description: 'Kumpulkan 1000 poin challenge',
       iconPath: 'assets/badges/points_1000.png',
       category: BadgeCategory.challenge,
       requiredPoints: 1000,
     ),
+    BadgeModel(
+      id: 'points_1500',
+      name: 'Sultan Poin',
+      description: 'Kumpulkan 1500 poin challenge',
+      iconPath: 'assets/badges/points_1500.png',
+      category: BadgeCategory.challenge,
+      requiredPoints: 1500,
+    ),
+    BadgeModel(
+      id: 'points_2000',
+      name: 'Mitos Finansial',
+      description: 'Kumpulkan 2000 poin challenge',
+      iconPath: 'assets/badges/points_2000.png',
+      category: BadgeCategory.challenge,
+      requiredPoints: 2000,
+    ),
 
-BadgeModel(
+    // Specific Challenge Badges (22-34)
+    BadgeModel(
       id: 'first_challenge',
       name: 'Langkah Pertama',
       description: 'Selesaikan challenge pertamamu',
@@ -146,6 +244,71 @@ BadgeModel(
       requiredChallengeId: 'no-online-shopping',
     ),
     BadgeModel(
+      id: 'challenge_comp_3',
+      name: 'Hat-trick Challenge',
+      description: 'Selesaikan total 3 challenge menabung',
+      iconPath: 'assets/badges/challenge_3.png',
+      category: BadgeCategory.challenge,
+    ),
+    BadgeModel(
+      id: 'challenge_comp_5',
+      name: 'Pejuang Sukses',
+      description: 'Selesaikan total 5 challenge menabung',
+      iconPath: 'assets/badges/challenge_5.png',
+      category: BadgeCategory.challenge,
+    ),
+    BadgeModel(
+      id: 'challenge_comp_10',
+      name: 'Kolektor Lencana',
+      description: 'Selesaikan total 10 challenge menabung',
+      iconPath: 'assets/badges/challenge_10.png',
+      category: BadgeCategory.challenge,
+    ),
+    BadgeModel(
+      id: 'challenge_comp_15',
+      name: 'Jawara Tantangan',
+      description: 'Selesaikan total 15 challenge menabung',
+      iconPath: 'assets/badges/challenge_15.png',
+      category: BadgeCategory.challenge,
+    ),
+    BadgeModel(
+      id: 'challenge_comp_20',
+      name: 'Master Tantangan',
+      description: 'Selesaikan total 20 challenge menabung',
+      iconPath: 'assets/badges/challenge_20.png',
+      category: BadgeCategory.challenge,
+    ),
+    BadgeModel(
+      id: 'challenge_comp_25',
+      name: 'Pahlawan Keuangan',
+      description: 'Selesaikan total 25 challenge menabung',
+      iconPath: 'assets/badges/challenge_25.png',
+      category: BadgeCategory.challenge,
+    ),
+    BadgeModel(
+      id: 'challenge_comp_30',
+      name: 'Bintang Tantangan',
+      description: 'Selesaikan total 30 challenge menabung',
+      iconPath: 'assets/badges/challenge_30.png',
+      category: BadgeCategory.challenge,
+    ),
+
+    // Saving Milestone Badges (35-40)
+    BadgeModel(
+      id: 'save_100k',
+      name: 'Tabungan Pertama',
+      description: 'Berhasil menabung total Rp 100.000',
+      iconPath: 'assets/badges/save_100k.png',
+      category: BadgeCategory.saving,
+    ),
+    BadgeModel(
+      id: 'save_250k',
+      name: 'Dana Siaga',
+      description: 'Berhasil menabung total Rp 250.000',
+      iconPath: 'assets/badges/save_250k.png',
+      category: BadgeCategory.saving,
+    ),
+    BadgeModel(
       id: 'save_500k',
       name: 'Jumbo Saver',
       description: 'Berhasil tabung 500K dalam sebulan',
@@ -153,12 +316,97 @@ BadgeModel(
       category: BadgeCategory.saving,
       requiredChallengeId: 'save-500k-month',
     ),
+    BadgeModel(
+      id: 'save_1m',
+      name: 'Jutawan Muda',
+      description: 'Berhasil menabung total Rp 1.000.000',
+      iconPath: 'assets/badges/save_1m.png',
+      category: BadgeCategory.saving,
+    ),
+    BadgeModel(
+      id: 'save_2m',
+      name: 'Dompet Tebal',
+      description: 'Berhasil menabung total Rp 2.500.000',
+      iconPath: 'assets/badges/save_2m.png',
+      category: BadgeCategory.saving,
+    ),
+    BadgeModel(
+      id: 'save_5m',
+      name: 'Benteng Keuangan',
+      description: 'Berhasil menabung total Rp 5.000.000',
+      iconPath: 'assets/badges/save_5m.png',
+      category: BadgeCategory.saving,
+    ),
 
-BadgeModel(
+    // Special & Habit Badges (41-50)
+    BadgeModel(
       id: 'early_bird',
       name: 'Early Adopter',
       description: 'Pengguna awal fitur Challenge Menabung',
       iconPath: 'assets/badges/early_bird.png',
+      category: BadgeCategory.special,
+    ),
+    BadgeModel(
+      id: 'coffee_less',
+      name: 'Hemat Ngopi',
+      description: 'Berhasil mengurangi jajan kopi mingguan',
+      iconPath: 'assets/badges/coffee.png',
+      category: BadgeCategory.special,
+    ),
+    BadgeModel(
+      id: 'transport_saver',
+      name: 'Bijak Transportasi',
+      description: 'Hemat pengeluaran transportasi bulanan',
+      iconPath: 'assets/badges/transport.png',
+      category: BadgeCategory.special,
+    ),
+    BadgeModel(
+      id: 'audit_master',
+      name: 'Pemeriksa Kas',
+      description: 'Rutin mengevaluasi catatan keuangan harian',
+      iconPath: 'assets/badges/audit.png',
+      category: BadgeCategory.special,
+    ),
+    BadgeModel(
+      id: 'smart_buyer',
+      name: 'Pembeli Cerdas',
+      description: 'Belanja mengutamakan kebutuhan pokok',
+      iconPath: 'assets/badges/smart.png',
+      category: BadgeCategory.special,
+    ),
+    BadgeModel(
+      id: 'wishlist_hunter',
+      name: 'Pemburu Wishlist',
+      description: 'Mencapai barang impian dari daftar wishlist',
+      iconPath: 'assets/badges/wishlist.png',
+      category: BadgeCategory.special,
+    ),
+    BadgeModel(
+      id: 'emergency_ready',
+      name: 'Siap Darurat',
+      description: 'Memiliki simpanan dana darurat terencana',
+      iconPath: 'assets/badges/emergency.png',
+      category: BadgeCategory.special,
+    ),
+    BadgeModel(
+      id: 'investor_mindset',
+      name: 'Pikir Investor',
+      description: 'Mulai menyisihkan dana untuk investasi',
+      iconPath: 'assets/badges/investor.png',
+      category: BadgeCategory.special,
+    ),
+    BadgeModel(
+      id: 'budget_guardian',
+      name: 'Pengawal Anggaran',
+      description: 'Pengeluaran bulanan tidak melebihi anggaran',
+      iconPath: 'assets/badges/guardian.png',
+      category: BadgeCategory.special,
+    ),
+    BadgeModel(
+      id: 'ultimate_champion',
+      name: 'Juara Sejati',
+      description: 'Mencapai level pencapaian tertinggi TabunganKu',
+      iconPath: 'assets/badges/ultimate.png',
       category: BadgeCategory.special,
     ),
   ];

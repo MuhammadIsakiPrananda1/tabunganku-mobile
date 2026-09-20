@@ -10,6 +10,7 @@ import 'package:tabunganku/providers/transaction_provider.dart';
 import 'package:tabunganku/models/saving_target_model.dart';
 import 'package:tabunganku/models/transaction_model.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:tabunganku/features/home/presentation/widgets/target_detail_sheet.dart';
 
 class SpecializedSavingPage extends ConsumerStatefulWidget {
   final String title;
@@ -351,54 +352,65 @@ class _SpecializedSavingPageState extends ConsumerState<SpecializedSavingPage> {
 
   Widget _buildTargetItem(SavingTargetModel target, bool isDarkMode) {
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
-    final transactions = ref.watch(transactionsByGroupProvider(null));
-    final targetBalance = transactions
-        .where((t) => !t.date.isBefore(target.createdAt))
-        .fold<double>(0, (s, t) => s + (t.type == TransactionType.income ? t.amount : -t.amount));
+    final targetBalance = target.savedAmount;
     final progress = (target.targetAmount > 0) ? (targetBalance / target.targetAmount).clamp(0.0, 1.0) : 0.0;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: isDarkMode ? Colors.white.withValues(alpha: 0.02) : Colors.white,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: isDarkMode ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: InkWell(
+        onTap: () {
+          TargetDetailSheet.show(
+            context: context,
+            target: target,
+            ref: ref,
+            onEdit: () => _showAddTargetSheet(isDarkMode, target: target),
+            onDelete: () => _deleteTarget(target.id),
+          );
+        },
+        borderRadius: BorderRadius.circular(24),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: Text(target.name, 
-                  maxLines: 1, overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: contentColor)),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(target.name, 
+                      maxLines: 1, overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: contentColor)),
+                  ),
+                  const SizedBox(width: 8),
+                  Text('${(progress * 100).toInt()}%', style: TextStyle(fontWeight: FontWeight.bold, color: widget.baseColor, fontSize: 11)),
+                ],
               ),
-              const SizedBox(width: 8),
-              Text('${(progress * 100).toInt()}%', style: TextStyle(fontWeight: FontWeight.bold, color: widget.baseColor, fontSize: 11)),
+              const SizedBox(height: 16),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: LinearProgressIndicator(
+                  value: progress,
+                  minHeight: 10,
+                  backgroundColor: widget.baseColor.withValues(alpha: 0.1),
+                  color: widget.baseColor,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildMiniInfo('Target', _formatRupiah(target.targetAmount), isDarkMode),
+                  _buildMiniInfo('Jatuh Tempo', DateFormat('d MMM yyyy').format(target.dueDate), isDarkMode),
+                ],
+              ),
             ],
           ),
-          const SizedBox(height: 16),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: LinearProgressIndicator(
-              value: progress,
-              minHeight: 10,
-              backgroundColor: widget.baseColor.withValues(alpha: 0.1),
-              color: widget.baseColor,
-            ),
-          ),
-          const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildMiniInfo('Target', _formatRupiah(target.targetAmount), isDarkMode),
-              _buildMiniInfo('Jatuh Tempo', DateFormat('d MMM yyyy').format(target.dueDate), isDarkMode),
-            ],
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -430,10 +442,15 @@ class _SpecializedSavingPageState extends ConsumerState<SpecializedSavingPage> {
     );
   }
 
-  void _showAddTargetSheet(bool isDarkMode) {
-    final nameController = TextEditingController(text: '${widget.category} ');
-    final amountController = TextEditingController();
-    DateTime selectedDate = DateTime.now().add(const Duration(days: 365));
+  void _showAddTargetSheet(bool isDarkMode, {SavingTargetModel? target}) {
+    final isEdit = target != null;
+    final nameController = TextEditingController(text: isEdit ? target.name : '${widget.category} ');
+    final amountController = TextEditingController(
+      text: isEdit 
+          ? target.targetAmount.round().toString().replaceAllMapped(RegExp(r'(\d)(?=(\d{3})+(?!\d))'), (match) => '${match[1]}.')
+          : ''
+    );
+    DateTime selectedDate = isEdit ? target.dueDate : DateTime.now().add(const Duration(days: 365));
 
     bool nameHasError = false;
     bool amountHasError = false;
@@ -446,7 +463,7 @@ class _SpecializedSavingPageState extends ConsumerState<SpecializedSavingPage> {
       builder: (context) => StatefulBuilder(
         builder: (context, setSheetState) => Container(
           padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom + 32,
+            bottom: MediaQuery.of(context).viewInsets.bottom > 0 ? MediaQuery.of(context).viewInsets.bottom : MediaQuery.of(context).padding.bottom + 32,
             top: 24,
             left: 28,
             right: 28,
@@ -467,7 +484,7 @@ class _SpecializedSavingPageState extends ConsumerState<SpecializedSavingPage> {
               ),
               const SizedBox(height: 20),
               Center(
-                child: Text('BUAT RENCANA', 
+                child: Text(isEdit ? 'UBAH RENCANA' : 'BUAT RENCANA', 
                   style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : Colors.teal.shade900)),
               ),
               const SizedBox(height: 24),
@@ -533,17 +550,27 @@ class _SpecializedSavingPageState extends ConsumerState<SpecializedSavingPage> {
                       return;
                     }
 
-                    final target = SavingTargetModel(
-                      id: DateTime.now().millisecondsSinceEpoch.toString(),
-                      name: nameVal,
-                      targetAmount: amount,
-                      dueDate: selectedDate,
-                      createdAt: DateTime.now(),
-                    );
-                    await ref.read(savingTargetServiceProvider).addTarget(target);
+                    if (isEdit) {
+                      final updated = target.copyWith(
+                        name: nameVal,
+                        targetAmount: amount,
+                        dueDate: selectedDate,
+                      );
+                      await ref.read(savingTargetServiceProvider).updateTarget(updated);
+                    } else {
+                      final newTarget = SavingTargetModel(
+                        id: DateTime.now().millisecondsSinceEpoch.toString(),
+                        name: nameVal,
+                        targetAmount: amount,
+                        dueDate: selectedDate,
+                        createdAt: DateTime.now(),
+                        category: widget.category,
+                      );
+                      await ref.read(savingTargetServiceProvider).addTarget(newTarget);
+                    }
                     if (context.mounted) {
                       Navigator.pop(context);
-                      showTopToast(context, 'Rencana Berhasil Dibuat');
+                      showTopToast(context, isEdit ? 'Rencana Berhasil Diperbarui' : 'Rencana Berhasil Dibuat');
                     }
                   },
                   style: ElevatedButton.styleFrom(
@@ -551,7 +578,7 @@ class _SpecializedSavingPageState extends ConsumerState<SpecializedSavingPage> {
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   ),
-                  child: const Text('Buat Rencana', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
+                  child: Text(isEdit ? 'Simpan Perubahan' : 'Buat Rencana', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
                 ),
               ),
             ],
@@ -559,6 +586,53 @@ class _SpecializedSavingPageState extends ConsumerState<SpecializedSavingPage> {
         ),
       ),
     );
+  }
+
+  Future<void> _deleteTarget(String id) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Theme.of(context).brightness == Brightness.dark ? AppColors.surfaceDark : Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: Text(
+          'Hapus Rencana?',
+          style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
+        content: Text(
+          'Apakah kamu yakin ingin menghapus rencana tabungan ini? Tindakan ini tidak dapat dikembalikan.',
+          style: GoogleFonts.quicksand(fontSize: 13, color: Theme.of(context).brightness == Brightness.dark ? Colors.white70 : Colors.black54),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(
+              'Batal',
+              style: GoogleFonts.quicksand(
+                fontWeight: FontWeight.bold,
+                color: Colors.grey,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(
+              'Hapus',
+              style: GoogleFonts.quicksand(
+                fontWeight: FontWeight.bold,
+                color: Colors.redAccent,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      await ref.read(savingTargetServiceProvider).deleteTarget(id);
+      if (mounted) {
+        showTopToast(context, 'Rencana berhasil dihapus.');
+      }
+    }
   }
 
   Widget _buildCompactInput(

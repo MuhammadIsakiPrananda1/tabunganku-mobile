@@ -185,10 +185,8 @@ void _showAddSheet() {
     final titleController = TextEditingController();
     TransactionType selectedType = TransactionType.expense;
     RecurringFrequency selectedFreq = RecurringFrequency.monthly;
-    String? selectedCategory;
     bool titleHasError = false;
     bool amountHasError = false;
-    bool categoryHasError = false;
 
     showModalBottomSheet(
       context: context,
@@ -199,7 +197,7 @@ void _showAddSheet() {
         final inset = MediaQuery.of(context).viewInsets.bottom;
 
         return Container(
-          padding: EdgeInsets.only(bottom: inset),
+          padding: EdgeInsets.only(bottom: inset > 0 ? inset : MediaQuery.of(context).padding.bottom),
           decoration: BoxDecoration(
             color: isDark ? AppColors.surfaceDark : Colors.white,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
@@ -330,8 +328,6 @@ Text(
                               if (val != null) {
                                 setSheetState(() {
                                   selectedType = val;
-                                  selectedCategory = null;
-                                  categoryHasError = false;
                                 });
                               }
                             },
@@ -342,94 +338,6 @@ Text(
                   ),
                 ),
                 const SizedBox(height: 20),
-
-Text(
-                  'Kategori',
-                  style: GoogleFonts.quicksand(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    color: isDark ? Colors.white70 : Colors.black54,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                InkWell(
-                  onTap: () {
-                    _showCategorySearchSheet(
-                      context: context,
-                      isDarkMode: isDark,
-                      currentSelected: selectedCategory ?? '',
-                      categoryObjects: selectedType == TransactionType.expense
-                          ? AppCategories.expenseCategories
-                          : AppCategories.incomeCategories,
-                      onSelected: (cat) {
-                        setSheetState(() {
-                          selectedCategory = cat.label;
-                          categoryHasError = false;
-                        });
-                      },
-                    );
-                  },
-                  borderRadius: BorderRadius.circular(16),
-                  child: Container(
-                    height: 52,
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? Colors.white.withValues(alpha: 0.05)
-                          : Colors.grey.shade100,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: categoryHasError
-                            ? Colors.red.shade400
-                            : (isDark ? Colors.white10 : Colors.grey.shade200),
-                        width: 1.2,
-                      ),
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Row(
-                      children: [
-                        Icon(
-                          selectedCategory != null &&
-                                  (selectedType == TransactionType.expense
-                                          ? AppCategories.expenseCategories
-                                          : AppCategories.incomeCategories)
-                                      .any((c) => c.label == selectedCategory)
-                              ? (selectedType == TransactionType.expense
-                                      ? AppCategories.expenseCategories
-                                      : AppCategories.incomeCategories)
-                                  .firstWhere(
-                                      (c) => c.label == selectedCategory)
-                                  .icon
-                              : Icons.category_rounded,
-                          size: 20,
-                          color: selectedCategory != null
-                              ? AppColors.primary
-                              : (isDark ? Colors.white30 : Colors.black38),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            selectedCategory ?? 'Pilih Kategori',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.quicksand(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                              color: selectedCategory != null
-                                  ? (isDark ? Colors.white : Colors.black87)
-                                  : (isDark ? Colors.white30 : Colors.black38),
-                            ),
-                          ),
-                        ),
-                        Icon(
-                          Icons.arrow_drop_down_rounded,
-                          size: 24,
-                          color: isDark ? Colors.white38 : Colors.grey,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
 
 Text(
                   'Frekuensi Penagihan',
@@ -533,15 +441,12 @@ Container(
                     setSheetState(() {
                       titleHasError = titleVal.isEmpty;
                       amountHasError = amountVal <= 0;
-                      categoryHasError = selectedCategory == null;
                     });
 
-                    if (titleHasError || amountHasError || categoryHasError) {
+                    if (titleHasError || amountHasError) {
                       showTopToast(context, titleHasError
                                       ? 'Nama tagihan tidak boleh kosong!'
-                                      : (amountHasError
-                                          ? 'Nominal harus lebih dari 0!'
-                                          : 'Silakan pilih kategori terlebih dahulu!'), isError: true);
+                                      : 'Nominal harus lebih dari 0!', isError: true);
                       return;
                     }
 
@@ -550,7 +455,7 @@ Container(
                       title: titleVal,
                       amount: amountVal,
                       type: selectedType,
-                      category: selectedCategory!,
+                      category: selectedType == TransactionType.expense ? 'Langganan' : 'Pemasukan',
                       frequency: selectedFreq,
                       startDate: DateTime.now(),
                       lastProcessedDate: DateTime.now(),
@@ -637,7 +542,7 @@ Container(
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
               ),
               padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+                bottom: MediaQuery.of(context).viewInsets.bottom > 0 ? MediaQuery.of(context).viewInsets.bottom : MediaQuery.of(context).padding.bottom + 24,
                 top: 16,
                 left: 24,
                 right: 24,
@@ -1060,10 +965,8 @@ Container(
     final titleController = TextEditingController(text: item.title);
     TransactionType selectedType = item.type;
     RecurringFrequency selectedFreq = item.frequency;
-    String? selectedCategory = item.category;
     bool titleHasError = false;
     bool amountHasError = false;
-    bool categoryHasError = false;
 
     showModalBottomSheet(
       context: context,
@@ -1074,7 +977,7 @@ Container(
         final inset = MediaQuery.of(context).viewInsets.bottom;
 
         return Container(
-          padding: EdgeInsets.only(bottom: inset),
+          padding: EdgeInsets.only(bottom: inset > 0 ? inset : MediaQuery.of(context).padding.bottom),
           decoration: BoxDecoration(
             color: isDark ? AppColors.surfaceDark : Colors.white,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
@@ -1205,8 +1108,6 @@ Container(
                               if (val != null) {
                                 setSheetState(() {
                                   selectedType = val;
-                                  selectedCategory = null;
-                                  categoryHasError = false;
                                 });
                               }
                             },
@@ -1216,95 +1117,7 @@ Container(
                     ],
                   ),
                 ),
-                const SizedBox(height: 20),
 
-                Text(
-                  'Kategori',
-                  style: GoogleFonts.quicksand(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    color: isDark ? Colors.white70 : Colors.black54,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                InkWell(
-                  onTap: () {
-                    _showCategorySearchSheet(
-                      context: context,
-                      isDarkMode: isDark,
-                      currentSelected: selectedCategory ?? '',
-                      categoryObjects: selectedType == TransactionType.expense
-                          ? AppCategories.expenseCategories
-                          : AppCategories.incomeCategories,
-                      onSelected: (cat) {
-                        setSheetState(() {
-                          selectedCategory = cat.label;
-                          categoryHasError = false;
-                        });
-                      },
-                    );
-                  },
-                  borderRadius: BorderRadius.circular(16),
-                  child: Container(
-                    height: 52,
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? Colors.white.withValues(alpha: 0.05)
-                          : Colors.grey.shade100,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: categoryHasError
-                            ? Colors.red.shade400
-                            : (isDark ? Colors.white10 : Colors.grey.shade200),
-                        width: 1.2,
-                      ),
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Row(
-                      children: [
-                        Icon(
-                          selectedCategory != null &&
-                                  (selectedType == TransactionType.expense
-                                          ? AppCategories.expenseCategories
-                                          : AppCategories.incomeCategories)
-                                      .any((c) => c.label == selectedCategory)
-                              ? (selectedType == TransactionType.expense
-                                      ? AppCategories.expenseCategories
-                                      : AppCategories.incomeCategories)
-                                  .firstWhere(
-                                      (c) => c.label == selectedCategory)
-                                  .icon
-                              : Icons.category_rounded,
-                          size: 20,
-                          color: selectedCategory != null
-                              ? AppColors.primary
-                              : (isDark ? Colors.white30 : Colors.black38),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            selectedCategory ?? 'Pilih Kategori',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.quicksand(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                              color: selectedCategory != null
-                                  ? (isDark ? Colors.white : Colors.black87)
-                                  : (isDark ? Colors.white30 : Colors.black38),
-                            ),
-                          ),
-                        ),
-                        Icon(
-                          Icons.arrow_drop_down_rounded,
-                          size: 24,
-                          color: isDark ? Colors.white38 : Colors.grey,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
 
                 Text(
                   'Frekuensi Penagihan',
@@ -1408,15 +1221,12 @@ Container(
                     setSheetState(() {
                       titleHasError = titleVal.isEmpty;
                       amountHasError = amountVal <= 0;
-                      categoryHasError = selectedCategory == null;
                     });
 
-                    if (titleHasError || amountHasError || categoryHasError) {
+                    if (titleHasError || amountHasError) {
                       showTopToast(context, titleHasError
                                       ? 'Nama tagihan tidak boleh kosong!'
-                                      : (amountHasError
-                                          ? 'Nominal harus lebih dari 0!'
-                                          : 'Silakan pilih kategori terlebih dahulu!'), isError: true);
+                                      : 'Nominal harus lebih dari 0!', isError: true);
                       return;
                     }
 
@@ -1424,7 +1234,7 @@ Container(
                       title: titleVal,
                       amount: amountVal,
                       type: selectedType,
-                      category: selectedCategory!,
+                      category: selectedType == TransactionType.expense ? 'Langganan' : 'Pemasukan',
                       frequency: selectedFreq,
                     );
                     
@@ -1934,306 +1744,7 @@ Text(
     );
   }
 
-  void _showCategorySearchSheet({
-    required BuildContext context,
-    required bool isDarkMode,
-    required String currentSelected,
-    required List<TransactionCategory> categoryObjects,
-    required ValueChanged<TransactionCategory> onSelected,
-  }) {
-    FocusScope.of(context).unfocus();
-    final searchController = TextEditingController();
-    String searchQuery = '';
 
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (sheetContext) {
-        return StatefulBuilder(
-          builder: (context, setModalState) {
-
-            final Map<String, List<TransactionCategory>> displayGrouped = {};
-            for (var cat in categoryObjects) {
-              final labelLower = cat.label.toLowerCase();
-              final groupLower = cat.group.toLowerCase();
-              final queryLower = searchQuery.toLowerCase();
-              if (labelLower.contains(queryLower) ||
-                  groupLower.contains(queryLower)) {
-                displayGrouped.putIfAbsent(cat.group, () => []).add(cat);
-              }
-            }
-
-            return Container(
-              height: MediaQuery.of(context).size.height * 0.8,
-              decoration: BoxDecoration(
-                color: isDarkMode ? AppColors.surfaceDark : Colors.white,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(32),
-                  topRight: Radius.circular(32),
-                ),
-              ),
-              child: Column(
-                children: [
-                  const SizedBox(height: 12),
-                  Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: isDarkMode ? Colors.white10 : Colors.black12,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        'CARI KATEGORI',
-                        style: GoogleFonts.quicksand(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                          letterSpacing: 1.5,
-                          color: isDarkMode ? Colors.white70 : Colors.black87,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
-                    child: TextField(
-                      controller: searchController,
-                      autofocus: false,
-                      style: GoogleFonts.quicksand(
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                        color: isDarkMode ? Colors.white : Colors.black87,
-                      ),
-                      decoration: InputDecoration(
-                        isDense: true,
-                        hintText: 'Cari kategori...',
-                        hintStyle: GoogleFonts.quicksand(
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                          color: isDarkMode ? Colors.white30 : Colors.black38,
-                        ),
-                        prefixIcon: Icon(
-                          Icons.search_rounded,
-                          color: isDarkMode ? Colors.white38 : Colors.black45,
-                          size: 20,
-                        ),
-                        suffixIcon: searchQuery.isNotEmpty
-                            ? GestureDetector(
-                                onTap: () {
-                                  searchController.clear();
-                                  setModalState(() {
-                                    searchQuery = '';
-                                  });
-                                },
-                                child: Icon(
-                                  Icons.close_rounded,
-                                  color: isDarkMode
-                                      ? Colors.white54
-                                      : Colors.black54,
-                                  size: 20,
-                                ),
-                              )
-                            : null,
-                        filled: true,
-                        fillColor: isDarkMode
-                            ? Colors.white.withValues(alpha: 0.05)
-                            : Colors.grey.shade100,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none,
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none,
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(
-                            color: AppColors.primary,
-                            width: 1.5,
-                          ),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 10),
-                      ),
-                      onChanged: (val) {
-                        setModalState(() {
-                          searchQuery = val;
-                        });
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Expanded(
-                    child: displayGrouped.isEmpty
-                        ? Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.search_off_rounded,
-                                  size: 48,
-                                  color: isDarkMode
-                                      ? Colors.white24
-                                      : Colors.black26,
-                                ),
-                                const SizedBox(height: 12),
-                                Text(
-                                  'Kategori tidak ditemukan.',
-                                  style: GoogleFonts.quicksand(
-                                    fontWeight: FontWeight.bold,
-                                    color: isDarkMode
-                                        ? Colors.white38
-                                        : Colors.black38,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                        : ListView.builder(
-                            padding: const EdgeInsets.only(bottom: 24),
-                            physics: const BouncingScrollPhysics(),
-                            itemCount: displayGrouped.length,
-                            itemBuilder: (context, groupIndex) {
-                              final groupName =
-                                  displayGrouped.keys.elementAt(groupIndex);
-                              final items = displayGrouped[groupName]!;
-                              final totalItemsInGroup = categoryObjects.where((c) => c.group == groupName).length;
-                              final groupColor = items.isNotEmpty
-                                  ? items.first.color
-                                  : AppColors.primary;
-
-                              return Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-
-                                  Padding(
-                                    padding: const EdgeInsets.only(
-                                        top: 20,
-                                        bottom: 10,
-                                        left: 24,
-                                        right: 24),
-                                    child: Row(
-                                      children: [
-                                        Container(
-                                          width: 3.5,
-                                          height: 14,
-                                          decoration: BoxDecoration(
-                                            color: groupColor,
-                                            borderRadius:
-                                                BorderRadius.circular(2),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 10),
-                                        Text(
-                                          '${groupName.toUpperCase()} ($totalItemsInGroup)',
-                                          style: GoogleFonts.quicksand(
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w800,
-                                            letterSpacing: 1.5,
-                                            color: groupColor,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-
-                                  ...items.map((cat) {
-                                    final isSelected =
-                                        cat.label == currentSelected;
-                                    return GestureDetector(
-                                      onTap: () {
-                                        onSelected(cat);
-                                        Navigator.pop(sheetContext);
-                                      },
-                                      child: Container(
-                                        margin: const EdgeInsets.symmetric(
-                                            vertical: 4, horizontal: 20),
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 10, horizontal: 16),
-                                        decoration: BoxDecoration(
-                                          color: isDarkMode
-                                              ? Colors.white
-                                                  .withValues(alpha: 0.03)
-                                              : Colors.grey.shade50,
-                                          borderRadius:
-                                              BorderRadius.circular(16),
-                                          border: Border.all(
-                                            color: isSelected
-                                                ? cat.color
-                                                : (isDarkMode
-                                                    ? Colors.white
-                                                        .withValues(alpha: 0.05)
-                                                    : Colors.grey.shade100),
-                                            width: 1.5,
-                                          ),
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            Container(
-                                              width: 36,
-                                              height: 36,
-                                              decoration: BoxDecoration(
-                                                color: cat.color.withValues(
-                                                    alpha: isDarkMode
-                                                        ? 0.15
-                                                        : 0.08),
-                                                shape: BoxShape.circle,
-                                              ),
-                                              child: Icon(
-                                                cat.icon,
-                                                size: 18,
-                                                color: cat.color,
-                                              ),
-                                            ),
-                                            const SizedBox(width: 16),
-                                            Expanded(
-                                              child: Text(
-                                                cat.label,
-                                                style: GoogleFonts.quicksand(
-                                                  fontSize: 13,
-                                                  fontWeight: isSelected
-                                                      ? FontWeight.w800
-                                                      : FontWeight.bold,
-                                                  color: isSelected
-                                                      ? cat.color
-                                                      : (isDarkMode
-                                                          ? Colors.white
-                                                          : Colors.black87),
-                                                ),
-                                              ),
-                                            ),
-                                            if (isSelected)
-                                              Icon(
-                                                Icons.check_circle_rounded,
-                                                color: cat.color,
-                                                size: 20,
-                                              ),
-                                          ],
-                                        ),
-                                      ),
-                                    );
-                                  }),
-                                ],
-                              );
-                            },
-                          ),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
 }
 
 class HighVisInput extends StatefulWidget {

@@ -1,3 +1,4 @@
+import 'package:tabunganku/core/widgets/offline_loading_dialog.dart';
 import 'dart:io';
 import 'package:tabunganku/core/widgets/top_toast.dart';
 import 'package:flutter/material.dart';
@@ -12,7 +13,6 @@ import 'package:tabunganku/core/theme/app_colors.dart';
 import 'package:tabunganku/core/theme/theme_provider.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'dart:async';
-import 'dart:ui';
 import '../widgets/shopping_form_sheet.dart';
 
 class ShoppingListPage extends ConsumerStatefulWidget {
@@ -64,80 +64,32 @@ class _ShoppingListPageState extends ConsumerState<ShoppingListPage> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      barrierColor: Colors.black.withValues(alpha: 0.35),
+      barrierColor: Colors.black.withValues(alpha: 0.45),
       builder: (dialogCtx) {
         _dialogContext = dialogCtx;
-        final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-        return BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-          child: PopScope(
-            canPop: false,
-            onPopInvokedWithResult: (didPop, result) {
-              if (didPop) return;
-              _dismissNoInternetPopup();
+        return PopScope(
+          canPop: false,
+          onPopInvokedWithResult: (didPop, result) {
+            if (didPop) return;
+            _dismissNoInternetPopup();
+            if (mounted && Navigator.of(context).canPop()) {
               Navigator.of(context).pop();
+            }
+          },
+          child: OfflineLoadingDialog(
+            title: 'Koneksi Belanja Terputus',
+            message: 'Sambungkan ke internet untuk memuat gambar belanja dari server dan mengelola data.',
+            accentColor: AppColors.primary,
+            onDismiss: () {
+              _dismissNoInternetPopup();
+              if (mounted && Navigator.of(context).canPop()) {
+                Navigator.of(context).pop();
+              }
             },
-            child: AlertDialog(
-              backgroundColor: isDarkMode ? AppColors.surfaceDark : Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-              content: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 8),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const SizedBox(
-                      width: 48,
-                      height: 48,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 3,
-                        valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    Text(
-                      'Koneksi Terputus',
-                      style: GoogleFonts.quicksand(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                        color: isDarkMode ? Colors.white : AppColors.primaryDark,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      'Sambungkan ke internet untuk memuat gambar belanja dari server dan mengelola data.',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.quicksand(
-                        fontSize: 13,
-                        color: isDarkMode ? Colors.white70 : Colors.black54,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 44,
-                      child: OutlinedButton(
-                        onPressed: () {
-                          _dismissNoInternetPopup();
-                          Navigator.of(context).pop();
-                        },
-                        style: OutlinedButton.styleFrom(
-                          side: BorderSide(color: isDarkMode ? Colors.white24 : Colors.grey.shade300),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        ),
-                        child: Text(
-                          'Kembali',
-                          style: GoogleFonts.quicksand(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13,
-                            color: isDarkMode ? Colors.white70 : Colors.grey.shade700,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            onRetry: () {
+              ref.invalidate(shoppingItemsStreamProvider);
+              _dismissNoInternetPopup();
+            },
           ),
         );
       },

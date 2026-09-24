@@ -1,3 +1,8 @@
+﻿/// Page: KprCalculatorPage
+///
+/// Simulasi cicilan KPR (Kredit Pemilikan Rumah).
+library;
+
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -478,5 +483,6 @@ class _RibuanFormatter extends TextInputFormatter {
     );
   }
 }
+
 
 

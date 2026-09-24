@@ -1,3 +1,9 @@
+/// Service: GoldService
+//
+// Mengelola catatan investasi emas dan harga pasar.
+/// Menyimpan data lokal di [SharedPreferences] per user.
+library;
+
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -290,7 +296,7 @@ class GoldService {
             'Accept': 'application/json',
             'Cache-Control': 'no-cache',
           },
-        ).timeout(const Duration(seconds: 4));
+        ).timeout(const Duration(seconds: 2));
 
         if (res.statusCode == 200) {
           final body = jsonDecode(res.body);

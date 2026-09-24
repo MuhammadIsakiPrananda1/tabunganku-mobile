@@ -1,4 +1,8 @@
-import 'dart:convert';
+/// Model: NabungBersamaModel
+//
+// Merepresentasikan kelompok tabungan bersama.
+/// Mendukung serialisasi JSON untuk penyimpanan di [SharedPreferences].
+library;
 
 class NabungBersamaModel {
   final String id;

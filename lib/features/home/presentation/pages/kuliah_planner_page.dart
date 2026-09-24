@@ -1,3 +1,8 @@
+﻿/// Page: KuliahPlannerPage
+///
+/// Rencana dana pendidikan kuliah masa depan.
+library;
+
 import 'dart:math';
 import 'package:tabunganku/core/widgets/top_toast.dart';
 import 'package:flutter/material.dart';
@@ -795,4 +800,5 @@ class _StatCell extends StatelessWidget {
     );
   }
 }
+
 

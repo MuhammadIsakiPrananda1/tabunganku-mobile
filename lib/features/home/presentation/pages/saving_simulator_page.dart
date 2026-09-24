@@ -1,3 +1,8 @@
+﻿/// Page: SavingSimulatorPage
+///
+/// Simulasi target dan proyeksi hasil tabungan.
+library;
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/services.dart';
@@ -777,3 +782,4 @@ class _RibuanSeparatorInputFormatter extends TextInputFormatter {
     );
   }
 }
+

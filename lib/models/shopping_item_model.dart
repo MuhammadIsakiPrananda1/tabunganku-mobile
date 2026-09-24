@@ -1,3 +1,9 @@
+/// Model: ShoppingItemModel
+//
+// Merepresentasikan item dalam daftar belanja.
+/// Mendukung serialisasi JSON untuk penyimpanan di [SharedPreferences].
+library;
+
 class ShoppingItem {
   final String id;
   final String name;

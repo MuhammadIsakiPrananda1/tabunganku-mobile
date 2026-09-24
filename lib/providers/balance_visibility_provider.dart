@@ -1,3 +1,8 @@
+/// Provider: BalanceVisibilityProvider
+//
+// Mengelola preferensi tampil/sembunyikan saldo di seluruh app.
+library;
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

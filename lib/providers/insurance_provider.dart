@@ -1,3 +1,8 @@
+/// Provider: InsuranceProvider
+//
+// Menyediakan akses reaktif ke data polis asuransi.
+library;
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tabunganku/models/insurance_model.dart';
 import 'package:tabunganku/services/insurance_service.dart';

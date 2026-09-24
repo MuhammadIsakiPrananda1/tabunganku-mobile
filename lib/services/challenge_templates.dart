@@ -1,3 +1,9 @@
+/// Service: ChallengeTemplates
+//
+// Template tantangan bawaan yang tersedia untuk dipilih.
+/// Menyimpan data lokal di [SharedPreferences] per user.
+library;
+
 import '../models/challenge_template_model.dart';
 import '../models/challenge_model.dart';
 import 'package:flutter/material.dart';

@@ -1,3 +1,8 @@
+﻿/// Page: InsuranceTrackerPage
+///
+/// Pelacak polis asuransi dan pengingat premi.
+library;
+
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import 'package:tabunganku/core/widgets/top_toast.dart';
@@ -895,3 +900,4 @@ class _StatCell extends StatelessWidget {
     );
   }
 }
+

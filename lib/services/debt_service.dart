@@ -1,3 +1,9 @@
+/// Service: DebtService
+//
+// Mengelola hutang dan piutang pengguna.
+/// Menyimpan data lokal di [SharedPreferences] per user.
+library;
+
 import 'dart:async';
 import 'dart:convert';
 
@@ -13,7 +19,7 @@ abstract class DebtService {
   Stream<List<DebtModel>> watchDebts();
 }
 
-class MockDebtService implements DebtService {
+class LocalDebtService implements DebtService {
   static const String _storagePrefix = 'debts_user_';
   static final SecureStorageService _secureStorage = SecureStorageService();
   static Future<SharedPreferences>? _prefsFuture;

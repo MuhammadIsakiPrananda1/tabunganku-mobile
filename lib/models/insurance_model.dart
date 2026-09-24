@@ -1,3 +1,9 @@
+/// Model: InsuranceModel
+//
+// Merepresentasikan polis asuransi yang dimiliki pengguna.
+/// Mendukung serialisasi JSON untuk penyimpanan di [SharedPreferences].
+library;
+
 class InsuranceModel {
   final String id;
   final String policyName;

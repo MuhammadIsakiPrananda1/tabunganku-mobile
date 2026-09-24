@@ -1,3 +1,9 @@
+/// Model: NoteModel
+//
+// Merepresentasikan catatan keuangan bebas milik pengguna.
+/// Mendukung serialisasi JSON untuk penyimpanan di [SharedPreferences].
+library;
+
 class NoteModel {
   final String id;
   final String title;

@@ -1,3 +1,8 @@
+/// Provider: NabungBersamaProvider
+//
+// Mengelola state kelompok tabungan bersama.
+library;
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tabunganku/models/nabung_bersama_model.dart';
 import 'package:tabunganku/services/nabung_bersama_service.dart';

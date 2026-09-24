@@ -1,3 +1,8 @@
+﻿/// Page: FeedbackPage
+///
+/// Formulir pengiriman umpan balik dan saran pengguna.
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -538,3 +543,4 @@ class _FeedbackPageState extends State<FeedbackPage> {
     );
   }
 }
+

@@ -1,17 +1,21 @@
+/// Service: ChallengeService
+//
+// Mengelola tantangan menabung dan pembaruan progress.
+/// Menyimpan data lokal di [SharedPreferences] per user.
+library;
+
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/foundation.dart';
-
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tabunganku/core/security/secure_storage_service.dart';
 import 'package:tabunganku/core/constants/app_version.dart';
+import 'package:tabunganku/core/constants/transaction_categories.dart';
 import 'package:tabunganku/models/challenge_model.dart';
 import 'package:tabunganku/models/challenge_template_model.dart';
 import 'package:tabunganku/models/transaction_model.dart';
-import 'package:tabunganku/services/challenge_templates.dart';
 import 'package:tabunganku/services/badge_service.dart';
-import 'package:tabunganku/core/constants/transaction_categories.dart';
+import 'package:tabunganku/services/challenge_templates.dart';
 
 abstract class ChallengeService {
   Future<List<ChallengeModel>> getChallenges();
@@ -40,10 +44,10 @@ abstract class ChallengeService {
   ChallengeTemplateModel? getTemplateById(String id);
 }
 
-class MockChallengeService implements ChallengeService {
+class LocalChallengeService implements ChallengeService {
   final BadgeService? badgeService;
 
-  MockChallengeService({this.badgeService});
+  LocalChallengeService({this.badgeService});
 
   static int _updateCounter = 0;
   static final StreamController<int> _updateController =

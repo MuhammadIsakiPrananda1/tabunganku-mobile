@@ -1,54 +1,61 @@
+/// Provider: UserProvider
+///
+/// Mengelola profil pengguna: nama, foto, dan timestamp pembuatan.
+/// Data persisted di [SharedPreferences] menggunakan key dari [PrefsKeys].
+library;
+
 import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tabunganku/core/constants/prefs_keys.dart';
+import 'package:tabunganku/models/user_profile_model.dart';
+import 'package:tabunganku/services/api_image_service.dart';
+export 'package:tabunganku/models/user_profile_model.dart';
 
-class UserProfile {
-  final String name;
-  final String? photoUrl;
-  final DateTime createdAt;
+// ─────────────────────────────────────────────────────────────────────────────
+// Providers
+// ─────────────────────────────────────────────────────────────────────────────
 
-  UserProfile({
-    required this.name,
-    this.photoUrl,
-    DateTime? createdAt,
-  }) : createdAt = createdAt ?? DateTime.now();
+final userProfileProvider =
+    StateNotifierProvider<UserProfileNotifier, UserProfile>((ref) {
+  return UserProfileNotifier();
+});
 
-  bool get isNewUser {
-    final difference = DateTime.now().difference(createdAt);
-    return difference.inHours < 72; // 3 hari (72 jam)
-  }
+/// Convenience provider — langsung baca nama pengguna tanpa subscribe ke
+/// seluruh profil.
+final userNameProvider = Provider<String>((ref) {
+  return ref.watch(userProfileProvider).name;
+});
 
-  UserProfile copyWith({
-    String? name,
-    String? photoUrl,
-    DateTime? createdAt,
-    bool clearPhoto = false,
-  }) {
-    return UserProfile(
-      name: name ?? this.name,
-      photoUrl: clearPhoto ? null : (photoUrl ?? this.photoUrl),
-      createdAt: createdAt ?? this.createdAt,
-    );
-  }
-}
+// ─────────────────────────────────────────────────────────────────────────────
+// UserProfileNotifier
+// ─────────────────────────────────────────────────────────────────────────────
 
+/// Notifier yang mengelola [UserProfile] dan sinkronisasi ke disk.
 class UserProfileNotifier extends StateNotifier<UserProfile> {
-  UserProfileNotifier() : super(UserProfile(name: 'user-0001')) {
+  UserProfileNotifier()
+      : super(UserProfile(name: 'user-0001', createdAt: DateTime.now())) {
     _loadProfile();
   }
 
+  // ── Username generation ────────────────────────────────────────────────────
+
+  /// Buat username default dengan format `user-XXXX` berdasarkan counter.
   static String generateDefaultUsername([int count = 1]) {
-    final paddedNum = count.toString().padLeft(4, '0');
-    return 'user-$paddedNum';
+    return 'user-${count.toString().padLeft(4, '0')}';
   }
 
+  /// Generate username urut berikutnya, persist counter ke SharedPreferences
+  /// dan file counter sebagai backup.
   Future<String> _generateSequentialUsername() async {
-    int counter = 1;
     try {
       final prefs = await SharedPreferences.getInstance();
-      counter = prefs.getInt('user_counter') ?? 1;
+      var counter = prefs.getInt(PrefsKeys.userCounter) ?? 1;
 
+      // Backup counter di file (ambil nilai terbesar antara prefs & file)
       final appDir = await getApplicationDocumentsDirectory();
       final counterFile = File('${appDir.path}/user_counter.txt');
       if (await counterFile.exists()) {
@@ -59,11 +66,9 @@ class UserProfileNotifier extends StateNotifier<UserProfile> {
         }
       }
 
-      final paddedNum = counter.toString().padLeft(4, '0');
-      final username = 'user-$paddedNum';
-
+      final username = generateDefaultUsername(counter);
       final nextCounter = counter + 1;
-      await prefs.setInt('user_counter', nextCounter);
+      await prefs.setInt(PrefsKeys.userCounter, nextCounter);
       try {
         await counterFile.writeAsString('$nextCounter');
       } catch (_) {}
@@ -74,100 +79,119 @@ class UserProfileNotifier extends StateNotifier<UserProfile> {
     }
   }
 
+  // ── Load from disk ─────────────────────────────────────────────────────────
+
   Future<void> _loadProfile() async {
     final prefs = await SharedPreferences.getInstance();
-    var createdMs = prefs.getInt('user_created_at');
+
+    // Buat atau ambil timestamp pembuatan akun
+    var createdMs = prefs.getInt(PrefsKeys.userCreatedAt);
     if (createdMs == null) {
       createdMs = DateTime.now().millisecondsSinceEpoch;
-      await prefs.setInt('user_created_at', createdMs);
+      await prefs.setInt(PrefsKeys.userCreatedAt, createdMs);
     }
     final createdAt = DateTime.fromMillisecondsSinceEpoch(createdMs);
 
-    var name = prefs.getString('user_name');
-
+    // Resolve nama — generate sequential jika default/kosong
+    var name = prefs.getString(PrefsKeys.userName);
     if (name == null ||
         name.trim().isEmpty ||
         name == 'Pengguna TabunganKu' ||
         name == 'user-xxxx' ||
         name.startsWith('user ')) {
       name = await _generateSequentialUsername();
-      await prefs.setString('user_name', name);
+      await prefs.setString(PrefsKeys.userName, name);
     }
 
-    final photoUrl = prefs.getString('user_photo_url');
-
+    // Validasi foto — hapus path jika file sudah tidak ada
+    final photoUrl = prefs.getString(PrefsKeys.userPhotoUrl);
     if (photoUrl != null && photoUrl.isNotEmpty) {
       if (await File(photoUrl).exists()) {
         state = UserProfile(name: name, photoUrl: photoUrl, createdAt: createdAt);
         return;
       } else {
-
-        await prefs.remove('user_photo_url');
+        debugPrint('[UserProfile] Foto tidak ditemukan, menghapus path lama.');
+        await prefs.remove(PrefsKeys.userPhotoUrl);
       }
     }
-    
+
     state = UserProfile(name: name, photoUrl: null, createdAt: createdAt);
   }
 
+  // ── Mutations ──────────────────────────────────────────────────────────────
+
+  /// Perbarui nama pengguna dan persist.
   Future<void> setName(String name) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('user_name', name);
+    await prefs.setString(PrefsKeys.userName, name);
     state = state.copyWith(name: name);
   }
 
+  /// Salin foto ke direktori permanent, unggah ke Cloud API jika online, dan persist.
   Future<String?> uploadAndSetPhoto(File file) async {
     try {
       final appDir = await getApplicationDocumentsDirectory();
-      final fileName = 'profile_photo_${DateTime.now().millisecondsSinceEpoch}.png';
-      final permanentFile = await file.copy('${appDir.path}/$fileName');
+      final fileName =
+          'profile_photo_${DateTime.now().millisecondsSinceEpoch}.png';
+      final permanent = await file.copy('${appDir.path}/$fileName');
 
-final oldPath = state.photoUrl;
+      // Hapus foto lama jika ada
+      final oldPath = state.photoUrl;
       if (oldPath != null && oldPath.isNotEmpty) {
-        final oldFile = File(oldPath);
-        if (await oldFile.exists()) {
-          try {
-            await oldFile.delete();
-          } catch (e) {
-
+        try {
+          if (oldPath.startsWith('http://') || oldPath.startsWith('https://')) {
+            ApiImageService.deleteImage(oldPath);
+          } else {
+            final oldFile = File(oldPath);
+            if (await oldFile.exists()) await oldFile.delete();
           }
+        } catch (e) {
+          debugPrint('[UserProfile] Gagal hapus foto lama: $e');
         }
       }
 
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('user_photo_url', permanentFile.path);
-      state = state.copyWith(photoUrl: permanentFile.path);
-      return permanentFile.path;
-    } catch (e) {
+      // Coba upload ke Cloud API (dengan fallback otomatis ke local disk)
+      String chosenUrl = permanent.path;
+      try {
+        final cloudResult = await ApiImageService.uploadImageDetailed(permanent);
+        if (cloudResult.success && cloudResult.url != null && cloudResult.url!.isNotEmpty) {
+          chosenUrl = cloudResult.url!;
+          debugPrint('[UserProfile] Foto profil berhasil diunggah ke Cloud API: $chosenUrl');
+        }
+      } catch (e) {
+        debugPrint('[UserProfile] Cloud API upload dilewati (offline/fallback): $e');
+      }
 
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('user_photo_url', file.path);
+      await prefs.setString(PrefsKeys.userPhotoUrl, chosenUrl);
+      state = state.copyWith(photoUrl: chosenUrl);
+      return chosenUrl;
+    } catch (e) {
+      debugPrint('[UserProfile] Copy foto gagal, pakai path langsung: $e');
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(PrefsKeys.userPhotoUrl, file.path);
       state = state.copyWith(photoUrl: file.path);
       return file.path;
     }
   }
 
+  /// Hapus foto profil dari disk/server dan dari state.
   Future<void> deletePhoto() async {
-    final prefs = await SharedPreferences.getInstance();
     final oldPath = state.photoUrl;
     if (oldPath != null && oldPath.isNotEmpty) {
-      final oldFile = File(oldPath);
-      if (await oldFile.exists()) {
-        try {
-          await oldFile.delete();
-        } catch (e) {
-
+      try {
+        if (oldPath.startsWith('http://') || oldPath.startsWith('https://')) {
+          await ApiImageService.deleteImage(oldPath);
+        } else {
+          final oldFile = File(oldPath);
+          if (await oldFile.exists()) await oldFile.delete();
         }
+      } catch (e) {
+        debugPrint('[UserProfile] Gagal hapus foto: $e');
       }
     }
-    await prefs.remove('user_photo_url');
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(PrefsKeys.userPhotoUrl);
     state = state.copyWith(clearPhoto: true);
   }
 }
-
-final userProfileProvider = StateNotifierProvider<UserProfileNotifier, UserProfile>((ref) {
-  return UserProfileNotifier();
-});
-
-final userNameProvider = Provider<String>((ref) {
-  return ref.watch(userProfileProvider).name;
-});

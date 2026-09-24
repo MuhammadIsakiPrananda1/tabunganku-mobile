@@ -1,3 +1,9 @@
+/// Service: NoteService
+//
+// Mengelola catatan keuangan pengguna.
+/// Menyimpan data lokal di [SharedPreferences] per user.
+library;
+
 import 'dart:async';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -11,7 +17,7 @@ abstract class NoteService {
   Stream<List<NoteModel>> watchNotes();
 }
 
-class SharedPreferencesNoteService implements NoteService {
+class LocalNoteService implements NoteService {
   static const String _storageKey = 'general_notes_user_';
   static Future<SharedPreferences>? _prefsFuture;
   static final Map<String, List<NoteModel>> _userNotes = {};

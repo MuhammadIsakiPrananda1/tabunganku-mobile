@@ -1,3 +1,9 @@
+/// Provider: PiggyBankProvider
+//
+// Mengelola state celengan digital.
+library;
+
+import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -61,12 +67,16 @@ class PiggyBankHistoryNotifier extends StateNotifier<List<PiggyBankLog>> {
   Future<void> _loadHistory() async {
     final prefs = await SharedPreferences.getInstance();
     final list = prefs.getStringList(_key) ?? [];
-
-}
+    state = list.map((e) => PiggyBankLog.fromJson(jsonDecode(e) as Map<String, dynamic>)).toList();
+  }
 
   Future<void> addLog(double amount) async {
     final log = PiggyBankLog(date: DateTime.now(), amount: amount);
     state = [log, ...state];
-
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(
+      _key,
+      state.map((e) => jsonEncode(e.toJson())).toList(),
+    );
   }
 }

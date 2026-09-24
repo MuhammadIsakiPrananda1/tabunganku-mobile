@@ -1,3 +1,9 @@
+/// Service: RecurringService
+//
+// Mengelola dan memproses transaksi berulang.
+/// Menyimpan data lokal di [SharedPreferences] per user.
+library;
+
 import 'dart:async';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';

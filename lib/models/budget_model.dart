@@ -1,3 +1,9 @@
+/// Model: BudgetModel
+//
+// Merepresentasikan batas anggaran per kategori per bulan.
+/// Mendukung serialisasi JSON untuk penyimpanan di [SharedPreferences].
+library;
+
 class BudgetModel {
   final String id;
   final String category;

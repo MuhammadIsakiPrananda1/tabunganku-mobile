@@ -1,3 +1,8 @@
+/// Provider: InvestmentProvider
+//
+// Menyediakan akses reaktif ke portofolio investasi.
+library;
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tabunganku/models/investment_model.dart';
 import 'package:tabunganku/services/investment_service.dart';

@@ -1,28 +1,31 @@
+/// Core: Services — Permission Service
+///
+/// Wrapper untuk [PermissionHandler] yang menyediakan pengecekan status izin
+/// dan dialog fallback ke pengaturan aplikasi saat izin ditolak permanen.
+library;
+
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:tabunganku/core/widgets/permission_dialog.dart';
 
 class PermissionService {
-
   static Future<bool> isGranted(Permission permission) async {
     return await permission.isGranted;
   }
 
-static Future<bool> requestPermission(
+  static Future<bool> requestPermission(
     BuildContext context, {
     required Permission permission,
     required String title,
     required String description,
     required IconData icon,
   }) async {
-
     var status = await permission.status;
 
-if (status.isGranted) return true;
+    if (status.isGranted) return true;
 
-status = await permission.request();
+    status = await permission.request();
 
-if (status.isPermanentlyDenied) {
+    if (status.isPermanentlyDenied) {
       if (context.mounted) {
         _showSettingsDialog(context, title);
       }
@@ -32,7 +35,7 @@ if (status.isPermanentlyDenied) {
     return status.isGranted;
   }
 
-static void _showSettingsDialog(BuildContext context, String permissionName) {
+  static void _showSettingsDialog(BuildContext context, String permissionName) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(

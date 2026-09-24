@@ -1,3 +1,8 @@
+﻿/// Page: InvestmentTrackerPage
+///
+/// Pelacak portofolio investasi saham, reksa dana, dan aset.
+library;
+
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import 'package:tabunganku/core/widgets/top_toast.dart';
@@ -824,4 +829,5 @@ class _StatCell extends StatelessWidget {
     );
   }
 }
+
 

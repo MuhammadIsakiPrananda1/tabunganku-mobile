@@ -1,3 +1,9 @@
+/// Model: TaxReminderModel
+//
+// Merepresentasikan pengingat pajak.
+/// Mendukung serialisasi JSON untuk penyimpanan di [SharedPreferences].
+library;
+
 
 class TaxReminderModel {
   final String id;

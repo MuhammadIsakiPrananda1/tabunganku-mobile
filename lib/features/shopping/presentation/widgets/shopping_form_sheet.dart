@@ -13,8 +13,8 @@ import 'package:tabunganku/core/theme/app_colors.dart';
 import 'package:tabunganku/core/theme/theme_provider.dart';
 import 'package:tabunganku/models/shopping_item_model.dart';
 import 'package:tabunganku/providers/shopping_item_provider.dart';
+import 'package:tabunganku/services/api_image_service.dart';
 import 'package:tabunganku/features/settings/presentation/providers/security_provider.dart';
-import 'package:tabunganku/services/image_upload_service.dart';
 
 class ShoppingFormSheet extends ConsumerStatefulWidget {
   final ShoppingItem? item;
@@ -52,8 +52,9 @@ class _ShoppingFormSheetState extends ConsumerState<ShoppingFormSheet> {
   
   String? _imagePath;
   String? _imageUrl;
-  bool _isOnline = false;
+  String? _pendingDeleteUrl;
   bool _isUploading = false;
+  bool _uploadFailed = false;
   
   final ImagePicker _picker = ImagePicker();
 
@@ -86,7 +87,6 @@ String initialPriceStr = '';
     _categoryController = TextEditingController(text: widget.item?.category ?? '');
     _imagePath = widget.item?.imagePath;
     _imageUrl = widget.item?.url;
-    _isOnline = widget.item?.isOnline ?? false;
 
 _pricePerUnitController.addListener(_calculateTotalPrice);
     _quantityController.addListener(_calculateTotalPrice);
@@ -151,50 +151,79 @@ if (_priceController.text.isNotEmpty) {
 
       final XFile? pickedFile = await _picker.pickImage(
         source: source,
-        maxWidth: 1000,
-        maxHeight: 1000,
+        maxWidth: 1600,
+        maxHeight: 1600,
         imageQuality: 85,
       );
       if (pickedFile != null) {
         final appDir = await getApplicationDocumentsDirectory();
-        final fileName = p.basename(pickedFile.path);
+        var rawExt = p.extension(pickedFile.path);
+        if (rawExt.isEmpty) rawExt = '.jpg';
+        final fileName = 'shopping_${DateTime.now().millisecondsSinceEpoch}$rawExt';
         final permanentPath = p.join(appDir.path, fileName);
 
         await File(pickedFile.path).copy(permanentPath);
 
         setState(() {
+          if (_imageUrl != null && _imageUrl!.isNotEmpty) {
+            _pendingDeleteUrl = _imageUrl;
+          }
           _imagePath = permanentPath;
+          _imageUrl = null;
           _isUploading = true;
+          _uploadFailed = false;
         });
 
-try {
-          final uploadService = ref.read(imageUploadServiceProvider);
-          final uploadedUrl = await uploadService.uploadImage(File(permanentPath));
-          if (uploadedUrl != null) {
-            setState(() {
-              _imageUrl = uploadedUrl;
-              _isOnline = true;
-            });
-          } else {
-
-            setState(() {
-              _imageUrl = null;
-              _isOnline = false;
-            });
-          }
-        } catch (e) {
-          debugPrint('[ShoppingFormSheet] Error uploading image: $e');
-        } finally {
-          setState(() {
-            _isUploading = false;
-          });
-        }
+        // Unggah gambar secara otomatis ke server TabunganKu Secure Image API
+        _uploadImageToServer(File(permanentPath));
       }
     } catch (e) {
       debugPrint('Error picking image: $e');
     } finally {
       ref.read(securityProvider.notifier).setExternalOperation(false);
     }
+  }
+
+  Future<void> _uploadImageToServer(File file) async {
+    setState(() {
+      _isUploading = true;
+      _uploadFailed = false;
+    });
+
+    final result = await ApiImageService.uploadImageDetailed(file);
+
+    if (!mounted) return;
+
+    if (result.success && result.url != null && result.url!.isNotEmpty) {
+      setState(() {
+        _imageUrl = result.url;
+        _isUploading = false;
+        _uploadFailed = false;
+      });
+      showTopToast(context, 'Foto berhasil diunggah ke server TabunganKu (WebP)!');
+    } else {
+      setState(() {
+        _isUploading = false;
+        _uploadFailed = true;
+      });
+      showTopToast(
+        context,
+        result.errorMessage ?? 'Tersimpan lokal di memori HP (server offline/gagal)',
+        isError: true,
+      );
+    }
+  }
+
+  void _removeImage() {
+    setState(() {
+      if (_imageUrl != null && _imageUrl!.isNotEmpty) {
+        _pendingDeleteUrl = _imageUrl;
+      }
+      _imagePath = null;
+      _imageUrl = null;
+      _isUploading = false;
+      _uploadFailed = false;
+    });
   }
 
   void _showImageSourceSheet() {
@@ -305,7 +334,189 @@ try {
     );
   }
 
+  Widget _buildImagePreview(bool isDarkMode) {
+    final hasLocal = _imagePath != null && _imagePath!.isNotEmpty;
+    final hasRemote = _imageUrl != null && _imageUrl!.isNotEmpty;
+
+    if (hasLocal || hasRemote) {
+      return Stack(
+        fit: StackFit.expand,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: hasLocal
+                ? Image.file(
+                    File(_imagePath!),
+                    width: double.infinity,
+                    height: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => hasRemote
+                        ? Image.network(
+                            _imageUrl!,
+                            width: double.infinity,
+                            height: double.infinity,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => const Center(
+                              child: Icon(Icons.broken_image_outlined,
+                                  color: AppColors.primary, size: 28),
+                            ),
+                          )
+                        : const Center(
+                            child: Icon(Icons.broken_image_outlined,
+                                color: AppColors.primary, size: 28),
+                          ),
+                  )
+                : Image.network(
+                    _imageUrl!,
+                    width: double.infinity,
+                    height: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => const Center(
+                      child: Icon(Icons.broken_image_outlined,
+                          color: AppColors.primary, size: 28),
+                    ),
+                  ),
+          ),
+          // Loading overlay saat upload ke server API
+          if (_isUploading)
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.55),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2.5,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Mengunggah ke server...',
+                      style: GoogleFonts.quicksand(
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          // Badge status tersimpan di Cloud
+          if (!_isUploading && hasRemote)
+            Positioned(
+              bottom: 8,
+              left: 8,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.7),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: const Color(0xFF00E676).withOpacity(0.4), width: 0.8),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.cloud_done_rounded, color: Color(0xFF00E676), size: 13),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Tersimpan di Cloud',
+                      style: GoogleFonts.quicksand(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          // Badge offline / retry jika gagal upload
+          if (!_isUploading && _uploadFailed && hasLocal)
+            Positioned(
+              bottom: 8,
+              left: 8,
+              child: GestureDetector(
+                onTap: () {
+                  if (_imagePath != null) {
+                    _uploadImageToServer(File(_imagePath!));
+                  }
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.amber.shade900.withOpacity(0.85),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.refresh_rounded, color: Colors.white, size: 13),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Offline • Coba upload lagi',
+                        style: GoogleFonts.quicksand(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          // Tombol hapus foto
+          Positioned(
+            top: 8,
+            right: 8,
+            child: GestureDetector(
+              onTap: _removeImage,
+              child: Container(
+                padding: const EdgeInsets.all(5),
+                decoration: const BoxDecoration(
+                  color: Colors.red,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.close, color: Colors.white, size: 14),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Icon(Icons.add_a_photo_rounded,
+            color: AppColors.primary, size: 24),
+        const SizedBox(width: 12),
+        Text(
+          'Tambah Foto Barang',
+          style: GoogleFonts.quicksand(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            color: isDarkMode ? Colors.white24 : Colors.grey.shade400,
+          ),
+        ),
+      ],
+    );
+  }
+
   void _submit() async {
+    if (_isUploading) {
+      showTopToast(context, 'Foto sedang diunggah ke server, tunggu sebentar...');
+      return;
+    }
+
     if (_formKey.currentState!.validate()) {
       final cleanAmount =
           _priceController.text.replaceAll(RegExp(r'[^0-9]'), '');
@@ -314,6 +525,13 @@ try {
       final finalCategory = _categoryController.text.trim().isEmpty 
           ? 'Belanja' 
           : _categoryController.text.trim();
+
+      // Bersihkan foto lama di server jika pengguna mengganti atau menghapus foto
+      if (_pendingDeleteUrl != null && _pendingDeleteUrl!.contains('neverlandstudio.my.id')) {
+        ApiImageService.deleteImage(_pendingDeleteUrl!);
+      }
+
+      final isStoredOnline = _imageUrl != null && _imageUrl!.isNotEmpty;
 
       final newItem = ShoppingItem(
         id: widget.item?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
@@ -325,7 +543,7 @@ try {
         category: finalCategory,
         imagePath: _imagePath,
         url: _imageUrl,
-        isOnline: _isOnline,
+        isOnline: isStoredOnline,
         isBought: widget.item?.isBought ?? false,
       );
 
@@ -338,7 +556,9 @@ try {
       if (mounted) {
         Navigator.pop(context);
         showTopToast(context, widget.item == null
-                  ? 'Rencana belanja ditambahkan!'
+                  ? (isStoredOnline
+                      ? 'Rencana belanja & foto Cloud API berhasil ditambahkan!'
+                      : 'Rencana belanja ditambahkan (tersimpan lokal)!')
                   : 'Rencana belanja diperbarui!');
       }
     }
@@ -417,13 +637,13 @@ try {
                   children: [
 
                     GestureDetector(
-                      onTap: _isUploading ? null : _showImageSourceSheet,
+                      onTap: _showImageSourceSheet,
                       child: Container(
                         width: double.infinity,
                         height: 120,
                         decoration: BoxDecoration(
                           color: isDarkMode
-                              ? Colors.white.withOpacity(0.02)
+                              ? Colors.white.withValues(alpha: 0.02)
                               : Colors.grey.shade50,
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
@@ -431,122 +651,7 @@ try {
                             width: 1.2,
                           ),
                         ),
-                        child: _isUploading
-                            ? Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const SizedBox(
-                                    width: 24,
-                                    height: 24,
-                                    child: CircularProgressIndicator(strokeWidth: 2.5, color: AppColors.primary),
-                                  ),
-                                  const SizedBox(height: 12),
-                                  Text(
-                                    'Mengunggah gambar ke cloud...',
-                                    style: GoogleFonts.quicksand(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.bold,
-                                      color: isDarkMode ? Colors.white60 : Colors.black54,
-                                    ),
-                                  ),
-                                ],
-                              )
-                            : _imagePath != null
-                                ? Stack(
-                                    children: [
-                                      ClipRRect(
-                                        borderRadius: BorderRadius.circular(16),
-                                        child: _isOnline && _imageUrl != null
-                                            ? Image.network(
-                                                _imageUrl!,
-                                                width: double.infinity,
-                                                height: double.infinity,
-                                                fit: BoxFit.cover,
-                                                loadingBuilder: (context, child, progress) {
-                                                  if (progress == null) return child;
-                                                  return const Center(
-                                                    child: CircularProgressIndicator(color: AppColors.primary),
-                                                  );
-                                                },
-                                                errorBuilder: (context, error, stackTrace) =>
-                                                    Image.file(
-                                                      File(_imagePath!),
-                                                      width: double.infinity,
-                                                      height: double.infinity,
-                                                      fit: BoxFit.cover,
-                                                    ),
-                                              )
-                                            : Image.file(
-                                                File(_imagePath!),
-                                                width: double.infinity,
-                                                height: double.infinity,
-                                                fit: BoxFit.cover,
-                                              ),
-                                      ),
-
-                                      Positioned(
-                                        bottom: 8,
-                                        left: 8,
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                          decoration: BoxDecoration(
-                                            color: _isOnline ? Colors.blueAccent.withOpacity(0.9) : Colors.amber.withOpacity(0.9),
-                                            borderRadius: BorderRadius.circular(6),
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Icon(
-                                                _isOnline ? Icons.cloud_done_rounded : Icons.smartphone_rounded,
-                                                color: Colors.white,
-                                                size: 10,
-                                              ),
-                                              const SizedBox(width: 4),
-                                              Text(
-                                                _isOnline ? 'CLOUD SERVER' : 'MEMORI LOKAL',
-                                                style: GoogleFonts.quicksand(
-                                                  fontSize: 8,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Colors.white,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                      Positioned(
-                                        top: 8,
-                                        right: 8,
-                                        child: GestureDetector(
-                                          onTap: () => setState(() {
-                                            _imagePath = null;
-                                            _imageUrl = null;
-                                            _isOnline = false;
-                                          }),
-                                          child: Container(
-                                            padding: const EdgeInsets.all(4),
-                                            decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
-                                            child: const Icon(Icons.close, color: Colors.white, size: 14),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  )
-                                : Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      const Icon(Icons.add_a_photo_rounded,
-                                          color: AppColors.primary, size: 24),
-                                      const SizedBox(width: 12),
-                                      Text(
-                                        'Tambah Foto Barang',
-                                        style: GoogleFonts.quicksand(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.bold,
-                                            color: isDarkMode ? Colors.white24 : Colors.grey.shade400),
-                                      ),
-                                    ],
-                                  ),
+                        child: _buildImagePreview(isDarkMode),
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -676,17 +781,39 @@ if (_priceController.text.isNotEmpty) ...[
                           child: SizedBox(
                             height: 48,
                             child: ElevatedButton(
-                              onPressed: _isUploading ? null : _submit,
+                              onPressed: _submit,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.primary,
                                 foregroundColor: Colors.white,
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                 elevation: 0,
                               ),
-                              child: Text(
-                                widget.item == null ? 'Simpan Rencana' : 'Simpan Perubahan',
-                                style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 14),
-                              ),
+                              child: _isUploading
+                                  ? Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        const SizedBox(
+                                          width: 16,
+                                          height: 16,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          'Mengunggah...',
+                                          style: GoogleFonts.quicksand(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 13,
+                                          ),
+                                        ),
+                                      ],
+                                    )
+                                  : Text(
+                                      widget.item == null ? 'Simpan Rencana' : 'Simpan Perubahan',
+                                      style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 14),
+                                    ),
                             ),
                           ),
                         ),

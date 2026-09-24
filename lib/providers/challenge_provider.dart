@@ -1,3 +1,8 @@
+/// Provider: ChallengeProvider
+//
+// Mengelola state tantangan menabung aktif dan statistik.
+library;
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tabunganku/models/challenge_model.dart';
 import 'package:tabunganku/models/challenge_template_model.dart';
@@ -8,16 +13,16 @@ import 'package:tabunganku/providers/notification_provider.dart';
 
 final challengeServiceProvider = Provider<ChallengeService>((ref) {
   final badgeService = ref.watch(badgeServiceProvider);
-  return MockChallengeService(badgeService: badgeService);
+  return LocalChallengeService(badgeService: badgeService);
 });
 
 final challengeUpdateStreamProvider = StreamProvider.autoDispose<int>((ref) {
-  return MockChallengeService.updateStream;
+  return LocalChallengeService.updateStream;
 });
 
 final badgeServiceProvider = Provider<BadgeService>((ref) {
   final notificationService = ref.watch(notificationServiceProvider);
-  return MockBadgeService(notificationService);
+  return LocalBadgeService(notificationService);
 });
 
 final challengesProvider = FutureProvider.autoDispose<List<ChallengeModel>>((ref) async {

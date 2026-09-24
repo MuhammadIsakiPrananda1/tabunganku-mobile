@@ -1,3 +1,9 @@
+/// Core: Utils — Bottom Sheet Helper
+///
+/// Menyediakan helper global untuk menampilkan modal bottom sheet
+/// yang adaptif dengan inset sistem navigasi perangkat.
+library;
+
 import 'package:flutter/material.dart';
 
 /// Helper global untuk menampilkan bottom sheet yang otomatis

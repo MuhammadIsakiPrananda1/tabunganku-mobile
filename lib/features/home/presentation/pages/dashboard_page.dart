@@ -1,7 +1,15 @@
+/// Page: DashboardPage
+///
+/// Halaman utama aplikasi TabunganKu yang menampilkan saldo, quick actions,
+/// alokasi cerdas, kalender pengeluaran, tab keuangan, tab riwayat, dan profil.
+library;
+
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import 'package:tabunganku/core/widgets/top_toast.dart';
 import 'dart:async';
+import 'package:tabunganku/features/home/presentation/widgets/calculator_sheet.dart';
+import 'package:tabunganku/features/home/presentation/widgets/history_tab_view.dart';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -36,18 +44,15 @@ import 'package:tabunganku/features/home/presentation/widgets/home_tab_view.dart
     as widgets;
 import 'package:tabunganku/providers/notification_provider.dart';
 import 'package:tabunganku/models/notification_model.dart';
-import 'package:tabunganku/features/home/presentation/widgets/notification_sheet.dart';
 import 'package:tabunganku/features/home/presentation/pages/notifications_page.dart';
 import 'package:tabunganku/core/constants/transaction_categories.dart';
 import 'package:tabunganku/providers/balance_visibility_provider.dart';
 
 import 'package:tabunganku/providers/bills_provider.dart';
 import 'package:tabunganku/models/bill_model.dart';
-import 'package:tabunganku/features/home/presentation/widgets/connectivity_guard.dart';
 import 'package:tabunganku/providers/gold_provider.dart';
 import 'package:tabunganku/providers/investment_provider.dart';
 import 'package:tabunganku/models/gold_investment_model.dart';
-import 'package:tabunganku/models/investment_model.dart';
 
 class DashboardPage extends ConsumerStatefulWidget {
   const DashboardPage({super.key});
@@ -414,7 +419,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         final monthName = DateFormat('MMMM yyyy', 'id_ID').format(now);
         final notification = NotificationModel(
           id: 'monthly_statement_$monthKey',
-          title: 'Laporan Bulanan Tersedia! 📄',
+          title: 'Laporan Bulanan Tersedia! ðŸ“„',
           message:
               'Statement rekap keuangan untuk bulan $monthName sudah siap diekspor. Silakan unduh rekap PDF di menu Pengaturan.',
           timestamp: DateTime.now(),
@@ -1025,7 +1030,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => const _CalculatorSheetContent(),
+      builder: (context) => const CalculatorSheetContent(),
     );
   }
 
@@ -1219,14 +1224,14 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       {
         'value': 'SeaBank (Standar)',
         'label': 'SeaBank (Standar)',
-        'subtitle': '2,5% p.a. – Tanpa min. saldo',
+        'subtitle': '2,5% p.a. â€“ Tanpa min. saldo',
         'icon': Icons.savings_rounded,
         'color': Colors.teal,
       },
       {
         'value': 'SeaBank (Deposito)',
         'label': 'SeaBank (Deposito)',
-        'subtitle': 'Up to 6% p.a. – Deposito Tinggi',
+        'subtitle': 'Up to 6% p.a. â€“ Deposito Tinggi',
         'icon': Icons.trending_up_rounded,
         'color': Colors.orangeAccent,
       },
@@ -1247,147 +1252,147 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       {
         'value': 'Blu by BCA Digital',
         'label': 'Blu by BCA Digital',
-        'subtitle': 'Blu – Digital banking by BCA',
+        'subtitle': 'Blu â€“ Digital banking by BCA',
         'icon': Icons.water_drop_rounded,
         'color': Colors.blue.shade500,
       },
       {
         'value': 'Allo Bank',
         'label': 'Allo Bank',
-        'subtitle': 'Allo – Belanja hemat & Bunga menarik',
+        'subtitle': 'Allo â€“ Belanja hemat & Bunga menarik',
         'icon': Icons.credit_card_rounded,
         'color': Colors.purple.shade600,
       },
       {
         'value': 'Bank BCA',
         'label': 'Bank BCA',
-        'subtitle': 'BCA – Bank Swasta Terbesar',
+        'subtitle': 'BCA â€“ Bank Swasta Terbesar',
         'icon': Icons.account_balance_rounded,
         'color': Colors.blue.shade800,
       },
       {
         'value': 'Bank Mandiri',
         'label': 'Bank Mandiri',
-        'subtitle': 'Mandiri – Bank BUMN Terbesar',
+        'subtitle': 'Mandiri â€“ Bank BUMN Terbesar',
         'icon': Icons.account_balance_rounded,
         'color': Colors.yellow.shade800,
       },
       {
         'value': 'Bank BRI',
         'label': 'Bank BRI',
-        'subtitle': 'BRI – Melayani Hingga Pelosok',
+        'subtitle': 'BRI â€“ Melayani Hingga Pelosok',
         'icon': Icons.account_balance_rounded,
         'color': Colors.blue.shade900,
       },
       {
         'value': 'Bank BNI',
         'label': 'Bank BNI',
-        'subtitle': 'BNI – Melayani Negeri Kebanggaan',
+        'subtitle': 'BNI â€“ Melayani Negeri Kebanggaan',
         'icon': Icons.account_balance_rounded,
         'color': Colors.orange.shade600,
       },
       {
         'value': 'Bank Syariah Indonesia (BSI)',
         'label': 'Bank Syariah Indonesia (BSI)',
-        'subtitle': 'BSI – Perbankan Syariah Modern',
+        'subtitle': 'BSI â€“ Perbankan Syariah Modern',
         'icon': Icons.account_balance_rounded,
         'color': Colors.teal.shade700,
       },
       {
         'value': 'Bank CIMB Niaga',
         'label': 'Bank CIMB Niaga',
-        'subtitle': 'CIMB Niaga – Transaksi Cerdas',
+        'subtitle': 'CIMB Niaga â€“ Transaksi Cerdas',
         'icon': Icons.account_balance_rounded,
         'color': Colors.red.shade800,
       },
       {
         'value': 'Bank Permata',
         'label': 'Bank Permata',
-        'subtitle': 'Permata Bank – Solusi Finansial Modern',
+        'subtitle': 'Permata Bank â€“ Solusi Finansial Modern',
         'icon': Icons.account_balance_rounded,
         'color': Colors.green.shade700,
       },
       {
         'value': 'DBS Bank',
         'label': 'DBS Bank',
-        'subtitle': 'DBS – Bank Terbesar di Asia Tenggara',
+        'subtitle': 'DBS â€“ Bank Terbesar di Asia Tenggara',
         'icon': Icons.account_balance_rounded,
         'color': Colors.red.shade600,
       },
       {
         'value': 'UOB Bank',
         'label': 'UOB Bank',
-        'subtitle': 'UOB – Solusi Keuangan Regional Asia',
+        'subtitle': 'UOB â€“ Solusi Keuangan Regional Asia',
         'icon': Icons.account_balance_rounded,
         'color': Colors.blue.shade700,
       },
       {
         'value': 'HSBC Bank',
         'label': 'HSBC Bank',
-        'subtitle': 'HSBC – Global Wealth & Banking',
+        'subtitle': 'HSBC â€“ Global Wealth & Banking',
         'icon': Icons.account_balance_rounded,
         'color': Colors.red.shade900,
       },
       {
         'value': 'Citibank',
         'label': 'Citibank',
-        'subtitle': 'Citibank – Layanan Finansial Global',
+        'subtitle': 'Citibank â€“ Layanan Finansial Global',
         'icon': Icons.public_rounded,
         'color': Colors.blue.shade600,
       },
       {
         'value': 'Standard Chartered',
         'label': 'Standard Chartered',
-        'subtitle': 'StanChart – Perbankan Internasional',
+        'subtitle': 'StanChart â€“ Perbankan Internasional',
         'icon': Icons.account_balance_rounded,
         'color': Colors.green.shade800,
       },
       {
         'value': 'GoPay',
         'label': 'GoPay',
-        'subtitle': 'GoPay – Ekosistem GoTo terintegrasi',
+        'subtitle': 'GoPay â€“ Ekosistem GoTo terintegrasi',
         'icon': Icons.account_balance_wallet_rounded,
         'color': Colors.teal.shade500,
       },
       {
         'value': 'OVO',
         'label': 'OVO',
-        'subtitle': 'OVO – Cashback & merchant terluas',
+        'subtitle': 'OVO â€“ Cashback & merchant terluas',
         'icon': Icons.account_balance_wallet_rounded,
         'color': Colors.deepPurple.shade700,
       },
       {
         'value': 'Dana',
         'label': 'Dana',
-        'subtitle': 'DANA – Dompet digital serbabisa',
+        'subtitle': 'DANA â€“ Dompet digital serbabisa',
         'icon': Icons.account_balance_wallet_rounded,
         'color': Colors.blue.shade400,
       },
       {
         'value': 'ShopeePay',
         'label': 'ShopeePay',
-        'subtitle': 'ShopeePay – Belanja & promo Shopee',
+        'subtitle': 'ShopeePay â€“ Belanja & promo Shopee',
         'icon': Icons.account_balance_wallet_rounded,
         'color': Colors.orange.shade900,
       },
       {
         'value': 'LinkAja',
         'label': 'LinkAja',
-        'subtitle': 'LinkAja – Layanan BUMN & Transportasi',
+        'subtitle': 'LinkAja â€“ Layanan BUMN & Transportasi',
         'icon': Icons.account_balance_wallet_rounded,
         'color': Colors.red.shade700,
       },
       {
         'value': 'PayPal',
         'label': 'PayPal',
-        'subtitle': 'PayPal – Pembayaran Global Internasional',
+        'subtitle': 'PayPal â€“ Pembayaran Global Internasional',
         'icon': Icons.payment_rounded,
         'color': Colors.blue.shade900,
       },
       {
         'value': 'Wise',
         'label': 'Wise',
-        'subtitle': 'Wise – Transfer & Saldo Multi-Mata Uang',
+        'subtitle': 'Wise â€“ Transfer & Saldo Multi-Mata Uang',
         'icon': Icons.sync_alt_rounded,
         'color': Colors.green.shade600,
       },
@@ -1443,181 +1448,181 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       },
       {
         'label': 'GoPay',
-        'subtitle': 'GoPay – Ekosistem GoTo terintegrasi',
+        'subtitle': 'GoPay â€“ Ekosistem GoTo terintegrasi',
         'icon': Icons.account_balance_wallet_rounded,
         'color': Colors.teal.shade500,
       },
       {
         'label': 'OVO',
-        'subtitle': 'OVO – Cashback & merchant terluas',
+        'subtitle': 'OVO â€“ Cashback & merchant terluas',
         'icon': Icons.account_balance_wallet_rounded,
         'color': Colors.deepPurple.shade600,
       },
       {
         'label': 'Dana',
-        'subtitle': 'DANA – Dompet digital serbabisa',
+        'subtitle': 'DANA â€“ Dompet digital serbabisa',
         'icon': Icons.account_balance_wallet_rounded,
         'color': Colors.blue.shade500,
       },
       {
         'label': 'ShopeePay',
-        'subtitle': 'ShopeePay – Belanja & promo Shopee',
+        'subtitle': 'ShopeePay â€“ Belanja & promo Shopee',
         'icon': Icons.account_balance_wallet_rounded,
         'color': Colors.orange.shade800,
       },
       {
         'label': 'LinkAja',
-        'subtitle': 'LinkAja – Layanan BUMN & Transportasi',
+        'subtitle': 'LinkAja â€“ Layanan BUMN & Transportasi',
         'icon': Icons.account_balance_wallet_rounded,
         'color': Colors.red.shade600,
       },
       {
         'label': 'Ovo Points',
-        'subtitle': 'OVO Points – Konversi cashback OVO',
+        'subtitle': 'OVO Points â€“ Konversi cashback OVO',
         'icon': Icons.star_rounded,
         'color': Colors.purple.shade400,
       },
       {
         'label': 'SeaBank',
-        'subtitle': 'SeaBank – Top-up & transfer digital',
+        'subtitle': 'SeaBank â€“ Top-up & transfer digital',
         'icon': Icons.savings_rounded,
         'color': Colors.teal.shade600,
       },
       {
         'label': 'Bank Jago',
-        'subtitle': 'Jago – Fitur Kantong & transfer instan',
+        'subtitle': 'Jago â€“ Fitur Kantong & transfer instan',
         'icon': Icons.account_balance_wallet_rounded,
         'color': Colors.orange.shade700,
       },
       {
         'label': 'Bank Neo Commerce',
-        'subtitle': 'Neo – Admin gratis & bunga harian',
+        'subtitle': 'Neo â€“ Admin gratis & bunga harian',
         'icon': Icons.bolt_rounded,
         'color': Colors.amber.shade700,
       },
       {
         'label': 'Blu by BCA',
-        'subtitle': 'Blu – Bank digital by BCA',
+        'subtitle': 'Blu â€“ Bank digital by BCA',
         'icon': Icons.water_drop_rounded,
         'color': Colors.blue.shade400,
       },
       {
         'label': 'Allo Bank',
-        'subtitle': 'Allo Bank – Belanja hemat Transmart',
+        'subtitle': 'Allo Bank â€“ Belanja hemat Transmart',
         'icon': Icons.credit_card_rounded,
         'color': Colors.purple.shade500,
       },
       {
         'label': 'Bank BCA',
-        'subtitle': 'BCA – Bank Swasta Nasional Terbesar',
+        'subtitle': 'BCA â€“ Bank Swasta Nasional Terbesar',
         'icon': Icons.account_balance_rounded,
         'color': Colors.blue.shade800,
       },
       {
         'label': 'Bank Mandiri',
-        'subtitle': 'Mandiri – Bank BUMN Terbesar',
+        'subtitle': 'Mandiri â€“ Bank BUMN Terbesar',
         'icon': Icons.account_balance_rounded,
         'color': Colors.yellow.shade700,
       },
       {
         'label': 'Bank BRI',
-        'subtitle': 'BRI – Melayani Hingga Pelosok',
+        'subtitle': 'BRI â€“ Melayani Hingga Pelosok',
         'icon': Icons.account_balance_rounded,
         'color': Colors.blue.shade900,
       },
       {
         'label': 'Bank BNI',
-        'subtitle': 'BNI – Melayani Negeri Kebanggaan',
+        'subtitle': 'BNI â€“ Melayani Negeri Kebanggaan',
         'icon': Icons.account_balance_rounded,
         'color': Colors.orange.shade600,
       },
       {
         'label': 'Bank BSI',
-        'subtitle': 'BSI – Perbankan Syariah Terbesar',
+        'subtitle': 'BSI â€“ Perbankan Syariah Terbesar',
         'icon': Icons.account_balance_rounded,
         'color': Colors.teal.shade700,
       },
       {
         'label': 'Bank CIMB Niaga',
-        'subtitle': 'CIMB Niaga – Transaksi Cerdas',
+        'subtitle': 'CIMB Niaga â€“ Transaksi Cerdas',
         'icon': Icons.account_balance_rounded,
         'color': Colors.red.shade700,
       },
       {
         'label': 'Bank Permata',
-        'subtitle': 'PermataBank – Layanan Prima',
+        'subtitle': 'PermataBank â€“ Layanan Prima',
         'icon': Icons.account_balance_rounded,
         'color': Colors.green.shade700,
       },
       {
         'label': 'Bank Danamon',
-        'subtitle': 'Danamon – Layanan Perbankan Lengkap',
+        'subtitle': 'Danamon â€“ Layanan Perbankan Lengkap',
         'icon': Icons.account_balance_rounded,
         'color': Colors.blue.shade600,
       },
       {
         'label': 'Bank Mega',
-        'subtitle': 'Bank Mega – Solusi Finansial Modern',
+        'subtitle': 'Bank Mega â€“ Solusi Finansial Modern',
         'icon': Icons.account_balance_rounded,
         'color': Colors.deepOrange.shade600,
       },
       {
         'label': 'Bank Panin',
-        'subtitle': 'Panin Bank – Tabungan & Investasi',
+        'subtitle': 'Panin Bank â€“ Tabungan & Investasi',
         'icon': Icons.account_balance_rounded,
         'color': Colors.indigo.shade500,
       },
       {
         'label': 'DBS Bank',
-        'subtitle': 'DBS – Bank Terbesar di Asia Tenggara',
+        'subtitle': 'DBS â€“ Bank Terbesar di Asia Tenggara',
         'icon': Icons.account_balance_rounded,
         'color': Colors.red.shade500,
       },
       {
         'label': 'HSBC Bank',
-        'subtitle': 'HSBC – Global Wealth & Banking',
+        'subtitle': 'HSBC â€“ Global Wealth & Banking',
         'icon': Icons.account_balance_rounded,
         'color': Colors.red.shade800,
       },
       {
         'label': 'Citibank',
-        'subtitle': 'Citibank – Layanan Finansial Global',
+        'subtitle': 'Citibank â€“ Layanan Finansial Global',
         'icon': Icons.public_rounded,
         'color': Colors.blue.shade600,
       },
       {
         'label': 'UOB Bank',
-        'subtitle': 'UOB – Solusi Keuangan Regional Asia',
+        'subtitle': 'UOB â€“ Solusi Keuangan Regional Asia',
         'icon': Icons.account_balance_rounded,
         'color': Colors.blue.shade700,
       },
       {
         'label': 'Standard Chartered',
-        'subtitle': 'StanChart – Perbankan Internasional',
+        'subtitle': 'StanChart â€“ Perbankan Internasional',
         'icon': Icons.account_balance_rounded,
         'color': Colors.green.shade800,
       },
       {
         'label': 'PayPal',
-        'subtitle': 'PayPal – Pembayaran Global Internasional',
+        'subtitle': 'PayPal â€“ Pembayaran Global Internasional',
         'icon': Icons.payment_rounded,
         'color': Colors.blue.shade900,
       },
       {
         'label': 'Wise',
-        'subtitle': 'Wise – Transfer Multi-Mata Uang',
+        'subtitle': 'Wise â€“ Transfer Multi-Mata Uang',
         'icon': Icons.sync_alt_rounded,
         'color': Colors.green.shade600,
       },
       {
         'label': 'Revolut',
-        'subtitle': 'Revolut – Neo-bank Digital Global',
+        'subtitle': 'Revolut â€“ Neo-bank Digital Global',
         'icon': Icons.account_balance_wallet_rounded,
         'color': Colors.indigo.shade700,
       },
       {
         'label': 'Jenius',
-        'subtitle': 'Jenius – Kartu Debit & Tabungan Digital',
+        'subtitle': 'Jenius â€“ Kartu Debit & Tabungan Digital',
         'icon': Icons.credit_card_rounded,
         'color': Colors.teal.shade400,
       },
@@ -2378,7 +2383,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                               Text(
                                                 selectedInterestBank ==
                                                         'SeaBank (Premium)'
-                                                    ? '7,4% p.a. dihitung harian untuk saldo ≥ Rp 1 juta. Dikreditkan otomatis setiap hari.'
+                                                    ? '7,4% p.a. dihitung harian untuk saldo â‰¥ Rp 1 juta. Dikreditkan otomatis setiap hari.'
                                                     : selectedInterestBank ==
                                                             'SeaBank (Standar)'
                                                         ? '2,5% p.a. Tanpa saldo minimum, bebas tarik kapan saja. Bunga dihitung & dikreditkan harian.'
@@ -3118,7 +3123,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                     }
                                     if (sheetContext.mounted && mounted) {
                                       showTopToast(context,
-                                          'Berhasil mencatat transaksi! ✨');
+                                          'Berhasil mencatat transaksi! âœ¨');
                                     }
                                   } catch (e) {
                                     setSheetState(() {
@@ -4044,7 +4049,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(
-              _showBalance ? _formatRupiah(amount) : 'Rp ••••',
+              _showBalance ? _formatRupiah(amount) : 'Rp â€¢â€¢â€¢â€¢',
               style: GoogleFonts.quicksand(
                 fontSize: 11.5,
                 fontWeight: FontWeight.w900,
@@ -4145,7 +4150,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // === KEKAYAAN BERSIH — MINIMALIST CARD WALLET ===
+          // === KEKAYAAN BERSIH â€” MINIMALIST CARD WALLET ===
           Container(
             width: double.infinity,
             decoration: BoxDecoration(
@@ -4189,7 +4194,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // ── Baris Atas: Badge Minimalist + Tombol Eye ──
+                        // â”€â”€ Baris Atas: Badge Minimalist + Tombol Eye â”€â”€
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           crossAxisAlignment: CrossAxisAlignment.center,
@@ -4252,7 +4257,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                         ),
                         const SizedBox(height: 10),
 
-                        // ── Angka Saldo Utama ──
+                        // â”€â”€ Angka Saldo Utama â”€â”€
                         FittedBox(
                           fit: BoxFit.scaleDown,
                           alignment: Alignment.centerLeft,
@@ -4262,7 +4267,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                     totalGoldGrams * 1200000.0 +
                                     investmentValuation -
                                     unpaidBillsAmount)
-                                : 'Rp ••••••••',
+                                : 'Rp â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢',
                             style: GoogleFonts.quicksand(
                               fontSize: 25,
                               fontWeight: FontWeight.w900,
@@ -4275,7 +4280,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                         ),
                         const SizedBox(height: 12),
 
-                        // ── 3 Metrik Mini (Saving Rate, Ketahanan, Tagihan) ──
+                        // â”€â”€ 3 Metrik Mini (Saving Rate, Ketahanan, Tagihan) â”€â”€
                         Container(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 8, vertical: 7),
@@ -4347,7 +4352,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                     ),
                   ),
 
-                  // ── Bagian Bawah: Baki Akun Aset Terhubung (Saldo, Emas, Invest) ──
+                  // â”€â”€ Bagian Bawah: Baki Akun Aset Terhubung (Saldo, Emas, Invest) â”€â”€
                   Container(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 10, vertical: 8),
@@ -4794,68 +4799,68 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
 
           const SizedBox(height: 20),
 
-          // ── Quote Inspirasi Harian ──────────────────────────────────
+          // â”€â”€ Quote Inspirasi Harian â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
           Builder(builder: (_) {
             const quotes = [
               (
                 text:
                     '"Jangan tunda menabung sampai kamu punya cukup uang. Mulailah menabung, dan kamu akan punya cukup."',
-                author: '— John D. Rockefeller',
+                author: 'â€” John D. Rockefeller',
               ),
               (
                 text:
                     '"Kekayaan bukan soal berapa banyak yang kamu hasilkan, tapi berapa banyak yang kamu simpan."',
-                author: '— Robert Kiyosaki',
+                author: 'â€” Robert Kiyosaki',
               ),
               (
                 text:
-                    '"Seseorang yang tidak pernah membuat kesalahan tidak pernah mencoba sesuatu yang baru — tapi yang tidak pernah menabung, tidak pernah bebas."',
-                author: '— Pepatah Keuangan',
+                    '"Seseorang yang tidak pernah membuat kesalahan tidak pernah mencoba sesuatu yang baru â€” tapi yang tidak pernah menabung, tidak pernah bebas."',
+                author: 'â€” Pepatah Keuangan',
               ),
               (
                 text:
                     '"Uang adalah alat. Ia akan membawamu ke mana pun kamu mau, tapi tidak akan menggantikan kamu sebagai pengemudinya."',
-                author: '— Ayn Rand',
+                author: 'â€” Ayn Rand',
               ),
               (
                 text:
                     '"Investasikan pada dirimu sendiri. Pendidikan finansialmu adalah aset terbaik yang bisa kamu miliki."',
-                author: '— Warren Buffett',
+                author: 'â€” Warren Buffett',
               ),
               (
                 text:
                     '"Sedikit demi sedikit, lama-lama menjadi bukit. Konsistensi dalam menabung lebih berharga dari jumlah yang besar sesekali."',
-                author: '— Pepatah Jawa',
+                author: 'â€” Pepatah Jawa',
               ),
               (
                 text:
-                    '"Kebiasaan hemat adalah bentuk disiplin diri tertinggi — sebuah kemenangan kecil setiap harinya."',
-                author: '— T. Harv Eker',
+                    '"Kebiasaan hemat adalah bentuk disiplin diri tertinggi â€” sebuah kemenangan kecil setiap harinya."',
+                author: 'â€” T. Harv Eker',
               ),
               (
                 text:
                     '"Bukan penghasilan yang menentukan kekayaanmu, melainkan keputusanmu hari ini."',
-                author: '— Dave Ramsey',
+                author: 'â€” Dave Ramsey',
               ),
               (
                 text:
                     '"Masa depan finansialmu bergantung pada apa yang kamu lakukan hari ini, bukan apa yang kamu rencanakan."',
-                author: '— Suze Orman',
+                author: 'â€” Suze Orman',
               ),
               (
                 text:
                     '"Setiap rupiah yang kamu hemat hari ini adalah satu langkah lebih dekat ke kebebasan finansialmu."',
-                author: '— TabunganKu',
+                author: 'â€” TabunganKu',
               ),
               (
                 text:
-                    '"Kebebasan finansial bukan impian — itu hasil dari kebiasaan kecil yang dilakukan dengan konsisten."',
-                author: '— Ramit Sethi',
+                    '"Kebebasan finansial bukan impian â€” itu hasil dari kebiasaan kecil yang dilakukan dengan konsisten."',
+                author: 'â€” Ramit Sethi',
               ),
               (
                 text:
                     '"Menabung adalah kemampuan untuk menunda kepuasan hari ini demi kebahagiaan yang lebih besar di masa depan."',
-                author: '— Morgan Housel',
+                author: 'â€” Morgan Housel',
               ),
             ];
 
@@ -5203,7 +5208,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         (ref.watch(themeProvider) == ThemeMode.system &&
             Theme.of(context).brightness == Brightness.dark);
 
-    return _HistoryTabView(
+    return HistoryTabView(
       allTransactions: transactions,
       isDarkMode: isDarkMode,
       buildTransactionCard: _buildTransactionCard,
@@ -5526,7 +5531,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                   : Colors.teal.shade900)),
                       const SizedBox(height: 2),
                       Text(
-                          '${DateFormat('EEEE, dd MMM', 'id_ID').format(t.date)} • ${DateFormat('HH:mm', 'id_ID').format(t.date)}',
+                          '${DateFormat('EEEE, dd MMM', 'id_ID').format(t.date)} â€¢ ${DateFormat('HH:mm', 'id_ID').format(t.date)}',
                           style: GoogleFonts.quicksand(
                               color:
                                   isDarkMode ? Colors.white54 : Colors.black26,
@@ -5855,1333 +5860,6 @@ const List<_NavItem> _navItems = [
   _NavItem(icon: Icons.person_outline_rounded, label: 'Profil'),
 ];
 
-class _CalculatorSheetContent extends ConsumerStatefulWidget {
-  const _CalculatorSheetContent();
-
-  @override
-  ConsumerState<_CalculatorSheetContent> createState() =>
-      _CalculatorSheetContentState();
-}
-
-class _CalculatorSheetContentState
-    extends ConsumerState<_CalculatorSheetContent> {
-  String _output = "0";
-  String _expression = "";
-  double? _num1;
-  double? _num2;
-  String? _operand;
-
-  void _calculate() {
-    if (_num1 == null || _operand == null) return;
-    _num2 = double.tryParse(_output.replaceAll('.', '').replaceAll(',', '.'));
-    if (_num2 == null) return;
-
-    double result = 0;
-    switch (_operand) {
-      case "+":
-        result = _num1! + _num2!;
-        break;
-      case "-":
-        result = _num1! - _num2!;
-        break;
-      case "×":
-        result = _num1! * _num2!;
-        break;
-      case "÷":
-        result = _num2 == 0 ? 0 : _num1! / _num2!;
-        break;
-    }
-
-    _output = result % 1 == 0
-        ? result.toInt().toString()
-        : result.toStringAsFixed(2).replaceAll('.', ',');
-    _num1 = result;
-    _num2 = null;
-    _operand = null;
-  }
-
-  void _buttonPressed(String buttonText) {
-    setState(() {
-      if (buttonText == "AC") {
-        _output = "0";
-        _expression = "";
-        _num1 = null;
-        _num2 = null;
-        _operand = null;
-      } else if (buttonText == "C") {
-        if (_output != "0") {
-          _output = _output.length > 1
-              ? _output.substring(0, _output.length - 1)
-              : "0";
-        }
-      } else if (buttonText == "+" ||
-          buttonText == "-" ||
-          buttonText == "×" ||
-          buttonText == "÷") {
-        double currentVal =
-            double.tryParse(_output.replaceAll('.', '').replaceAll(',', '.')) ??
-                0;
-
-        if (_num1 == null) {
-          _num1 = currentVal;
-          _operand = buttonText;
-          _expression = "$_output $buttonText";
-          _output = "0";
-        } else if (_operand != null) {
-          if (_output == "0") {
-            _operand = buttonText;
-            _expression =
-                _expression.substring(0, _expression.length - 1) + buttonText;
-          } else {
-            _calculate();
-            _operand = buttonText;
-            _expression = "$_output $buttonText";
-            _output = "0";
-          }
-        } else {
-          _num1 = currentVal;
-          _operand = buttonText;
-          _expression = "$_output $buttonText";
-          _output = "0";
-        }
-      } else if (buttonText == "%") {
-        double val =
-            double.tryParse(_output.replaceAll('.', '').replaceAll(',', '.')) ??
-                0;
-        _output = (val / 100).toString().replaceAll('.', ',');
-      } else if (buttonText == "+/-") {
-        if (_output.startsWith("-")) {
-          _output = _output.substring(1);
-        } else if (_output != "0") {
-          _output = "-$_output";
-        }
-      } else if (buttonText == "=") {
-        if (_num1 != null && _operand != null) {
-          _expression = "";
-          _calculate();
-
-          _num1 = null;
-          _operand = null;
-        }
-      } else {
-        if (_output == "0") {
-          _output = buttonText;
-        } else {
-          _output = _output + buttonText;
-        }
-      }
-    });
-  }
-
-  String _formatDisplay(String val) {
-    if (val == "0") return "0";
-    if (val.contains(',')) return val;
-    final clean = val.replaceAll('.', '');
-    final parts = clean.split(',');
-    final whole = parts[0];
-    final formattedWhole = whole.replaceAllMapped(
-      RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
-      (match) => '${match[1]}.',
-    );
-    return parts.length > 1 ? '$formattedWhole,${parts[1]}' : formattedWhole;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
-        (ref.watch(themeProvider) == ThemeMode.system &&
-            theme.brightness == Brightness.dark);
-
-    return Container(
-      padding: EdgeInsets.fromLTRB(
-          24, 12, 24, 24 + MediaQuery.of(context).padding.bottom),
-      decoration: BoxDecoration(
-        color: isDarkMode ? AppColors.surfaceDark : Colors.white,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(40)),
-        boxShadow: isDarkMode
-            ? [
-                BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.3),
-                    blurRadius: 40,
-                    offset: const Offset(0, -10))
-              ]
-            : [
-                BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
-                    blurRadius: 40,
-                    offset: const Offset(0, -10))
-              ],
-      ),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              margin: const EdgeInsets.only(bottom: 20),
-              decoration: BoxDecoration(
-                  color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
-                  borderRadius: BorderRadius.circular(2)),
-            ),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: isDarkMode
-                    ? Colors.white.withValues(alpha: 0.03)
-                    : AppColors.background,
-                borderRadius: BorderRadius.circular(24),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(_expression,
-                      style: GoogleFonts.quicksand(
-                          fontSize: 11,
-                          color: isDarkMode
-                              ? Colors.white24
-                              : Colors.teal.shade800.withValues(alpha: 0.4),
-                          fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 4),
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    reverse: true,
-                    child: Text(
-                      _formatDisplay(_output),
-                      style: GoogleFonts.quicksand(
-                          fontSize: 40,
-                          fontWeight: FontWeight.bold,
-                          color:
-                              isDarkMode ? Colors.white : Colors.teal.shade900,
-                          letterSpacing: -1),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-            GridView.count(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: 4,
-              mainAxisSpacing: 10,
-              crossAxisSpacing: 10,
-              children: [
-                _calcButton("AC", isAction: true, isDarkMode: isDarkMode),
-                _calcButton("+/-", isAction: true, isDarkMode: isDarkMode),
-                _calcButton("%", isAction: true, isDarkMode: isDarkMode),
-                _calcButton("÷", isOperator: true, isDarkMode: isDarkMode),
-                _calcButton("7", isDarkMode: isDarkMode),
-                _calcButton("8", isDarkMode: isDarkMode),
-                _calcButton("9", isDarkMode: isDarkMode),
-                _calcButton("×", isOperator: true, isDarkMode: isDarkMode),
-                _calcButton("4", isDarkMode: isDarkMode),
-                _calcButton("5", isDarkMode: isDarkMode),
-                _calcButton("6", isDarkMode: isDarkMode),
-                _calcButton("-", isOperator: true, isDarkMode: isDarkMode),
-                _calcButton("1", isDarkMode: isDarkMode),
-                _calcButton("2", isDarkMode: isDarkMode),
-                _calcButton("3", isDarkMode: isDarkMode),
-                _calcButton("+", isOperator: true, isDarkMode: isDarkMode),
-                _calcButton("C", isDarkMode: isDarkMode),
-                _calcButton("0", isDarkMode: isDarkMode),
-                _calcButton(",", isDarkMode: isDarkMode),
-                _calcButton("=",
-                    isOperator: true, isPrimary: true, isDarkMode: isDarkMode),
-              ],
-            ),
-            const SizedBox(height: 8),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _calcButton(String text,
-      {bool isOperator = false,
-      bool isAction = false,
-      bool isPrimary = false,
-      required bool isDarkMode}) {
-    Color bgColor =
-        isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.white;
-    Color textColor = isDarkMode ? Colors.white : Colors.teal.shade900;
-
-    if (isOperator) {
-      bgColor = isPrimary
-          ? AppColors.primary
-          : (isDarkMode
-              ? Colors.teal.shade900.withValues(alpha: 0.3)
-              : Colors.teal.shade50);
-      textColor = isPrimary
-          ? Colors.white
-          : (isDarkMode ? Colors.teal.shade300 : AppColors.primary);
-    } else if (isAction) {
-      bgColor = isDarkMode
-          ? Colors.white.withValues(alpha: 0.08)
-          : Colors.grey.shade50;
-      textColor = isDarkMode ? Colors.teal.shade200 : Colors.teal.shade700;
-    }
-
-    return Material(
-      color: bgColor,
-      borderRadius: BorderRadius.circular(20),
-      child: InkWell(
-        onTap: () => _buttonPressed(text == "," ? "." : text),
-        borderRadius: BorderRadius.circular(20),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-                color: isDarkMode
-                    ? Colors.white.withValues(alpha: 0.05)
-                    : Colors.teal.shade50.withValues(alpha: 0.5),
-                width: 1),
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            text,
-            style: GoogleFonts.quicksand(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: textColor,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _HistoryTabView extends StatefulWidget {
-  final List<TransactionModel> allTransactions;
-  final bool isDarkMode;
-  final Widget Function(TransactionModel) buildTransactionCard;
-  final Widget Function(String, double, Color) miniHeaderStat;
-  final String Function(double) formatRupiah;
-  final String Function(double) formatCompact;
-  final void Function(TransactionModel) onTransactionTap;
-  final Future<void> Function({
-    required List<TransactionModel> monthTx,
-    required String monthLabel,
-  }) onExportMonth;
-
-  const _HistoryTabView({
-    required this.allTransactions,
-    required this.isDarkMode,
-    required this.buildTransactionCard,
-    required this.miniHeaderStat,
-    required this.formatRupiah,
-    required this.formatCompact,
-    required this.onTransactionTap,
-    required this.onExportMonth,
-  });
-
-  @override
-  State<_HistoryTabView> createState() => _HistoryTabViewState();
-}
-
-class _HistoryTabViewState extends State<_HistoryTabView> {
-  int _filterIndex = 0;
-
-  final TextEditingController _searchCtrl = TextEditingController();
-  String _searchQuery = '';
-
-  int _typeFilter = 0;
-
-  int _debtTypeFilter = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    _searchCtrl.addListener(() {
-      setState(() => _searchQuery = _searchCtrl.text.toLowerCase());
-    });
-  }
-
-  @override
-  void dispose() {
-    _searchCtrl.dispose();
-    super.dispose();
-  }
-
-  bool _isHutangPiutang(TransactionModel t) =>
-      t.category == 'Hutang' || t.category == 'Piutang';
-  bool _isBelanja(TransactionModel t) => t.id.startsWith('shopping_');
-  bool _isRegular(TransactionModel t) => !_isHutangPiutang(t) && !_isBelanja(t);
-
-  String _fmtCur(double amount) =>
-      NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0)
-          .format(amount);
-
-  @override
-  Widget build(BuildContext context) {
-    final sorted = [...widget.allTransactions]
-      ..sort((a, b) => b.date.compareTo(a.date));
-
-    final regularList = sorted.where(_isRegular).toList();
-    final hutangList = sorted.where(_isHutangPiutang).toList();
-    final belanjaList = sorted.where(_isBelanja).toList();
-    final isDark = widget.isDarkMode;
-
-    return Column(
-      children: [
-        _buildHistoryFilter(isDark, regularList, hutangList, belanjaList),
-        _buildSearchBar(isDark, regularList),
-        Expanded(
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 300),
-            child: _buildFilteredBody(
-                sorted, regularList, hutangList, belanjaList, isDark),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSearchBar(bool isDark, List<TransactionModel> regularList) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
-          child: Builder(builder: (context) {
-            final isDk = isDark;
-            return TextField(
-              controller: _searchCtrl,
-              style: GoogleFonts.quicksand(
-                  fontSize: 11,
-                  color: isDk ? Colors.white : Colors.black87,
-                  fontWeight: FontWeight.bold),
-              decoration: InputDecoration(
-                hintText: 'Cari transaksi...',
-                hintStyle: GoogleFonts.quicksand(
-                    fontSize: 14,
-                    color: isDk ? Colors.white24 : Colors.black26,
-                    fontWeight: FontWeight.bold),
-                prefixIcon: Icon(Icons.search_rounded,
-                    color: isDk ? Colors.white38 : Colors.black38, size: 20),
-                suffixIcon: _searchQuery.isNotEmpty
-                    ? IconButton(
-                        icon: Icon(Icons.clear_rounded,
-                            size: 18,
-                            color: isDk ? Colors.white38 : Colors.black38),
-                        onPressed: () {
-                          _searchCtrl.clear();
-                          setState(() {
-                            _searchQuery = '';
-                          });
-                        },
-                      )
-                    : null,
-                filled: true,
-                fillColor: isDk
-                    ? Colors.white.withValues(alpha: 0.05)
-                    : Colors.grey.shade100,
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide.none),
-                enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(
-                        color: isDk
-                            ? Colors.white10
-                            : Colors.black.withValues(alpha: 0.04))),
-                focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide:
-                        BorderSide(color: AppColors.primary, width: 1.5)),
-              ),
-            );
-          }),
-        ),
-        const SizedBox(height: 10),
-        if (_filterIndex == 0 || _filterIndex == 1)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Row(
-              children: [
-                Text(
-                  'Filter Tipe:',
-                  style: GoogleFonts.quicksand(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    color: isDark ? Colors.white54 : Colors.grey.shade600,
-                  ),
-                ),
-                const SizedBox(width: 10),
-                if (_filterIndex == 0)
-                  _buildTypeDropdown(isDark)
-                else if (_filterIndex == 1)
-                  _buildDebtTypeDropdown(isDark),
-              ],
-            ),
-          ),
-        const SizedBox(height: 8),
-      ],
-    );
-  }
-
-  Widget _buildTypeDropdown(bool isDark) {
-    final options = [
-      {
-        'val': 0,
-        'label': 'Semua',
-        'icon': Icons.receipt_long_rounded,
-        'color': AppColors.primary
-      },
-      {
-        'val': 1,
-        'label': 'Pemasukan',
-        'icon': Icons.arrow_downward_rounded,
-        'color': const Color(0xFF2ECC71)
-      },
-      {
-        'val': 2,
-        'label': 'Pengeluaran',
-        'icon': Icons.arrow_upward_rounded,
-        'color': const Color(0xFFE74C3C)
-      },
-    ];
-
-    final currentOption = options.firstWhere((e) => e['val'] == _typeFilter,
-        orElse: () => options[0]);
-    final currentColor = currentOption['color'] as Color;
-    final currentIcon = currentOption['icon'] as IconData;
-    final currentLabel = currentOption['label'] as String;
-
-    return PopupMenuButton<int>(
-      initialValue: _typeFilter,
-      onSelected: (int val) {
-        setState(() => _typeFilter = val);
-      },
-      borderRadius: BorderRadius.circular(20),
-      offset: const Offset(0, 42),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-      clipBehavior: Clip.antiAlias,
-      color: isDark ? AppColors.surfaceDark : Colors.white,
-      elevation: 6,
-      itemBuilder: (context) => options.map((opt) {
-        final val = opt['val'] as int;
-        final selected = _typeFilter == val;
-        final color = opt['color'] as Color;
-        return PopupMenuItem<int>(
-          value: val,
-          height: 44,
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: isDark ? 0.2 : 0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(opt['icon'] as IconData, size: 14, color: color),
-              ),
-              const SizedBox(width: 12),
-              Text(
-                opt['label'] as String,
-                style: GoogleFonts.quicksand(
-                  fontSize: 12,
-                  fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
-                  color: selected
-                      ? color
-                      : (isDark ? Colors.white : Colors.black87),
-                ),
-              ),
-              if (selected) ...[
-                const Spacer(),
-                Icon(Icons.check_circle_rounded, size: 16, color: color),
-              ],
-            ],
-          ),
-        );
-      }).toList(),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: currentColor.withValues(alpha: isDark ? 0.15 : 0.08),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: currentColor.withValues(alpha: isDark ? 0.4 : 0.25),
-            width: 1.2,
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(currentIcon, size: 14, color: currentColor),
-            const SizedBox(width: 8),
-            Text(
-              currentLabel,
-              style: GoogleFonts.quicksand(
-                fontSize: 11.5,
-                fontWeight: FontWeight.bold,
-                color: isDark ? Colors.white : currentColor,
-              ),
-            ),
-            const SizedBox(width: 6),
-            Icon(
-              Icons.keyboard_arrow_down_rounded,
-              size: 16,
-              color: isDark ? Colors.white60 : currentColor,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDebtTypeDropdown(bool isDark) {
-    final options = [
-      {
-        'val': 0,
-        'label': 'Semua',
-        'icon': Icons.receipt_long_rounded,
-        'color': AppColors.primary
-      },
-      {
-        'val': 1,
-        'label': 'Hutang',
-        'icon': Icons.call_made_rounded,
-        'color': const Color(0xFFE74C3C)
-      },
-      {
-        'val': 2,
-        'label': 'Piutang',
-        'icon': Icons.call_received_rounded,
-        'color': const Color(0xFF2ECC71)
-      },
-    ];
-
-    final currentOption = options.firstWhere((e) => e['val'] == _debtTypeFilter,
-        orElse: () => options[0]);
-    final currentColor = currentOption['color'] as Color;
-    final currentIcon = currentOption['icon'] as IconData;
-    final currentLabel = currentOption['label'] as String;
-
-    return PopupMenuButton<int>(
-      initialValue: _debtTypeFilter,
-      onSelected: (int val) {
-        setState(() => _debtTypeFilter = val);
-      },
-      borderRadius: BorderRadius.circular(20),
-      offset: const Offset(0, 42),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-      clipBehavior: Clip.antiAlias,
-      color: isDark ? AppColors.surfaceDark : Colors.white,
-      elevation: 6,
-      itemBuilder: (context) => options.map((opt) {
-        final val = opt['val'] as int;
-        final selected = _debtTypeFilter == val;
-        final color = opt['color'] as Color;
-        return PopupMenuItem<int>(
-          value: val,
-          height: 44,
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: isDark ? 0.2 : 0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(opt['icon'] as IconData, size: 14, color: color),
-              ),
-              const SizedBox(width: 12),
-              Text(
-                opt['label'] as String,
-                style: GoogleFonts.quicksand(
-                  fontSize: 12,
-                  fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
-                  color: selected
-                      ? color
-                      : (isDark ? Colors.white : Colors.black87),
-                ),
-              ),
-              if (selected) ...[
-                const Spacer(),
-                Icon(Icons.check_circle_rounded, size: 16, color: color),
-              ],
-            ],
-          ),
-        );
-      }).toList(),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: currentColor.withValues(alpha: isDark ? 0.15 : 0.08),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: currentColor.withValues(alpha: isDark ? 0.4 : 0.25),
-            width: 1.2,
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(currentIcon, size: 14, color: currentColor),
-            const SizedBox(width: 8),
-            Text(
-              currentLabel,
-              style: GoogleFonts.quicksand(
-                fontSize: 11.5,
-                fontWeight: FontWeight.bold,
-                color: isDark ? Colors.white : currentColor,
-              ),
-            ),
-            const SizedBox(width: 6),
-            Icon(
-              Icons.keyboard_arrow_down_rounded,
-              size: 16,
-              color: isDark ? Colors.white60 : currentColor,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHistoryFilter(bool isDark, List<TransactionModel> regularList,
-      List<TransactionModel> hutangList, List<TransactionModel> belanjaList) {
-    final categories = [
-      'Pemasukan & Pengeluaran',
-      'Hutang & Piutang',
-      'Belanja'
-    ];
-    final categoryIcons = [
-      Icons.account_balance_rounded,
-      Icons.account_balance_wallet_rounded,
-      Icons.shopping_basket_rounded
-    ];
-
-    return Container(
-      margin: const EdgeInsets.fromLTRB(20, 12, 20, 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Material(
-            color: Colors.transparent,
-            borderRadius: BorderRadius.circular(20),
-            clipBehavior: Clip.antiAlias,
-            child: InkWell(
-              onTap: () async {
-                final RenderBox button =
-                    context.findRenderObject() as RenderBox;
-                final RenderBox overlay = Navigator.of(context)
-                    .overlay!
-                    .context
-                    .findRenderObject() as RenderBox;
-                final RelativeRect position = RelativeRect.fromRect(
-                  Rect.fromPoints(
-                    button.localToGlobal(const Offset(0, 45),
-                        ancestor: overlay),
-                    button.localToGlobal(button.size.bottomRight(Offset.zero),
-                        ancestor: overlay),
-                  ),
-                  Offset.zero & overlay.size,
-                );
-
-                final int? result = await showMenu<int>(
-                  context: context,
-                  position: position,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20)),
-                  clipBehavior: Clip.antiAlias,
-                  color: isDark ? AppColors.surfaceDark : Colors.white,
-                  elevation: 8,
-                  items: [
-                    for (int i = 0; i < categories.length; i++)
-                      PopupMenuItem(
-                        value: i,
-                        padding: EdgeInsets.zero,
-                        height: 52,
-                        child: GestureDetector(
-                          onTap: () => Navigator.pop(context, i),
-                          behavior: HitTestBehavior.opaque,
-                          child: Container(
-                            width: double.infinity,
-                            height: 52,
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: Row(
-                              children: [
-                                Icon(categoryIcons[i],
-                                    size: 18,
-                                    color: _filterIndex == i
-                                        ? AppColors.primary
-                                        : (isDark
-                                            ? Colors.white38
-                                            : Colors.black38)),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Text(categories[i],
-                                      style: GoogleFonts.quicksand(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.bold,
-                                        color: _filterIndex == i
-                                            ? AppColors.primary
-                                            : (isDark
-                                                ? Colors.white
-                                                : Colors.black87),
-                                      )),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
-                );
-                if (result != null && mounted) {
-                  setState(() => _filterIndex = result);
-                }
-              },
-              borderRadius: BorderRadius.circular(20),
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? Colors.white.withValues(alpha: 0.05)
-                      : Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                      color: isDark
-                          ? Colors.white10
-                          : Colors.black.withValues(alpha: 0.03)),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(categoryIcons[_filterIndex],
-                        size: 16, color: AppColors.primary),
-                    const SizedBox(width: 10),
-                    Text(
-                      categories[_filterIndex],
-                      style: GoogleFonts.quicksand(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : AppColors.primaryDark,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Icon(Icons.keyboard_arrow_down_rounded,
-                        size: 18,
-                        color: isDark ? Colors.white38 : Colors.black38),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              _filterIndex == 0
-                  ? '${regularList.length} Item'
-                  : (_filterIndex == 1
-                      ? '${hutangList.length} Item'
-                      : '${belanjaList.length} Item'),
-              style: GoogleFonts.quicksand(
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primary),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFilteredBody(
-      List<TransactionModel> allSorted,
-      List<TransactionModel> regularList,
-      List<TransactionModel> hutangList,
-      List<TransactionModel> belanjaList,
-      bool isDark) {
-    switch (_filterIndex) {
-      case 0:
-        return _buildRegularTab(allSorted, regularList, isDark);
-      case 1:
-        return _buildHutangTab(hutangList, isDark);
-      case 2:
-        return _buildBelanjaTab(belanjaList, isDark);
-      default:
-        return const SizedBox.shrink();
-    }
-  }
-
-  Widget _buildRegularTab(List<TransactionModel> allSorted,
-      List<TransactionModel> regularList, bool isDark) {
-    final filtered = regularList.where((t) {
-      if (_typeFilter == 1 && t.type != TransactionType.income) {
-        return false;
-      }
-      if (_typeFilter == 2 && t.type != TransactionType.expense) {
-        return false;
-      }
-
-      if (_searchQuery.isNotEmpty) {
-        final q = _searchQuery;
-        if (!t.title.toLowerCase().contains(q) &&
-            !t.category.toLowerCase().contains(q) &&
-            !t.description.toLowerCase().contains(q)) {
-          return false;
-        }
-      }
-      return true;
-    }).toList();
-
-    final isFiltering = _searchQuery.isNotEmpty || _typeFilter != 0;
-
-    if (regularList.isEmpty) {
-      return _emptyState(isDark,
-          icon: Icons.receipt_long_outlined,
-          label: 'Belum ada pemasukan/pengeluaran');
-    }
-
-    if (filtered.isEmpty && isFiltering) {
-      return _emptyState(isDark,
-          icon: Icons.search_off_rounded,
-          label: 'Tidak ada hasil',
-          subtitle: 'Coba ubah kata kunci atau hapus filter');
-    }
-
-    final Map<String, List<TransactionModel>> grouped = {};
-    for (final t in filtered) {
-      final k = DateFormat('MMMM yyyy', 'id_ID').format(t.date).toUpperCase();
-      grouped.putIfAbsent(k, () => []).add(t);
-    }
-
-    final Map<String, List<TransactionModel>> allGrouped = {};
-    for (final t in allSorted) {
-      final k = DateFormat('MMMM yyyy', 'id_ID').format(t.date).toUpperCase();
-      allGrouped.putIfAbsent(k, () => []).add(t);
-    }
-
-    return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 80),
-      itemCount: grouped.keys.length,
-      itemBuilder: (context, i) {
-        final monthKey = grouped.keys.elementAt(i);
-        final monthTx = grouped[monthKey]!;
-        final allMonthTx = allGrouped[monthKey] ?? monthTx;
-
-        final totalIn = allMonthTx
-            .where((t) => t.type == TransactionType.income)
-            .fold(0.0, (s, t) => s + t.amount);
-        final totalOut = allMonthTx
-            .where((t) => t.type == TransactionType.expense)
-            .fold(0.0, (s, t) => s + t.amount);
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(8, 24, 8, 16),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(monthKey,
-                            style: GoogleFonts.quicksand(
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                                color: isDark
-                                    ? Colors.white60
-                                    : Colors.teal.shade900,
-                                letterSpacing: 1.2)),
-                        const SizedBox(height: 10),
-                        Wrap(
-                          spacing: 10,
-                          runSpacing: 10,
-                          crossAxisAlignment: WrapCrossAlignment.center,
-                          children: [
-                            widget.miniHeaderStat(
-                                'MASUK',
-                                totalIn,
-                                isDark
-                                    ? Colors.greenAccent.shade400
-                                    : Colors.green),
-                            widget.miniHeaderStat(
-                                'KELUAR',
-                                totalOut,
-                                isDark
-                                    ? Colors.redAccent.shade200
-                                    : Colors.red),
-                          ],
-                        )
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            ...monthTx.map((t) => widget.buildTransactionCard(t)),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _buildHutangTab(List<TransactionModel> list, bool isDark) {
-    if (list.isEmpty) {
-      return _emptyState(isDark,
-          icon: Icons.account_balance_wallet_outlined,
-          label: 'Belum ada riwayat hutang/piutang',
-          subtitle: 'Muncul saat hutang/piutang ditandai lunas');
-    }
-
-    final filtered = list.where((t) {
-      if (_searchQuery.isNotEmpty) {
-        final q = _searchQuery.toLowerCase();
-        if (!t.title.toLowerCase().contains(q) &&
-            !t.category.toLowerCase().contains(q) &&
-            !t.description.toLowerCase().contains(q)) {
-          return false;
-        }
-      }
-      return true;
-    }).toList();
-
-    if (filtered.isEmpty && _searchQuery.isNotEmpty) {
-      return _emptyState(isDark,
-          icon: Icons.search_off_rounded,
-          label: 'Tidak ada hasil',
-          subtitle: 'Coba ubah kata kunci pencarian Anda');
-    }
-
-    final hutangOnly = filtered.where((t) => t.category == 'Hutang').toList();
-    final piutangOnly = filtered.where((t) => t.category == 'Piutang').toList();
-    final totalH = hutangOnly.fold(0.0, (s, t) => s + t.amount);
-    final totalP = piutangOnly.fold(0.0, (s, t) => s + t.amount);
-
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 80),
-      children: [
-        const SizedBox(height: 12),
-        Container(
-          padding: const EdgeInsets.all(18),
-          margin: const EdgeInsets.only(bottom: 24),
-          decoration: BoxDecoration(
-            color: isDark
-                ? Colors.white.withValues(alpha: 0.05)
-                : Colors.grey.shade50,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-                color: isDark
-                    ? Colors.white.withValues(alpha: 0.08)
-                    : Colors.grey.shade100),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                  child: _sumItemMinimalist(isDark,
-                      label: 'HUTANG DIBAYAR',
-                      amount: totalH,
-                      color: Colors.red.shade400)),
-              Container(
-                  width: 1,
-                  height: 30,
-                  color: isDark ? Colors.white12 : Colors.grey.shade200),
-              Expanded(
-                  child: _sumItemMinimalist(isDark,
-                      label: 'PIUTANG DITERIMA',
-                      amount: totalP,
-                      color: Colors.green.shade400)),
-            ],
-          ),
-        ),
-        if ((_debtTypeFilter == 0 || _debtTypeFilter == 1) &&
-            hutangOnly.isNotEmpty) ...[
-          ...hutangOnly.map((t) => _debtCard(t, isDark)),
-        ],
-        if ((_debtTypeFilter == 0 || _debtTypeFilter == 2) &&
-            piutangOnly.isNotEmpty) ...[
-          ...piutangOnly.map((t) => _debtCard(t, isDark)),
-        ],
-      ],
-    );
-  }
-
-  Widget _buildBelanjaTab(List<TransactionModel> list, bool isDark) {
-    if (list.isEmpty) {
-      return _emptyState(isDark,
-          icon: Icons.shopping_bag_outlined,
-          label: 'Belum ada riwayat belanja',
-          subtitle: 'Muncul saat item belanja ditandai dibeli');
-    }
-
-    final filtered = list.where((t) {
-      if (_searchQuery.isNotEmpty) {
-        final q = _searchQuery.toLowerCase();
-        if (!t.title.toLowerCase().contains(q) &&
-            !t.category.toLowerCase().contains(q) &&
-            !t.description.toLowerCase().contains(q)) {
-          return false;
-        }
-      }
-      return true;
-    }).toList();
-
-    if (filtered.isEmpty && _searchQuery.isNotEmpty) {
-      return _emptyState(isDark,
-          icon: Icons.search_off_rounded,
-          label: 'Tidak ada hasil',
-          subtitle: 'Coba ubah kata kunci pencarian Anda');
-    }
-
-    final total = filtered.fold(0.0, (s, t) => s + t.amount);
-
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 80),
-      children: [
-        Container(
-          padding: const EdgeInsets.all(18),
-          margin: const EdgeInsets.only(bottom: 16),
-          decoration: BoxDecoration(
-            color: isDark
-                ? Colors.white.withValues(alpha: 0.05)
-                : Colors.grey.shade50,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-                color: isDark
-                    ? Colors.white.withValues(alpha: 0.08)
-                    : Colors.grey.shade100),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                  child: _sumItemMinimalist(isDark,
-                      label: 'TOTAL BELANJA',
-                      amount: total,
-                      color: AppColors.primary)),
-              Container(
-                  width: 1,
-                  height: 30,
-                  color: isDark ? Colors.white12 : Colors.grey.shade200),
-              Expanded(
-                  child: _sumItemMinimalist(isDark,
-                      label: 'JUMLAH ITEM',
-                      amount: filtered.length.toDouble(),
-                      isCurrency: false,
-                      color: isDark ? Colors.white38 : Colors.black38)),
-            ],
-          ),
-        ),
-        ...filtered.map((t) => _shoppingCard(t, isDark)),
-      ],
-    );
-  }
-
-  Widget _debtCard(TransactionModel t, bool isDark) {
-    final isHutang = t.category == 'Hutang';
-    final color = isHutang ? Colors.red.shade400 : Colors.green.shade400;
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      decoration: BoxDecoration(
-        color: isDark ? Colors.white.withValues(alpha: 0.04) : Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-            color: isDark
-                ? Colors.white.withValues(alpha: 0.06)
-                : Colors.grey.shade100),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(18),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: () => widget.onTransactionTap(t),
-          child: Padding(
-            padding: const EdgeInsets.all(14),
-            child: Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                      color: color.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(13)),
-                  child: Icon(
-                      isHutang
-                          ? Icons.call_made_rounded
-                          : Icons.call_received_rounded,
-                      color: color,
-                      size: 18),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(t.title,
-                          style: GoogleFonts.quicksand(
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                              color: isDark ? Colors.white : Colors.black87)),
-                      if (t.description.isNotEmpty)
-                        Text(t.description,
-                            style: GoogleFonts.quicksand(
-                                fontSize: 11,
-                                color:
-                                    isDark ? Colors.white38 : Colors.black38)),
-                      Text('#${t.id.replaceAll('paid_debt_', '')}',
-                          style: GoogleFonts.quicksand(
-                              fontSize: 9,
-                              color: isDark
-                                  ? Colors.white.withValues(alpha: 0.2)
-                                  : Colors.grey.shade400)),
-                    ],
-                  ),
-                ),
-                Text(_fmtCur(t.amount),
-                    style: GoogleFonts.quicksand(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        color: color)),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _shoppingCard(TransactionModel t, bool isDark) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      decoration: BoxDecoration(
-        color: isDark ? Colors.white.withValues(alpha: 0.04) : Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-            color: isDark
-                ? Colors.white.withValues(alpha: 0.06)
-                : Colors.grey.shade100),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(18),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: () => widget.onTransactionTap(t),
-          child: Padding(
-            padding: const EdgeInsets.all(14),
-            child: Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(13)),
-                  child: const Icon(Icons.shopping_bag_rounded,
-                      color: AppColors.primary, size: 18),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(t.title,
-                      style: GoogleFonts.quicksand(
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          color: isDark ? Colors.white : Colors.black87)),
-                ),
-                Text(_fmtCur(t.amount),
-                    style: GoogleFonts.quicksand(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primary)),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _sumItemMinimalist(bool isDark,
-      {required String label,
-      required double amount,
-      required Color color,
-      bool isCurrency = true}) {
-    return Column(children: [
-      Text(label,
-          style: GoogleFonts.quicksand(
-              fontSize: 8,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 0.8,
-              color: isDark ? Colors.white38 : Colors.black38)),
-      const SizedBox(height: 5),
-      Text(isCurrency ? _fmtCur(amount) : amount.toInt().toString(),
-          style: GoogleFonts.quicksand(
-              fontSize: 11, fontWeight: FontWeight.bold, color: color)),
-    ]);
-  }
-
-  Widget _groupHeader(String label, Color color, bool isDark) {
-    return Row(children: [
-      Container(
-          width: 4,
-          height: 14,
-          decoration: BoxDecoration(
-              color: color, borderRadius: BorderRadius.circular(2))),
-      const SizedBox(width: 10),
-      Text(label,
-          style: GoogleFonts.quicksand(
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 1.2,
-              color: isDark ? Colors.white38 : Colors.black38)),
-    ]);
-  }
-
-  Widget _emptyState(bool isDark,
-      {required IconData icon, required String label, String? subtitle}) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(28),
-            decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.06),
-                shape: BoxShape.circle),
-            child: Icon(icon,
-                size: 60, color: AppColors.primary.withValues(alpha: 0.3)),
-          ),
-          const SizedBox(height: 20),
-          Text(label,
-              style: GoogleFonts.quicksand(
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  color: isDark ? Colors.white38 : Colors.black38)),
-          if (subtitle != null) ...[
-            const SizedBox(height: 8),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 40),
-              child: Text(subtitle,
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.quicksand(
-                      fontSize: 11,
-                      color: isDark ? Colors.white24 : Colors.black26)),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
 
 class _QuickAction {
   final IconData icon;
@@ -7197,21 +5875,4 @@ class _NavItem {
   final String label;
 
   const _NavItem({required this.icon, required this.label});
-}
-
-class _RibuanFormatter extends TextInputFormatter {
-  @override
-  TextEditingValue formatEditUpdate(
-      TextEditingValue oldValue, TextEditingValue newValue) {
-    if (newValue.text.isEmpty) return newValue;
-    final intValue = int.tryParse(newValue.text.replaceAll('.', ''));
-    if (intValue == null) return oldValue;
-    final newText =
-        NumberFormat.currency(locale: 'id_ID', symbol: '', decimalDigits: 0)
-            .format(intValue)
-            .trim();
-    return TextEditingValue(
-        text: newText,
-        selection: TextSelection.collapsed(offset: newText.length));
-  }
 }

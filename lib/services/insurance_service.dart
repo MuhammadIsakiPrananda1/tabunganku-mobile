@@ -1,3 +1,9 @@
+/// Service: InsuranceService
+//
+// Mengelola data polis asuransi pengguna.
+/// Menyimpan data lokal di [SharedPreferences] per user.
+library;
+
 import 'dart:async';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -5,9 +11,9 @@ import 'package:tabunganku/core/security/secure_storage_service.dart';
 import 'package:tabunganku/models/insurance_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final insuranceServiceProvider = Provider((ref) => MockInsuranceService());
+final insuranceServiceProvider = Provider((ref) => LocalInsuranceService());
 
-class MockInsuranceService {
+class LocalInsuranceService {
   static const String _storagePrefix = 'insurance_user_';
   static final SecureStorageService _secureStorage = SecureStorageService();
   static Future<SharedPreferences>? _prefsFuture;

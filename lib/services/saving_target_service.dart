@@ -1,3 +1,9 @@
+/// Service: SavingTargetService
+//
+// Mengelola target tabungan beserta progress-nya.
+/// Menyimpan data lokal di [SharedPreferences] per user.
+library;
+
 import 'dart:async';
 import 'dart:convert';
 
@@ -12,7 +18,7 @@ abstract class SavingTargetService {
   Stream<List<SavingTargetModel>> watchTargets();
 }
 
-class MockSavingTargetService implements SavingTargetService {
+class LocalSavingTargetService implements SavingTargetService {
   static const String _storageKey = 'saving_targets_user_';
   static Future<SharedPreferences>? _prefsFuture;
   static final Map<String, List<SavingTargetModel>> _userTargets = {};

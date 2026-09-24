@@ -1,3 +1,8 @@
+﻿/// Page: RamadanModePage
+///
+/// Mode Ramadan: anggaran belanja lebaran, zakat, sedekah.
+library;
+
 import 'dart:convert';
 import 'package:tabunganku/core/widgets/top_toast.dart';
 import 'package:uuid/uuid.dart';
@@ -1800,3 +1805,4 @@ class _RibuanFormatter extends TextInputFormatter {
     );
   }
 }
+

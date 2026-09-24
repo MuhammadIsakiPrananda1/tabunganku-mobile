@@ -1,3 +1,9 @@
+/// Service: TransactionService
+//
+// Mengelola penyimpanan dan pengambilan transaksi keuangan.
+/// Menyimpan data lokal di [SharedPreferences] per user.
+library;
+
 import 'dart:async';
 import 'dart:convert';
 
@@ -17,10 +23,10 @@ abstract class TransactionService {
   Stream<List<TransactionModel>> watchTransactions();
 }
 
-class MockTransactionService implements TransactionService {
+class LocalTransactionService implements TransactionService {
   final ChallengeService? challengeService;
 
-  MockTransactionService({this.challengeService});
+  LocalTransactionService({this.challengeService});
 
   @override
   Future<void> clearAllTransactions() async {

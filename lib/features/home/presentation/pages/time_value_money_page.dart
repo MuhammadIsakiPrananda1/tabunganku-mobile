@@ -1,3 +1,8 @@
+﻿/// Page: TimeValueMoneyPage
+///
+/// Kalkulator nilai waktu uang (time value of money).
+library;
+
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -791,3 +796,4 @@ class _TimeValueMoneyPageState extends ConsumerState<TimeValueMoneyPage>
     );
   }
 }
+

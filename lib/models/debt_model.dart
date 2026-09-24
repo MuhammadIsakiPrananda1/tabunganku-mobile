@@ -1,3 +1,9 @@
+/// Model: DebtModel
+//
+// Merepresentasikan hutang atau piutang pengguna.
+/// Mendukung serialisasi JSON untuk penyimpanan di [SharedPreferences].
+library;
+
 enum DebtType {
   hutang,
   piutang,

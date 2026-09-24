@@ -1,3 +1,8 @@
+﻿/// Page: NetSalaryCalculatorPage
+///
+/// Kalkulator take-home pay dan potongan pajak.
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -1029,5 +1034,6 @@ class _RibuanFormatter extends TextInputFormatter {
     );
   }
 }
+
 
 

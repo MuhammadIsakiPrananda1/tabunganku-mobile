@@ -1,3 +1,8 @@
+﻿/// Page: CurrencyConverterPage
+///
+/// Konversi mata uang asing secara real-time / lokal.
+library;
+
 import 'package:tabunganku/core/widgets/offline_loading_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -773,5 +778,6 @@ class _CurrencyConverterPageState extends ConsumerState<CurrencyConverterPage> {
     );
   }
 }
+
 
 

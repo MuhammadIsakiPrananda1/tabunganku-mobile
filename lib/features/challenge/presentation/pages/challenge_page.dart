@@ -1,14 +1,18 @@
+﻿/// Page: ChallengePage
+///
+/// Pusat tantangan menabung interaktif dan pencapaian gamifikasi.
+library;
+
 import 'package:flutter/material.dart';
-import 'package:tabunganku/core/widgets/top_toast.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
+import 'package:tabunganku/core/theme/app_colors.dart';
+import 'package:tabunganku/core/widgets/top_toast.dart';
+import 'package:tabunganku/models/badge_model.dart';
 import 'package:tabunganku/models/challenge_model.dart';
 import 'package:tabunganku/models/challenge_template_model.dart';
-import 'package:tabunganku/models/badge_model.dart';
 import 'package:tabunganku/providers/challenge_provider.dart';
-import 'package:tabunganku/providers/transaction_provider.dart';
-import 'package:tabunganku/core/theme/app_colors.dart';
-import 'package:intl/intl.dart';
 
 class ChallengePage extends ConsumerStatefulWidget {
   const ChallengePage({super.key});
@@ -16,7 +20,6 @@ class ChallengePage extends ConsumerStatefulWidget {
   @override
   ConsumerState<ChallengePage> createState() => _ChallengePageState();
 }
-
 class _ChallengePageState extends ConsumerState<ChallengePage> {
   String _activeCategory = 'Aktif';
 
@@ -458,7 +461,7 @@ class _ActiveChallengesTab extends ConsumerWidget {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        Text('•',
+                        Text('â€¢',
                             style: TextStyle(
                                 color: isDark
                                     ? Colors.white12
@@ -623,19 +626,19 @@ class _TemplatesTab extends ConsumerWidget {
         const SizedBox(height: 20),
         _buildSection(
             context,
-            '🌟 Challenge Harian',
+            'ðŸŒŸ Challenge Harian',
             templates.where((t) => t.type == ChallengeType.daily).toList(),
             onChallengeStarted),
         const SizedBox(height: 8),
         _buildSection(
             context,
-            '📅 Challenge Mingguan',
+            'ðŸ“… Challenge Mingguan',
             templates.where((t) => t.type == ChallengeType.weekly).toList(),
             onChallengeStarted),
         const SizedBox(height: 8),
         _buildSection(
             context,
-            '🎯 Challenge Bulanan',
+            'ðŸŽ¯ Challenge Bulanan',
             templates.where((t) => t.type == ChallengeType.monthly).toList(),
             onChallengeStarted),
       ],
@@ -1246,9 +1249,9 @@ class _BadgeItem extends StatelessWidget {
                     fontSize: 13, height: 1.4, fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
             if (badge.requiredPoints > 0)
-              _buildRequirement('🎯 Butuh ${badge.requiredPoints} poin'),
+              _buildRequirement('ðŸŽ¯ Butuh ${badge.requiredPoints} poin'),
             if (badge.requiredStreak != null)
-              _buildRequirement('🔥 Butuh ${badge.requiredStreak} hari streak'),
+              _buildRequirement('ðŸ”¥ Butuh ${badge.requiredStreak} hari streak'),
             if (badge.isEarned) ...[
               const SizedBox(height: 12),
               Container(
@@ -1334,3 +1337,4 @@ class _BadgeItem extends StatelessWidget {
     }
   }
 }
+

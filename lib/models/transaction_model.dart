@@ -1,7 +1,11 @@
-enum TransactionType {
-  income,
-  expense,
-}
+/// Model: TransactionModel
+///
+/// Merepresentasikan satu transaksi keuangan (pemasukan atau pengeluaran).
+/// Mendukung serialisasi JSON untuk penyimpanan di [SharedPreferences].
+library;
+
+/// Tipe transaksi — pemasukan atau pengeluaran.
+enum TransactionType { income, expense }
 
 class TransactionModel {
   final String id;
@@ -29,14 +33,12 @@ class TransactionModel {
   });
 
   factory TransactionModel.fromJson(Map<String, dynamic> json) {
-    DateTime parsedDate;
+    final DateTime parsedDate;
     final dateVal = json['date'];
     if (dateVal is String) {
       parsedDate = DateTime.parse(dateVal);
-    } else if (dateVal is dynamic && dateVal.runtimeType.toString() == 'Timestamp') {
-
-parsedDate = dateVal.toDate();
     } else {
+      // Fallback: Firestore Timestamp atau nilai tak dikenal
       parsedDate = DateTime.now();
     }
 
@@ -96,4 +98,4 @@ parsedDate = dateVal.toDate();
   }
 }
 
-final List<TransactionModel> dummyTransactions = [];
+

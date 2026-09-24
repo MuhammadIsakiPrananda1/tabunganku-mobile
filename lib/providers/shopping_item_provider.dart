@@ -1,9 +1,14 @@
+/// Provider: ShoppingItemProvider
+//
+// Menyediakan akses reaktif ke daftar belanja.
+library;
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tabunganku/models/shopping_item_model.dart';
 import 'package:tabunganku/services/shopping_item_service.dart';
 
 final shoppingItemServiceProvider = Provider<ShoppingItemService>((ref) {
-  return MockShoppingItemService();
+  return LocalShoppingItemService();
 });
 
 final shoppingItemsStreamProvider =

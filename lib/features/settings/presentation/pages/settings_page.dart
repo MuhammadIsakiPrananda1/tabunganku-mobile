@@ -1,30 +1,33 @@
-import 'dart:async';
-import 'package:tabunganku/core/widgets/top_toast.dart';
-import 'package:tabunganku/core/widgets/marquee_text.dart';
-import 'dart:io';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:go_router/go_router.dart';
-import 'package:share_plus/share_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
+/// Page: SettingsPage
+///
+/// Pusat pengaturan aplikasi, tema, keamanan PIN, backup, dan profil.
+library;
 
+import 'dart:async';
+import 'dart:io';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tabunganku/core/constants/app_version.dart';
+import 'package:tabunganku/core/services/export_service.dart';
 import 'package:tabunganku/core/theme/app_colors.dart';
 import 'package:tabunganku/core/theme/theme_provider.dart';
-import 'package:tabunganku/providers/user_provider.dart';
-import 'package:tabunganku/providers/transaction_provider.dart';
-import 'package:tabunganku/models/transaction_model.dart';
-import 'package:tabunganku/features/settings/presentation/providers/security_provider.dart';
-import 'package:tabunganku/features/settings/presentation/providers/achievement_provider.dart';
-import 'package:tabunganku/core/constants/app_version.dart';
-import 'package:intl/intl.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:tabunganku/core/widgets/marquee_text.dart';
+import 'package:tabunganku/core/widgets/top_toast.dart';
 import 'package:tabunganku/features/settings/presentation/pages/crop_page.dart';
-import 'package:tabunganku/core/services/export_service.dart';
-
+import 'package:tabunganku/features/settings/presentation/providers/achievement_provider.dart';
+import 'package:tabunganku/features/settings/presentation/providers/security_provider.dart';
+import 'package:tabunganku/models/transaction_model.dart';
+import 'package:tabunganku/providers/transaction_provider.dart';
+import 'package:tabunganku/providers/user_provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
 
@@ -607,7 +610,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 Icons.feedback_outlined,
                 'Kirim Masukan / Feedback',
                 () => context.push('/feedback'),
-                subtitle: 'Beri rating & saran untuk aplikasi ⭐',
+                subtitle: 'Beri rating & saran untuk aplikasi â­',
                 color: Colors.orange,
                 isDarkMode: isDarkMode,
               ),
@@ -1596,7 +1599,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
   void _shareApp() {
     Share.share(
-        'Ayo raih target finansialmu lebih mudah dengan TabunganKu! Download aplikasi resmi di sini: https://tabunganku.neverlandstudio.my.id/ 🎉');
+        'Ayo raih target finansialmu lebih mudah dengan TabunganKu! Download aplikasi resmi di sini: https://tabunganku.neverlandstudio.my.id/ ðŸŽ‰');
   }
 
   void _showPrivacyPolicyDialog(bool isDarkMode) {
@@ -1611,19 +1614,19 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         title: 'Kebijakan Privasi',
         subtitle: 'Terakhir diperbarui: Juni 2026',
         content: [
-          _infoSection('📱 TabunganKu Adalah Aplikasi Lokal',
-              'Semua data yang kamu masukkan di TabunganKu — mulai dari catatan pemasukan & pengeluaran, target tabungan, celengan bersama, daftar belanja, hingga foto profil — semuanya tersimpan 100% di memori HP kamu sendiri. Tidak ada server, tidak ada cloud, tidak ada akun yang perlu dibuat.'),
-          _infoSection('📋 Data Apa yang Tersimpan?',
+          _infoSection('ðŸ“± TabunganKu Adalah Aplikasi Lokal',
+              'Semua data yang kamu masukkan di TabunganKu â€” mulai dari catatan pemasukan & pengeluaran, target tabungan, celengan bersama, daftar belanja, hingga foto profil â€” semuanya tersimpan 100% di memori HP kamu sendiri. Tidak ada server, tidak ada cloud, tidak ada akun yang perlu dibuat.'),
+          _infoSection('ðŸ“‹ Data Apa yang Tersimpan?',
               'TabunganKu menyimpan: (1) Nama dan foto profil yang kamu atur sendiri, (2) Riwayat transaksi pemasukan & pengeluaran, (3) Data target tabungan dan progresnya, (4) Data celengan bersama & anggota grup, (5) Daftar wishlist belanja, (6) Pengaturan PIN keamanan (dalam bentuk terenkripsi), dan (7) Preferensi aplikasi seperti tema dan waktu pengingat.'),
-          _infoSection('🔒 Keamanan Berlapis',
+          _infoSection('ðŸ”’ Keamanan Berlapis',
               'Kamu bisa memasang PIN 6 digit dan/atau kunci biometrik (sidik jari/wajah) untuk mencegah orang lain mengakses aplikasi. PIN disimpan dalam bentuk hash terenkripsi, bukan teks biasa, sehingga bahkan pengembang pun tidak bisa membacanya.'),
-          _infoSection('📤 Berbagi Data — Hanya Atas Kemauanmu',
+          _infoSection('ðŸ“¤ Berbagi Data â€” Hanya Atas Kemauanmu',
               'TabunganKu tidak pernah mengirim datamu ke mana pun tanpa izin. Fitur ekspor PDF bulanan dan ekspor CSV hanya berjalan saat kamu menekan tombolnya sendiri, dan hasilnya langsung dikirim ke aplikasi yang kamu pilih (WhatsApp, email, dll).'),
-          _infoSection('🔔 Notifikasi Pengingat',
-              'Jika kamu mengaktifkan pengingat menabung harian, TabunganKu menjadwalkan notifikasi lokal di HP kamu. Notifikasi ini tidak melewati server manapun — sepenuhnya diproses oleh sistem Android/iOS di perangkatmu.'),
-          _infoSection('🗑️ Menghapus Data',
+          _infoSection('ðŸ”” Notifikasi Pengingat',
+              'Jika kamu mengaktifkan pengingat menabung harian, TabunganKu menjadwalkan notifikasi lokal di HP kamu. Notifikasi ini tidak melewati server manapun â€” sepenuhnya diproses oleh sistem Android/iOS di perangkatmu.'),
+          _infoSection('ðŸ—‘ï¸ Menghapus Data',
               'Untuk menghapus semua data aplikasi sekaligus, kamu dapat membersihkan data aplikasi atau menghapus (uninstall) TabunganKu dari HP kamu.'),
-          _infoSection('📬 Ada Pertanyaan?',
+          _infoSection('ðŸ“¬ Ada Pertanyaan?',
               'Hubungi tim Neverland Studio di Arlianto032@gmail.com. Kami dengan senang hati menjawab pertanyaan seputar privasi dan keamanan datamu.'),
         ],
       ),
@@ -1642,19 +1645,19 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         title: 'Syarat & Ketentuan',
         subtitle: 'Berlaku sejak Juni 2026',
         content: [
-          _infoSection('✅ Untuk Siapa TabunganKu?',
-              'TabunganKu dibuat khusus untuk kamu yang ingin mencatat keuangan pribadi secara mandiri — mulai dari pemasukan harian, pengeluaran, target menabung, hingga nabung bareng teman atau keluarga lewat fitur Celengan Bersama. Aplikasi ini tidak memerlukan internet maupun akun untuk digunakan.'),
-          _infoSection('📝 Tanggung Jawab Pengguna',
-              'Semua data yang kamu masukkan — jumlah uang, kategori, catatan — adalah tanggung jawabmu sepenuhnya. TabunganKu hanya mencatat apa yang kamu input; kami tidak memverifikasi kebenaran data keuanganmu. Pastikan kamu mencatat dengan teliti agar laporan keuanganmu akurat.'),
-          _infoSection('👥 Fitur Celengan Bersama',
+          _infoSection('âœ… Untuk Siapa TabunganKu?',
+              'TabunganKu dibuat khusus untuk kamu yang ingin mencatat keuangan pribadi secara mandiri â€” mulai dari pemasukan harian, pengeluaran, target menabung, hingga nabung bareng teman atau keluarga lewat fitur Celengan Bersama. Aplikasi ini tidak memerlukan internet maupun akun untuk digunakan.'),
+          _infoSection('ðŸ“ Tanggung Jawab Pengguna',
+              'Semua data yang kamu masukkan â€” jumlah uang, kategori, catatan â€” adalah tanggung jawabmu sepenuhnya. TabunganKu hanya mencatat apa yang kamu input; kami tidak memverifikasi kebenaran data keuanganmu. Pastikan kamu mencatat dengan teliti agar laporan keuanganmu akurat.'),
+          _infoSection('ðŸ‘¥ Fitur Celengan Bersama',
               'Fitur Nabung Bersama memungkinkan kamu membuat grup tabungan dan menambahkan anggota. Semua data grup disimpan lokal di perangkatmu. Kamu sebagai pembuat grup bertanggung jawab atas pengelolaan anggota dan transparansi dana di dalam grup tersebut.'),
-          _infoSection('📄 Ekspor & Laporan',
+          _infoSection('ðŸ“„ Ekspor & Laporan',
               'Hasil ekspor PDF maupun CSV yang dihasilkan TabunganKu hanya bersifat ringkasan dari data yang kamu masukkan sendiri. Dokumen ini tidak memiliki kekuatan hukum sebagai laporan keuangan resmi dan tidak ditandatangani oleh pihak manapun.'),
-          _infoSection('🎨 Hak Cipta & Kepemilikan',
+          _infoSection('ðŸŽ¨ Hak Cipta & Kepemilikan',
               'Seluruh desain antarmuka, ikon, ilustrasi, nama "TabunganKu", dan kode sumber aplikasi ini adalah milik Neverland Studio. Dilarang menggandakan, memodifikasi, atau mendistribusikan ulang dalam bentuk apapun tanpa izin tertulis dari Neverland Studio.'),
-          _infoSection('⚠️ Batas Tanggung Jawab',
+          _infoSection('âš ï¸ Batas Tanggung Jawab',
               'TabunganKu adalah alat bantu pencatatan, bukan penasihat keuangan. Kami tidak bertanggung jawab atas keputusan finansial yang kamu buat berdasarkan data di aplikasi ini. Selalu bijak dalam mengelola keuanganmu.'),
-          _infoSection('🔄 Pembaruan Aplikasi',
+          _infoSection('ðŸ”„ Pembaruan Aplikasi',
               'Neverland Studio sewaktu-waktu dapat merilis pembaruan yang menambahkan fitur baru atau mengubah tampilan. Dengan terus menggunakan TabunganKu setelah pembaruan, kamu dianggap menyetujui perubahan yang ada. Syarat & Ketentuan terbaru selalu bisa dibaca di menu ini.'),
         ],
       ),
@@ -2007,3 +2010,4 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     return Colors.purple;
   }
 }
+

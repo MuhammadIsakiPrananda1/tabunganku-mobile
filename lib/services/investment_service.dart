@@ -1,3 +1,9 @@
+/// Service: InvestmentService
+//
+// Mengelola portofolio investasi pengguna.
+/// Menyimpan data lokal di [SharedPreferences] per user.
+library;
+
 import 'dart:async';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -5,9 +11,9 @@ import 'package:tabunganku/core/security/secure_storage_service.dart';
 import 'package:tabunganku/models/investment_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final investmentServiceProvider = Provider((ref) => MockInvestmentService());
+final investmentServiceProvider = Provider((ref) => LocalInvestmentService());
 
-class MockInvestmentService {
+class LocalInvestmentService {
   static const String _storagePrefix = 'investments_user_';
   static final SecureStorageService _secureStorage = SecureStorageService();
   static Future<SharedPreferences>? _prefsFuture;

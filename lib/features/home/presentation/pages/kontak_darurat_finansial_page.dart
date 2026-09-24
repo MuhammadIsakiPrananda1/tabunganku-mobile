@@ -1,3 +1,8 @@
+﻿/// Page: KontakDaruratFinansialPage
+///
+/// Daftar kontak darurat institusi finansial.
+library;
+
 import 'package:flutter/material.dart';
 import 'package:tabunganku/core/widgets/top_toast.dart';
 import 'package:flutter/services.dart';
@@ -650,3 +655,4 @@ Text(
     );
   }
 }
+

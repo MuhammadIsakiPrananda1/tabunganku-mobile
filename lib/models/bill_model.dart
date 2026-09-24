@@ -1,3 +1,9 @@
+/// Model: BillModel
+//
+// Merepresentasikan satu tagihan/cicilan yang perlu dilacak.
+/// Mendukung serialisasi JSON untuk penyimpanan di [SharedPreferences].
+library;
+
 class BillModel {
   final String id;
   final String name;

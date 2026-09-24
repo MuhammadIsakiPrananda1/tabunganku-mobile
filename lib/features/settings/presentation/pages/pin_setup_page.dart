@@ -1,10 +1,17 @@
+/// Feature: Settings — PIN Setup Page
+///
+/// Halaman untuk mengatur PIN baru, mengganti PIN lama, atau mengkonfirmasi
+/// PIN baru. Alur: (opsional) verifikasi PIN lama → input PIN baru → konfirmasi PIN baru.
+library;
+
 import 'package:flutter/material.dart';
-import 'package:tabunganku/core/widgets/top_toast.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tabunganku/core/theme/app_colors.dart';
+import 'package:tabunganku/core/widgets/pin_keypad.dart';
+import 'package:tabunganku/core/widgets/top_toast.dart';
 import 'package:tabunganku/features/settings/presentation/providers/security_provider.dart';
 
 class PinSetupPage extends ConsumerStatefulWidget {
@@ -14,22 +21,33 @@ class PinSetupPage extends ConsumerStatefulWidget {
   ConsumerState<PinSetupPage> createState() => _PinSetupPageState();
 }
 
-class _PinSetupPageState extends ConsumerState<PinSetupPage> with TickerProviderStateMixin {
-  String _currentPin = "";
-  bool _isOldPinStage = false;
-  bool _isConfirmStage = false;
-  String _firstPin = "";
-  late AnimationController _shakeController;
-  bool _isError = false;
-  String _errorMessage = "";
+class _PinSetupPageState extends ConsumerState<PinSetupPage>
+    with TickerProviderStateMixin {
+  // ── State ──────────────────────────────────────────────────────────────────
+  String _currentPin = '';
 
+  /// True ketika user harus memasukkan PIN lama terlebih dahulu (ganti PIN).
+  bool _isOldPinStage = false;
+
+  /// True ketika user diminta mengkonfirmasi PIN baru yang sudah diisi.
+  bool _isConfirmStage = false;
+
+  /// Menyimpan PIN pertama saat menunggu konfirmasi.
+  String _firstPin = '';
+
+  bool _isError = false;
+  String _errorMessage = '';
+
+  // ── Controllers ────────────────────────────────────────────────────────────
+  late final AnimationController _shakeController;
+
+  // ── Lifecycle ──────────────────────────────────────────────────────────────
   @override
   void initState() {
     super.initState();
     final security = ref.read(securityProvider);
-    if (security.hasPin) {
-      _isOldPinStage = true;
-    }
+    if (security.hasPin) _isOldPinStage = true;
+
     _shakeController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 500),
@@ -42,76 +60,94 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage> with TickerProvider
     super.dispose();
   }
 
-  void _onKeyPress(String value) {
+  // ── Input handlers ─────────────────────────────────────────────────────────
+  void _onNumber(String digit) {
+    if (_currentPin.length >= 4) return;
     setState(() {
+      _currentPin += digit;
       _isError = false;
-      _errorMessage = "";
+      _errorMessage = '';
     });
-
-    if (value == "back") {
-      if (_currentPin.isNotEmpty) {
-        setState(() => _currentPin = _currentPin.substring(0, _currentPin.length - 1));
-      }
-    } else {
-      if (_currentPin.length < 4) {
-        setState(() => _currentPin += value);
-        if (_currentPin.length == 4) {
-
-          Future.delayed(const Duration(milliseconds: 150), () {
-            if (mounted) _handlePinCompletion();
-          });
-        }
-      }
+    if (_currentPin.length == 4) {
+      // Beri jeda singkat agar dot terakhir sempat terrender sebelum aksi.
+      Future.delayed(const Duration(milliseconds: 150), () {
+        if (mounted) _handlePinCompletion();
+      });
     }
+  }
+
+  void _onBackspace() {
+    if (_currentPin.isEmpty) return;
+    setState(() {
+      _currentPin = _currentPin.substring(0, _currentPin.length - 1);
+      _isError = false;
+      _errorMessage = '';
+    });
   }
 
   Future<void> _handlePinCompletion() async {
     if (_isOldPinStage) {
-
-      final isValid = await ref.read(securityProvider.notifier).verifyPin(_currentPin);
-      if (isValid) {
-        setState(() {
-          _isOldPinStage = false;
-          _currentPin = "";
-        });
-      } else {
-        setState(() {
-          _isError = true;
-          _errorMessage = 'PIN Lama Salah!';
-          _currentPin = "";
-        });
-        _shakeController.forward(from: 0);
-        HapticFeedback.vibrate();
-      }
+      await _verifyOldPin();
     } else if (!_isConfirmStage) {
-
-      _firstPin = _currentPin;
-      setState(() {
-        _isConfirmStage = true;
-        _currentPin = "";
-      });
+      _enterConfirmStage();
     } else {
-
-      if (_currentPin == _firstPin) {
-
-        ref.read(securityProvider.notifier).setPin(_currentPin);
-        context.pop();
-        showTopToast(context, 'PIN Keamanan Berhasil Diatur! ✓');
-      } else {
-
-        setState(() {
-          _isError = true;
-          _errorMessage = 'PIN tidak cocok, silakan coba lagi.';
-          _currentPin = "";
-          _isConfirmStage = false;
-          _firstPin = "";
-        });
-        _shakeController.forward(from: 0);
-        HapticFeedback.vibrate();
-      }
+      await _saveNewPin();
     }
   }
 
+  /// Verifikasi PIN lama sebelum memperbolehkan ganti PIN.
+  Future<void> _verifyOldPin() async {
+    final isValid = await ref
+        .read(securityProvider.notifier)
+        .verifyPin(_currentPin, trackAttempts: false);
+
+    if (isValid) {
+      setState(() {
+        _isOldPinStage = false;
+        _currentPin = '';
+      });
+    } else {
+      _showError('PIN Lama Salah!');
+    }
+  }
+
+  /// Pindah ke tahap konfirmasi PIN baru.
+  void _enterConfirmStage() {
+    _firstPin = _currentPin;
+    setState(() {
+      _isConfirmStage = true;
+      _currentPin = '';
+    });
+  }
+
+  /// Konfirmasi dan simpan PIN baru jika cocok.
+  Future<void> _saveNewPin() async {
+    if (_currentPin == _firstPin) {
+      await ref.read(securityProvider.notifier).setPin(_currentPin);
+      if (mounted) {
+        context.pop();
+        showTopToast(context, 'PIN Keamanan Berhasil Diatur! ✓');
+      }
+    } else {
+      setState(() {
+        _isConfirmStage = false;
+        _firstPin = '';
+      });
+      _showError('PIN tidak cocok, silakan coba lagi.');
+    }
+  }
+
+  void _showError(String message) {
+    setState(() {
+      _isError = true;
+      _errorMessage = message;
+      _currentPin = '';
+    });
+    _shakeController.forward(from: 0);
+    HapticFeedback.vibrate();
+  }
+
+  // ── Build ──────────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -123,131 +159,141 @@ class _PinSetupPageState extends ConsumerState<PinSetupPage> with TickerProvider
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded, color: colorScheme.onSurface, size: 20),
+          icon: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: colorScheme.onSurface,
+            size: 20,
+          ),
           onPressed: () => context.pop(),
         ),
       ),
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
-            return SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
+            // ── Responsive sizing ──────────────────────────────────────────
+            final maxHeight = constraints.maxHeight;
+            final isVeryCompact = maxHeight < 560;
+            final isCompact = maxHeight < 700;
+            final horizontalPadding =
+                constraints.maxWidth < 360 ? 16.0 : 24.0;
+            const contentMaxWidth = 380.0;
+
+            final availableWidth =
+                (constraints.maxWidth - horizontalPadding * 2)
+                    .clamp(0.0, contentMaxWidth);
+            final buttonSize = ((availableWidth - 56) / 3).clamp(
+              48.0,
+              isVeryCompact ? 54.0 : (isCompact ? 64.0 : 72.0),
+            );
+            final rowSpacing =
+                isVeryCompact ? 3.0 : (isCompact ? 6.0 : 10.0);
+            final iconContainerSize =
+                isVeryCompact ? 48.0 : (isCompact ? 60.0 : 76.0);
+            final iconSize =
+                isVeryCompact ? 22.0 : (isCompact ? 28.0 : 34.0);
+            final iconBottomSpacing =
+                isVeryCompact ? 10.0 : (isCompact ? 16.0 : 22.0);
+            final titleBottomSpacing = isVeryCompact ? 4.0 : 8.0;
+            final descBottomSpacing =
+                isVeryCompact ? 12.0 : (isCompact ? 20.0 : 30.0);
+            final dotsBottomSpacing = isVeryCompact ? 10.0 : 16.0;
+            final keypadBottomSpacing =
+                isVeryCompact ? 10.0 : (isCompact ? 16.0 : 28.0);
+
+            return Center(
               child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: constraints.maxHeight - 50),
-                child: IntrinsicHeight(
-                  child: Column(
-                    children: [
-                      const Spacer(flex: 1),
+                constraints: const BoxConstraints(maxWidth: contentMaxWidth),
+                child: SingleChildScrollView(
+                  physics: const ClampingScrollPhysics(),
+                  padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(minHeight: maxHeight),
+                    child: IntrinsicHeight(
+                      child: Column(
+                        children: [
+                          Spacer(flex: isCompact ? 1 : 2),
 
-Container(
-                        width: 80,
-                        height: 80,
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withValues(alpha: 0.1),
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: AppColors.primary.withValues(alpha: 0.15),
-                            width: 1.5,
-                          ),
-                        ),
-                        child: Icon(
-                          _isOldPinStage 
-                            ? Icons.lock_outline_rounded 
-                            : (_isConfirmStage ? Icons.gpp_good_rounded : Icons.shield_outlined),
-                          size: 34,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-
-Text(
-                        _isOldPinStage 
-                          ? 'PIN Lama' 
-                          : (_isConfirmStage ? 'Konfirmasi PIN Baru' : 'Atur PIN Baru'),
-                        style: GoogleFonts.quicksand(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w900,
-                          color: colorScheme.onSurface,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-
-Text(
-                        _isOldPinStage
-                          ? 'Masukkan PIN lama kamu untuk verifikasi'
-                          : (_isConfirmStage 
-                            ? 'Masukkan kembali 4 digit PIN baru kamu'
-                            : 'Gunakan 4 digit angka rahasia untuk keamanan'),
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.quicksand(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: isDarkMode ? Colors.white38 : Colors.black45,
-                        ),
-                      ),
-                      const SizedBox(height: 36),
-
-AnimatedBuilder(
-                        animation: _shakeController,
-                        builder: (context, child) {
-                          final offset = Curves.elasticIn.transform(_shakeController.value) * 10;
-                          return Transform.translate(
-                            offset: Offset(offset, 0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: List.generate(4, (index) {
-                                final active = index < _currentPin.length;
-                                return AnimatedContainer(
-                                  duration: const Duration(milliseconds: 150),
-                                  margin: const EdgeInsets.symmetric(horizontal: 12),
-                                  width: 16,
-                                  height: 16,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: active ? AppColors.primary : AppColors.primary.withValues(alpha: 0.15),
-                                    border: Border.all(
-                                      color: active ? AppColors.primary : AppColors.primary.withValues(alpha: 0.3),
-                                      width: 1.5,
-                                    ),
-                                    boxShadow: active ? [
-                                      BoxShadow(
-                                        color: AppColors.primary.withValues(alpha: 0.3),
-                                        blurRadius: 10,
-                                        spreadRadius: 1,
-                                      )
-                                    ] : null,
-                                  ),
-                                );
-                              }),
+                          // ── Ikon header ────────────────────────────────
+                          Container(
+                            width: iconContainerSize,
+                            height: iconContainerSize,
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withValues(alpha: 0.1),
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: AppColors.primary.withValues(alpha: 0.15),
+                                width: 1.5,
+                              ),
                             ),
-                          );
-                        },
-                      ),
-                      
-                      const SizedBox(height: 20),
-
-if (_isError)
-                        Container(
-                          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
-                          decoration: BoxDecoration(
-                            color: Colors.red.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(12),
+                            child: Icon(
+                              _headerIcon,
+                              size: iconSize,
+                              color: AppColors.primary,
+                            ),
                           ),
-                          child: Text(
-                            _errorMessage,
+                          SizedBox(height: iconBottomSpacing),
+
+                          // ── Judul ──────────────────────────────────────
+                          Text(
+                            _stageTitle,
                             style: GoogleFonts.quicksand(
-                              fontSize: 11,
-                              color: Colors.red.shade600,
-                              fontWeight: FontWeight.bold,
+                              fontSize: isVeryCompact ? 18 : (isCompact ? 20 : 22),
+                              fontWeight: FontWeight.w900,
+                              color: colorScheme.onSurface,
                             ),
                           ),
-                        ),
-                        
-                      const Spacer(flex: 2),
+                          SizedBox(height: titleBottomSpacing),
 
-_buildKeypad(isDarkMode),
-                      const SizedBox(height: 32),
-                    ],
+                          // ── Deskripsi ──────────────────────────────────
+                          Text(
+                            _stageDescription,
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.quicksand(
+                              fontSize: isVeryCompact ? 11 : 12,
+                              fontWeight: FontWeight.w600,
+                              color: isDarkMode
+                                  ? Colors.white38
+                                  : Colors.black45,
+                            ),
+                          ),
+                          SizedBox(height: descBottomSpacing),
+
+                          // ── PIN dots ───────────────────────────────────
+                          PinDots(
+                            filledCount: _currentPin.length,
+                            dotSize: isCompact ? 13.0 : 16.0,
+                            shakeAnimation: _shakeController,
+                          ),
+                          SizedBox(height: dotsBottomSpacing),
+
+                          // ── Pesan error ────────────────────────────────
+                          if (_isError)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child: Text(
+                                _errorMessage,
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.quicksand(
+                                  fontSize: 12,
+                                  color: Colors.red.shade600,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+
+                          const Spacer(flex: 1),
+
+                          // ── Keypad ─────────────────────────────────────
+                          PinKeypad(
+                            buttonSize: buttonSize,
+                            rowSpacing: rowSpacing,
+                            onNumber: _onNumber,
+                            onBackspace: _onBackspace,
+                          ),
+                          SizedBox(height: keypadBottomSpacing),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -258,113 +304,23 @@ _buildKeypad(isDarkMode),
     );
   }
 
-  Widget _buildKeypad(bool isDarkMode) {
-    return Column(
-      children: [
-        for (var row in [['1', '2', '3'], ['4', '5', '6'], ['7', '8', '9']])
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                for (var val in row) _buildKeypadButton(val, isDarkMode),
-              ],
-            ),
-          ),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
+  // ── Helpers untuk teks/ikon dinamis berdasarkan stage ─────────────────────
 
-              const SizedBox(width: 72),
-              _buildKeypadButton('0', isDarkMode),
-              _buildKeypadIconButton(Icons.backspace_outlined, _onBackspace, isDarkMode),
-            ],
-          ),
-        ),
-      ],
-    );
+  IconData get _headerIcon {
+    if (_isOldPinStage) return Icons.lock_outline_rounded;
+    if (_isConfirmStage) return Icons.gpp_good_rounded;
+    return Icons.shield_outlined;
   }
 
-  void _onBackspace() {
-    _onKeyPress("back");
+  String get _stageTitle {
+    if (_isOldPinStage) return 'PIN Lama';
+    if (_isConfirmStage) return 'Konfirmasi PIN Baru';
+    return 'Atur PIN Baru';
   }
 
-  Widget _buildKeypadButton(String value, bool isDarkMode) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () => _onKeyPress(value),
-        borderRadius: BorderRadius.circular(40),
-        child: Container(
-          width: 72,
-          height: 72,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Theme.of(context).cardColor,
-            border: Border.all(
-              color: isDarkMode 
-                  ? Colors.white.withValues(alpha: 0.05) 
-                  : Colors.black.withValues(alpha: 0.03),
-              width: 1.2,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: isDarkMode ? 0.2 : 0.02),
-                blurRadius: 8,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Center(
-            child: Text(
-              value,
-              style: GoogleFonts.quicksand(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: colorScheme.onSurface,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildKeypadIconButton(IconData icon, VoidCallback onTap, bool isDarkMode) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(40),
-        child: Container(
-          width: 72,
-          height: 72,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Theme.of(context).cardColor,
-            border: Border.all(
-              color: isDarkMode 
-                  ? Colors.white.withValues(alpha: 0.05) 
-                  : Colors.black.withValues(alpha: 0.03),
-              width: 1.2,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: isDarkMode ? 0.2 : 0.02),
-                blurRadius: 8,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Center(
-            child: Icon(icon, color: AppColors.primary, size: 24),
-          ),
-        ),
-      ),
-    );
+  String get _stageDescription {
+    if (_isOldPinStage) return 'Masukkan PIN lama kamu untuk verifikasi';
+    if (_isConfirmStage) return 'Masukkan kembali 4 digit PIN baru kamu';
+    return 'Gunakan 4 digit angka rahasia untuk keamanan';
   }
 }

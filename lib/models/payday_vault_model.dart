@@ -1,8 +1,14 @@
+/// Model: PaydayVaultModel
+//
+// Merepresentasikan brankas gajian untuk alokasi otomatis.
+/// Mendukung serialisasi JSON untuk penyimpanan di [SharedPreferences].
+library;
+
 import 'dart:convert';
 
 class PaydayVaultModel {
   final double monthlySalary;
-  final int paydayDate;
+  final int? paydayDate;
   final double needsPercent;
   final double wantsPercent;
   final double savingsPercent;
@@ -15,7 +21,7 @@ class PaydayVaultModel {
 
   PaydayVaultModel({
     this.monthlySalary = 0,
-    this.paydayDate = 25,
+    this.paydayDate,
     this.needsPercent = 50.0,
     this.wantsPercent = 30.0,
     this.savingsPercent = 20.0,
@@ -90,7 +96,10 @@ class PaydayVaultModel {
   factory PaydayVaultModel.fromMap(Map<String, dynamic> map) {
     return PaydayVaultModel(
       monthlySalary: (map['monthlySalary'] as num?)?.toDouble() ?? 0,
-      paydayDate: map['paydayDate'] as int? ?? 25,
+      paydayDate: ((map['monthlySalary'] as num?)?.toDouble() ?? 0) <= 0 &&
+              map['paydayDate'] == 25
+          ? null
+          : map['paydayDate'] as int?,
       needsPercent: (map['needsPercent'] as num?)?.toDouble() ?? 50.0,
       wantsPercent: (map['wantsPercent'] as num?)?.toDouble() ?? 30.0,
       savingsPercent: (map['savingsPercent'] as num?)?.toDouble() ?? 20.0,

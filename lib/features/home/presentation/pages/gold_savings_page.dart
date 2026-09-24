@@ -1,3 +1,8 @@
+﻿/// Page: GoldSavingsPage
+///
+/// Tabungan emas dan pelacakan nilai investasi fisik.
+library;
+
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import 'package:tabunganku/core/widgets/top_toast.dart';
@@ -1495,3 +1500,4 @@ class _RibuanFormatter extends TextInputFormatter {
     );
   }
 }
+

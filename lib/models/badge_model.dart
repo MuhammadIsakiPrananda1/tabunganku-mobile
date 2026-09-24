@@ -1,3 +1,9 @@
+/// Model: BadgeModel
+//
+// Merepresentasikan badge/pencapaian yang bisa diraih pengguna.
+/// Mendukung serialisasi JSON untuk penyimpanan di [SharedPreferences].
+library;
+
 enum BadgeCategory {
   streak,
   challenge,

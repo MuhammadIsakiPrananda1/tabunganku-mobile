@@ -1,3 +1,9 @@
+/// Service: BillsService
+//
+// Mengelola penyimpanan tagihan berulang pengguna.
+/// Menyimpan data lokal di [SharedPreferences] per user.
+library;
+
 import 'dart:async';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -5,9 +11,9 @@ import 'package:tabunganku/core/security/secure_storage_service.dart';
 import 'package:tabunganku/models/bill_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final billsServiceProvider = Provider((ref) => MockBillsService());
+final billsServiceProvider = Provider((ref) => LocalBillsService());
 
-class MockBillsService {
+class LocalBillsService {
   static const String _storagePrefix = 'bills_user_';
   static final SecureStorageService _secureStorage = SecureStorageService();
   static Future<SharedPreferences>? _prefsFuture;
@@ -46,6 +52,38 @@ class MockBillsService {
     } catch (_) {
       _userBills[userId] = [];
     }
+
+    final changed = _checkAndResetMonthlyBills(userId);
+    if (changed) {
+      await _saveUserBills(userId);
+    }
+  }
+
+  /// Memeriksa apakah bulan pembayaran tagihan berbeda dengan bulan saat ini.
+  /// Jika sudah berganti bulan, tagihan di-reset otomatis menjadi belum dibayar (isPaid = false).
+  bool _checkAndResetMonthlyBills(String userId) {
+    final now = DateTime.now();
+    final list = _userBills[userId];
+    if (list == null || list.isEmpty) return false;
+
+    bool hasChanges = false;
+    for (int i = 0; i < list.length; i++) {
+      final bill = list[i];
+      if (bill.isPaid) {
+        if (bill.lastPaidDate == null) {
+          list[i] = bill.copyWith(isPaid: false);
+          hasChanges = true;
+        } else {
+          final isSameMonth = bill.lastPaidDate!.year == now.year &&
+              bill.lastPaidDate!.month == now.month;
+          if (!isSameMonth) {
+            list[i] = bill.copyWith(isPaid: false);
+            hasChanges = true;
+          }
+        }
+      }
+    }
+    return hasChanges;
   }
 
   Future<void> _saveUserBills(String userId) async {
@@ -61,9 +99,25 @@ class MockBillsService {
     _streamController.add(List.unmodifiable(list));
   }
 
+  /// Memeriksa dan mereset tagihan untuk siklus bulan baru secara eksplisit.
+  Future<void> checkAndResetMonthlyBills() async {
+    final userId = await _getCurrentUserId();
+    await _ensureUserLoaded(userId);
+    final changed = _checkAndResetMonthlyBills(userId);
+    if (changed) {
+      await _saveUserBills(userId);
+      await _emitBills(userId);
+    }
+  }
+
   Future<List<BillModel>> getBills() async {
     final userId = await _getCurrentUserId();
     await _ensureUserLoaded(userId);
+    final changed = _checkAndResetMonthlyBills(userId);
+    if (changed) {
+      await _saveUserBills(userId);
+      await _emitBills(userId);
+    }
     return List.unmodifiable(_userBills[userId] ?? []);
   }
 
@@ -100,6 +154,11 @@ class MockBillsService {
       Future<void>(() async {
         final userId = await _getCurrentUserId();
         await _ensureUserLoaded(userId);
+        final changed = _checkAndResetMonthlyBills(userId);
+        if (changed) {
+          await _saveUserBills(userId);
+          await _emitBills(userId);
+        }
         controller.add(List.unmodifiable(_userBills[userId] ?? []));
       });
       final sub = _streamController.stream.listen(controller.add);

@@ -122,7 +122,7 @@ _debtDate = widget.debt?.dueDate ?? DateTime.now();
     final subColor = isDark ? Colors.white54 : Colors.black54;
 
     final accentColor =
-        _type == DebtType.hutang ? const Color(0xFFE53935) : AppColors.primary;
+        _type == DebtType.hutang ? const Color(0xFFF43F5E) : AppColors.primary;
 
     final focusBorder = OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),
@@ -160,41 +160,41 @@ _debtDate = widget.debt?.dueDate ?? DateTime.now();
               ),
               const SizedBox(height: 20),
 
-Center(
-                child: Text(
-                  widget.debt != null
-                      ? 'Edit Catatan'
-                      : (_type == DebtType.hutang
-                          ? 'Catat Hutang Baru'
-                          : 'Catat Piutang Baru'),
-                  style: GoogleFonts.quicksand(
-                    fontSize: 19,
-                    fontWeight: FontWeight.bold,
-                    color: isDark ? Colors.white : Colors.black87,
-                    letterSpacing: -0.5,
-                  ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 28),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        widget.debt != null
+                            ? 'Edit Catatan'
+                            : (_type == DebtType.hutang
+                                ? 'Catat Hutang Baru'
+                                : 'Catat Piutang Baru'),
+                        style: GoogleFonts.quicksand(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white : Colors.black87,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                    ),
+                    _CompactTypeDropdown(
+                      type: _type,
+                      isDark: isDark,
+                      onChanged: (t) => setState(() => _type = t),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 28),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-
-                    if (widget.initialType == null || widget.debt != null) ...[
-                      _buildLabel('Jenis Catatan', labelColor),
-                      const SizedBox(height: 4),
-                      _TypeToggle(
-                        selected: _type,
-                        isDark: isDark,
-                        onChanged: (t) => setState(() => _type = t),
-                      ),
-                      const SizedBox(height: 16),
-                    ],
-
-_buildLabel('Nama Kontak', labelColor, required: true),
+                    _buildLabel('Nama Kontak', labelColor, required: true),
                     const SizedBox(height: 4),
                     TextFormField(
                       controller: _contactController,
@@ -343,12 +343,20 @@ _buildLabel('Keterangan', labelColor, required: true),
                     ),
                     const SizedBox(height: 16),
 
-_buildLabel('Tanggal Hutang', labelColor, required: true),
+                    _buildLabel(
+                      _type == DebtType.hutang
+                          ? 'Tanggal Hutang'
+                          : 'Tanggal Piutang',
+                      labelColor,
+                      required: true,
+                    ),
                     const SizedBox(height: 4),
                     FormField<DateTime>(
                       initialValue: _debtDate,
                       validator: (_) => _debtDate == null
-                          ? 'Tanggal hutang harus diisi'
+                          ? (_type == DebtType.hutang
+                              ? 'Tanggal hutang harus diisi'
+                              : 'Tanggal piutang harus diisi')
                           : null,
                       builder: (field) {
                         return Column(
@@ -402,7 +410,9 @@ _buildLabel('Tanggal Hutang', labelColor, required: true),
                                     Expanded(
                                       child: Text(
                                         _debtDate == null
-                                            ? 'Pilih tanggal hutang'
+                                            ? (_type == DebtType.hutang
+                                                ? 'Pilih tanggal hutang'
+                                                : 'Pilih tanggal piutang')
                                             : DateFormat('EEEE, d MMMM yyyy',
                                                     'id_ID')
                                                 .format(_debtDate!),
@@ -513,101 +523,129 @@ SizedBox(
   }
 }
 
-class _TypeToggle extends StatelessWidget {
-  final DebtType selected;
+class _CompactTypeDropdown extends StatelessWidget {
+  final DebtType type;
   final bool isDark;
   final ValueChanged<DebtType> onChanged;
 
-  const _TypeToggle({
-    required this.selected,
+  const _CompactTypeDropdown({
+    required this.type,
     required this.isDark,
     required this.onChanged,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: _Pill(
-            label: 'Hutang',
-            icon: Icons.call_made_rounded,
-            isSelected: selected == DebtType.hutang,
-            color: const Color(0xFFE53935),
-            isDark: isDark,
-            onTap: () => onChanged(DebtType.hutang),
+    final options = [
+      {
+        'val': DebtType.hutang,
+        'label': 'Hutang',
+        'icon': Icons.arrow_upward_rounded,
+        'color': const Color(0xFFF43F5E),
+      },
+      {
+        'val': DebtType.piutang,
+        'label': 'Piutang',
+        'icon': Icons.arrow_downward_rounded,
+        'color': const Color(0xFF10B981),
+      },
+    ];
+
+    final currentOption = options.firstWhere((e) => e['val'] == type);
+    final currentColor = currentOption['color'] as Color;
+    final currentIcon = currentOption['icon'] as IconData;
+    final currentLabel = currentOption['label'] as String;
+
+    return PopupMenuButton<DebtType>(
+      initialValue: type,
+      tooltip: 'Pilih jenis catatan',
+      onSelected: (val) {
+        if (val != type) {
+          HapticFeedback.lightImpact();
+          onChanged(val);
+        }
+      },
+      borderRadius: BorderRadius.circular(20),
+      offset: const Offset(0, 42),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+      clipBehavior: Clip.antiAlias,
+      color: isDark ? AppColors.surfaceDark : Colors.white,
+      elevation: 6,
+      itemBuilder: (context) => options.map((opt) {
+        final val = opt['val'] as DebtType;
+        final selected = type == val;
+        final color = opt['color'] as Color;
+        return PopupMenuItem<DebtType>(
+          value: val,
+          height: 48,
+          padding: EdgeInsets.zero,
+          child: Container(
+            color: selected
+                ? (isDark
+                    ? Colors.white.withValues(alpha: 0.08)
+                    : Colors.grey.shade100)
+                : Colors.transparent,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            height: 48,
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: isDark ? 0.2 : 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(opt['icon'] as IconData, size: 14, color: color),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  opt['label'] as String,
+                  style: GoogleFonts.quicksand(
+                    fontSize: 13,
+                    fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+                    color: selected
+                        ? color
+                        : (isDark ? Colors.white : Colors.black87),
+                  ),
+                ),
+                if (selected) ...[
+                  const Spacer(),
+                  Icon(Icons.check_circle_rounded, size: 18, color: color),
+                ],
+              ],
+            ),
           ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _Pill(
-            label: 'Piutang',
-            icon: Icons.call_received_rounded,
-            isSelected: selected == DebtType.piutang,
-            color: AppColors.primary,
-            isDark: isDark,
-            onTap: () => onChanged(DebtType.piutang),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _Pill extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final bool isSelected;
-  final Color color;
-  final bool isDark;
-  final VoidCallback onTap;
-
-  const _Pill({
-    required this.label,
-    required this.icon,
-    required this.isSelected,
-    required this.color,
-    required this.isDark,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final bg = isSelected
-        ? color.withValues(alpha: isDark ? 0.2 : 0.08)
-        : (isDark ? Colors.white.withValues(alpha: 0.03) : Colors.grey.shade50);
-    final border = isSelected
-        ? color.withValues(alpha: 0.5)
-        : (isDark ? Colors.white10 : Colors.black26);
-
-    return GestureDetector(
-      onTap: onTap,
+        );
+      }).toList(),
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.symmetric(vertical: 11),
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: bg,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: border, width: 1.2),
+          color: currentColor.withValues(alpha: isDark ? 0.15 : 0.08),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: currentColor.withValues(alpha: isDark ? 0.4 : 0.25),
+            width: 1.2,
+          ),
         ),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon,
-                size: 15,
-                color: isSelected
-                    ? color
-                    : (isDark ? Colors.white38 : Colors.black38)),
+            Icon(currentIcon, size: 14, color: currentColor),
             const SizedBox(width: 8),
             Text(
-              label,
+              currentLabel,
               style: GoogleFonts.quicksand(
                 fontSize: 12,
-                fontWeight: FontWeight.w800,
-                color: isSelected
-                    ? color
-                    : (isDark ? Colors.white38 : Colors.black38),
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : currentColor,
               ),
+            ),
+            const SizedBox(width: 6),
+            Icon(
+              Icons.keyboard_arrow_down_rounded,
+              size: 16,
+              color: isDark ? Colors.white60 : currentColor,
             ),
           ],
         ),

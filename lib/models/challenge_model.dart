@@ -1,3 +1,9 @@
+/// Model: ChallengeModel
+//
+// Merepresentasikan tantangan menabung aktif atau selesai.
+/// Mendukung serialisasi JSON untuk penyimpanan di [SharedPreferences].
+library;
+
 enum ChallengeType {
   daily,
   weekly,

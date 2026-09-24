@@ -1,3 +1,8 @@
+﻿/// Page: BrankasFinansialPage
+///
+/// Brankas finansial dan ringkasan portofolio aset.
+library;
+
 import 'dart:convert';
 import 'package:tabunganku/core/widgets/top_toast.dart';
 import 'package:flutter/material.dart';
@@ -1036,3 +1041,4 @@ class _BrankasFinansialPageState extends ConsumerState<BrankasFinansialPage> {
     );
   }
 }
+

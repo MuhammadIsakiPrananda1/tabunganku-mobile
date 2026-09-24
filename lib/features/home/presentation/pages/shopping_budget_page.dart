@@ -1,3 +1,8 @@
+﻿/// Page: ShoppingBudgetPage
+///
+/// Anggaran dan daftar belanja terencana.
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -721,3 +726,4 @@ class _ShoppingBudgetPageState extends ConsumerState<ShoppingBudgetPage> {
     );
   }
 }
+

@@ -1,3 +1,9 @@
+/// Service: BudgetService
+//
+// Mengelola batas anggaran per kategori per bulan.
+/// Menyimpan data lokal di [SharedPreferences] per user.
+library;
+
 import 'dart:async';
 import 'dart:convert';
 
@@ -12,7 +18,7 @@ abstract class BudgetService {
   Stream<List<BudgetModel>> watchBudgets();
 }
 
-class MockBudgetService implements BudgetService {
+class LocalBudgetService implements BudgetService {
   static const String _storagePrefix = 'budgets_user_';
   static final SecureStorageService _secureStorage = SecureStorageService();
   static Future<SharedPreferences>? _prefsFuture;

@@ -1,3 +1,8 @@
+﻿/// Page: WisataPlannerPage
+///
+/// Rencana anggaran dan tabungan liburan wisata.
+library;
+
 import 'dart:convert';
 import 'package:tabunganku/core/widgets/top_toast.dart';
 import 'package:flutter/material.dart';
@@ -1444,4 +1449,5 @@ class _StatCell extends StatelessWidget {
     );
   }
 }
+
 

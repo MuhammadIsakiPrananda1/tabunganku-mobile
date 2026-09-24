@@ -83,7 +83,7 @@ class ExportService {
         .where((t) => t.type == TransactionType.expense)
         .fold(0.0, (s, t) => s + t.amount);
     final balance = income - expense;
-    final double saldoAwal = 0.0;
+    const double saldoAwal = 0.0;
 
     final poppinsRegular =
         await rootBundle.load("assets/fonts/Poppins-Regular.ttf");

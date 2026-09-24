@@ -1,9 +1,14 @@
+/// Provider: BudgetProvider
+//
+// Menyediakan akses reaktif ke anggaran bulanan.
+library;
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tabunganku/models/budget_model.dart';
 import 'package:tabunganku/services/budget_service.dart';
 
 final budgetServiceProvider = Provider<BudgetService>((ref) {
-  return MockBudgetService();
+  return LocalBudgetService();
 });
 
 final budgetsStreamProvider = StreamProvider.autoDispose<List<BudgetModel>>((ref) {

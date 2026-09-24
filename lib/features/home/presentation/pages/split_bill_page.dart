@@ -1,3 +1,8 @@
+﻿/// Page: SplitBillPage
+///
+/// Pembagi tagihan bersama teman secara adil.
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -525,3 +530,4 @@ class _SplitBillPageState extends ConsumerState<SplitBillPage> {
     );
   }
 }
+

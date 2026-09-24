@@ -1,3 +1,9 @@
+/// Service: OverseasTravelService
+//
+// Mengelola rencana perjalanan luar negeri.
+/// Menyimpan data lokal di [SharedPreferences] per user.
+library;
+
 import 'dart:async';
 import 'dart:convert';
 import 'package:tabunganku/core/security/secure_storage_service.dart';
@@ -11,7 +17,7 @@ abstract class OverseasTravelService {
   Stream<List<OverseasTravelGoalModel>> watchGoals();
 }
 
-class MockOverseasTravelService implements OverseasTravelService {
+class LocalOverseasTravelService implements OverseasTravelService {
   static const String _storageKey = 'overseas_travel_goals_v1';
   static final SecureStorageService _secureStorage = SecureStorageService();
   static final Map<String, List<OverseasTravelGoalModel>> _userGoals = {};

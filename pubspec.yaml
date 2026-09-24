@@ -47,8 +47,10 @@ dependencies:
   flutter_native_contact_picker: ^0.0.11
   connectivity_plus: ^7.1.1
   http: ^1.6.0
+  http_parser: ^4.1.2
   uuid: ^4.3.3
   image_cropper: 8.0.2
+  liquid_swipe: ^3.1.0
 
 dev_dependencies:
   flutter_test:

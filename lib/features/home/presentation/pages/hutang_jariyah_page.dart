@@ -1,3 +1,8 @@
+﻿/// Page: HutangJariyahPage
+///
+/// Pelacak hutang piutang dan catatan cicilan.
+library;
+
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import 'package:tabunganku/core/widgets/top_toast.dart';
@@ -918,3 +923,4 @@ class _RibuanFormatter extends TextInputFormatter {
     );
   }
 }
+

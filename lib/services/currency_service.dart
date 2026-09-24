@@ -1,3 +1,9 @@
+/// Service: CurrencyService
+//
+// Mengambil kurs mata uang dari API dan menyimpan cache lokal.
+/// Menyimpan data lokal di [SharedPreferences] per user.
+library;
+
 import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;

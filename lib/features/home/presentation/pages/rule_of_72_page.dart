@@ -1,3 +1,8 @@
+﻿/// Page: RuleOf72Page
+///
+/// Kalkulator aturan 72 estimasi waktu penggandaan aset.
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -340,5 +345,6 @@ class _RibuanFormatter extends TextInputFormatter {
     );
   }
 }
+
 
 

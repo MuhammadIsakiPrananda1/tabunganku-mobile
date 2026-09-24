@@ -1,3 +1,8 @@
+/// Page: AllServicesPage
+///
+/// Halaman katalog semua fitur & layanan TabunganKu.
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -69,14 +74,6 @@ class _AllServicesPageState extends ConsumerState<AllServicesPage> {
         title: 'TABUNGAN & INVESTASI',
         services: [
           _ServiceData(
-            icon: Icons.card_giftcard_rounded,
-            title: 'Alokasi THR & Bonus',
-            subtitle: 'Rencanakan pembagian THR untuk keluarga, mudik & tabungan',
-            color: Colors.teal,
-            route: '/thr-bonus',
-            badgeIcon: Icons.star_rounded,
-          ),
-          _ServiceData(
             icon: Icons.lock_rounded,
             title: 'Gembok Tabungan Gaji',
             subtitle: 'Auto-split 50/30/20 & gembok tabungan gaji bulanan',
@@ -91,6 +88,22 @@ class _AllServicesPageState extends ConsumerState<AllServicesPage> {
             color: Colors.pinkAccent,
             route: '/piggy-bank',
             badgeIcon: Icons.add_rounded,
+          ),
+          _ServiceData(
+            icon: Icons.local_fire_department_rounded,
+            title: 'Streak Menabung',
+            subtitle: 'Pantau konsistensi menabung harian & raih badge',
+            color: Colors.deepOrange,
+            route: '/saving-streak',
+            badgeIcon: Icons.emoji_events_rounded,
+          ),
+          _ServiceData(
+            icon: Icons.toll_rounded,
+            title: 'Tabungan Pembulatan',
+            subtitle: 'Bulatkan pengeluaran & tabung kembalian receh otomatis',
+            color: Colors.indigoAccent,
+            route: '/round-up-savings',
+            badgeIcon: Icons.auto_fix_high_rounded,
           ),
           _ServiceData(
             icon: Icons.assignment_turned_in_rounded,
@@ -202,14 +215,6 @@ class _AllServicesPageState extends ConsumerState<AllServicesPage> {
             badgeIcon: Icons.tune_rounded,
           ),
           _ServiceData(
-            icon: Icons.local_fire_department_rounded,
-            title: 'Kebebasan Finansial (FIRE)',
-            subtitle: 'Hitung target dana untuk pensiun lebih awal',
-            color: Colors.deepOrange,
-            route: '/fire-calculator',
-            badgeIcon: Icons.star_rounded,
-          ),
-          _ServiceData(
             icon: Icons.home_rounded,
             title: 'Kalkulator KPR & Cicilan',
             subtitle: 'Hitung cicilan dan total bunga KPR rumah',
@@ -232,14 +237,6 @@ class _AllServicesPageState extends ConsumerState<AllServicesPage> {
             color: Colors.deepOrange,
             route: '/inflation-calculator',
             badgeIcon: Icons.warning_amber_rounded,
-          ),
-          _ServiceData(
-            icon: Icons.medical_services_rounded,
-            title: 'Checkup Kesehatan Keuangan',
-            subtitle: 'Diagnosis kesehatan finansial & rasio keuangan pribadimu',
-            color: Colors.teal,
-            route: '/financial-health',
-            badgeIcon: Icons.favorite_rounded,
           ),
         ],
       ),
@@ -640,87 +637,71 @@ class _AllServicesPageState extends ConsumerState<AllServicesPage> {
 
   Widget _buildServiceCartoonIcon(_ServiceData item, bool isDarkMode) {
     final color = item.color;
-    final bgColor = isDarkMode
-        ? color.withValues(alpha: 0.18)
-        : HSLColor.fromColor(color).withLightness(0.95).withSaturation(0.65).toColor();
-
-    final borderColor = isDarkMode
-        ? color.withValues(alpha: 0.45)
-        : HSLColor.fromColor(color).withLightness(0.75).withSaturation(0.60).toColor();
-
-    final shadowColor = isDarkMode
-        ? Colors.black.withValues(alpha: 0.40)
-        : HSLColor.fromColor(color).withLightness(0.68).withSaturation(0.55).toColor();
-
     final iconColor = isDarkMode
         ? HSLColor.fromColor(color).withLightness(0.78).toColor()
-        : HSLColor.fromColor(color).withLightness(0.40).toColor();
+        : HSLColor.fromColor(color).withLightness(0.38).withSaturation(0.85).toColor();
 
-    final badgeIcon = item.badgeIcon ?? Icons.star_rounded;
-    final badgeBgColor = color;
+    final cushionColor = isDarkMode
+        ? Colors.white.withValues(alpha: 0.08)
+        : Colors.white.withValues(alpha: 0.72);
+
+    final cushionBorder = isDarkMode
+        ? color.withValues(alpha: 0.20)
+        : color.withValues(alpha: 0.14);
 
     return Container(
       width: 48,
       height: 48,
       decoration: BoxDecoration(
-        color: bgColor,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: isDarkMode
+              ? [
+                  color.withValues(alpha: 0.22),
+                  color.withValues(alpha: 0.10),
+                ]
+              : [
+                  color.withValues(alpha: 0.15),
+                  color.withValues(alpha: 0.06),
+                ],
+        ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: borderColor,
-          width: 2.0,
+          color: isDarkMode
+              ? color.withValues(alpha: 0.28)
+              : color.withValues(alpha: 0.18),
+          width: 1.2,
         ),
         boxShadow: [
-          // 2D Comic bottom shadow (flat cartoon pop)
           BoxShadow(
-            color: shadowColor,
+            color: color.withValues(alpha: isDarkMode ? 0.16 : 0.10),
+            blurRadius: 7,
             offset: const Offset(0, 2.5),
-            blurRadius: 0,
+            spreadRadius: 0,
           ),
         ],
       ),
-      child: Stack(
-        clipBehavior: Clip.none,
-        alignment: Alignment.center,
-        children: [
-          // Razor-sharp, 100% crystal clear primary icon
-          Icon(
-            item.icon,
-            size: 24,
-            color: iconColor,
-          ),
-
-          // Cute 2D cartoon sticker badge on corner
-          Positioned(
-            right: -3,
-            top: -3,
-            child: Container(
-              width: 16,
-              height: 16,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: badgeBgColor,
-                border: Border.all(
-                  color: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
-                  width: 1.8,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.15),
-                    offset: const Offset(0, 1.2),
-                    blurRadius: 2,
-                  ),
-                ],
-              ),
-              child: Center(
-                child: Icon(
-                  badgeIcon,
-                  size: 9,
-                  color: Colors.white,
-                ),
-              ),
+      child: Center(
+        child: Container(
+          width: 32,
+          height: 32,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: cushionColor,
+            border: Border.all(
+              color: cushionBorder,
+              width: 1.0,
             ),
           ),
-        ],
+          child: Center(
+            child: Icon(
+              item.icon,
+              size: 20,
+              color: iconColor,
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -750,3 +731,4 @@ class _ServiceData {
     this.badgeIcon,
   });
 }
+

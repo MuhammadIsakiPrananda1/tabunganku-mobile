@@ -140,21 +140,6 @@ class _CartoonActionButtonState extends State<CartoonActionButton> {
     final isDark = widget.isDarkMode;
     final color = widget.config.baseColor;
 
-    // Pastel candy pod background
-    final bgColor = isDark
-        ? color.withValues(alpha: 0.18)
-        : HSLColor.fromColor(color).withLightness(0.95).withSaturation(0.70).toColor();
-
-    // Bold 2D cartoon border
-    final borderColor = isDark
-        ? color.withValues(alpha: 0.50)
-        : HSLColor.fromColor(color).withLightness(0.72).withSaturation(0.65).toColor();
-
-    // 2D Comic Solid Shadow
-    final shadowColor = isDark
-        ? Colors.black.withValues(alpha: 0.50)
-        : HSLColor.fromColor(color).withLightness(0.68).withSaturation(0.60).toColor();
-
     return GestureDetector(
       onTapDown: (_) {
         setState(() => _isPressed = true);
@@ -169,32 +154,47 @@ class _CartoonActionButtonState extends State<CartoonActionButton> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Transform.translate(
-            offset: Offset(0, _isPressed ? 2.5 : 0),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 90),
+          AnimatedScale(
+            scale: _isPressed ? 0.91 : 1.0,
+            duration: const Duration(milliseconds: 110),
+            curve: Curves.easeOutCubic,
+            child: Container(
               width: 54,
               height: 54,
               decoration: BoxDecoration(
-                color: bgColor,
-                borderRadius: BorderRadius.circular(19),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: isDark
+                      ? [
+                          color.withValues(alpha: 0.22),
+                          color.withValues(alpha: 0.10),
+                        ]
+                      : [
+                          color.withValues(alpha: 0.15),
+                          color.withValues(alpha: 0.06),
+                        ],
+                ),
+                borderRadius: BorderRadius.circular(18),
                 border: Border.all(
-                  color: borderColor,
-                  width: 2.0,
+                  color: isDark
+                      ? color.withValues(alpha: 0.28)
+                      : color.withValues(alpha: 0.18),
+                  width: 1.2,
                 ),
                 boxShadow: [
-                  // Flat comic 2D bottom shadow (tactile button pop)
                   BoxShadow(
-                    color: shadowColor,
-                    offset: _isPressed ? const Offset(0, 1.0) : const Offset(0, 3.5),
-                    blurRadius: 0,
+                    color: color.withValues(alpha: isDark ? 0.16 : 0.10),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                    spreadRadius: 0,
                   ),
                 ],
               ),
               child: Center(
                 child: CartoonIconWidget(
                   type: widget.config.cartoonType,
-                  size: 38,
+                  size: 35,
                   isDarkMode: isDark,
                 ),
               ),
@@ -207,24 +207,25 @@ class _CartoonActionButtonState extends State<CartoonActionButton> {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: GoogleFonts.quicksand(
-              fontSize: 10.5,
-              fontWeight: FontWeight.w800,
-              height: 1.15,
-              color: isDark ? Colors.white.withValues(alpha: 0.95) : const Color(0xFF1E293B),
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              height: 1.18,
+              letterSpacing: -0.1,
+              color: isDark ? Colors.white.withValues(alpha: 0.92) : const Color(0xFF1E293B),
             ),
           ),
           if (widget.subLabel != null && widget.subLabel!.isNotEmpty)
             Padding(
-              padding: const EdgeInsets.only(top: 1),
+              padding: const EdgeInsets.only(top: 2),
               child: Text(
                 widget.subLabel!,
                 textAlign: TextAlign.center,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: GoogleFonts.quicksand(
-                  fontSize: 8,
-                  fontWeight: FontWeight.w800,
-                  color: isDark ? Colors.white38 : Colors.black45,
+                  fontSize: 8.5,
+                  fontWeight: FontWeight.w700,
+                  color: isDark ? color.withValues(alpha: 0.90) : color,
                 ),
               ),
             ),

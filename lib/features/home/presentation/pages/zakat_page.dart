@@ -1,3 +1,8 @@
+﻿/// Page: ZakatPage
+///
+/// Kalkulator dan pencatatan zakat mal / fitrah.
+library;
+
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import 'package:tabunganku/core/widgets/top_toast.dart';
@@ -466,3 +471,4 @@ class _RibuanFormatter extends TextInputFormatter {
     );
   }
 }
+

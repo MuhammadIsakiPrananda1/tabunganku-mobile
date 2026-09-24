@@ -1,3 +1,9 @@
+/// Service: ShoppingItemService
+//
+// Mengelola daftar belanja pengguna.
+/// Menyimpan data lokal di [SharedPreferences] per user.
+library;
+
 import 'dart:async';
 import 'dart:convert';
 
@@ -13,7 +19,7 @@ abstract class ShoppingItemService {
   Stream<List<ShoppingItem>> watchItems();
 }
 
-class MockShoppingItemService implements ShoppingItemService {
+class LocalShoppingItemService implements ShoppingItemService {
   static const String _storagePrefix = 'shopping_items_user_';
   static final SecureStorageService _secureStorage = SecureStorageService();
   static Future<SharedPreferences>? _prefsFuture;

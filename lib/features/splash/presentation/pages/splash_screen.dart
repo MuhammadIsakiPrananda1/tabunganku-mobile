@@ -1,9 +1,15 @@
+﻿/// Page: SplashScreen
+///
+/// Layar pembuka aplikasi dan inisialisasi rute awal.
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:liquid_swipe/liquid_swipe.dart';
 import 'package:tabunganku/core/constants/app_version.dart';
 import 'package:tabunganku/core/theme/app_colors.dart';
 import 'package:tabunganku/core/theme/theme_provider.dart';
@@ -24,8 +30,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   bool _isCheckingStatus = true;
   bool _hasSeenIntro = false;
 
-  // Onboarding PageView Controller
-  final PageController _pageController = PageController();
+  // Onboarding Liquid Controller
+  late final LiquidController _liquidController;
   int _currentPage = 0;
 
   // Splash Loading Animations
@@ -41,6 +47,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   @override
   void initState() {
     super.initState();
+    _liquidController = LiquidController();
 
     // Inisialisasi animasi Splash Loading yang tenang & elegan (Human-crafted)
     _splashFadeController = AnimationController(
@@ -156,7 +163,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
   @override
   void dispose() {
-    _pageController.dispose();
     _splashFadeController.dispose();
     _splashProgressController.dispose();
     super.dispose();
@@ -169,8 +175,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
         (themeMode == ThemeMode.system &&
             MediaQuery.platformBrightnessOf(context) == Brightness.dark);
 
-    final bgColor =
-        isDark ? const Color(0xFF0F172A) : const Color(0xFFFFFFFF);
+    final bgColor = isDark ? const Color(0xFF0F172A) : const Color(0xFFFFFFFF);
     final textColor =
         isDark ? const Color(0xFFF8FAFC) : const Color(0xFF0F172A);
     final subtitleColor =
@@ -257,7 +262,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                             width: 88,
                             height: 88,
                             decoration: BoxDecoration(
-                              color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                              color: isDark
+                                  ? const Color(0xFF1E293B)
+                                  : Colors.white,
                               borderRadius: BorderRadius.circular(22),
                               border: Border.all(
                                 color: isDark
@@ -269,7 +276,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                                 BoxShadow(
                                   color: isDark
                                       ? Colors.black.withValues(alpha: 0.40)
-                                      : const Color(0xFF0F172A).withValues(alpha: 0.06),
+                                      : const Color(0xFF0F172A)
+                                          .withValues(alpha: 0.06),
                                   blurRadius: 24,
                                   offset: const Offset(0, 10),
                                 ),
@@ -418,8 +426,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   }
 
   /// ═══════════════════════════════════════════════════════════════════════
+  /// 2. ONBOARDING SLIDER SCREEN (Smooth Native Slider + Mouse-Scroll Hand Swipe Hint)
   /// ═══════════════════════════════════════════════════════════════════════
-  /// 2. ONBOARDING SLIDER SCREEN (Ultra-Minimalist, Sleek & Keren)
+  /// ═══════════════════════════════════════════════════════════════════════
+  /// 2. ONBOARDING SLIDER SCREEN (Liquid Swipe ala Video Demo + Hand Swipe Handle)
   /// ═══════════════════════════════════════════════════════════════════════
   Widget _buildOnboardingSliderScreen(
     BuildContext context,
@@ -428,249 +438,377 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     Color textColor,
     Color subtitleColor,
   ) {
-    final slides = [
-      _SlideData(
+    // Dynamic contrast colors based on current slide
+    final isCurrentDark = _currentPage == 1 ? true : isDark;
+
+    final pages = [
+      _buildLiquidPage(
+        isDark: isDark,
+        bgColor: isDark ? const Color(0xFF0F172A) : Colors.white,
+        textColor: isDark ? Colors.white : const Color(0xFF0F172A),
+        subtitleColor:
+            isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
         title: 'Target Tabungan,\nTerarah & Terukur',
         description:
             'Buat pos tabungan untuk setiap impianmu. Pantau perkembangannya setiap hari dengan target yang jelas dan realistis.',
         illustration: _buildSlide1Illustration(isDark),
+        isLastPage: false,
       ),
-      _SlideData(
+      _buildLiquidPage(
+        isDark: true,
+        bgColor: isDark ? const Color(0xFF022C22) : const Color(0xFF0F172A),
+        textColor: Colors.white,
+        subtitleColor: const Color(0xFF94A3B8),
         title: 'Arus Kas Rapi,\nBebas Bocor Halus',
         description:
             'Ketahui ke mana setiap rupiah mengalir. Kelola anggaran bulanan secara bijak dan nikmati kontrol penuh atas uangmu.',
-        illustration: _buildSlide2Illustration(isDark),
+        illustration: _buildSlide2Illustration(true),
+        isLastPage: false,
       ),
-      _SlideData(
+      _buildLiquidPage(
+        isDark: isDark,
+        bgColor: isDark ? const Color(0xFF064E3B) : Colors.white,
+        textColor: isDark ? Colors.white : const Color(0xFF0F172A),
+        subtitleColor:
+            isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
         title: 'Privat & Aman,\nHanya di HP-mu',
         description:
             'Data keuanganmu 100% tersimpan di perangkat lokal. Bebas iklan, tanpa pelacak, dan dilindungi enkripsi PIN serta biometrik.',
         illustration: _buildSlide3Illustration(isDark),
+        isLastPage: true,
       ),
     ];
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
-        systemNavigationBarColor: bgColor,
+        statusBarIconBrightness:
+            isCurrentDark ? Brightness.light : Brightness.dark,
+        systemNavigationBarColor:
+            isCurrentDark ? const Color(0xFF0F172A) : Colors.white,
         systemNavigationBarIconBrightness:
-            isDark ? Brightness.light : Brightness.dark,
+            isCurrentDark ? Brightness.light : Brightness.dark,
       ),
       child: Scaffold(
-        backgroundColor: bgColor,
-        body: SafeArea(
-          child: Column(
+        backgroundColor: isCurrentDark ? const Color(0xFF0F172A) : Colors.white,
+        body: Stack(
+          children: [
+            // Liquid Swipe Engine ala Video Demo
+            LiquidSwipe(
+              pages: pages,
+              liquidController: _liquidController,
+              onPageChangeCallback: (index) {
+                setState(() {
+                  _currentPage = index;
+                });
+              },
+              waveType: WaveType.liquidReveal,
+              enableSideReveal: false,
+              slideIconWidget: null,
+              enableLoop: false,
+              fullTransitionValue: 880,
+              ignoreUserGestureWhileAnimating: true,
+            ),
+
+            // Bottom Indicators (Pill Dots)
+            Positioned(
+              bottom: 22,
+              left: 0,
+              right: 0,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(3, (index) {
+                  final isSelected = _currentPage == index;
+                  return AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeOutCubic,
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    height: 6,
+                    width: isSelected ? 24 : 7,
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? AppColors.primary
+                          : (isCurrentDark
+                              ? Colors.white.withValues(alpha: 0.25)
+                              : Colors.black.withValues(alpha: 0.12)),
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                  );
+                }),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLiquidPage({
+    required bool isDark,
+    required Color bgColor,
+    required Color textColor,
+    required Color subtitleColor,
+    required String title,
+    required String description,
+    required Widget illustration,
+    required bool isLastPage,
+  }) {
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      color: bgColor,
+      child: SafeArea(
+        child: Column(
+          children: [
+            // Top Bar: Brand Pill Glassmorphic & Tombol Lewati (Terintegrasi per slide)
+            _buildTopBar(
+              isDark: isDark,
+              textColor: textColor,
+              subtitleColor: subtitleColor,
+              isLastPage: isLastPage,
+            ),
+            const Spacer(flex: 1),
+
+            // Visual Hero Illustration
+            SizedBox(
+              height: 230,
+              child: Center(child: illustration),
+            ),
+
+            const Spacer(flex: 1),
+
+            // Title (Centered bold)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: Text(
+                title,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.quicksand(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.5,
+                  height: 1.25,
+                  color: textColor,
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 10),
+
+            // Subtitle Description (Centered medium)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 36),
+              child: Text(
+                description,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.quicksand(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  height: 1.45,
+                  color: subtitleColor,
+                ),
+              ),
+            ),
+
+            const Spacer(flex: 1),
+
+            // Bottom Action Area (Tepat di atas titik indikator, tidak berjejer)
+            if (isLastPage)
+              SizedBox(
+                height: 52,
+                child: Center(
+                  child: _buildStartNowButton(isDark, textColor),
+                ),
+              )
+            else
+              _buildBottomSwipeHint(isDark),
+
+            const SizedBox(height: 42), // Spacing for bottom dots
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Top Bar yang terintegrasi di setiap halaman slide (berubah warna seketika bersama sapuan gelombang)
+  Widget _buildTopBar({
+    required bool isDark,
+    required Color textColor,
+    required Color subtitleColor,
+    required bool isLastPage,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // Brand Pill Glassmorphic
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            decoration: BoxDecoration(
+              color: isDark
+                  ? const Color(0xFF1E293B).withValues(alpha: 0.75)
+                  : Colors.white.withValues(alpha: 0.85),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.12)
+                    : Colors.black.withValues(alpha: 0.06),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.04),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 22,
+                  height: 22,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(6),
+                    child: Image.asset(
+                      'assets/icon.webp',
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'TabunganKu',
+                  style: GoogleFonts.quicksand(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.2,
+                    color: textColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Tombol Lewati (Sebelum slide terakhir)
+          if (!isLastPage)
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: _completeIntro,
+                borderRadius: BorderRadius.circular(20),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 14, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.10)
+                        : Colors.black.withValues(alpha: 0.05),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.08)
+                          : Colors.black.withValues(alpha: 0.05),
+                    ),
+                  ),
+                  child: Text(
+                    'Lewati',
+                    style: GoogleFonts.quicksand(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: subtitleColor,
+                    ),
+                  ),
+                ),
+              ),
+            )
+          else
+            const SizedBox(width: 48),
+        ],
+      ),
+    );
+  }
+
+  /// Tulisan Petunjuk Swipe di Bagian Bawah (Hanya Teks, Tidak Bisa Diklik)
+  Widget _buildBottomSwipeHint(bool isDark) {
+    final textColor = isDark
+        ? Colors.white.withValues(alpha: 0.75)
+        : const Color(0xFF475569);
+    final iconColor = isDark
+        ? Colors.white.withValues(alpha: 0.45)
+        : const Color(0xFF64748B);
+
+    return SizedBox(
+      height: 52,
+      child: Center(
+        child: IgnorePointer(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              // Top Segmented Progress Bar (Modern & Sleek ala Wise/Linear)
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                child: Row(
-                  children: List.generate(
-                    slides.length,
-                    (index) => Expanded(
-                      child: Container(
-                        height: 3,
-                        margin: EdgeInsets.only(
-                          left: index == 0 ? 0 : 4,
-                          right: index == slides.length - 1 ? 0 : 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: index <= _currentPage
-                              ? AppColors.primary
-                              : (isDark
-                                  ? const Color(0xFF1E293B)
-                                  : const Color(0xFFE2E8F0)),
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                    ),
-                  ),
+              Icon(
+                Icons.chevron_left_rounded,
+                size: 16,
+                color: iconColor,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                'Swipe ke kiri atau kanan',
+                style: GoogleFonts.quicksand(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.2,
+                  color: textColor,
                 ),
               ),
-
-              // Top Bar: Logo & Tombol Lewati
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 26,
-                          height: 26,
-                          decoration: BoxDecoration(
-                            color: isDark
-                                ? const Color(0xFF1E293B)
-                                : const Color(0xFFF1F5F9),
-                            borderRadius: BorderRadius.circular(7),
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(7),
-                            child: Image.asset(
-                              'assets/icon.webp',
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'TabunganKu',
-                          style: GoogleFonts.quicksand(
-                            fontSize: 13.5,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: -0.2,
-                            color: textColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                    if (_currentPage < slides.length - 1)
-                      TextButton(
-                        onPressed: _completeIntro,
-                        style: TextButton.styleFrom(
-                          foregroundColor: subtitleColor,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
-                          ),
-                          minimumSize: Size.zero,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        ),
-                        child: Text(
-                          'Lewati',
-                          style: GoogleFonts.quicksand(
-                            fontSize: 12.5,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      )
-                    else
-                      const SizedBox(height: 24),
-                  ],
-                ),
-              ),
-
-              // PageView Slides
-              Expanded(
-                child: PageView.builder(
-                  controller: _pageController,
-                  itemCount: slides.length,
-                  onPageChanged: (index) {
-                    setState(() {
-                      _currentPage = index;
-                    });
-                  },
-                  itemBuilder: (context, index) {
-                    final slide = slides[index];
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Spacer(flex: 1),
-
-                          // Visual Hero Widget
-                          SizedBox(
-                            height: 250,
-                            child: Center(child: slide.illustration),
-                          ),
-
-                          const Spacer(flex: 1),
-
-                          // Title
-                          Text(
-                            slide.title,
-                            textAlign: TextAlign.center,
-                            style: GoogleFonts.quicksand(
-                              fontSize: 25,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: -0.5,
-                              height: 1.25,
-                              color: textColor,
-                            ),
-                          ),
-
-                          const SizedBox(height: 12),
-
-                          // Description
-                          Text(
-                            slide.description,
-                            textAlign: TextAlign.center,
-                            style: GoogleFonts.quicksand(
-                              fontSize: 13.5,
-                              fontWeight: FontWeight.w500,
-                              height: 1.5,
-                              color: subtitleColor,
-                            ),
-                          ),
-
-                          const Spacer(flex: 2),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              ),
-
-              // Bottom Navigation Button
-              Padding(
-                padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 52,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      if (_currentPage < slides.length - 1) {
-                        _pageController.nextPage(
-                          duration: const Duration(milliseconds: 320),
-                          curve: Curves.easeOutCubic,
-                        );
-                      } else {
-                        _completeIntro();
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shadowColor: Colors.transparent,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          _currentPage < slides.length - 1
-                              ? 'Lanjut'
-                              : 'Mulai Sekarang',
-                          style: GoogleFonts.quicksand(
-                            color: Colors.white,
-                            fontSize: 15.5,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 0.3,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Icon(
-                          _currentPage < slides.length - 1
-                              ? Icons.arrow_forward_rounded
-                              : Icons.check_rounded,
-                          color: Colors.white,
-                          size: 18,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+              const SizedBox(width: 4),
+              Icon(
+                Icons.chevron_right_rounded,
+                size: 16,
+                color: iconColor,
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Tombol Mulai Sekarang (Hanya Teks dan Border, Terpusat di Atas Titik Indikator)
+  Widget _buildStartNowButton(bool isDark, Color textColor) {
+    final borderColor = isDark
+        ? Colors.white.withValues(alpha: 0.5)
+        : const Color(0xFF0F172A).withValues(alpha: 0.35);
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        key: const ValueKey('start_button'),
+        borderRadius: BorderRadius.circular(20),
+        onTap: _completeIntro,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 9),
+          decoration: BoxDecoration(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.08)
+                : Colors.black.withValues(alpha: 0.04),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: borderColor,
+              width: 1.3,
+            ),
+          ),
+          child: Text(
+            'Mulai Sekarang',
+            style: GoogleFonts.quicksand(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              letterSpacing: -0.1,
+              color: textColor,
+            ),
           ),
         ),
       ),
@@ -923,8 +1061,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                 ),
               ),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: const Color(0xFF10B981).withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(8),
@@ -1012,17 +1149,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
           width: 26,
           height: 26,
           decoration: BoxDecoration(
-            color: isDark
-                ? const Color(0xFF334155)
-                : const Color(0xFFF1F5F9),
+            color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
             borderRadius: BorderRadius.circular(7),
           ),
           child: Icon(
             icon,
             size: 14,
-            color: isDark
-                ? const Color(0xFFCBD5E1)
-                : const Color(0xFF475569),
+            color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
           ),
         ),
         const SizedBox(width: 8),
@@ -1041,9 +1174,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
           style: GoogleFonts.quicksand(
             fontSize: 11.5,
             fontWeight: FontWeight.w700,
-            color: isDark
-                ? const Color(0xFF94A3B8)
-                : const Color(0xFF64748B),
+            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
           ),
         ),
       ],
@@ -1106,9 +1237,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
             style: GoogleFonts.quicksand(
               fontSize: 11,
               fontWeight: FontWeight.w500,
-              color: isDark
-                  ? const Color(0xFF94A3B8)
-                  : const Color(0xFF64748B),
+              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
             ),
           ),
           const SizedBox(height: 14),
@@ -1143,9 +1272,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
             style: GoogleFonts.quicksand(
               fontSize: 11,
               fontWeight: FontWeight.w600,
-              color: isDark
-                  ? const Color(0xFFE2E8F0)
-                  : const Color(0xFF334155),
+              color: isDark ? const Color(0xFFE2E8F0) : const Color(0xFF334155),
             ),
           ),
         ),
@@ -1154,14 +1281,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   }
 }
 
-class _SlideData {
-  final String title;
-  final String description;
-  final Widget illustration;
 
-  _SlideData({
-    required this.title,
-    required this.description,
-    required this.illustration,
-  });
-}
+
+

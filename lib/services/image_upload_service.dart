@@ -1,65 +1,44 @@
+/// Service: ImageUploadService
+///
+/// Pengelolaan upload gambar untuk TabunganKu yang terintegrasi dengan TabunganKu Secure Image API.
+library;
+
 import 'dart:io';
-import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:http/http.dart' as http;
-import 'package:path/path.dart' as p;
+import 'api_image_service.dart';
 
 final imageUploadServiceProvider = Provider<ImageUploadService>((ref) {
   return ImageUploadService();
 });
 
 class ImageUploadService {
-
-  static const String _serverUrl = 'http://103.6.201.118:8089/upload';
-
-Future<String> getServerUrl() async {
-    return _serverUrl;
+  /// Upload gambar ke server TabunganKu via ApiImageService
+  Future<String?> uploadImage(File file) async {
+    return ApiImageService.uploadImage(file);
   }
 
-Future<String?> uploadImage(File file) async {
-    try {
-      debugPrint('[ImageUploadService] Mengunggah gambar ke VPS: $_serverUrl');
-      final uri = Uri.parse(_serverUrl);
+  /// Upload gambar dengan detail hasil respons
+  Future<ApiUploadResult> uploadImageDetailed(File file) async {
+    return ApiImageService.uploadImageDetailed(file);
+  }
 
-      final request = http.MultipartRequest('POST', uri);
+  /// Hapus gambar dari server TabunganKu via ApiImageService
+  Future<bool> deleteImage(String filenameOrUrl) async {
+    return ApiImageService.deleteImage(filenameOrUrl);
+  }
 
-final stream = http.ByteStream(file.openRead());
-      final length = await file.length();
+  /// Cek kesehatan & latensi server
+  Future<ServerHealthInfo> getHealthDetails() async {
+    return ApiImageService.getHealthDetails();
+  }
 
-      final multipartFile = http.MultipartFile(
-        'image',
-        stream,
-        length,
-        filename: p.basename(file.path),
-      );
+  /// Uji fungsionalitas upload langsung
+  Future<ApiUploadResult> testUpload() async {
+    return ApiImageService.testUpload();
+  }
 
-      request.files.add(multipartFile);
-
-final streamedResponse = await request.send().timeout(
-            const Duration(seconds: 15),
-          );
-
-      final response = await http.Response.fromStream(streamedResponse);
-
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data = jsonDecode(response.body);
-        if (data['success'] == true && data['url'] != null) {
-          final uploadedUrl = data['url'] as String;
-          debugPrint('[ImageUploadService] Upload sukses: $uploadedUrl');
-          return uploadedUrl;
-        } else if (data['url'] != null) {
-          return data['url'] as String;
-        }
-      }
-
-      debugPrint(
-          '[ImageUploadService] Gagal upload. Status: ${response.statusCode}, Body: ${response.body}');
-      return null;
-    } catch (e) {
-      debugPrint(
-          '[ImageUploadService] Koneksi VPS gagal atau offline (Fallback ke lokal): $e');
-      return null;
-    }
+  /// Dapatkan Base URL aktif
+  Future<String> getBaseUrl() async {
+    return ApiImageService.getBaseUrl();
   }
 }

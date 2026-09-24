@@ -1,3 +1,8 @@
+﻿/// Page: InflationCalculatorPage
+///
+/// Simulasi dampak inflasi terhadap nilai uang masa depan.
+library;
+
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -806,5 +811,6 @@ class _InflationCalculatorPageState
     );
   }
 }
+
 
 

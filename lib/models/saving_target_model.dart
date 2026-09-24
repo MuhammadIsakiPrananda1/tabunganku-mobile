@@ -1,3 +1,9 @@
+/// Model: SavingTargetModel
+//
+// Merepresentasikan target tabungan dengan deadline.
+/// Mendukung serialisasi JSON untuk penyimpanan di [SharedPreferences].
+library;
+
 class SavingTargetModel {
   final String id;
   final String name;

@@ -1,3 +1,8 @@
+﻿/// Page: CropPage
+///
+/// Editor pemotongan foto profil pengguna sebelum disimpan.
+library;
+
 import 'dart:io';
 import 'package:tabunganku/core/widgets/top_toast.dart';
 import 'dart:ui' as ui;
@@ -317,3 +322,4 @@ _isCropping
     );
   }
 }
+

@@ -1,4 +1,8 @@
-import 'dart:convert';
+/// Model: NotificationModel
+//
+// Merepresentasikan notifikasi in-app.
+/// Mendukung serialisasi JSON untuk penyimpanan di [SharedPreferences].
+library;
 
 enum NotificationType {
   badge,

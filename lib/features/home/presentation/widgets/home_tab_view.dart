@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:tabunganku/core/theme/app_colors.dart';
 import 'package:tabunganku/core/theme/theme_provider.dart';
+import 'package:tabunganku/core/widgets/wave_background.dart';
 import 'package:tabunganku/models/transaction_model.dart';
 import 'package:tabunganku/models/saving_target_model.dart';
 import 'package:tabunganku/providers/transaction_provider.dart';
@@ -256,19 +257,9 @@ final goldTxs = ref.watch(goldTransactionsStreamProvider).valueOrNull ?? [];
                   ),
                 ),
 
-                const SizedBox(height: 8),
-
-                // ── Di Bawah Saldo: Chip Estimasi Akhir Bulan ──
-                _buildCompactEstChip(
-                  totalBalance: totalBalance,
-                  totalIncome: totalIncome,
-                  totalExpense: totalExpense,
-                  isDarkMode: isDarkMode,
-                ),
-
                 // ── Garis Pembatas Horizontal (BRImo style) ──
                 Container(
-                  margin: const EdgeInsets.only(top: 14, bottom: 12),
+                  margin: const EdgeInsets.only(top: 16, bottom: 12),
                   height: 1,
                   color: isDarkMode
                       ? Colors.white.withValues(alpha: 0.08)
@@ -440,210 +431,6 @@ final goldTxs = ref.watch(goldTransactionsStreamProvider).valueOrNull ?? [];
     );
   }
 
-  Widget _buildCompactEstChip({
-    required double totalBalance,
-    required double totalIncome,
-    required double totalExpense,
-    required bool isDarkMode,
-  }) {
-    final now = DateTime.now();
-    final totalDays = DateTime(now.year, now.month + 1, 0).day;
-    final day = now.day;
-    final currentDay = day > 0 ? day : 1;
-    final estIncome = (totalIncome / currentDay) * totalDays;
-    final estExpense = (totalExpense / currentDay) * totalDays;
-    final rawRemainingNet =
-        (estIncome - totalIncome) - (estExpense - totalExpense);
-    final double dampingFactor = rawRemainingNet >= 0
-        ? 1.0
-        : (currentDay / 10.0).clamp(0.1, 1.0);
-    final remainingNet = rawRemainingNet * dampingFactor;
-    final projectedBalance = totalBalance + remainingNet;
-    final isDanger = projectedBalance < totalBalance;
-    final baseColor =
-        isDanger ? const Color(0xFFF43F5E) : const Color(0xFF10B981);
-
-    return GestureDetector(
-      onTap: () => _showEstimationInfoModal(
-        context,
-        isDarkMode,
-        currentDay,
-        totalDays,
-        projectedBalance,
-      ),
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5.5),
-        decoration: BoxDecoration(
-          color: baseColor.withValues(alpha: isDarkMode ? 0.14 : 0.08),
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: baseColor.withValues(alpha: isDarkMode ? 0.40 : 0.30),
-            width: 1.1,
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              isDanger
-                  ? Icons.trending_down_rounded
-                  : Icons.trending_up_rounded,
-              size: 14,
-              color: baseColor,
-            ),
-            const SizedBox(width: 4.5),
-            Text(
-              widget.showBalance
-                  ? (isDanger ? '-' : '+') +
-                      _formatRupiah(projectedBalance.abs())
-                  : 'Rp •••••',
-              style: GoogleFonts.quicksand(
-                fontSize: 11,
-                fontWeight: FontWeight.w800,
-                color: isDarkMode
-                    ? (isDanger
-                        ? const Color(0xFFFB7185)
-                        : const Color(0xFF34D399))
-                    : baseColor,
-              ),
-            ),
-            const SizedBox(width: 3.5),
-            Text(
-              'Est.',
-              style: GoogleFonts.quicksand(
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
-                color: isDarkMode
-                    ? const Color(0xFF94A3B8)
-                    : const Color(0xFF64748B),
-              ),
-            ),
-            const SizedBox(width: 2.5),
-            Icon(
-              Icons.info_outline_rounded,
-              size: 11,
-              color: isDarkMode ? Colors.white38 : const Color(0xFF94A3B8),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showEstimationInfoModal(
-    BuildContext context,
-    bool isDarkMode,
-    int currentDay,
-    int totalDays,
-    double projectedBalance,
-  ) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: isDarkMode ? const Color(0xFF1E2632) : Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return Padding(
-          padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 36,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: isDarkMode ? Colors.white24 : Colors.black12,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 18),
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.15),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.auto_graph_rounded,
-                      color: AppColors.primary,
-                      size: 20,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    'Tentang Estimasi Saldo',
-                    style: GoogleFonts.quicksand(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color:
-                          isDarkMode ? Colors.white : const Color(0xFF0F172A),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 14),
-              Text(
-                'Estimasi dihitung berdasarkan tren rata-rata pengeluaran dan pemasukan harian Anda hingga hari ke-$currentDay dari total $totalDays hari di bulan ini.',
-                style: GoogleFonts.quicksand(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                  height: 1.5,
-                  color: isDarkMode
-                      ? const Color(0xFF94A3B8)
-                      : const Color(0xFF64748B),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: isDarkMode
-                      ? Colors.white.withValues(alpha: 0.04)
-                      : const Color(0xFFF8FAFC),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: isDarkMode
-                        ? Colors.white.withValues(alpha: 0.06)
-                        : const Color(0xFFE2E8F0),
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Perkiraan Saldo Akhir Bulan:',
-                      style: GoogleFonts.quicksand(
-                        fontSize: 12.5,
-                        fontWeight: FontWeight.w500,
-                        color: isDarkMode
-                            ? Colors.white70
-                            : const Color(0xFF334155),
-                      ),
-                    ),
-                    Text(
-                      _formatRupiah(projectedBalance),
-                      style: GoogleFonts.quicksand(
-                        fontSize: 13.5,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
 
   Widget _buildActionGrid(
     bool isDarkMode, {
@@ -971,6 +758,16 @@ final goldTxs = ref.watch(goldTransactionsStreamProvider).valueOrNull ?? [];
           borderRadius: BorderRadius.circular(28),
           child: Stack(
             children: [
+              // Wave Accent on Card Background
+              Positioned.fill(
+                child: CustomPaint(
+                  painter: CardWavePainter(
+                    waveColor: AppColors.primary
+                        .withValues(alpha: isDarkMode ? 0.07 : 0.05),
+                    progress: progress,
+                  ),
+                ),
+              ),
               Positioned(
                 top: -20,
                 right: -10,

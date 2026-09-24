@@ -1,3 +1,8 @@
+/// Provider: NotificationProvider
+//
+// Mengelola daftar notifikasi in-app pengguna.
+library;
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tabunganku/models/notification_model.dart';
 import 'package:tabunganku/services/notification_service.dart';

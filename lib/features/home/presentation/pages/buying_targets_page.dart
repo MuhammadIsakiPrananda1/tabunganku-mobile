@@ -1,3 +1,8 @@
+﻿/// Page: BuyingTargetsPage
+///
+/// Daftar dan pelacakan target pembelian barang.
+library;
+
 import 'package:flutter/material.dart';
 import 'package:tabunganku/core/widgets/top_toast.dart';
 import 'package:tabunganku/features/home/presentation/widgets/savings_adjustment_dialog.dart';
@@ -1612,3 +1617,4 @@ class _RibuanFormatter extends TextInputFormatter {
     return TextEditingValue(text: newText, selection: TextSelection.collapsed(offset: newText.length));
   }
 }
+

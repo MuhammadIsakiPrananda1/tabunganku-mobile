@@ -1,3 +1,9 @@
+/// Model: ChallengeTemplateModel
+//
+// Template tantangan yang bisa dipilih pengguna.
+/// Mendukung serialisasi JSON untuk penyimpanan di [SharedPreferences].
+library;
+
 import 'package:flutter/material.dart';
 import 'challenge_model.dart';
 

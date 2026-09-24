@@ -1,3 +1,8 @@
+﻿/// Page: OverseasTravelPage
+///
+/// Perencanaan anggaran perjalanan luar negeri dan kalkulasi mata uang.
+library;
+
 import 'package:flutter/material.dart';
 import 'package:tabunganku/core/widgets/top_toast.dart';
 import 'package:flutter/services.dart';
@@ -955,3 +960,4 @@ class _RibuanFormatter extends TextInputFormatter {
     );
   }
 }
+

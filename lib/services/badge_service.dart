@@ -1,3 +1,9 @@
+/// Service: BadgeService
+//
+// Mengelola penyimpanan dan penghitungan badge/pencapaian pengguna.
+/// Menyimpan data lokal di [SharedPreferences] per user.
+library;
+
 import 'dart:async';
 import 'dart:convert';
 
@@ -18,10 +24,10 @@ abstract class BadgeService {
   Future<void> unlockFirstChallengeBadge();
 }
 
-class MockBadgeService implements BadgeService {
+class LocalBadgeService implements BadgeService {
   final NotificationService _notificationService;
   
-  MockBadgeService(this._notificationService);
+  LocalBadgeService(this._notificationService);
 
   static const String _earnedBadgesKey = 'earned_badges_';
   
@@ -480,11 +486,11 @@ class MockBadgeService implements BadgeService {
       earnedIds.add(badgeId);
       await _saveEarnedBadgeIds(earnedIds);
 
-final badge = await getBadgeById(badgeId);
+      final badge = await getBadgeById(badgeId);
       if (badge != null) {
         await _notificationService.addNotification(
           NotificationModel(
-            id: 'badge_$badgeId\_${DateTime.now().millisecondsSinceEpoch}',
+            id: 'badge_${badgeId}_${DateTime.now().millisecondsSinceEpoch}',
             title: 'Badge Baru Terbuka! 🏆',
             message: 'Selamat! Kamu baru saja mendapatkan badge "${badge.name}".',
             timestamp: DateTime.now(),
@@ -504,11 +510,11 @@ final badge = await getBadgeById(badgeId);
     for (final badge in availableBadges) {
       bool shouldUnlock = false;
 
-if (badge.requiredPoints > 0 && currentPoints >= badge.requiredPoints) {
+      if (badge.requiredPoints > 0 && currentPoints >= badge.requiredPoints) {
         shouldUnlock = true;
       }
 
-if (badge.requiredStreak != null && currentStreak >= badge.requiredStreak!) {
+      if (badge.requiredStreak != null && currentStreak >= badge.requiredStreak!) {
         shouldUnlock = true;
       }
       
@@ -521,7 +527,8 @@ if (badge.requiredStreak != null && currentStreak >= badge.requiredStreak!) {
     return unlocked;
   }
 
-Future<void> unlockChallengeBadge(String challengeTemplateId) async {
+  @override
+  Future<void> unlockChallengeBadge(String challengeTemplateId) async {
     final badge = _allBadges.firstWhere(
       (b) => b.requiredChallengeId == challengeTemplateId,
       orElse: () => _allBadges.first,
@@ -532,11 +539,12 @@ Future<void> unlockChallengeBadge(String challengeTemplateId) async {
     }
   }
 
-Future<void> unlockFirstChallengeBadge() async {
+  @override
+  Future<void> unlockFirstChallengeBadge() async {
     await unlockBadge('first_challenge');
   }
 
-Future<void> unlockEarlyBirdBadge() async {
+  Future<void> unlockEarlyBirdBadge() async {
     await unlockBadge('early_bird');
   }
 }

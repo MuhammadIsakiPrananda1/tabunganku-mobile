@@ -1,3 +1,9 @@
+/// Service: NotificationService
+//
+// Mengelola notifikasi lokal menggunakan flutter_local_notifications.
+/// Menyimpan data lokal di [SharedPreferences] per user.
+library;
+
 import 'dart:async';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';

@@ -1,3 +1,9 @@
+/// Model: OverseasTravelModel
+//
+// Merepresentasikan rencana perjalanan luar negeri.
+/// Mendukung serialisasi JSON untuk penyimpanan di [SharedPreferences].
+library;
+
 class OverseasTravelGoalModel {
   final String id;
   final String destinationName;

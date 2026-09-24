@@ -1,4 +1,3 @@
-import 'package:tabunganku/core/widgets/offline_loading_dialog.dart';
 import 'dart:io';
 import 'package:tabunganku/core/widgets/top_toast.dart';
 import 'package:flutter/material.dart';
@@ -11,8 +10,7 @@ import 'package:tabunganku/providers/shopping_item_provider.dart';
 import 'package:tabunganku/providers/transaction_provider.dart';
 import 'package:tabunganku/core/theme/app_colors.dart';
 import 'package:tabunganku/core/theme/theme_provider.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
-import 'dart:async';
+import 'package:tabunganku/services/api_image_service.dart';
 import '../widgets/shopping_form_sheet.dart';
 
 class ShoppingListPage extends ConsumerStatefulWidget {
@@ -25,86 +23,17 @@ class ShoppingListPage extends ConsumerStatefulWidget {
 class _ShoppingListPageState extends ConsumerState<ShoppingListPage> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
-
-  bool _isNoInternetDialogShowing = false;
-  BuildContext? _dialogContext;
-  StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
+  bool _isSyncingAll = false;
 
   @override
   void initState() {
     super.initState();
-    _checkInternet();
-    _connectivitySubscription = Connectivity().onConnectivityChanged.listen((results) {
-      if (results.contains(ConnectivityResult.none)) {
-        _showNoInternetPopup();
-      } else {
-        _dismissNoInternetPopup();
-      }
-    });
   }
 
   @override
   void dispose() {
-    _connectivitySubscription?.cancel();
     _searchController.dispose();
     super.dispose();
-  }
-
-  Future<void> _checkInternet() async {
-    final results = await Connectivity().checkConnectivity();
-    if (results.contains(ConnectivityResult.none) && mounted) {
-      _showNoInternetPopup();
-    }
-  }
-
-  void _showNoInternetPopup() {
-    if (_isNoInternetDialogShowing) return;
-    _isNoInternetDialogShowing = true;
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      barrierColor: Colors.black.withValues(alpha: 0.45),
-      builder: (dialogCtx) {
-        _dialogContext = dialogCtx;
-        return PopScope(
-          canPop: false,
-          onPopInvokedWithResult: (didPop, result) {
-            if (didPop) return;
-            _dismissNoInternetPopup();
-            if (mounted && Navigator.of(context).canPop()) {
-              Navigator.of(context).pop();
-            }
-          },
-          child: OfflineLoadingDialog(
-            title: 'Koneksi Belanja Terputus',
-            message: 'Sambungkan ke internet untuk memuat gambar belanja dari server dan mengelola data.',
-            accentColor: AppColors.primary,
-            onDismiss: () {
-              _dismissNoInternetPopup();
-              if (mounted && Navigator.of(context).canPop()) {
-                Navigator.of(context).pop();
-              }
-            },
-            onRetry: () {
-              ref.invalidate(shoppingItemsStreamProvider);
-              _dismissNoInternetPopup();
-            },
-          ),
-        );
-      },
-    ).then((_) {
-      _isNoInternetDialogShowing = false;
-      _dialogContext = null;
-    });
-  }
-
-  void _dismissNoInternetPopup() {
-    if (_isNoInternetDialogShowing && _dialogContext != null) {
-      Navigator.of(_dialogContext!).pop();
-      _isNoInternetDialogShowing = false;
-      _dialogContext = null;
-    }
   }
 
   String _formatRupiah(double amount) {
@@ -131,6 +60,7 @@ class _ShoppingListPageState extends ConsumerState<ShoppingListPage> {
         category: item.category != null && item.category!.trim().isNotEmpty
             ? item.category!.trim()
             : 'Belanja Bulanan',
+        imageUrl: item.url ?? item.imagePath,
       );
       await ref.read(transactionServiceProvider).addTransaction(transaction);
     } else {
@@ -172,10 +102,7 @@ class _ShoppingListPageState extends ConsumerState<ShoppingListPage> {
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          onPressed: () {
-            _dismissNoInternetPopup();
-            Navigator.pop(context);
-          },
+          onPressed: () => Navigator.pop(context),
           icon: Icon(Icons.arrow_back_ios_new_rounded, color: txtClr, size: 20),
         ),
         title: Text(
@@ -199,9 +126,16 @@ class _ShoppingListPageState extends ConsumerState<ShoppingListPage> {
                             item.category!.toLowerCase().contains(_searchQuery.toLowerCase()));
                   }).toList();
 
+                  final unSyncedItems = items.where((i) =>
+                      i.imagePath != null &&
+                      i.imagePath!.isNotEmpty &&
+                      (i.url == null || i.url!.isEmpty)).toList();
+
                   return Column(
                     children: [
                       _buildDashboardHeader(items, isDarkMode),
+                      if (unSyncedItems.isNotEmpty)
+                        _buildCloudSyncBanner(unSyncedItems, isDarkMode),
                       _buildSearchAndFilters(isDarkMode),
                       Expanded(
                         child: filteredItems.isEmpty
@@ -580,76 +514,92 @@ class _ShoppingListPageState extends ConsumerState<ShoppingListPage> {
                 ),
                 const SizedBox(width: 8),
 
-Stack(
-                  alignment: Alignment.bottomRight,
-                  children: [
-                    Container(
-                      width: 46,
-                      height: 46,
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: isDarkMode ? 0.15 : 0.08),
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: item.isOnline && item.url != null && item.url!.isNotEmpty
-                          ? ClipRRect(
-                              borderRadius: BorderRadius.circular(14),
-                              child: Image.network(
-                                item.url!,
-                                fit: BoxFit.cover,
-                                loadingBuilder: (context, child, loadingProgress) {
-                                  if (loadingProgress == null) return child;
-                                  return const Center(
-                                    child: SizedBox(
-                                      width: 14,
-                                      height: 14,
-                                      child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
-                                    ),
-                                  );
-                                },
-                                errorBuilder: (context, error, stackTrace) =>
-                                    const Icon(Icons.broken_image_outlined, color: AppColors.primary, size: 20),
-                              ),
-                            )
-                          : item.imagePath != null && item.imagePath!.isNotEmpty
-                              ? ClipRRect(
-                                  borderRadius: BorderRadius.circular(14),
-                                  child: Image.file(
-                                    File(item.imagePath!),
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) =>
-                                        const Icon(Icons.shopping_bag_rounded, color: AppColors.primary, size: 20),
-                                  ),
-                                )
-                              : const Icon(Icons.shopping_bag_rounded, color: AppColors.primary, size: 20),
-                    ),
+                GestureDetector(
+                  onTap: (item.imagePath != null && item.imagePath!.isNotEmpty) ||
+                          (item.url != null && item.url!.isNotEmpty)
+                      ? () => _showImagePreviewDialog(context, item, isDarkMode)
+                      : null,
+                  child: Stack(
+                    alignment: Alignment.bottomRight,
+                    children: [
+                      Builder(
+                        builder: (context) {
+                          final hasLocalFile = item.imagePath != null &&
+                              item.imagePath!.isNotEmpty &&
+                              File(item.imagePath!).existsSync();
+                          final hasRemote = item.url != null && item.url!.isNotEmpty;
 
-                    if (item.url != null && item.url!.isNotEmpty)
-                      Positioned(
-                        bottom: 0,
-                        right: 0,
-                        child: Container(
-                          padding: const EdgeInsets.all(2),
-                          decoration: const BoxDecoration(
-                            color: Colors.blueAccent,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(Icons.cloud_done_rounded, color: Colors.white, size: 8),
-                        ),
-                      )
-                    else if (item.imagePath != null && item.imagePath!.isNotEmpty)
-                      Positioned(
-                        bottom: 0,
-                        right: 0,
-                        child: Container(
-                          padding: const EdgeInsets.all(2),
-                          decoration: const BoxDecoration(
-                            color: Colors.amber,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(Icons.smartphone_rounded, color: Colors.white, size: 8),
-                        ),
+                          Widget imageContent;
+                          if (hasLocalFile) {
+                            imageContent = Image.file(
+                              File(item.imagePath!),
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => const Icon(
+                                Icons.shopping_bag_rounded,
+                                color: AppColors.primary,
+                                size: 20,
+                              ),
+                            );
+                          } else if (hasRemote) {
+                            imageContent = Image.network(
+                              item.url!,
+                              fit: BoxFit.cover,
+                              loadingBuilder: (context, child, progress) {
+                                if (progress == null) return child;
+                                return const Center(
+                                  child: SizedBox(
+                                    width: 14,
+                                    height: 14,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: AppColors.primary,
+                                    ),
+                                  ),
+                                );
+                              },
+                              errorBuilder: (_, __, ___) => const Icon(
+                                Icons.broken_image_outlined,
+                                color: AppColors.primary,
+                                size: 20,
+                              ),
+                            );
+                          } else {
+                            imageContent = const Icon(
+                              Icons.shopping_bag_rounded,
+                              color: AppColors.primary,
+                              size: 20,
+                            );
+                          }
+
+                          return Container(
+                            width: 46,
+                            height: 46,
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withValues(alpha: isDarkMode ? 0.15 : 0.08),
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(14),
+                              child: imageContent,
+                            ),
+                          );
+                        },
                       ),
-                  ],
+                      if (item.url != null && item.url!.contains('neverlandstudio.my.id'))
+                        Container(
+                          padding: const EdgeInsets.all(2),
+                          decoration: const BoxDecoration(
+                            color: Color(0xFF00E676),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.cloud_done_rounded,
+                            color: Colors.black,
+                            size: 10,
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
                 const SizedBox(width: 12),
 
@@ -772,6 +722,31 @@ Column(
                 _toggleBoughtStatus(item);
               },
             ),
+            if ((item.url != null && item.url!.isNotEmpty) ||
+                (item.imagePath != null && item.imagePath!.isNotEmpty))
+              _buildOptionTile(
+                icon: Icons.image_search_rounded,
+                label: 'Lihat Foto Barang',
+                color: Colors.teal,
+                isDarkMode: isDarkMode,
+                onTap: () {
+                  Navigator.pop(context);
+                  _showImagePreviewDialog(context, item, isDarkMode);
+                },
+              ),
+            if (item.imagePath != null &&
+                item.imagePath!.isNotEmpty &&
+                (item.url == null || item.url!.isEmpty))
+              _buildOptionTile(
+                icon: Icons.cloud_upload_rounded,
+                label: 'Unggah Foto ke Cloud API',
+                color: Colors.blueAccent,
+                isDarkMode: isDarkMode,
+                onTap: () {
+                  Navigator.pop(context);
+                  _uploadSingleItemToCloud(item);
+                },
+              ),
             _buildOptionTile(
               icon: Icons.edit_outlined,
               label: 'Edit Rencana',
@@ -789,6 +764,11 @@ Column(
               isDarkMode: isDarkMode,
               onTap: () async {
                 Navigator.pop(context);
+
+                // Bersihkan gambar di server TabunganKu jika ada
+                if (item.url != null && item.url!.contains('neverlandstudio.my.id')) {
+                  ApiImageService.deleteImage(item.url!);
+                }
 
                 try {
                   await ref.read(transactionServiceProvider).deleteTransaction('shopping_${item.id}');
@@ -834,7 +814,312 @@ Column(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
     );
   }
+
+  void _showImagePreviewDialog(BuildContext context, ShoppingItem item, bool isDarkMode) {
+    final hasLocal = item.imagePath != null && item.imagePath!.isNotEmpty;
+    final hasRemote = item.url != null && item.url!.isNotEmpty;
+    if (!hasLocal && !hasRemote) return;
+
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+        child: Container(
+          decoration: BoxDecoration(
+            color: isDarkMode ? AppColors.surfaceDark : Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 12, 12),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            item.name,
+                            style: GoogleFonts.quicksand(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: isDarkMode ? Colors.white : Colors.black87,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 2),
+                          if (hasRemote)
+                            Row(
+                              children: [
+                                const Icon(Icons.cloud_done_rounded, color: Color(0xFF00E676), size: 13),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'Tersimpan di Cloud API (WebP)',
+                                  style: GoogleFonts.quicksand(
+                                    fontSize: 11,
+                                    color: Colors.grey,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            )
+                          else if (hasLocal)
+                            Row(
+                              children: [
+                                const Icon(Icons.phone_android_rounded, color: Colors.amber, size: 13),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'Tersimpan Lokal di Memori HP',
+                                  style: GoogleFonts.quicksand(
+                                    fontSize: 11,
+                                    color: Colors.amber.shade700,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close_rounded),
+                      color: isDarkMode ? Colors.white70 : Colors.black54,
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+              ),
+              ClipRRect(
+                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(24)),
+                child: Container(
+                  constraints: BoxConstraints(
+                    maxHeight: MediaQuery.of(context).size.height * 0.6,
+                    minHeight: 200,
+                  ),
+                  width: double.infinity,
+                  color: isDarkMode ? Colors.black26 : Colors.grey.shade100,
+                  child: InteractiveViewer(
+                    clipBehavior: Clip.none,
+                    child: hasLocal && File(item.imagePath!).existsSync()
+                        ? Image.file(
+                            File(item.imagePath!),
+                            fit: BoxFit.contain,
+                            errorBuilder: (_, __, ___) => hasRemote
+                                ? Image.network(
+                                    item.url!,
+                                    fit: BoxFit.contain,
+                                    errorBuilder: (_, __, ___) => const Center(
+                                      child: Icon(Icons.broken_image_outlined,
+                                          color: AppColors.primary, size: 48),
+                                    ),
+                                  )
+                                : const Center(
+                                    child: Icon(Icons.broken_image_outlined,
+                                        color: AppColors.primary, size: 48),
+                                  ),
+                          )
+                        : (hasRemote
+                            ? Image.network(
+                                item.url!,
+                                fit: BoxFit.contain,
+                                loadingBuilder: (context, child, progress) {
+                                  if (progress == null) return child;
+                                  return Center(
+                                    child: CircularProgressIndicator(
+                                      value: progress.expectedTotalBytes != null
+                                          ? progress.cumulativeBytesLoaded / progress.expectedTotalBytes!
+                                          : null,
+                                      color: AppColors.primary,
+                                    ),
+                                  );
+                                },
+                                errorBuilder: (context, error, stackTrace) => const Center(
+                                  child: Icon(Icons.broken_image_outlined,
+                                      color: AppColors.primary, size: 48),
+                                ),
+                              )
+                            : const Center(
+                                child: Icon(Icons.broken_image_outlined,
+                                    color: AppColors.primary, size: 48),
+                              )),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _uploadSingleItemToCloud(ShoppingItem item) async {
+    if (item.imagePath == null) return;
+    final file = File(item.imagePath!);
+    if (!file.existsSync()) {
+      showTopToast(context, 'Berkas foto lokal tidak ditemukan di memori.', isError: true);
+      return;
+    }
+
+    showTopToast(context, 'Mengunggah foto "${item.name}" ke Cloud API...');
+    final result = await ApiImageService.uploadImageDetailed(file);
+    if (!mounted) return;
+
+    if (result.success && result.url != null) {
+      final updated = item.copyWith(
+        url: result.url,
+        isOnline: true,
+      );
+      await ref.read(shoppingItemServiceProvider).updateItem(updated);
+      if (!mounted) return;
+      showTopToast(context, 'Foto "${item.name}" berhasil dicadangkan ke Cloud API!');
+    } else {
+      if (!mounted) return;
+      showTopToast(
+        context,
+        result.errorMessage ?? 'Gagal mengunggah foto ke Cloud API.',
+        isError: true,
+      );
+    }
+  }
+
+  Future<void> _syncAllUnsyncedItems(List<ShoppingItem> unSyncedItems) async {
+    if (unSyncedItems.isEmpty || _isSyncingAll) return;
+
+    setState(() => _isSyncingAll = true);
+    showTopToast(context, 'Memulai sinkronisasi ${unSyncedItems.length} foto ke Cloud API...');
+
+    int successCount = 0;
+    String? lastError;
+
+    for (final item in unSyncedItems) {
+      if (item.imagePath == null) continue;
+      final file = File(item.imagePath!);
+      if (!file.existsSync()) continue;
+
+      // Beri jeda antar upload untuk mematuhi rate limit server
+      await Future.delayed(const Duration(milliseconds: 350));
+
+      final result = await ApiImageService.uploadImageDetailed(file);
+      if (result.success && result.url != null) {
+        final updated = item.copyWith(
+          url: result.url,
+          isOnline: true,
+        );
+        await ref.read(shoppingItemServiceProvider).updateItem(updated);
+        successCount++;
+      } else {
+        lastError = result.errorMessage;
+        if (result.statusCode == 429) {
+          // Kuota rate limit habis, hentikan batch agar request tidak sia-sia
+          break;
+        }
+      }
+    }
+
+    if (mounted) {
+      setState(() => _isSyncingAll = false);
+      if (successCount == unSyncedItems.length) {
+        showTopToast(context, 'Semua ($successCount) foto berhasil disinkronkan ke Cloud API!');
+      } else if (successCount > 0) {
+        showTopToast(
+          context,
+          '$successCount foto disinkronkan.${lastError != null ? " Sisa: $lastError" : ""}',
+        );
+      } else {
+        showTopToast(
+          context,
+          lastError ?? 'Sinkronisasi gagal. Pastikan koneksi internet stabil.',
+          isError: true,
+        );
+      }
+    }
+  }
+
+  Widget _buildCloudSyncBanner(List<ShoppingItem> unSyncedItems, bool isDarkMode) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(24, 0, 24, 12),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: isDarkMode
+            ? Colors.amber.shade900.withValues(alpha: 0.2)
+            : const Color(0xFFFFF8E1),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.amber.shade600.withValues(alpha: 0.4),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: Colors.amber.shade700.withValues(alpha: 0.15),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.cloud_upload_rounded, color: Colors.amber.shade800, size: 18),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${unSyncedItems.length} Foto Belum di Cloud',
+                  style: GoogleFonts.quicksand(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: isDarkMode ? Colors.amber.shade300 : Colors.amber.shade900,
+                  ),
+                ),
+                Text(
+                  'Cadangkan foto barang ke Cloud API',
+                  style: GoogleFonts.quicksand(
+                    fontSize: 10,
+                    color: isDarkMode ? Colors.white60 : Colors.black54,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          ElevatedButton(
+            onPressed: _isSyncingAll ? null : () => _syncAllUnsyncedItems(unSyncedItems),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.amber.shade800,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              elevation: 0,
+            ),
+            child: _isSyncingAll
+                ? const SizedBox(
+                    width: 12,
+                    height: 12,
+                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                  )
+                : Text(
+                    'Sinkronkan',
+                    style: GoogleFonts.quicksand(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
 }
+
 
 class _StatCell extends StatelessWidget {
   final String label;

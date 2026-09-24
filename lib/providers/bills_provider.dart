@@ -1,3 +1,8 @@
+/// Provider: BillsProvider
+//
+// Menyediakan akses reaktif ke data tagihan berulang.
+library;
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tabunganku/models/bill_model.dart';
 import 'package:tabunganku/services/bills_service.dart';

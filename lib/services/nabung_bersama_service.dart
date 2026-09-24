@@ -1,3 +1,9 @@
+/// Service: NabungBersamaService
+//
+// Mengelola kelompok tabungan bersama.
+/// Menyimpan data lokal di [SharedPreferences] per user.
+library;
+
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tabunganku/models/nabung_bersama_model.dart';

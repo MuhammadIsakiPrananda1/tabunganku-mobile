@@ -1,3 +1,8 @@
+/// Provider: ConnectivityProvider
+//
+// Memantau status koneksi internet secara reaktif.
+library;
+
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

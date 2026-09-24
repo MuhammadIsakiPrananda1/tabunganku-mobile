@@ -1,3 +1,8 @@
+/// Provider: PaydayVaultProvider
+//
+// Mengelola state brankas gajian.
+library;
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tabunganku/models/payday_vault_model.dart';

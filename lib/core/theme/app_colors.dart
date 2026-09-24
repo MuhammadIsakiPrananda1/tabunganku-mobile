@@ -1,4 +1,18 @@
+/// Core: Theme — App Colors
+///
+/// Palet warna terpusat untuk seluruh aplikasi TabunganKu.
+/// Semua warna bersifat `static const` — zero runtime overhead.
+///
+/// ## Penggunaan
+/// ```dart
+/// Container(color: AppColors.primary)
+/// ```
+/// Untuk warna yang bergantung pada tema (light/dark), gunakan
+/// `Theme.of(context).colorScheme` sebagai gantinya.
+library;
+
 import 'package:flutter/material.dart';
+
 
 class AppColors {
   // Primary

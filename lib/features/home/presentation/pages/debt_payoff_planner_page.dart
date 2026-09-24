@@ -1,3 +1,8 @@
+﻿/// Page: DebtPayoffPlannerPage
+///
+/// Rencana pelunasan hutang (metode snowball / avalanche).
+library;
+
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -536,5 +541,6 @@ class _RibuanFormatter extends TextInputFormatter {
     );
   }
 }
+
 
 

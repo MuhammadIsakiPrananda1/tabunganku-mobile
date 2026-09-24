@@ -1,3 +1,8 @@
+/// Provider: GoldProvider
+//
+// Menyediakan akses reaktif ke data investasi emas.
+library;
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tabunganku/models/gold_investment_model.dart';
 import 'package:tabunganku/services/gold_service.dart';

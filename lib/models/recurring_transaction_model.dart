@@ -1,3 +1,9 @@
+/// Model: RecurringTransactionModel
+//
+// Merepresentasikan transaksi berulang (cicilan, langganan).
+/// Mendukung serialisasi JSON untuk penyimpanan di [SharedPreferences].
+library;
+
 import 'package:tabunganku/models/transaction_model.dart';
 
 enum RecurringFrequency {

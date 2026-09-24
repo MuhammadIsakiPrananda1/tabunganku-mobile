@@ -1,3 +1,9 @@
+/// Model: InvestmentModel
+//
+// Merepresentasikan portofolio investasi (reksa dana, saham, dll).
+/// Mendukung serialisasi JSON untuk penyimpanan di [SharedPreferences].
+library;
+
 class InvestmentModel {
   final String id;
   final String assetName;

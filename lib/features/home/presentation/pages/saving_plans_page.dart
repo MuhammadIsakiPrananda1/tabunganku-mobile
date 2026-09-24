@@ -1,3 +1,8 @@
+﻿/// Page: SavingPlansPage
+///
+/// Daftar dan ringkasan rencana menabung aktif.
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -1126,5 +1131,6 @@ class _StatCell extends StatelessWidget {
     );
   }
 }
+
 
 

@@ -34,7 +34,6 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
   final _amountController = TextEditingController();
   final _customCategoryController = TextEditingController();
   String? _selectedCategory;
-  String? _selectedGroup;
   bool _isCustomCategory = false;
   bool _amountHasError = false;
 
@@ -68,26 +67,16 @@ for (var cat in AppCategories.expenseCategories) {
       if (isKnown) {
         _selectedCategory = existingCat;
         _isCustomCategory = false;
-
-        _selectedGroup = AppCategories.expenseCategories.firstWhere((c) => c.label == existingCat).group;
       } else {
         _selectedCategory = AppCategories.otherLabel;
         _isCustomCategory = true;
         _customCategoryController.text =
             existingCat == AppCategories.otherLabel ? '' : existingCat;
-        _selectedGroup = AppCategories.expenseCategories.firstWhere((c) => c.label == AppCategories.otherLabel).group;
       }
     } else if (widget.initialCategory != null) {
       _selectedCategory = widget.initialCategory;
-      try {
-        _selectedGroup = AppCategories.expenseCategories.firstWhere((c) => c.label == _selectedCategory).group;
-      } catch (_) {
-        _selectedGroup = AppCategories.expenseCategories.first.group;
-      }
     } else {
-
       _selectedCategory = 'Makanan & Minuman';
-      _selectedGroup = 'Kebutuhan Pokok';
     }
   }
 
@@ -279,7 +268,6 @@ for (var cat in AppCategories.expenseCategories) {
                         onSelected: (cat) {
                           setState(() {
                             _selectedCategory = cat.label;
-                            _selectedGroup = cat.group;
                             _isCustomCategory = cat.label == AppCategories.otherLabel;
                           });
                         },

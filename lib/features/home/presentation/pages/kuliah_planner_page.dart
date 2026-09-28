@@ -1,4 +1,4 @@
-﻿/// Page: KuliahPlannerPage
+/// Page: KuliahPlannerPage
 ///
 /// Rencana dana pendidikan kuliah masa depan.
 library;

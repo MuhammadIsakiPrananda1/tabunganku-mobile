@@ -1,4 +1,4 @@
-﻿/// Page: HajjUmrahPlannerPage
+/// Page: HajjUmrahPlannerPage
 ///
 /// Perencanaan dan simulasi tabungan ibadah haji/umrah.
 library;
@@ -12,9 +12,7 @@ import 'package:tabunganku/core/theme/app_colors.dart';
 import 'package:tabunganku/core/theme/theme_provider.dart';
 import 'package:tabunganku/core/widgets/top_toast.dart';
 import 'package:tabunganku/models/saving_target_model.dart';
-import 'package:tabunganku/models/transaction_model.dart';
 import 'package:tabunganku/providers/saving_target_provider.dart';
-import 'package:tabunganku/providers/transaction_provider.dart';
 import 'package:tabunganku/features/home/presentation/widgets/target_detail_sheet.dart';
 
 class HajjUmrahPlannerPage extends ConsumerStatefulWidget {

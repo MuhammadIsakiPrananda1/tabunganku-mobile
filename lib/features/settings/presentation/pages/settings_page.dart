@@ -25,8 +25,12 @@ import 'package:tabunganku/features/settings/presentation/pages/crop_page.dart';
 import 'package:tabunganku/features/settings/presentation/providers/achievement_provider.dart';
 import 'package:tabunganku/features/settings/presentation/providers/security_provider.dart';
 import 'package:tabunganku/models/transaction_model.dart';
+import 'package:tabunganku/providers/saving_streak_provider.dart';
 import 'package:tabunganku/providers/transaction_provider.dart';
 import 'package:tabunganku/providers/user_provider.dart';
+import 'package:tabunganku/features/premium/presentation/widgets/vip_access_gate_sheet.dart';
+import 'package:tabunganku/features/premium/providers/premium_provider.dart';
+import 'package:tabunganku/features/premium/models/premium_certificate.dart';
 import 'package:url_launcher/url_launcher.dart';
 class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
@@ -450,7 +454,10 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     final IconData rankIcon = _getRankIcon(totalIncome);
     final Color rankColor = _getRankColor(totalIncome);
 
-    final streak = ref.watch(savingStreakProvider);
+    final streak = ref.watch(savingStreakProvider).currentStreak;
+    final premiumState = ref.watch(premiumProvider);
+    final isVip = premiumState.isVip;
+    final cert = premiumState.certificate;
 
     final currencyFormatter =
         NumberFormat.currency(locale: 'id_ID', symbol: 'Rp', decimalDigits: 0);
@@ -462,16 +469,54 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         child: Column(
           children: [
             _buildProfileCard(
-                profile, isDarkMode, rankName, rankIcon, rankColor),
+                profile, isDarkMode, rankName, rankIcon, rankColor, isVip, cert),
             const SizedBox(height: 24),
             _buildStatsRow(streak, currentBalance, unlockedCount,
                 achievements.length, currencyFormatter, isDarkMode),
+            const SizedBox(height: 16),
+            _buildSectionHeader('Keanggotaan VIP'),
+            _buildSettingGroup([
+              _buildSettingTile(
+                Icons.workspace_premium_rounded,
+                'Paket TabunganKu VIP',
+                () => VipAccessGateSheet.show(context),
+                subtitle: isVip && cert != null
+                    ? 'Paket ${cert.packageLabel} • ${cert.remainingTimeLabel}'
+                    : 'Pilihan paket 1 hari, 3 hari, 7 hari, 1 bulan & seumur hidup',
+                trailing: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: isVip
+                        ? const Color(0xFFFFD700).withValues(alpha: 0.15)
+                        : (isDarkMode ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: isVip
+                          ? const Color(0xFFFFD700).withValues(alpha: 0.5)
+                          : (isDarkMode ? Colors.white12 : Colors.black12),
+                    ),
+                  ),
+                  child: Text(
+                    isVip && cert != null ? cert.packageLabel : 'Pilih Paket',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w800,
+                      color: isVip
+                          ? const Color(0xFFFFD700)
+                          : (isDarkMode ? Colors.white70 : Colors.black87),
+                    ),
+                  ),
+                ),
+                color: const Color(0xFFFFB800),
+                isDarkMode: isDarkMode,
+              ),
+            ], isDarkMode),
             const SizedBox(height: 16),
             _buildSectionHeader(
                 'Pencapaian ($unlockedCount/${achievements.length})'),
             const SizedBox(height: 8),
             _buildAchievementList(achievements, isDarkMode),
-            const SizedBox(height: 8),
+            const SizedBox(height: 16),
             _buildSectionHeader('Preferensi'),
             _buildSettingGroup([
               _buildSettingTile(
@@ -610,22 +655,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 Icons.feedback_outlined,
                 'Kirim Masukan / Feedback',
                 () => context.push('/feedback'),
-                subtitle: 'Beri rating & saran untuk aplikasi â­',
+                subtitle: 'Beri rating & saran untuk aplikasi ⭐',
                 color: Colors.orange,
-                isDarkMode: isDarkMode,
-              ),
-              _buildSettingTile(
-                Icons.auto_stories_outlined,
-                'Panduan & Pengenalan Aplikasi',
-                () async {
-                  final prefs = await SharedPreferences.getInstance();
-                  await prefs.setBool('has_seen_onboarding_intro', false);
-                  if (context.mounted) {
-                    context.go('/splash');
-                  }
-                },
-                subtitle: 'Lihat kembali slide pengenalan TabunganKu',
-                color: Colors.teal,
                 isDarkMode: isDarkMode,
               ),
               _buildSettingTile(
@@ -649,8 +680,14 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     );
   }
 
-  Widget _buildProfileCard(UserProfile profile, bool isDarkMode, String rank,
-      IconData rankIcon, Color rankColor) {
+  Widget _buildProfileCard(
+      UserProfile profile,
+      bool isDarkMode,
+      String rank,
+      IconData rankIcon,
+      Color rankColor,
+      bool isVip,
+      PremiumCertificate? cert) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
@@ -843,36 +880,79 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color:
-                        rankColor.withValues(alpha: isDarkMode ? 0.15 : 0.08),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: rankColor.withValues(alpha: 0.3),
-                      width: 1,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(rankIcon, color: rankColor, size: 13),
-                      const SizedBox(width: 5),
-                      Flexible(
-                        child: Text(
-                          rank,
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.quicksand(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            color: rankColor,
-                          ),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    Container(
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color:
+                            rankColor.withValues(alpha: isDarkMode ? 0.15 : 0.08),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: rankColor.withValues(alpha: 0.3),
+                          width: 1,
                         ),
                       ),
-                    ],
-                  ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(rankIcon, color: rankColor, size: 13),
+                          const SizedBox(width: 5),
+                          Text(
+                            rank,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.quicksand(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: rankColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (isVip && cert != null)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFFFFD700), Color(0xFFFFA500)],
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFFFFD700)
+                                  .withValues(alpha: 0.3),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.workspace_premium_rounded,
+                              size: 12,
+                              color: Colors.black,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              cert.packageLabel,
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
                 ),
               ],
             ),

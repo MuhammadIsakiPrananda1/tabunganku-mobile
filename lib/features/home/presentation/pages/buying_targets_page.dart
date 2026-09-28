@@ -1,4 +1,4 @@
-﻿/// Page: BuyingTargetsPage
+/// Page: BuyingTargetsPage
 ///
 /// Daftar dan pelacakan target pembelian barang.
 library;

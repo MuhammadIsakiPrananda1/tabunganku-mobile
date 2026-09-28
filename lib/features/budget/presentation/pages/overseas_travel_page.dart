@@ -1,4 +1,4 @@
-﻿/// Page: OverseasTravelPage
+/// Page: OverseasTravelPage
 ///
 /// Perencanaan anggaran perjalanan luar negeri dan kalkulasi mata uang.
 library;

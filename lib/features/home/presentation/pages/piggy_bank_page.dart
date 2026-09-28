@@ -1,4 +1,4 @@
-﻿/// Page: PiggyBankPage
+/// Page: PiggyBankPage
 ///
 /// Celengan digital untuk menabung receh harian.
 library;

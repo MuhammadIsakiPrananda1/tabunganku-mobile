@@ -1,4 +1,4 @@
-﻿/// Page: SplitBillPage
+/// Page: SplitBillPage
 ///
 /// Pembagi tagihan bersama teman secara adil.
 library;

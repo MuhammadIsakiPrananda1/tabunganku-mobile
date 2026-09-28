@@ -1,4 +1,4 @@
-﻿/// Page: NotificationsPage
+/// Page: NotificationsPage
 ///
 /// Pusat notifikasi in-app dan pengingat keuangan.
 library;

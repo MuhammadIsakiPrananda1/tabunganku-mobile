@@ -48,5 +48,12 @@ abstract final class PrefsKeys {
   /// Timestamp (millisecondsSinceEpoch) lockout berakhir.
   static const String lockoutUntil = 'security_lockout_until';
 
+  // ── Cloud Image API ────────────────────────────────────────────────────────
+
+  /// Custom Base URL untuk Image API.
+  static const String imageApiBaseUrl = 'image_api_base_url';
+
+  /// Custom API Key untuk Image API.
+  static const String imageApiKey = 'image_api_key';
 }
 

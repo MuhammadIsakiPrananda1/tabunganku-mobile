@@ -1,4 +1,4 @@
-﻿/// Page: MosqueDonationPage
+/// Page: MosqueDonationPage
 ///
 /// Catatan donasi, infaq, dan sedekah masjid.
 library;

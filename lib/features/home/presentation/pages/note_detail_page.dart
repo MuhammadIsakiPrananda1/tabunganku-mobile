@@ -1,4 +1,4 @@
-﻿/// Page: NoteDetailPage
+/// Page: NoteDetailPage
 ///
 /// Detail dan editor catatan keuangan.
 library;

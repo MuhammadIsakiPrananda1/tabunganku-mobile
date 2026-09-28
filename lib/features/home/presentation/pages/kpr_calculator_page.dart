@@ -1,4 +1,4 @@
-﻿/// Page: KprCalculatorPage
+/// Page: KprCalculatorPage
 ///
 /// Simulasi cicilan KPR (Kredit Pemilikan Rumah).
 library;

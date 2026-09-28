@@ -1,4 +1,4 @@
-﻿/// Page: EmergencyFundCalculatorPage
+/// Page: EmergencyFundCalculatorPage
 ///
 /// Kalkulator dana darurat sesuai kebutuhan bulanan.
 library;

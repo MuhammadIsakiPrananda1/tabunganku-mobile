@@ -1,4 +1,4 @@
-﻿/// Page: ChallengePage
+/// Page: ChallengePage
 ///
 /// Pusat tantangan menabung interaktif dan pencapaian gamifikasi.
 library;
@@ -287,7 +287,6 @@ class _ActiveChallengesTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final activeChallenges = ref.watch(activeChallengesProvider);
-    final isDark = theme.brightness == Brightness.dark;
 
     return activeChallenges.when(
       data: (challenges) {

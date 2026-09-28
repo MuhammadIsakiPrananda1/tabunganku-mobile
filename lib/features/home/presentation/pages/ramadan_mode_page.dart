@@ -1,4 +1,4 @@
-﻿/// Page: RamadanModePage
+/// Page: RamadanModePage
 ///
 /// Mode Ramadan: anggaran belanja lebaran, zakat, sedekah.
 library;
@@ -217,7 +217,6 @@ final expensesRaw = prefs.getString(_prefKeyExpenses);
   }
 
   int get _tarawihCount => _tarawihRakaat.where((r) => r > 0).length;
-  int get _sedekahCount => _sedekahAmounts.where((a) => a > 0).length;
   double get _totalSedekahAmount => _sedekahAmounts.fold(0.0, (sum, a) => sum + a);
 
   @override

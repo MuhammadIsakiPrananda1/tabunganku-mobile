@@ -7,7 +7,7 @@
 /// - [addTransactionProvider] — action provider untuk tambah transaksi
 /// - [transactionsProvider] — FutureProvider snapshot sekali
 /// - [transactionsStreamProvider] — StreamProvider reaktif
-/// - [savingStreakProvider] — hitung hari unik aktivitas keuangan
+/// - [transactionUniqueDaysProvider] — hitung hari unik aktivitas keuangan
 library;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -86,11 +86,8 @@ final transactionProvider =
 // Statistics providers
 // ─────────────────────────────────────────────────────────────────────────────
 
-/// Hitung streak berdasarkan jumlah **hari unik** yang ada transaksinya.
-///
-/// Streak tidak di-reset saat hari tanpa aktivitas — ini by design agar
-/// pengguna tidak kehilangan motivasi karena lupa input satu hari.
-final savingStreakProvider = Provider.autoDispose<int>((ref) {
+/// Hitung jumlah **hari unik** yang ada transaksinya.
+final transactionDaysCountProvider = Provider.autoDispose<int>((ref) {
   final transactionsAsync = ref.watch(transactionsStreamProvider);
   return transactionsAsync.maybeWhen(
     data: (transactions) {

@@ -1,4 +1,4 @@
-﻿/// Page: NabungBersamaPage
+/// Page: NabungBersamaPage
 ///
 /// Kelola tabungan bersama keluarga, pasangan, atau komunitas.
 library;

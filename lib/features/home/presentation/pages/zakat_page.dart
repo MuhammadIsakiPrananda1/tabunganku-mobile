@@ -1,4 +1,4 @@
-﻿/// Page: ZakatPage
+/// Page: ZakatPage
 ///
 /// Kalkulator dan pencatatan zakat mal / fitrah.
 library;

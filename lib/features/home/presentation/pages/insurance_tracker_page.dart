@@ -1,4 +1,4 @@
-﻿/// Page: InsuranceTrackerPage
+/// Page: InsuranceTrackerPage
 ///
 /// Pelacak polis asuransi dan pengingat premi.
 library;

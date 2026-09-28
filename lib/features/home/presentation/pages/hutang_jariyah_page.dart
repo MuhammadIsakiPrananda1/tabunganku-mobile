@@ -1,4 +1,4 @@
-﻿/// Page: HutangJariyahPage
+/// Page: HutangJariyahPage
 ///
 /// Pelacak hutang piutang dan catatan cicilan.
 library;
@@ -168,7 +168,6 @@ if (_commitments[index]['frequency'] == 'Sekali') {
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
     final pageBgColor = isDarkMode ? AppColors.backgroundDark : const Color(0xFFFBFDFB);
     final accentColor = AppColors.primary;
-    final goldColor = AppColors.primaryLight;
 
     return Scaffold(
       backgroundColor: pageBgColor,

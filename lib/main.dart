@@ -4,9 +4,12 @@
 ///   1. [_AppInitializer.run] — timezone, notifikasi, error handler, locale
 ///   2. [SharedPreferences] — baca preferensi awal (balance visibility)
 ///   3. [runApp] dengan [ProviderScope] + override provider awal
+library;
+
 import 'dart:io';
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -36,16 +39,21 @@ import 'providers/balance_visibility_provider.dart';
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
 
+/// Pengendali HTTP kustom dengan batas waktu koneksi (timeout).
+/// Pada mode debug, sertifikat lokal (localhost / emulator loopback) diperbolehkan.
 class _AppHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {
     return super.createHttpClient(context)
       ..connectionTimeout = const Duration(seconds: 15)
       ..badCertificateCallback = (X509Certificate cert, String host, int port) {
-        return host.contains('neverlandstudio.my.id') ||
-            host.contains('localhost') ||
-            host.contains('10.0.2.2') ||
-            host.contains('127.0.0.1');
+        // Demi audit keamanan publik, bypass TLS hanya diizinkan di mode debug untuk localhost/emulator
+        if (kDebugMode) {
+          return host.contains('localhost') ||
+              host.contains('10.0.2.2') ||
+              host.contains('127.0.0.1');
+        }
+        return false;
       };
   }
 }

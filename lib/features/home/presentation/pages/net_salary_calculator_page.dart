@@ -1,4 +1,4 @@
-﻿/// Page: NetSalaryCalculatorPage
+/// Page: NetSalaryCalculatorPage
 ///
 /// Kalkulator take-home pay dan potongan pajak.
 library;
@@ -661,8 +661,6 @@ Theme(
                       ),
                       const SizedBox(height: 6),
                       ...List.generate(taxBrackets.length, (idx) {
-                        final bracket = taxBrackets[idx];
-                        final rate = (bracket['rate'] * 100).toInt();
                         final taxInBracket = bracketTaxes.length > idx ? bracketTaxes[idx] : 0.0;
                         
                         String label = '';

@@ -1,4 +1,4 @@
-﻿/// Page: CropPage
+/// Page: CropPage
 ///
 /// Editor pemotongan foto profil pengguna sebelum disimpan.
 library;

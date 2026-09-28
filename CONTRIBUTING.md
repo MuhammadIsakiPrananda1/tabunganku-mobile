@@ -38,7 +38,9 @@ Kami mengikuti standar **Conventional Commits** untuk memudahkan pelacakan perub
 *   `refactor`: Perubahan kode yang tidak memperbaiki bug maupun menambah fitur.
 *   `chore`: Pembaruan tugas build, paket dependensi, dll.
 
-**Contoh**: `feat(ocr): menambahkan animasi laser pada scan struk`
+**Contoh**: `feat(streak): menambahkan visualisasi kalender saving streak`
+
+Untuk panduan verifikasi keamanan dan model data, silakan rujuk [AUDIT.md](AUDIT.md).
 
 ---
 

@@ -1,4 +1,4 @@
-﻿/// Page: InvestmentTrackerPage
+/// Page: InvestmentTrackerPage
 ///
 /// Pelacak portofolio investasi saham, reksa dana, dan aset.
 library;
@@ -22,12 +22,6 @@ class InvestmentTrackerPage extends ConsumerStatefulWidget {
 }
 
 class _InvestmentTrackerPageState extends ConsumerState<InvestmentTrackerPage> {
-  final _amountController = TextEditingController();
-
-  String _formatRupiah(double amount) {
-    return NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(amount);
-  }
-
   @override
   Widget build(BuildContext context) {
     final investmentsAsync = ref.watch(investmentServiceProvider).watchInvestments();
@@ -119,7 +113,6 @@ class _InvestmentTrackerPageState extends ConsumerState<InvestmentTrackerPage> {
   }
 
   Widget _buildSummaryCard(double invested, double current, double pl, bool isDarkMode) {
-    final isProfit = pl >= 0;
     final cardBg = isDarkMode ? AppColors.surfaceDark : Colors.white;
     final borderCol = isDarkMode ? Colors.white10 : Colors.grey.shade200;
     final fmt = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);

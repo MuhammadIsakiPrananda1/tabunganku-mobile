@@ -13457,21 +13457,27 @@ class AppCategories {
     ),
   ];
 
-  static IconData getIconForCategory(String categoryName) {
-    final allCategories = [...expenseCategories, ...incomeCategories];
-    try {
-      return allCategories.firstWhere((c) => c.label == categoryName).icon;
-    } catch (_) {
-      return Icons.help_outline_rounded;
+  static Map<String, TransactionCategory>? _cachedCategoryMap;
+
+  static Map<String, TransactionCategory> get _categoryMap {
+    if (_cachedCategoryMap == null) {
+      final map = <String, TransactionCategory>{};
+      for (final c in expenseCategories) {
+        map[c.label] = c;
+      }
+      for (final c in incomeCategories) {
+        map[c.label] = c;
+      }
+      _cachedCategoryMap = map;
     }
+    return _cachedCategoryMap!;
+  }
+
+  static IconData getIconForCategory(String categoryName) {
+    return _categoryMap[categoryName]?.icon ?? Icons.help_outline_rounded;
   }
 
   static Color getColorForCategory(String categoryName) {
-    final allCategories = [...expenseCategories, ...incomeCategories];
-    try {
-      return allCategories.firstWhere((c) => c.label == categoryName).color;
-    } catch (_) {
-      return Colors.grey;
-    }
+    return _categoryMap[categoryName]?.color ?? Colors.grey;
   }
 }

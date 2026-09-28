@@ -527,7 +527,8 @@ if (_priceController.text.isNotEmpty) {
           : _categoryController.text.trim();
 
       // Bersihkan foto lama di server jika pengguna mengganti atau menghapus foto
-      if (_pendingDeleteUrl != null && _pendingDeleteUrl!.contains('neverlandstudio.my.id')) {
+      if (_pendingDeleteUrl != null && 
+          (_pendingDeleteUrl!.startsWith('http://') || _pendingDeleteUrl!.startsWith('https://'))) {
         ApiImageService.deleteImage(_pendingDeleteUrl!);
       }
 

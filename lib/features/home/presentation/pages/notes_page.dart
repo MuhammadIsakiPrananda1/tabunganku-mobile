@@ -1,4 +1,4 @@
-﻿/// Page: NotesPage
+/// Page: NotesPage
 ///
 /// Daftar catatan keuangan pribadi.
 library;

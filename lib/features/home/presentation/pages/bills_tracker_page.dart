@@ -1,4 +1,4 @@
-﻿/// Page: BillsTrackerPage
+/// Page: BillsTrackerPage
 ///
 /// Pelacak tagihan bulanan dan pengingat jatuh tempo.
 library;

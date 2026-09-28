@@ -1,4 +1,4 @@
-﻿/// Page: BrankasFinansialPage
+/// Page: BrankasFinansialPage
 ///
 /// Brankas finansial dan ringkasan portofolio aset.
 library;

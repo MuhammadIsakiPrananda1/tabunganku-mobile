@@ -1,4 +1,4 @@
-﻿/// Page: SplashScreen
+/// Page: SplashScreen
 ///
 /// Layar pembuka aplikasi dan inisialisasi rute awal.
 library;

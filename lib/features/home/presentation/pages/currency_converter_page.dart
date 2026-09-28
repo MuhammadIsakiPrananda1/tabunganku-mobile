@@ -1,4 +1,4 @@
-﻿/// Page: CurrencyConverterPage
+/// Page: CurrencyConverterPage
 ///
 /// Konversi mata uang asing secara real-time / lokal.
 library;
@@ -14,6 +14,8 @@ import 'package:tabunganku/core/theme/theme_provider.dart';
 import 'package:tabunganku/services/currency_service.dart';
 import 'package:tabunganku/core/utils/currency_formatter.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:tabunganku/features/premium/presentation/widgets/vip_access_gate_sheet.dart';
+import 'package:tabunganku/features/premium/providers/premium_provider.dart';
 import 'dart:async';
 
 class CurrencyConverterPage extends ConsumerStatefulWidget {
@@ -235,12 +237,41 @@ class _CurrencyConverterPageState extends ConsumerState<CurrencyConverterPage> {
     final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
         (ref.watch(themeProvider) == ThemeMode.system &&
             Theme.of(context).brightness == Brightness.dark);
+    final isVip = ref.watch(premiumProvider).isVip;
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
 
     final pageBgColor =
         isDarkMode ? AppColors.backgroundDark : const Color(0xFFF8FAF9);
     final accentColor =
         isDarkMode ? const Color(0xFF3498DB) : const Color(0xFF2980B9);
+
+    if (!isVip) {
+      return Scaffold(
+        backgroundColor: pageBgColor,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          centerTitle: true,
+          leading: IconButton(
+            onPressed: () {
+              _dismissNoInternetPopup();
+              Navigator.pop(context);
+            },
+            icon: Icon(Icons.arrow_back_ios_new_rounded,
+                color: contentColor, size: 20),
+          ),
+          title: Text(
+            'Konverter Valas',
+            style: GoogleFonts.quicksand(
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+              color: contentColor,
+            ),
+          ),
+        ),
+        body: _buildVipLockBarrier(isDarkMode),
+      );
+    }
 
     final fromRate = (_fromCurrency['rate'] as num?)?.toDouble() ?? 1.0;
     final toRate = (_toCurrency['rate'] as num?)?.toDouble() ?? 1.0;
@@ -775,6 +806,237 @@ class _CurrencyConverterPageState extends ConsumerState<CurrencyConverterPage> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildVipLockBarrier(bool isDarkMode) {
+    final goldColor =
+        isDarkMode ? const Color(0xFFFFB800) : const Color(0xFFD97706);
+    final cardBg = isDarkMode ? const Color(0xFF1E293B) : Colors.white;
+    final borderColor = isDarkMode ? Colors.white10 : const Color(0xFFE2E8F0);
+    final textSecondary =
+        isDarkMode ? Colors.white60 : const Color(0xFF64748B);
+
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Glowing VIP Lock Badge
+            Container(
+              width: 88,
+              height: 88,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    goldColor.withValues(alpha: isDarkMode ? 0.35 : 0.22),
+                    goldColor.withValues(alpha: 0.04),
+                  ],
+                ),
+                border: Border.all(
+                  color: goldColor.withValues(alpha: 0.35),
+                  width: 1.5,
+                ),
+              ),
+              child: Center(
+                child: Icon(
+                  Icons.lock_rounded,
+                  size: 40,
+                  color: goldColor,
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Tag "FITUR EKSKLUSIF VIP"
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: goldColor.withValues(alpha: isDarkMode ? 0.18 : 0.1),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: goldColor.withValues(alpha: 0.35),
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.workspace_premium_rounded,
+                      size: 13, color: goldColor),
+                  const SizedBox(width: 5),
+                  Text(
+                    'FITUR EKSKLUSIF VIP',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.8,
+                      color: goldColor,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            Text(
+              'Konverter Valas Terkunci',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+                color: isDarkMode ? Colors.white : AppColors.primaryDark,
+              ),
+            ),
+            const SizedBox(height: 8),
+
+            Text(
+              'Akses nilai tukar mata uang asing real-time, grafik pergerakan kurs, dan konversi multi-valas global hanya tersedia untuk pelanggan TabunganKu VIP.',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.quicksand(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w600,
+                color: textSecondary,
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // Benefit cards
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: cardBg,
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: borderColor, width: 1),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black
+                        .withValues(alpha: isDarkMode ? 0.2 : 0.04),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  _buildBenefitRow(
+                    Icons.trending_up_rounded,
+                    'Kurs 20+ Mata Uang Dunia Real-time',
+                    'USD, EUR, SGD, JPY, SAR, MYR, GBP & lainnya',
+                    isDarkMode,
+                    goldColor,
+                  ),
+                  Divider(
+                    height: 20,
+                    color: isDarkMode
+                        ? Colors.white10
+                        : Colors.black.withValues(alpha: 0.04),
+                  ),
+                  _buildBenefitRow(
+                    Icons.sync_alt_rounded,
+                    'Konversi Instan Dua Arah',
+                    'Hitung konversi ke Rupiah atau sebaliknya tanpa jeda',
+                    isDarkMode,
+                    goldColor,
+                  ),
+                  Divider(
+                    height: 20,
+                    color: isDarkMode
+                        ? Colors.white10
+                        : Colors.black.withValues(alpha: 0.04),
+                  ),
+                  _buildBenefitRow(
+                    Icons.security_rounded,
+                    'Bebas Kuota & Selalu Diperbarui',
+                    'Pembaruan kurs berkala setiap ada koneksi internet',
+                    isDarkMode,
+                    goldColor,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // Tombol Buka Akses VIP
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  HapticFeedback.mediumImpact();
+                  VipAccessGateSheet.show(context);
+                },
+                icon: const Icon(Icons.workspace_premium_rounded, size: 18),
+                label: Text(
+                  'BERLANGGANAN TABUNGANKU VIP',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 12.5,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: goldColor,
+                  foregroundColor: isDarkMode ? Colors.black : Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBenefitRow(
+    IconData icon,
+    String title,
+    String subtitle,
+    bool isDarkMode,
+    Color goldColor,
+  ) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(7),
+          decoration: BoxDecoration(
+            color: goldColor.withValues(alpha: isDarkMode ? 0.16 : 0.1),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, size: 15, color: goldColor),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: GoogleFonts.quicksand(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: isDarkMode ? Colors.white : Colors.black87,
+                ),
+              ),
+              Text(
+                subtitle,
+                style: GoogleFonts.quicksand(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w500,
+                  color:
+                      isDarkMode ? Colors.white38 : const Color(0xFF64748B),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

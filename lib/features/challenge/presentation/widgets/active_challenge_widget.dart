@@ -5,7 +5,6 @@ import 'package:tabunganku/models/challenge_model.dart';
 import 'package:tabunganku/providers/challenge_provider.dart';
 import 'package:tabunganku/core/theme/app_colors.dart';
 import 'package:tabunganku/features/challenge/presentation/pages/challenge_page.dart';
-import 'package:intl/intl.dart';
 
 class ActiveChallengeWidget extends ConsumerWidget {
   const ActiveChallengeWidget({super.key});

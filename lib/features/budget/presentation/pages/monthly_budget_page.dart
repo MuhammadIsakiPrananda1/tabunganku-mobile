@@ -1,4 +1,4 @@
-﻿/// Page: MonthlyBudgetPage
+/// Page: MonthlyBudgetPage
 ///
 /// Halaman penetapan dan pelacakan anggaran bulanan per kategori.
 library;

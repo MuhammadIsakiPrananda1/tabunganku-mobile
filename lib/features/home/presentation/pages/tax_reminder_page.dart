@@ -1,4 +1,4 @@
-﻿/// Page: TaxReminderPage
+/// Page: TaxReminderPage
 ///
 /// Pengingat jadwal pembayaran pajak.
 library;

@@ -1,4 +1,4 @@
-﻿/// Page: RuleOf72Page
+/// Page: RuleOf72Page
 ///
 /// Kalkulator aturan 72 estimasi waktu penggandaan aset.
 library;

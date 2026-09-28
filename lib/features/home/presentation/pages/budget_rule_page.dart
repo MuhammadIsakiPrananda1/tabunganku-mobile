@@ -1,4 +1,4 @@
-﻿/// Page: BudgetRulePage
+/// Page: BudgetRulePage
 ///
 /// Aturan anggaran keuangan (50/30/20, dsb.).
 library;

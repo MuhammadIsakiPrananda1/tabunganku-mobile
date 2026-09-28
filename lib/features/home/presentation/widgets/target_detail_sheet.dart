@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:tabunganku/core/theme/app_colors.dart';
 import 'package:tabunganku/core/theme/theme_provider.dart';
 import 'package:tabunganku/models/saving_target_model.dart';
-import 'package:tabunganku/models/transaction_model.dart';
-import 'package:tabunganku/providers/transaction_provider.dart';
 import 'package:tabunganku/providers/saving_target_provider.dart';
-import 'package:tabunganku/core/widgets/top_toast.dart';
 import 'package:tabunganku/features/home/presentation/widgets/savings_adjustment_dialog.dart';
 
 class TargetDetailSheet extends ConsumerWidget {
@@ -31,10 +27,6 @@ class TargetDetailSheet extends ConsumerWidget {
     required VoidCallback onEdit,
     required VoidCallback onDelete,
   }) {
-    final theme = Theme.of(context);
-    final isDarkMode = ref.read(themeProvider) == ThemeMode.dark ||
-        (ref.read(themeProvider) == ThemeMode.system && theme.brightness == Brightness.dark);
-
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,

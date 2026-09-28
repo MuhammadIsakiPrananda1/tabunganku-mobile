@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:tabunganku/models/transaction_model.dart';
+import 'package:tabunganku/providers/saving_streak_provider.dart';
 import 'package:tabunganku/providers/transaction_provider.dart';
 
 class Achievement {
@@ -34,7 +35,7 @@ class Achievement {
 
 final achievementsProvider = Provider<List<Achievement>>((ref) {
   final transactionsAsync = ref.watch(transactionsStreamProvider);
-  final streak = ref.watch(savingStreakProvider);
+  final streak = ref.watch(savingStreakProvider).currentStreak;
 
   final allTransactions = transactionsAsync.asData?.value ?? transactionsAsync.valueOrNull ?? [];
   final transactions = allTransactions.where((t) => t.groupId == null).toList();

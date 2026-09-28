@@ -1,4 +1,4 @@
-﻿/// Page: SavingSimulatorPage
+/// Page: SavingSimulatorPage
 ///
 /// Simulasi target dan proyeksi hasil tabungan.
 library;

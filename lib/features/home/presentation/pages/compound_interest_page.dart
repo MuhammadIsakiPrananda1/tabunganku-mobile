@@ -1,4 +1,4 @@
-﻿/// Page: CompoundInterestPage
+/// Page: CompoundInterestPage
 ///
 /// Kalkulator bunga berbunga (compound interest).
 library;

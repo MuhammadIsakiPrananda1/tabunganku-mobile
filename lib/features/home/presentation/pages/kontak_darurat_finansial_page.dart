@@ -1,4 +1,4 @@
-﻿/// Page: KontakDaruratFinansialPage
+/// Page: KontakDaruratFinansialPage
 ///
 /// Daftar kontak darurat institusi finansial.
 library;

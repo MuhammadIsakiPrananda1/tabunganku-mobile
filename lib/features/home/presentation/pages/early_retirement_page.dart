@@ -1,4 +1,4 @@
-﻿/// Page: EarlyRetirementPage
+/// Page: EarlyRetirementPage
 ///
 /// Kalkulator dan proyeksi pensiun dini.
 library;

@@ -113,6 +113,25 @@ class _ShoppingListPageState extends ConsumerState<ShoppingListPage> {
             color: txtClr,
           ),
         ),
+        actions: [
+          IconButton(
+            tooltip: 'Status Cloud API',
+            onPressed: () => _showCloudApiStatusDialog(context, isDarkMode),
+            icon: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.cloud_sync_rounded,
+                color: AppColors.primary,
+                size: 18,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       body: SafeArea(
         child: Column(
@@ -585,7 +604,7 @@ class _ShoppingListPageState extends ConsumerState<ShoppingListPage> {
                           );
                         },
                       ),
-                      if (item.url != null && item.url!.contains('neverlandstudio.my.id'))
+                      if (item.url != null && (item.url!.startsWith('http://') || item.url!.startsWith('https://')))
                         Container(
                           padding: const EdgeInsets.all(2),
                           decoration: const BoxDecoration(
@@ -766,7 +785,7 @@ Column(
                 Navigator.pop(context);
 
                 // Bersihkan gambar di server TabunganKu jika ada
-                if (item.url != null && item.url!.contains('neverlandstudio.my.id')) {
+                if (item.url != null && (item.url!.startsWith('http://') || item.url!.startsWith('https://'))) {
                   ApiImageService.deleteImage(item.url!);
                 }
 
@@ -1115,6 +1134,243 @@ Column(
           ),
         ],
       ),
+    );
+  }
+
+  void _showCloudApiStatusDialog(BuildContext context, bool isDarkMode) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setSheetState) {
+          return FutureBuilder<ServerHealthInfo>(
+            future: ApiImageService.getHealthDetails(),
+            builder: (context, snapshot) {
+              final isLoading = snapshot.connectionState == ConnectionState.waiting;
+              final health = snapshot.data;
+              final isOnline = health?.isHealthy ?? false;
+
+              return Container(
+                padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+                decoration: BoxDecoration(
+                  color: isDarkMode ? AppColors.surfaceDark : Colors.white,
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: isDarkMode ? Colors.white10 : Colors.black12,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withValues(alpha: 0.12),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.cloud_sync_rounded, color: AppColors.primary, size: 24),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'TabunganKu Cloud Image API',
+                                style: GoogleFonts.quicksand(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: isDarkMode ? Colors.white : Colors.black87,
+                                ),
+                              ),
+                              Text(
+                                'api.neverlandstudio.my.id',
+                                style: GoogleFonts.quicksand(
+                                  fontSize: 12,
+                                  color: Colors.grey,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (isLoading)
+                          const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
+                          )
+                        else
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: isOnline
+                                  ? const Color(0xFF00E676).withValues(alpha: 0.15)
+                                  : Colors.red.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  width: 7,
+                                  height: 7,
+                                  decoration: BoxDecoration(
+                                    color: isOnline ? const Color(0xFF00C853) : Colors.red,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  isOnline ? 'ONLINE' : 'OFFLINE',
+                                  style: GoogleFonts.quicksand(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    color: isOnline ? const Color(0xFF00C853) : Colors.red,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: isDarkMode ? Colors.white.withValues(alpha: 0.04) : Colors.grey.shade50,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          _buildDetailRow(
+                            'Status Layanan',
+                            isLoading ? 'Memeriksa...' : (health?.status ?? 'Offline'),
+                            isDarkMode,
+                          ),
+                          const Divider(height: 16),
+                          _buildDetailRow(
+                            'Protokol Keamanan',
+                            'Dynamic AES-256-GCM Token',
+                            isDarkMode,
+                            color: isDarkMode ? Colors.white : AppColors.primary,
+                          ),
+                          const Divider(height: 16),
+                          _buildDetailRow(
+                            'Format Sanitasi',
+                            'WebP 85% • Anti-EXIF/GPS',
+                            isDarkMode,
+                          ),
+                          const Divider(height: 16),
+                          _buildDetailRow(
+                            'Waktu Respons (Latensi)',
+                            isLoading ? '-' : '${health?.latencyMs ?? 0} ms',
+                            isDarkMode,
+                            color: (health?.latencyMs ?? 0) < 500 ? Colors.green : Colors.amber.shade800,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () async {
+                              showTopToast(context, 'Menguji live upload & delete ke server...');
+                              final res = await ApiImageService.testUpload();
+                              if (context.mounted) {
+                                if (res.success) {
+                                  showTopToast(context, 'Uji live upload & sanitasi WebP berhasil 100%!');
+                                } else {
+                                  showTopToast(context, res.errorMessage ?? 'Uji upload gagal', isError: true);
+                                }
+                                setSheetState(() {});
+                              }
+                            },
+                            style: OutlinedButton.styleFrom(
+                              side: BorderSide(
+                                color: isDarkMode ? Colors.white24 : AppColors.primary.withValues(alpha: 0.4),
+                              ),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                            ),
+                            icon: const Icon(Icons.speed_rounded, size: 18, color: AppColors.primary),
+                            label: Text(
+                              'Uji Live Upload',
+                              style: GoogleFonts.quicksand(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                                color: isDarkMode ? Colors.white : AppColors.primary,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () => Navigator.pop(ctx),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              elevation: 0,
+                            ),
+                            child: Text(
+                              'Tutup',
+                              style: GoogleFonts.quicksand(fontWeight: FontWeight.bold, fontSize: 13),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value, bool isDarkMode, {Color? color}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.quicksand(
+            fontSize: 12,
+            color: isDarkMode ? Colors.white60 : Colors.black54,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        Text(
+          value,
+          style: GoogleFonts.quicksand(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            color: color ?? (isDarkMode ? Colors.white : Colors.black87),
+          ),
+        ),
+      ],
     );
   }
 

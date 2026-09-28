@@ -1,4 +1,4 @@
-﻿/// Page: DebtPayoffPlannerPage
+/// Page: DebtPayoffPlannerPage
 ///
 /// Rencana pelunasan hutang (metode snowball / avalanche).
 library;

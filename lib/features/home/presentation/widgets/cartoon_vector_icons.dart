@@ -31,6 +31,7 @@ enum CartoonIconType {
   health,
   splitBill,
   vault,
+  vip,
 }
 
 class _CartoonIconInfo {
@@ -194,6 +195,11 @@ _CartoonIconInfo _getCartoonIconData(CartoonIconType type) {
       return const _CartoonIconInfo(
         mainIcon: Icons.lock_rounded,
         color: Color(0xFF64748B),
+      );
+    case CartoonIconType.vip:
+      return const _CartoonIconInfo(
+        mainIcon: Icons.auto_awesome_rounded,
+        color: Color(0xFFFFB800),
       );
   }
 }

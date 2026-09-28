@@ -17,6 +17,8 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:tabunganku/features/premium/presentation/widgets/vip_access_gate_sheet.dart';
+import 'package:tabunganku/features/premium/providers/premium_provider.dart';
 import 'package:tabunganku/main.dart' show flutterLocalNotificationsPlugin;
 import 'package:tabunganku/services/recurring_service.dart';
 import 'package:tabunganku/providers/transaction_provider.dart';
@@ -33,8 +35,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tabunganku/models/transaction_model.dart';
 import 'package:tabunganku/models/saving_target_model.dart';
 import 'package:tabunganku/features/settings/presentation/pages/settings_page.dart';
-import 'package:tabunganku/features/transaction/presentation/pages/recurring_list_page.dart'
-    hide HighVisInput;
+import 'package:tabunganku/features/transaction/presentation/pages/recurring_list_page.dart';
 import 'package:tabunganku/core/utils/currency_formatter.dart';
 import 'package:tabunganku/core/services/export_service.dart';
 import 'package:tabunganku/features/home/presentation/widgets/smart_clock_widgets.dart';
@@ -68,7 +69,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     ref.read(balanceVisibilityProvider.notifier).toggle();
   }
 
-  int? _wisdomIndex;
   final PageController _targetPageController = PageController();
 
   void _showSavingSimulatorSheet() {
@@ -501,7 +501,12 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         context.push('/zakat');
         break;
       case QuickActionType.goldSavings:
-        context.push('/gold');
+        final isVip = ref.read(premiumProvider).isVip;
+        if (!isVip) {
+          VipAccessGateSheet.show(context);
+        } else {
+          context.push('/gold');
+        }
         break;
       case QuickActionType.emergencyFund:
         context.push('/emergency-fund');
@@ -996,34 +1001,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     );
   }
 
-  Widget _buildDetailRow(
-      String label, String value, IconData icon, Color color) {
-    final theme = Theme.of(context);
-    final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
-        (ref.watch(themeProvider) == ThemeMode.system &&
-            theme.brightness == Brightness.dark);
-
-    return Row(
-      children: [
-        Icon(icon,
-            color: isDarkMode ? color.withValues(alpha: 0.8) : color, size: 20),
-        const SizedBox(width: 16),
-        Expanded(
-            child: Text(label,
-                style: GoogleFonts.quicksand(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13,
-                    color: isDarkMode ? Colors.white38 : Colors.black54))),
-        const SizedBox(width: 8),
-        Text(value,
-            style: GoogleFonts.quicksand(
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-                color: isDarkMode ? Colors.white : AppColors.primaryDark)),
-      ],
-    );
-  }
-
   void _showCalculatorSheet() {
     showModalBottomSheet(
       useSafeArea: true,
@@ -1210,6 +1187,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       selectedCategory = categoryObjects.first.label;
     }
 
+    // ignore: unused_local_variable
     var selectedGroup =
         categoryObjects.any((cat) => cat.label == selectedCategory)
             ? categoryObjects
@@ -1218,7 +1196,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             : (categoryObjects.isNotEmpty ? categoryObjects.first.group : '');
     var categoryUserSelected = false;
     var noteText = '';
-    DateTime selectedDateTime = DateTime.now();
     bool isSaving = false;
     final interestBankOptions = [
       {
@@ -3918,17 +3895,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     );
   }
 
-  Widget _buildInputLabel(String label, bool isDarkMode) {
-    return Text(
-      label,
-      style: GoogleFonts.quicksand(
-        fontSize: 13,
-        fontWeight: FontWeight.bold,
-        color: isDarkMode ? Colors.white70 : Colors.black87,
-      ),
-    );
-  }
-
   double? _toAmount(String raw) {
     final digitsOnly = raw.replaceAll(RegExp(r'[^0-9]'), '');
     if (digitsOnly.isEmpty) return null;
@@ -4080,34 +4046,11 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         .where((t) => t.type == TransactionType.income)
         .fold<double>(0, (s, a) => s + a.amount);
 
-    final now = DateTime.now();
 
     final theme = Theme.of(context);
     final themeMode = ref.watch(themeProvider);
     final isDarkMode = themeMode == ThemeMode.dark ||
         (themeMode == ThemeMode.system && theme.brightness == Brightness.dark);
-
-    final currentMonthTx = transactions
-        .where((t) => t.date.year == now.year && t.date.month == now.month)
-        .toList();
-
-    final categoryTotals = <String, double>{};
-    for (var t
-        in currentMonthTx.where((t) => t.type == TransactionType.expense)) {
-      categoryTotals[t.category] = (categoryTotals[t.category] ?? 0) + t.amount;
-    }
-    final topCategory = categoryTotals.entries.isEmpty
-        ? null
-        : categoryTotals.entries.reduce((a, b) => a.value > b.value ? a : b);
-
-    final largestTransaction = currentMonthTx.isEmpty
-        ? null
-        : currentMonthTx.reduce((a, b) => a.amount > b.amount ? a : b);
-
-    final monthlyActivity = currentMonthTx.length;
-
-    final targetsAsync = ref.watch(savingTargetsStreamProvider);
-    final targets = targetsAsync.valueOrNull ?? [];
 
     final billsAsync = ref.watch(billsStreamProvider);
     final bills =
@@ -4123,27 +4066,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         investments.fold(0.0, (s, i) => s + i.currentValuation);
     final unpaidBillsAmount =
         bills.where((b) => !b.isPaid).fold(0.0, (s, b) => s + b.amount);
-
-    BillModel? closestBill;
-    int? daysUntilDue;
-    if (bills.isNotEmpty) {
-      final unpaid = bills.where((b) => !b.isPaid).toList();
-      if (unpaid.isNotEmpty) {
-        unpaid.sort((a, b) {
-          int daysA = a.dueDay >= now.day
-              ? a.dueDay - now.day
-              : (30 - now.day + a.dueDay);
-          int daysB = b.dueDay >= now.day
-              ? b.dueDay - now.day
-              : (30 - now.day + b.dueDay);
-          return daysA.compareTo(daysB);
-        });
-        closestBill = unpaid.first;
-        daysUntilDue = closestBill.dueDay >= now.day
-            ? closestBill.dueDay - now.day
-            : (30 - now.day + closestBill.dueDay);
-      }
-    }
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 110),

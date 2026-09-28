@@ -1,4 +1,4 @@
-﻿/// Page: FeedbackPage
+/// Page: FeedbackPage
 ///
 /// Formulir pengiriman umpan balik dan saran pengguna.
 library;

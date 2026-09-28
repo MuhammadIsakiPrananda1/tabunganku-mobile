@@ -1,4 +1,4 @@
-﻿/// Page: ShoppingBudgetPage
+/// Page: ShoppingBudgetPage
 ///
 /// Anggaran dan daftar belanja terencana.
 library;

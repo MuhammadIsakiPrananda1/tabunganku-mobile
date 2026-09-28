@@ -1,4 +1,4 @@
-﻿/// Page: TimeValueMoneyPage
+/// Page: TimeValueMoneyPage
 ///
 /// Kalkulator nilai waktu uang (time value of money).
 library;
@@ -455,7 +455,6 @@ class _TimeValueMoneyPageState extends ConsumerState<TimeValueMoneyPage>
   }
 
   Widget _buildFVInsight(bool isDarkMode) {
-    final pv = _parseAmount(_pvAmountCtrl.text);
     final rate = double.tryParse(_pvRateCtrl.text) ?? 8;
     final years = int.tryParse(_pvYearsCtrl.text) ?? 10;
     final doublingYears = 72 / rate;

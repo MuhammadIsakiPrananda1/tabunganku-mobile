@@ -92,6 +92,7 @@ import 'package:tabunganku/features/shopping/presentation/pages/shopping_list_pa
 // ── All Services ──────────────────────────────────────────────────────────────
 import 'package:tabunganku/features/home/presentation/pages/all_services_page.dart';
 
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Provider
 // ─────────────────────────────────────────────────────────────────────────────
@@ -449,6 +450,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: 'shopping',
         builder: (_, __) => const ShoppingListPage(),
       ),
+
     ],
   );
 });

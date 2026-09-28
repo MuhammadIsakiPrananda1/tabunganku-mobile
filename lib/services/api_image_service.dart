@@ -1,8 +1,14 @@
 /// Service: ApiImageService
 ///
-/// Layanan integrasi TabunganKu Secure Image API.
-/// Menyediakan fungsi upload, sanitasi otomatis (WebP), pengecekan kesehatan server,
-/// konfigurasi dinamis (Base URL & API Key), serta pengujian koneksi langsung.
+/// Layanan integrasi TabunganKu Secure Image API sesuai spesifikasi resmi:
+/// https://api.neverlandstudio.my.id/reference (OpenAPI 3.1.0)
+///
+/// Fitur Utama:
+/// 1. Dynamic Encrypted Token (AES-256-GCM) dengan Single-Use Replay Protection.
+/// 2. Unggah & sanitasi otomatis: konversi WebP kualitas 85%, pembersihan metadata EXIF/GPS, batas 5MB.
+/// 3. Penghapusan gambar aman berbasis nama file UUID WebP.
+/// 4. Pengecekan kesehatan server (/health) dan latensi real-time.
+/// 5. Pengujian live upload & cleanup otomatis.
 library;
 
 import 'dart:convert';
@@ -13,6 +19,8 @@ import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tabunganku/core/constants/prefs_keys.dart';
 
 final apiImageServiceProvider = Provider<ApiImageService>((ref) {
   return ApiImageService();
@@ -57,7 +65,7 @@ class ApiUploadResult {
 }
 
 class ApiImageService {
-  // Domain resmi permanen TabunganKu Image API (tidak dapat diubah)
+  // Domain resmi permanen TabunganKu Secure Image API
   static const String defaultBaseUrl = 'https://api.neverlandstudio.my.id';
   static const String defaultApiKey = 'tabunganku_secure_upload_key_2026';
 
@@ -65,7 +73,7 @@ class ApiImageService {
   static String get baseUrl => defaultBaseUrl;
   static String get apiKey => defaultApiKey;
 
-  /// Sanitasi URL: bersihkan spasi, hilangkan trailing slash, pastikan memiliki skema
+  /// Sanitasi URL: bersihkan spasi, hilangkan trailing slash, pastikan memiliki skema https/http
   static String sanitizeUrl(String url) {
     var cleaned = url.trim();
     while (cleaned.endsWith('/')) {
@@ -77,14 +85,50 @@ class ApiImageService {
     return cleaned;
   }
 
-  /// Ambil Base URL aktif (permanen domain resmi)
-  static Future<String> getBaseUrl() async => defaultBaseUrl;
+  /// Ambil Base URL aktif (membaca dari preferensi, atau fallback ke default resmi)
+  static Future<String> getBaseUrl() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final customUrl = prefs.getString(PrefsKeys.imageApiBaseUrl);
+      if (customUrl != null && customUrl.trim().isNotEmpty) {
+        return sanitizeUrl(customUrl);
+      }
+    } catch (_) {}
+    return defaultBaseUrl;
+  }
 
-  /// Ambil API Key aktif (permanen default resmi)
-  static Future<String> getApiKey() async => defaultApiKey;
+  /// Ambil API Key aktif (membaca dari preferensi, atau fallback ke default)
+  static Future<String> getApiKey() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final customKey = prefs.getString(PrefsKeys.imageApiKey);
+      if (customKey != null && customKey.trim().isNotEmpty) {
+        return customKey.trim();
+      }
+    } catch (_) {}
+    return defaultApiKey;
+  }
 
+  /// Simpan custom Base URL
+  static Future<void> setBaseUrl(String url) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(PrefsKeys.imageApiBaseUrl, sanitizeUrl(url));
+  }
 
-  /// Mendeteksi MediaType yang didukung server
+  /// Simpan custom API Key
+  static Future<void> setApiKey(String key) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(PrefsKeys.imageApiKey, key.trim());
+  }
+
+  /// Reset konfigurasi ke bawaan resmi
+  static Future<void> resetToDefault() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(PrefsKeys.imageApiBaseUrl);
+    await prefs.remove(PrefsKeys.imageApiKey);
+  }
+
+  /// Mendeteksi MediaType yang didukung server sesuai spesifikasi (JPEG, PNG, WEBP, GIF)
   static MediaType _getMediaType(String filePath) {
     final ext = path.extension(filePath).toLowerCase();
     switch (ext) {
@@ -99,6 +143,61 @@ class ApiImageService {
       default:
         return MediaType('image', 'jpeg');
     }
+  }
+
+  /// Mendapatkan Dynamic Encrypted Token (AES-256-GCM) dari server TabunganKu.
+  /// Sesuai panduan integrasi resmi: https://api.neverlandstudio.my.id/reference
+  ///
+  /// [action]: 'upload', 'delete', atau 'all' (default: 'upload')
+  /// [userId]: ID pengguna opsional untuk audit keamanan
+  static Future<String?> getDynamicToken({
+    String action = 'upload',
+    String? userId,
+  }) async {
+    try {
+      final currentBaseUrl = await getBaseUrl();
+      final resolvedUserId = userId ?? 'tabunganku_mobile_user';
+      final tokenUri = Uri.parse('$currentBaseUrl/api/auth/token');
+
+      // 1. Coba request POST terlebih dahulu (metode standar OpenAPI)
+      try {
+        final postRes = await http.post(
+          tokenUri,
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({
+            'userId': resolvedUserId,
+            'action': action,
+          }),
+        ).timeout(const Duration(seconds: 8));
+
+        if (postRes.statusCode == 200) {
+          final Map<String, dynamic> data = jsonDecode(postRes.body);
+          if (data['success'] == true && data['token'] != null) {
+            final t = data['token'].toString();
+            if (t.isNotEmpty) return t;
+          }
+        }
+      } catch (postErr) {
+        debugPrint('[ApiImageService] Dynamic token POST gagal: $postErr, mencoba GET shortcut...');
+      }
+
+      // 2. Fallback: shortcut GET /api/auth/token?userId=...&action=...
+      final getUri = Uri.parse('$currentBaseUrl/api/auth/token?userId=$resolvedUserId&action=$action');
+      final getRes = await http.get(getUri).timeout(const Duration(seconds: 8));
+
+      if (getRes.statusCode == 200) {
+        final Map<String, dynamic> data = jsonDecode(getRes.body);
+        if (data['success'] == true && data['token'] != null) {
+          final t = data['token'].toString();
+          if (t.isNotEmpty) return t;
+        }
+      } else {
+        debugPrint('[ApiImageService] Gagal generate token [${getRes.statusCode}]: ${getRes.body}');
+      }
+    } catch (e) {
+      debugPrint('[ApiImageService] Error saat meminta dynamic token: $e');
+    }
+    return null;
   }
 
   /// Cek kesehatan & status uptime server (boolean sederhana)
@@ -160,7 +259,8 @@ class ApiImageService {
     }
   }
 
-  /// Upload gambar dengan laporan hasil terperinci (error message, status code, rate limit)
+  /// Upload gambar dengan Dynamic Encrypted Token (AES-256-GCM) sesuai spesifikasi resmi.
+  /// Mengembalikan laporan hasil terperinci (error message, status code, rate limit, URL WebP).
   static Future<ApiUploadResult> uploadImageDetailed(File file) async {
     try {
       if (!await file.exists()) {
@@ -171,7 +271,7 @@ class ApiImageService {
         );
       }
 
-      // Validasi batas ukuran file 5 MB
+      // Validasi batas ukuran file 5 MB sesuai dokumentasi API
       final fileSize = await file.length();
       if (fileSize > 5 * 1024 * 1024) {
         final sizeMb = (fileSize / (1024 * 1024)).toStringAsFixed(2);
@@ -184,22 +284,41 @@ class ApiImageService {
       }
 
       final currentBaseUrl = await getBaseUrl();
-      final currentApiKey = await getApiKey();
+
+      // 1. Minta Dynamic Encrypted Token (AES-256-GCM) khusus aksi upload
+      String? token = await getDynamicToken(action: 'upload');
+
+      // Fallback: periksa apakah pengguna menyetel Master API Key khusus
+      if (token == null || token.isEmpty) {
+        final customKey = await getApiKey();
+        if (customKey.isNotEmpty && customKey != defaultApiKey) {
+          token = customKey;
+        }
+      }
+
+      if (token == null || token.isEmpty) {
+        return const ApiUploadResult(
+          success: false,
+          statusCode: 401,
+          errorMessage: 'Tidak dapat memperoleh token otorisasi upload dari server API.',
+        );
+      }
 
       final uri = Uri.parse('$currentBaseUrl/api/upload');
       final request = http.MultipartRequest('POST', uri);
 
-      // 1. Tambahkan API Key pada header
-      request.headers['x-api-key'] = currentApiKey;
+      // 2. Sertakan token dinamis pada header x-api-key dan Authorization
+      request.headers['x-api-key'] = token;
+      request.headers['Authorization'] = 'Bearer $token';
 
-      // 2. Tentukan MediaType yang valid
+      // 3. Tentukan MediaType yang valid (image/jpeg, image/png, image/webp, image/gif)
       final mediaType = _getMediaType(file.path);
       var filename = path.basename(file.path);
       if (!filename.contains('.')) {
         filename = '$filename.jpg';
       }
 
-      // 3. Lampirkan file pada field 'image'
+      // 4. Lampirkan file pada field 'image' (didukung juga 'file' / 'photo')
       request.files.add(
         await http.MultipartFile.fromPath(
           'image',
@@ -209,8 +328,8 @@ class ApiImageService {
         ),
       );
 
-      // 4. Kirim request dengan timeout 25 detik
-      final streamedResponse = await request.send().timeout(const Duration(seconds: 25));
+      // 5. Kirim request dengan timeout 30 detik
+      final streamedResponse = await request.send().timeout(const Duration(seconds: 30));
       final response = await http.Response.fromStream(streamedResponse);
 
       final rateRemainingHeader = response.headers['ratelimit-remaining'];
@@ -222,7 +341,7 @@ class ApiImageService {
           final imageUrl = (jsonResponse['url'] ?? jsonResponse['data']?['url']) as String?;
           final savedName = (jsonResponse['data']?['filename']) as String?;
           if (imageUrl != null && imageUrl.isNotEmpty) {
-            debugPrint('[ApiImageService] Upload berhasil: $imageUrl');
+            debugPrint('[ApiImageService] Upload berhasil ke Cloud: $imageUrl (WebP)');
             return ApiUploadResult(
               success: true,
               url: imageUrl,
@@ -234,7 +353,7 @@ class ApiImageService {
         }
       }
 
-      // Analisis kode error HTTP untuk pesan ramah pengguna
+      // Analisis kode status dan pesan error dari server
       String errorMsg = 'Upload gagal (Status ${response.statusCode})';
       try {
         final Map<String, dynamic> errJson = jsonDecode(response.body);
@@ -243,12 +362,14 @@ class ApiImageService {
         }
       } catch (_) {}
 
-      if (response.statusCode == 401 || response.statusCode == 403) {
-        errorMsg = 'Autentikasi gagal. Periksa kembali API Key Anda di Pengaturan.';
+      if (response.statusCode == 401) {
+        errorMsg = 'Token otorisasi hangus atau kedaluwarsa. Silakan ulangi upload.';
+      } else if (response.statusCode == 403) {
+        errorMsg = 'Akses ditolak oleh server (Token atau API Key tidak valid).';
       } else if (response.statusCode == 413) {
         errorMsg = 'Ukuran foto melebihi kapasitas server (maksimal 5 MB).';
       } else if (response.statusCode == 429) {
-        errorMsg = 'Batas upload tercapai (Rate limit). Mohon tunggu beberapa saat.';
+        errorMsg = 'Batas kuota upload tercapai (Rate limit). Mohon tunggu beberapa saat.';
       }
 
       debugPrint('[ApiImageService] Upload gagal [${response.statusCode}]: ${response.body}');
@@ -274,13 +395,14 @@ class ApiImageService {
   }
 
   /// Upload gambar ke server TabunganKu
-  /// Mengembalikan URL publik gambar (contoh: https://api.neverlandstudio.my.id/uploads/<uuid>.webp)
+  /// Mengembalikan URL publik gambar WebP (contoh: https://api.neverlandstudio.my.id/uploads/<uuid>.webp)
   static Future<String?> uploadImage(File file) async {
     final result = await uploadImageDetailed(file);
     return result.success ? result.url : null;
   }
 
   /// Hapus gambar dari server berdasarkan filename atau URL lengkap
+  /// Memerlukan token dinamis dengan izin aksi 'delete'
   static Future<bool> deleteImage(String filenameOrUrl) async {
     try {
       final trimmed = filenameOrUrl.trim();
@@ -305,19 +427,35 @@ class ApiImageService {
       if (filename.isEmpty) return false;
 
       final currentBaseUrl = await getBaseUrl();
-      final currentApiKey = await getApiKey();
+
+      // Dapatkan token dinamis dengan izin delete
+      String? token = await getDynamicToken(action: 'delete');
+
+      // Fallback ke master key jika ada
+      if (token == null || token.isEmpty) {
+        final customKey = await getApiKey();
+        if (customKey.isNotEmpty && customKey != defaultApiKey) {
+          token = customKey;
+        }
+      }
+
+      if (token == null || token.isEmpty) {
+        debugPrint('[ApiImageService] Hapus gambar dilewati: token tidak tersedia.');
+        return false;
+      }
 
       final uri = Uri.parse('$currentBaseUrl/api/upload/$filename');
       final response = await http.delete(
         uri,
         headers: {
-          'x-api-key': currentApiKey,
+          'x-api-key': token,
+          'Authorization': 'Bearer $token',
         },
       ).timeout(const Duration(seconds: 15));
 
       final success = response.statusCode >= 200 && response.statusCode < 300;
       if (success) {
-        debugPrint('[ApiImageService] Hapus gambar berhasil: $filename');
+        debugPrint('[ApiImageService] Hapus gambar berhasil dari Cloud: $filename');
       } else {
         debugPrint('[ApiImageService] Gagal menghapus gambar [$filename]: ${response.statusCode}');
       }
@@ -328,7 +466,7 @@ class ApiImageService {
     }
   }
 
-  /// Uji live upload: membuat gambar uji coba kecil (1x1 GIF), mengunggah ke server,
+  /// Uji live upload: membuat gambar uji coba kecil (1x1 PNG), mengunggah ke server,
   /// lalu langsung menghapusnya kembali untuk memverifikasi jalur API 100% fungsional.
   static Future<ApiUploadResult> testUpload() async {
     File? tempFile;
@@ -371,4 +509,6 @@ class ApiImageService {
   Future<bool> ping() => checkHealth();
   Future<ServerHealthInfo> details() => getHealthDetails();
   Future<ApiUploadResult> test() => testUpload();
+  Future<String?> fetchToken({String action = 'upload', String? userId}) =>
+      getDynamicToken(action: action, userId: userId);
 }

@@ -11,6 +11,8 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'package:tabunganku/core/theme/app_colors.dart';
 import 'package:tabunganku/core/theme/theme_provider.dart';
+import 'package:tabunganku/features/premium/presentation/widgets/vip_access_gate_sheet.dart';
+import 'package:tabunganku/features/premium/providers/premium_provider.dart';
 
 class AllServicesPage extends ConsumerStatefulWidget {
   const AllServicesPage({super.key});
@@ -120,6 +122,7 @@ class _AllServicesPageState extends ConsumerState<AllServicesPage> {
             color: Colors.amber,
             route: '/gold',
             badgeIcon: Icons.auto_awesome_rounded,
+            isVipOnly: true,
           ),
           _ServiceData(
             icon: Icons.trending_up_rounded,
@@ -258,6 +261,7 @@ class _AllServicesPageState extends ConsumerState<AllServicesPage> {
             color: Colors.blue,
             route: '/currency-converter',
             badgeIcon: Icons.swap_horiz_rounded,
+            isVipOnly: true,
           ),
           _ServiceData(
             icon: Icons.speed_rounded,
@@ -368,6 +372,7 @@ class _AllServicesPageState extends ConsumerState<AllServicesPage> {
     final isDarkMode = ref.watch(themeProvider) == ThemeMode.dark ||
         (ref.watch(themeProvider) == ThemeMode.system &&
             theme.brightness == Brightness.dark);
+    final isVip = ref.watch(premiumProvider).isVip;
 
     final filteredCategories = _getCategories().map((category) {
       final matchingServices = category.services.where((service) {
@@ -467,7 +472,8 @@ class _AllServicesPageState extends ConsumerState<AllServicesPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _buildCategoryHeader(isDarkMode, category.title),
-                          _buildCompactCategoryCard(context, isDarkMode, category.services),
+                          _buildCompactCategoryCard(
+                              context, isDarkMode, isVip, category.services),
                         ],
                       );
                     },
@@ -537,7 +543,7 @@ class _AllServicesPageState extends ConsumerState<AllServicesPage> {
   }
 
   Widget _buildCompactCategoryCard(
-      BuildContext context, bool isDarkMode, List<_ServiceData> items) {
+      BuildContext context, bool isDarkMode, bool isVip, List<_ServiceData> items) {
     return Container(
       decoration: BoxDecoration(
         color: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
@@ -561,7 +567,7 @@ class _AllServicesPageState extends ConsumerState<AllServicesPage> {
           final item = items[index];
           return Column(
             children: [
-              _buildCompactListItem(context, item, isDarkMode),
+              _buildCompactListItem(context, item, isDarkMode, isVip),
               if (index != items.length - 1)
                 Divider(
                   height: 1,
@@ -579,11 +585,17 @@ class _AllServicesPageState extends ConsumerState<AllServicesPage> {
   }
 
   Widget _buildCompactListItem(
-      BuildContext context, _ServiceData item, bool isDarkMode) {
+      BuildContext context, _ServiceData item, bool isDarkMode, bool isVip) {
+    final isLocked = item.isVipOnly && !isVip;
+
     return InkWell(
       onTap: () {
         HapticFeedback.lightImpact();
-        context.push(item.route);
+        if (isLocked) {
+          VipAccessGateSheet.show(context);
+        } else {
+          context.push(item.route);
+        }
       },
       borderRadius: BorderRadius.circular(20),
       child: Padding(
@@ -606,8 +618,59 @@ class _AllServicesPageState extends ConsumerState<AllServicesPage> {
                             fontWeight: FontWeight.w800,
                             color: isDarkMode ? Colors.white : AppColors.primaryDark,
                           ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
+                      if (item.isVipOnly) ...[
+                        const SizedBox(width: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: isVip
+                                ? const Color(0xFF10B981)
+                                    .withValues(alpha: isDarkMode ? 0.2 : 0.12)
+                                : const Color(0xFFFFB800)
+                                    .withValues(alpha: isDarkMode ? 0.22 : 0.14),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(
+                              color: isVip
+                                  ? const Color(0xFF10B981).withValues(alpha: 0.4)
+                                  : const Color(0xFFFFB800).withValues(alpha: 0.45),
+                              width: 0.8,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                isVip
+                                    ? Icons.workspace_premium_rounded
+                                    : Icons.lock_rounded,
+                                size: 10,
+                                color: isVip
+                                    ? const Color(0xFF10B981)
+                                    : (isDarkMode
+                                        ? const Color(0xFFFFB800)
+                                        : const Color(0xFFD97706)),
+                              ),
+                              const SizedBox(width: 3),
+                              Text(
+                                isVip ? 'VIP' : 'PRO VIP',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 8.5,
+                                  fontWeight: FontWeight.w900,
+                                  color: isVip
+                                      ? const Color(0xFF10B981)
+                                      : (isDarkMode
+                                          ? const Color(0xFFFFB800)
+                                          : const Color(0xFFD97706)),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                   const SizedBox(height: 2),
@@ -625,9 +688,15 @@ class _AllServicesPageState extends ConsumerState<AllServicesPage> {
               ),
             ),
             Icon(
-              Icons.chevron_right_rounded,
-              size: 20,
-              color: isDarkMode ? Colors.white24 : Colors.grey.shade300,
+              isLocked
+                  ? Icons.lock_rounded
+                  : Icons.chevron_right_rounded,
+              size: isLocked ? 18 : 20,
+              color: isLocked
+                  ? (isDarkMode
+                      ? const Color(0xFFFFB800)
+                      : const Color(0xFFD97706))
+                  : (isDarkMode ? Colors.white24 : Colors.grey.shade300),
             ),
           ],
         ),
@@ -721,6 +790,7 @@ class _ServiceData {
   final Color color;
   final String route;
   final IconData? badgeIcon;
+  final bool isVipOnly;
 
   _ServiceData({
     required this.icon,
@@ -729,6 +799,7 @@ class _ServiceData {
     required this.color,
     required this.route,
     this.badgeIcon,
+    this.isVipOnly = false,
   });
 }
 

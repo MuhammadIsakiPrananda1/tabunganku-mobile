@@ -431,7 +431,6 @@ final goldTxs = ref.watch(goldTransactionsStreamProvider).valueOrNull ?? [];
     );
   }
 
-
   Widget _buildActionGrid(
     bool isDarkMode, {
     required double goldGramBalance,

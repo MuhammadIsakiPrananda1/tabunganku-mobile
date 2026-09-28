@@ -1,4 +1,4 @@
-﻿/// Page: InflationCalculatorPage
+/// Page: InflationCalculatorPage
 ///
 /// Simulasi dampak inflasi terhadap nilai uang masa depan.
 library;
@@ -28,8 +28,6 @@ class _InflationCalculatorPageState
 
   int _startYear = 2016;
   int _targetYear = 2026;
-  double _customInflationRate =
-      4.3; // Rata-rata inflasi tahunan historis Indonesia (~4.3%)
 
   double _equivalentValue = 0;
   double _purchasingPower = 0;
@@ -59,7 +57,6 @@ class _InflationCalculatorPageState
 
     final int yearsDiff = _targetYear - _startYear;
     final double rate = double.tryParse(cleanedRateText) ?? 0.0;
-    _customInflationRate = rate;
     final double rateDecimal = rate / 100;
 
     if (yearsDiff > 0) {
@@ -109,7 +106,6 @@ class _InflationCalculatorPageState
     final contentColor = isDarkMode ? Colors.white : AppColors.primaryDark;
     final pageBgColor =
         isDarkMode ? AppColors.backgroundDark : const Color(0xFFF8FAFC);
-    final cardColor = isDarkMode ? const Color(0xFF1E293B) : Colors.white;
     final accentColor =
         isDarkMode ? const Color(0xFFFF7043) : const Color(0xFFE64A19);
 

@@ -21,6 +21,8 @@ export 'notification_provider.dart';
 export 'overseas_travel_provider.dart';
 export 'payday_vault_provider.dart';
 export 'piggy_bank_provider.dart';
+export 'round_up_provider.dart';
+export 'saving_streak_provider.dart';
 export 'saving_target_provider.dart';
 export 'shopping_item_provider.dart';
 export 'transaction_provider.dart';

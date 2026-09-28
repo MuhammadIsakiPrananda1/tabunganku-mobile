@@ -1,4 +1,4 @@
-﻿/// Page: TaxCalculatorPage
+/// Page: TaxCalculatorPage
 ///
 /// Kalkulator pajak penghasilan (PPh).
 library;

@@ -14,7 +14,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tabunganku/core/constants/app_version.dart';
 import 'package:tabunganku/core/services/export_service.dart';
 import 'package:tabunganku/core/theme/app_colors.dart';

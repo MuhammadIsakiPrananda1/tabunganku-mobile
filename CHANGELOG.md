@@ -4,22 +4,35 @@ Seluruh evolusi, fitur, dan perbaikan aplikasi **TabunganKu** terdokumentasi sec
 
 ---
 
-## 💎 [1.5.2] — 24 September 2026
-*Rilis v1.5.2 menghadirkan evolusi mutakhir pada ekosistem TabunganKu dengan integrasi microservice Cloud Image API, fitur gamifikasi Saving Streak, inovasi Round-Up Savings, Tab Riwayat Transaksi dedikasi, serta standardisasi arsitektur modular yang lebih tangguh.*
+## 💎 [1.5.2] — Edisi Stellar Sky
+*Rilis akbar v1.5.2 (Stellar Sky) menghadirkan lompatan teknologi terbesar dalam ekosistem TabunganKu dengan pengamanan kriptografi CryptoSentinel (AES-256-GCM & HMAC-SHA256), portal VIP Access Gateway, suite kalkulator finansial komprehensif (Valuta Asing, Simulasi Emas Antam, Smart Shopping List & Anggaran Interaktif, Bunga Berbunga, Pajak & Gaji Bersih, Nilai Waktu Uang, Inflasi, Aturan 72), integrasi microservice Cloud Image API, celengan receh Round-Up Savings, gamifikasi Saving Streak, dan Tab Riwayat Transaksi dedikasi.*
 
 ### 🆕 Fitur Yang Ditambah
-*   **TabunganKu Cloud Image API & Diagnostics**: Integrasi microservice image server (`https://api.neverlandstudio.my.id`) dengan kompresi WebP adaptif, sanitasi metadata EXIF otomatis, diagnostik koneksi live (ping latency), live upload test, dan konfigurasi endpoint langsung dari aplikasi (`API_DOCUMENTATION.md`).
-*   **Round-Up Savings (Nabung Receh Otomatis)**: Modul pembulatan transaksi otomatis ke kelipatan terdekat (Rp 1.000, Rp 5.000, Rp 10.000) untuk celengan tabungan receh tanpa terasa.
-*   **Saving Streak & Konsistensi Menabung**: Pelacakan konsistensi menabung harian dengan kalender streak visual, milestone konsistensi, dan motivasi target berkala.
-*   **Tab Riwayat Transaksi Dedikasi (History Tab View)**: Tampilan navigasi tab baru untuk penelusuran riwayat transaksi keuangan yang komprehensif, cepat, dan mudah disaring.
-*   **Calculator Sheet Terpadu**: Bottom sheet kalkulator dinamis yang dapat diakses secara instan saat merencanakan anggaran maupun pencatatan mutasi.
-*   **Komponen UI Modern & Model Profil**: Penambahan `PinKeypad` ergonomis dengan haptic feedback, `WaveBackground` dinamis, serta standarisasi `UserProfileModel` baru untuk sinkronisasi profil pengguna.
+*   **Lapisan Kriptografi CryptoSentinel & VIP Access Gateway**:
+    *   Implementasi `CryptoSentinel` dengan enkripsi berkekuatan militer AES-256-GCM dan verifikasi tanda tangan digital HMAC-SHA256.
+    *   Sistem validasi lisensi offline-first dengan `PremiumCertificate`, deteksi modifikasi (anti-tamper), dan device fingerprinting tanpa ketergantungan server.
+    *   Bottom sheet interaktif `VIPAccessGateSheet` untuk aktivasi kode lisensi, preview keuntungan paket premium, dan verifikasi status instan.
+*   **Suite Kalkulator & Perencana Finansial Tingkat Lanjut**:
+    *   **Konverter Mata Uang Multi-Valuta (Currency Converter)**: Simulasi kurs live (IDR, USD, EUR, JPY, SGD, MYR, SAR) dengan fitur tukar arah (*quick flip*) dan pintasan nominal instan.
+    *   **Tabungan & Simulasi Emas Logam Mulia (Gold Savings)**: Pelacakan harga live emas Antam, perhitungan spread harga beli/buyback, konversi dua arah gram ke rupiah, dan target akumulasi simpanan gram fisik.
+    *   **Smart Shopping List & Integrasi Anggaran**: Modul daftar belanja interaktif dengan kalkulasi otomatis subtotal dan total harga, checkbox barang terbeli, serta sinkronisasi langsung ke pos pengeluaran.
+    *   **Kalkulator Bunga Berbunga (Compound Interest)**: Simulasi imbal hasil investasi dan pertumbuhan modal jangka panjang dengan setoran berkala.
+    *   **Kalkulator Gaji Bersih (Net Salary) & Pajak**: Perhitungan take-home pay dengan simulasi potongan PPh 21, BPJS Ketenagakerjaan/Kesehatan, dan pengingat SPT/PBB.
+    *   **Kalkulator Inflasi & Daya Beli Riil**: Proyeksi penurunan nilai riil uang di masa depan berdasarkan tingkat inflasi tahunan.
+    *   **Rule of 72 & Time Value of Money (TVM)**: Proyeksi masa penggandaan modal dan perbandingan Future Value vs Present Value.
+    *   **Debt Payoff Planner & Emergency Fund**: Perencanaan percepatan pelunasan utang dan perhitungan batas ideal dana darurat keluarga.
+*   **Round-Up Savings (Nabung Receh Otomatis)**: Modul pembulatan transaksi pengeluaran otomatis ke kelipatan terdekat (Rp 1.000, Rp 5.000, Rp 10.000) untuk celengan tabungan receh tanpa terasa.
+*   **Saving Streak & Gamifikasi Konsistensi**: Pelacakan konsistensi menabung harian dengan kalender streak visual, milestone konsistensi, dan motivasi target berkala.
+*   **Tab Riwayat Transaksi Dedikasi (Dedicated History Tab)**: Tampilan navigasi tab khusus untuk penelusuran riwayat mutasi transaksi keuangan secara komprehensif dengan filter tanggal dan pencarian instan.
+*   **Calculator Sheet Terpadu**: Bottom sheet kalkulator dinamis yang dapat diakses secara instan saat merencanakan anggaran maupun mencatat mutasi.
+*   **Cloud Image API & Diagnostics Center**: Integrasi microservice image server (`https://api.neverlandstudio.my.id`) dengan kompresi WebP 85% adaptif, sanitasi metadata EXIF otomatis, diagnostik latensi ping real-time, live test upload, dan kustomisasi endpoint dinamis.
+*   **Komponen UI Modern & Ikon Kartun Vektor**: Penambahan `PinKeypad` ergonomis dengan haptic feedback, `WaveBackground` dinamis, serta set `CartoonVectorIcons` untuk visualisasi layanan finansial yang elegan.
 
 ### 🛠️ Fitur Yang Diubah
-*   **Modular Architecture & Clean Exports**: Standardisasi struktur barrel file (`core.dart`, `models.dart`, `providers.dart`, `services.dart`, `widgets.dart`, `security.dart`) serta integrasi `LocalDataMixin` untuk penanganan data offline-first yang konsisten.
+*   **Modular Architecture & Clean Barrel Exports**: Standardisasi struktur barrel file (`core.dart`, `models.dart`, `providers.dart`, `services.dart`, `widgets.dart`, `security.dart`) serta integrasi `LocalDataMixin` untuk penanganan data offline-first yang konsisten.
 *   **Sentralisasi Kunci Preferensi**: Konsolidasi seluruh key SharedPreferences ke dalam `prefs_keys.dart`.
-*   **Optimalisasi App Router & Navigasi**: Penyelarasan route GoRouter dengan seluruh fitur baru dan perbaikan penanganan transisi layar.
-*   **Penyempurnaan Tema & Komponen**: Optimalisasi kontras kartu dashboard, penyempurnaan tipografi Inter & Plus Jakarta Sans, dan peningkatan fluiditas animasi.
+*   **Optimalisasi App Router & Navigasi**: Penyelarasan route GoRouter dengan seluruh feature suite baru dan perbaikan penanganan transisi layar.
+*   **Penyempurnaan Tema & Desain Responsif**: Optimalisasi kontras kartu dashboard, penyempurnaan tipografi Inter & Plus Jakarta Sans, dan peningkatan fluiditas animasi.
 
 ### 🗑️ Fitur Yang Dihapus
 *   **Pembersihan Modul Usang (Deprecated Cleanup)**: Penghapusan modul lama yang telah digantikan oleh modul baru (`thr_bonus_page.dart`, `financial_health_checkup_page.dart`, `fire_calculator_page.dart`, `thr_bonus_model.dart`, `thr_bonus_provider.dart`).

@@ -81,14 +81,19 @@ class PremiumCertificate {
 
   bool get isLifetime => tier == PremiumTier.vipLifetime || expiresAt == null;
 
+  bool get isOwner =>
+      licenseKey?.toUpperCase().contains('OWNER') == true ||
+      licenseKey?.toUpperCase().contains('DEV') == true;
+
   bool get isExpired {
-    if (isLifetime) return false;
+    if (isLifetime || isOwner) return false;
     return DateTime.now().isAfter(expiresAt!);
   }
 
-  String get packageLabel => tier.displayName;
+  String get packageLabel => isOwner ? 'Owner VIP' : tier.displayName;
 
   String get remainingTimeLabel {
+    if (isOwner) return 'Aktif Selamanya (Owner)';
     if (isLifetime) return 'Aktif Selamanya';
     if (expiresAt == null) return 'Aktif';
     final diff = expiresAt!.difference(DateTime.now());

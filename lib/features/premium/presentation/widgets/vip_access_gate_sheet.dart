@@ -162,7 +162,13 @@ Mohon petunjuk pembayaran dan tolong kirimkan kode lisensi resminya setelah tran
     if (success) {
       HapticFeedback.heavyImpact();
       Navigator.pop(context, true);
-      showTopToast(context, 'Lisensi Resmi VIP Berhasil Diaktifkan! 👑');
+      final isOwner = code.toUpperCase().contains('OWNER');
+      showTopToast(
+        context,
+        isOwner
+            ? 'Lisensi Resmi Owner VIP Permanen Berhasil Diaktifkan! 👑'
+            : 'Lisensi Resmi VIP Berhasil Diaktifkan! 👑',
+      );
     } else {
       HapticFeedback.vibrate();
       setState(() {

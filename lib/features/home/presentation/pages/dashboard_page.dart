@@ -419,7 +419,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         final monthName = DateFormat('MMMM yyyy', 'id_ID').format(now);
         final notification = NotificationModel(
           id: 'monthly_statement_$monthKey',
-          title: 'Laporan Bulanan Tersedia! ðŸ“„',
+          title: 'Laporan Bulanan Tersedia! 📄',
           message:
               'Statement rekap keuangan untuk bulan $monthName sudah siap diekspor. Silakan unduh rekap PDF di menu Pengaturan.',
           timestamp: DateTime.now(),
@@ -1201,14 +1201,14 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       {
         'value': 'SeaBank (Standar)',
         'label': 'SeaBank (Standar)',
-        'subtitle': '2,5% p.a. â€“ Tanpa min. saldo',
+        'subtitle': '2,5% p.a. - Tanpa min. saldo',
         'icon': Icons.savings_rounded,
         'color': Colors.teal,
       },
       {
         'value': 'SeaBank (Deposito)',
         'label': 'SeaBank (Deposito)',
-        'subtitle': 'Up to 6% p.a. â€“ Deposito Tinggi',
+        'subtitle': 'Up to 6% p.a. - Deposito Tinggi',
         'icon': Icons.trending_up_rounded,
         'color': Colors.orangeAccent,
       },
@@ -1229,147 +1229,147 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       {
         'value': 'Blu by BCA Digital',
         'label': 'Blu by BCA Digital',
-        'subtitle': 'Blu â€“ Digital banking by BCA',
+        'subtitle': 'Blu - Digital banking by BCA',
         'icon': Icons.water_drop_rounded,
         'color': Colors.blue.shade500,
       },
       {
         'value': 'Allo Bank',
         'label': 'Allo Bank',
-        'subtitle': 'Allo â€“ Belanja hemat & Bunga menarik',
+        'subtitle': 'Allo - Belanja hemat & Bunga menarik',
         'icon': Icons.credit_card_rounded,
         'color': Colors.purple.shade600,
       },
       {
         'value': 'Bank BCA',
         'label': 'Bank BCA',
-        'subtitle': 'BCA â€“ Bank Swasta Terbesar',
+        'subtitle': 'BCA - Bank Swasta Terbesar',
         'icon': Icons.account_balance_rounded,
         'color': Colors.blue.shade800,
       },
       {
         'value': 'Bank Mandiri',
         'label': 'Bank Mandiri',
-        'subtitle': 'Mandiri â€“ Bank BUMN Terbesar',
+        'subtitle': 'Mandiri - Bank BUMN Terbesar',
         'icon': Icons.account_balance_rounded,
         'color': Colors.yellow.shade800,
       },
       {
         'value': 'Bank BRI',
         'label': 'Bank BRI',
-        'subtitle': 'BRI â€“ Melayani Hingga Pelosok',
+        'subtitle': 'BRI - Melayani Hingga Pelosok',
         'icon': Icons.account_balance_rounded,
         'color': Colors.blue.shade900,
       },
       {
         'value': 'Bank BNI',
         'label': 'Bank BNI',
-        'subtitle': 'BNI â€“ Melayani Negeri Kebanggaan',
+        'subtitle': 'BNI - Melayani Negeri Kebanggaan',
         'icon': Icons.account_balance_rounded,
         'color': Colors.orange.shade600,
       },
       {
         'value': 'Bank Syariah Indonesia (BSI)',
         'label': 'Bank Syariah Indonesia (BSI)',
-        'subtitle': 'BSI â€“ Perbankan Syariah Modern',
+        'subtitle': 'BSI - Perbankan Syariah Modern',
         'icon': Icons.account_balance_rounded,
         'color': Colors.teal.shade700,
       },
       {
         'value': 'Bank CIMB Niaga',
         'label': 'Bank CIMB Niaga',
-        'subtitle': 'CIMB Niaga â€“ Transaksi Cerdas',
+        'subtitle': 'CIMB Niaga - Transaksi Cerdas',
         'icon': Icons.account_balance_rounded,
         'color': Colors.red.shade800,
       },
       {
         'value': 'Bank Permata',
         'label': 'Bank Permata',
-        'subtitle': 'Permata Bank â€“ Solusi Finansial Modern',
+        'subtitle': 'Permata Bank - Solusi Finansial Modern',
         'icon': Icons.account_balance_rounded,
         'color': Colors.green.shade700,
       },
       {
         'value': 'DBS Bank',
         'label': 'DBS Bank',
-        'subtitle': 'DBS â€“ Bank Terbesar di Asia Tenggara',
+        'subtitle': 'DBS - Bank Terbesar di Asia Tenggara',
         'icon': Icons.account_balance_rounded,
         'color': Colors.red.shade600,
       },
       {
         'value': 'UOB Bank',
         'label': 'UOB Bank',
-        'subtitle': 'UOB â€“ Solusi Keuangan Regional Asia',
+        'subtitle': 'UOB - Solusi Keuangan Regional Asia',
         'icon': Icons.account_balance_rounded,
         'color': Colors.blue.shade700,
       },
       {
         'value': 'HSBC Bank',
         'label': 'HSBC Bank',
-        'subtitle': 'HSBC â€“ Global Wealth & Banking',
+        'subtitle': 'HSBC - Global Wealth & Banking',
         'icon': Icons.account_balance_rounded,
         'color': Colors.red.shade900,
       },
       {
         'value': 'Citibank',
         'label': 'Citibank',
-        'subtitle': 'Citibank â€“ Layanan Finansial Global',
+        'subtitle': 'Citibank - Layanan Finansial Global',
         'icon': Icons.public_rounded,
         'color': Colors.blue.shade600,
       },
       {
         'value': 'Standard Chartered',
         'label': 'Standard Chartered',
-        'subtitle': 'StanChart â€“ Perbankan Internasional',
+        'subtitle': 'StanChart - Perbankan Internasional',
         'icon': Icons.account_balance_rounded,
         'color': Colors.green.shade800,
       },
       {
         'value': 'GoPay',
         'label': 'GoPay',
-        'subtitle': 'GoPay â€“ Ekosistem GoTo terintegrasi',
+        'subtitle': 'GoPay - Ekosistem GoTo terintegrasi',
         'icon': Icons.account_balance_wallet_rounded,
         'color': Colors.teal.shade500,
       },
       {
         'value': 'OVO',
         'label': 'OVO',
-        'subtitle': 'OVO â€“ Cashback & merchant terluas',
+        'subtitle': 'OVO - Cashback & merchant terluas',
         'icon': Icons.account_balance_wallet_rounded,
         'color': Colors.deepPurple.shade700,
       },
       {
         'value': 'Dana',
         'label': 'Dana',
-        'subtitle': 'DANA â€“ Dompet digital serbabisa',
+        'subtitle': 'DANA - Dompet digital serbabisa',
         'icon': Icons.account_balance_wallet_rounded,
         'color': Colors.blue.shade400,
       },
       {
         'value': 'ShopeePay',
         'label': 'ShopeePay',
-        'subtitle': 'ShopeePay â€“ Belanja & promo Shopee',
+        'subtitle': 'ShopeePay - Belanja & promo Shopee',
         'icon': Icons.account_balance_wallet_rounded,
         'color': Colors.orange.shade900,
       },
       {
         'value': 'LinkAja',
         'label': 'LinkAja',
-        'subtitle': 'LinkAja â€“ Layanan BUMN & Transportasi',
+        'subtitle': 'LinkAja - Layanan BUMN & Transportasi',
         'icon': Icons.account_balance_wallet_rounded,
         'color': Colors.red.shade700,
       },
       {
         'value': 'PayPal',
         'label': 'PayPal',
-        'subtitle': 'PayPal â€“ Pembayaran Global Internasional',
+        'subtitle': 'PayPal - Pembayaran Global Internasional',
         'icon': Icons.payment_rounded,
         'color': Colors.blue.shade900,
       },
       {
         'value': 'Wise',
         'label': 'Wise',
-        'subtitle': 'Wise â€“ Transfer & Saldo Multi-Mata Uang',
+        'subtitle': 'Wise - Transfer & Saldo Multi-Mata Uang',
         'icon': Icons.sync_alt_rounded,
         'color': Colors.green.shade600,
       },
@@ -1425,181 +1425,181 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       },
       {
         'label': 'GoPay',
-        'subtitle': 'GoPay â€“ Ekosistem GoTo terintegrasi',
+        'subtitle': 'GoPay - Ekosistem GoTo terintegrasi',
         'icon': Icons.account_balance_wallet_rounded,
         'color': Colors.teal.shade500,
       },
       {
         'label': 'OVO',
-        'subtitle': 'OVO â€“ Cashback & merchant terluas',
+        'subtitle': 'OVO - Cashback & merchant terluas',
         'icon': Icons.account_balance_wallet_rounded,
         'color': Colors.deepPurple.shade600,
       },
       {
         'label': 'Dana',
-        'subtitle': 'DANA â€“ Dompet digital serbabisa',
+        'subtitle': 'DANA - Dompet digital serbabisa',
         'icon': Icons.account_balance_wallet_rounded,
         'color': Colors.blue.shade500,
       },
       {
         'label': 'ShopeePay',
-        'subtitle': 'ShopeePay â€“ Belanja & promo Shopee',
+        'subtitle': 'ShopeePay - Belanja & promo Shopee',
         'icon': Icons.account_balance_wallet_rounded,
         'color': Colors.orange.shade800,
       },
       {
         'label': 'LinkAja',
-        'subtitle': 'LinkAja â€“ Layanan BUMN & Transportasi',
+        'subtitle': 'LinkAja - Layanan BUMN & Transportasi',
         'icon': Icons.account_balance_wallet_rounded,
         'color': Colors.red.shade600,
       },
       {
         'label': 'Ovo Points',
-        'subtitle': 'OVO Points â€“ Konversi cashback OVO',
+        'subtitle': 'OVO Points - Konversi cashback OVO',
         'icon': Icons.star_rounded,
         'color': Colors.purple.shade400,
       },
       {
         'label': 'SeaBank',
-        'subtitle': 'SeaBank â€“ Top-up & transfer digital',
+        'subtitle': 'SeaBank - Top-up & transfer digital',
         'icon': Icons.savings_rounded,
         'color': Colors.teal.shade600,
       },
       {
         'label': 'Bank Jago',
-        'subtitle': 'Jago â€“ Fitur Kantong & transfer instan',
+        'subtitle': 'Jago - Fitur Kantong & transfer instan',
         'icon': Icons.account_balance_wallet_rounded,
         'color': Colors.orange.shade700,
       },
       {
         'label': 'Bank Neo Commerce',
-        'subtitle': 'Neo â€“ Admin gratis & bunga harian',
+        'subtitle': 'Neo - Admin gratis & bunga harian',
         'icon': Icons.bolt_rounded,
         'color': Colors.amber.shade700,
       },
       {
         'label': 'Blu by BCA',
-        'subtitle': 'Blu â€“ Bank digital by BCA',
+        'subtitle': 'Blu - Bank digital by BCA',
         'icon': Icons.water_drop_rounded,
         'color': Colors.blue.shade400,
       },
       {
         'label': 'Allo Bank',
-        'subtitle': 'Allo Bank â€“ Belanja hemat Transmart',
+        'subtitle': 'Allo Bank - Belanja hemat Transmart',
         'icon': Icons.credit_card_rounded,
         'color': Colors.purple.shade500,
       },
       {
         'label': 'Bank BCA',
-        'subtitle': 'BCA â€“ Bank Swasta Nasional Terbesar',
+        'subtitle': 'BCA - Bank Swasta Nasional Terbesar',
         'icon': Icons.account_balance_rounded,
         'color': Colors.blue.shade800,
       },
       {
         'label': 'Bank Mandiri',
-        'subtitle': 'Mandiri â€“ Bank BUMN Terbesar',
+        'subtitle': 'Mandiri - Bank BUMN Terbesar',
         'icon': Icons.account_balance_rounded,
         'color': Colors.yellow.shade700,
       },
       {
         'label': 'Bank BRI',
-        'subtitle': 'BRI â€“ Melayani Hingga Pelosok',
+        'subtitle': 'BRI - Melayani Hingga Pelosok',
         'icon': Icons.account_balance_rounded,
         'color': Colors.blue.shade900,
       },
       {
         'label': 'Bank BNI',
-        'subtitle': 'BNI â€“ Melayani Negeri Kebanggaan',
+        'subtitle': 'BNI - Melayani Negeri Kebanggaan',
         'icon': Icons.account_balance_rounded,
         'color': Colors.orange.shade600,
       },
       {
         'label': 'Bank BSI',
-        'subtitle': 'BSI â€“ Perbankan Syariah Terbesar',
+        'subtitle': 'BSI - Perbankan Syariah Terbesar',
         'icon': Icons.account_balance_rounded,
         'color': Colors.teal.shade700,
       },
       {
         'label': 'Bank CIMB Niaga',
-        'subtitle': 'CIMB Niaga â€“ Transaksi Cerdas',
+        'subtitle': 'CIMB Niaga - Transaksi Cerdas',
         'icon': Icons.account_balance_rounded,
         'color': Colors.red.shade700,
       },
       {
         'label': 'Bank Permata',
-        'subtitle': 'PermataBank â€“ Layanan Prima',
+        'subtitle': 'PermataBank - Layanan Prima',
         'icon': Icons.account_balance_rounded,
         'color': Colors.green.shade700,
       },
       {
         'label': 'Bank Danamon',
-        'subtitle': 'Danamon â€“ Layanan Perbankan Lengkap',
+        'subtitle': 'Danamon - Layanan Perbankan Lengkap',
         'icon': Icons.account_balance_rounded,
         'color': Colors.blue.shade600,
       },
       {
         'label': 'Bank Mega',
-        'subtitle': 'Bank Mega â€“ Solusi Finansial Modern',
+        'subtitle': 'Bank Mega - Solusi Finansial Modern',
         'icon': Icons.account_balance_rounded,
         'color': Colors.deepOrange.shade600,
       },
       {
         'label': 'Bank Panin',
-        'subtitle': 'Panin Bank â€“ Tabungan & Investasi',
+        'subtitle': 'Panin Bank - Tabungan & Investasi',
         'icon': Icons.account_balance_rounded,
         'color': Colors.indigo.shade500,
       },
       {
         'label': 'DBS Bank',
-        'subtitle': 'DBS â€“ Bank Terbesar di Asia Tenggara',
+        'subtitle': 'DBS - Bank Terbesar di Asia Tenggara',
         'icon': Icons.account_balance_rounded,
         'color': Colors.red.shade500,
       },
       {
         'label': 'HSBC Bank',
-        'subtitle': 'HSBC â€“ Global Wealth & Banking',
+        'subtitle': 'HSBC - Global Wealth & Banking',
         'icon': Icons.account_balance_rounded,
         'color': Colors.red.shade800,
       },
       {
         'label': 'Citibank',
-        'subtitle': 'Citibank â€“ Layanan Finansial Global',
+        'subtitle': 'Citibank - Layanan Finansial Global',
         'icon': Icons.public_rounded,
         'color': Colors.blue.shade600,
       },
       {
         'label': 'UOB Bank',
-        'subtitle': 'UOB â€“ Solusi Keuangan Regional Asia',
+        'subtitle': 'UOB - Solusi Keuangan Regional Asia',
         'icon': Icons.account_balance_rounded,
         'color': Colors.blue.shade700,
       },
       {
         'label': 'Standard Chartered',
-        'subtitle': 'StanChart â€“ Perbankan Internasional',
+        'subtitle': 'StanChart - Perbankan Internasional',
         'icon': Icons.account_balance_rounded,
         'color': Colors.green.shade800,
       },
       {
         'label': 'PayPal',
-        'subtitle': 'PayPal â€“ Pembayaran Global Internasional',
+        'subtitle': 'PayPal - Pembayaran Global Internasional',
         'icon': Icons.payment_rounded,
         'color': Colors.blue.shade900,
       },
       {
         'label': 'Wise',
-        'subtitle': 'Wise â€“ Transfer Multi-Mata Uang',
+        'subtitle': 'Wise - Transfer Multi-Mata Uang',
         'icon': Icons.sync_alt_rounded,
         'color': Colors.green.shade600,
       },
       {
         'label': 'Revolut',
-        'subtitle': 'Revolut â€“ Neo-bank Digital Global',
+        'subtitle': 'Revolut - Neo-bank Digital Global',
         'icon': Icons.account_balance_wallet_rounded,
         'color': Colors.indigo.shade700,
       },
       {
         'label': 'Jenius',
-        'subtitle': 'Jenius â€“ Kartu Debit & Tabungan Digital',
+        'subtitle': 'Jenius - Kartu Debit & Tabungan Digital',
         'icon': Icons.credit_card_rounded,
         'color': Colors.teal.shade400,
       },
@@ -3100,7 +3100,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                     }
                                     if (sheetContext.mounted && mounted) {
                                       showTopToast(context,
-                                          'Berhasil mencatat transaksi! âœ¨');
+                                          'Berhasil mencatat transaksi! ✨');
                                     }
                                   } catch (e) {
                                     setSheetState(() {
@@ -4015,7 +4015,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(
-              _showBalance ? _formatRupiah(amount) : 'Rp â€¢â€¢â€¢â€¢',
+              _showBalance ? _formatRupiah(amount) : 'Rp \u2022\u2022\u2022\u2022',
               style: GoogleFonts.quicksand(
                 fontSize: 11.5,
                 fontWeight: FontWeight.w900,
@@ -4072,7 +4072,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // === KEKAYAAN BERSIH â€” MINIMALIST CARD WALLET ===
+          // === KEKAYAAN BERSIH - MINIMALIST CARD WALLET ===
           Container(
             width: double.infinity,
             decoration: BoxDecoration(
@@ -4116,7 +4116,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // â”€â”€ Baris Atas: Badge Minimalist + Tombol Eye â”€â”€
+                        // -- Baris Atas: Badge Minimalist + Tombol Eye --
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           crossAxisAlignment: CrossAxisAlignment.center,
@@ -4179,7 +4179,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                         ),
                         const SizedBox(height: 10),
 
-                        // â”€â”€ Angka Saldo Utama â”€â”€
+                        // -- Angka Saldo Utama --
                         FittedBox(
                           fit: BoxFit.scaleDown,
                           alignment: Alignment.centerLeft,
@@ -4189,7 +4189,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                     totalGoldGrams * 1200000.0 +
                                     investmentValuation -
                                     unpaidBillsAmount)
-                                : 'Rp â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢',
+                                : 'Rp \u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022',
                             style: GoogleFonts.quicksand(
                               fontSize: 25,
                               fontWeight: FontWeight.w900,
@@ -4202,7 +4202,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                         ),
                         const SizedBox(height: 12),
 
-                        // â”€â”€ 3 Metrik Mini (Saving Rate, Ketahanan, Tagihan) â”€â”€
+                        // -- 3 Metrik Mini (Saving Rate, Ketahanan, Tagihan) --
                         Container(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 8, vertical: 7),
@@ -4274,7 +4274,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                     ),
                   ),
 
-                  // â”€â”€ Bagian Bawah: Baki Akun Aset Terhubung (Saldo, Emas, Invest) â”€â”€
+                  // -- Bagian Bawah: Baki Akun Aset Terhubung (Saldo, Emas, Invest) --
                   Container(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 10, vertical: 8),
@@ -4721,68 +4721,68 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
 
           const SizedBox(height: 20),
 
-          // â”€â”€ Quote Inspirasi Harian â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+          // -- Quote Inspirasi Harian ----------------------------------
           Builder(builder: (_) {
             const quotes = [
               (
                 text:
                     '"Jangan tunda menabung sampai kamu punya cukup uang. Mulailah menabung, dan kamu akan punya cukup."',
-                author: 'â€” John D. Rockefeller',
+                author: 'John D. Rockefeller',
               ),
               (
                 text:
                     '"Kekayaan bukan soal berapa banyak yang kamu hasilkan, tapi berapa banyak yang kamu simpan."',
-                author: 'â€” Robert Kiyosaki',
+                author: 'Robert Kiyosaki',
               ),
               (
                 text:
-                    '"Seseorang yang tidak pernah membuat kesalahan tidak pernah mencoba sesuatu yang baru â€” tapi yang tidak pernah menabung, tidak pernah bebas."',
-                author: 'â€” Pepatah Keuangan',
+                    '"Seseorang yang tidak pernah membuat kesalahan tidak pernah mencoba sesuatu yang baru - tapi yang tidak pernah menabung, tidak pernah bebas."',
+                author: 'Pepatah Keuangan',
               ),
               (
                 text:
                     '"Uang adalah alat. Ia akan membawamu ke mana pun kamu mau, tapi tidak akan menggantikan kamu sebagai pengemudinya."',
-                author: 'â€” Ayn Rand',
+                author: 'Ayn Rand',
               ),
               (
                 text:
                     '"Investasikan pada dirimu sendiri. Pendidikan finansialmu adalah aset terbaik yang bisa kamu miliki."',
-                author: 'â€” Warren Buffett',
+                author: 'Warren Buffett',
               ),
               (
                 text:
                     '"Sedikit demi sedikit, lama-lama menjadi bukit. Konsistensi dalam menabung lebih berharga dari jumlah yang besar sesekali."',
-                author: 'â€” Pepatah Jawa',
+                author: 'Pepatah Jawa',
               ),
               (
                 text:
-                    '"Kebiasaan hemat adalah bentuk disiplin diri tertinggi â€” sebuah kemenangan kecil setiap harinya."',
-                author: 'â€” T. Harv Eker',
+                    '"Kebiasaan hemat adalah bentuk disiplin diri tertinggi - sebuah kemenangan kecil setiap harinya."',
+                author: 'T. Harv Eker',
               ),
               (
                 text:
                     '"Bukan penghasilan yang menentukan kekayaanmu, melainkan keputusanmu hari ini."',
-                author: 'â€” Dave Ramsey',
+                author: 'Dave Ramsey',
               ),
               (
                 text:
                     '"Masa depan finansialmu bergantung pada apa yang kamu lakukan hari ini, bukan apa yang kamu rencanakan."',
-                author: 'â€” Suze Orman',
+                author: 'Suze Orman',
               ),
               (
                 text:
                     '"Setiap rupiah yang kamu hemat hari ini adalah satu langkah lebih dekat ke kebebasan finansialmu."',
-                author: 'â€” TabunganKu',
+                author: 'TabunganKu',
               ),
               (
                 text:
-                    '"Kebebasan finansial bukan impian â€” itu hasil dari kebiasaan kecil yang dilakukan dengan konsisten."',
-                author: 'â€” Ramit Sethi',
+                    '"Kebebasan finansial bukan impian - itu hasil dari kebiasaan kecil yang dilakukan dengan konsisten."',
+                author: 'Ramit Sethi',
               ),
               (
                 text:
                     '"Menabung adalah kemampuan untuk menunda kepuasan hari ini demi kebahagiaan yang lebih besar di masa depan."',
-                author: 'â€” Morgan Housel',
+                author: 'Morgan Housel',
               ),
             ];
 
@@ -5419,23 +5419,36 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             decoration: BoxDecoration(
               color: isDarkMode
                   ? theme.cardColor
-                  : Colors.white.withValues(alpha: 0.9),
+                  : Colors.white,
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                  color: isDarkMode
-                      ? Colors.white.withValues(alpha: 0.05)
-                      : Colors.black.withValues(alpha: 0.01)),
+                color: isDarkMode
+                    ? Colors.white.withValues(alpha: 0.09)
+                    : Colors.black.withValues(alpha: 0.08),
+                width: 1.2,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: isDarkMode ? 0.22 : 0.035),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
+                ),
+              ],
             ),
             child: Row(
               children: [
                 Container(
-                  width: 40,
-                  height: 40,
+                  width: 42,
+                  height: 42,
                   decoration: BoxDecoration(
-                    color: catColor.withValues(alpha: isDarkMode ? 0.2 : 0.08),
+                    color: catColor.withValues(alpha: isDarkMode ? 0.18 : 0.08),
                     shape: BoxShape.circle,
+                    border: Border.all(
+                      color: catColor.withValues(alpha: isDarkMode ? 0.28 : 0.15),
+                      width: 1,
+                    ),
                   ),
-                  child: Icon(catIcon, color: catColor, size: 18),
+                  child: Icon(catIcon, color: catColor, size: 19),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -5447,30 +5460,30 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                           overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.quicksand(
                               fontWeight: FontWeight.bold,
-                              fontSize: 11,
+                              fontSize: 12,
                               color: isDarkMode
                                   ? Colors.white
                                   : Colors.teal.shade900)),
                       const SizedBox(height: 2),
                       Text(
-                          '${DateFormat('EEEE, dd MMM', 'id_ID').format(t.date)} â€¢ ${DateFormat('HH:mm', 'id_ID').format(t.date)}',
+                          '${DateFormat('EEEE, dd MMM', 'id_ID').format(t.date)} \u2022 ${DateFormat('HH:mm', 'id_ID').format(t.date)}',
                           style: GoogleFonts.quicksand(
                               color:
-                                  isDarkMode ? Colors.white54 : Colors.black26,
+                                  isDarkMode ? Colors.white54 : Colors.black45,
                               fontSize: 11,
-                              fontWeight: FontWeight.bold)),
+                              fontWeight: FontWeight.w600)),
                     ],
                   ),
                 ),
                 Text(
                   '${isExpense ? '- ' : '+ '}${_formatRupiah(t.amount)}',
                   style: GoogleFonts.quicksand(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 12.5,
                     color: isExpense
-                        ? (isDarkMode ? Colors.redAccent : Colors.red.shade700)
+                        ? (isDarkMode ? Colors.redAccent.shade100 : Colors.red.shade700)
                         : (isDarkMode
-                            ? Colors.greenAccent
+                            ? Colors.greenAccent.shade400
                             : Colors.green.shade700),
                   ),
                 ),

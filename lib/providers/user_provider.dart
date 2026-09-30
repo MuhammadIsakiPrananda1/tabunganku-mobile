@@ -12,7 +12,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tabunganku/core/constants/prefs_keys.dart';
 import 'package:tabunganku/models/user_profile_model.dart';
-import 'package:tabunganku/services/api_image_service.dart';
 export 'package:tabunganku/models/user_profile_model.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -127,7 +126,7 @@ class UserProfileNotifier extends StateNotifier<UserProfile> {
     state = state.copyWith(name: name);
   }
 
-  /// Salin foto ke direktori permanent, unggah ke Cloud API jika online, dan persist.
+  /// Salin foto ke direktori permanent lokal dan simpan path ke SharedPreferences.
   Future<String?> uploadAndSetPhoto(File file) async {
     try {
       final appDir = await getApplicationDocumentsDirectory();
@@ -135,13 +134,11 @@ class UserProfileNotifier extends StateNotifier<UserProfile> {
           'profile_photo_${DateTime.now().millisecondsSinceEpoch}.png';
       final permanent = await file.copy('${appDir.path}/$fileName');
 
-      // Hapus foto lama jika ada
+      // Hapus foto lokal lama jika ada
       final oldPath = state.photoUrl;
       if (oldPath != null && oldPath.isNotEmpty) {
         try {
-          if (oldPath.startsWith('http://') || oldPath.startsWith('https://')) {
-            ApiImageService.deleteImage(oldPath);
-          } else {
+          if (!oldPath.startsWith('http://') && !oldPath.startsWith('https://')) {
             final oldFile = File(oldPath);
             if (await oldFile.exists()) await oldFile.delete();
           }
@@ -150,39 +147,30 @@ class UserProfileNotifier extends StateNotifier<UserProfile> {
         }
       }
 
-      // Coba upload ke Cloud API (dengan fallback otomatis ke local disk)
-      String chosenUrl = permanent.path;
-      try {
-        final cloudResult = await ApiImageService.uploadImageDetailed(permanent);
-        if (cloudResult.success && cloudResult.url != null && cloudResult.url!.isNotEmpty) {
-          chosenUrl = cloudResult.url!;
-          debugPrint('[UserProfile] Foto profil berhasil diunggah ke Cloud API: $chosenUrl');
-        }
-      } catch (e) {
-        debugPrint('[UserProfile] Cloud API upload dilewati (offline/fallback): $e');
-      }
-
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(PrefsKeys.userPhotoUrl, chosenUrl);
-      state = state.copyWith(photoUrl: chosenUrl);
-      return chosenUrl;
+      await prefs.setString(PrefsKeys.userPhotoUrl, permanent.path);
+      state = state.copyWith(photoUrl: permanent.path);
+      return permanent.path;
     } catch (e) {
-      debugPrint('[UserProfile] Copy foto gagal, pakai path langsung: $e');
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(PrefsKeys.userPhotoUrl, file.path);
-      state = state.copyWith(photoUrl: file.path);
-      return file.path;
+      debugPrint('[UserProfile] Simpan foto lokal gagal, pakai path langsung: $e');
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString(PrefsKeys.userPhotoUrl, file.path);
+        state = state.copyWith(photoUrl: file.path);
+        return file.path;
+      } catch (err) {
+        debugPrint('[UserProfile] Gagal menyimpan path foto: $err');
+        return null;
+      }
     }
   }
 
-  /// Hapus foto profil dari disk/server dan dari state.
+  /// Hapus foto profil dari disk lokal dan dari state.
   Future<void> deletePhoto() async {
     final oldPath = state.photoUrl;
     if (oldPath != null && oldPath.isNotEmpty) {
       try {
-        if (oldPath.startsWith('http://') || oldPath.startsWith('https://')) {
-          await ApiImageService.deleteImage(oldPath);
-        } else {
+        if (!oldPath.startsWith('http://') && !oldPath.startsWith('https://')) {
           final oldFile = File(oldPath);
           if (await oldFile.exists()) await oldFile.delete();
         }

@@ -460,7 +460,7 @@ class _ActiveChallengesTab extends ConsumerWidget {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        Text('â€¢',
+                        Text('\u2022',
                             style: TextStyle(
                                 color: isDark
                                     ? Colors.white12
@@ -625,19 +625,19 @@ class _TemplatesTab extends ConsumerWidget {
         const SizedBox(height: 20),
         _buildSection(
             context,
-            'ðŸŒŸ Challenge Harian',
+            '🌟 Challenge Harian',
             templates.where((t) => t.type == ChallengeType.daily).toList(),
             onChallengeStarted),
         const SizedBox(height: 8),
         _buildSection(
             context,
-            'ðŸ“… Challenge Mingguan',
+            '📅 Challenge Mingguan',
             templates.where((t) => t.type == ChallengeType.weekly).toList(),
             onChallengeStarted),
         const SizedBox(height: 8),
         _buildSection(
             context,
-            'ðŸŽ¯ Challenge Bulanan',
+            '🎯 Challenge Bulanan',
             templates.where((t) => t.type == ChallengeType.monthly).toList(),
             onChallengeStarted),
       ],
@@ -1248,9 +1248,9 @@ class _BadgeItem extends StatelessWidget {
                     fontSize: 13, height: 1.4, fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
             if (badge.requiredPoints > 0)
-              _buildRequirement('ðŸŽ¯ Butuh ${badge.requiredPoints} poin'),
+              _buildRequirement('🎯 Butuh ${badge.requiredPoints} poin'),
             if (badge.requiredStreak != null)
-              _buildRequirement('ðŸ”¥ Butuh ${badge.requiredStreak} hari streak'),
+              _buildRequirement('🔥 Butuh ${badge.requiredStreak} hari streak'),
             if (badge.isEarned) ...[
               const SizedBox(height: 12),
               Container(

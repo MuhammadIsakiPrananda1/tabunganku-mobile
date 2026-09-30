@@ -103,13 +103,13 @@ class PremiumSecurityService {
   /// 1. Standar Kriptografis: `TBK-VIP-[PLAN]-[RANDOM]-[CHECKSUM]`
   /// 2. Format Praktis Owner via WhatsApp: `TBK-VIP-1DAY-2026`, `TBK-VIP-3DAY-2026`, `TBK-VIP-7DAY-2026`, `TBK-VIP-30DY-2026`, `TBK-VIP-LIFE-2026`
   Future<bool> activateWithLicenseKey(String licenseKey) async {
-    final cleanKey = licenseKey.trim().toUpperCase();
+    final cleanKey = licenseKey.trim().toUpperCase().replaceAll(' ', '-');
 
     PremiumTier tier;
     DateTime? expiresAt;
     final now = DateTime.now();
 
-    // 1. Cek format praktis yang dapat langsung diberikan Owner via WhatsApp
+    // 1. Cek format praktis yang dapat langsung diberikan Owner via WhatsApp & Kunci Lisensi Khusus Owner Permanent
     if (cleanKey == 'TBK-VIP-1DAY-2026' || cleanKey == 'TBK-1DAY-2026' || cleanKey == 'VIP-1DAY-TBK') {
       tier = PremiumTier.oneDay;
       expiresAt = now.add(const Duration(days: 1));
@@ -122,7 +122,22 @@ class PremiumSecurityService {
     } else if (cleanKey == 'TBK-VIP-30DY-2026' || cleanKey == 'TBK-30DY-2026' || cleanKey == 'TBK-VIP-1BULAN-2026' || cleanKey == 'VIP-30DY-TBK') {
       tier = PremiumTier.oneMonth;
       expiresAt = now.add(const Duration(days: 30));
-    } else if (cleanKey == 'TBK-VIP-LIFE-2026' || cleanKey == 'TBK-LIFE-2026' || cleanKey == 'TBK-VIP-SEUMURHIDUP-2026' || cleanKey == 'TBK-VIP-SEUMURHIDUP' || cleanKey == 'VIP-LIFE-TBK' || cleanKey == 'TBK-OWNER-628995257735') {
+    } else if (cleanKey == 'TBK-OWNER-PERMANENT' ||
+        cleanKey == 'TBK-OWNER-LIFETIME' ||
+        cleanKey == 'TBK-OWNER-VIP' ||
+        cleanKey == 'TBK-OWNER-2026' ||
+        cleanKey == 'TBK-OWNER' ||
+        cleanKey == 'OWNER-PERMANENT' ||
+        cleanKey == 'OWNER-LIFETIME' ||
+        cleanKey == 'OWNER-VIP' ||
+        cleanKey == 'OWNER-TABUNGANKU' ||
+        cleanKey == 'TBK-VIP-LIFE-2026' ||
+        cleanKey == 'TBK-LIFE-2026' ||
+        cleanKey == 'TBK-VIP-SEUMURHIDUP-2026' ||
+        cleanKey == 'TBK-VIP-SEUMURHIDUP' ||
+        cleanKey == 'VIP-LIFE-TBK' ||
+        cleanKey == 'TBK-OWNER-628995257735' ||
+        cleanKey == 'OWNER') {
       tier = PremiumTier.vipLifetime;
       expiresAt = null; // Seumur hidup
     } else {

@@ -4,7 +4,6 @@
 library;
 
 import 'dart:io';
-import 'package:tabunganku/core/widgets/top_toast.dart';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -37,17 +36,41 @@ class _CropPageState extends State<CropPage> {
   }
 
   void _loadImageDimensions() {
-    final image = FileImage(File(widget.imagePath));
+    final file = File(widget.imagePath);
+    if (!file.existsSync()) {
+      if (mounted) {
+        setState(() {
+          _imageWidth = 300;
+          _imageHeight = 300;
+          _isLoadingDimensions = false;
+        });
+      }
+      return;
+    }
+
+    final image = FileImage(file);
     image.resolve(const ImageConfiguration()).addListener(
-      ImageStreamListener((ImageInfo info, bool _) {
-        if (mounted) {
-          setState(() {
-            _imageWidth = info.image.width.toDouble();
-            _imageHeight = info.image.height.toDouble();
-            _isLoadingDimensions = false;
-          });
-        }
-      }),
+      ImageStreamListener(
+        (ImageInfo info, bool _) {
+          if (mounted) {
+            setState(() {
+              _imageWidth = info.image.width.toDouble();
+              _imageHeight = info.image.height.toDouble();
+              _isLoadingDimensions = false;
+            });
+          }
+        },
+        onError: (dynamic exception, StackTrace? stackTrace) {
+          debugPrint('Error loading image dimensions: $exception');
+          if (mounted) {
+            setState(() {
+              _imageWidth = 300;
+              _imageHeight = 300;
+              _isLoadingDimensions = false;
+            });
+          }
+        },
+      ),
     );
   }
 
@@ -85,7 +108,8 @@ final tempDir = await getTemporaryDirectory();
     } catch (e) {
       debugPrint('Error cropping image: $e');
       if (mounted) {
-        showTopToast(context, 'Gagal memotong gambar. Coba lagi.', isError: true);
+        // Fallback: Jika pemotongan gagal, tetap teruskan file gambar asli agar tidak terblokir
+        Navigator.pop(context, widget.imagePath);
       }
     } finally {
       if (mounted) {
@@ -159,11 +183,13 @@ Container(
                               )
                             : Builder(
                                 builder: (context) {
-                                  final aspectRatio = _imageWidth! / _imageHeight!;
+                                  final double w = _imageWidth ?? 300;
+                                  final double h = _imageHeight ?? 300;
+                                  final double aspectRatio = h > 0 ? (w / h) : 1.0;
                                   double childWidth;
                                   double childHeight;
 
-if (aspectRatio >= 1.0) {
+                                  if (aspectRatio >= 1.0) {
                                     childHeight = 300;
                                     childWidth = 300 * aspectRatio;
                                   } else {
@@ -251,7 +277,7 @@ _isCropping
                       ? Container(
                           width: 60,
                           height: 60,
-                          decoration: BoxDecoration(
+                          decoration: const BoxDecoration(
                             color: AppColors.primary,
                             shape: BoxShape.circle,
                           ),

@@ -1,7 +1,7 @@
 # 🛡️ Kebijakan & Arsitektur Keamanan (Security Policy)
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Security_Policy-v1.5.2_Active-00C853?style=for-the-badge&logo=shield&logoColor=white" alt="Security Policy">
+  <img src="https://img.shields.io/badge/Security_Policy-v1.5.3_Active-00C853?style=for-the-badge&logo=shield&logoColor=white" alt="Security Policy">
   <img src="https://img.shields.io/badge/Enkripsi-AES--256--GCM-6200EA?style=for-the-badge&logo=lock&logoColor=white" alt="AES-256">
   <img src="https://img.shields.io/badge/Integritas-HMAC--SHA256-blue?style=for-the-badge" alt="HMAC">
   <img src="https://img.shields.io/badge/Hardware-Keystore%20%2F%20Keychain-E65100?style=for-the-badge" alt="Hardware Backed">

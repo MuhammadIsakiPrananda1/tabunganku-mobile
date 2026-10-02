@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="#-fitur-fitur-unggulan"><img src="https://img.shields.io/badge/Versi-1.5.2-blue?style=for-the-badge" alt="Versi"></a>
+  <a href="#-fitur-fitur-unggulan"><img src="https://img.shields.io/badge/Versi-1.5.3-blue?style=for-the-badge" alt="Versi"></a>
   <a href="https://flutter.dev"><img src="https://img.shields.io/badge/Flutter-3.0.0+-02569B?style=for-the-badge&logo=flutter&logoColor=white" alt="Flutter"></a>
   <a href="https://dart.dev"><img src="https://img.shields.io/badge/Dart-3.0.0+-0175C2?style=for-the-badge&logo=dart&logoColor=white" alt="Dart"></a>
   <a href="https://riverpod.dev"><img src="https://img.shields.io/badge/State-Riverpod_2.x-764ABC?style=for-the-badge&logo=riverpod&logoColor=white" alt="Riverpod"></a>

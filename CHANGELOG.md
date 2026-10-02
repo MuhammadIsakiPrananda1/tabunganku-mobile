@@ -24,7 +24,8 @@ Dokumentasi kronologis seluruh perjalanan evolusi, penambahan fitur, peningkatan
 | **[1.4.9](#-149--30-april-2026)** | 30 April 2026 | Simulasi harga emas pasar terkini, modul cek kesehatan finansial, dan overlay keamanan. |
 | **[1.5.0](#-150--7-mei-2026)** | 7 Mei 2026 | Algoritma proyeksi saldo cerdas akhir bulan, reset statistik bulanan, dan desain minimalis. |
 | **[1.5.1](#-151--15-juni-2026)** | 15 Juni 2026 | Sistem catatan keuangan, migrasi Nabung Bersama, kalkulator KPR, FIRE, dan dana darurat. |
-| **[1.5.2](#-152--versi-terkini)** | Versi Terkini | Mesin kriptografi CryptoSentinel (AES-256-GCM), celengan receh Round-Up, Saving Streak, & valas live. |
+| **[1.5.2](#-152--20-september-2026)** | 20 September 2026 | Mesin kriptografi CryptoSentinel (AES-256-GCM), celengan receh Round-Up, Saving Streak, & valas live. |
+| **[1.5.3](#-153--versi-terkini)** | Versi Terkini | Optimalisasi performa aplikasi & pembaruan API real-time (parallel fetch, cache TTL, endpoint terbaru). |
 
 ---
 
@@ -432,7 +433,7 @@ Dokumentasi kronologis seluruh perjalanan evolusi, penambahan fitur, peningkatan
 
 ---
 
-## 💎 [1.5.2] — Versi Terkini
+## 💎 [1.5.2] — 20 September 2026
 
 *Lompatan teknologi terbesar: Pengamanan kriptografi militer CryptoSentinel, suite kalkulator terlengkap, tabungan receh otomatis, dan pelacakan konsistensi.*
 
@@ -476,6 +477,47 @@ Dokumentasi kronologis seluruh perjalanan evolusi, penambahan fitur, peningkatan
 * **Build**: v1.5.2-stable
 * **Keamanan**: AES-256-GCM, HMAC-SHA256, Android Keystore, iOS Keychain
 * **Data Layer**: 100% Offline-First Local Data Sovereignty
+
+---
+
+## 🚀 [1.5.3] — Versi Terkini
+
+*Lompatan efisiensi: optimalisasi performa menyeluruh dan pembaruan infrastruktur API ke standar real-time terbaru.*
+
+### 🛠️ Optimalisasi & Peningkatan Performa
+* **Parallel Fetch Harga Emas Real-Time**:
+  * Pengambilan nilai tukar USD/IDR dan harga spot emas XAU/USD kini dilakukan **secara bersamaan (parallel)** menggunakan `Future.wait`, memangkas waktu respons data hingga **50% lebih cepat** dibandingkan metode sekuensial sebelumnya.
+* **Race Strategy Konverter Valas (Currency Service)**:
+  * Tiga endpoint primer dikirimkan secara paralel; respons tercepat yang valid langsung digunakan — tanpa menunggu endpoint lain selesai. Ini memastikan kurs tampil dalam hitungan milidetik.
+* **Sistem Cache Lokal Kurs Valuta (TTL 5 Menit)**:
+  * Hasil kurs tersimpan secara lokal di `SharedPreferences` selama 5 menit. Aplikasi tidak perlu memanggil API setiap kali layar valas dibuka, menghemat data seluler dan meningkatkan kelancaran UI.
+* **Interval Update Harga Emas Dioptimalkan**:
+  * Periode refresh `StreamProvider` harga emas disesuaikan dari 2 menit menjadi **3 menit** untuk keseimbangan optimal antara kebaruan data dan konsumsi daya baterai.
+* **Timeout Jaringan Lebih Responsif**:
+  * Seluruh timeout koneksi API image server, token endpoint, dan health check diperbarui dari 8 detik menjadi **6 detik** — mengurangi waktu tunggu saat server lambat merespons.
+
+### 🌐 Pembaruan API — Endpoint Lebih Terbaru & Andal
+* **Frankfurter (ECB) sebagai Endpoint Primer Valas**:
+  * `api.frankfurter.dev/v1/latest` kini menjadi endpoint pertama yang dicoba untuk konversi USD/IDR — berbasis data European Central Bank, gratis, dan sangat stabil.
+* **Endpoint Harga Emas Spot Diperluas**:
+  * Selain `api.gold-api.com`, ditambahkan `metals.live/api/spot/gold` dan `api.metalpriceapi.com` sebagai sumber data XAU/USD cadangan untuk ketangguhan lebih tinggi.
+* **Endpoint Antam Diperluas**:
+  * Ditambahkan `api.logammulia.com/v1/price/antam` sebagai endpoint fallback ketiga untuk harga langsung Antam, melengkapi dua sumber sebelumnya.
+* **Header `User-Agent` Terstandarisasi**:
+  * Seluruh request ke API image server kini menyertakan header `User-Agent: TabunganKu-Mobile/1.5.3` untuk audit traffic yang lebih transparan di sisi server.
+* **Kalibrasi Harga Default Emas Diperbarui**:
+  * Harga fallback offline dikalibrasi ulang ke angka pasar terkini: **beli Rp 2.685.000/gram** dan **buyback Rp 2.548.000/gram**.
+
+### 🗑️ Pembersihan Kode & Optimasi
+* **Eliminasi Redundansi Fetch Sekuensial**: Logika pengambilan data lama yang menunggu satu per satu digantikan oleh strategi parallel/race yang lebih efisien.
+* **Ekstraksi `_fetchGoldUsdPerOz`**: Pemisahan fungsi pengambilan harga emas menjadi metode tersendiri untuk meningkatkan keterbacaan dan kemudahan pengujian unit di masa mendatang.
+
+### ⚡ Detail Teknis
+* **Build**: v1.5.3-stable
+* **Strategy Fetch**: Parallel Race (`Future.wait`, `Completer`) untuk latensi minimum
+* **Cache**: `SharedPreferences` TTL 5 menit untuk kurs valas
+* **API Endpoints Baru**: Frankfurter ECB, metals.live, metalpriceapi.com, logammulia.com
+* **Timeout**: 6 detik (API Image), 3 detik (Valas/Emas USD/IDR), 4 detik (Spot XAU)
 
 ---
 

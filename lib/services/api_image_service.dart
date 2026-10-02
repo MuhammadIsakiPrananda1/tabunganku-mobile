@@ -9,6 +9,7 @@
 /// 3. Penghapusan gambar aman berbasis nama file UUID WebP.
 /// 4. Pengecekan kesehatan server (/health) dan latensi real-time.
 /// 5. Pengujian live upload & cleanup otomatis.
+/// v1.5.3 — Optimalisasi timeout, retry token lebih cepat, header User-Agent terbaru.
 library;
 
 import 'dart:convert';
@@ -163,12 +164,15 @@ class ApiImageService {
       try {
         final postRes = await http.post(
           tokenUri,
-          headers: {'Content-Type': 'application/json'},
+          headers: {
+            'Content-Type': 'application/json',
+            'User-Agent': 'TabunganKu-Mobile/1.5.3',
+          },
           body: jsonEncode({
             'userId': resolvedUserId,
             'action': action,
           }),
-        ).timeout(const Duration(seconds: 8));
+        ).timeout(const Duration(seconds: 6)); // v1.5.3: dipercepat dari 8 ke 6 detik
 
         if (postRes.statusCode == 200) {
           final Map<String, dynamic> data = jsonDecode(postRes.body);
@@ -183,7 +187,10 @@ class ApiImageService {
 
       // 2. Fallback: shortcut GET /api/auth/token?userId=...&action=...
       final getUri = Uri.parse('$currentBaseUrl/api/auth/token?userId=$resolvedUserId&action=$action');
-      final getRes = await http.get(getUri).timeout(const Duration(seconds: 8));
+      final getRes = await http.get(
+        getUri,
+        headers: {'User-Agent': 'TabunganKu-Mobile/1.5.3'},
+      ).timeout(const Duration(seconds: 6)); // v1.5.3: dipercepat dari 8 ke 6 detik
 
       if (getRes.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(getRes.body);
@@ -205,7 +212,10 @@ class ApiImageService {
     try {
       final currentBaseUrl = await getBaseUrl();
       final uri = Uri.parse('$currentBaseUrl/health');
-      final response = await http.get(uri).timeout(const Duration(seconds: 8));
+      final response = await http.get(
+        uri,
+        headers: {'User-Agent': 'TabunganKu-Mobile/1.5.3'},
+      ).timeout(const Duration(seconds: 6)); // v1.5.3: dipercepat dari 8 ke 6 detik
       return response.statusCode == 200;
     } catch (e) {
       debugPrint('[ApiImageService] Health check failed: $e');
@@ -219,7 +229,10 @@ class ApiImageService {
     final currentBaseUrl = await getBaseUrl();
     try {
       final uri = Uri.parse('$currentBaseUrl/health');
-      final response = await http.get(uri).timeout(const Duration(seconds: 8));
+      final response = await http.get(
+        uri,
+        headers: {'User-Agent': 'TabunganKu-Mobile/1.5.3'},
+      ).timeout(const Duration(seconds: 6)); // v1.5.3
       stopwatch.stop();
 
       if (response.statusCode == 200) {

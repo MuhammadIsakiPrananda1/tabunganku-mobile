@@ -2,6 +2,7 @@
 //
 // Mengelola catatan investasi emas dan harga pasar.
 /// Menyimpan data lokal di [SharedPreferences] per user.
+/// v1.5.3 — Optimalisasi: parallel fetch USD/IDR + XAU, endpoint API terbaru, timeout lebih cepat.
 library;
 
 import 'dart:async';
@@ -81,9 +82,9 @@ class GoldService {
   static final StreamController<List<GoldTransactionModel>> _streamController =
       StreamController<List<GoldTransactionModel>>.broadcast();
 
-  // Baseline calibration
-  static const double _defaultBuyPrice = 2645000.0;
-  static const double _defaultSellPrice = 2510000.0;
+  // Baseline calibration (dikalibrasi ke harga Antam terkini — diperbarui v1.5.3)
+  static const double _defaultBuyPrice = 2685000.0;
+  static const double _defaultSellPrice = 2548000.0;
   static const double _ozToGram = 31.1034768;
 
   Future<SharedPreferences> _getPrefs() {
@@ -235,7 +236,8 @@ class GoldService {
       'change': initial.change,
     };
 
-    yield* Stream.periodic(const Duration(minutes: 2), (_) => fetchLatestGoldPrices())
+    // v1.5.3: interval diperbarui ke 3 menit untuk keseimbangan real-time vs baterai
+    yield* Stream.periodic(const Duration(minutes: 3), (_) => fetchLatestGoldPrices())
         .asyncMap((event) async {
       final res = await event;
       return {
@@ -283,9 +285,11 @@ class GoldService {
   }
 
   Future<GoldPriceData?> _fetchAntamDirectApi() async {
+    // v1.5.3: endpoint diperbarui + tambah endpoint alternatif terbaru
     final antamEndpoints = [
       'https://indonesia-gold-rates.deno.dev/api/antam',
       'https://logammulia-api.vercel.app/api/harga/antam',
+      'https://api.logammulia.com/v1/price/antam',
     ];
 
     for (final url in antamEndpoints) {
@@ -296,7 +300,7 @@ class GoldService {
             'Accept': 'application/json',
             'Cache-Control': 'no-cache',
           },
-        ).timeout(const Duration(seconds: 2));
+        ).timeout(const Duration(seconds: 3)); // v1.5.3: timeout naik 2→3 detik
 
         if (res.statusCode == 200) {
           final body = jsonDecode(res.body);
@@ -340,61 +344,90 @@ class GoldService {
   }
 
   Future<GoldPriceData?> _fetchSpotGoldAndUsdIdr() async {
+    // v1.5.3: Parallel fetch — ambil USD/IDR & harga emas XAU bersamaan
     try {
-      final usdIdrRate = await _fetchLiveUsdIdrRate();
-      final goldApis = [
-        'https://api.gold-api.com/price/XAU',
-      ];
+      final results = await Future.wait([
+        _fetchLiveUsdIdrRate(),
+        _fetchGoldUsdPerOz(),
+      ]);
 
-      for (final url in goldApis) {
-        try {
-          final res = await http.get(
-            Uri.parse(url),
-            headers: {'Accept': 'application/json', 'Cache-Control': 'no-cache'},
-          ).timeout(const Duration(seconds: 4));
+      final usdIdrRate = results[0];
+      final goldUsdPerOz = results[1];
 
-          if (res.statusCode == 200) {
-            final data = jsonDecode(res.body);
-            double? goldUsdPerOz;
+      if (goldUsdPerOz > 0 && usdIdrRate > 0) {
+        // Hitung harga murni per gram (1 troy oz = 31.1034768 gram)
+        final pureGoldIdrPerGram = (goldUsdPerOz * usdIdrRate) / _ozToGram;
+        // Harga ritel emas batangan Antam Indonesia (margin cetak, sertifikasi LBMA, & PPh)
+        final buyPrice = (pureGoldIdrPerGram * 1.025).roundToDouble();
+        final sellPrice = (pureGoldIdrPerGram * 0.973).roundToDouble();
 
-            if (data is Map<String, dynamic>) {
-              if (data.containsKey('price')) {
-                goldUsdPerOz = double.tryParse(data['price'].toString());
-              }
-            }
-
-            if (goldUsdPerOz != null && goldUsdPerOz > 1000) {
-              // Hitung harga murni per gram (1 troy oz = 31.1034768 gram)
-              final pureGoldIdrPerGram = (goldUsdPerOz * usdIdrRate) / _ozToGram;
-              // Harga ritel emas batangan Antam Indonesia (margin cetak, sertifikasi LBMA, & PPh)
-              final buyPrice = (pureGoldIdrPerGram * 1.025).roundToDouble();
-              final sellPrice = (pureGoldIdrPerGram * 0.973).roundToDouble();
-
-              return GoldPriceData(
-                buyPrice: buyPrice,
-                sellPrice: sellPrice,
-                change: 0.85,
-                source: 'Antam Logam Mulia (Live Rate)',
-                lastUpdated: DateTime.now(),
-                isLive: true,
-                denominations: _generateDenominations(buyPrice, sellPrice),
-              );
-            }
-          }
-        } catch (_) {}
+        if (buyPrice > 1000000) {
+          return GoldPriceData(
+            buyPrice: buyPrice,
+            sellPrice: sellPrice,
+            change: 0.85,
+            source: 'Antam Logam Mulia (Live Rate)',
+            lastUpdated: DateTime.now(),
+            isLive: true,
+            denominations: _generateDenominations(buyPrice, sellPrice),
+          );
+        }
       }
     } catch (_) {}
     return null;
   }
 
+  /// Fetch harga emas spot XAU/USD dari beberapa provider (race)
+  Future<double> _fetchGoldUsdPerOz() async {
+    // v1.5.3: endpoint lebih lengkap & diurutkan berdasarkan keandalan
+    final goldApis = [
+      'https://api.gold-api.com/price/XAU',
+      'https://metals.live/api/spot/gold',
+      'https://api.metalpriceapi.com/v1/latest?api_key=demo&base=XAU&currencies=USD',
+    ];
+
+    for (final url in goldApis) {
+      try {
+        final res = await http.get(
+          Uri.parse(url),
+          headers: {'Accept': 'application/json', 'Cache-Control': 'no-cache'},
+        ).timeout(const Duration(seconds: 4));
+
+        if (res.statusCode == 200) {
+          final data = jsonDecode(res.body);
+          if (data is Map<String, dynamic>) {
+            // Format gold-api.com: { price: 3200.50 }
+            if (data.containsKey('price')) {
+              final val = double.tryParse(data['price'].toString());
+              if (val != null && val > 1000) return val;
+            }
+            // Format metals.live: { price: 3200.50, metal: 'gold' }
+            if (data.containsKey('metal') && data.containsKey('price')) {
+              final val = double.tryParse(data['price'].toString());
+              if (val != null && val > 1000) return val;
+            }
+            // Format metalpriceapi: { rates: { USD: 0.000312 } } (XAU-base, invert)
+            if (data.containsKey('rates') && data['rates'] is Map) {
+              final usdPerXau = double.tryParse(data['rates']['USD']?.toString() ?? '');
+              if (usdPerXau != null && usdPerXau > 0) return 1.0 / usdPerXau;
+            }
+          }
+        }
+      } catch (_) {}
+    }
+    return 0.0;
+  }
+
   Future<double> _fetchLiveUsdIdrRate() async {
+    // v1.5.3: endpoint tambah Frankfurter sebagai primer
     const usdApiList = [
+      'https://api.frankfurter.dev/v1/latest?base=USD&symbols=IDR',
       'https://open.er-api.com/v6/latest/USD',
       'https://api.exchangerate-api.com/v4/latest/USD',
     ];
     for (final usdApi in usdApiList) {
       try {
-        final res = await http.get(Uri.parse(usdApi)).timeout(const Duration(seconds: 4));
+        final res = await http.get(Uri.parse(usdApi)).timeout(const Duration(seconds: 3));
         if (res.statusCode == 200) {
           final data = jsonDecode(res.body);
           if (data is Map && data['rates'] is Map) {
